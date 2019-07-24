@@ -350,18 +350,19 @@ public class BugreportProgressService extends Service {
 
     private final class BugreportCallbackImpl extends BugreportCallback {
 
-        private final int mId;
         private final BugreportInfo mInfo;
 
-        BugreportCallbackImpl(String name, int id) {
-            mId = id;
+        BugreportCallbackImpl(String name) {
             // pid not used in this workflow, so setting default = 0
-            mInfo = new BugreportInfo(mContext, mId, 0 /* pid */, name,
+            mInfo = new BugreportInfo(mContext, 0 /* pid */, name,
                     100 /* max progress*/);
         }
 
         @Override
         public void onProgress(float progress) {
+            if (progress == 0) {
+                trackInfoWithId();
+            }
             checkProgressUpdated(mInfo, (int) progress);
         }
 
@@ -369,16 +370,33 @@ public class BugreportProgressService extends Service {
         // Logging errors and removing progress notification for now.
         @Override
         public void onError(@BugreportErrorCode int errorCode) {
-            stopProgress(mId);
+            trackInfoWithId();
+            stopProgress(mInfo.id);
             Log.e(TAG, "Bugreport API callback onError() errorCode = " + errorCode);
             return;
         }
 
         @Override
         public void onFinished() {
+            trackInfoWithId();
             // Stop running on foreground, otherwise share notification cannot be dismissed.
-            onBugreportFinished(mId);
+            onBugreportFinished(mInfo.id);
             stopSelfWhenDone();
+        }
+
+        /**
+         * Reads bugreport id and links it to the bugreport info to track the bugreport's
+         * progress/completion/error. id is incremented in dumpstate code. This function is called
+         * when dumpstate calls one of the callback functions (onProgress, onFinished, onError)
+         * after the id has been incremented.
+         */
+        private void trackInfoWithId() {
+            final int id = SystemProperties.getInt(PROPERTY_LAST_ID, 1);
+            if (mBugreportInfos.get(id) == null) {
+                mInfo.id = id;
+                mBugreportInfos.put(mInfo.id, mInfo);
+            }
+            return;
         }
     }
 
@@ -565,19 +583,15 @@ public class BugreportProgressService extends Service {
         mBugreportManager = (BugreportManager) mContext.getSystemService(
                 Context.BUGREPORT_SERVICE);
         final Executor executor = ActivityThread.currentActivityThread().getExecutor();
-        // TODO(b/123617758): This id should come from dumpstate.
-        // Dumpstate increments PROPERTY_LAST_ID, may be racy if multiple calls
-        // to dumpstate are made simultaneously.
-        final int id = SystemProperties.getInt(PROPERTY_LAST_ID, 0) + 1;
+
         Log.i(TAG, "bugreport type = " + bugreportType
                 + " bugreport file fd: " + bugreportFd
                 + " screenshot file fd: " + screenshotFd);
 
-        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(bugreportName, id);
+        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(bugreportName);
         try {
             mBugreportManager.startBugreport(bugreportFd, screenshotFd,
                     new BugreportParams(bugreportType), executor, bugreportCallback);
-            mBugreportInfos.put(bugreportCallback.mInfo.id, bugreportCallback.mInfo);
         } catch (RuntimeException e) {
             Log.i(TAG, "error in generating bugreports: ", e);
             // The binder call didn't go through successfully, so need to close the fds.
@@ -1811,7 +1825,7 @@ public class BugreportProgressService extends Service {
         /**
          * Sequential, user-friendly id used to identify the bugreport.
          */
-        final int id;
+        int id;
 
         /**
          * {@code pid} of the {@code dumpstate} process generating the bugreport.
@@ -1903,8 +1917,15 @@ public class BugreportProgressService extends Service {
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_STARTED.
          */
         BugreportInfo(Context context, int id, int pid, String name, int max) {
-            this.context = context;
+            this(context, pid, name, max);
             this.id = id;
+        }
+
+        /**
+         * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_REQUESTED.
+         */
+        BugreportInfo(Context context, int pid, String name, int max) {
+            this.context = context;
             this.pid = pid;
             this.name = name;
             this.max = this.realMax = max;
