@@ -808,8 +808,7 @@ public class NotificationPanelView extends PanelView implements
             if (suppressedSummary) {
                 continue;
             }
-            if (!mLockscreenUserManager.shouldShowOnKeyguard(
-                    row.getStatusBarNotification())) {
+            if (!mLockscreenUserManager.shouldShowOnKeyguard(row.getEntry())) {
                 continue;
             }
             if (row.isRemoved()) {
