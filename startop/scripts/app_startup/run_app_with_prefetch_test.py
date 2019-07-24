@@ -33,17 +33,18 @@ import io
 import os
 import shlex
 import sys
+import tempfile
 # global imports
 from contextlib import contextmanager
 
 # pip imports
 import pytest
 # local imports
-import run_app_with_prefetch as run
-from mock import Mock, call, patch
+import run_app_with_prefetch as runner
+from mock import call, patch, Mock
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from app_startup.lib.app_runner import AppRunner
 #
 # Argument Parsing Helpers
 #
@@ -85,7 +86,7 @@ def parse_args(args):
     :return:  dictionary of parsed key/values
     """
   # "-a b -c d"    => ['-a', 'b', '-c', 'd']
-  return vars(run.parse_options(shlex.split(args)))
+  return vars(runner.parse_options(shlex.split(args)))
 
 def default_dict_for_parsed_args(**kwargs):
   """Combines it with all of the "optional" parameters' default values."""
@@ -154,130 +155,132 @@ def test_argparse():
 
 def test_main():
   args = '--package com.fake.package --activity act -s'
-  opts = run.parse_options(shlex.split(args))
-
-  args = run.get_args_from_opts(opts)
-  result = run.run_test(args)
+  opts = runner.parse_options(shlex.split(args))
+  result = runner.PrefetchAppRunner(**vars(opts)).run()
   assert result == [('TotalTime', '123')]
 
-def test_set_up_adb_env():
+def _mocked_run_shell_command(*args, **kwargs):
+  if args[0] == 'adb shell ps | grep "music" | awk \'{print $2;}\'':
+    return (True, '9999')
+  else:
+    return (True, '')
+
+def test_preprocess_no_cache_drop():
   with patch('lib.cmd_utils.run_shell_command',
              new_callable=Mock) as mock_run_shell_command:
-    mock_run_shell_command.return_value = (True, '')
-    run.set_up_adb_env()
+    mock_run_shell_command.side_effect = _mocked_run_shell_command
+    prefetch_app_runner = runner.PrefetchAppRunner(package='music',
+                                                   activity='MainActivity',
+                                                   readahead='warm',
+                                                   compiler_filter=None,
+                                                   timeout=None,
+                                                   simulate=False,
+                                                   debug=False,
+                                                   input=None)
+
+    prefetch_app_runner.preprocess()
 
     calls = [call('adb root'),
              call('adb shell "getenforce"'),
              call('adb shell "setenforce 0"'),
              call('adb shell "stop"'),
              call('adb shell "start"'),
-             call('adb wait-for-device')]
+             call('adb wait-for-device'),
+             call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+             call('adb shell "kill 9999"')]
     mock_run_shell_command.assert_has_calls(calls)
 
-def test_set_up_adb_env_with_permissive():
+def test_preprocess_with_cache_drop():
   with patch('lib.cmd_utils.run_shell_command',
              new_callable=Mock) as mock_run_shell_command:
-    mock_run_shell_command.return_value = (True, 'Permissive')
-    run.set_up_adb_env()
+    mock_run_shell_command.side_effect = _mocked_run_shell_command
+    prefetch_app_runner = runner.PrefetchAppRunner(package='music',
+                                                   activity='MainActivity',
+                                                   readahead='cold',
+                                                   compiler_filter=None,
+                                                   timeout=None,
+                                                   simulate=False,
+                                                   debug=False,
+                                                   input=None)
 
-    calls = [call('adb root'), call('adb shell "getenforce"')]
+    prefetch_app_runner.preprocess()
+
+    calls = [call('adb root'),
+             call('adb shell "getenforce"'),
+             call('adb shell "setenforce 0"'),
+             call('adb shell "stop"'),
+             call('adb shell "start"'),
+             call('adb wait-for-device'),
+             call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+             call('adb shell "kill 9999"'),
+             call('adb shell "echo 3 > /proc/sys/vm/drop_caches"')]
     mock_run_shell_command.assert_has_calls(calls)
 
-def test_configure_compiler_filter():
+def test_preprocess_with_cache_drop_and_iorapd_enabled():
   with patch('lib.cmd_utils.run_shell_command',
              new_callable=Mock) as mock_run_shell_command:
-    mock_run_shell_command.return_value = (True, 'speed arm64 kUpToDate')
-    run.configure_compiler_filter('speed', 'music', 'MainActivity')
+    mock_run_shell_command.side_effect = _mocked_run_shell_command
 
-    calls = [call(os.path.join(run.DIR, 'query_compiler_filter.py') +
-                  ' --package music')]
-    mock_run_shell_command.assert_has_calls(calls)
+    with tempfile.NamedTemporaryFile() as input:
+      prefetch_app_runner = runner.PrefetchAppRunner(package='music',
+                                                     activity='MainActivity',
+                                                     readahead='fadvise',
+                                                     compiler_filter=None,
+                                                     timeout=None,
+                                                     simulate=False,
+                                                     debug=False,
+                                                     input=input.name)
 
-def test_parse_metrics_output():
-  input = 'a1=b1\nc1=d1\ne1=f1'
-  ret = run.parse_metrics_output(input)
+      prefetch_app_runner.preprocess()
 
-  assert ret == [('a1', 'b1'), ('c1', 'd1'), ('e1', 'f1')]
-
-def _mocked_run_shell_command(*args, **kwargs):
-  if args[0] == 'adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"':
-    return (True, "2019-07-02 23:20:06.972674825")
-  elif args[0] == 'adb shell ps | grep "music" | awk \'{print $2;}\'':
-    return (True, '9999')
-  else:
-    return (True, 'a1=b1\nc1=d1=d2\ne1=f1')
+      calls = [call('adb root'),
+               call('adb shell "getenforce"'),
+               call('adb shell "setenforce 0"'),
+               call('adb shell "stop"'),
+               call('adb shell "start"'),
+               call('adb wait-for-device'),
+               call(
+                   'adb shell ps | grep "music" | awk \'{print $2;}\''),
+               call('adb shell "kill 9999"'),
+               call('adb shell "echo 3 > /proc/sys/vm/drop_caches"'),
+               call('bash -c "source {}; iorapd_readahead_enable"'.
+                    format(AppRunner.IORAP_COMMON_BASH_SCRIPT))]
+      mock_run_shell_command.assert_has_calls(calls)
 
 @patch('lib.adb_utils.blocking_wait_for_logcat_displayed_time')
 @patch('lib.cmd_utils.run_shell_command')
-def test_run_no_vm_cache_drop(mock_run_shell_command,
-                              mock_blocking_wait_for_logcat_displayed_time):
-  mock_run_shell_command.side_effect = _mocked_run_shell_command
-  mock_blocking_wait_for_logcat_displayed_time.return_value = 123
-
-  run.run('warm',
-          'music',
-          'MainActivity',
-          timeout=10,
-          simulate=False,
-          debug=False)
-
-  calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-           call('adb shell "kill 9999"'),
-           call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
-           call(
-             'timeout {timeout} "{DIR}/launch_application" "{package}" "{activity}"'
-               .format(timeout=10,
-                       DIR=run.DIR,
-                       package='music',
-                       activity='MainActivity',
-                       timestamp='2019-07-02 23:20:06.972674825')),
-           call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-           call('adb shell "kill 9999"')]
-  mock_run_shell_command.assert_has_calls(calls)
-
-@patch('lib.adb_utils.blocking_wait_for_logcat_displayed_time')
-@patch('lib.cmd_utils.run_shell_command')
-def test_run_with_vm_cache_drop_and_post_launch_cleanup(
+def test_postprocess_with_launch_cleanup(
     mock_run_shell_command,
     mock_blocking_wait_for_logcat_displayed_time):
   mock_run_shell_command.side_effect = _mocked_run_shell_command
   mock_blocking_wait_for_logcat_displayed_time.return_value = 123
 
-  run.run('fadvise',
-          'music',
-          'MainActivity',
-          timeout=10,
-          simulate=False,
-          debug=False)
+  with tempfile.NamedTemporaryFile() as input:
+    prefetch_app_runner = runner.PrefetchAppRunner(package='music',
+                                                   activity='MainActivity',
+                                                   readahead='fadvise',
+                                                   compiler_filter=None,
+                                                   timeout=10,
+                                                   simulate=False,
+                                                   debug=False,
+                                                   input=input.name)
 
-  calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-           call('adb shell "kill 9999"'),
-           call('adb shell "echo 3 > /proc/sys/vm/drop_caches"'),
-           call('bash -c "source {}; iorapd_readahead_enable"'.
-                format(run.IORAP_COMMON_BASH_SCRIPT)),
-           call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
-           call(
-             'timeout {timeout} "{DIR}/launch_application" '
-             '"{package}" "{activity}"'
-               .format(timeout=10,
-                       DIR=run.DIR,
-                       package='music',
-                       activity='MainActivity',
-                       timestamp='2019-07-02 23:20:06.972674825')),
-           call(
-             'bash -c "source {script_path}; '
+    prefetch_app_runner.postprocess('2019-07-02 23:20:06.972674825')
+
+    calls = [
+        call('bash -c "source {script_path}; '
              'iorapd_readahead_wait_until_finished '
              '\'{package}\' \'{activity}\' \'{timestamp}\' \'{timeout}\'"'.
-               format(timeout=10,
-                      package='music',
-                      activity='MainActivity',
-                      timestamp='2019-07-02 23:20:06.972674825',
-                      script_path=run.IORAP_COMMON_BASH_SCRIPT)),
-           call('bash -c "source {}; iorapd_readahead_disable"'.
-                format(run.IORAP_COMMON_BASH_SCRIPT)),
-           call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-           call('adb shell "kill 9999"')]
-  mock_run_shell_command.assert_has_calls(calls)
+                 format(timeout=10,
+                        package='music',
+                        activity='MainActivity',
+                        timestamp='2019-07-02 23:20:06.972674825',
+                        script_path=AppRunner.IORAP_COMMON_BASH_SCRIPT)),
+        call('bash -c "source {}; iorapd_readahead_disable"'.
+             format(AppRunner.IORAP_COMMON_BASH_SCRIPT)),
+        call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+        call('adb shell "kill 9999"')]
+    mock_run_shell_command.assert_has_calls(calls)
 
 if __name__ == '__main__':
   pytest.main()

@@ -30,32 +30,146 @@ import argparse
 import os
 import sys
 import time
-from typing import List, Tuple, Optional, NamedTuple
+from typing import List, Tuple, Optional
 
 # local imports
 import lib.adb_utils as adb_utils
+from lib.app_runner import AppRunner, AppRunnerListener
 
 # global variables
 DIR = os.path.abspath(os.path.dirname(__file__))
-IORAP_COMMON_BASH_SCRIPT = os.path.realpath(os.path.join(DIR,
-                                                         '../iorap/common'))
-APP_STARTUP_COMMON_BASH_SCRIPT = os.path.realpath(os.path.join(DIR,
-                                                               'lib/common'))
 
 sys.path.append(os.path.dirname(DIR))
 import lib.print_utils as print_utils
 import lib.cmd_utils as cmd_utils
 import iorap.lib.iorapd_utils as iorapd_utils
 
-RunCommandArgs = NamedTuple('RunCommandArgs',
-                            [('package', str),
-                             ('readahead', str),
-                             ('activity', Optional[str]),
-                             ('compiler_filter', Optional[str]),
-                             ('timeout', Optional[int]),
-                             ('debug', bool),
-                             ('simulate', bool),
-                             ('input', Optional[str])])
+class PrefetchAppRunner(AppRunnerListener):
+  def __init__(self,
+               package: str,
+               activity: Optional[str],
+               readahead: str,
+               compiler_filter: Optional[str],
+               timeout: Optional[int],
+               simulate: bool,
+               debug: bool,
+               input:Optional[str],
+               **kwargs):
+    self.app_runner = AppRunner(package,
+                                activity,
+                                compiler_filter,
+                                timeout,
+                                simulate)
+    self.app_runner.add_callbacks(self)
+
+    self.simulate = simulate
+    self.readahead = readahead
+    self.debug = debug
+    self.input = input
+    print_utils.DEBUG = self.debug
+    cmd_utils.SIMULATE = self.simulate
+
+
+  def run(self) -> Optional[List[Tuple[str]]]:
+    """Runs an app.
+
+    Returns:
+      A list of (metric, value) tuples.
+    """
+    return self.app_runner.run()
+
+  def preprocess(self):
+    passed = self.validate_options()
+    if not passed:
+      return
+
+    # Sets up adb environment.
+    adb_utils.root()
+    adb_utils.disable_selinux()
+    time.sleep(1)
+
+    # Kill any existing process of this app
+    adb_utils.pkill(self.app_runner.package)
+
+    if self.readahead != 'warm':
+      print_utils.debug_print('Drop caches for non-warm start.')
+      # Drop all caches to get cold starts.
+      adb_utils.vm_drop_cache()
+
+    if self.readahead != 'warm' and self.readahead != 'cold':
+      iorapd_utils.enable_iorapd_readahead()
+
+  def postprocess(self, pre_launch_timestamp: str):
+    passed = self._perform_post_launch_cleanup(pre_launch_timestamp)
+    if not passed and not self.app_runner.simulate:
+      print_utils.error_print('Cannot perform post launch cleanup!')
+      return None
+
+    # Kill any existing process of this app
+    adb_utils.pkill(self.app_runner.package)
+
+  def _perform_post_launch_cleanup(self, logcat_timestamp: str) -> bool:
+    """Performs cleanup at the end of each loop iteration.
+
+    Returns:
+      A bool indicates whether the cleanup succeeds or not.
+    """
+    if self.readahead != 'warm' and self.readahead != 'cold':
+      passed = iorapd_utils.wait_for_iorapd_finish(self.app_runner.package,
+                                                   self.app_runner.activity,
+                                                   self.app_runner.timeout,
+                                                   self.debug,
+                                                   logcat_timestamp)
+
+      if not passed:
+        return passed
+
+      return iorapd_utils.disable_iorapd_readahead()
+
+    # Don't need to do anything for warm or cold.
+    return True
+
+  def metrics_selector(self, am_start_output: str,
+                       pre_launch_timestamp: str) -> str:
+    """Parses the metric after app startup by reading from logcat in a blocking
+    manner until all metrics have been found".
+
+    Returns:
+      the total time and displayed time of app startup.
+      For example: "TotalTime=123\nDisplayedTime=121
+    """
+    total_time = AppRunner.parse_total_time(am_start_output)
+    displayed_time = adb_utils.blocking_wait_for_logcat_displayed_time(
+        pre_launch_timestamp, self.app_runner.package, self.app_runner.timeout)
+
+    return 'TotalTime={}\nDisplayedTime={}'.format(total_time, displayed_time)
+
+  def validate_options(self) -> bool:
+    """Validates the activity and trace file if needed.
+
+    Returns:
+      A bool indicates whether the activity is valid.
+    """
+    needs_trace_file = self.readahead != 'cold' and self.readahead != 'warm'
+    if needs_trace_file and (self.input is None or
+                             not os.path.exists(self.input)):
+      print_utils.error_print('--input not specified!')
+      return False
+
+    # Install necessary trace file. This must be after the activity checking.
+    if needs_trace_file:
+      passed = iorapd_utils.iorapd_compiler_install_trace_file(
+          self.app_runner.package, self.app_runner.activity, self.input)
+      if not cmd_utils.SIMULATE and not passed:
+        print_utils.error_print('Failed to install compiled TraceFile.pb for '
+                                '"{}/{}"'.
+                                    format(self.app_runner.package,
+                                           self.app_runner.activity))
+        return False
+
+    return True
+
+
 
 def parse_options(argv: List[str] = None):
   """Parses command line arguments and return an argparse Namespace object."""
@@ -101,271 +215,10 @@ def parse_options(argv: List[str] = None):
 
   return parser.parse_args(argv)
 
-def validate_options(args: RunCommandArgs) -> Tuple[bool, RunCommandArgs]:
-  """Validates the activity and trace file if needed.
-
-  Returns:
-    A bool indicates whether the activity is valid and trace file exists if
-    necessary.
-  """
-  needs_trace_file = (args.readahead != 'cold' and args.readahead != 'warm')
-  if needs_trace_file and (args.input is None or
-                           not os.path.exists(args.input)):
-    print_utils.error_print('--input not specified!')
-    return False, args
-
-  if args.simulate:
-    args = args._replace(activity='act')
-
-  if not args.activity:
-    _, activity = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
-                                           'get_activity_name',
-                                           [args.package])
-    args = args._replace(activity=activity)
-
-  if not args.activity:
-    print_utils.error_print('Activity name could not be found, '
-                            'invalid package name?!')
-    return False, args
-
-  # Install necessary trace file. This must be after the activity checking.
-  if needs_trace_file:
-    passed = iorapd_utils.iorapd_compiler_install_trace_file(
-        args.package, args.activity, args.input)
-    if not cmd_utils.SIMULATE and not passed:
-      print_utils.error_print('Failed to install compiled TraceFile.pb for '
-                              '"{}/{}"'.
-                                format(args.package, args.activity))
-      return False, args
-
-  return True, args
-
-def set_up_adb_env():
-  """Sets up adb environment."""
-  adb_utils.root()
-  adb_utils.disable_selinux()
-  time.sleep(1)
-
-def configure_compiler_filter(compiler_filter: str, package: str,
-                              activity: str) -> bool:
-  """Configures compiler filter (e.g. speed).
-
-  Returns:
-    A bool indicates whether configure of compiler filer succeeds or not.
-  """
-  if not compiler_filter:
-    print_utils.debug_print('No --compiler-filter specified, don\'t'
-                            ' need to force it.')
-    return True
-
-  passed, current_compiler_filter_info = \
-    cmd_utils.run_shell_command(
-        '{} --package {}'.format(os.path.join(DIR, 'query_compiler_filter.py'),
-                                 package))
-
-  if passed != 0:
-    return passed
-
-  # TODO: call query_compiler_filter directly as a python function instead of
-  #  these shell calls.
-  current_compiler_filter, current_reason, current_isa = \
-    current_compiler_filter_info.split(' ')
-  print_utils.debug_print('Compiler Filter={} Reason={} Isa={}'.format(
-      current_compiler_filter, current_reason, current_isa))
-
-  # Don't trust reasons that aren't 'unknown' because that means
-  #  we didn't manually force the compilation filter.
-  # (e.g. if any automatic system-triggered compilations are not unknown).
-  if current_reason != 'unknown' or current_compiler_filter != compiler_filter:
-    passed, _ = adb_utils.run_shell_command('{}/force_compiler_filter '
-                                            '--compiler-filter "{}" '
-                                            '--package "{}"'
-                                            ' --activity "{}'.
-                                              format(DIR, compiler_filter,
-                                                     package, activity))
-  else:
-    adb_utils.debug_print('Queried compiler-filter matched requested '
-                          'compiler-filter, skip forcing.')
-    passed = False
-  return passed
-
-def parse_metrics_output(input: str,
-                         simulate: bool = False) -> List[Tuple[str, str, str]]:
-  """Parses ouput of app startup to metrics and corresponding values.
-
-  It converts 'a=b\nc=d\ne=f\n...' into '[(a,b,''),(c,d,''),(e,f,'')]'
-
-  Returns:
-    A list of tuples that including metric name, metric value and rest info.
-  """
-  all_metrics = []
-  for line in input.split('\n'):
-    if not line:
-      continue
-    splits = line.split('=')
-    if len(splits) < 2:
-      print_utils.error_print('Bad line "{}"'.format(line))
-      continue
-    metric_name = splits[0]
-    metric_value = splits[1]
-    rest = splits[2] if len(splits) > 2 else ''
-    if rest:
-      print_utils.error_print('Corrupt line "{}"'.format(line))
-    print_utils.debug_print('metric: "{metric_name}", '
-                            'value: "{metric_value}" '.
-                              format(metric_name=metric_name,
-                                   metric_value=metric_value))
-
-    all_metrics.append((metric_name, metric_value))
-  return all_metrics
-
-def _parse_total_time(am_start_output: str) -> Optional[str]:
-  """Parses the total time from 'adb shell am start pkg' output.
-
-  Returns:
-    the total time of app startup.
-  """
-  for line in am_start_output.split('\n'):
-    if 'TotalTime:' in line:
-      return line[len('TotalTime:'):].strip()
-  return None
-
-def blocking_parse_all_metrics(am_start_output: str, package: str,
-                               pre_launch_timestamp: str,
-                               timeout: int) -> str:
-  """Parses the metric after app startup by reading from logcat in a blocking
-  manner until all metrics have been found".
-
-  Returns:
-    the total time and displayed time of app startup.
-    For example: "TotalTime=123\nDisplayedTime=121
-  """
-  total_time = _parse_total_time(am_start_output)
-  displayed_time = adb_utils.blocking_wait_for_logcat_displayed_time(
-      pre_launch_timestamp, package, timeout)
-
-  return 'TotalTime={}\nDisplayedTime={}'.format(total_time, displayed_time)
-
-def run(readahead: str,
-        package: str,
-        activity: str,
-        timeout: int,
-        simulate: bool,
-        debug: bool) -> List[Tuple[str, str]]:
-  """Runs app startup test.
-
-  Returns:
-    A list of tuples that including metric name, metric value and rest info.
-  """
-  print_utils.debug_print('==========================================')
-  print_utils.debug_print('=====             START              =====')
-  print_utils.debug_print('==========================================')
-
-  # Kill any existing process of this app
-  adb_utils.pkill(package)
-
-  if readahead != 'warm':
-    print_utils.debug_print('Drop caches for non-warm start.')
-    # Drop all caches to get cold starts.
-    adb_utils.vm_drop_cache()
-
-  if readahead != 'warm' and readahead != 'cold':
-    iorapd_utils.enable_iorapd_readahead()
-
-  print_utils.debug_print('Running with timeout {}'.format(timeout))
-
-  pre_launch_timestamp = adb_utils.logcat_save_timestamp()
-
-  passed, output = cmd_utils.run_shell_command('timeout {timeout} '
-                                               '"{DIR}/launch_application" '
-                                               '"{package}" '
-                                               '"{activity}"'
-                                                 .format(timeout=timeout,
-                                                       DIR=DIR,
-                                                       package=package,
-                                                       activity=activity))
-  if not passed and not simulate:
-    return None
-
-  if simulate:
-    results = [('TotalTime', '123')]
-  else:
-    output = blocking_parse_all_metrics(output,
-                                        package,
-                                        pre_launch_timestamp,
-                                        timeout)
-    results = parse_metrics_output(output, simulate)
-
-  passed = perform_post_launch_cleanup(
-      readahead, package, activity, timeout, debug, pre_launch_timestamp)
-  if not passed and not simulate:
-    print_utils.error_print('Cannot perform post launch cleanup!')
-    return None
-
-  adb_utils.pkill(package)
-  return results
-
-def perform_post_launch_cleanup(readahead: str,
-                                package: str,
-                                activity: str,
-                                timeout: int,
-                                debug: bool,
-                                logcat_timestamp: str) -> bool:
-  """Performs cleanup at the end of each loop iteration.
-
-  Returns:
-    A bool indicates whether the cleanup succeeds or not.
-  """
-  if readahead != 'warm' and readahead != 'cold':
-    passed = iorapd_utils.wait_for_iorapd_finish(package,
-                                                 activity,
-                                                 timeout,
-                                                 debug,
-                                                 logcat_timestamp)
-
-    if not passed:
-      return passed
-
-    return iorapd_utils.disable_iorapd_readahead()
-
-  # Don't need to do anything for warm or cold.
-  return True
-
-def run_test(args: RunCommandArgs) -> List[Tuple[str, str]]:
-  """Runs one test using given options.
-
-  Returns:
-    A list of tuples that including metric name, metric value.
-  """
-  print_utils.DEBUG = args.debug
-  cmd_utils.SIMULATE = args.simulate
-
-  passed, args = validate_options(args)
-  if not passed:
-    return None
-
-  set_up_adb_env()
-
-  # Ensure the APK is currently compiled with whatever we passed in
-  # via --compiler-filter.
-  # No-op if this option was not passed in.
-  if not configure_compiler_filter(args.compiler_filter, args.package,
-                                   args.activity):
-    return None
-
-  return run(args.readahead, args.package, args.activity, args.timeout,
-             args.simulate, args.debug)
-
-def get_args_from_opts(opts: argparse.Namespace) -> RunCommandArgs:
-  kwargs = {}
-  for field in RunCommandArgs._fields:
-    kwargs[field] = getattr(opts, field)
-  return RunCommandArgs(**kwargs)
-
 def main():
   opts = parse_options()
-  args = get_args_from_opts(opts)
-  result = run_test(args)
+  runner = PrefetchAppRunner(**vars(opts))
+  result = runner.run()
 
   if result is None:
     return 1
