@@ -1013,7 +1013,7 @@ message GlobalSettingsProto {
         optional SettingProto watchdog_poor_network_test_enabled = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto suspend_optimizations_enabled = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto verbose_logging_enabled = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        reserved 25; // connected_mac_randomization_enabled
+        reserved 25; reserved "connected_mac_randomization_enabled";
         optional SettingProto max_dhcp_retry_count = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto mobile_data_transition_wakelock_timeout_ms = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Controls whether WiFi configurations created by a Device Owner app should
@@ -1025,7 +1025,7 @@ message GlobalSettingsProto {
         optional SettingProto device_owner_configs_lockdown = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto frequency_band = 29 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto p2p_device_name = 30;
-        optional SettingProto reenable_delay_ms = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 31; reserved "reenable_delay_ms";
         optional SettingProto ephemeral_out_of_range_timeout_ms = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto on_when_proxy_disconnected = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto bounce_delay_override_ms = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
