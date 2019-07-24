@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -31,6 +32,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 
 import androidx.test.filters.SmallTest;
 
@@ -85,6 +87,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarWindowController.class);
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         when(mLockIconContainer.getParent()).thenReturn(mock(ViewGroup.class));
+        when(mLockIconContainer.animate()).thenReturn(mock(ViewPropertyAnimator.class,
+                RETURNS_DEEP_STUBS));
         mStatusBarKeyguardViewManager = new TestableStatusBarKeyguardViewManager(getContext(),
                 mViewMediatorCallback, mLockPatternUtils);
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
