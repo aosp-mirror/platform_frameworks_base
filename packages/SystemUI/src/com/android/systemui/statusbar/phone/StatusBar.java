@@ -3563,6 +3563,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 userAllowsPrivateNotificationsInPublic(mLockscreenUserManager.getCurrentUserId())
                 || !mLockscreenUserManager.shouldShowLockscreenNotifications()
                 || mFalsingManager.shouldEnforceBouncer();
+        if (mKeyguardBypassController.getBypassEnabled()) {
+            fullShadeNeedsBouncer = false;
+        }
         if (mLockscreenUserManager.isLockscreenPublicMode(userId) && fullShadeNeedsBouncer) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
             showBouncerIfKeyguard();
