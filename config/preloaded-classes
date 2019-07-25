@@ -563,7 +563,6 @@ android.app.job.JobInfo
 android.app.job.JobParameters$1
 android.app.job.JobParameters
 android.app.job.JobScheduler
-android.app.job.JobSchedulerFrameworkInitializer
 android.app.job.JobService$1
 android.app.job.JobService
 android.app.job.JobServiceEngine$JobHandler
