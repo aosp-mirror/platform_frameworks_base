@@ -40,6 +40,7 @@ constexpr int32_t sHeaderSize = 4;
 static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong");
 
 constexpr int sHistogramSize = ProfileData::HistogramSize();
+constexpr int sGPUHistogramSize = ProfileData::GPUHistogramSize();
 
 static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto,
                                       const std::string& package, int64_t versionCode,
@@ -211,6 +212,37 @@ bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::str
         bucket->set_frame_count(bucket->frame_count() + entry.frameCount);
         index++;
     });
+    if (hitMergeError) return false;
+    // fill in GPU frame time histogram
+    creatingHistogram = false;
+    if (proto->gpu_histogram_size() == 0) {
+        proto->mutable_gpu_histogram()->Reserve(sGPUHistogramSize);
+        creatingHistogram = true;
+    } else if (proto->gpu_histogram_size() != sGPUHistogramSize) {
+        ALOGE("GPU histogram size mismatch, proto is %d expected %d", proto->gpu_histogram_size(),
+              sGPUHistogramSize);
+        return false;
+    }
+    index = 0;
+    data->histogramGPUForEach([&](ProfileData::HistogramEntry entry) {
+        if (hitMergeError) return;
+
+        protos::GraphicsStatsHistogramBucketProto* bucket;
+        if (creatingHistogram) {
+            bucket = proto->add_gpu_histogram();
+            bucket->set_render_millis(entry.renderTimeMs);
+        } else {
+            bucket = proto->mutable_gpu_histogram(index);
+            if (bucket->render_millis() != static_cast<int32_t>(entry.renderTimeMs)) {
+                ALOGW("GPU frame time mistmatch %d vs. %u", bucket->render_millis(),
+                      entry.renderTimeMs);
+                hitMergeError = true;
+                return;
+            }
+        }
+        bucket->set_frame_count(bucket->frame_count() + entry.frameCount);
+        index++;
+    });
     return !hitMergeError;
 }
 
@@ -218,6 +250,22 @@ static int32_t findPercentile(protos::GraphicsStatsProto* proto, int percentile)
     int32_t pos = percentile * proto->summary().total_frames() / 100;
     int32_t remaining = proto->summary().total_frames() - pos;
     for (auto it = proto->histogram().rbegin(); it != proto->histogram().rend(); ++it) {
+        remaining -= it->frame_count();
+        if (remaining <= 0) {
+            return it->render_millis();
+        }
+    }
+    return 0;
+}
+
+static int32_t findGPUPercentile(protos::GraphicsStatsProto* proto, int percentile) {
+    uint32_t totalGPUFrameCount = 0;  // this is usually  proto->summary().total_frames() - 3.
+    for (auto it = proto->gpu_histogram().rbegin(); it != proto->gpu_histogram().rend(); ++it) {
+        totalGPUFrameCount += it->frame_count();
+    }
+    int32_t pos = percentile * totalGPUFrameCount / 100;
+    int32_t remaining = totalGPUFrameCount - pos;
+    for (auto it = proto->gpu_histogram().rbegin(); it != proto->gpu_histogram().rend(); ++it) {
         remaining -= it->frame_count();
         if (remaining <= 0) {
             return it->render_millis();
@@ -253,6 +301,14 @@ void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int fd) {
     dprintf(fd, "\nNumber Frame deadline missed: %d", summary.missed_deadline_count());
     dprintf(fd, "\nHISTOGRAM:");
     for (const auto& it : proto->histogram()) {
+        dprintf(fd, " %dms=%d", it.render_millis(), it.frame_count());
+    }
+    dprintf(fd, "\n50th gpu percentile: %dms", findGPUPercentile(proto, 50));
+    dprintf(fd, "\n90th gpu percentile: %dms", findGPUPercentile(proto, 90));
+    dprintf(fd, "\n95th gpu percentile: %dms", findGPUPercentile(proto, 95));
+    dprintf(fd, "\n99th gpu percentile: %dms", findGPUPercentile(proto, 99));
+    dprintf(fd, "\nGPU HISTOGRAM:");
+    for (const auto& it : proto->gpu_histogram()) {
         dprintf(fd, " %dms=%d", it.render_millis(), it.frame_count());
     }
     dprintf(fd, "\n");

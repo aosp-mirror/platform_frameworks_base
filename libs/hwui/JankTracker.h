@@ -58,6 +58,7 @@ public:
 
     FrameInfo* startFrame() { return &mFrames.next(); }
     void finishFrame(const FrameInfo& frame);
+    void finishGpuDraw(const FrameInfo& frame);
 
     void dumpStats(int fd) { dumpData(fd, &mDescription, mData.get()); }
     void dumpFrames(int fd);

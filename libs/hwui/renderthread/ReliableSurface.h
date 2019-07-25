@@ -49,6 +49,21 @@ public:
         return ret;
     }
 
+    status_t getFrameTimestamps(uint64_t frameNumber,
+            nsecs_t* outRequestedPresentTime, nsecs_t* outAcquireTime,
+            nsecs_t* outLatchTime, nsecs_t* outFirstRefreshStartTime,
+            nsecs_t* outLastRefreshStartTime, nsecs_t* outGlCompositionDoneTime,
+            nsecs_t* outDisplayPresentTime, nsecs_t* outDequeueReadyTime,
+            nsecs_t* outReleaseTime) {
+        return mSurface->getFrameTimestamps(frameNumber, outRequestedPresentTime, outAcquireTime,
+            outLatchTime, outFirstRefreshStartTime, outLastRefreshStartTime,
+            outGlCompositionDoneTime, outDisplayPresentTime, outDequeueReadyTime, outReleaseTime);
+    }
+
+    void enableFrameTimestamps(bool enable) {
+        return mSurface->enableFrameTimestamps(enable);
+    }
+
 private:
     const sp<Surface> mSurface;
 
