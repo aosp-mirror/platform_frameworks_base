@@ -692,9 +692,19 @@ public class BubbleStackView extends FrameLayout {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "addBubble: " + bubble);
         }
+
+        if (mBubbleContainer.getChildCount() == 0) {
+            mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
+        }
+
         bubble.inflate(mInflater, this);
         bubble.getIconView().setBubbleIconFactory(mBubbleIconFactory);
         bubble.getIconView().updateViews();
+
+        // Set the dot position to the opposite of the side the stack is resting on, since the stack
+        // resting slightly off-screen would result in the dot also being off-screen.
+        bubble.getIconView().setDotPosition(
+                !mStackOnLeftOrWillBe /* onLeft */, false /* animate */);
 
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
