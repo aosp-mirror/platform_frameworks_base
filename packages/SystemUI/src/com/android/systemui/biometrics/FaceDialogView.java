@@ -460,6 +460,7 @@ public class FaceDialogView extends BiometricDialogView {
 
     @Override
     public void onDialogAnimatedIn() {
+        super.onDialogAnimatedIn();
         mDialogAnimatedIn = true;
         mIconController.startPulsing();
     }
