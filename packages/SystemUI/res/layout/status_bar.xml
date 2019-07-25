@@ -42,6 +42,32 @@
         android:visibility="gone"
         />
 
+    <LinearLayout
+        android:id="@+id/divider_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@color/transparent" >
+
+        <android.widget.Space
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="@integer/qqs_split_fraction" />
+
+        <com.android.systemui.DarkReceiverImpl
+            android:id="@+id/divider"
+            android:layout_height="match_parent"
+            android:layout_width="1dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp" />
+
+        <android.widget.Space
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="@integer/qs_split_fraction" />
+
+    </LinearLayout>
+
     <LinearLayout android:id="@+id/status_bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
