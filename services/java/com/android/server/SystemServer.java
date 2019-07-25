@@ -87,6 +87,7 @@ import com.android.server.biometrics.iris.IrisService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
@@ -1098,6 +1099,11 @@ public final class SystemServer {
             t.traceBegin("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
             t.traceEnd();
+
+            t.traceBegin("PlatformCompat");
+            ServiceManager.addService("platform_compat", new PlatformCompat(context));
+            t.traceEnd();
+
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
