@@ -17,12 +17,10 @@ package com.android.server.broadcastradio.hal2;
 
 import static org.junit.Assert.*;
 
-import android.hardware.broadcastradio.V2_0.ProgramInfo;
 import android.hardware.broadcastradio.V2_0.ProgramListChunk;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
-import android.hardware.radio.RadioMetadata;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -30,7 +28,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,55 +42,58 @@ public class ProgramInfoCacheTest {
 
     private final ProgramSelector.Identifier mAmFmIdentifier =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, 88500);
-    private final RadioManager.ProgramInfo mAmFmInfo = makeProgramInfo(
+    private final RadioManager.ProgramInfo mAmFmInfo = TestUtils.makeProgramInfo(
             ProgramSelector.PROGRAM_TYPE_FM, mAmFmIdentifier, 0);
 
     private final ProgramSelector.Identifier mRdsIdentifier =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_RDS_PI, 15019);
-    private final RadioManager.ProgramInfo mRdsInfo = makeProgramInfo(
+    private final RadioManager.ProgramInfo mRdsInfo = TestUtils.makeProgramInfo(
             ProgramSelector.PROGRAM_TYPE_FM, mRdsIdentifier, 0);
 
     private final ProgramSelector.Identifier mDabEnsembleIdentifier =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, 1337);
-    private final RadioManager.ProgramInfo mDabEnsembleInfo = makeProgramInfo(
+    private final RadioManager.ProgramInfo mDabEnsembleInfo = TestUtils.makeProgramInfo(
             ProgramSelector.PROGRAM_TYPE_DAB, mDabEnsembleIdentifier, 0);
 
     private final ProgramSelector.Identifier mVendorCustomIdentifier =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, 9001);
-    private final RadioManager.ProgramInfo mVendorCustomInfo = makeProgramInfo(
+    private final RadioManager.ProgramInfo mVendorCustomInfo = TestUtils.makeProgramInfo(
             ProgramSelector.PROGRAM_TYPE_VENDOR_START, mVendorCustomIdentifier, 0);
 
     // HAL-side ProgramInfoCache containing all of the above ProgramInfos.
-    private final ProgramInfoCache mAllProgramInfos = new ProgramInfoCache(null, mAmFmInfo,
+    private final ProgramInfoCache mAllProgramInfos = new ProgramInfoCache(null, true, mAmFmInfo,
             mRdsInfo, mDabEnsembleInfo, mVendorCustomInfo);
 
     @Test
     public void testUpdateFromHal() {
-        // First test a purging chunk.
-        ProgramInfoCache cache = new ProgramInfoCache(null, mAmFmInfo);
+        // First test updating an incomplete cache with a purging, complete chunk.
+        ProgramInfoCache cache = new ProgramInfoCache(null, false, mAmFmInfo);
         ProgramListChunk chunk = new ProgramListChunk();
         chunk.purge = true;
-        chunk.modified.add(programInfoToHal(mRdsInfo));
-        chunk.modified.add(programInfoToHal(mDabEnsembleInfo));
-        cache.updateFromHalProgramListChunk(chunk);
         chunk.complete = true;
+        chunk.modified.add(TestUtils.programInfoToHal(mRdsInfo));
+        chunk.modified.add(TestUtils.programInfoToHal(mDabEnsembleInfo));
+        cache.updateFromHalProgramListChunk(chunk);
         assertTrue(cache.programInfosAreExactly(mRdsInfo, mDabEnsembleInfo));
+        assertTrue(cache.isComplete());
 
-        // Then test a non-purging chunk.
+        // Then test a non-purging, incomplete chunk.
         chunk.purge = false;
+        chunk.complete = false;
         chunk.modified.clear();
-        RadioManager.ProgramInfo updatedRdsInfo = makeProgramInfo(ProgramSelector.PROGRAM_TYPE_FM,
-                mRdsIdentifier, 1);
-        chunk.modified.add(programInfoToHal(updatedRdsInfo));
-        chunk.modified.add(programInfoToHal(mVendorCustomInfo));
+        RadioManager.ProgramInfo updatedRdsInfo = TestUtils.makeProgramInfo(
+                ProgramSelector.PROGRAM_TYPE_FM, mRdsIdentifier, 1);
+        chunk.modified.add(TestUtils.programInfoToHal(updatedRdsInfo));
+        chunk.modified.add(TestUtils.programInfoToHal(mVendorCustomInfo));
         chunk.removed.add(Convert.programIdentifierToHal(mDabEnsembleIdentifier));
         cache.updateFromHalProgramListChunk(chunk);
         assertTrue(cache.programInfosAreExactly(updatedRdsInfo, mVendorCustomInfo));
+        assertFalse(cache.isComplete());
     }
 
     @Test
     public void testNullFilter() {
-        ProgramInfoCache cache = new ProgramInfoCache(null);
+        ProgramInfoCache cache = new ProgramInfoCache(null, true);
         cache.filterAndUpdateFrom(mAllProgramInfos, false);
         assertTrue(cache.programInfosAreExactly(mAmFmInfo, mRdsInfo, mDabEnsembleInfo,
                   mVendorCustomInfo));
@@ -140,11 +140,11 @@ public class ProgramInfoCacheTest {
 
     @Test
     public void testPurgeUpdateChunks() {
-        ProgramInfoCache cache = new ProgramInfoCache(null, mAmFmInfo);
+        ProgramInfoCache cache = new ProgramInfoCache(null, false, mAmFmInfo);
         List<ProgramList.Chunk> chunks =
                 cache.filterAndUpdateFromInternal(mAllProgramInfos, true, 3, 3);
         assertEquals(2, chunks.size());
-        verifyChunkListFlags(chunks, true);
+        verifyChunkListFlags(chunks, true, true);
         verifyChunkListModified(chunks, 3, mAmFmInfo, mRdsInfo, mDabEnsembleInfo,
                 mVendorCustomInfo);
         verifyChunkListRemoved(chunks, 0);
@@ -154,23 +154,26 @@ public class ProgramInfoCacheTest {
     public void testDeltaUpdateChunksModificationsIncluded() {
         // Create a cache with a filter that allows modifications, and set its contents to
         // mAmFmInfo, mRdsInfo, mDabEnsembleInfo, and mVendorCustomInfo.
-        ProgramInfoCache cache = new ProgramInfoCache(null, mAmFmInfo, mRdsInfo, mDabEnsembleInfo,
-                mVendorCustomInfo);
+        ProgramInfoCache cache = new ProgramInfoCache(null, true, mAmFmInfo, mRdsInfo,
+                mDabEnsembleInfo, mVendorCustomInfo);
 
         // Create a HAL cache that:
+        // - Is complete.
         // - Retains mAmFmInfo.
         // - Replaces mRdsInfo with updatedRdsInfo.
         // - Drops mDabEnsembleInfo and mVendorCustomInfo.
         // - Introduces a new SXM info.
-        RadioManager.ProgramInfo updatedRdsInfo = makeProgramInfo(ProgramSelector.PROGRAM_TYPE_FM,
-                mRdsIdentifier, 1);
-        RadioManager.ProgramInfo newSxmInfo = makeProgramInfo(ProgramSelector.PROGRAM_TYPE_SXM,
+        RadioManager.ProgramInfo updatedRdsInfo = TestUtils.makeProgramInfo(
+                ProgramSelector.PROGRAM_TYPE_FM, mRdsIdentifier, 1);
+        RadioManager.ProgramInfo newSxmInfo = TestUtils.makeProgramInfo(
+                ProgramSelector.PROGRAM_TYPE_SXM,
                 new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL, 12345),
                 0);
-        ProgramInfoCache halCache = new ProgramInfoCache(null, mAmFmInfo, updatedRdsInfo,
+        ProgramInfoCache halCache = new ProgramInfoCache(null, true, mAmFmInfo, updatedRdsInfo,
                 newSxmInfo);
 
         // Update the cache and verify:
+        // - The final chunk's complete flag is set.
         // - mAmFmInfo is retained and not reported in the chunks.
         // - updatedRdsInfo should appear as an update to mRdsInfo.
         // - newSxmInfo should appear as a new entry.
@@ -178,7 +181,7 @@ public class ProgramInfoCacheTest {
         List<ProgramList.Chunk> chunks = cache.filterAndUpdateFromInternal(halCache, false, 5, 1);
         assertTrue(cache.programInfosAreExactly(mAmFmInfo, updatedRdsInfo, newSxmInfo));
         assertEquals(2, chunks.size());
-        verifyChunkListFlags(chunks, false);
+        verifyChunkListFlags(chunks, false, true);
         verifyChunkListModified(chunks, 5, updatedRdsInfo, newSxmInfo);
         verifyChunkListRemoved(chunks, 1, mDabEnsembleIdentifier, mVendorCustomIdentifier);
     }
@@ -188,63 +191,50 @@ public class ProgramInfoCacheTest {
         // Create a cache with a filter that excludes modifications, and set its contents to
         // mAmFmInfo, mRdsInfo, mDabEnsembleInfo, and mVendorCustomInfo.
         ProgramInfoCache cache = new ProgramInfoCache(new ProgramList.Filter(new HashSet<Integer>(),
-                new HashSet<ProgramSelector.Identifier>(), true, true), mAmFmInfo, mRdsInfo,
+                new HashSet<ProgramSelector.Identifier>(), true, true), true, mAmFmInfo, mRdsInfo,
                 mDabEnsembleInfo, mVendorCustomInfo);
 
         // Create a HAL cache that:
+        // - Is incomplete.
         // - Retains mAmFmInfo.
         // - Replaces mRdsInfo with updatedRdsInfo.
         // - Drops mDabEnsembleInfo and mVendorCustomInfo.
         // - Introduces a new SXM info.
-        RadioManager.ProgramInfo updatedRdsInfo = makeProgramInfo(ProgramSelector.PROGRAM_TYPE_FM,
-                mRdsIdentifier, 1);
-        RadioManager.ProgramInfo newSxmInfo = makeProgramInfo(ProgramSelector.PROGRAM_TYPE_SXM,
+        RadioManager.ProgramInfo updatedRdsInfo = TestUtils.makeProgramInfo(
+                ProgramSelector.PROGRAM_TYPE_FM, mRdsIdentifier, 1);
+        RadioManager.ProgramInfo newSxmInfo = TestUtils.makeProgramInfo(
+                ProgramSelector.PROGRAM_TYPE_SXM,
                 new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL, 12345),
                 0);
-        ProgramInfoCache halCache = new ProgramInfoCache(null, mAmFmInfo, updatedRdsInfo,
+        ProgramInfoCache halCache = new ProgramInfoCache(null, false, mAmFmInfo, updatedRdsInfo,
                 newSxmInfo);
 
         // Update the cache and verify:
+        // - All complete flags are false.
         // - mAmFmInfo and mRdsInfo are retained and not reported in the chunks.
         // - newSxmInfo should appear as a new entry.
         // - mDabEnsembleInfo and mVendorCustomInfo should be reported as removed.
         List<ProgramList.Chunk> chunks = cache.filterAndUpdateFromInternal(halCache, false, 5, 1);
         assertTrue(cache.programInfosAreExactly(mAmFmInfo, mRdsInfo, newSxmInfo));
         assertEquals(2, chunks.size());
-        verifyChunkListFlags(chunks, false);
+        verifyChunkListFlags(chunks, false, false);
         verifyChunkListModified(chunks, 5, newSxmInfo);
         verifyChunkListRemoved(chunks, 1, mDabEnsembleIdentifier, mVendorCustomIdentifier);
     }
 
-    private static RadioManager.ProgramInfo makeProgramInfo(int programType,
-            ProgramSelector.Identifier identifier, int signalQuality) {
-        // Note: If you set new fields, check if programInfoToHal() needs to be updated as well.
-        return new RadioManager.ProgramInfo(new ProgramSelector(programType, identifier, null,
-                null), null, null, null, 0, signalQuality, new RadioMetadata.Builder().build(),
-                new HashMap<String, String>());
-    }
-
-    private static ProgramInfo programInfoToHal(RadioManager.ProgramInfo info) {
-        // Note that because Convert does not by design provide functions for all conversions, this
-        // function only copies fields that are set by makeProgramInfo().
-        ProgramInfo hwInfo = new ProgramInfo();
-        hwInfo.selector = Convert.programSelectorToHal(info.getSelector());
-        hwInfo.signalQuality = info.getSignalStrength();
-        return hwInfo;
-    }
-
     // Verifies that:
     // - The first chunk's purge flag matches expectPurge.
-    // - The last chunk's complete flag is set.
+    // - The last chunk's complete flag matches expectComplete.
     // - All other flags are false.
-    private static void verifyChunkListFlags(List<ProgramList.Chunk> chunks, boolean expectPurge) {
+    private static void verifyChunkListFlags(List<ProgramList.Chunk> chunks, boolean expectPurge,
+            boolean expectComplete) {
         if (chunks.isEmpty()) {
             return;
         }
         for (int i = 0; i < chunks.size(); i++) {
             ProgramList.Chunk chunk = chunks.get(i);
             assertEquals(i == 0 && expectPurge, chunk.isPurge());
-            assertEquals(i == chunks.size() - 1, chunk.isComplete());
+            assertEquals(i == chunks.size() - 1 && expectComplete, chunk.isComplete());
         }
     }
 
