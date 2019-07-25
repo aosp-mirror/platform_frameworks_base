@@ -27,6 +27,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.Iterator;
 
@@ -38,6 +39,7 @@ public class KernelWakelockReader {
     private static int sKernelWakelockUpdateVersion = 0;
     private static final String sWakelockFile = "/proc/wakelocks";
     private static final String sWakeupSourceFile = "/d/wakeup_sources";
+    private static final String sSysClassWakeupDir = "/sys/class/wakeup";
 
     private static final int[] PROC_WAKELOCKS_FORMAT = new int[] {
         Process.PROC_TAB_TERM|Process.PROC_OUT_STRING|                // 0: name
@@ -71,99 +73,108 @@ public class KernelWakelockReader {
      * @return the updated data.
      */
     public final KernelWakelockStats readKernelWakelockStats(KernelWakelockStats staleStats) {
-        byte[] buffer = new byte[32*1024];
-        int len = 0;
-        boolean wakeup_sources;
-        final long startTime = SystemClock.uptimeMillis();
+        boolean useSystemSuspend = (new File(sSysClassWakeupDir)).exists();
 
-        final int oldMask = StrictMode.allowThreadDiskReadsMask();
-        try {
-            FileInputStream is;
-            try {
-                is = new FileInputStream(sWakelockFile);
-                wakeup_sources = false;
-            } catch (java.io.FileNotFoundException e) {
+        if (useSystemSuspend) {
+            WakeLockInfo[] wlStats = null;
+            if (mSuspendControlService == null) {
                 try {
-                    is = new FileInputStream(sWakeupSourceFile);
-                    wakeup_sources = true;
-                } catch (java.io.FileNotFoundException e2) {
-                    Slog.wtf(TAG, "neither " + sWakelockFile + " nor " +
-                            sWakeupSourceFile + " exists");
+                    mSuspendControlService = ISuspendControlService.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow("suspend_control"));
+                } catch (ServiceNotFoundException e) {
+                    Slog.wtf(TAG, "Required service suspend_control not available", e);
                     return null;
                 }
             }
 
-            int cnt;
-            while ((cnt = is.read(buffer, len, buffer.length - len)) > 0) {
-                len += cnt;
+            try {
+                wlStats = mSuspendControlService.getWakeLockStats();
+                updateVersion(staleStats);
+                updateWakelockStats(wlStats, staleStats);
+            } catch (RemoteException e) {
+                Slog.wtf(TAG, "Failed to obtain wakelock stats from ISuspendControlService", e);
+                return null;
             }
 
-            is.close();
-        } catch (java.io.IOException e) {
-            Slog.wtf(TAG, "failed to read kernel wakelocks", e);
-            return null;
-        } finally {
-            StrictMode.setThreadPolicyMask(oldMask);
-        }
+            return removeOldStats(staleStats);
 
-        final long readTime = SystemClock.uptimeMillis() - startTime;
-        if (readTime > 100) {
-            Slog.w(TAG, "Reading wakelock stats took " + readTime + "ms");
-        }
+        } else {
+            byte[] buffer = new byte[32*1024];
+            int len = 0;
+            boolean wakeup_sources;
+            final long startTime = SystemClock.uptimeMillis();
 
-        if (len > 0) {
-            if (len >= buffer.length) {
-                Slog.wtf(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
+            final int oldMask = StrictMode.allowThreadDiskReadsMask();
+            try {
+                FileInputStream is;
+                try {
+                    is = new FileInputStream(sWakelockFile);
+                    wakeup_sources = false;
+                } catch (java.io.FileNotFoundException e) {
+                    try {
+                        is = new FileInputStream(sWakeupSourceFile);
+                        wakeup_sources = true;
+                    } catch (java.io.FileNotFoundException e2) {
+                        Slog.wtf(TAG, "neither " + sWakelockFile + " nor " +
+                                sWakeupSourceFile + " exists");
+                        return null;
+                    }
+                }
+
+                int cnt;
+                while ((cnt = is.read(buffer, len, buffer.length - len)) > 0) {
+                    len += cnt;
+                }
+
+                is.close();
+            } catch (java.io.IOException e) {
+                Slog.wtf(TAG, "failed to read kernel wakelocks", e);
+                return null;
+            } finally {
+                StrictMode.setThreadPolicyMask(oldMask);
             }
-            int i;
-            for (i=0; i<len; i++) {
-                if (buffer[i] == '\0') {
-                    len = i;
-                    break;
+
+            final long readTime = SystemClock.uptimeMillis() - startTime;
+            if (readTime > 100) {
+                Slog.w(TAG, "Reading wakelock stats took " + readTime + "ms");
+            }
+
+            if (len > 0) {
+                if (len >= buffer.length) {
+                    Slog.wtf(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
+                }
+                int i;
+                for (i=0; i<len; i++) {
+                    if (buffer[i] == '\0') {
+                        len = i;
+                        break;
+                    }
                 }
             }
+
+            updateVersion(staleStats);
+            parseProcWakelocks(buffer, len, wakeup_sources, staleStats);
+            return removeOldStats(staleStats);
         }
-
-        updateVersion(staleStats);
-
-        parseProcWakelocks(buffer, len, wakeup_sources, staleStats);
-
-        if (mSuspendControlService == null) {
-            try {
-                mSuspendControlService = ISuspendControlService.Stub.asInterface(
-                    ServiceManager.getServiceOrThrow("suspend_control"));
-            } catch (ServiceNotFoundException e) {
-                Slog.wtf(TAG, "Required service suspend_control not available", e);
-            }
-        }
-
-        try {
-            WakeLockInfo[] wlStats = mSuspendControlService.getWakeLockStats();
-            getNativeWakelockStats(wlStats, staleStats);
-        } catch (RemoteException e) {
-            Slog.wtf(TAG, "Failed to obtain wakelock stats from ISuspendControlService", e);
-        }
-
-        return removeOldStats(staleStats);
     }
 
     /**
-     * Reads native wakelock stats from SystemSuspend and updates staleStats with the new
-     * information.
+     * Updates statleStats with stats from  SystemSuspend.
      * @param staleStats Existing object to update.
      * @return the updated stats.
      */
     @VisibleForTesting
-    public KernelWakelockStats getNativeWakelockStats(WakeLockInfo[] wlStats,
+    public KernelWakelockStats updateWakelockStats(WakeLockInfo[] wlStats,
                                                       final KernelWakelockStats staleStats) {
         for (WakeLockInfo info : wlStats) {
             if (!staleStats.containsKey(info.name)) {
                 staleStats.put(info.name, new KernelWakelockStats.Entry((int) info.activeCount,
-                        info.totalTime, sKernelWakelockUpdateVersion));
+                        info.totalTime * 1000 /* ms to us */, sKernelWakelockUpdateVersion));
             } else {
                 KernelWakelockStats.Entry kwlStats = staleStats.get(info.name);
                 kwlStats.mCount = (int) info.activeCount;
-                kwlStats.mTotalTime = info.totalTime;
+                // Convert milliseconds to microseconds
+                kwlStats.mTotalTime = info.totalTime * 1000;
                 kwlStats.mVersion = sKernelWakelockUpdateVersion;
             }
         }
