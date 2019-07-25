@@ -47,7 +47,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
-import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateControllerProto;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
@@ -88,8 +87,6 @@ public final class ConnectivityController extends StateController implements
     @GuardedBy("mLock")
     private final ArraySet<Network> mAvailableNetworks = new ArraySet<>();
 
-    private boolean mUseQuotaLimit;
-
     private static final int MSG_DATA_SAVER_TOGGLED = 0;
     private static final int MSG_UID_RULES_CHANGES = 1;
     private static final int MSG_REEVALUATE_JOBS = 2;
@@ -110,8 +107,6 @@ public final class ConnectivityController extends StateController implements
         mConnManager.registerNetworkCallback(request, mNetworkCallback);
 
         mNetPolicyManager.registerListener(mNetPolicyListener);
-
-        mUseQuotaLimit = !mConstants.USE_HEARTBEATS;
     }
 
     @GuardedBy("mLock")
@@ -139,24 +134,6 @@ public final class ConnectivityController extends StateController implements
                 jobs.remove(jobStatus);
             }
             maybeRevokeStandbyExceptionLocked(jobStatus);
-        }
-    }
-
-    @GuardedBy("mLock")
-    @Override
-    public void onConstantsUpdatedLocked() {
-        if (mConstants.USE_HEARTBEATS) {
-            // App idle exceptions are only requested for the rolling quota system.
-            if (DEBUG) Slog.i(TAG, "Revoking all standby exceptions");
-            for (int i = 0; i < mRequestedWhitelistJobs.size(); ++i) {
-                int uid = mRequestedWhitelistJobs.keyAt(i);
-                mNetPolicyManagerInternal.setAppIdleWhitelist(uid, false);
-            }
-            mRequestedWhitelistJobs.clear();
-        }
-        if (mUseQuotaLimit == mConstants.USE_HEARTBEATS) {
-            mUseQuotaLimit = !mConstants.USE_HEARTBEATS;
-            mHandler.obtainMessage(MSG_REEVALUATE_JOBS).sendToTarget();
         }
     }
 
@@ -237,11 +214,6 @@ public final class ConnectivityController extends StateController implements
     @GuardedBy("mLock")
     @Override
     public void evaluateStateLocked(JobStatus jobStatus) {
-        if (mConstants.USE_HEARTBEATS) {
-            // This should only be used for the rolling quota system.
-            return;
-        }
-
         if (!jobStatus.hasConnectivityConstraint()) {
             return;
         }
@@ -263,9 +235,6 @@ public final class ConnectivityController extends StateController implements
     @GuardedBy("mLock")
     @Override
     public void reevaluateStateLocked(final int uid) {
-        if (mConstants.USE_HEARTBEATS) {
-            return;
-        }
         // Check if we still need a connectivity exception in case the JobService was disabled.
         ArraySet<JobStatus> jobs = mTrackedJobs.get(uid);
         if (jobs == null) {
@@ -329,9 +298,7 @@ public final class ConnectivityController extends StateController implements
      */
     private boolean isInsane(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
-        final long maxJobExecutionTimeMs = mUseQuotaLimit
-                ? mService.getMaxJobExecutionTimeMs(jobStatus)
-                : JobServiceContext.EXECUTING_TIMESLICE_MILLIS;
+        final long maxJobExecutionTimeMs = mService.getMaxJobExecutionTimeMs(jobStatus);
 
         final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
         if (downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
@@ -617,7 +584,6 @@ public final class ConnectivityController extends StateController implements
     @Override
     public void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate) {
-        pw.print("mUseQuotaLimit="); pw.println(mUseQuotaLimit);
 
         if (mRequestedWhitelistJobs.size() > 0) {
             pw.print("Requested standby exceptions:");

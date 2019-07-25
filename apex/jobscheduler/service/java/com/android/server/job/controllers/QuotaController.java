@@ -416,13 +416,6 @@ public final class QuotaController extends StateController {
 
     private volatile boolean mInParole;
 
-    /**
-     * If the QuotaController should throttle apps based on their standby bucket and job activity.
-     * If false, all jobs will have their CONSTRAINT_WITHIN_QUOTA bit set to true immediately and
-     * indefinitely.
-     */
-    private boolean mShouldThrottle;
-
     /** How much time each app will have to run jobs within their standby bucket window. */
     private long mAllowedTimePerPeriodMs = QcConstants.DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
 
@@ -594,8 +587,6 @@ public final class QuotaController extends StateController {
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
-
-        mShouldThrottle = !mConstants.USE_HEARTBEATS;
     }
 
     @Override
@@ -607,8 +598,6 @@ public final class QuotaController extends StateController {
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
-        // Still need to track jobs even if mShouldThrottle is false in case it's set to true at
-        // some point.
         ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
         if (jobs == null) {
             jobs = new ArraySet<>();
@@ -616,16 +605,10 @@ public final class QuotaController extends StateController {
         }
         jobs.add(jobStatus);
         jobStatus.setTrackingController(JobStatus.TRACKING_QUOTA);
-        if (mShouldThrottle) {
-            final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
-            setConstraintSatisfied(jobStatus, isWithinQuota);
-            if (!isWithinQuota) {
-                maybeScheduleStartAlarmLocked(userId, pkgName,
-                        getEffectiveStandbyBucket(jobStatus));
-            }
-        } else {
-            // QuotaController isn't throttling, so always set to true.
-            jobStatus.setQuotaConstraintSatisfied(true);
+        final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
+        setConstraintSatisfied(jobStatus, isWithinQuota);
+        if (!isWithinQuota) {
+            maybeScheduleStartAlarmLocked(userId, pkgName, getEffectiveStandbyBucket(jobStatus));
         }
     }
 
@@ -670,20 +653,6 @@ public final class QuotaController extends StateController {
                 jobs.remove(jobStatus);
             }
             mTopStartedJobs.remove(jobStatus);
-        }
-    }
-
-    @Override
-    public void onConstantsUpdatedLocked() {
-        if (mShouldThrottle == mConstants.USE_HEARTBEATS) {
-            mShouldThrottle = !mConstants.USE_HEARTBEATS;
-
-            // Update job bookkeeping out of band.
-            BackgroundThread.getHandler().post(() -> {
-                synchronized (mLock) {
-                    maybeUpdateAllConstraintsLocked();
-                }
-            });
         }
     }
 
@@ -780,8 +749,6 @@ public final class QuotaController extends StateController {
     boolean isWithinQuotaLocked(final int userId, @NonNull final String packageName,
             final int standbyBucket) {
         if (standbyBucket == NEVER_INDEX) return false;
-        // This check is needed in case the flag is toggled after a job has been registered.
-        if (!mShouldThrottle) return true;
 
         // Quota constraint is not enforced while charging or when parole is on.
         if (mChargeTracker.isCharging() || mInParole) {
@@ -1820,8 +1787,7 @@ public final class QuotaController extends StateController {
                     if (timer != null && timer.isActive()) {
                         timer.rescheduleCutoff();
                     }
-                    if (!mShouldThrottle || maybeUpdateConstraintForPkgLocked(userId,
-                            packageName)) {
+                    if (maybeUpdateConstraintForPkgLocked(userId, packageName)) {
                         mStateChangedListener.onControllerStateChanged();
                     }
                 }
@@ -2396,7 +2362,7 @@ public final class QuotaController extends StateController {
                     changed = true;
                 }
 
-                if (changed && mShouldThrottle) {
+                if (changed) {
                     // Update job bookkeeping out of band.
                     BackgroundThread.getHandler().post(() -> {
                         synchronized (mLock) {
@@ -2561,7 +2527,6 @@ public final class QuotaController extends StateController {
     @Override
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
-        pw.println("Is throttling: " + mShouldThrottle);
         pw.println("Is charging: " + mChargeTracker.isCharging());
         pw.println("In parole: " + mInParole);
         pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());

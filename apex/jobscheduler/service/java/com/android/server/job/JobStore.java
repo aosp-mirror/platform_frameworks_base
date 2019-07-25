@@ -189,7 +189,7 @@ public final class JobStore {
             if (utcTimes != null) {
                 Pair<Long, Long> elapsedRuntimes =
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
-                JobStatus newJob = new JobStatus(job, job.getBaseHeartbeat(),
+                JobStatus newJob = new JobStatus(job,
                         elapsedRuntimes.first, elapsedRuntimes.second,
                         0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
                 newJob.prepareLocked(am);
@@ -944,10 +944,9 @@ public final class JobStore {
             JobSchedulerInternal service = LocalServices.getService(JobSchedulerInternal.class);
             final int appBucket = JobSchedulerService.standbyBucketForPackage(sourcePackageName,
                     sourceUserId, elapsedNow);
-            long currentHeartbeat = service != null ? service.currentHeartbeat() : 0;
             JobStatus js = new JobStatus(
                     jobBuilder.build(), uid, sourcePackageName, sourceUserId,
-                    appBucket, currentHeartbeat, sourceTag,
+                    appBucket, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
                     (rtcIsGood) ? null : rtcRuntimes, internalFlags);

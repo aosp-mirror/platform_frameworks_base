@@ -16,7 +16,6 @@
 
 package com.android.server.job;
 
-import android.annotation.UserIdInt;
 import android.app.job.JobInfo;
 
 import java.util.List;
@@ -26,31 +25,6 @@ import java.util.List;
  * {@hide} Only for use within the system server.
  */
 public interface JobSchedulerInternal {
-
-    // Bookkeeping about app standby bucket scheduling
-
-    /**
-     * The current bucket heartbeat ordinal
-     */
-    long currentHeartbeat();
-
-    /**
-     * Heartbeat ordinal at which the given standby bucket's jobs next become runnable
-     */
-    long nextHeartbeatForBucket(int bucket);
-
-    /**
-     * Heartbeat ordinal for the given app.  This is typically the heartbeat at which
-     * the app last ran jobs, so that a newly-scheduled job in an app that hasn't run
-     * jobs in a long time is immediately runnable even if the app is bucketed into
-     * an infrequent time allocation.
-     */
-    public long baseHeartbeatForApp(String packageName, @UserIdInt int userId, int appBucket);
-
-    /**
-     * Tell the scheduler when a JobServiceContext starts running a job in an app
-     */
-    void noteJobStart(String packageName, int userId);
 
     /**
      * Returns a list of pending jobs scheduled by the system service.
