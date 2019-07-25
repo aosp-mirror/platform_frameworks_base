@@ -34,7 +34,7 @@ Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::Rende
 }
 
 static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
-                              const SkPaint& paint, Canvas* canvas) {
+                              const Paint& paint, Canvas* canvas) {
     const SkScalar strokeWidth = fmax(thickness, 1.0f);
     const SkScalar bottom = top + strokeWidth;
     canvas->drawRect(left, top, right, bottom, paint);
@@ -182,7 +182,7 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
 void Canvas::drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,
                             float outerBottom, float outerRx, float outerRy, float innerLeft,
                             float innerTop, float innerRight, float innerBottom, float innerRx,
-                            float innerRy, const SkPaint& paint) {
+                            float innerRy, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);
     SkRect inner = SkRect::MakeLTRB(innerLeft, innerTop, innerRight, innerBottom);
@@ -198,7 +198,7 @@ void Canvas::drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerR
 void Canvas::drawDoubleRoundRectRadii(float outerLeft, float outerTop, float outerRight,
                             float outerBottom, const float* outerRadii, float innerLeft,
                             float innerTop, float innerRight, float innerBottom,
-                            const float* innerRadii, const SkPaint& paint) {
+                            const float* innerRadii, const Paint& paint) {
     static_assert(sizeof(SkVector) == sizeof(float) * 2);
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);

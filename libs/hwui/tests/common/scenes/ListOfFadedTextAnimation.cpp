@@ -49,7 +49,7 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
         SkMatrix matrix;
         matrix.setScale(1, length);
         matrix.postRotate(-90);
-        SkPaint fadingPaint;
+        Paint fadingPaint;
         fadingPaint.setShader(s->makeWithLocalMatrix(matrix));
         fadingPaint.setBlendMode(SkBlendMode::kDstOut);
         canvas.drawRect(0, 0, length, itemHeight, fadingPaint);

@@ -24,6 +24,7 @@
 #include "DamageAccumulator.h"
 #include "FatalTestCanvas.h"
 #include "IContextFactory.h"
+#include "hwui/Paint.h"
 #include "SkiaCanvas.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaPipeline.h"
@@ -60,7 +61,7 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
             0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
             [propSetupCallback](RenderProperties& props, SkiaRecordingCanvas& canvas) {
                 propSetupCallback(props);
-                SkPaint paint;
+                Paint paint;
                 paint.setColor(SK_ColorWHITE);
                 canvas.drawRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, paint);
             });

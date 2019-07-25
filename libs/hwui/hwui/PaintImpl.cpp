@@ -34,6 +34,7 @@ Paint::Paint()
 Paint::Paint(const Paint& paint)
         : SkPaint(paint)
         , mFont(paint.mFont)
+        , mLooper(paint.mLooper)
         , mLetterSpacing(paint.mLetterSpacing)
         , mWordSpacing(paint.mWordSpacing)
         , mFontFeatureSettings(paint.mFontFeatureSettings)
@@ -52,6 +53,7 @@ Paint::~Paint() {}
 Paint& Paint::operator=(const Paint& other) {
     SkPaint::operator=(other);
     mFont = other.mFont;
+    mLooper = other.mLooper;
     mLetterSpacing = other.mLetterSpacing;
     mWordSpacing = other.mWordSpacing;
     mFontFeatureSettings = other.mFontFeatureSettings;
@@ -69,6 +71,7 @@ Paint& Paint::operator=(const Paint& other) {
 bool operator==(const Paint& a, const Paint& b) {
     return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b) &&
            a.mFont == b.mFont &&
+           a.mLooper == b.mLooper && 
            a.mLetterSpacing == b.mLetterSpacing && a.mWordSpacing == b.mWordSpacing &&
            a.mFontFeatureSettings == b.mFontFeatureSettings &&
            a.mMinikinLocaleListId == b.mMinikinLocaleListId &&
@@ -83,6 +86,7 @@ void Paint::reset() {
 
     mFont = SkFont();
     mFont.setEdging(SkFont::Edging::kAlias);
+    mLooper.reset();
 
     mStrikeThru = false;
     mUnderline = false;
