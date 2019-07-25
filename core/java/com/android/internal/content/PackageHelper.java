@@ -261,8 +261,21 @@ public class PackageHelper {
     public static boolean fitsOnInternal(Context context, SessionParams params) throws IOException {
         final StorageManager storage = context.getSystemService(StorageManager.class);
         final UUID target = storage.getUuidForPath(Environment.getDataDirectory());
-        return (params.sizeBytes <= storage.getAllocatableBytes(target,
-                translateAllocateFlags(params.installFlags)));
+        final int flags = translateAllocateFlags(params.installFlags);
+
+        final long allocateableBytes = storage.getAllocatableBytes(target,
+                flags | StorageManager.FLAG_ALLOCATE_NON_CACHE_ONLY);
+
+        // If we fit on internal storage without including freeable cache space, don't bother
+        // checking to determine how much space is taken up by the cache.
+        if (params.sizeBytes <= allocateableBytes) {
+            return true;
+        }
+
+        final long cacheClearable = storage.getAllocatableBytes(target,
+                flags | StorageManager.FLAG_ALLOCATE_CACHE_ONLY);
+
+        return params.sizeBytes <= allocateableBytes + cacheClearable;
     }
 
     public static boolean fitsOnExternal(Context context, SessionParams params) {

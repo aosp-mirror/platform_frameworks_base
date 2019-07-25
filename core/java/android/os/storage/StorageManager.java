@@ -1987,11 +1987,31 @@ public class StorageManager {
      */
     public static final int FLAG_ALLOCATE_DEFY_HALF_RESERVED = 1 << 2;
 
+    /**
+     * Flag indicating that a disk space check should not take into account
+     * freeable cached space when determining allocatable space.
+     *
+     * Intended for use with {@link #getAllocatableBytes()}.
+     * @hide
+     */
+    public static final int FLAG_ALLOCATE_NON_CACHE_ONLY = 1 << 3;
+
+    /**
+     * Flag indicating that a disk space check should only return freeable
+     * cached space when determining allocatable space.
+     *
+     * Intended for use with {@link #getAllocatableBytes()}.
+     * @hide
+     */
+    public static final int FLAG_ALLOCATE_CACHE_ONLY = 1 << 4;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_ALLOCATE_" }, value = {
             FLAG_ALLOCATE_AGGRESSIVE,
             FLAG_ALLOCATE_DEFY_ALL_RESERVED,
             FLAG_ALLOCATE_DEFY_HALF_RESERVED,
+            FLAG_ALLOCATE_NON_CACHE_ONLY,
+            FLAG_ALLOCATE_CACHE_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllocateFlags {}
