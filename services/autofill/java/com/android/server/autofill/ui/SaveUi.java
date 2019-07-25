@@ -165,7 +165,13 @@ final class SaveUi {
         mComponentName = componentName;
         mCompatMode = compatMode;
 
-        context = new ContextThemeWrapper(context, mThemeId);
+        context = new ContextThemeWrapper(context, mThemeId) {
+            @Override
+            public void startActivity(Intent intent) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                super.startActivity(intent);
+            }
+        };
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
