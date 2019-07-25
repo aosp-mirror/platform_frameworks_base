@@ -945,6 +945,10 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     boolean mEnterAnimationComplete;
 
+    /** Track last dispatched multi-window and PiP mode to client, internal debug purpose **/
+    private Boolean mLastDispatchedIsInMultiWindowMode;
+    private Boolean mLastDispatchedIsInPictureInPictureMode;
+
     private static native String getDlWarning();
 
     /** Return the intent that started this activity. */
@@ -6990,6 +6994,10 @@ public class Activity extends ContextThemeWrapper
                 writer.print(mResumed); writer.print(" mStopped=");
                 writer.print(mStopped); writer.print(" mFinished=");
                 writer.println(mFinished);
+        writer.print(innerPrefix); writer.print("mLastDispatchedIsInMultiWindowMode=");
+                writer.print(mLastDispatchedIsInMultiWindowMode);
+                writer.print(" mLastDispatchedIsInPictureInPictureMode=");
+                writer.println(mLastDispatchedIsInPictureInPictureMode);
         writer.print(innerPrefix); writer.print("mChangingConfigurations=");
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
@@ -8071,6 +8079,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
+        mLastDispatchedIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -8083,6 +8092,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
+        mLastDispatchedIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 
