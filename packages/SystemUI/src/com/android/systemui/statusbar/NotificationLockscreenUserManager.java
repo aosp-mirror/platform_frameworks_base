@@ -15,7 +15,6 @@
 package com.android.systemui.statusbar;
 
 import android.content.pm.UserInfo;
-import android.service.notification.StatusBarNotification;
 import android.util.SparseArray;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -58,7 +57,7 @@ public interface NotificationLockscreenUserManager {
 
     boolean shouldHideNotifications(int userId);
     boolean shouldHideNotifications(String key);
-    boolean shouldShowOnKeyguard(StatusBarNotification sbn);
+    boolean shouldShowOnKeyguard(NotificationEntry entry);
 
     boolean isAnyProfilePublicMode();
 

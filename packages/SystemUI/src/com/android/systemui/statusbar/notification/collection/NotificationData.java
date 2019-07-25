@@ -25,7 +25,6 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
@@ -108,10 +107,19 @@ public class NotificationData {
             boolean bSystemMax = bImportance >= NotificationManager.IMPORTANCE_HIGH
                     && isSystemNotification(nb);
 
-            boolean isHeadsUp = a.getRow().isHeadsUp();
-            if (isHeadsUp != b.getRow().isHeadsUp()) {
-                return isHeadsUp ? -1 : 1;
-            } else if (isHeadsUp) {
+
+            boolean aHeadsUp = a.getRow().isHeadsUp();
+            boolean bHeadsUp = b.getRow().isHeadsUp();
+
+            // HACK: This should really go elsewhere, but it's currently not straightforward to
+            // extract the comparison code and we're guaranteed to touch every element, so this is
+            // the best place to set the buckets for the moment.
+            a.setIsTopBucket(aHeadsUp || aMedia || aSystemMax || a.isHighPriority());
+            b.setIsTopBucket(bHeadsUp || bMedia || bSystemMax || b.isHighPriority());
+
+            if (aHeadsUp != bHeadsUp) {
+                return aHeadsUp ? -1 : 1;
+            } else if (aHeadsUp) {
                 // Provide consistent ranking with headsUpManager
                 return mHeadsUpManager.compare(a, b);
             } else if (a.getRow().showingAmbientPulsing() != b.getRow().showingAmbientPulsing()) {

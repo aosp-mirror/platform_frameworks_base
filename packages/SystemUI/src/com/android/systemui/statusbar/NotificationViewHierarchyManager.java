@@ -394,15 +394,13 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.isRowRemoved();
-            boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry
-                    .notification);
+            boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry);
             if (!showOnKeyguard) {
                 // min priority notifications should show if their summary is showing
                 if (mGroupManager.isChildInGroupWithSummary(entry.notification)) {
                     NotificationEntry summary = mGroupManager.getLogicalGroupSummary(
                             entry.notification);
-                    if (summary != null && mLockscreenUserManager.shouldShowOnKeyguard(
-                            summary.notification))         {
+                    if (summary != null && mLockscreenUserManager.shouldShowOnKeyguard(summary)) {
                         showOnKeyguard = true;
                     }
                 }
