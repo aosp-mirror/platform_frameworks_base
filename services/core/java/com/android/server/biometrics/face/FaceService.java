@@ -609,27 +609,32 @@ public class FaceService extends BiometricServiceBase {
         public void resetLockout(byte[] token) {
             checkPermission(MANAGE_BIOMETRIC);
 
-            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
-                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
-                return;
-            }
+            mHandler.post(() -> {
+                if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                    Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
+                    return;
+                }
 
-            Slog.d(TAG, "Resetting lockout for user: " + mCurrentUserId);
+                Slog.d(TAG, "Resetting lockout for user: " + mCurrentUserId);
 
-            try {
-                mDaemonWrapper.resetLockout(token);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Unable to reset lockout", e);
-            }
+                try {
+                    mDaemonWrapper.resetLockout(token);
+                } catch (RemoteException e) {
+                    Slog.e(getTag(), "Unable to reset lockout", e);
+                }
+            });
         }
 
         @Override
         public void setFeature(int userId, int feature, boolean enabled, final byte[] token,
                 IFaceServiceReceiver receiver, final String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
-            updateActiveGroup(userId, opPackageName);
 
             mHandler.post(() -> {
+                if (DEBUG) {
+                    Slog.d(TAG, "setFeature for user(" + userId + ")");
+                }
+                updateActiveGroup(userId, opPackageName);
                 if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
                     Slog.e(TAG, "No enrolled biometrics while setting feature: " + feature);
                     return;
@@ -660,9 +665,12 @@ public class FaceService extends BiometricServiceBase {
         public void getFeature(int userId, int feature, IFaceServiceReceiver receiver,
                 final String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
-            updateActiveGroup(userId, opPackageName);
 
             mHandler.post(() -> {
+                if (DEBUG) {
+                    Slog.d(TAG, "getFeature for user(" + userId + ")");
+                }
+                updateActiveGroup(userId, opPackageName);
                 // This should ideally return tri-state, but the user isn't shown settings unless
                 // they are enrolled so it's fine for now.
                 if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
