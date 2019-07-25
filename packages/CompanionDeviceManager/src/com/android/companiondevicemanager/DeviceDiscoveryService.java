@@ -24,6 +24,7 @@ import static com.android.internal.util.CollectionUtils.emptyIfNull;
 import static com.android.internal.util.CollectionUtils.size;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -115,7 +116,8 @@ public class DeviceDiscoveryService extends Service {
             }
             mFindCallback = findCallback;
             mServiceCallback = serviceCallback;
-            DeviceDiscoveryService.this.startDiscovery(request);
+            Handler.getMain().sendMessage(obtainMessage(
+                    DeviceDiscoveryService::startDiscovery, DeviceDiscoveryService.this, request));
         }
     };
 
@@ -145,6 +147,7 @@ public class DeviceDiscoveryService extends Service {
         sInstance = this;
     }
 
+    @MainThread
     private void startDiscovery(AssociationRequest request) {
         if (!request.equals(mRequest)) {
             mRequest = request;
@@ -211,12 +214,13 @@ public class DeviceDiscoveryService extends Service {
         return !isEmpty(mediumSpecificFilters) || isEmpty(mFilters);
     }
 
+    @MainThread
     private void reset() {
         if (DEBUG) Log.i(LOG_TAG, "reset()");
         stopScan();
         mDevicesFound.clear();
         mSelectedDevice = null;
-        notifyDataSetChanged();
+        mDevicesAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -260,16 +264,17 @@ public class DeviceDiscoveryService extends Service {
 
         if (DEBUG) Log.i(LOG_TAG, "Found device " + device);
 
+        Handler.getMain().sendMessage(obtainMessage(
+                DeviceDiscoveryService::onDeviceFoundMainThread, this, device));
+    }
+
+    @MainThread
+    void onDeviceFoundMainThread(@NonNull DeviceFilterPair device) {
         if (mDevicesFound.isEmpty()) {
             onReadyToShowUI();
         }
         mDevicesFound.add(device);
-        notifyDataSetChanged();
-    }
-
-    private void notifyDataSetChanged() {
-        Handler.getMain().sendMessage(obtainMessage(
-                DevicesAdapter::notifyDataSetChanged, mDevicesAdapter));
+        mDevicesAdapter.notifyDataSetChanged();
     }
 
     //TODO also, on timeout -> call onFailure
@@ -286,9 +291,15 @@ public class DeviceDiscoveryService extends Service {
     }
 
     private void onDeviceLost(@Nullable DeviceFilterPair device) {
-        mDevicesFound.remove(device);
-        notifyDataSetChanged();
         if (DEBUG) Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
+        Handler.getMain().sendMessage(obtainMessage(
+                DeviceDiscoveryService::onDeviceLostMainThread, this, device));
+    }
+
+    @MainThread
+    void onDeviceLostMainThread(@Nullable DeviceFilterPair device) {
+        mDevicesFound.remove(device);
+        mDevicesAdapter.notifyDataSetChanged();
     }
 
     void onDeviceSelected(String callingPackage, String deviceAddress) {
