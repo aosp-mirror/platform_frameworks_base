@@ -95,6 +95,8 @@ interface IAccessibilityServiceConnection {
 
     void sendGesture(int sequence, in ParceledListSlice gestureSteps);
 
+    void dispatchGesture(int sequence, in ParceledListSlice gestureSteps, int displayId);
+
     boolean isFingerprintGestureDetectionAvailable();
 
     IBinder getOverlayWindowToken(int displayid);

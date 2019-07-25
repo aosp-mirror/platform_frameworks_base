@@ -170,7 +170,7 @@ public class KeyguardBouncer {
 
         // Split up the work over multiple frames.
         DejankUtils.removeCallbacks(mResetRunnable);
-        if (mUnlockMethodCache.isUnlockingWithFacePossible() && !needsFullscreenBouncer()
+        if (mUnlockMethodCache.isFaceAuthEnabled() && !needsFullscreenBouncer()
                 && !mKeyguardUpdateMonitor.userNeedsStrongAuth()) {
             mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
         } else {
@@ -349,7 +349,7 @@ public class KeyguardBouncer {
      * {@link #show(boolean)} was called but we're not showing yet, or being dragged.
      */
     public boolean inTransit() {
-        return mShowingSoon || mExpansion != EXPANSION_HIDDEN;
+        return mShowingSoon || mExpansion != EXPANSION_HIDDEN && mExpansion != EXPANSION_VISIBLE;
     }
 
     /**

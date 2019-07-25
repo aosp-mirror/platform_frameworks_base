@@ -23,21 +23,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.view.Display;
 
 import com.android.server.wm.WindowManagerInternal;
 
@@ -50,6 +54,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 
 /**
@@ -73,6 +78,9 @@ public class AccessibilityServiceConnectionTest {
     @Mock GlobalActionPerformer mMockGlobalActionPerformer;
     @Mock KeyEventDispatcher mMockKeyEventDispatcher;
     @Mock MagnificationController mMockMagnificationController;
+    @Mock IBinder mMockIBinder;
+    @Mock IAccessibilityServiceClient mMockServiceClient;
+    @Mock MotionEventInjector mMockMotionEventInjector;
 
     MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
@@ -82,15 +90,22 @@ public class AccessibilityServiceConnectionTest {
         when(mMockSystemSupport.getKeyEventDispatcher()).thenReturn(mMockKeyEventDispatcher);
         when(mMockSystemSupport.getMagnificationController())
                 .thenReturn(mMockMagnificationController);
+        when(mMockSystemSupport.getMotionEventInjectorForDisplayLocked(
+                Display.DEFAULT_DISPLAY)).thenReturn(mMockMotionEventInjector);
 
         when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
+        when(mMockIBinder.queryLocalInterface(any())).thenReturn(mMockServiceClient);
+        when(mMockWindowManagerInternal.isTouchableDisplay(Display.DEFAULT_DISPLAY)).thenReturn(
+                true);
+
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
                 COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockWindowManagerInternal,
                 mMockGlobalActionPerformer, mMockA11yWindowManager);
+        when(mMockSecurityPolicy.canPerformGestures(mConnection)).thenReturn(true);
     }
 
     @After
@@ -115,25 +130,23 @@ public class AccessibilityServiceConnectionTest {
 
     @Test
     public void bindConnectUnbind_linksAndUnlinksToServiceDeath() throws RemoteException {
-        IBinder mockBinder = mock(IBinder.class);
         setServiceBinding(COMPONENT_NAME);
         mConnection.bindLocked();
-        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
-        verify(mockBinder).linkToDeath(eq(mConnection), anyInt());
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+        verify(mMockIBinder).linkToDeath(eq(mConnection), anyInt());
         mConnection.unbindLocked();
-        verify(mockBinder).unlinkToDeath(eq(mConnection), anyInt());
+        verify(mMockIBinder).unlinkToDeath(eq(mConnection), anyInt());
     }
 
     @Test
     public void connectedServiceCrashedAndRestarted_crashReportedInServiceInfo() {
-        IBinder mockBinder = mock(IBinder.class);
         setServiceBinding(COMPONENT_NAME);
         mConnection.bindLocked();
-        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
         assertFalse(mConnection.getServiceInfo().crashed);
         mConnection.binderDied();
         assertTrue(mConnection.getServiceInfo().crashed);
-        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
         mHandler.sendAllMessages();
         assertFalse(mConnection.getServiceInfo().crashed);
     }
@@ -145,10 +158,9 @@ public class AccessibilityServiceConnectionTest {
 
     @Test
     public void binderDied_keysGetFlushed() {
-        IBinder mockBinder = mock(IBinder.class);
         setServiceBinding(COMPONENT_NAME);
         mConnection.bindLocked();
-        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
         mConnection.binderDied();
         assertTrue(mConnection.getServiceInfo().crashed);
         verify(mMockKeyEventDispatcher).flush(mConnection);
@@ -157,17 +169,63 @@ public class AccessibilityServiceConnectionTest {
     @Test
     public void connectedService_notInEnabledServiceList_doNotInitClient()
             throws RemoteException {
-        IBinder mockBinder = mock(IBinder.class);
-        IAccessibilityServiceClient mockClient = mock(IAccessibilityServiceClient.class);
-        when(mockBinder.queryLocalInterface(any())).thenReturn(mockClient);
         when(mMockUserState.getEnabledServicesLocked())
                 .thenReturn(Collections.emptySet());
         setServiceBinding(COMPONENT_NAME);
 
         mConnection.bindLocked();
-        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
         mHandler.sendAllMessages();
         verify(mMockSystemSupport, times(2)).onClientChangeLocked(false);
-        verify(mockClient, times(0)).init(any(), anyInt(), any());
+        verify(mMockServiceClient, times(0)).init(any(), anyInt(), any());
     }
+
+    @Test
+    public void sendGesture_touchableDisplay_injectEvents()
+            throws RemoteException {
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+
+        ParceledListSlice parceledListSlice = mock(ParceledListSlice.class);
+        List<GestureDescription.GestureStep> gestureSteps = mock(List.class);
+        when(parceledListSlice.getList()).thenReturn(gestureSteps);
+        mConnection.dispatchGesture(0, parceledListSlice, Display.DEFAULT_DISPLAY);
+
+        verify(mMockMotionEventInjector).injectEvents(gestureSteps, mMockServiceClient, 0);
+    }
+
+    @Test
+    public void sendGesture_untouchableDisplay_performGestureResultFailed()
+            throws RemoteException {
+        when(mMockWindowManagerInternal.isTouchableDisplay(Display.DEFAULT_DISPLAY)).thenReturn(
+                false);
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+
+        ParceledListSlice parceledListSlice = mock(ParceledListSlice.class);
+        List<GestureDescription.GestureStep> gestureSteps = mock(List.class);
+        when(parceledListSlice.getList()).thenReturn(gestureSteps);
+        mConnection.dispatchGesture(0, parceledListSlice, Display.DEFAULT_DISPLAY);
+
+        verify(mMockMotionEventInjector, never()).injectEvents(gestureSteps, mMockServiceClient, 0);
+        verify(mMockServiceClient).onPerformGestureResult(0, false);
+    }
+
+    @Test
+    public void sendGesture_invalidDisplay_performGestureResultFailed()
+            throws RemoteException {
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+
+        ParceledListSlice parceledListSlice = mock(ParceledListSlice.class);
+        List<GestureDescription.GestureStep> gestureSteps = mock(List.class);
+        when(parceledListSlice.getList()).thenReturn(gestureSteps);
+        mConnection.dispatchGesture(0, parceledListSlice, Display.INVALID_DISPLAY);
+
+        verify(mMockServiceClient).onPerformGestureResult(0, false);
+    }
+
 }

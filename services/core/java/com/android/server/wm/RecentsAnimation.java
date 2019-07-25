@@ -355,7 +355,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         // launch-behind state is restored. That also prevents the next transition
                         // type being disturbed if the visibility is updated after setting the next
                         // transition (the target activity will be one of closing apps).
-                        if (!controller.shouldCancelWithDeferredScreenshot()
+                        if (!controller.shouldDeferCancelWithScreenshot()
                                 && !targetStack.isFocusedStackOnDisplay()) {
                             targetStack.ensureActivitiesVisibleLocked(null /* starting */,
                                     0 /* starting */, false /* preserveWindows */);
@@ -415,16 +415,18 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         final DisplayContent dc =
                 mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         dc.mBoundsAnimationController.setAnimationType(
-                controller.shouldCancelWithDeferredScreenshot() ? FADE_IN : BOUNDS);
+                controller.shouldDeferCancelUntilNextTransition() ? FADE_IN : BOUNDS);
 
-        // Cancel running recents animation and screenshot previous task when the next
-        // transition starts in below cases:
-        // 1) The next launching task is not in recents animation task.
+        // We defer canceling the recents animation until the next app transition in the following
+        // cases:
+        // 1) The next launching task is not being animated by the recents animation
         // 2) The next task is home activity. (i.e. pressing home key to back home in recents).
         if ((!controller.isAnimatingTask(stack.getTaskStack().getTopChild())
                 || controller.isTargetApp(stack.getTopActivity().mAppWindowToken))
-                && controller.shouldCancelWithDeferredScreenshot()) {
-            controller.cancelOnNextTransitionStart();
+                && controller.shouldDeferCancelUntilNextTransition()) {
+            // Always prepare an app transition since we rely on the transition callbacks to cleanup
+            mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+            controller.setCancelOnNextTransitionStart();
         } else {
             // Just cancel directly to unleash from launcher when the next launching task is the
             // current top task.

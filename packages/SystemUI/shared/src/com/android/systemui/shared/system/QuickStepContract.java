@@ -80,6 +80,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_HOME_DISABLED = 1 << 8;
     // The keyguard is showing, but occluded
     public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED = 1 << 9;
+    // The search feature is disabled (either by SUW/SysUI/device policy)
+    public static final int SYSUI_STATE_SEARCH_DISABLED = 1 << 10;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -91,7 +93,8 @@ public class QuickStepContract {
             SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
             SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
             SYSUI_STATE_OVERVIEW_DISABLED,
-            SYSUI_STATE_HOME_DISABLED
+            SYSUI_STATE_HOME_DISABLED,
+            SYSUI_STATE_SEARCH_DISABLED
     })
     public @interface SystemUiStateFlags {}
 
@@ -100,6 +103,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_SCREEN_PINNING) != 0 ? "screen_pinned" : "");
         str.add((flags & SYSUI_STATE_OVERVIEW_DISABLED) != 0 ? "overview_disabled" : "");
         str.add((flags & SYSUI_STATE_HOME_DISABLED) != 0 ? "home_disabled" : "");
+        str.add((flags & SYSUI_STATE_SEARCH_DISABLED) != 0 ? "search_disabled" : "");
         str.add((flags & SYSUI_STATE_NAV_BAR_HIDDEN) != 0 ? "navbar_hidden" : "");
         str.add((flags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0 ? "notif_visible" : "");
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING) != 0 ? "keygrd_visible" : "");
@@ -150,10 +154,11 @@ public class QuickStepContract {
      * disabled.
      */
     public static boolean isAssistantGestureDisabled(int sysuiStateFlags) {
-        // Disable when in screen pinning, immersive, the bouncer is showing
+        // Disable when in screen pinning, immersive, the bouncer is showing, or search is disabled
         int disableFlags = SYSUI_STATE_SCREEN_PINNING
                 | SYSUI_STATE_NAV_BAR_HIDDEN
-                | SYSUI_STATE_BOUNCER_SHOWING;
+                | SYSUI_STATE_BOUNCER_SHOWING
+                | SYSUI_STATE_SEARCH_DISABLED;
         if ((sysuiStateFlags & disableFlags) != 0) {
             return true;
         }

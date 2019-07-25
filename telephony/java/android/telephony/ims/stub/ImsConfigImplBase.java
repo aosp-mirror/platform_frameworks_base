@@ -19,6 +19,7 @@ package android.telephony.ims.stub;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.os.PersistableBundle;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsConfig;
@@ -180,6 +181,11 @@ public class ImsConfigImplBase {
             }
 
             return retVal;
+        }
+
+        @Override
+        public void updateImsCarrierConfigs(PersistableBundle bundle) throws RemoteException {
+            getImsConfigImpl().updateImsCarrierConfigs(bundle);
         }
 
         private ImsConfigImplBase getImsConfigImpl() throws RemoteException {
@@ -386,5 +392,12 @@ public class ImsConfigImplBase {
     public String getConfigString(int item) {
         // Base Implementation - To be overridden.
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    public void updateImsCarrierConfigs(PersistableBundle bundle) {
+        // Base Implementation - Should be overridden
     }
 }

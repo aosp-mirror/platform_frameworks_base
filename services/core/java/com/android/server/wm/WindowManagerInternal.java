@@ -511,4 +511,9 @@ public abstract class WindowManagerInternal {
      */
     public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
 
+    /**
+     * Checks if this display is touchable.
+     */
+    public abstract boolean isTouchableDisplay(int displayId);
+
 }
