@@ -967,6 +967,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static boolean sBrokenInsetsDispatch;
 
+    /**
+     * Prior to Q, calling
+     * {@link com.android.internal.policy.DecorView#setBackgroundDrawable(Drawable)}
+     * did not call update the window format so the opacity of the background was not correctly
+     * applied to the window. Some applications rely on this misbehavior to work properly.
+     * <p>
+     * From Q, {@link com.android.internal.policy.DecorView#setBackgroundDrawable(Drawable)} is
+     * the same as {@link com.android.internal.policy.DecorView#setWindowBackground(Drawable)}
+     * which updates the window format.
+     * @hide
+     */
+    protected static boolean sBrokenWindowBackground;
+
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
     @Retention(RetentionPolicy.SOURCE)
@@ -5103,6 +5116,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sBrokenInsetsDispatch = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
                     || targetSdkVersion < Build.VERSION_CODES.Q;
+
+            sBrokenWindowBackground = targetSdkVersion < Build.VERSION_CODES.Q;
 
             sCompatibilityDone = true;
         }

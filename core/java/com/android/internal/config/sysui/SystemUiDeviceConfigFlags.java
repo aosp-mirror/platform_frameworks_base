@@ -186,6 +186,89 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String BRIGHTLINE_FALSING_MANAGER_ENABLED =
             "brightline_falsing_manager_enabled";
+    /**
+     * (float) Maximum fraction of the screen required to qualify as a real swipe.
+     */
+    public static final String BRIGHTLINE_FALSING_DISTANCE_SCREEN_FRACTION_MAX_DISTANCE =
+            "brightline_falsing_distance_screen_fraction_max_distance";
+
+    /**
+     * (float) Multiplier for swipe velocity to convert it to pixels for a fling.
+     */
+    public static final String BRIGHTLINE_FALSING_DISTANCE_VELOCITY_TO_DISTANCE =
+            "brightline_falsing_distance_velcoity_to_distance";
+
+    /**
+     * (float) How far, in inches, must a fling travel horizontally to qualify as intentional.
+     */
+    public static final String BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_FLING_THRESHOLD_IN =
+            "brightline_falsing_distance_horizontal_fling_threshold_in";
+
+    /**
+     * (float) Maximum fraction of the screen required to qualify as a real swipe.
+     */
+    public static final String BRIGHTLINE_FALSING_DISTANCE_VERTICAL_FLING_THRESHOLD_IN =
+            "brightline_falsing_distance_vertical_fling_threshold_in";
+
+    /**
+     * (float) How far, in inches, must a continuous swipe travel horizontally to be intentional.
+     */
+    public static final String BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_SWIPE_THRESHOLD_IN =
+            "brightline_falsing_distance_horizontal_swipe_threshold_in";
+
+    /**
+     * (float) How far, in inches, must a continuous swipe travel vertically to be intentional.
+     */
+    public static final String BRIGHTLINE_FALSING_DISTANCE_VERTICAL_SWIPE_THRESHOLD_IN =
+            "brightline_falsing_distance_horizontal_swipe_threshold_in";
+
+    /**
+     * (float) Percentage of swipe with the proximity sensor covered that triggers a higher
+     * swipe distance requirement.
+     */
+    public static final String BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD =
+            "brightline_falsing_proximity_percent_covered_threshold";
+
+    /**
+     * (float) Angle, in radians, that a swipe can vary from horizontal and sill be intentional.
+     */
+    public static final String BRIGHTLINE_FALSING_DIAGONAL_HORIZONTAL_ANGLE_RANGE =
+            "brightline_falsing_diagonal_horizontal_angle_range";
+
+    /**
+     * (float) Angle, in radians, that a swipe can vary from vertical and sill be intentional.
+     */
+    public static final String BRIGHTLINE_FALSING_DIAGONAL_VERTICAL_ANGLE_RANGE =
+            "brightline_falsing_diagonal_horizontal_angle_range";
+
+    /**
+     * (float) Distance, in inches, that a swipe is allowed to vary in the horizontal direction for
+     * horizontal swipes.
+     */
+    public static final String BRIGHTLINE_FALSING_ZIGZAG_X_PRIMARY_DEVIANCE =
+            "brightline_falsing_zigzag_x_primary_deviance";
+
+    /**
+     * (float) Distance, in inches, that a swipe is allowed to vary in the vertical direction for
+     * vertical swipes.
+     */
+    public static final String BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE =
+            "brightline_falsing_zigzag_y_primary_deviance";
+
+    /**
+     * (float) Distance, in inches, that a swipe is allowed to vary in the horizontal direction for
+     * horizontal swipes.
+     */
+    public static final String BRIGHTLINE_FALSING_ZIGZAG_X_SECONDARY_DEVIANCE =
+            "brightline_falsing_zigzag_x_secondary_deviance";
+
+    /**
+     * (float) Distance, in inches, that a swipe is allowed to vary in the vertical direction for
+     * vertical swipes.
+     */
+    public static final String BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE =
+            "brightline_falsing_zigzag_y_secondary_deviance";
+
 
     private SystemUiDeviceConfigFlags() { }
 }
