@@ -26,9 +26,6 @@ import android.os.RemoteException;
 
 import java.util.List;
 
-
-// APEX NOTE: Class path referred to by robolectric, so can't move it.
-
 /**
  * Concrete implementation of the JobScheduler interface
  * @hide 
@@ -36,7 +33,7 @@ import java.util.List;
 public class JobSchedulerImpl extends JobScheduler {
     IJobScheduler mBinder;
 
-    public JobSchedulerImpl(IJobScheduler binder) {
+    /* package */ JobSchedulerImpl(IJobScheduler binder) {
         mBinder = binder;
     }
 

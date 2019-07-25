@@ -23,6 +23,8 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
+import android.app.job.IJobScheduler;
+import android.app.job.JobScheduler;
 import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
@@ -196,15 +198,12 @@ import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Manages all of the system services that can be returned by {@link Context#getSystemService}.
  * Used by {@link ContextImpl}.
- *
- * @hide
  */
-public final class SystemServiceRegistry {
+final class SystemServiceRegistry {
     private static final String TAG = "SystemServiceRegistry";
 
     // Service registry information.
@@ -980,6 +979,14 @@ public final class SystemServiceRegistry {
                 return new NetworkStatsManager(ctx.getOuterContext());
             }});
 
+        registerService(Context.JOB_SCHEDULER_SERVICE, JobScheduler.class,
+                new StaticServiceFetcher<JobScheduler>() {
+            @Override
+            public JobScheduler createService() throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.JOB_SCHEDULER_SERVICE);
+                return new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b));
+            }});
+
         registerService(Context.PERSISTENT_DATA_BLOCK_SERVICE, PersistentDataBlockManager.class,
                 new StaticServiceFetcher<PersistentDataBlockManager>() {
             @Override
@@ -1314,22 +1321,6 @@ public final class SystemServiceRegistry {
             ServiceFetcher<T> serviceFetcher) {
         SYSTEM_SERVICE_NAMES.put(serviceClass, serviceName);
         SYSTEM_SERVICE_FETCHERS.put(serviceName, serviceFetcher);
-    }
-
-    /**
-     * APEX modules will use it to register their service wrapper.
-     *
-     * @hide
-     */
-    public static <T> void registerStaticService(String serviceName, Class<T> serviceClass,
-            Function<IBinder, T> serviceFetcher) {
-        registerService(serviceName, serviceClass,
-                new StaticServiceFetcher<T>() {
-                    @Override
-                    public T createService() throws ServiceNotFoundException {
-                        IBinder b = ServiceManager.getServiceOrThrow(serviceName);
-                        return serviceFetcher.apply(b);
-                    }});
     }
 
     /**
