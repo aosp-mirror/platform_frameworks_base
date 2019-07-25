@@ -27,8 +27,6 @@ import android.os.Handler;
 import android.util.Slog;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-import android.view.MotionEvent.PointerCoords;
-import android.view.MotionEvent.PointerProperties;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -129,15 +127,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
     // Context in which this explorer operates.
     private final Context mContext;
 
-    // The long pressing pointer id if coordinate remapping is needed.
-    private int mLongPressingPointerId = -1;
-
-    // The long pressing pointer X if coordinate remapping is needed.
-    private int mLongPressingPointerDeltaX;
-
-    // The long pressing pointer Y if coordinate remapping is needed.
-    private int mLongPressingPointerDeltaY;
-
 
 /**
      * Creates a new instance.
@@ -231,10 +220,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
         mGestureDetector.clear();
         // Go to initial state.
         mState.clear();
-        // Clear the long pressing pointer remap data.
-        mLongPressingPointerId = -1;
-        mLongPressingPointerDeltaX = 0;
-        mLongPressingPointerDeltaY = 0;
         mAms.onTouchInteractionEnd();
     }
 
@@ -705,17 +690,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 return;
             }
             case MotionEvent.ACTION_UP: {
-                // Offset the event if we are doing a long press as the
-                // target is not necessarily under the user's finger.
-                if (mLongPressingPointerId >= 0) {
-                    event = offsetEvent(event, - mLongPressingPointerDeltaX,
-                            - mLongPressingPointerDeltaY);
-                    // Clear the long press state.
-                    mLongPressingPointerId = -1;
-                    mLongPressingPointerDeltaX = 0;
-                    mLongPressingPointerDeltaY = 0;
-                }
-
                 // Deliver the event.
                 sendMotionEvent(event, event.getAction(), ALL_POINTER_ID_BITS, policyFlags);
 
@@ -865,18 +839,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
         } else {
             event.setDownTime(mInjectedPointerTracker.getLastInjectedDownEventTime());
         }
-
-        // If the user is long pressing but the long pressing pointer
-        // was not exactly over the accessibility focused item we need
-        // to remap the location of that pointer so the user does not
-        // have to explicitly touch explore something to be able to
-        // long press it, or even worse to avoid the user long pressing
-        // on the wrong item since click and long press behave differently.
-        if (mLongPressingPointerId >= 0) {
-            event = offsetEvent(event, - mLongPressingPointerDeltaX,
-                    - mLongPressingPointerDeltaY);
-        }
-
         if (DEBUG) {
             Slog.d(LOG_TAG, "Injecting event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
@@ -894,39 +856,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
         if (event != prototype) {
             event.recycle();
         }
-    }
-
-    /**
-     * Offsets all pointers in the given event by adding the specified X and Y
-     * offsets.
-     *
-     * @param event The event to offset.
-     * @param offsetX The X offset.
-     * @param offsetY The Y offset.
-     * @return An event with the offset pointers or the original event if both
-     *         offsets are zero.
-     */
-    private MotionEvent offsetEvent(MotionEvent event, int offsetX, int offsetY) {
-        if (offsetX == 0 && offsetY == 0) {
-            return event;
-        }
-        final int remappedIndex = event.findPointerIndex(mLongPressingPointerId);
-        final int pointerCount = event.getPointerCount();
-        PointerProperties[] props = PointerProperties.createArray(pointerCount);
-        PointerCoords[] coords = PointerCoords.createArray(pointerCount);
-        for (int i = 0; i < pointerCount; i++) {
-            event.getPointerProperties(i, props[i]);
-            event.getPointerCoords(i, coords[i]);
-            if (i == remappedIndex) {
-                coords[i].x += offsetX;
-                coords[i].y += offsetY;
-            }
-        }
-        return MotionEvent.obtain(event.getDownTime(),
-                event.getEventTime(), event.getAction(), event.getPointerCount(),
-                props, coords, event.getMetaState(), event.getButtonState(),
-                1.0f, 1.0f, event.getDeviceId(), event.getEdgeFlags(),
-                event.getSource(), event.getDisplayId(), event.getFlags());
     }
 
     /**
@@ -1189,9 +1118,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 + ", mDetermineUserIntentTimeout: " + mDetermineUserIntentTimeout
                 + ", mDoubleTapSlop: " + mDoubleTapSlop
                 + ", mDraggingPointerId: " + mDraggingPointerId
-                + ", mLongPressingPointerId: " + mLongPressingPointerId
-                + ", mLongPressingPointerDeltaX: " + mLongPressingPointerDeltaX
-                + ", mLongPressingPointerDeltaY: " + mLongPressingPointerDeltaY
                 + ", mTempPoint: " + mTempPoint
                 + " }";
     }
