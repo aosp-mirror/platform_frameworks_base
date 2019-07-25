@@ -111,6 +111,9 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected boolean mRequireConfirmation;
     private int mUserId; // used to determine if we should show work background
 
+    private boolean mCompletedAnimatingIn;
+    private boolean mPendingDismissDialog;
+
     protected abstract int getHintStringResourceId();
     protected abstract int getAuthenticatedAccessibilityResourceId();
     protected abstract int getIconDescriptionResourceId();
@@ -332,6 +335,7 @@ public abstract class BiometricDialogView extends LinearLayout {
             mDialog.setAlpha(1.0f);
             mDialog.setTranslationY(0);
             mLayout.setAlpha(1.0f);
+            mCompletedAnimatingIn = true;
         } else {
             // Dim the background and slide the dialog up
             mDialog.setTranslationY(mAnimationTranslationOffset);
@@ -352,6 +356,12 @@ public abstract class BiometricDialogView extends LinearLayout {
     }
 
     public void startDismiss() {
+        if (!mCompletedAnimatingIn) {
+            Log.w(TAG, "startDismiss(): waiting for onDialogAnimatedIn");
+            mPendingDismissDialog = true;
+            return;
+        }
+
         mAnimatingAway = true;
 
         // This is where final cleanup should occur.
@@ -499,6 +509,13 @@ public abstract class BiometricDialogView extends LinearLayout {
     }
 
     public void onDialogAnimatedIn() {
+        mCompletedAnimatingIn = true;
+
+        if (mPendingDismissDialog) {
+            Log.d(TAG, "onDialogAnimatedIn(): mPendingDismissDialog=true, dismissing now");
+            startDismiss();
+            mPendingDismissDialog = false;
+        }
     }
 
     public void restoreState(Bundle bundle) {
