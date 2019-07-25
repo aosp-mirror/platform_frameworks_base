@@ -4831,44 +4831,98 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * @return whether the provided notification record is allowed to be represented as a bubble.
+     * @return whether the provided notification record is allowed to be represented as a bubble,
+     * accounting for user choice & policy.
      */
     private boolean isNotificationAppropriateToBubble(NotificationRecord r, String pkg, int userId,
             NotificationRecord oldRecord) {
         Notification notification = r.getNotification();
-        Notification.BubbleMetadata metadata = notification.getBubbleMetadata();
-        boolean intentCanBubble = metadata != null
-                && canLaunchInActivityView(getContext(), metadata.getIntent(), pkg);
+        if (!canBubble(r, pkg, userId)) {
+            // no log: canBubble has its own
+            return false;
+        }
 
-        // Does the app want to bubble & is able to bubble
-        boolean canBubble = intentCanBubble
-                && mPreferencesHelper.areBubblesAllowed(pkg, userId)
-                && mPreferencesHelper.bubblesEnabled()
-                && r.getChannel().canBubble()
-                && !mActivityManager.isLowRamDevice();
+        if (mActivityManager.isLowRamDevice()) {
+            logBubbleError(r.getKey(), "low ram device");
+            return false;
+        }
 
-        // Is the app in the foreground?
-        final boolean appIsForeground =
-                mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+        if (mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND) {
+            // If the app is foreground it always gets to bubble
+            return true;
+        }
 
-        // Is the notification something we'd allow to bubble?
-        // A call with a foreground service + person
+        if (oldRecord != null && (oldRecord.getNotification().flags & FLAG_BUBBLE) != 0) {
+            // This is an update to an active bubble
+            return true;
+        }
+
+        // At this point the bubble must fulfill communication policy
+
+        // Communication always needs a person
         ArrayList<Person> peopleList = notification.extras != null
                 ? notification.extras.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST)
                 : null;
-        boolean isForegroundCall = CATEGORY_CALL.equals(notification.category)
-                && (notification.flags & FLAG_FOREGROUND_SERVICE) != 0;
-        // OR message style (which always has a person) with any remote input
-        Class<? extends Notification.Style> style = notification.getNotificationStyle();
-        boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
-        boolean notificationAppropriateToBubble =
-                (isMessageStyle && hasValidRemoteInput(notification))
-                || (peopleList != null && !peopleList.isEmpty() && isForegroundCall);
+        // Message style requires a person & it's not included in the list
+        boolean isMessageStyle = Notification.MessagingStyle.class.equals(
+                notification.getNotificationStyle());
+        if (!isMessageStyle && (peopleList == null || peopleList.isEmpty())) {
+            logBubbleError(r.getKey(), "if not foreground, must have a person and be "
+                    + "Notification.MessageStyle or Notification.CATEGORY_CALL");
+            return false;
+        }
 
-        // OR something that was previously a bubble & still exists
-        boolean bubbleUpdate = oldRecord != null
-                && (oldRecord.getNotification().flags & FLAG_BUBBLE) != 0;
-        return canBubble && (notificationAppropriateToBubble || appIsForeground || bubbleUpdate);
+        // Communication is a message or a call
+        boolean isCall = CATEGORY_CALL.equals(notification.category);
+        boolean hasForegroundService = (notification.flags & FLAG_FOREGROUND_SERVICE) != 0;
+        if (isMessageStyle) {
+            if (hasValidRemoteInput(notification)) {
+                return true;
+            }
+            logBubbleError(r.getKey(), "messages require valid remote input");
+            return false;
+        } else if (isCall) {
+            if (hasForegroundService) {
+                return true;
+            }
+            logBubbleError(r.getKey(), "calls require foreground service");
+            return false;
+        }
+        logBubbleError(r.getKey(), "if not foreground, must be "
+                + "Notification.MessageStyle or Notification.CATEGORY_CALL");
+        return false;
+    }
+
+    /**
+     * @return whether the user has enabled the provided notification to bubble, does not account
+     * for policy.
+     */
+    private boolean canBubble(NotificationRecord r, String pkg, int userId) {
+        Notification notification = r.getNotification();
+        Notification.BubbleMetadata metadata = notification.getBubbleMetadata();
+        if (metadata == null) {
+            // no log: no need to inform dev if they didn't attach bubble metadata
+            return false;
+        }
+        if (!canLaunchInActivityView(getContext(), metadata.getIntent(), pkg)) {
+            // no log: method has the failure log
+            return false;
+        }
+        if (!mPreferencesHelper.bubblesEnabled()) {
+            logBubbleError(r.getKey(), "bubbles disabled for user: " + userId);
+            return false;
+        }
+        if (!mPreferencesHelper.areBubblesAllowed(pkg, userId)) {
+            logBubbleError(r.getKey(),
+                    "bubbles for package: " + pkg + " disabled for user: " + userId);
+            return false;
+        }
+        if (!r.getChannel().canBubble()) {
+            logBubbleError(r.getKey(),
+                    "bubbles for channel " + r.getChannel().getId() + " disabled");
+            return false;
+        }
+        return true;
     }
 
     private boolean hasValidRemoteInput(Notification n) {
@@ -4887,6 +4941,11 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
+    private void logBubbleError(String key, String failureMessage) {
+        if (DBG) {
+            Log.w(TAG, "Bubble notification: " + key + " failed: " + failureMessage);
+        }
+    }
     /**
      * Whether an intent is properly configured to display in an {@link android.app.ActivityView}.
      *
