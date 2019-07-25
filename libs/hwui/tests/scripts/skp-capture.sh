@@ -29,10 +29,14 @@ fi
 phase1_timeout_seconds=60
 phase2_timeout_seconds=300
 package="$1"
-filename="$(date '+%H%M%S').skp"
+extension="skp"
+if (( "$2" > 1 )); then # 2nd arg is number of frames
+    extension="mskp" # use different extension for multi frame files.
+fi
+filename="$(date '+%H%M%S').${extension}"
 remote_path="/data/data/${package}/cache/${filename}"
 local_path_prefix="$(date '+%Y-%m-%d_%H%M%S')_${package}"
-local_path="${local_path_prefix}.skp"
+local_path="${local_path_prefix}.${extension}"
 enable_capture_key='debug.hwui.capture_skp_enabled'
 enable_capture_value=$(adb shell "getprop '${enable_capture_key}'")
 
