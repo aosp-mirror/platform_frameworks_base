@@ -512,6 +512,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     public void prepareForGentleWakeUp() {
         if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
             mInFrontAlpha = 1f;
+            mInFrontTint = Color.BLACK;
+            mBehindTint = Color.BLACK;
             mAnimateChange = false;
             updateScrims();
             mAnimateChange = true;

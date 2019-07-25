@@ -142,7 +142,10 @@ public enum ScrimState {
             mFrontAlpha = 0f;
             mBubbleAlpha = 0f;
             mBehindTint = Color.BLACK;
+            mFrontTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
+            mAnimationDuration = mWakeLockScreenSensorActive
+                    ? ScrimController.ANIMATION_DURATION_LONG : ScrimController.ANIMATION_DURATION;
         }
 
         @Override

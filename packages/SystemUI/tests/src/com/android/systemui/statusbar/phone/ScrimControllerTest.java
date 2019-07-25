@@ -252,14 +252,14 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
+        // Front scrim should be transparent, but tinted
         // Back scrim should be semi-transparent so the user can see the wallpaper
         // Pulse callback should have been invoked
         assertScrimAlpha(TRANSPARENT /* front */,
                 OPAQUE /* back */,
                 TRANSPARENT /* bubble */);
 
-        assertScrimTint(false /* front */,
+        assertScrimTint(true /* front */,
                 true /* behind */,
                 false /* bubble */);
 
