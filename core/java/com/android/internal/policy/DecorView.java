@@ -989,7 +989,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             } else {
                 mBackgroundPadding.setEmpty();
             }
-            drawableChanged();
+            if (!View.sBrokenWindowBackground) {
+                drawableChanged();
+            }
         }
     }
 
