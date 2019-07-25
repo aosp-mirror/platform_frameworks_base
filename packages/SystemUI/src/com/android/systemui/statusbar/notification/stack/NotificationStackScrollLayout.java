@@ -5776,7 +5776,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             currentIndex++;
             boolean beforeSpeedBump;
             if (mHighPriorityBeforeSpeedBump) {
-                beforeSpeedBump = row.getEntry().isHighPriority();
+                beforeSpeedBump = row.getEntry().isTopBucket();
             } else {
                 beforeSpeedBump = !row.getEntry().ambient;
             }
@@ -5834,9 +5834,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             case ROWS_ALL:
                 return true;
             case ROWS_HIGH_PRIORITY:
-                return row.getEntry().isHighPriority();
+                return row.getEntry().isTopBucket();
             case ROWS_GENTLE:
-                return !row.getEntry().isHighPriority();
+                return !row.getEntry().isTopBucket();
             default:
                 throw new IllegalArgumentException("Unknown selection: " + selection);
         }
