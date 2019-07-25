@@ -65,6 +65,9 @@ LOCAL_FULL_MANIFEST_FILE := $(gen)
 
 LOCAL_MULTILIB := both
 LOCAL_JNI_SHARED_LIBRARIES := libshim_jni
+# Explicitly uncompress native libs rather than letting the build system doing it and destroy the
+# v2/v3 signature.
+LOCAL_USE_EMBEDDED_NATIVE_LIBS := true
 
 LOCAL_USE_AAPT2 := true
 
