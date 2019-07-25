@@ -323,14 +323,24 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         }
         updateDarkTint();
 
+        updateIconVisibility();
+        updateClickability();
+
+        return true;
+    }
+
+    /**
+     * Update the icon visibility
+     * @return true if the visibility changed
+     */
+    private boolean updateIconVisibility() {
         boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
         boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
                 || mShowingLaunchAffordance;
         if (mBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
-            if (mHeadsUpManager.isHeadsUpGoingAway()
-                    || mHeadsUpManager.hasPinnedHeadsUp()
-                    || (mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                    && !mWakeUpCoordinator.getNotificationsFullyHidden())) {
+            if ((mHeadsUpManager.isHeadsUpGoingAway() || mHeadsUpManager.hasPinnedHeadsUp())
+                    && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                    && !mWakeUpCoordinator.getNotificationsFullyHidden()) {
                 invisible = true;
             }
         }
@@ -349,10 +359,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                         .setDuration(233)
                         .start();
             }
+            return true;
         }
-        updateClickability();
-
-        return true;
+        return false;
     }
 
     private boolean canBlockUpdates() {
@@ -440,7 +449,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     @Override
     public void onFullyHiddenChanged(boolean isFullyHidden) {
         if (mBypassController.getBypassEnabled()) {
-            update();
+            boolean changed = updateIconVisibility();
+            if (changed) {
+                update();
+            }
         }
     }
 

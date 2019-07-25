@@ -500,6 +500,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
+    private boolean mWillExpand;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -4406,6 +4407,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mStateAnimator.setShadeExpanded(isExpanded);
         mSwipeHelper.setIsExpanded(isExpanded);
         if (changed) {
+            mWillExpand = false;
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();
                 mExpandHelper.cancelImmediately();
@@ -5055,7 +5057,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed)) {
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
             mNeedsAnimation = true;
-            if (!mIsExpanded && !isHeadsUp) {
+            if (!mIsExpanded && !mWillExpand && !isHeadsUp) {
                 row.setHeadsUpAnimatingAway(true);
             }
             requestChildrenUpdate();
@@ -5074,6 +5076,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mAmbientState.setMaxHeadsUpTranslation(height - bottomBarHeight);
         mStateAnimator.setHeadsUpAppearHeightBottom(height);
         requestChildrenUpdate();
+    }
+
+    @Override
+    public void setWillExpand(boolean willExpand) {
+        mWillExpand = willExpand;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5676,6 +5683,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             // The bottom might change because we're using the final actual height of the view
             mAnimateBottomOnLayout = true;
         }
+        // Let's update the footer once the notifications have been updated (in the next frame)
+        post(this::updateFooter);
     }
 
     public void setOnPulseHeightChangedListener(Runnable listener) {
@@ -5746,7 +5755,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             currentIndex++;
             boolean beforeSpeedBump;
             if (mHighPriorityBeforeSpeedBump) {
-                beforeSpeedBump = row.getEntry().isHighPriority();
+                beforeSpeedBump = row.getEntry().isTopBucket();
             } else {
                 beforeSpeedBump = !row.getEntry().ambient;
             }
@@ -5804,9 +5813,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             case ROWS_ALL:
                 return true;
             case ROWS_HIGH_PRIORITY:
-                return row.getEntry().isHighPriority();
+                return row.getEntry().isTopBucket();
             case ROWS_GENTLE:
-                return !row.getEntry().isHighPriority();
+                return !row.getEntry().isTopBucket();
             default:
                 throw new IllegalArgumentException("Unknown selection: " + selection);
         }

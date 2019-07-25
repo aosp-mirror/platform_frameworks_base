@@ -814,6 +814,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
         mNotificationPanel.setOnReinflationListener(mNotificationIconAreaController::initAodIcons);
+        mNotificationPanel.addExpansionListener(mWakeUpCoordinator);
 
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mNotificationIconAreaController);
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
@@ -1803,6 +1804,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
                 }
                 mNotificationPanel.expand(true /* animate */);
+                ((NotificationListContainer) mStackScroller).setWillExpand(true);
+                mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN, 1);
             } else if (!mNotificationPanel.isInSettings() && !mNotificationPanel.isExpanding()){
                 mNotificationPanel.flingSettings(0 /* velocity */,
@@ -1940,7 +1943,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (start) {
             mNotificationPanel.startWaitingForOpenPanelGesture();
-            setPanelExpanded(true);
         } else {
             mNotificationPanel.stopWaitingForOpenPanelGesture(velocity);
         }
@@ -2387,6 +2389,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (mLightBarController != null) {
             mLightBarController.dump(fd, pw, args);
+        }
+
+        if (mUnlockMethodCache != null) {
+            mUnlockMethodCache.dump(pw);
         }
 
         if (mKeyguardBypassController != null) {
@@ -3564,6 +3570,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 userAllowsPrivateNotificationsInPublic(mLockscreenUserManager.getCurrentUserId())
                 || !mLockscreenUserManager.shouldShowLockscreenNotifications()
                 || mFalsingManager.shouldEnforceBouncer();
+        if (mKeyguardBypassController.getBypassEnabled()) {
+            fullShadeNeedsBouncer = false;
+        }
         if (mLockscreenUserManager.isLockscreenPublicMode(userId) && fullShadeNeedsBouncer) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
             showBouncerIfKeyguard();

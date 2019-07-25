@@ -419,7 +419,7 @@ public class StatusBarWindowView extends FrameLayout {
         if (mNotificationPanel.isFullyExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mService.isBouncerShowing()
-                && !mBypassController.getBypassEnabled()
+                && (!mBypassController.getBypassEnabled() || mNotificationPanel.isQsExpanded())
                 && !mService.isDozing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
         }
