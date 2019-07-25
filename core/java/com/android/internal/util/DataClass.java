@@ -177,11 +177,10 @@ public @interface DataClass {
 
     /**
      * @deprecated to be used by code generator exclusively
-     * @hide
      */
     @Deprecated
     @Retention(RetentionPolicy.SOURCE)
-    @Target({FIELD, METHOD, PARAMETER, LOCAL_VARIABLE, ANNOTATION_TYPE, CONSTRUCTOR, TYPE})
+    @Target({METHOD})
     @interface Generated {
         long time();
         String codegenVersion();
@@ -190,12 +189,27 @@ public @interface DataClass {
 
         /**
          * @deprecated to be used by code generator exclusively
-         * @hide
          */
         @Deprecated
         @Retention(RetentionPolicy.SOURCE)
         @Target({FIELD, METHOD, ANNOTATION_TYPE, CONSTRUCTOR, TYPE})
         @interface Member {}
+    }
+
+    /**
+     * Opt out of generating {@link #genConstDefs IntDef/StringDef}s for annotated constant
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({FIELD})
+    @interface SuppressConstDefsGeneration {}
+
+    /**
+     * A class-level annotation to suppress methods' generation by name
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({TYPE})
+    @interface Suppress {
+        String[] value();
     }
 
     /**

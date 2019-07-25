@@ -17,6 +17,8 @@
 
 package android.processor.staledataclass
 
+import com.android.codegen.BASE_BUILDER_CLASS
+import com.android.codegen.CANONICAL_BUILDER_CLASS
 import com.android.codegen.CODEGEN_NAME
 import com.android.codegen.CODEGEN_VERSION
 import com.sun.tools.javac.code.Symbol
@@ -29,6 +31,7 @@ import javax.annotation.processing.SupportedAnnotationTypes
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
@@ -107,20 +110,30 @@ class StaleDataclassProcessor: AbstractProcessor() {
 
     private fun processSingleFile(elementAnnotatedWithGenerated: Element) {
 
-        val inputSignatures = elementAnnotatedWithGenerated
-                .enclosingElement
-                .enclosedElements
-                .filterNot {
-                    it.annotationMirrors.any { "Generated" in it.annotationType.toString() }
-                }.map {
-                    elemToString(it)
-                }.toSet()
+        val classElement = elementAnnotatedWithGenerated.enclosingElement
+
+        val inputSignatures = computeSignaturesForClass(classElement)
+                .plus(computeSignaturesForClass(classElement.enclosedElements.find {
+                    it.kind == ElementKind.CLASS
+                            && !isGenerated(it)
+                            && it.simpleName.toString() == BASE_BUILDER_CLASS
+                }))
+                .plus(computeSignaturesForClass(classElement.enclosedElements.find {
+                    it.kind == ElementKind.CLASS
+                            && !isGenerated(it)
+                            && it.simpleName.toString() == CANONICAL_BUILDER_CLASS
+                }))
+                .plus(classElement
+                        .annotationMirrors
+                        .find { it.annotationType.toString() == DATACLASS_ANNOTATION_NAME }
+                        .toString())
+                .toSet()
 
         val annotationParams = elementAnnotatedWithGenerated
                 .annotationMirrors
                 .find { ann -> isGeneratedAnnotation(ann) }!!
                 .elementValues
-                .map { (k, v) -> k.getSimpleName().toString() to v.getValue() }
+                .map { (k, v) -> k.simpleName.toString() to v.value }
                 .toMap()
 
         val lastGenerated = annotationParams["time"] as Long
@@ -140,7 +153,7 @@ class StaleDataclassProcessor: AbstractProcessor() {
         }
 
         val source = repoRoot!!.resolve(sourceRelative)
-        val clazz = elementAnnotatedWithGenerated.enclosingElement.toString()
+        val clazz = classElement.toString()
 
         if (inputSignatures != lastGenInputSignatures) {
             error(buildString {
@@ -156,6 +169,23 @@ class StaleDataclassProcessor: AbstractProcessor() {
             stale += Stale(clazz, source, lastGenerated)
         }
     }
+
+    private fun computeSignaturesForClass(classElement: Element?): List<String> {
+        if (classElement == null) return emptyList()
+        val type = classElement as TypeElement
+        return classElement
+                .enclosedElements
+                .filterNot {
+                    it.kind == ElementKind.CLASS
+                            || it.kind == ElementKind.CONSTRUCTOR
+                            || isGenerated(it)
+                }.map {
+                    elemToString(it)
+                } + "class ${classElement.simpleName} extends ${type.superclass} implements [${type.interfaces.joinToString(", ")}]"
+    }
+
+    private fun isGenerated(it: Element) =
+            it.annotationMirrors.any { "Generated" in it.annotationType.toString() }
 
     private fun error(msg: String) {
         processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, msg)

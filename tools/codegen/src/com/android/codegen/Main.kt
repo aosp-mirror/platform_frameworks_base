@@ -9,9 +9,6 @@ const val INDENT_SINGLE = "    "
 
 val PRIMITIVE_TYPES = listOf("byte", "short", "int", "long", "char", "float", "double", "boolean")
 
-const val CANONICAL_BUILDER_CLASS = "Builder"
-const val GENERATED_BUILDER_CLASS = "GeneratedBuilder"
-
 val BUILTIN_SPECIAL_PARCELLINGS = listOf("Pattern")
 
 const val FLAG_BUILDER_PROTECTED_SETTERS = "--builder-protected-setters"
@@ -66,10 +63,10 @@ Special methods/etc. you can define:
       Will be called in constructor, after all the fields have been initialized.
       This is a good place to put any custom validation logic that you may have
 
-  static class $CANONICAL_BUILDER_CLASS extends $GENERATED_BUILDER_CLASS
-      If a class extending $GENERATED_BUILDER_CLASS is specified, generated builder's setters will
+  static class $CANONICAL_BUILDER_CLASS extends $BASE_BUILDER_CLASS
+      If a class extending $BASE_BUILDER_CLASS is specified, generated builder's setters will
       return the provided $CANONICAL_BUILDER_CLASS type.
-      $GENERATED_BUILDER_CLASS's constructor(s) will be package-private to encourage using $CANONICAL_BUILDER_CLASS instead
+      $BASE_BUILDER_CLASS's constructor(s) will be package-private to encourage using $CANONICAL_BUILDER_CLASS instead
       This allows you to extend the generated builder, adding or overriding any methods you may want
 
 
@@ -131,7 +128,6 @@ fun main(args: Array<String>) {
 
 
         // $GENERATED_WARNING_PREFIX v$CODEGEN_VERSION.
-        //   on ${currentTimestamp()}
         //
         // DO NOT MODIFY!
         //
@@ -143,14 +139,6 @@ fun main(args: Array<String>) {
 
         if (FeatureFlag.CONST_DEFS()) generateConstDefs()
 
-        "@$DataClassGenerated(" {
-            +"time = ${System.currentTimeMillis()}L,"
-            +"codegenVersion = \"$CODEGEN_VERSION\","
-            +"sourceFile = \"${file.relativeTo(File(System.getenv("ANDROID_BUILD_TOP")))}\","
-            +"inputSignatures = \"${getInputSignatures().joinToString("\\n")}\""
-        }
-        +"\n"
-
 
         if (FeatureFlag.CONSTRUCTOR()) {
             generateConstructor("public")
@@ -160,6 +148,7 @@ fun main(args: Array<String>) {
                 || FeatureFlag.PARCELABLE()) {
             generateConstructor("/* package-private */")
         }
+        if (FeatureFlag.COPY_CONSTRUCTOR()) generateCopyConstructor()
 
         if (FeatureFlag.GETTERS()) generateGetters()
         if (FeatureFlag.SETTERS()) generateSetters()
@@ -168,7 +157,6 @@ fun main(args: Array<String>) {
 
         if (FeatureFlag.FOR_EACH_FIELD()) generateForEachField()
 
-        if (FeatureFlag.COPY_CONSTRUCTOR()) generateCopyConstructor()
         if (FeatureFlag.WITHERS()) generateWithers()
 
         if (FeatureFlag.PARCELABLE()) generateParcelable()
@@ -177,6 +165,8 @@ fun main(args: Array<String>) {
         if (FeatureFlag.BUILDER()) generateBuilder()
 
         if (FeatureFlag.AIDL()) generateAidl(file)
+
+        generateMetadata(file)
 
         rmEmptyLine()
     }
