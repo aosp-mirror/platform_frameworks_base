@@ -23,6 +23,7 @@ import android.app.NotificationChannel.DEFAULT_CHANNEL_ID
 import android.app.NotificationChannelGroup
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
@@ -171,7 +172,6 @@ class ChannelEditorDialogController @Inject constructor(
     private fun done() {
         resetState()
         dialog.dismiss()
-        onFinishListener?.onChannelEditorDialogFinished()
     }
 
     private fun resetState() {
@@ -261,6 +261,11 @@ class ChannelEditorDialogController @Inject constructor(
         dialog.apply {
             setContentView(R.layout.notif_half_shelf)
             setCanceledOnTouchOutside(true)
+            setOnDismissListener(object : DialogInterface.OnDismissListener {
+                override fun onDismiss(dialog: DialogInterface?) {
+                    onFinishListener?.onChannelEditorDialogFinished()
+                }
+            })
             findViewById<ChannelEditorListView>(R.id.half_shelf_container).apply {
                 controller = this@ChannelEditorDialogController
                 appIcon = this@ChannelEditorDialogController.appIcon
