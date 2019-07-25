@@ -42,7 +42,7 @@ class ClassPrinter(
     init {
         val fieldsWithMissingNullablity = fields.filter { field ->
             !field.isPrimitive
-                    && Modifier.TRANSIENT !in field.fieldAst.modifiers
+                    && field.fieldAst.modifiers.none { it.keyword == Modifier.Keyword.TRANSIENT }
                     && "@$Nullable" !in field.annotations
                     && "@$NonNull" !in field.annotations
         }

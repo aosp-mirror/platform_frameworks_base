@@ -1,6 +1,5 @@
 package com.android.codegen
 
-import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.expr.ClassExpr
 import com.github.javaparser.ast.expr.Name
@@ -115,8 +114,9 @@ data class FieldInfo(
             classPrinter {
                 fieldAst.addAnnotation(SingleMemberAnnotationExpr(
                         Name(ParcelWith),
-                        ClassExpr(JavaParser.parseClassOrInterfaceType(
-                                "$Parcelling.BuiltIn.For$FieldClass"))))
+                        ClassExpr(JAVA_PARSER
+                                .parseClassOrInterfaceType("$Parcelling.BuiltIn.For$FieldClass")
+                                .throwIfFailed())))
             }
         }
         fieldAst.annotations.map { it.removeComment().toString() }
