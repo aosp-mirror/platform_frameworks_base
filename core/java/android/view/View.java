@@ -10556,6 +10556,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p>Do not modify the provided list after this method is called.</p>
      *
+     * <p>Note: the system will put a limit of <code>200dp</code> on the vertical extent of the
+     * exclusions it takes into account. The limit does not apply while the navigation
+     * bar is {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY stickily} hidden, nor to the
+     * {@link android.inputmethodservice.InputMethodService input method} and
+     * {@link Intent#CATEGORY_HOME home activity}.
+     * </p>
+     *
      * @param rects A list of precision gesture regions that this view needs to function correctly
      */
     public void setSystemGestureExclusionRects(@NonNull List<Rect> rects) {
