@@ -17,6 +17,10 @@ package com.android.systemui.statusbar;
 
 import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_FADING;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController
+        .MODE_WAKE_AND_UNLOCK_PULSING;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_MEDIA_FAKE_ARTWORK;
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_LOCKSCREEN_WALLPAPER;
 import static com.android.systemui.statusbar.phone.StatusBar.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
@@ -595,9 +599,11 @@ public class NotificationMediaManager implements Dumpable {
                 boolean cannotAnimateDoze = shadeController != null
                         && shadeController.isDozing()
                         && !ScrimState.AOD.getAnimateChange();
-                if (mBiometricUnlockController != null && mBiometricUnlockController.getMode()
+                boolean needsBypassFading = mKeyguardMonitor.isBypassFadingAnimation();
+                if (((mBiometricUnlockController != null && mBiometricUnlockController.getMode()
                         == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
-                        || hideBecauseOccluded || cannotAnimateDoze) {
+                                || cannotAnimateDoze) && !needsBypassFading)
+                        || hideBecauseOccluded) {
 
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
@@ -622,9 +628,7 @@ public class NotificationMediaManager implements Dumpable {
                             });
                     if (mKeyguardMonitor.isKeyguardFadingAway()) {
                         mBackdrop.animate()
-                                // Make it disappear faster, as the focus should be on the activity
-                                // behind.
-                                .setDuration(mKeyguardMonitor.getKeyguardFadingAwayDuration() / 2)
+                                .setDuration(mKeyguardMonitor.getShortenedFadingAwayDuration())
                                 .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
                                 .setInterpolator(Interpolators.LINEAR)
                                 .start();
