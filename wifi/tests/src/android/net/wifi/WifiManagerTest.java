@@ -1313,19 +1313,26 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
     }
 
     /**
-     * Verify calls to {@link WifiManager#addNetworkSuggestions(List)} and
+     * Verify calls to {@link WifiManager#addNetworkSuggestions(List)},
+     * {@link WifiManager#getNetworkSuggestions()} and
      * {@link WifiManager#removeNetworkSuggestions(List)}.
      */
     @Test
-    public void addRemoveNetworkSuggestions() throws Exception {
+    public void addGetRemoveNetworkSuggestions() throws Exception {
+        List<WifiNetworkSuggestion> testList = new ArrayList<>();
         when(mWifiService.addNetworkSuggestions(any(List.class), anyString()))
                 .thenReturn(WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS);
         when(mWifiService.removeNetworkSuggestions(any(List.class), anyString()))
                 .thenReturn(WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS);
+        when(mWifiService.getNetworkSuggestions(anyString()))
+                .thenReturn(testList);
 
         assertEquals(WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS,
-                mWifiManager.addNetworkSuggestions(new ArrayList<>()));
+                mWifiManager.addNetworkSuggestions(testList));
         verify(mWifiService).addNetworkSuggestions(anyList(), eq(TEST_PACKAGE_NAME));
+
+        assertEquals(testList, mWifiManager.getNetworkSuggestions());
+        verify(mWifiService).getNetworkSuggestions(eq(TEST_PACKAGE_NAME));
 
         assertEquals(WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS,
                 mWifiManager.removeNetworkSuggestions(new ArrayList<>()));

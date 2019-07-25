@@ -205,6 +205,8 @@ interface IWifiManager
 
     int removeNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
 
+    List<WifiNetworkSuggestion> getNetworkSuggestions(in String packageName);
+
     String[] getFactoryMacAddresses();
 
     void setDeviceMobilityState(int state);
