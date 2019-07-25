@@ -370,6 +370,13 @@ class WindowStateAnimator {
             // of the proper size. The preserved surface will still be removed when client
             // finishes drawing to the new surface.
             mSurfaceDestroyDeferred = false;
+
+            // Make sure to reparent any children of the new surface back to the preserved
+            // surface before destroying it.
+            if (mSurfaceController != null && mPendingDestroySurface != null) {
+                mPostDrawTransaction.reparentChildren(mSurfaceController.mSurfaceControl,
+                        mPendingDestroySurface.mSurfaceControl).apply();
+            }
             destroySurfaceLocked();
             mSurfaceDestroyDeferred = true;
             return;
