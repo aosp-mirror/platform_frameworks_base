@@ -18,56 +18,44 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 import android.content.pm.PackageParser;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 
 @VisibleForTesting
 interface PackageAbiHelper {
     /**
-     * Derive and set the location of native libraries for the given package,
+     * Derive and get the location of native libraries for the given package,
      * which varies depending on where and how the package was installed.
-     *
-     * WARNING: This API enables modifying of the package.
-     * TODO(b/137881067): Modify so that caller is responsible for setting pkg fields as necessary
      */
-    void setNativeLibraryPaths(PackageParser.Package pkg, File appLib32InstallDir);
+    NativeLibraryPaths getNativeLibraryPaths(
+            PackageParser.Package pkg, File appLib32InstallDir);
 
     /**
-     * Calculate the abis and roots for a bundled app. These can uniquely
-     * be determined from the contents of the system partition, i.e whether
-     * it contains 64 or 32 bit shared libraries etc. We do not validate any
-     * of this information, and instead assume that the system was built
-     * sensibly.
-     *
-     * WARNING: This API enables modifying of the package.
-     * TODO(b/137881067): Modify so that caller is responsible for setting pkg fields as necessary
+     * Calculate the abis for a bundled app. These can uniquely be determined from the contents of
+     * the system partition, i.e whether it contains 64 or 32 bit shared libraries etc. We do not
+     * validate any of this information, and instead assume that the system was built sensibly.
      */
-    void setBundledAppAbisAndRoots(PackageParser.Package pkg,
-            PackageSetting pkgSetting);
+    Abis getBundledAppAbis(PackageParser.Package pkg);
 
     /**
-     * Derive the ABI of a non-system package located at {@code scanFile}. This information
-     * is derived purely on the basis of the contents of {@code scanFile} and
-     * {@code cpuAbiOverride}.
+     * Derive the ABI of a non-system package located at {@code pkg}. This information
+     * is derived purely on the basis of the contents of {@code pkg} and {@code cpuAbiOverride}.
      *
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
-     *
-     * WARNING: This API enables modifying of the package.
-     * TODO(b/137881067): Modify so that caller is responsible for setting pkg fields as necessary
      */
-    void derivePackageAbi(PackageParser.Package pkg, String cpuAbiOverride,
-            boolean extractLibs)
+    Pair<Abis, NativeLibraryPaths> derivePackageAbi(
+            PackageParser.Package pkg, String cpuAbiOverride, boolean extractLibs)
             throws PackageManagerException;
 
     /**
-     * Adjusts ABIs for a set of packages belonging to a shared user so that they all match.
-     * i.e, so that all packages can be run inside a single process if required.
+     * Calculates adjusted ABIs for a set of packages belonging to a shared user so that they all
+     * match. i.e, so that all packages can be run inside a single process if required.
      *
-     * Optionally, callers can pass in a parsed package via {@code newPackage} in which case
+     * Optionally, callers can pass in a parsed package via {@code scannedPackage} in which case
      * this function will either try and make the ABI for all packages in
      * {@code packagesForUser} match {@code scannedPackage} or will update the ABI of
      * {@code scannedPackage} to match the ABI selected for {@code packagesForUser}. This
@@ -76,10 +64,72 @@ interface PackageAbiHelper {
      * NOTE: We currently only match for the primary CPU abi string. Matching the secondary
      * adds unnecessary complexity.
      *
-     * WARNING: This API enables modifying of the package.
-     * TODO(b/137881067): Modify so that caller is responsible for setting pkg fields as necessary
+     * @return the calculated primary abi that should be set for all non-specified packages
+     *         belonging to the shared user.
      */
     @Nullable
-    List<String> adjustCpuAbisForSharedUser(
+    String getAdjustedAbiForSharedUser(
             Set<PackageSetting> packagesForUser, PackageParser.Package scannedPackage);
+
+    /**
+     * The native library paths and related properties that should be set on a
+     * {@link android.content.pm.PackageParser.Package}.
+     */
+    final class NativeLibraryPaths {
+        public final String nativeLibraryRootDir;
+        public final boolean nativeLibraryRootRequiresIsa;
+        public final String nativeLibraryDir;
+        public final String secondaryNativeLibraryDir;
+
+        @VisibleForTesting
+        NativeLibraryPaths(String nativeLibraryRootDir,
+                boolean nativeLibraryRootRequiresIsa, String nativeLibraryDir,
+                String secondaryNativeLibraryDir) {
+            this.nativeLibraryRootDir = nativeLibraryRootDir;
+            this.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
+            this.nativeLibraryDir = nativeLibraryDir;
+            this.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
+        }
+
+        public void applyTo(PackageParser.Package pkg) {
+            pkg.applicationInfo.nativeLibraryRootDir = nativeLibraryRootDir;
+            pkg.applicationInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
+            pkg.applicationInfo.nativeLibraryDir = nativeLibraryDir;
+            pkg.applicationInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
+        }
+    }
+
+    /**
+     * The primary and secondary ABIs that should be set on a package and its package setting.
+     */
+    final class Abis {
+        public final String primary;
+        public final String secondary;
+
+        @VisibleForTesting
+        Abis(String primary, String secondary) {
+            this.primary = primary;
+            this.secondary = secondary;
+        }
+
+        Abis(PackageParser.Package pkg) {
+            this(pkg.applicationInfo.primaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi);
+        }
+
+        public void applyTo(PackageParser.Package pkg) {
+            pkg.applicationInfo.primaryCpuAbi = primary;
+            pkg.applicationInfo.secondaryCpuAbi = secondary;
+        }
+        public void applyTo(PackageSetting pkgSetting) {
+            // pkgSetting might be null during rescan following uninstall of updates
+            // to a bundled app, so accommodate that possibility.  The settings in
+            // that case will be established later from the parsed package.
+            //
+            // If the settings aren't null, sync them up with what we've derived.
+            if (pkgSetting != null) {
+                pkgSetting.primaryCpuAbiString = primary;
+                pkgSetting.secondaryCpuAbiString = secondary;
+            }
+        }
+    }
 }

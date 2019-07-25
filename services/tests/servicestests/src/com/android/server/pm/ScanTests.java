@@ -34,9 +34,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
@@ -48,6 +46,7 @@ import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
+import android.util.Pair;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -62,6 +61,7 @@ import java.io.File;
 
 @RunWith(MockitoJUnitRunner.class)
 @Presubmit
+// TODO: shared user tests
 public class ScanTests {
 
     private static final String DUMMY_PACKAGE_NAME = "some.app.to.test";
@@ -76,6 +76,24 @@ public class ScanTests {
         when(mMockUserManager.getUserIds()).thenReturn(new int[]{0});
     }
 
+    @Before
+    public void setupDefaultAbiBehavior() throws Exception {
+        when(mMockPackageAbiHelper.derivePackageAbi(
+                any(PackageParser.Package.class), nullable(String.class), anyBoolean()))
+                .thenReturn(new Pair<>(
+                        new PackageAbiHelper.Abis("derivedPrimary", "derivedSecondary"),
+                        new PackageAbiHelper.NativeLibraryPaths(
+                                "derivedRootDir", true, "derivedNativeDir", "derivedNativeDir2")));
+        when(mMockPackageAbiHelper.getNativeLibraryPaths(
+                any(PackageParser.Package.class), any(File.class)))
+                .thenReturn(new PackageAbiHelper.NativeLibraryPaths(
+                        "getRootDir", true, "getNativeDir", "getNativeDir2"
+                ));
+        when(mMockPackageAbiHelper.getBundledAppAbis(
+                any(PackageParser.Package.class)))
+                .thenReturn(new PackageAbiHelper.Abis("bundledPrimary", "bundledSecondary"));
+    }
+
     @Test
     public void newInstallSimpleAllNominal() throws Exception {
         final PackageManagerService.ScanRequest scanRequest =
@@ -84,15 +102,11 @@ public class ScanTests {
                         .addScanFlag(PackageManagerService.SCAN_AS_FULL_APP)
                         .build();
 
-
         final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
 
         assertBasicPackageScanResult(scanResult, DUMMY_PACKAGE_NAME, false /*isInstant*/);
         assertThat(scanResult.existingSettingCopied, is(false));
-        verify(mMockPackageAbiHelper, never()).derivePackageAbi(any(PackageParser.Package.class),
-                anyString() /*abioverride*/, anyBoolean() /*extractNativeLibs*/);
-        verify(mMockPackageAbiHelper).setNativeLibraryPaths(
-                scanResult.pkgSetting.pkg, PackageManagerService.sAppLib32InstallDir);
+        assertPathsNotDerived(scanResult);
     }
 
     @Test
@@ -162,10 +176,7 @@ public class ScanTests {
         assertThat(scanResult.pkgSetting.secondaryCpuAbiString, is("secondaryCpuAbi"));
         assertThat(scanResult.pkgSetting.cpuAbiOverrideString, nullValue());
 
-        verify(mMockPackageAbiHelper, never()).derivePackageAbi(any(PackageParser.Package.class),
-                anyString() /*abioverride*/, anyBoolean() /*extractNativeLibs*/);
-        verify(mMockPackageAbiHelper).setNativeLibraryPaths(
-                scanResult.pkgSetting.pkg, PackageManagerService.sAppLib32InstallDir);
+        assertPathsNotDerived(scanResult);
     }
 
     @Test
@@ -293,12 +304,13 @@ public class ScanTests {
                         .build();
 
 
-        executeScan(new ScanRequestBuilder(basicPackage)
+        final PackageManagerService.ScanResult scanResult = executeScan(new ScanRequestBuilder(
+                basicPackage)
                 .setPkgSetting(pkgSetting)
                 .addScanFlag(SCAN_FIRST_BOOT_OR_UPGRADE)
                 .build());
 
-        verify(mMockPackageAbiHelper).derivePackageAbi(basicPackage, "testOverride", true);
+        assertAbiAndPathssDerived(scanResult);
     }
 
     @Test
@@ -484,7 +496,7 @@ public class ScanTests {
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
 
         final ApplicationInfo applicationInfo = pkgSetting.pkg.applicationInfo;
-        verifyBasicApplicationInfo(scanResult, applicationInfo);
+        assertBasicApplicationInfo(scanResult, applicationInfo);
 
     }
 
@@ -497,14 +509,12 @@ public class ScanTests {
         assertThat(pkgSetting.usesStaticLibrariesVersions, is(new long[]{234L, 456L}));
         assertThat(pkgSetting.pkg, is(scanResult.request.pkg));
         assertThat(pkgSetting.pkg.mExtras, is(pkgSetting));
-        assertThat(pkgSetting.legacyNativeLibraryPathString,
-                is("/data/tmp/randompath/base.apk:/lib"));
         assertThat(pkgSetting.codePath, is(new File(createCodePath(packageName))));
         assertThat(pkgSetting.resourcePath, is(new File(createResourcePath(packageName))));
         assertThat(pkgSetting.versionCode, is(PackageInfo.composeLongVersionCode(1, 2345)));
     }
 
-    private static void verifyBasicApplicationInfo(PackageManagerService.ScanResult scanResult,
+    private static void assertBasicApplicationInfo(PackageManagerService.ScanResult scanResult,
             ApplicationInfo applicationInfo) {
         assertThat(applicationInfo.processName, is(scanResult.request.pkg.packageName));
 
@@ -516,5 +526,26 @@ public class ScanTests {
                 scanResult.request.pkg.packageName).getAbsolutePath();
         assertThat(applicationInfo.credentialProtectedDataDir, is(calculatedCredentialId));
         assertThat(applicationInfo.dataDir, is(applicationInfo.credentialProtectedDataDir));
+    }
+
+    private static void assertAbiAndPathssDerived(PackageManagerService.ScanResult scanResult) {
+        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.applicationInfo;
+        assertThat(applicationInfo.primaryCpuAbi, is("derivedPrimary"));
+        assertThat(applicationInfo.secondaryCpuAbi, is("derivedSecondary"));
+
+        assertThat(applicationInfo.nativeLibraryRootDir, is("derivedRootDir"));
+        assertThat(scanResult.pkgSetting.legacyNativeLibraryPathString, is("derivedRootDir"));
+        assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));
+        assertThat(applicationInfo.nativeLibraryDir, is("derivedNativeDir"));
+        assertThat(applicationInfo.secondaryNativeLibraryDir, is("derivedNativeDir2"));
+    }
+
+    private static void assertPathsNotDerived(PackageManagerService.ScanResult scanResult) {
+        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.applicationInfo;
+        assertThat(applicationInfo.nativeLibraryRootDir, is("getRootDir"));
+        assertThat(scanResult.pkgSetting.legacyNativeLibraryPathString, is("getRootDir"));
+        assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));
+        assertThat(applicationInfo.nativeLibraryDir, is("getNativeDir"));
+        assertThat(applicationInfo.secondaryNativeLibraryDir, is("getNativeDir2"));
     }
 }
