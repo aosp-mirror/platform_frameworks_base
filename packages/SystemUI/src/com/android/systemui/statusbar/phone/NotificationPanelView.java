@@ -808,8 +808,7 @@ public class NotificationPanelView extends PanelView implements
             if (suppressedSummary) {
                 continue;
             }
-            if (!mLockscreenUserManager.shouldShowOnKeyguard(
-                    row.getStatusBarNotification())) {
+            if (!mLockscreenUserManager.shouldShowOnKeyguard(row.getEntry())) {
                 continue;
             }
             if (row.isRemoved()) {
@@ -1723,8 +1722,8 @@ public class NotificationPanelView extends PanelView implements
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
         }
-        if (mExpansionListener != null) {
-            mExpansionListener.onQsExpansionChanged(mQsMaxExpansionHeight != 0
+        for (int i = 0; i < mExpansionListeners.size(); i++) {
+            mExpansionListeners.get(i).onQsExpansionChanged(mQsMaxExpansionHeight != 0
                     ? mQsExpansionHeight / mQsMaxExpansionHeight : 0);
         }
         if (DEBUG) {
@@ -3380,24 +3379,4 @@ public class NotificationPanelView extends PanelView implements
         mOnReinflationListener = onReinflationListener;
     }
 
-    /**
-     * Panel and QS expansion callbacks.
-     */
-    public interface PanelExpansionListener {
-        /**
-         * Invoked whenever the notification panel expansion changes, at every animation frame.
-         * This is the main expansion that happens when the user is swiping up to dismiss the
-         * lock screen.
-         *
-         * @param expansion 0 when collapsed, 1 when expanded.
-         * @param tracking {@code true} when the user is actively dragging the panel.
-         */
-        void onPanelExpansionChanged(float expansion, boolean tracking);
-
-        /**
-         * Invoked whenever the QS expansion changes, at every animation frame.
-         * @param expansion 0 when collapsed, 1 when expanded.
-         */
-        void onQsExpansionChanged(float expansion);
-    }
 }

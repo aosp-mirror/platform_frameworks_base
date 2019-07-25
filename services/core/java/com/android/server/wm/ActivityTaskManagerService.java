@@ -1015,7 +1015,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final int startActivities(IApplicationThread caller, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle bOptions,
             int userId) {
-        assertPackageMatchesCallingUid(callingPackage);
         final String reason = "startActivities";
         enforceNotIsolatedCaller(reason);
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
@@ -1035,11 +1034,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 true /*validateIncomingUser*/);
     }
 
-    private int startActivityAsUser(IApplicationThread caller, String callingPackage,
+    int startActivityAsUser(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId,
             boolean validateIncomingUser) {
-        assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
 
         userId = getActivityStartController().checkTargetUser(userId, validateIncomingUser,
@@ -1212,7 +1210,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
-        assertPackageMatchesCallingUid(callingPackage);
         final WaitResult res = new WaitResult();
         synchronized (mGlobalLock) {
             enforceNotIsolatedCaller("startActivityAndWait");
@@ -1240,7 +1237,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final int startActivityWithConfig(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, Configuration config, Bundle bOptions, int userId) {
-        assertPackageMatchesCallingUid(callingPackage);
         synchronized (mGlobalLock) {
             enforceNotIsolatedCaller("startActivityWithConfig");
             userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
@@ -1290,7 +1286,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, IBinder permissionToken,
             boolean ignoreTargetSecurity, int userId) {
-        assertPackageMatchesCallingUid(callingPackage);
         // This is very dangerous -- it allows you to perform a start activity (including
         // permission grants) as any app that may launch one of your own activities.  So we only
         // allow this in two cases:
@@ -1420,7 +1415,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             Intent intent, String resolvedType, IVoiceInteractionSession session,
             IVoiceInteractor interactor, int startFlags, ProfilerInfo profilerInfo,
             Bundle bOptions, int userId) {
-        assertPackageMatchesCallingUid(callingPackage);
         mAmInternal.enforceCallingPermission(BIND_VOICE_INTERACTION, "startVoiceActivity()");
         if (session == null || interactor == null) {
             throw new NullPointerException("null session or interactor");
@@ -1444,7 +1438,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public int startAssistantActivity(String callingPackage, int callingPid, int callingUid,
             Intent intent, String resolvedType, Bundle bOptions, int userId) {
-        assertPackageMatchesCallingUid(callingPackage);
         mAmInternal.enforceCallingPermission(BIND_VOICE_INTERACTION, "startAssistantActivity()");
         userId = handleIncomingUser(callingPid, callingUid, userId, "startAssistantActivity");
 
@@ -2370,9 +2363,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     void moveTaskToFrontLocked(@Nullable IApplicationThread appThread,
             @Nullable String callingPackage, int taskId, int flags, SafeActivityOptions options,
             boolean fromRecents) {
+
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        assertPackageMatchesCallingUid(callingPackage);
+        if (!isSameApp(callingUid, callingPackage)) {
+            String msg = "Permission Denial: moveTaskToFrontLocked() from pid="
+                    + Binder.getCallingPid() + " as package " + callingPackage;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
         if (!checkAppSwitchAllowedLocked(callingPid, callingUid, -1, -1, "Task to front")) {
             SafeActivityOptions.abort(options);
             return;
@@ -2424,7 +2423,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /**
      * Return true if callingUid is system, or packageName belongs to that callingUid.
      */
-    private boolean isSameApp(int callingUid, @Nullable String packageName) {
+    boolean isSameApp(int callingUid, @Nullable String packageName) {
         try {
             if (callingUid != 0 && callingUid != SYSTEM_UID) {
                 if (packageName == null) {
@@ -2439,21 +2438,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // Should not happen
         }
         return true;
-    }
-
-    /**
-     * Checks that the provided package name matches the current calling UID, throws a security
-     * exception if it doesn't.
-     */
-    void assertPackageMatchesCallingUid(@Nullable String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        if (isSameApp(callingUid, packageName)) {
-            return;
-        }
-        final String msg = "Permission Denial: package=" + packageName
-                + " does not belong to uid=" + callingUid;
-        Slog.w(TAG, msg);
-        throw new SecurityException(msg);
     }
 
     boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
@@ -2989,7 +2973,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public List<IBinder> getAppTasks(String callingPackage) {
         int callingUid = Binder.getCallingUid();
-        assertPackageMatchesCallingUid(callingPackage);
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -6210,7 +6193,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 SafeActivityOptions options, int userId, boolean validateIncomingUser,
                 PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
-            assertPackageMatchesCallingUid(callingPackage);
             synchronized (mGlobalLock) {
                 return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
                         realCallingUid, callingPackage, intents, resolvedTypes, resultTo, options,
@@ -6226,7 +6208,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
                 PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
-            assertPackageMatchesCallingUid(callingPackage);
             synchronized (mGlobalLock) {
                 return getActivityStartController().startActivityInPackage(uid, realCallingPid,
                         realCallingUid, callingPackage, intent, resolvedType, resultTo, resultWho,

@@ -274,12 +274,13 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
         // Assume recents animation already started, set a state that cancel recents animation
         // with screenshot.
-        doReturn(true).when(mRecentsAnimationController).shouldCancelWithDeferredScreenshot();
+        doReturn(true).when(mRecentsAnimationController).shouldDeferCancelUntilNextTransition();
+        doReturn(true).when(mRecentsAnimationController).shouldDeferCancelWithScreenshot();
         // Start another fullscreen activity.
         fullscreenStack2.moveToFront("Activity start");
 
-        // Ensure that the recents animation was canceled by cancelOnNextTransitionStart().
-        verify(mRecentsAnimationController, times(1)).cancelOnNextTransitionStart();
+        // Ensure that the recents animation was canceled by setCancelOnNextTransitionStart().
+        verify(mRecentsAnimationController, times(1)).setCancelOnNextTransitionStart();
     }
 
     @Test
@@ -315,7 +316,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         // Ensure that the recents animation was NOT canceled
         verify(mService.mWindowManager, times(0)).cancelRecentsAnimationSynchronously(
                 eq(REORDER_KEEP_IN_PLACE), any());
-        verify(mRecentsAnimationController, times(0)).cancelOnNextTransitionStart();
+        verify(mRecentsAnimationController, times(0)).setCancelOnNextTransitionStart();
     }
 
     @Test
