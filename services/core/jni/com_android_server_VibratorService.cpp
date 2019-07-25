@@ -16,17 +16,12 @@
 
 #define LOG_TAG "VibratorService"
 
-#include <android/hardware/vibrator/1.0/IVibrator.h>
-#include <android/hardware/vibrator/1.0/types.h>
-#include <android/hardware/vibrator/1.0/IVibrator.h>
-#include <android/hardware/vibrator/1.1/types.h>
-#include <android/hardware/vibrator/1.2/IVibrator.h>
-#include <android/hardware/vibrator/1.2/types.h>
-#include <android/hardware/vibrator/1.3/IVibrator.h>
+#include <android/hardware/vibrator/1.4/IVibrator.h>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <utils/misc.h>
 #include <utils/Log.h>
@@ -36,6 +31,7 @@
 #include <stdio.h>
 
 using android::hardware::Return;
+using android::hardware::Void;
 using android::hardware::vibrator::V1_0::EffectStrength;
 using android::hardware::vibrator::V1_0::Status;
 using android::hardware::vibrator::V1_1::Effect_1_1;
@@ -44,8 +40,31 @@ namespace V1_0 = android::hardware::vibrator::V1_0;
 namespace V1_1 = android::hardware::vibrator::V1_1;
 namespace V1_2 = android::hardware::vibrator::V1_2;
 namespace V1_3 = android::hardware::vibrator::V1_3;
+namespace V1_4 = android::hardware::vibrator::V1_4;
 
 namespace android {
+
+static jmethodID sMethodIdOnComplete;
+
+class VibratorCallback : public V1_4::IVibratorCallback {
+    public:
+        VibratorCallback(JNIEnv *env, jobject vibration) :
+        mVibration(MakeGlobalRefOrDie(env, vibration)) {}
+
+        ~VibratorCallback() {
+            JNIEnv *env = AndroidRuntime::getJNIEnv();
+            env->DeleteGlobalRef(mVibration);
+        }
+
+        Return<void> onComplete() override {
+            auto env = AndroidRuntime::getJNIEnv();
+            env->CallVoidMethod(mVibration, sMethodIdOnComplete);
+            return Void();
+        }
+
+    private:
+        jobject mVibration;
+};
 
 static constexpr int NUM_TRIES = 2;
 
@@ -119,17 +138,17 @@ bool isValidEffect(jlong effect) {
     return val >= *iter.begin() && val <= *std::prev(iter.end());
 }
 
-static void vibratorInit(JNIEnv /* env */, jobject /* clazz */)
+static void vibratorInit(JNIEnv *env, jclass clazz)
 {
     halCall(&V1_0::IVibrator::ping).isOk();
 }
 
-static jboolean vibratorExists(JNIEnv* /* env */, jobject /* clazz */)
+static jboolean vibratorExists(JNIEnv* /* env */, jclass /* clazz */)
 {
     return halCall(&V1_0::IVibrator::ping).isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void vibratorOn(JNIEnv* /* env */, jobject /* clazz */, jlong timeout_ms)
+static void vibratorOn(JNIEnv* /* env */, jclass /* clazz */, jlong timeout_ms)
 {
     Status retStatus = halCall(&V1_0::IVibrator::on, timeout_ms).withDefault(Status::UNKNOWN_ERROR);
     if (retStatus != Status::OK) {
@@ -137,7 +156,7 @@ static void vibratorOn(JNIEnv* /* env */, jobject /* clazz */, jlong timeout_ms)
     }
 }
 
-static void vibratorOff(JNIEnv* /* env */, jobject /* clazz */)
+static void vibratorOff(JNIEnv* /* env */, jclass /* clazz */)
 {
     Status retStatus = halCall(&V1_0::IVibrator::off).withDefault(Status::UNKNOWN_ERROR);
     if (retStatus != Status::OK) {
@@ -145,11 +164,11 @@ static void vibratorOff(JNIEnv* /* env */, jobject /* clazz */)
     }
 }
 
-static jlong vibratorSupportsAmplitudeControl(JNIEnv*, jobject) {
+static jlong vibratorSupportsAmplitudeControl(JNIEnv*, jclass) {
     return halCall(&V1_0::IVibrator::supportsAmplitudeControl).withDefault(false);
 }
 
-static void vibratorSetAmplitude(JNIEnv*, jobject, jint amplitude) {
+static void vibratorSetAmplitude(JNIEnv*, jclass, jint amplitude) {
     Status status = halCall(&V1_0::IVibrator::setAmplitude, static_cast<uint32_t>(amplitude))
         .withDefault(Status::UNKNOWN_ERROR);
     if (status != Status::OK) {
@@ -158,11 +177,11 @@ static void vibratorSetAmplitude(JNIEnv*, jobject, jint amplitude) {
     }
 }
 
-static jboolean vibratorSupportsExternalControl(JNIEnv*, jobject) {
+static jboolean vibratorSupportsExternalControl(JNIEnv*, jclass) {
     return halCall(&V1_3::IVibrator::supportsExternalControl).withDefault(false);
 }
 
-static void vibratorSetExternalControl(JNIEnv*, jobject, jboolean enabled) {
+static void vibratorSetExternalControl(JNIEnv*, jclass, jboolean enabled) {
     Status status = halCall(&V1_3::IVibrator::setExternalControl, static_cast<uint32_t>(enabled))
         .withDefault(Status::UNKNOWN_ERROR);
     if (status != Status::OK) {
@@ -171,7 +190,8 @@ static void vibratorSetExternalControl(JNIEnv*, jobject, jboolean enabled) {
     }
 }
 
-static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jlong strength) {
+static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong strength,
+                                   jobject vibration) {
     Status status;
     uint32_t lengthMs;
     auto callback = [&status, &lengthMs](Status retStatus, uint32_t retLengthMs) {
@@ -181,7 +201,11 @@ static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jlong strengt
     EffectStrength effectStrength(static_cast<EffectStrength>(strength));
 
     Return<void> ret;
-    if (isValidEffect<V1_0::Effect>(effect)) {
+    if (auto hal = getHal<V1_4::IVibrator>(); hal && isValidEffect<V1_3::Effect>(effect)) {
+        sp<VibratorCallback> effectCallback = new VibratorCallback(env, vibration);
+        ret = hal->call(&V1_4::IVibrator::perform_1_4, static_cast<V1_3::Effect>(effect),
+                effectStrength, effectCallback, callback);
+    } else if (isValidEffect<V1_0::Effect>(effect)) {
         ret = halCall(&V1_0::IVibrator::perform, static_cast<V1_0::Effect>(effect),
                 effectStrength, callback);
     } else if (isValidEffect<Effect_1_1>(effect)) {
@@ -218,6 +242,10 @@ static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jlong strengt
     return -1;
 }
 
+static jlong vibratorGetCapabilities(JNIEnv*, jclass) {
+    return halCall(&V1_4::IVibrator::getCapabilities).withDefault(0);
+}
+
 static const JNINativeMethod method_table[] = {
     { "vibratorExists", "()Z", (void*)vibratorExists },
     { "vibratorInit", "()V", (void*)vibratorInit },
@@ -225,13 +253,18 @@ static const JNINativeMethod method_table[] = {
     { "vibratorOff", "()V", (void*)vibratorOff },
     { "vibratorSupportsAmplitudeControl", "()Z", (void*)vibratorSupportsAmplitudeControl},
     { "vibratorSetAmplitude", "(I)V", (void*)vibratorSetAmplitude},
-    { "vibratorPerformEffect", "(JJ)J", (void*)vibratorPerformEffect},
+    { "vibratorPerformEffect", "(JJLcom/android/server/VibratorService$Vibration;)J",
+        (void*)vibratorPerformEffect},
     { "vibratorSupportsExternalControl", "()Z", (void*)vibratorSupportsExternalControl},
     { "vibratorSetExternalControl", "(Z)V", (void*)vibratorSetExternalControl},
+    { "vibratorGetCapabilities", "()J", (void*)vibratorGetCapabilities},
 };
 
 int register_android_server_VibratorService(JNIEnv *env)
 {
+    sMethodIdOnComplete = GetMethodIDOrDie(env,
+            FindClassOrDie(env, "com/android/server/VibratorService$Vibration"),
+            "onComplete", "()V");
     return jniRegisterNativeMethods(env, "com/android/server/VibratorService",
             method_table, NELEM(method_table));
 }
