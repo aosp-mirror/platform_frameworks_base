@@ -1742,6 +1742,12 @@ public class DeviceIdleController extends SystemService
             return mConstants;
         }
 
+
+        /** Returns the current elapsed realtime in milliseconds. */
+        long getElapsedRealtime() {
+            return SystemClock.elapsedRealtime();
+        }
+
         LocationManager getLocationManager() {
             if (mLocationManager == null) {
                 mLocationManager = mContext.getSystemService(LocationManager.class);
@@ -2023,7 +2029,7 @@ public class DeviceIdleController extends SystemService
 
     private void unregisterDeviceIdleConstraintInternal(IDeviceIdleConstraint constraint) {
         synchronized (this) {
-            // Artifically force the constraint to inactive to unblock anything waiting for it.
+            // Artificially force the constraint to inactive to unblock anything waiting for it.
             onConstraintStateChangedLocked(constraint, /* active= */ false);
 
             // Let the constraint know that we are not listening to it any more.
@@ -2746,9 +2752,18 @@ public class DeviceIdleController extends SystemService
                 mState = STATE_QUICK_DOZE_DELAY;
                 // Make sure any motion sensing or locating is stopped.
                 resetIdleManagementLocked();
-                // Wait a small amount of time in case something (eg: background service from
-                // recently closed app) needs to finish running.
-                scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                if (isUpcomingAlarmClock()) {
+                    // If there's an upcoming AlarmClock alarm, we won't go into idle, so
+                    // setting a wakeup alarm before the upcoming alarm is futile. Set the quick
+                    // doze alarm to after the upcoming AlarmClock alarm.
+                    scheduleAlarmLocked(
+                            mAlarmManager.getNextWakeFromIdleTime() - mInjector.getElapsedRealtime()
+                                    + mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                } else {
+                    // Wait a small amount of time in case something (eg: background service from
+                    // recently closed app) needs to finish running.
+                    scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                }
                 EventLogTags.writeDeviceIdle(mState, "no activity");
             } else if (mState == STATE_ACTIVE) {
                 mState = STATE_INACTIVE;
@@ -2758,7 +2773,16 @@ public class DeviceIdleController extends SystemService
                 if (shouldUseIdleTimeoutFactorLocked()) {
                     delay = (long) (mPreIdleFactor * delay);
                 }
-                scheduleAlarmLocked(delay, false);
+                if (isUpcomingAlarmClock()) {
+                    // If there's an upcoming AlarmClock alarm, we won't go into idle, so
+                    // setting a wakeup alarm before the upcoming alarm is futile. Set the idle
+                    // alarm to after the upcoming AlarmClock alarm.
+                    scheduleAlarmLocked(
+                            mAlarmManager.getNextWakeFromIdleTime() - mInjector.getElapsedRealtime()
+                                    + delay, false);
+                } else {
+                    scheduleAlarmLocked(delay, false);
+                }
                 EventLogTags.writeDeviceIdle(mState, "no activity");
             }
         }
@@ -2906,13 +2930,21 @@ public class DeviceIdleController extends SystemService
         return mState;
     }
 
+    /**
+     * Returns true if there's an upcoming AlarmClock alarm that is soon enough to prevent the
+     * device from going into idle.
+     */
+    private boolean isUpcomingAlarmClock() {
+        return mInjector.getElapsedRealtime() + mConstants.MIN_TIME_TO_ALARM
+                >= mAlarmManager.getNextWakeFromIdleTime();
+    }
+
     @VisibleForTesting
     void stepIdleStateLocked(String reason) {
         if (DEBUG) Slog.d(TAG, "stepIdleStateLocked: mState=" + mState);
         EventLogTags.writeDeviceIdleStep();
 
-        final long now = SystemClock.elapsedRealtime();
-        if ((now+mConstants.MIN_TIME_TO_ALARM) > mAlarmManager.getNextWakeFromIdleTime()) {
+        if (isUpcomingAlarmClock()) {
             // Whoops, there is an upcoming alarm.  We don't actually want to go idle.
             if (mState != STATE_ACTIVE) {
                 mActiveReason = ACTIVE_REASON_ALARM;
