@@ -18,6 +18,7 @@ package com.android.systemui.bubbles;
 
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -110,6 +111,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private ActivityView.StateCallback mStateCallback = new ActivityView.StateCallback() {
         @Override
         public void onActivityViewReady(ActivityView view) {
+            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+                Log.d(TAG, "onActivityViewReady: mActivityViewStatus=" + mActivityViewStatus
+                        + " bubble=" + getBubbleKey());
+            }
             switch (mActivityViewStatus) {
                 case INITIALIZING:
                 case INITIALIZED:
@@ -117,18 +122,32 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                     ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                             0 /* enterResId */, 0 /* exitResId */);
                     // Post to keep the lifecycle normal
-                    post(() -> mActivityView.startActivity(mBubbleIntent, options));
+                    post(() -> {
+                        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+                            Log.d(TAG, "onActivityViewReady: calling startActivity, "
+                                    + "bubble=" + getBubbleKey());
+                        }
+                        mActivityView.startActivity(mBubbleIntent, options);
+                    });
                     mActivityViewStatus = ActivityViewStatus.ACTIVITY_STARTED;
             }
         }
 
         @Override
         public void onActivityViewDestroyed(ActivityView view) {
+            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+                Log.d(TAG, "onActivityViewDestroyed: mActivityViewStatus=" + mActivityViewStatus
+                        + " bubble=" + getBubbleKey());
+            }
             mActivityViewStatus = ActivityViewStatus.RELEASED;
         }
 
         @Override
         public void onTaskCreated(int taskId, ComponentName componentName) {
+            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+                Log.d(TAG, "onTaskCreated: taskId=" + taskId
+                        + " bubble=" + getBubbleKey());
+            }
             // Since Bubble ActivityView applies singleTaskDisplay this is
             // guaranteed to only be called once per ActivityView. The taskId is
             // saved to use for removeTask, preventing appearance in recent tasks.
@@ -143,6 +162,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
          */
         @Override
         public void onTaskRemovalStarted(int taskId) {
+            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+                Log.d(TAG, "onTaskRemovalStarted: taskId=" + taskId
+                        + " mActivityViewStatus=" + mActivityViewStatus
+                        + " bubble=" + getBubbleKey());
+            }
             if (mBubble != null) {
                 // Must post because this is called from a binder thread.
                 post(() -> mBubbleController.removeBubble(mBubble.getKey(),
@@ -179,6 +203,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "onFinishInflate: bubble=" + getBubbleKey());
+        }
 
         Resources res = getResources();
         mPointerView = findViewById(R.id.pointer_view);
@@ -226,6 +253,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         });
     }
 
+    private String getBubbleKey() {
+        return mBubble != null ? mBubble.getKey() : "null";
+    }
+
     void applyThemeAttrs() {
         TypedArray ta = getContext().obtainStyledAttributes(R.styleable.BubbleExpandedView);
         int bgColor = ta.getColor(
@@ -251,6 +282,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (mActivityView != null) {
             mActivityView.setForwardedInsets(Insets.of(0, 0, 0, 0));
         }
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "onDetachedFromWindow: bubble=" + getBubbleKey());
+        }
     }
 
     /**
@@ -262,6 +296,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * and setting {@code false} actually means rendering the contents in transparent.
      */
     void setContentVisibility(boolean visibility) {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "setContentVisibility: visibility=" + visibility
+                    + " bubble=" + getBubbleKey());
+        }
         final float alpha = visibility ? 1f : 0f;
         mPointerView.setAlpha(alpha);
         if (mActivityView != null) {
@@ -289,6 +327,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * Sets the bubble used to populate this view.
      */
     public void setBubble(Bubble bubble, BubbleStackView stackView, String appName) {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "setBubble: bubble=" + (bubble != null ? bubble.getKey() : "null"));
+        }
+
         mStackView = stackView;
         mBubble = bubble;
         mAppName = appName;
@@ -316,6 +358,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * Lets activity view know it should be shown / populated.
      */
     public void populateExpandedView() {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "populateExpandedView: "
+                    + "bubble=" + getBubbleKey());
+        }
+
         if (usingActivityView()) {
             mActivityView.setCallback(mStateCallback);
         } else {
@@ -328,6 +375,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * only update the deep-links in the title, and the height of the view.
      */
     public void update(Bubble bubble) {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "update: bubble=" + (bubble != null ? bubble.getKey() : "null"));
+        }
         if (bubble.getKey().equals(mBubble.getKey())) {
             mBubble = bubble;
             updateSettingsContentDescription();
@@ -339,6 +389,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     private void updateExpandedView() {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "updateExpandedView: bubble="
+                    + getBubbleKey());
+        }
+
         mBubbleIntent = mBubble.getBubbleIntent(mContext);
         if (mBubbleIntent != null) {
             setContentVisibility(false);
@@ -356,6 +411,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     void updateHeight() {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "updateHeight: bubble=" + getBubbleKey());
+        }
         if (usingActivityView()) {
             int max = getMaxExpandedHeight() - mSettingsIconHeight - mPointerHeight
                     - mPointerMargin;
@@ -370,6 +428,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 lp.height = (int) height;
                 mActivityView.setLayoutParams(lp);
                 mNeedsNewHeight = false;
+            }
+            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+                Log.d(TAG, "updateHeight: bubble=" + getBubbleKey() + " height=" + height
+                        + " mNeedsNewHeight=" + mNeedsNewHeight);
             }
         }
     }
@@ -438,6 +500,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * Update appearance of the expanded view being displayed.
      */
     public void updateView() {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "updateView: bubble="
+                    + getBubbleKey());
+        }
         if (usingActivityView()
                 && mActivityView.getVisibility() == VISIBLE
                 && mActivityView.isAttachedToWindow()) {
@@ -460,6 +526,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * Removes and releases an ActivityView if one was previously created for this bubble.
      */
     public void cleanUpExpandedState() {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "cleanUpExpandedState: mActivityViewStatus=" + mActivityViewStatus
+                    + ", bubble=" + getBubbleKey());
+        }
         if (mActivityView == null) {
             return;
         }
@@ -486,6 +556,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * which {@link ActivityView} uses.
      */
     void notifyDisplayEmpty() {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "notifyDisplayEmpty: bubble="
+                    + getBubbleKey()
+                    + " mActivityViewStatus=" + mActivityViewStatus);
+        }
         if (mActivityViewStatus == ActivityViewStatus.ACTIVITY_STARTED) {
             mActivityViewStatus = ActivityViewStatus.INITIALIZED;
         }
