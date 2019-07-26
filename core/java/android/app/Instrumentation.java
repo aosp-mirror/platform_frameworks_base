@@ -50,6 +50,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManagerGlobal;
@@ -528,6 +529,12 @@ public class Instrumentation {
             } while (mWaitingActivities.contains(aw));
 
             waitForEnterAnimationComplete(aw.activity);
+
+            // Apply an empty transaction to ensure SF has a chance to update before
+            // the Activity is ready (b/138263890).
+            try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+                t.apply(true);
+            }
             return aw.activity;
         }
     }
