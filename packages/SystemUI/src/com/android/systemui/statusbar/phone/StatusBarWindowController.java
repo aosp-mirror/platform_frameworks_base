@@ -51,12 +51,13 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
 import com.google.android.collect.Lists;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-
 import java.util.ArrayList;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -352,7 +353,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     }
 
     private void applyForceStatusBarVisibleFlag(State state) {
-        if (state.forceStatusBarVisible) {
+        if (state.forceStatusBarVisible || state.forcePluginOpen) {
             mLpChanged.privateFlags |= WindowManager
                     .LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
         } else {
