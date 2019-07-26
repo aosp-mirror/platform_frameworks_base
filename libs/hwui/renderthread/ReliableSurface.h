@@ -43,6 +43,12 @@ public:
 
     uint64_t getNextFrameNumber() const { return mSurface->getNextFrameNumber(); }
 
+    int getAndClearError() {
+        int ret = mBufferQueueState;
+        mBufferQueueState = OK;
+        return ret;
+    }
+
 private:
     const sp<Surface> mSurface;
 
@@ -55,10 +61,10 @@ private:
     ANativeWindowBuffer* mReservedBuffer = nullptr;
     base::unique_fd mReservedFenceFd;
     bool mHasDequeuedBuffer = false;
-    bool mInErrorState = false;
+    int mBufferQueueState = OK;
 
     bool isFallbackBuffer(const ANativeWindowBuffer* windowBuffer) const;
-    ANativeWindowBuffer* acquireFallbackBuffer();
+    ANativeWindowBuffer* acquireFallbackBuffer(int error);
     void clearReservedBuffer();
 
     void perform(int operation, va_list args);
