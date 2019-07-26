@@ -20,6 +20,7 @@ import static android.view.MotionEvent.INVALID_POINTER_ID;
 
 import static com.android.server.accessibility.TouchState.ALL_POINTER_ID_BITS;
 
+import android.accessibilityservice.AccessibilityGestureInfo;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
@@ -356,14 +357,14 @@ class TouchExplorer extends BaseEventStreamTransformation
     }
 
     @Override
-    public boolean onGestureCompleted(int gestureId) {
+    public boolean onGestureCompleted(AccessibilityGestureInfo gestureInfo) {
         if (!mState.isGestureDetecting()) {
             return false;
         }
 
         endGestureDetection(true);
 
-        mAms.onGesture(gestureId);
+        mAms.onGesture(gestureInfo);
 
         return true;
     }

@@ -32,6 +32,14 @@ package android {
 
 }
 
+package android.accessibilityservice {
+
+  public final class AccessibilityGestureInfo implements android.os.Parcelable {
+    ctor public AccessibilityGestureInfo(int, int);
+  }
+
+}
+
 package android.animation {
 
   public class ValueAnimator extends android.animation.Animator {
