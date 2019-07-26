@@ -581,12 +581,16 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     public static ParcelFileDescriptor fromData(byte[] data, String name) throws IOException {
         if (data == null) return null;
         MemoryFile file = new MemoryFile(name, data.length);
-        if (data.length > 0) {
-            file.writeBytes(data, 0, 0, data.length);
+        try {
+            if (data.length > 0) {
+                file.writeBytes(data, 0, 0, data.length);
+            }
+            file.deactivate();
+            FileDescriptor fd = file.getFileDescriptor();
+            return fd != null ? ParcelFileDescriptor.dup(fd) : null;
+        } finally {
+            file.close();
         }
-        file.deactivate();
-        FileDescriptor fd = file.getFileDescriptor();
-        return fd != null ? ParcelFileDescriptor.dup(fd) : null;
     }
 
     /**
