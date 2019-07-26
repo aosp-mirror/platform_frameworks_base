@@ -106,20 +106,29 @@ public class DozeTriggers implements DozeMachine.Part {
         mDockManager = dockManager;
     }
 
-    private void onNotification() {
+    private void onNotification(Runnable onPulseSuppressedListener) {
         if (DozeMachine.DEBUG) {
             Log.d(TAG, "requestNotificationPulse");
         }
         if (!sWakeDisplaySensorState) {
             Log.d(TAG, "Wake display false. Pulse denied.");
+            runIfNotNull(onPulseSuppressedListener);
             return;
         }
         mNotificationPulseTime = SystemClock.elapsedRealtime();
         if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
+            runIfNotNull(onPulseSuppressedListener);
             return;
         }
-        requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */);
+        requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */,
+                onPulseSuppressedListener);
         DozeLog.traceNotificationPulse(mContext);
+    }
+
+    private static void runIfNotNull(Runnable runnable) {
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 
     private void proximityCheckThenCall(IntConsumer callback,
@@ -158,10 +167,11 @@ public class DozeTriggers implements DozeMachine.Part {
         if (isWakeDisplay) {
             onWakeScreen(wakeEvent, mMachine.isExecutingTransition() ? null : mMachine.getState());
         } else if (isLongPress) {
-            requestPulse(pulseReason, sensorPerformedProxCheck);
+            requestPulse(pulseReason, sensorPerformedProxCheck, null /* onPulseSupressedListener */);
         } else if (isWakeLockScreen) {
             if (wakeEvent) {
-                requestPulse(pulseReason, sensorPerformedProxCheck);
+                requestPulse(pulseReason, sensorPerformedProxCheck,
+                        null /* onPulseSupressedListener */);
             }
         } else {
             proximityCheckThenCall((result) -> {
@@ -340,7 +350,8 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    private void requestPulse(final int reason, boolean performedProxCheck) {
+    private void requestPulse(final int reason, boolean performedProxCheck,
+            Runnable onPulseSuppressedListener) {
         Assert.isMainThread();
         mDozeHost.extendPulse(reason);
 
@@ -357,6 +368,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 DozeLog.tracePulseDropped(mContext, mPulsePending, mMachine.getState(),
                         mDozeHost.isPulsingBlocked());
             }
+            runIfNotNull(onPulseSuppressedListener);
             return;
         }
 
@@ -365,6 +377,7 @@ public class DozeTriggers implements DozeMachine.Part {
             if (result == ProximityCheck.RESULT_NEAR) {
                 // in pocket, abort pulse
                 mPulsePending = false;
+                runIfNotNull(onPulseSuppressedListener);
             } else {
                 // not in pocket, continue pulsing
                 continuePulseRequest(reason);
@@ -482,7 +495,8 @@ public class DozeTriggers implements DozeMachine.Part {
         public void onReceive(Context context, Intent intent) {
             if (PULSE_ACTION.equals(intent.getAction())) {
                 if (DozeMachine.DEBUG) Log.d(TAG, "Received pulse intent");
-                requestPulse(DozeLog.PULSE_REASON_INTENT, false /* performedProxCheck */);
+                requestPulse(DozeLog.PULSE_REASON_INTENT, false, /* performedProxCheck */
+                        null /* onPulseSupressedListener */);
             }
             if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
                 mMachine.requestState(DozeMachine.State.FINISH);
@@ -532,8 +546,8 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private DozeHost.Callback mHostCallback = new DozeHost.Callback() {
         @Override
-        public void onNotificationAlerted() {
-            onNotification();
+        public void onNotificationAlerted(Runnable onPulseSuppressedListener) {
+            onNotification(onPulseSuppressedListener);
         }
 
         @Override
