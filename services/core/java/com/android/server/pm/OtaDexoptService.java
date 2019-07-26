@@ -120,7 +120,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
         final List<PackageParser.Package> important;
         final List<PackageParser.Package> others;
-        synchronized (mPackageManagerService.mPackages) {
+        synchronized (mPackageManagerService.mLock) {
             // Important: the packages we need to run with ab-ota compiler-reason.
             important = PackageManagerServiceUtils.getPackagesForDexopt(
                     mPackageManagerService.mPackages.values(), mPackageManagerService,
