@@ -40,6 +40,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -139,6 +140,12 @@ public class NotificationPanelView extends PanelView implements
     // changed.
     private static final int CAP_HEIGHT = 1456;
     private static final int FONT_HEIGHT = 2163;
+
+    /**
+     * Maximum time before which we will expand the panel even for slow motions when getting a
+     * touch passed over from launcher.
+     */
+    private static final int MAX_TIME_TO_OPEN_WHEN_FLINGING_FROM_LAUNCHER = 300;
 
     static final String COUNTER_PANEL_OPEN = "panel_open";
     static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
@@ -375,6 +382,8 @@ public class NotificationPanelView extends PanelView implements
     private boolean mHeadsUpPinnedMode;
     private float mKeyguardHeadsUpShowingAmount = 0.0f;
     private boolean mShowingKeyguardHeadsUp;
+    private boolean mAllowExpandForSmallExpansion;
+    private Runnable mExpandAfterLayoutRunnable;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -666,6 +675,10 @@ public class NotificationPanelView extends PanelView implements
         }
         updateMaxHeadsUpTranslation();
         updateGestureExclusionRect();
+        if (mExpandAfterLayoutRunnable != null) {
+            mExpandAfterLayoutRunnable.run();
+            mExpandAfterLayoutRunnable = null;
+        }
     }
 
     private void updateGestureExclusionRect() {
@@ -1065,6 +1078,8 @@ public class NotificationPanelView extends PanelView implements
             mDownY = event.getY();
             mCollapsedOnDown = isFullyCollapsed();
             mListenForHeadsUp = mCollapsedOnDown && mHeadsUpManager.hasPinnedHeadsUp();
+            mAllowExpandForSmallExpansion = mExpectingSynthesizedDown;
+            mTouchSlopExceededBeforeDown = mExpectingSynthesizedDown;
             if (mExpectingSynthesizedDown) {
                 mLastEventSynthesizedDown = true;
             } else {
@@ -1120,6 +1135,20 @@ public class NotificationPanelView extends PanelView implements
     private float getQsExpansionFraction() {
         return Math.min(1f, (mQsExpansionHeight - mQsMinExpansionHeight)
                 / (mQsMaxExpansionHeight - mQsMinExpansionHeight));
+    }
+
+    @Override
+    protected boolean shouldExpandWhenNotFlinging() {
+        if (super.shouldExpandWhenNotFlinging()) {
+            return true;
+        }
+        if (mAllowExpandForSmallExpansion) {
+            // When we get a touch that came over from launcher, the velocity isn't always correct
+            // Let's err on expanding if the gesture has been reasonably slow
+            long timeSinceDown = SystemClock.uptimeMillis() - mDownTime;
+            return timeSinceDown <= MAX_TIME_TO_OPEN_WHEN_FLINGING_FROM_LAUNCHER;
+        }
+        return false;
     }
 
     @Override
@@ -1294,10 +1323,19 @@ public class NotificationPanelView extends PanelView implements
      *
      * @param velocity unit is in px / millis
      */
-    public void stopWaitingForOpenPanelGesture(float velocity) {
+    public void stopWaitingForOpenPanelGesture(final float velocity) {
         if (mExpectingSynthesizedDown) {
             mExpectingSynthesizedDown = false;
-            fling(velocity > 1f ? 1000f * velocity : 0, true /* animate */);
+            maybeVibrateOnOpening();
+            Runnable runnable = () -> fling(velocity > 1f ? 1000f * velocity : 0,
+                    true /* expand */);
+            if (mStatusBar.getStatusBarWindow().getHeight()
+                    != mStatusBar.getStatusBarHeight()) {
+                // The panel is already expanded to its full size, let's expand directly
+                runnable.run();
+            } else {
+                mExpandAfterLayoutRunnable = runnable;
+            }
             onTrackingStopped(false);
         }
     }

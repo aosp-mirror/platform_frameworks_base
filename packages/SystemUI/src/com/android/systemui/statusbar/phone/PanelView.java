@@ -62,7 +62,8 @@ public abstract class PanelView extends FrameLayout {
     private static final int INITIAL_OPENING_PEEK_DURATION = 200;
     private static final int PEEK_ANIMATION_DURATION = 360;
     private static final int NO_FIXED_DURATION = -1;
-    private long mDownTime;
+    protected long mDownTime;
+    protected boolean mTouchSlopExceededBeforeDown;
     private float mMinExpandHeight;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mPanelUpdateWhenAnimatorEnds;
@@ -323,7 +324,7 @@ public abstract class PanelView extends FrameLayout {
                 if (!mGestureWaitForTouchSlop || (mHeightAnimator != null && !mHintAnimationRunning)
                         || mPeekAnimator != null) {
                     mTouchSlopExceeded = (mHeightAnimator != null && !mHintAnimationRunning)
-                            || mPeekAnimator != null;
+                            || mPeekAnimator != null || mTouchSlopExceededBeforeDown;
                     cancelHeightAnimator();
                     cancelPeek();
                     onTrackingStarted();
@@ -409,9 +410,7 @@ public abstract class PanelView extends FrameLayout {
         runPeekAnimation(INITIAL_OPENING_PEEK_DURATION, getOpeningHeight(),
                 false /* collapseWhenFinished */);
         notifyBarPanelExpansionChanged();
-        if (mVibrateOnOpening) {
-            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
-        }
+        maybeVibrateOnOpening();
 
         //TODO: keyguard opens QS a different way; log that too?
 
@@ -424,6 +423,12 @@ public abstract class PanelView extends FrameLayout {
                 (int) (event.getX() / width * 100),
                 (int) (event.getY() / height * 100),
                 rot);
+    }
+
+    protected void maybeVibrateOnOpening() {
+        if (mVibrateOnOpening) {
+            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+        }
     }
 
     protected abstract float getOpeningHeight();
@@ -577,7 +582,7 @@ public abstract class PanelView extends FrameLayout {
                 mInitialTouchY = y;
                 mInitialTouchX = x;
                 mTouchStartedInEmptyArea = !isInContentBounds(x, y);
-                mTouchSlopExceeded = false;
+                mTouchSlopExceeded = mTouchSlopExceededBeforeDown;
                 mJustPeeked = false;
                 mMotionAborted = false;
                 mPanelClosedOnDown = isFullyCollapsed();
@@ -680,10 +685,14 @@ public abstract class PanelView extends FrameLayout {
             return true;
         }
         if (Math.abs(vectorVel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-            return getExpandedFraction() > 0.5f;
+            return shouldExpandWhenNotFlinging();
         } else {
             return vel > 0;
         }
+    }
+
+    protected boolean shouldExpandWhenNotFlinging() {
+        return getExpandedFraction() > 0.5f;
     }
 
     /**
