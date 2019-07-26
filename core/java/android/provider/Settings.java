@@ -8687,10 +8687,16 @@ public final class Settings {
          * Whether the notification bubbles are globally enabled
          * The value is boolean (1 or 0).
          * @hide
+         * @deprecated use {@link Global#NOTIFICATION_BUBBLES} instead.
          */
         @TestApi
+        @Deprecated
         public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
 
+        /**
+         * @deprecated use {@link Global#NOTIFICATION_BUBBLES_VALIDATOR} instead.
+         */
+        @Deprecated
         private static final Validator NOTIFICATION_BUBBLES_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
