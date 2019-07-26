@@ -163,6 +163,7 @@ class Instruction {
     kNew,
     kReturn,
     kReturnObject,
+    kSetStaticField
   };
 
   ////////////////////////
@@ -236,6 +237,11 @@ class Instruction {
   static inline Instruction GetStaticField(size_t field_id, Value dest) {
     return Instruction{Op::kGetStaticField, field_id, dest};
   }
+
+  static inline Instruction SetStaticField(size_t field_id, Value value) {
+    return Instruction{Op::kSetStaticField, field_id, /*result_is_object=*/false, /*dest=*/{}, value};
+  }
+
 
   ///////////////
   // Accessors //

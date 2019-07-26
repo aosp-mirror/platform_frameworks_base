@@ -297,6 +297,22 @@ void GenerateSimpleTestCases(const string& outdir) {
     method.Encode();
   }(readStaticField);
 
+  // Set a static field
+  // void setStaticField() { TestClass.staticInteger = 7; }
+  MethodBuilder setStaticField{
+      cbuilder.CreateMethod("setStaticField", Prototype{TypeDescriptor::Void()})};
+  [&](MethodBuilder& method) {
+    const ir::FieldDecl* field =
+        dex_file.GetOrAddField(TypeDescriptor::FromClassname("android.startop.test.TestClass"),
+                               "staticInteger",
+                               TypeDescriptor::Int());
+    Value number{method.MakeRegister()};
+    method.BuildConst4(number, 7);
+    method.AddInstruction(Instruction::SetStaticField(field->orig_index, number));
+    method.BuildReturn();
+    method.Encode();
+  }(setStaticField);
+
   slicer::MemView image{dex_file.CreateImage()};
   std::ofstream out_file(outdir + "/simple.dex");
   out_file.write(image.ptr<const char>(), image.size());

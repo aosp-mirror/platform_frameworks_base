@@ -105,6 +105,9 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
     case Instruction::Op::kGetStaticField:
       out << "kGetStaticField";
       return out;
+    case Instruction::Op::kSetStaticField:
+      out << "kSetStaticField";
+      return out;
   }
 }
 
@@ -380,6 +383,7 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
     case Instruction::Op::kCheckCast:
       return EncodeCast(instruction);
     case Instruction::Op::kGetStaticField:
+    case Instruction::Op::kSetStaticField:
       return EncodeStaticFieldOp(instruction);
   }
 }
@@ -536,13 +540,32 @@ void MethodBuilder::EncodeCast(const Instruction& instruction) {
 }
 
 void MethodBuilder::EncodeStaticFieldOp(const Instruction& instruction) {
-  CHECK_EQ(Instruction::Op::kGetStaticField, instruction.opcode());
-  CHECK(instruction.dest().has_value());
-  CHECK(instruction.dest()->is_variable());
-  CHECK_EQ(0, instruction.args().size());
+  switch (instruction.opcode()) {
+    case Instruction::Op::kGetStaticField: {
+      CHECK(instruction.dest().has_value());
+      CHECK(instruction.dest()->is_variable());
+      CHECK_EQ(0, instruction.args().size());
 
-  Encode21c(
-      ::art::Instruction::SGET, RegisterValue(*instruction.dest()), instruction.index_argument());
+      Encode21c(::art::Instruction::SGET,
+                RegisterValue(*instruction.dest()),
+                instruction.index_argument());
+      break;
+    }
+    case Instruction::Op::kSetStaticField: {
+      CHECK(!instruction.dest().has_value());
+      const auto& args = instruction.args();
+      CHECK_EQ(1, args.size());
+      CHECK(args[0].is_variable());
+
+      Encode21c(::art::Instruction::SPUT,
+                RegisterValue(args[0]),
+                instruction.index_argument());
+      break;
+    }
+    default: {
+      LOG(FATAL) << "Unsupported static field operation";
+    }
+  }
 }
 
 size_t MethodBuilder::RegisterValue(const Value& value) const {

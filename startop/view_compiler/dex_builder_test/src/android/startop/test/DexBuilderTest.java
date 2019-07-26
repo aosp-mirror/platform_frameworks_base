@@ -180,4 +180,14 @@ public final class DexBuilderTest {
     TestClass.staticInteger = 5;
     Assert.assertEquals(5, method.invoke(null));
   }
+
+  @Test
+  public void setStaticField() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("setStaticField");
+    TestClass.staticInteger = 5;
+    method.invoke(null);
+    Assert.assertEquals(7, TestClass.staticInteger);
+  }
 }
