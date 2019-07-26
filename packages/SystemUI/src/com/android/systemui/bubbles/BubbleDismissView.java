@@ -81,7 +81,7 @@ public class BubbleDismissView extends FrameLayout {
             // safely assume it was animating out rather than in.
             if (alpha < 0.5f) {
                 // If the alpha spring was animating the view out, set it to GONE when it's done.
-                setVisibility(GONE);
+                setVisibility(INVISIBLE);
             }
         });
     }
