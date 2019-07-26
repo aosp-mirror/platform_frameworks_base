@@ -445,14 +445,13 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return bypass ? MODE_WAKE_AND_UNLOCK : MODE_ONLY_WAKE;
-            } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
+            } else if (!unlockingAllowed) {
+                return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
+            } else if (mDozeScrimController.isPulsing()) {
                 // Let's not wake-up to lock screen when not bypassing, otherwise the notification
                 // would move as the user tried to tap it.
                 return bypass ? MODE_WAKE_AND_UNLOCK_PULSING : MODE_NONE;
             } else {
-                if (!(mDozeScrimController.isPulsing() && !unlockingAllowed)) {
-                    Log.wtf(TAG, "Face somehow arrived when the device was not interactive");
-                }
                 if (bypass) {
                     // Wake-up fading out nicely
                     return MODE_WAKE_AND_UNLOCK_PULSING;
@@ -530,7 +529,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mStatusBar.notifyBiometricAuthModeChanged();
     }
 
-    private final WakefulnessLifecycle.Observer mWakefulnessObserver =
+    @VisibleForTesting
+    final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
         @Override
         public void onFinishedWakingUp() {
