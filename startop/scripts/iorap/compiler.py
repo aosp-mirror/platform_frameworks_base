@@ -305,7 +305,7 @@ def main(argv):
     transform_perfetto_trace_to_systrace(options.perfetto_trace_file,
                                          trace_file.name)
     return run(sql_db_path,
-               options.trace_file,
+               trace_file.name,
                options.trace_duration,
                options.output_file,
                inode_table,
