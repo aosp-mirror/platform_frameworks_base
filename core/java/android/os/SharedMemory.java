@@ -259,9 +259,6 @@ public final class SharedMemory implements Parcelable, Closeable {
             mCleaner.clean();
             mCleaner = null;
         }
-
-        // Cleaner.clean doesn't clear the value of the file descriptor.
-        mFileDescriptor.setInt$(-1);
     }
 
     @Override
