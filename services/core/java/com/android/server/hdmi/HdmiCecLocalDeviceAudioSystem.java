@@ -1238,8 +1238,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         // Wake up if the current device if ready to route.
         mService.wakeUp();
-        if (getLocalActivePort() == portId) {
-            HdmiLogger.debug("Not switching to the same port " + portId);
+        if ((getLocalActivePort() == portId) && (portId != Constants.CEC_SWITCH_ARC)) {
+            HdmiLogger.debug("Not switching to the same port " + portId + " except for arc");
             return;
         }
         // Switch to HOME if the current active port is not HOME yet
