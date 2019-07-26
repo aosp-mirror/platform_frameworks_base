@@ -176,6 +176,7 @@ public final class NotificationEntry {
     private boolean mSensitive = true;
     private Runnable mOnSensitiveChangedListener;
     private boolean mAutoHeadsUp;
+    private boolean mPulseSupressed;
 
     public NotificationEntry(StatusBarNotification n) {
         this(n, null);
@@ -898,6 +899,14 @@ public final class NotificationEntry {
 
     public void setOnSensitiveChangedListener(Runnable listener) {
         mOnSensitiveChangedListener = listener;
+    }
+
+    public boolean isPulseSuppressed() {
+        return mPulseSupressed;
+    }
+
+    public void setPulseSuppressed(boolean suppressed) {
+        mPulseSupressed = suppressed;
     }
 
     /** Information about a suggestion that is being edited. */
