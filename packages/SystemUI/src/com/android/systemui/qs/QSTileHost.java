@@ -109,7 +109,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         defaultFactory.setHost(this);
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
-        mDumpController.addListener(this);
+        mDumpController.registerDumpable(TAG, this);
 
         mainHandler.post(() -> {
             // This is technically a hack to avoid circular dependency of
@@ -131,7 +131,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mTunerService.removeTunable(this);
         mServices.destroy();
         mPluginManager.removePluginListener(this);
-        mDumpController.removeListener(this);
+        mDumpController.unregisterDumpable(this);
     }
 
     @Override

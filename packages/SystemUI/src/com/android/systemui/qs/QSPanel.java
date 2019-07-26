@@ -187,7 +187,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.addCallback(this);
         }
-        if (mDumpController != null) mDumpController.addListener(this);
+        if (mDumpController != null) mDumpController.registerDumpable(getDumpableTag(), this);
     }
 
     @Override
@@ -202,8 +202,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.removeCallback(this);
         }
-        if (mDumpController != null) mDumpController.removeListener(this);
+        if (mDumpController != null) mDumpController.unregisterDumpable(this);
         super.onDetachedFromWindow();
+    }
+
+    protected String getDumpableTag() {
+        return TAG;
     }
 
     @Override

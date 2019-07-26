@@ -127,7 +127,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
                                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE, null));
                     }
                 });
-        Dependency.get(DumpController.class).addListener(this);
+        Dependency.get(DumpController.class).registerDumpable(TAG, this);
     }
 
     @Override // AssistHandleCallbacks
