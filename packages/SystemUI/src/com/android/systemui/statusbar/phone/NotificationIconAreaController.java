@@ -78,6 +78,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private int mAodIconTint;
     private boolean mFullyHidden;
     private boolean mAodIconsVisible;
+    private boolean mIsPulsing;
 
     public NotificationIconAreaController(Context context, StatusBar statusBar,
             StatusBarStateController statusBarStateController,
@@ -265,7 +266,9 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (!showAmbient && entry.shouldSuppressStatusBar()) {
             return false;
         }
-        if (hidePulsing && entry.showingPulsing()) {
+        if (hidePulsing && entry.showingPulsing()
+                && (!mWakeUpCoordinator.getNotificationsFullyHidden()
+                        || !entry.isPulseSuppressed())) {
             return false;
         }
         return true;
