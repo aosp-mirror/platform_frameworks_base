@@ -15702,8 +15702,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 } else {
                     try {
+                        // Settings will be written during the call to updateSettingsLI().
                         executeDeletePackageLIF(reconciledPkg.deletePackageAction, packageName,
-                                true, request.mAllUsers, true, pkg);
+                                true, request.mAllUsers, false, pkg);
                     } catch (SystemDeleteException e) {
                         if (Build.IS_ENG) {
                             throw new RuntimeException("Unexpected failure", e);
