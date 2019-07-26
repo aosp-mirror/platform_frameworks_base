@@ -77,8 +77,10 @@ public interface DozeHost {
     interface Callback {
         /**
          * Called when a high priority notification is added.
+         * @param onPulseSuppressedListener A listener that is invoked if the pulse is being
+         *                                  supressed.
          */
-        default void onNotificationAlerted() {}
+        default void onNotificationAlerted(Runnable onPulseSuppressedListener) {}
 
         /**
          * Called when battery state or power save mode changes.
