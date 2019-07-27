@@ -23,6 +23,7 @@ import java.util.List;
 public class Stats {
     private long mMedian, mMin, mMax, mPercentile90, mPercentile95;
     private double mMean, mStandardDeviation;
+    private final int mSize;
 
     /* Calculate stats in constructor. */
     public Stats(List<Long> values) {
@@ -35,6 +36,7 @@ public class Stats {
 
         Collections.sort(values);
 
+        mSize = size;
         mMin = values.get(0);
         mMax = values.get(values.size() - 1);
 
@@ -54,6 +56,10 @@ public class Stats {
             mStandardDeviation += tmp * tmp;
         }
         mStandardDeviation = Math.sqrt(mStandardDeviation / (double) (size - 1));
+    }
+
+    public int getSize() {
+        return mSize;
     }
 
     public double getMean() {
