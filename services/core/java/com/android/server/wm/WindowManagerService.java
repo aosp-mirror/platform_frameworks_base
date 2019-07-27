@@ -3290,10 +3290,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Don't enable the screen until all existing windows have been drawn.
-            if (!mForceDisplayEnabled
-                    // TODO(multidisplay): Expand to all displays?
-                    && getDefaultDisplayContentLocked().checkWaitingForWindows()) {
-                return;
+            if (!mForceDisplayEnabled) {
+                for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
+                    if (mRoot.getChildAt(i).shouldWaitForSystemDecorWindowsOnBoot()) {
+                        return;
+                    }
+                }
             }
 
             if (!mBootAnimationStopped) {

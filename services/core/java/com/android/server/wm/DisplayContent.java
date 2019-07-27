@@ -59,11 +59,10 @@ import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -169,6 +168,7 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -438,11 +438,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
     /** A collection of windows that provide tap exclude regions inside of them. */
     final ArraySet<WindowState> mTapExcludeProvidingWindows = new ArraySet<>();
-
-    private boolean mHaveBootMsg = false;
-    private boolean mHaveApp = false;
-    private boolean mHaveWallpaper = false;
-    private boolean mHaveKeyguard = true;
 
     private final LinkedList<AppWindowToken> mTmpUpdateAllDrawn = new LinkedList();
 
@@ -3350,34 +3345,38 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }, true /* traverseTopToBottom */);
     }
 
-    boolean checkWaitingForWindows() {
+    /** @return {@code true} if there is window to wait before enabling the screen. */
+    boolean shouldWaitForSystemDecorWindowsOnBoot() {
+        if (!isDefaultDisplay && !supportsSystemDecorations()) {
+            // Nothing to wait because the secondary display doesn't support system decorations,
+            // there is no wallpaper, keyguard (status bar) or application (home) window to show
+            // during booting.
+            return false;
+        }
 
-        mHaveBootMsg = false;
-        mHaveApp = false;
-        mHaveWallpaper = false;
-        mHaveKeyguard = true;
+        final SparseBooleanArray drawnWindowTypes = new SparseBooleanArray();
+        // Presuppose keyguard is drawn because if its window isn't attached, we don't know if it
+        // wants to be shown or hidden, then it should not delay enabling the screen.
+        drawnWindowTypes.put(TYPE_STATUS_BAR, true);
 
-        final WindowState visibleWindow = getWindow(w -> {
-            if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
+        final WindowState visibleNotDrawnWindow = getWindow(w -> {
+            if (w.mViewVisibility == View.VISIBLE && !w.mObscured && !w.isDrawnLw()) {
                 return true;
             }
             if (w.isDrawnLw()) {
-                if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
-                    mHaveBootMsg = true;
-                } else if (w.mAttrs.type == TYPE_APPLICATION
-                        || w.mAttrs.type == TYPE_DRAWN_APPLICATION) {
-                    mHaveApp = true;
-                } else if (w.mAttrs.type == TYPE_WALLPAPER) {
-                    mHaveWallpaper = true;
-                } else if (w.mAttrs.type == TYPE_STATUS_BAR) {
-                    mHaveKeyguard = mWmService.mPolicy.isKeyguardDrawnLw();
+                final int type = w.mAttrs.type;
+                if (type == TYPE_BOOT_PROGRESS || type == TYPE_BASE_APPLICATION
+                        || type == TYPE_WALLPAPER) {
+                    drawnWindowTypes.put(type, true);
+                } else if (type == TYPE_STATUS_BAR) {
+                    drawnWindowTypes.put(TYPE_STATUS_BAR, mWmService.mPolicy.isKeyguardDrawnLw());
                 }
             }
             return false;
         });
 
-        if (visibleWindow != null) {
-            // We have a visible window.
+        if (visibleNotDrawnWindow != null) {
+            // Wait for the visible window to be drawn.
             return true;
         }
 
@@ -3389,22 +3388,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         com.android.internal.R.bool.config_checkWallpaperAtBoot)
                 && !mWmService.mOnlyCore;
 
+        final boolean haveBootMsg = drawnWindowTypes.get(TYPE_BOOT_PROGRESS);
+        final boolean haveApp = drawnWindowTypes.get(TYPE_BASE_APPLICATION);
+        final boolean haveWallpaper = drawnWindowTypes.get(TYPE_WALLPAPER);
+        final boolean haveKeyguard = drawnWindowTypes.get(TYPE_STATUS_BAR);
+
         ProtoLog.i(WM_DEBUG_SCREEN_ON,
-                        "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b "
-                                + "wallEnabled=%b haveKeyguard=%b",
-                        mWmService.mSystemBooted, mWmService.mShowingBootMessages, mHaveBootMsg,
-                        mHaveApp, mHaveWallpaper, wallpaperEnabled, mHaveKeyguard);
+                "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b "
+                        + "wallEnabled=%b haveKeyguard=%b",
+                mWmService.mSystemBooted, mWmService.mShowingBootMessages, haveBootMsg,
+                haveApp, haveWallpaper, wallpaperEnabled, haveKeyguard);
 
         // If we are turning on the screen to show the boot message, don't do it until the boot
         // message is actually displayed.
-        if (!mWmService.mSystemBooted && !mHaveBootMsg) {
+        if (!mWmService.mSystemBooted && !haveBootMsg) {
             return true;
         }
 
         // If we are turning on the screen after the boot is completed normally, don't do so until
         // we have the application and wallpaper.
         if (mWmService.mSystemBooted
-                && ((!mHaveApp && !mHaveKeyguard) || (wallpaperEnabled && !mHaveWallpaper))) {
+                && ((!haveApp && !haveKeyguard) || (wallpaperEnabled && !haveWallpaper))) {
             return true;
         }
 
