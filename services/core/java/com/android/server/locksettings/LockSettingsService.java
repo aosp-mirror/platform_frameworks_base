@@ -446,7 +446,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         public boolean hasEnrolledBiometrics(int userId) {
             BiometricManager bm = mContext.getSystemService(BiometricManager.class);
-            return bm.canAuthenticate(userId) == BiometricManager.BIOMETRIC_SUCCESS;
+            return bm.hasEnrolledBiometrics(userId);
         }
 
         public int binderGetCallingUid() {
