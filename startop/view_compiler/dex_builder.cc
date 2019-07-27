@@ -102,6 +102,12 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
     case Instruction::Op::kCheckCast:
       out << "kCheckCast";
       return out;
+    case Instruction::Op::kGetStaticField:
+      out << "kGetStaticField";
+      return out;
+    case Instruction::Op::kSetStaticField:
+      out << "kSetStaticField";
+      return out;
   }
 }
 
@@ -227,6 +233,22 @@ ir::Type* DexBuilder::GetOrAddType(const std::string& descriptor) {
   type->orig_index = dex_file_->types_indexes.AllocateIndex();
   dex_file_->types_map[type->orig_index] = type;
   return type;
+}
+
+ir::FieldDecl* DexBuilder::GetOrAddField(TypeDescriptor parent, const std::string& name,
+                                         TypeDescriptor type) {
+  const auto key = std::make_tuple(parent, name);
+  if (field_decls_by_key_.find(key) != field_decls_by_key_.end()) {
+    return field_decls_by_key_[key];
+  }
+
+  ir::FieldDecl* field = Alloc<ir::FieldDecl>();
+  field->parent = GetOrAddType(parent);
+  field->name = GetOrAddString(name);
+  field->type = GetOrAddType(type);
+  dex_file_->fields_map[field->orig_index] = field;
+  field_decls_by_key_[key] = field;
+  return field;
 }
 
 ir::Proto* Prototype::Encode(DexBuilder* dex) const {
@@ -360,6 +382,9 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
       return EncodeNew(instruction);
     case Instruction::Op::kCheckCast:
       return EncodeCast(instruction);
+    case Instruction::Op::kGetStaticField:
+    case Instruction::Op::kSetStaticField:
+      return EncodeStaticFieldOp(instruction);
   }
 }
 
@@ -428,7 +453,7 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruct
     // first move all the arguments into contiguous temporary registers.
     std::array<Value, kMaxArgs> scratch = GetScratchRegisters<kMaxArgs>();
 
-    const auto& prototype = dex_->GetPrototypeByMethodId(instruction.method_id());
+    const auto& prototype = dex_->GetPrototypeByMethodId(instruction.index_argument());
     CHECK(prototype.has_value());
 
     for (size_t i = 0; i < instruction.args().size(); ++i) {
@@ -452,12 +477,12 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruct
 
     Encode3rc(InvokeToInvokeRange(opcode),
               instruction.args().size(),
-              instruction.method_id(),
+              instruction.index_argument(),
               RegisterValue(scratch[0]));
   } else {
     Encode35c(opcode,
               instruction.args().size(),
-              instruction.method_id(),
+              instruction.index_argument(),
               arguments[0],
               arguments[1],
               arguments[2],
@@ -512,6 +537,35 @@ void MethodBuilder::EncodeCast(const Instruction& instruction) {
   CHECK_LT(RegisterValue(*instruction.dest()), 256);
   CHECK(type.is_type());
   Encode21c(::art::Instruction::CHECK_CAST, RegisterValue(*instruction.dest()), type.value());
+}
+
+void MethodBuilder::EncodeStaticFieldOp(const Instruction& instruction) {
+  switch (instruction.opcode()) {
+    case Instruction::Op::kGetStaticField: {
+      CHECK(instruction.dest().has_value());
+      CHECK(instruction.dest()->is_variable());
+      CHECK_EQ(0, instruction.args().size());
+
+      Encode21c(::art::Instruction::SGET,
+                RegisterValue(*instruction.dest()),
+                instruction.index_argument());
+      break;
+    }
+    case Instruction::Op::kSetStaticField: {
+      CHECK(!instruction.dest().has_value());
+      const auto& args = instruction.args();
+      CHECK_EQ(1, args.size());
+      CHECK(args[0].is_variable());
+
+      Encode21c(::art::Instruction::SPUT,
+                RegisterValue(args[0]),
+                instruction.index_argument());
+      break;
+    }
+    default: {
+      LOG(FATAL) << "Unsupported static field operation";
+    }
+  }
 }
 
 size_t MethodBuilder::RegisterValue(const Value& value) const {
