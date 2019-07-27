@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.preload.actions;
+package android.accessibilityservice;
 
-import com.android.preload.DumpTableModel;
-
-import java.awt.event.ActionEvent;
-
-import javax.swing.AbstractAction;
-
-public class ClearTableAction extends AbstractAction {
-    private final DumpTableModel dataTableModel;
-
-    public ClearTableAction(DumpTableModel dataTableModel) {
-        super("Clear");
-        this.dataTableModel = dataTableModel;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        dataTableModel.clear();
-    }
-}
+parcelable AccessibilityGestureInfo;

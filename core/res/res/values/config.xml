@@ -1700,6 +1700,12 @@
         <!-- Add packages here -->
     </string-array>
 
+    <string-array name="config_forceQueryablePackages" translatable="false">
+        <item>com.android.settings</item>
+        <!-- Add packages here -->
+    </string-array>
+
+
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not
          specified -->
     <string name="default_wallpaper_component" translatable="false">@null</string>

@@ -53,6 +53,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.longThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -129,9 +130,12 @@ public class DeviceIdleControllerTest {
         ConnectivityService connectivityService;
         LocationManager locationManager;
         ConstraintController constraintController;
+        // Freeze time for testing.
+        long nowElapsed;
 
         InjectorForTest(Context ctx) {
             super(ctx);
+            nowElapsed = SystemClock.elapsedRealtime();
         }
 
         @Override
@@ -153,6 +157,11 @@ public class DeviceIdleControllerTest {
         @Override
         ConnectivityService getConnectivityService() {
             return connectivityService;
+        }
+
+        @Override
+        long getElapsedRealtime() {
+            return nowElapsed;
         }
 
         @Override
@@ -494,11 +503,44 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.becomeActiveLocked("testing", 0);
         verifyStateConditions(STATE_ACTIVE);
 
+        setAlarmSoon(false);
         setChargingOn(false);
         setScreenOn(false);
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
+        verify(mDeviceIdleController)
+                .scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT), eq(false));
+    }
+
+    @Test
+    public void testStateActiveToStateInactive_UpcomingAlarm() {
+        final long timeUntilAlarm = mConstants.MIN_TIME_TO_ALARM / 2;
+        // Set an upcoming alarm that will prevent full idle.
+        doReturn(mInjector.getElapsedRealtime() + timeUntilAlarm)
+                .when(mAlarmManager).getNextWakeFromIdleTime();
+
+        InOrder inOrder = inOrder(mDeviceIdleController);
+
+        enterDeepState(STATE_ACTIVE);
+        setQuickDozeEnabled(false);
+        setChargingOn(false);
+        setScreenOn(false);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_INACTIVE);
+        inOrder.verify(mDeviceIdleController)
+                .scheduleAlarmLocked(eq(timeUntilAlarm + mConstants.INACTIVE_TIMEOUT), eq(false));
+
+        enterDeepState(STATE_ACTIVE);
+        setQuickDozeEnabled(true);
+        setChargingOn(false);
+        setScreenOn(false);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        inOrder.verify(mDeviceIdleController).scheduleAlarmLocked(
+                eq(timeUntilAlarm + mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
     }
 
     @Test
@@ -515,42 +557,68 @@ public class DeviceIdleControllerTest {
 
     @Test
     public void testTransitionFromAnyStateToStateQuickDozeDelay() {
+        setAlarmSoon(false);
+        InOrder inOrder = inOrder(mDeviceIdleController);
+
         enterDeepState(STATE_ACTIVE);
         setQuickDozeEnabled(true);
         setChargingOn(false);
         setScreenOn(false);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        inOrder.verify(mDeviceIdleController)
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
 
         enterDeepState(STATE_INACTIVE);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        inOrder.verify(mDeviceIdleController)
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
 
         enterDeepState(STATE_IDLE_PENDING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        inOrder.verify(mDeviceIdleController)
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
 
         enterDeepState(STATE_SENSING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        inOrder.verify(mDeviceIdleController)
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
 
         enterDeepState(STATE_LOCATING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        inOrder.verify(mDeviceIdleController)
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
 
         // IDLE should stay as IDLE.
         enterDeepState(STATE_IDLE);
+        // Clear out any alarm setting from the order before checking for this section.
+        inOrder.verify(mDeviceIdleController, atLeastOnce())
+                .scheduleAlarmLocked(anyLong(), anyBoolean());
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_IDLE);
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
 
         // IDLE_MAINTENANCE should stay as IDLE_MAINTENANCE.
         enterDeepState(STATE_IDLE_MAINTENANCE);
+        // Clear out any alarm setting from the order before checking for this section.
+        inOrder.verify(mDeviceIdleController, atLeastOnce())
+                .scheduleAlarmLocked(anyLong(), anyBoolean());
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
 
+        // State is already QUICK_DOZE_DELAY. No work should be done.
         enterDeepState(STATE_QUICK_DOZE_DELAY);
+        // Clear out any alarm setting from the order before checking for this section.
+        inOrder.verify(mDeviceIdleController, atLeastOnce())
+                .scheduleAlarmLocked(anyLong(), anyBoolean());
         setQuickDozeEnabled(true);
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
     }
 
     @Test

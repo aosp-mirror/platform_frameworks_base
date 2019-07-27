@@ -561,18 +561,22 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             executeAfterKeyguardGoneAction();
             boolean wakeUnlockPulsing =
                     mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING;
-            if (wakeUnlockPulsing) {
+            boolean needsFading = needsBypassFading();
+            if (needsFading) {
+                delay = 0;
+                fadeoutDuration = KeyguardBypassController.BYPASS_PANEL_FADE_DURATION;
+            } else if (wakeUnlockPulsing) {
                 delay = 0;
                 fadeoutDuration = 240;
             }
-            mStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
+            mStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration, needsFading);
             mBiometricUnlockController.startKeyguardFadingAway();
             hideBouncer(true /* destroyView */);
             if (wakeUnlockPulsing) {
-                if (needsBypassFading()) {
+                if (needsFading) {
                     ViewGroupFadeHelper.fadeOutAllChildrenExcept(mNotificationPanelView,
                             mNotificationContainer,
-                            KeyguardBypassController.BYPASS_PANEL_FADE_DURATION,
+                            fadeoutDuration,
                                     () -> {
                         mStatusBar.hideKeyguard();
                         onKeyguardFadedAway();
@@ -585,10 +589,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
                 if (!staying) {
                     mStatusBarWindowController.setKeyguardFadingAway(true);
-                    if (needsBypassFading()) {
+                    if (needsFading) {
                         ViewGroupFadeHelper.fadeOutAllChildrenExcept(mNotificationPanelView,
                                 mNotificationContainer,
-                                KeyguardBypassController.BYPASS_PANEL_FADE_DURATION,
+                                fadeoutDuration,
                                 () -> {
                                     mStatusBar.hideKeyguard();
                                 });

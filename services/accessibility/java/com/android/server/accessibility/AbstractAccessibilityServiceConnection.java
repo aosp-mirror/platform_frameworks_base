@@ -23,6 +23,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCE
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+import android.accessibilityservice.AccessibilityGestureInfo;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
@@ -1164,9 +1165,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    public void notifyGesture(int gestureId) {
+    public void notifyGesture(AccessibilityGestureInfo gestureInfo) {
         mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_GESTURE,
-                gestureId, 0).sendToTarget();
+                gestureInfo).sendToTarget();
     }
 
     public void notifyClearAccessibilityNodeInfoCache() {
@@ -1255,13 +1256,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private void notifyGestureInternal(int gestureId) {
+    private void notifyGestureInternal(AccessibilityGestureInfo gestureInfo) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                listener.onGesture(gestureId);
+                listener.onGesture(gestureInfo);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error during sending gesture " + gestureId
+                Slog.e(LOG_TAG, "Error during sending gesture " + gestureInfo
                         + " to " + mService, re);
             }
         }
@@ -1456,8 +1457,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final int type = message.what;
             switch (type) {
                 case MSG_ON_GESTURE: {
-                    final int gestureId = message.arg1;
-                    notifyGestureInternal(gestureId);
+                    notifyGestureInternal((AccessibilityGestureInfo) message.obj);
                 } break;
 
                 case MSG_CLEAR_ACCESSIBILITY_CACHE: {

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.accessibilityservice.AccessibilityGestureInfo;
 import android.accessibilityservice.AccessibilityService.Callbacks;
 import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -1232,7 +1233,7 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public boolean onGesture(int gestureId) {
+                public boolean onGesture(AccessibilityGestureInfo gestureInfo) {
                     /* do nothing */
                     return false;
                 }

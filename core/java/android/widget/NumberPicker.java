@@ -921,10 +921,12 @@ public class NumberPicker extends LinearLayout {
                 if (!mFlingScroller.isFinished()) {
                     mFlingScroller.forceFinished(true);
                     mAdjustScroller.forceFinished(true);
+                    onScrollerFinished(mFlingScroller);
                     onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
                 } else if (!mAdjustScroller.isFinished()) {
                     mFlingScroller.forceFinished(true);
                     mAdjustScroller.forceFinished(true);
+                    onScrollerFinished(mAdjustScroller);
                 } else if (mLastDownEventY < mTopSelectionDividerTop) {
                     postChangeCurrentByOneFromLongPress(
                             false, ViewConfiguration.getLongPressTimeout());
@@ -2556,14 +2558,16 @@ public class NumberPicker extends LinearLayout {
                             }
                             return false;
                         }
-                        case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                        case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+                        case R.id.accessibilityActionScrollDown: {
                             if (NumberPicker.this.isEnabled()
                                     && (getWrapSelectorWheel() || getValue() < getMaxValue())) {
                                 changeValueByOne(true);
                                 return true;
                             }
                         } return false;
-                        case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                        case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+                        case R.id.accessibilityActionScrollUp: {
                             if (NumberPicker.this.isEnabled()
                                     && (getWrapSelectorWheel() || getValue() > getMinValue())) {
                                 changeValueByOne(false);
@@ -2865,10 +2869,13 @@ public class NumberPicker extends LinearLayout {
             }
             if (NumberPicker.this.isEnabled()) {
                 if (getWrapSelectorWheel() || getValue() < getMaxValue()) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
                 }
                 if (getWrapSelectorWheel() || getValue() > getMinValue()) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                    info.addAction(
+                            AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
                 }
             }
 

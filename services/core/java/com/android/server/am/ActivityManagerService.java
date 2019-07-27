@@ -7901,11 +7901,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void reportGlobalUsageEventLocked(int event) {
-        mUsageStatsService.reportEvent("android", mUserController.getCurrentUserId(), event);
+        mUsageStatsService.reportEvent(Event.DEVICE_EVENT_PACKAGE_NAME,
+                mUserController.getCurrentUserId(), event);
         int[] profiles = mUserController.getCurrentProfileIds();
         if (profiles != null) {
             for (int i = profiles.length - 1; i >= 0; i--) {
-                mUsageStatsService.reportEvent((String)null, profiles[i], event);
+                mUsageStatsService.reportEvent(Event.DEVICE_EVENT_PACKAGE_NAME, profiles[i], event);
             }
         }
     }

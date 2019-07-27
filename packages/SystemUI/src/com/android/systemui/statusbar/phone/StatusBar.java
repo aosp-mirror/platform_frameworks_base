@@ -1579,7 +1579,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         mEntryManager.updateNotifications();
         if (isDozing() && isHeadsUp) {
-            mDozeServiceHost.fireNotificationPulse();
+            entry.setPulseSuppressed(false);
+            mDozeServiceHost.fireNotificationPulse(entry);
             if (mPulsing) {
                 mDozeScrimController.cancelPendingPulseTimeout();
             }
@@ -3206,12 +3207,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     /**
      * Notifies the status bar the Keyguard is fading away with the specified timings.
-     *
-     * @param startTime the start time of the animations in uptime millis
+     *  @param startTime the start time of the animations in uptime millis
      * @param delay the precalculated animation delay in milliseconds
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
+     * @param isBypassFading is this a fading away animation while bypassing
      */
-    public void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration) {
+    public void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration,
+            boolean isBypassFading) {
         mCommandQueue.appTransitionStarting(mDisplayId, startTime + fadeoutDuration
                         - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
                 LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
@@ -3219,7 +3221,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue.appTransitionStarting(mDisplayId,
                     startTime - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
                     LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
-        mKeyguardMonitor.notifyKeyguardFadingAway(delay, fadeoutDuration);
+        mKeyguardMonitor.notifyKeyguardFadingAway(delay, fadeoutDuration, isBypassFading);
     }
 
     /**
@@ -3929,9 +3931,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
-        public void fireNotificationPulse() {
+        public void fireNotificationPulse(NotificationEntry entry) {
+            Runnable pulseSupressedListener = () -> {
+                entry.setPulseSuppressed(true);
+                mNotificationIconAreaController.updateAodNotificationIcons();
+            };
             for (Callback callback : mCallbacks) {
-                callback.onNotificationAlerted();
+                callback.onNotificationAlerted(pulseSupressedListener);
             }
         }
 

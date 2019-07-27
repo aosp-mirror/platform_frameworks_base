@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -174,6 +175,7 @@ public class AccessibilityGestureDetectorTest {
         }
 
         // Check that correct gesture was recognized.
-        verify(mResultListener).onGestureCompleted(gestureId);
+        verify(mResultListener).onGestureCompleted(
+                argThat(gestureInfo -> gestureInfo.getGestureId() == gestureId));
     }
 }

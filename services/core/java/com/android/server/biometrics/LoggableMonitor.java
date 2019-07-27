@@ -93,7 +93,7 @@ public abstract class LoggableMonitor {
                 statsAction(),
                 statsClient(),
                 acquiredInfo,
-                0 /* vendorCode */, // Don't log vendorCode for now
+                vendorCode,
                 Utils.isDebugEnabled(context, targetUserId));
     }
 

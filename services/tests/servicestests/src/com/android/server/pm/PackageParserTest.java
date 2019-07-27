@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -557,6 +558,9 @@ public class PackageParserTest {
         pkg.mRequiredForAllUsers = true;
         pkg.visibleToInstantApps = true;
         pkg.use32bitAbi = true;
+        pkg.mForceQueryable = true;
+        pkg.mQueriesPackages = new ArrayList<>(Arrays.asList("foo27"));
+        pkg.mQueriesIntents = new ArrayList<>(Arrays.asList(new Intent("foo28")));
     }
 
     private static void assertAllFieldsExist(PackageParser.Package pkg) throws Exception {

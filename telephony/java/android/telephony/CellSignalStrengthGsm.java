@@ -143,7 +143,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     }
 
     /**
-     * Get the signal strength as dBm
+     * Get the signal strength as dBm.
      */
     @Override
     public int getDbm() {
@@ -163,18 +163,17 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     }
 
     /**
-     * Return the Received Signal Strength Indicator
+     * Return the Received Signal Strength Indicator.
      *
      * @return the RSSI in dBm (-113, -51) or
      *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}.
-     * @hide
      */
     public int getRssi() {
         return mRssi;
     }
 
     /**
-     * Return the Bit Error Rate
+     * Return the Bit Error Rate.
      *
      * @return the bit error rate (0-7, 99) as defined in TS 27.007 8.5 or
      *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}.

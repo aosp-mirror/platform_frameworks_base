@@ -24,6 +24,7 @@ import android.util.LongSparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 /**
  * This class maintains state relating to platform compatibility changes.
  *
@@ -167,6 +168,24 @@ public final class CompatConfig {
             }
         }
         return overrideExists;
+    }
+
+    /**
+    * Dumps the current list of compatibility config information.
+    *
+    * @param pw The {@link PrintWriter} instance to which the information will be dumped.
+    */
+    public void dumpConfig(PrintWriter pw) {
+        synchronized (mChanges) {
+            if (mChanges.size() == 0) {
+                pw.println("No compat overrides.");
+                return;
+            }
+            for (int i = 0; i < mChanges.size(); ++i) {
+                CompatChange c = mChanges.valueAt(i);
+                pw.println(c.toString());
+            }
+        }
     }
 
 }
