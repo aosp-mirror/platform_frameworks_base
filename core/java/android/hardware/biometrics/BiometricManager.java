@@ -129,6 +129,25 @@ public class BiometricManager {
     }
 
     /**
+     * @hide
+     * @param userId
+     * @return
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public boolean hasEnrolledBiometrics(int userId) {
+        if (mService != null) {
+            try {
+                return mService.hasEnrolledBiometrics(userId);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Remote exception in hasEnrolledBiometrics(): " + e);
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Listens for changes to biometric eligibility on keyguard from user settings.
      * @param callback
      * @hide
