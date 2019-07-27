@@ -1451,7 +1451,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param pkg The package for which to reset.
      * @param userId The device user for which to do a reset.
      */
-    @GuardedBy("mPackages")
+    @GuardedBy("mLock")
     private void resetRuntimePermissionsInternal(final PackageParser.Package pkg,
             final int userId) {
         final String packageName = pkg.packageName;

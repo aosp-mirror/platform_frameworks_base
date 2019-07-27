@@ -112,7 +112,7 @@ class InstantAppRegistry {
     private final CookiePersistence mCookiePersistence;
 
     /** State for uninstalled instant apps */
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private SparseArray<List<UninstalledInstantAppState>> mUninstalledInstantApps;
 
     /**
@@ -121,11 +121,11 @@ class InstantAppRegistry {
      * The value is a set of instant app UIDs.
      * UserID -> TargetAppId -> InstantAppId
      */
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private SparseArray<SparseArray<SparseBooleanArray>> mInstantGrants;
 
     /** The set of all installed instant apps. UserID -> AppID */
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private SparseArray<SparseBooleanArray> mInstalledInstantAppUids;
 
     public InstantAppRegistry(PackageManagerService service) {
@@ -133,7 +133,7 @@ class InstantAppRegistry {
         mCookiePersistence = new CookiePersistence(BackgroundThread.getHandler().getLooper());
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public byte[] getInstantAppCookieLPw(@NonNull String packageName,
             @UserIdInt int userId) {
         // Only installed packages can get their own cookie
@@ -157,7 +157,7 @@ class InstantAppRegistry {
         return null;
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public boolean setInstantAppCookieLPw(@NonNull String packageName,
             @Nullable byte[] cookie, @UserIdInt int userId) {
         if (cookie != null && cookie.length > 0) {
@@ -182,7 +182,7 @@ class InstantAppRegistry {
 
     private void persistInstantApplicationCookie(@Nullable byte[] cookie,
             @NonNull String packageName, @NonNull File cookieFile, @UserIdInt int userId) {
-        synchronized (mService.mPackages) {
+        synchronized (mService.mLock) {
             File appDir = getInstantApplicationDir(packageName, userId);
             if (!appDir.exists() && !appDir.mkdirs()) {
                 Slog.e(LOG_TAG, "Cannot create instant app cookie directory");
@@ -250,7 +250,7 @@ class InstantAppRegistry {
 
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public @Nullable List<InstantAppInfo> getInstantAppsLPr(@UserIdInt int userId) {
         List<InstantAppInfo> installedApps = getInstalledInstantApplicationsLPr(userId);
         List<InstantAppInfo> uninstalledApps = getUninstalledInstantApplicationsLPr(userId);
@@ -263,7 +263,7 @@ class InstantAppRegistry {
         return uninstalledApps;
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public void onPackageInstalledLPw(@NonNull PackageParser.Package pkg, @NonNull int[] userIds) {
         PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
@@ -334,7 +334,7 @@ class InstantAppRegistry {
         }
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public void onPackageUninstalledLPw(@NonNull PackageParser.Package pkg,
             @NonNull int[] userIds) {
         PackageSetting ps = (PackageSetting) pkg.mExtras;
@@ -360,7 +360,7 @@ class InstantAppRegistry {
         }
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public void onUserRemovedLPw(int userId) {
         if (mUninstalledInstantApps != null) {
             mUninstalledInstantApps.remove(userId);
@@ -399,7 +399,7 @@ class InstantAppRegistry {
         return instantGrantList.get(instantAppId);
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public void grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
             int targetAppId, int instantAppId) {
         if (mInstalledInstantAppUids == null) {
@@ -434,7 +434,7 @@ class InstantAppRegistry {
         instantGrantList.put(instantAppId, true /*granted*/);
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public void addInstantAppLPw(@UserIdInt int userId, int instantAppId) {
         if (mInstalledInstantAppUids == null) {
             mInstalledInstantAppUids = new SparseArray<>();
@@ -447,7 +447,7 @@ class InstantAppRegistry {
         instantAppList.put(instantAppId, true /*installed*/);
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private void removeInstantAppLPw(@UserIdInt int userId, int instantAppId) {
         // remove from the installed list
         if (mInstalledInstantAppUids == null) {
@@ -473,7 +473,7 @@ class InstantAppRegistry {
         }
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private void removeAppLPw(@UserIdInt int userId, int targetAppId) {
         // remove from the installed list
         if (mInstantGrants == null) {
@@ -486,7 +486,7 @@ class InstantAppRegistry {
         targetAppList.delete(targetAppId);
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private void addUninstalledInstantAppLPw(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId) {
         InstantAppInfo uninstalledApp = createInstantAppInfoForPackage(
@@ -541,13 +541,13 @@ class InstantAppRegistry {
         }
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     boolean hasInstantApplicationMetadataLPr(String packageName, int userId) {
         return hasUninstalledInstantAppStateLPr(packageName, userId)
                 || hasInstantAppMetadataLPr(packageName, userId);
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     public void deleteInstantApplicationMetadataLPw(@NonNull String packageName,
             @UserIdInt int userId) {
         removeUninstalledInstantAppStateLPw((UninstalledInstantAppState state) ->
@@ -564,7 +564,7 @@ class InstantAppRegistry {
         }
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private void removeUninstalledInstantAppStateLPw(
             @NonNull Predicate<UninstalledInstantAppState> criteria, @UserIdInt int userId) {
         if (mUninstalledInstantApps == null) {
@@ -592,7 +592,7 @@ class InstantAppRegistry {
         }
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private boolean hasUninstalledInstantAppStateLPr(String packageName, @UserIdInt int userId) {
         if (mUninstalledInstantApps == null) {
             return false;
@@ -685,7 +685,7 @@ class InstantAppRegistry {
         final long now = System.currentTimeMillis();
 
         // Prune first installed instant apps
-        synchronized (mService.mPackages) {
+        synchronized (mService.mLock) {
             allUsers = PackageManagerService.sUserManager.getUserIds();
 
             final int packageCount = mService.mPackages.size();
@@ -768,7 +768,7 @@ class InstantAppRegistry {
         }
 
         // Prune uninstalled instant apps
-        synchronized (mService.mPackages) {
+        synchronized (mService.mLock) {
             // TODO: Track last used time for uninstalled instant apps for better pruning
             for (int userId : UserManagerService.getInstance().getUserIds()) {
                 // Prune in-memory state
@@ -811,7 +811,7 @@ class InstantAppRegistry {
         return false;
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private @Nullable List<InstantAppInfo> getInstalledInstantApplicationsLPr(
             @UserIdInt int userId) {
         List<InstantAppInfo> result = null;
@@ -866,7 +866,7 @@ class InstantAppRegistry {
         }
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private @Nullable List<InstantAppInfo> getUninstalledInstantApplicationsLPr(
             @UserIdInt int userId) {
         List<UninstalledInstantAppState> uninstalledAppStates =
@@ -939,7 +939,7 @@ class InstantAppRegistry {
         return uninstalledAppState.mInstantAppInfo;
     }
 
-    @GuardedBy("mService.mPackages")
+    @GuardedBy("mService.mLock")
     private @Nullable List<UninstalledInstantAppState> getUninstalledInstantAppStatesLPr(
             @UserIdInt int userId) {
         List<UninstalledInstantAppState> uninstalledAppStates = null;

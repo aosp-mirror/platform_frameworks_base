@@ -4020,7 +4020,7 @@ public final class Settings {
         String[] seinfos;
         int[] targetSdkVersions;
         int packagesCount;
-        synchronized (mPackages) {
+        synchronized (mLock) {
             Collection<PackageSetting> packages = mPackages.values();
             packagesCount = packages.size();
             volumeUuids = new String[packagesCount];
@@ -4064,7 +4064,7 @@ public final class Settings {
                 Slog.w(TAG, "Failed to prepare app data", e);
             }
         }
-        synchronized (mPackages) {
+        synchronized (mLock) {
             applyDefaultPreferredAppsLPw(userHandle);
         }
     }
