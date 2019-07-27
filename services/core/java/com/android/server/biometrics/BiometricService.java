@@ -789,6 +789,23 @@ public class BiometricService extends SystemService {
             return error;
         }
 
+        @Override
+        public boolean hasEnrolledBiometrics(int userId) {
+            checkInternalPermission();
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                for (int i = 0; i < mAuthenticators.size(); i++) {
+                    if (mAuthenticators.get(i).mAuthenticator.hasEnrolledTemplates(userId)) {
+                        return true;
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            return false;
+        }
+
         @Override // Binder call
         public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
                 throws RemoteException {

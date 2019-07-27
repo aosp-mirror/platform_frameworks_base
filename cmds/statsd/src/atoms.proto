@@ -5301,7 +5301,7 @@ message NetworkDnsEventReported {
     // Only valid for event_type = EVENT_RESNSEND.
     optional int32 res_nsend_flags = 5;
 
-    optional android.stats.dnsresolver.Transport network_type = 6;
+    optional android.stats.dnsresolver.NetworkType network_type = 6;
 
     // The DNS over TLS mode on a specific netId.
     optional android.stats.dnsresolver.PrivateDnsModes private_dns_modes = 7;
@@ -5309,6 +5309,9 @@ message NetworkDnsEventReported {
     // Additional pass-through fields opaque to statsd.
     // The DNS resolver Mainline module can add new fields here without requiring an OS update.
     optional android.stats.dnsresolver.DnsQueryEvents dns_query_events = 8 [(log_mode) = MODE_BYTES];
+
+    // The sample rate of DNS stats (to statsd) is 1/sampling_rate_denom.
+    optional int32 sampling_rate_denom = 9;
 }
 
 /**
