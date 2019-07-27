@@ -153,6 +153,7 @@ class Instruction {
     kBranchEqz,
     kBranchNEqz,
     kCheckCast,
+    kGetStaticField,
     kInvokeDirect,
     kInvokeInterface,
     kInvokeStatic,
@@ -162,6 +163,7 @@ class Instruction {
     kNew,
     kReturn,
     kReturnObject,
+    kSetStaticField
   };
 
   ////////////////////////
@@ -170,12 +172,12 @@ class Instruction {
 
   // For instructions with no return value and no arguments.
   static inline Instruction OpNoArgs(Op opcode) {
-    return Instruction{opcode, /*method_id*/ 0, /*dest*/ {}};
+    return Instruction{opcode, /*index_argument*/ 0, /*dest*/ {}};
   }
   // For most instructions, which take some number of arguments and have an optional return value.
   template <typename... T>
   static inline Instruction OpWithArgs(Op opcode, std::optional<const Value> dest, T... args) {
-    return Instruction{opcode, /*method_id=*/0, /*result_is_object=*/false, dest, args...};
+    return Instruction{opcode, /*index_argument=*/0, /*result_is_object=*/false, dest, args...};
   }
 
   // A cast instruction. Basically, `(type)val`
@@ -186,77 +188,87 @@ class Instruction {
 
   // For method calls.
   template <typename... T>
-  static inline Instruction InvokeVirtual(size_t method_id, std::optional<const Value> dest,
+  static inline Instruction InvokeVirtual(size_t index_argument, std::optional<const Value> dest,
                                           Value this_arg, T... args) {
     return Instruction{
-        Op::kInvokeVirtual, method_id, /*result_is_object=*/false, dest, this_arg, args...};
+        Op::kInvokeVirtual, index_argument, /*result_is_object=*/false, dest, this_arg, args...};
   }
   // Returns an object
   template <typename... T>
-  static inline Instruction InvokeVirtualObject(size_t method_id, std::optional<const Value> dest,
+  static inline Instruction InvokeVirtualObject(size_t index_argument, std::optional<const Value> dest,
                                                 Value this_arg, T... args) {
     return Instruction{
-        Op::kInvokeVirtual, method_id, /*result_is_object=*/true, dest, this_arg, args...};
+        Op::kInvokeVirtual, index_argument, /*result_is_object=*/true, dest, this_arg, args...};
   }
   // For direct calls (basically, constructors).
   template <typename... T>
-  static inline Instruction InvokeDirect(size_t method_id, std::optional<const Value> dest,
+  static inline Instruction InvokeDirect(size_t index_argument, std::optional<const Value> dest,
                                          Value this_arg, T... args) {
     return Instruction{
-        Op::kInvokeDirect, method_id, /*result_is_object=*/false, dest, this_arg, args...};
+        Op::kInvokeDirect, index_argument, /*result_is_object=*/false, dest, this_arg, args...};
   }
   // Returns an object
   template <typename... T>
-  static inline Instruction InvokeDirectObject(size_t method_id, std::optional<const Value> dest,
+  static inline Instruction InvokeDirectObject(size_t index_argument, std::optional<const Value> dest,
                                                Value this_arg, T... args) {
     return Instruction{
-        Op::kInvokeDirect, method_id, /*result_is_object=*/true, dest, this_arg, args...};
+        Op::kInvokeDirect, index_argument, /*result_is_object=*/true, dest, this_arg, args...};
   }
   // For static calls.
   template <typename... T>
-  static inline Instruction InvokeStatic(size_t method_id, std::optional<const Value> dest,
+  static inline Instruction InvokeStatic(size_t index_argument, std::optional<const Value> dest,
                                          T... args) {
-    return Instruction{Op::kInvokeStatic, method_id, /*result_is_object=*/false, dest, args...};
+    return Instruction{Op::kInvokeStatic, index_argument, /*result_is_object=*/false, dest, args...};
   }
   // Returns an object
   template <typename... T>
-  static inline Instruction InvokeStaticObject(size_t method_id, std::optional<const Value> dest,
+  static inline Instruction InvokeStaticObject(size_t index_argument, std::optional<const Value> dest,
                                                T... args) {
-    return Instruction{Op::kInvokeStatic, method_id, /*result_is_object=*/true, dest, args...};
+    return Instruction{Op::kInvokeStatic, index_argument, /*result_is_object=*/true, dest, args...};
   }
   // For static calls.
   template <typename... T>
-  static inline Instruction InvokeInterface(size_t method_id, std::optional<const Value> dest,
+  static inline Instruction InvokeInterface(size_t index_argument, std::optional<const Value> dest,
                                             T... args) {
-    return Instruction{Op::kInvokeInterface, method_id, /*result_is_object=*/false, dest, args...};
+    return Instruction{Op::kInvokeInterface, index_argument, /*result_is_object=*/false, dest, args...};
+
   }
+
+  static inline Instruction GetStaticField(size_t field_id, Value dest) {
+    return Instruction{Op::kGetStaticField, field_id, dest};
+  }
+
+  static inline Instruction SetStaticField(size_t field_id, Value value) {
+    return Instruction{Op::kSetStaticField, field_id, /*result_is_object=*/false, /*dest=*/{}, value};
+  }
+
 
   ///////////////
   // Accessors //
   ///////////////
 
   Op opcode() const { return opcode_; }
-  size_t method_id() const { return method_id_; }
+  size_t index_argument() const { return index_argument_; }
   bool result_is_object() const { return result_is_object_; }
   const std::optional<const Value>& dest() const { return dest_; }
   const std::vector<const Value>& args() const { return args_; }
 
  private:
-  inline Instruction(Op opcode, size_t method_id, std::optional<const Value> dest)
-      : opcode_{opcode}, method_id_{method_id}, result_is_object_{false}, dest_{dest}, args_{} {}
+  inline Instruction(Op opcode, size_t index_argument, std::optional<const Value> dest)
+      : opcode_{opcode}, index_argument_{index_argument}, result_is_object_{false}, dest_{dest}, args_{} {}
 
   template <typename... T>
-  inline constexpr Instruction(Op opcode, size_t method_id, bool result_is_object,
+  inline constexpr Instruction(Op opcode, size_t index_argument, bool result_is_object,
                                std::optional<const Value> dest, T... args)
       : opcode_{opcode},
-        method_id_{method_id},
+        index_argument_{index_argument},
         result_is_object_{result_is_object},
         dest_{dest},
         args_{args...} {}
 
   const Op opcode_;
   // The index of the method to invoke, for kInvokeVirtual and similar opcodes.
-  const size_t method_id_{0};
+  const size_t index_argument_{0};
   const bool result_is_object_;
   const std::optional<const Value> dest_;
   const std::vector<const Value> args_;
@@ -319,6 +331,7 @@ class MethodBuilder {
   void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
   void EncodeNew(const Instruction& instruction);
   void EncodeCast(const Instruction& instruction);
+  void EncodeStaticFieldOp(const Instruction& instruction);
 
   // Low-level instruction format encoding. See
   // https://source.android.com/devices/tech/dalvik/instruction-formats for documentation of
@@ -481,6 +494,11 @@ class DexBuilder {
   // See the TypeDescriptor class for help generating these. GetOrAddType can be used to declare
   // imported classes.
   ir::Type* GetOrAddType(const std::string& descriptor);
+  inline ir::Type* GetOrAddType(TypeDescriptor descriptor) {
+    return GetOrAddType(descriptor.descriptor());
+  }
+
+  ir::FieldDecl* GetOrAddField(TypeDescriptor parent, const std::string& name, TypeDescriptor type);
 
   // Returns the method id for the method, creating it if it has not been created yet.
   const MethodDeclData& GetOrDeclareMethod(TypeDescriptor type, const std::string& name,
@@ -526,6 +544,9 @@ class DexBuilder {
 
   // Keep track of already-encoded protos.
   std::map<Prototype, ir::Proto*> proto_map_;
+
+  // Keep track of fields that have been declared
+  std::map<std::tuple<TypeDescriptor, std::string>, ir::FieldDecl*> field_decls_by_key_;
 };
 
 template <typename... T>
