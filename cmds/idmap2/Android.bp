@@ -18,6 +18,7 @@ cc_defaults {
     tidy_checks: [
         "modernize-*",
         "-modernize-avoid-c-arrays",
+        "-modernize-use-trailing-return-type",
         "android-*",
         "misc-*",
         "readability-*",
