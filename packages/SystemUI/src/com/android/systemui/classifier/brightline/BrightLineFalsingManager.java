@@ -44,6 +44,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final SensorManager mSensorManager;
     private final FalsingDataProvider mDataProvider;
     private boolean mSessionStarted;
+    private boolean mShowingAod;
+    private boolean mScreenOn;
 
     private final ExecutorService mBackgroundExecutor = Executors.newSingleThreadExecutor();
 
@@ -98,7 +100,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     private void sessionStart() {
-        if (!mSessionStarted) {
+        if (!mSessionStarted && !mShowingAod && mScreenOn) {
             logDebug("Starting Session");
             mSessionStarted = true;
             registerSensors();
@@ -159,6 +161,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public void onSucccessfulUnlock() {
+        sessionEnd();
     }
 
     @Override
@@ -167,6 +170,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public void setShowingAod(boolean showingAod) {
+        mShowingAod = showingAod;
         if (showingAod) {
             sessionEnd();
         } else {
@@ -251,7 +255,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public void onScreenOnFromTouch() {
-        sessionStart();
+        onScreenTurningOn();
     }
 
     @Override
@@ -273,11 +277,13 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public void onScreenTurningOn() {
+        mScreenOn = true;
         sessionStart();
     }
 
     @Override
     public void onScreenOff() {
+        mScreenOn = false;
         sessionEnd();
     }
 
