@@ -65,7 +65,7 @@ class ImageRevealHelper {
             @Override
             public void onAnimationStart(Animator animation) {
                 if (mRevealListener != null) {
-                    mRevealListener.onRevealStart();
+                    mRevealListener.onRevealStart(true /* animate */);
                 }
             }
         });
@@ -73,7 +73,7 @@ class ImageRevealHelper {
 
     private void animate() {
         mAnimator.cancel();
-        mAnimator.setFloatValues(mReveal, !mAwake ? MIN_REVEAL : MAX_REVEAL);
+        mAnimator.setFloatValues(mReveal, mAwake ? MAX_REVEAL : MIN_REVEAL);
         mAnimator.start();
     }
 
@@ -84,12 +84,11 @@ class ImageRevealHelper {
     void updateAwake(boolean awake, long duration) {
         mAwake = awake;
         mAnimator.setDuration(duration);
-        if (!mAwake && duration == 0) {
-            // We are transiting from home to aod,
-            // since main thread is waiting for rendering finished, we only need draw
-            // the last state directly, which is a black screen.
-            mReveal = MIN_REVEAL;
-            mRevealListener.onRevealStart();
+        if (duration == 0) {
+            // We are transiting from home to aod or aod to home directly,
+            // we don't need to do transition in these cases.
+            mReveal = mAwake ? MAX_REVEAL : MIN_REVEAL;
+            mRevealListener.onRevealStart(false /* animate */);
             mRevealListener.onRevealStateChanged();
             mRevealListener.onRevealEnd();
         } else {
@@ -110,7 +109,7 @@ class ImageRevealHelper {
         /**
          * Called back while reveal starts.
          */
-        void onRevealStart();
+        void onRevealStart(boolean animate);
 
         /**
          * Called back while reveal ends.
