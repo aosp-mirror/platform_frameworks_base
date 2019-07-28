@@ -1509,6 +1509,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setStatusAccessibilityImportance(expanded
                 ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        if (getNavigationBarView() != null) {
+            getNavigationBarView().onStatusBarPanelStateChanged();
+        }
     }
 
     public boolean isWakeUpComingFromTouch() {

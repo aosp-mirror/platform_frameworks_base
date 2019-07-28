@@ -82,11 +82,15 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED = 1 << 9;
     // The search feature is disabled (either by SUW/SysUI/device policy)
     public static final int SYSUI_STATE_SEARCH_DISABLED = 1 << 10;
+    // The notification panel is expanded and interactive (either locked or unlocked), and the
+    // quick settings is not expanded
+    public static final int SYSUI_STATE_QUICK_SETTINGS_EXPANDED = 1 << 11;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
             SYSUI_STATE_NAV_BAR_HIDDEN,
             SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
+            SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
             SYSUI_STATE_BOUNCER_SHOWING,
             SYSUI_STATE_A11Y_BUTTON_CLICKABLE,
             SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE,
@@ -106,6 +110,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_SEARCH_DISABLED) != 0 ? "search_disabled" : "");
         str.add((flags & SYSUI_STATE_NAV_BAR_HIDDEN) != 0 ? "navbar_hidden" : "");
         str.add((flags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0 ? "notif_visible" : "");
+        str.add((flags & SYSUI_STATE_QUICK_SETTINGS_EXPANDED) != 0 ? "qs_visible" : "");
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING) != 0 ? "keygrd_visible" : "");
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0
                 ? "keygrd_occluded" : "");
@@ -154,11 +159,13 @@ public class QuickStepContract {
      * disabled.
      */
     public static boolean isAssistantGestureDisabled(int sysuiStateFlags) {
-        // Disable when in screen pinning, immersive, the bouncer is showing, or search is disabled
+        // Disable when in quick settings, screen pinning, immersive, the bouncer is showing, 
+        // or search is disabled
         int disableFlags = SYSUI_STATE_SCREEN_PINNING
                 | SYSUI_STATE_NAV_BAR_HIDDEN
                 | SYSUI_STATE_BOUNCER_SHOWING
-                | SYSUI_STATE_SEARCH_DISABLED;
+                | SYSUI_STATE_SEARCH_DISABLED
+                | SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
         if ((sysuiStateFlags & disableFlags) != 0) {
             return true;
         }
