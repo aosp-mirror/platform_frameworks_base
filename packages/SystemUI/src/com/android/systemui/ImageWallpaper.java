@@ -47,7 +47,7 @@ public class ImageWallpaper extends WallpaperService {
     // This is to avoid destroying then recreating render context in a very short time.
     private static final int DELAY_FINISH_RENDERING = 1000;
     private static final int INTERVAL_WAIT_FOR_RENDERING = 100;
-    private static final int PATIENCE_WAIT_FOR_RENDERING = 5;
+    private static final int PATIENCE_WAIT_FOR_RENDERING = 10;
     private HandlerThread mWorker;
 
     @Override
@@ -124,10 +124,10 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
-            long duration = mNeedTransition || animationDuration != 0 ? animationDuration : 0;
+            if (!mNeedTransition) return;
             mWorker.getThreadHandler().post(
-                    () -> mRenderer.updateAmbientMode(inAmbientMode, duration));
-            if (inAmbientMode && duration == 0) {
+                    () -> mRenderer.updateAmbientMode(inAmbientMode, animationDuration));
+            if (inAmbientMode && animationDuration == 0) {
                 // This means that we are transiting from home to aod, to avoid
                 // race condition between window visibility and transition,
                 // we don't return until the transition is finished. See b/136643341.
