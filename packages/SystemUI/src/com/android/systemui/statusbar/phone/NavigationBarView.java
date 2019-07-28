@@ -21,6 +21,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
@@ -707,7 +708,7 @@ public class NavigationBarView extends FrameLayout implements
         }
     }
 
-    public void onPanelExpandedChange() {
+    public void onStatusBarPanelStateChanged() {
         updateSlippery();
         updateSystemUiStateFlags();
     }
@@ -725,6 +726,8 @@ public class NavigationBarView extends FrameLayout implements
         if (mPanelView != null) {
             mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                     mPanelView.isFullyExpanded() && !mPanelView.isInSettings(), displayId);
+            mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
+                    mPanelView.isInSettings(), displayId);
         }
     }
 
