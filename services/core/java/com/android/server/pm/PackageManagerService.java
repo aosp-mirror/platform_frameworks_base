@@ -319,6 +319,8 @@ import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState;
+import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -21639,6 +21641,17 @@ public class PackageManagerService extends IPackageManager.Stub
             mPermissionManager.updateAllPermissions(
                     StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
                     mPermissionCallback);
+
+            final PermissionPolicyInternal permissionPolicyInternal =
+                    LocalServices.getService(PermissionPolicyInternal.class);
+            permissionPolicyInternal.setOnInitializedCallback(userId -> {
+                // The SDK updated case is already handled when we run during the ctor.
+                synchronized (mPackages) {
+                    mPermissionManager.updateAllPermissions(
+                            StorageManager.UUID_PRIVATE_INTERNAL, false /*sdkUpdated*/,
+                            mPackages.values(), mPermissionCallback);
+                }
+            });
         }
 
         // Watch for external volumes that come and go over time
