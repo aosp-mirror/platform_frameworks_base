@@ -46,7 +46,6 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Objects;
 
@@ -279,7 +278,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.panelExpansionChanged(frac, expanded);
         updateScrimFraction();
         if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
-            mBar.getNavigationBarView().onPanelExpandedChange();
+            mBar.getNavigationBarView().onStatusBarPanelStateChanged();
         }
     }
 
