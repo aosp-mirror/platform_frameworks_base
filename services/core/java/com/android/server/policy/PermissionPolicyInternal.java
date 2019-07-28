@@ -18,12 +18,26 @@ package com.android.server.policy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.Intent;
 
 /**
  * Internal calls into {@link PermissionPolicyService}.
  */
 public abstract class PermissionPolicyInternal {
+
+    /**
+     * Callback for initializing the permission policy service.
+     */
+    public interface OnInitializedCallback {
+
+        /**
+         * Called when initialized for the given user.
+         *
+         * @param userId The initialized user.
+         */
+        void onInitialized(@UserIdInt int userId);
+    }
 
     /**
      * Check whether an activity should be started.
@@ -36,4 +50,17 @@ public abstract class PermissionPolicyInternal {
      */
     public abstract boolean checkStartActivity(@NonNull Intent intent, int callingUid,
             @Nullable String callingPackage);
+
+    /**
+     * @return Whether the policy is initialized for a user.
+     */
+    public abstract boolean isInitialized(@UserIdInt int userId);
+
+    /**
+     * Set a callback for users being initialized. If the user is already
+     * initialized the callback will not be invoked.
+     *
+     * @param callback The callback to register.
+     */
+    public abstract void setOnInitializedCallback(@NonNull OnInitializedCallback callback);
 }
