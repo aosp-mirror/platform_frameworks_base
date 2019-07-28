@@ -75,14 +75,15 @@
         <attr name="horizontalSpacing" format="dimension" />
     </declare-styleable>
 
-    <!-- Theme for icons in the status bar (light/dark). background/fillColor is used for dual tone
-         icons like wifi and signal, and singleToneColor is used for icons with only one tone.
+    <!-- Theme for icons in the status/nav bar (light/dark). background/fillColor is used for dual
+         tone icons like wifi and signal, and singleToneColor is used for icons with only one tone.
          Contract: Pixel with fillColor blended over backgroundColor blended over translucent should
          equal to singleToneColor blended over translucent. -->
     <declare-styleable name="TonedIcon">
         <attr name="backgroundColor" format="integer" />
         <attr name="fillColor" format="integer" />
         <attr name="singleToneColor" format="integer" />
+        <attr name="homeHandleColor" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="StatusBarWindowView_Layout">
