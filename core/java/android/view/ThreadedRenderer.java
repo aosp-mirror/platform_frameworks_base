@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 import android.view.animation.AnimationUtils;
@@ -674,11 +675,11 @@ public final class ThreadedRenderer extends HardwareRenderer {
 
         int syncResult = syncAndDrawFrame(choreographer.mFrameInfo);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
-            setEnabled(false);
-            attachInfo.mViewRootImpl.mSurface.release();
-            // Invalidate since we failed to draw. This should fetch a Surface
-            // if it is still needed or do nothing if we are no longer drawing
-            attachInfo.mViewRootImpl.invalidate();
+            Log.w("OpenGLRenderer", "Surface lost, forcing relayout");
+            // We lost our surface. For a relayout next frame which should give us a new
+            // surface from WindowManager, which hopefully will work.
+            attachInfo.mViewRootImpl.mForceNextWindowRelayout = true;
+            attachInfo.mViewRootImpl.requestLayout();
         }
         if ((syncResult & SYNC_REDRAW_REQUESTED) != 0) {
             attachInfo.mViewRootImpl.invalidate();
