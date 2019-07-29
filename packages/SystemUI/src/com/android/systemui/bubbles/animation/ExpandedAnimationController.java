@@ -456,6 +456,12 @@ public class ExpandedAnimationController
     @Override
     void onChildReordered(View child, int oldIndex, int newIndex) {
         updateBubblePositions();
+
+        // We expect reordering during collapse, since we'll put the last selected bubble on top.
+        // Update the collapse animation so they end up in the right stacked positions.
+        if (mAnimatingCollapse) {
+            startOrUpdatePathAnimation(false /* expanding */);
+        }
     }
 
     private void updateBubblePositions() {
