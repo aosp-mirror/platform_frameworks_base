@@ -153,6 +153,7 @@ public class ActivityLaunchAnimator {
                 if (primary == null) {
                     setAnimationPending(false);
                     invokeCallback(iRemoteAnimationFinishedCallback);
+                    mNotificationPanel.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
                     return;
                 }
 
