@@ -33,6 +33,10 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
+static inline SkScalar isIntegerAligned(SkScalar x) {
+    return fabsf(roundf(x) - x) <= NON_ZERO_EPSILON;
+}
+
 // Disable filtering when there is no scaling in screen coordinates and the corners have the same
 // fraction (for translate) or zero fraction (for any other rect-to-rect transform).
 static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, const SkRect& dstRect) {
@@ -62,10 +66,10 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
     if (requiresIntegerTranslate) {
         // Device rect and source rect should be integer aligned to ensure there's no difference
         // in how nearest-neighbor sampling is resolved.
-        return !(MathUtils::isZero(SkScalarFraction(srcRect.x())) &&
-                 MathUtils::isZero(SkScalarFraction(srcRect.y())) &&
-                 MathUtils::isZero(SkScalarFraction(dstDevRect.x())) &&
-                 MathUtils::isZero(SkScalarFraction(dstDevRect.y())));
+        return !(isIntegerAligned(srcRect.x()) &&
+                 isIntegerAligned(srcRect.y()) &&
+                 isIntegerAligned(dstDevRect.x()) &&
+                 isIntegerAligned(dstDevRect.y()));
     } else {
         // As long as src and device rects are translated by the same fractional amount,
         // filtering won't be needed
