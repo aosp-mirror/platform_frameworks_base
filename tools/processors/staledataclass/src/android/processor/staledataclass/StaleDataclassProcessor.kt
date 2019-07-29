@@ -125,6 +125,7 @@ class StaleDataclassProcessor: AbstractProcessor() {
 
         val lastGenerated = annotationParams["time"] as Long
         val codegenVersion = annotationParams["codegenVersion"] as String
+        val codegenMajorVersion = codegenVersion.substringBefore(".")
         val sourceRelative = File(annotationParams["sourceFile"] as String)
 
         val lastGenInputSignatures = (annotationParams["inputSignatures"] as String).lines().toSet()
@@ -151,7 +152,7 @@ class StaleDataclassProcessor: AbstractProcessor() {
             stale += Stale(clazz, source, lastGenerated)
         }
 
-        if (codegenVersion != CODEGEN_VERSION) {
+        if (codegenMajorVersion != CODEGEN_VERSION.substringBefore(".")) {
             stale += Stale(clazz, source, lastGenerated)
         }
     }

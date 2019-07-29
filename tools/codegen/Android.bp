@@ -1,5 +1,5 @@
 java_binary_host {
-    name: "codegen",
+    name: "codegen_cli",
     manifest: "manifest.txt",
     srcs: [
         "src/**/*.kt",
