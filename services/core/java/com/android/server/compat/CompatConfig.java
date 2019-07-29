@@ -17,14 +17,27 @@
 package com.android.server.compat;
 
 import android.content.pm.ApplicationInfo;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.LongSparseArray;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.compat.config.Change;
+import com.android.server.compat.config.XmlParser;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+
+import javax.xml.datatype.DatatypeConfigurationException;
 /**
  * This class maintains state relating to platform compatibility changes.
  *
@@ -33,7 +46,12 @@ import java.io.PrintWriter;
  */
 public final class CompatConfig {
 
-    private static final CompatConfig sInstance = new CompatConfig();
+    private static final String TAG = "CompatConfig";
+    private static final String CONFIG_FILE_SUFFIX = "platform_compat_config.xml";
+
+    private static final CompatConfig sInstance = new CompatConfig().initConfigFromLib(
+            Environment.buildPath(
+                    Environment.getRootDirectory(), "etc", "sysconfig"));
 
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
@@ -185,6 +203,31 @@ public final class CompatConfig {
                 CompatChange c = mChanges.valueAt(i);
                 pw.println(c.toString());
             }
+        }
+    }
+
+    CompatConfig initConfigFromLib(File libraryDir) {
+        if (!libraryDir.exists() || !libraryDir.isDirectory()) {
+            Slog.e(TAG, "No directory " + libraryDir + ", skipping");
+            return this;
+        }
+        for (File f : libraryDir.listFiles()) {
+            //TODO(b/138222363): Handle duplicate ids across config files.
+            if (f.getPath().endsWith(CONFIG_FILE_SUFFIX)) {
+                readConfig(f);
+            }
+        }
+        return this;
+    }
+
+    private void readConfig(File configFile) {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
+            for (Change change : XmlParser.read(in).getCompatChange()) {
+                Slog.w(TAG, "Adding: " + change.toString());
+                addChange(new CompatChange(change));
+            }
+        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
+            Slog.e(TAG, "Encountered an error while reading/parsing compat config file", e);
         }
     }
 
