@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.util.SparseArray;
 
@@ -41,6 +42,12 @@ class PackageSettingBuilder {
     private long[] mUsesStaticLibrariesVersions;
     private String mVolumeUuid;
     private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
+    private PackageParser.Package mPkg;
+
+    public PackageSettingBuilder setPackage(PackageParser.Package pkg) {
+        this.mPkg = pkg;
+        return this;
+    }
 
     public PackageSettingBuilder setName(String name) {
         this.mName = name;
@@ -144,6 +151,7 @@ class PackageSettingBuilder {
                 mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mParentPackageName,
                 mChildPackageNames, mSharedUserId, mUsesStaticLibraries,
                 mUsesStaticLibrariesVersions);
+        packageSetting.pkg = mPkg;
         packageSetting.volumeUuid = this.mVolumeUuid;
         for (int i = 0; i < mUserStates.size(); i++) {
             packageSetting.setUserState(mUserStates.keyAt(i), mUserStates.valueAt(i));
