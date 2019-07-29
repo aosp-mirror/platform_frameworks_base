@@ -374,6 +374,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
         clipTransientViews();
 
         setClipTopAmount(clipTopAmount);
+        boolean isHidden = getViewState().hidden || clipTopAmount >= getIntrinsicHeight();
+        if (mShowNotificationShelf) {
+            setVisibility(isHidden ? View.INVISIBLE : View.VISIBLE);
+        }
         setBackgroundTop(backgroundTop);
         setFirstElementRoundness(firstElementRoundness);
         mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
