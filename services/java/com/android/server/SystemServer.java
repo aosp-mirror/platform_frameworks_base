@@ -1980,6 +1980,11 @@ public final class SystemServer {
         }
         t.traceEnd();
 
+        // Permission policy service
+        t.traceBegin("StartPermissionPolicyService");
+        mSystemServiceManager.startService(PermissionPolicyService.class);
+        t.traceEnd();
+
         t.traceBegin("MakePackageManagerServiceReady");
         mPackageManagerService.systemReady();
         t.traceEnd();
@@ -2012,11 +2017,6 @@ public final class SystemServer {
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");
         mSystemServiceManager.startBootPhase(t, SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
-        t.traceEnd();
-
-        // Permission policy service
-        t.traceBegin("StartPermissionPolicyService");
-        mSystemServiceManager.startService(PermissionPolicyService.class);
         t.traceEnd();
 
         // These are needed to propagate to the runnable below.

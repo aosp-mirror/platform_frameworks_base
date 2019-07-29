@@ -66,6 +66,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
+import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -85,6 +86,10 @@ public final class PermissionPolicyService extends SystemService {
     /** Whether the user is started but not yet stopped */
     @GuardedBy("mLock")
     private final SparseBooleanArray mIsStarted = new SparseBooleanArray();
+
+    /** Callbacks for when a user is initialized */
+    @GuardedBy("mLock")
+    private OnInitializedCallback mOnInitializedCallback;
 
     /**
      * Whether an async {@link #synchronizePackagePermissionsAndAppOpsForUser} is currently
@@ -240,12 +245,20 @@ public final class PermissionPolicyService extends SystemService {
 
         grantOrUpgradeDefaultRuntimePermissionsIfNeeded(userId);
 
+        final OnInitializedCallback callback;
+
         synchronized (mLock) {
             mIsStarted.put(userId, true);
+            callback = mOnInitializedCallback;
         }
 
         // Force synchronization as permissions might have changed
         synchronizePermissionsAndAppOpsForUser(userId);
+
+        // Tell observers we are initialized for this user.
+        if (callback != null) {
+            callback.onInitialized(userId);
+        }
     }
 
     @Override
@@ -807,6 +820,18 @@ public final class PermissionPolicyService extends SystemService {
                 return false;
             }
             return true;
+        }
+
+        @Override
+        public boolean isInitialized(int userId) {
+            return isStarted(userId);
+        }
+
+        @Override
+        public void setOnInitializedCallback(@NonNull OnInitializedCallback callback) {
+            synchronized (mLock) {
+                mOnInitializedCallback = callback;
+            }
         }
 
         /**

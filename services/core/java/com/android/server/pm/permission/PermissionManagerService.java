@@ -125,6 +125,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal.Default
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultHomeProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
 import libcore.util.EmptyArray;
@@ -226,6 +227,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @GuardedBy("mLock")
     private boolean mSystemReady;
+
+    @GuardedBy("mLock")
+    private PermissionPolicyInternal mPermissionPolicyInternal;
 
     /**
      * For each foreground/background permission the mapping:
@@ -2443,6 +2447,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             boolean softRestricted = bp.isSoftRestricted();
 
                             for (int userId : currentUserIds) {
+                                // If permission policy is not ready we don't deal with restricted
+                                // permissions as the policy may whitelist some permissions. Once
+                                // the policy is initialized we would re-evaluate permissions.
+                                final boolean permissionPolicyInitialized =
+                                        mPermissionPolicyInternal != null
+                                                && mPermissionPolicyInternal.isInitialized(userId);
+
                                 PermissionState permState = origPermissions
                                         .getRuntimePermissionState(perm, userId);
                                 int flags = permState != null ? permState.getFlags() : 0;
@@ -2457,7 +2468,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                                 if (appSupportsRuntimePermissions) {
                                     // If hard restricted we don't allow holding it
-                                    if (hardRestricted) {
+                                    if (permissionPolicyInitialized && hardRestricted) {
                                         if (!restrictionExempt) {
                                             if (permState != null && permState.isGranted()
                                                     && permissionsState.revokeRuntimePermission(
@@ -2470,7 +2481,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                             }
                                         }
                                     // If soft restricted we allow holding in a restricted form
-                                    } else if (softRestricted) {
+                                    } else if (permissionPolicyInitialized && softRestricted) {
                                         // Regardless if granted set the restriction flag as it
                                         // may affect app treatment based on this permission.
                                         if (!restrictionExempt && !restrictionApplied) {
@@ -2489,7 +2500,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                         flags &= ~FLAG_PERMISSION_REVOKE_ON_UPGRADE;
                                         wasChanged = true;
                                     // Hard restricted permissions cannot be held.
-                                    } else if (!hardRestricted || restrictionExempt) {
+                                    } else if (!permissionPolicyInitialized
+                                            || (!hardRestricted || restrictionExempt)) {
                                         if (permState != null && permState.isGranted()) {
                                             if (permissionsState.grantRuntimePermission(bp, userId)
                                                     == PERMISSION_OPERATION_FAILURE) {
@@ -2518,31 +2530,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                                     // If legacy app always grant the permission but if restricted
                                     // and not exempt take a note a restriction should be applied.
-                                    if ((hardRestricted || softRestricted)
-                                            && !restrictionExempt && !restrictionApplied) {
+                                    if (permissionPolicyInitialized
+                                            && (hardRestricted || softRestricted)
+                                                    && !restrictionExempt && !restrictionApplied) {
                                         flags |= FLAG_PERMISSION_APPLY_RESTRICTION;
                                         wasChanged = true;
                                     }
                                 }
 
                                 // If unrestricted or restriction exempt, don't apply restriction.
-                                if (!(hardRestricted || softRestricted) || restrictionExempt)  {
-                                    if (restrictionApplied) {
-                                        flags &= ~FLAG_PERMISSION_APPLY_RESTRICTION;
-                                        // Dropping restriction on a legacy app requires a review.
-                                        if (!appSupportsRuntimePermissions) {
-                                            flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+                                if (permissionPolicyInitialized) {
+                                    if (!(hardRestricted || softRestricted) || restrictionExempt) {
+                                        if (restrictionApplied) {
+                                            flags &= ~FLAG_PERMISSION_APPLY_RESTRICTION;
+                                            // Dropping restriction on a legacy app implies a review
+                                            if (!appSupportsRuntimePermissions) {
+                                                flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+                                            }
+                                            wasChanged = true;
                                         }
-                                        wasChanged = true;
                                     }
-                                }
-
-                                if (hardRestricted && !restrictionExempt
-                                        && (flags & FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
-                                    // Applying a hard restriction implies revoking it. This might
-                                    // lead to a system-fixed, revoked permission.
-                                    flags &= ~FLAG_PERMISSION_SYSTEM_FIXED;
-                                    wasChanged = true;
                                 }
 
                                 if (wasChanged) {
@@ -2579,6 +2586,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             boolean softRestricted = bp.isSoftRestricted();
 
                             for (int userId : currentUserIds) {
+                                // If permission policy is not ready we don't deal with restricted
+                                // permissions as the policy may whitelist some permissions. Once
+                                // the policy is initialized we would re-evaluate permissions.
+                                final boolean permissionPolicyInitialized =
+                                        mPermissionPolicyInternal != null
+                                                && mPermissionPolicyInternal.isInitialized(userId);
+
                                 boolean wasChanged = false;
 
                                 boolean restrictionExempt =
@@ -2589,7 +2603,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                                 if (appSupportsRuntimePermissions) {
                                     // If hard restricted we don't allow holding it
-                                    if (hardRestricted) {
+                                    if (permissionPolicyInitialized && hardRestricted) {
                                         if (!restrictionExempt) {
                                             if (permState != null && permState.isGranted()
                                                     && permissionsState.revokeRuntimePermission(
@@ -2602,7 +2616,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                             }
                                         }
                                     // If soft restricted we allow holding in a restricted form
-                                    } else if (softRestricted) {
+                                    } else if (permissionPolicyInitialized && softRestricted) {
                                         // Regardless if granted set the  restriction flag as it
                                         // may affect app treatment based on this permission.
                                         if (!restrictionExempt && !restrictionApplied) {
@@ -2621,7 +2635,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                         flags &= ~FLAG_PERMISSION_REVOKE_ON_UPGRADE;
                                         wasChanged = true;
                                     // Hard restricted permissions cannot be held.
-                                    } else if (!hardRestricted || restrictionExempt) {
+                                    } else if (!permissionPolicyInitialized ||
+                                            (!hardRestricted || restrictionExempt)) {
                                         if (permissionsState.grantRuntimePermission(bp, userId) !=
                                                 PERMISSION_OPERATION_FAILURE) {
                                              wasChanged = true;
@@ -2637,22 +2652,25 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                                     // If legacy app always grant the permission but if restricted
                                     // and not exempt take a note a restriction should be applied.
-                                    if ((hardRestricted || softRestricted)
-                                            && !restrictionExempt && !restrictionApplied) {
+                                    if (permissionPolicyInitialized
+                                            && (hardRestricted || softRestricted)
+                                                    && !restrictionExempt && !restrictionApplied) {
                                         flags |= FLAG_PERMISSION_APPLY_RESTRICTION;
                                         wasChanged = true;
                                     }
                                 }
 
                                 // If unrestricted or restriction exempt, don't apply restriction.
-                                if (!(hardRestricted || softRestricted) || restrictionExempt)  {
-                                    if (restrictionApplied) {
-                                        flags &= ~FLAG_PERMISSION_APPLY_RESTRICTION;
-                                        // Dropping restriction on a legacy app requires a review.
-                                        if (!appSupportsRuntimePermissions) {
-                                            flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+                                if (permissionPolicyInitialized) {
+                                    if (!(hardRestricted || softRestricted) || restrictionExempt) {
+                                        if (restrictionApplied) {
+                                            flags &= ~FLAG_PERMISSION_APPLY_RESTRICTION;
+                                            // Dropping restriction on a legacy app implies a review
+                                            if (!appSupportsRuntimePermissions) {
+                                                flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+                                            }
+                                            wasChanged = true;
                                         }
-                                        wasChanged = true;
                                     }
                                 }
 
@@ -3959,6 +3977,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
+        mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
 
         int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
         for (int userId : UserManagerService.getInstance().getUserIds()) {
