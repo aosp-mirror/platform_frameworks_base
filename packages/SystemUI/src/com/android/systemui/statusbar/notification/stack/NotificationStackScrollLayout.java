@@ -1355,7 +1355,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mIsClipped = clipped;
         }
 
-        if (!mAmbientPulseManager.hasNotifications() && mAmbientState.isFullyDark()) {
+        if (!mPulsing && mAmbientState.isFullyDark()) {
             setClipBounds(null);
         } else if (mAmbientState.isDarkAtAll()) {
             clipToOutline = true;
@@ -5169,6 +5169,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return;
         }
         mPulsing = pulsing;
+        updateClipping();
         mAmbientState.setPulsing(pulsing);
         mSwipeHelper.setPulsing(pulsing);
         updateNotificationAnimationStates();

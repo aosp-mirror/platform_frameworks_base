@@ -512,7 +512,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float viewEnd = row.getTranslationY() + row.getActualHeight();
         boolean isPinned = (row.isPinned() || row.isHeadsUpAnimatingAway())
                 && !mAmbientState.isDozingAndNotPulsing(row);
-        boolean shouldClipOwnTop = row.showingAmbientPulsing()
+        boolean shouldClipOwnTop = row.showingAmbientPulsing() && !mAmbientState.isFullyDark()
                 || (mAmbientState.isPulseExpanding() && childIndex == 0);
         if (viewEnd > notificationClipEnd && !shouldClipOwnTop
                 && (mAmbientState.isShadeExpanded() || !isPinned)) {
@@ -752,8 +752,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 iconState.scaleY = 1.0f;
                 iconState.hidden = false;
             }
-            if (row.isAboveShelf() || (!row.isInShelf() && (isLastChild && row.areGutsExposed()
-                    || row.getTranslationZ() > mAmbientState.getBaseZHeight()))) {
+            if ((row.isAboveShelf() || (!row.isInShelf() && (isLastChild && row.areGutsExposed()
+                    || row.getTranslationZ() > mAmbientState.getBaseZHeight())))
+                        && !mAmbientState.isFullyDark()) {
                 iconState.hidden = true;
             }
             int backgroundColor = getBackgroundColorWithoutTint();
