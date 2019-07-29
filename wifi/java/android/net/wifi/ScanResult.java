@@ -427,6 +427,21 @@ public class ScanResult implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public boolean is60GHz() {
+        return ScanResult.is60GHz(frequency);
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public static boolean is60GHz(int freq) {
+        return freq >= 58320 && freq <= 70200;
+    }
+
+    /**
      *  @hide
      * anqp lines from supplicant BSS response
      */

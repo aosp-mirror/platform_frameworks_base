@@ -106,6 +106,16 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static final int HIGHER_FREQ_5GHZ = 5900;
 
+    /**
+     * Lower bound on the 60 GHz (802.11ad) WIGIG channels
+     */
+    public static final int LOWER_FREQ_60GHZ = 58320;
+
+    /**
+     * Upper bound on the 60 GHz (802.11ad) WIGIG channels
+     */
+    public static final int HIGHER_FREQ_60GHZ = 70200;
+
     /** The key which identifies this AccessPoint grouping. */
     private String mKey;
 
