@@ -90,11 +90,24 @@ class KeyguardController {
     }
 
     /**
-     * @return true if either 1) AOD is showing, or 2) Keyguard is showing, not going away, and not
-     *         being occluded on the given display, false otherwise.
+     * @return true if either Keyguard or AOD are showing, not going away, and not being occluded
+     *         on the given display, false otherwise.
      */
     boolean isKeyguardOrAodShowing(int displayId) {
-        return mAodShowing || isKeyguardShowing(displayId);
+        return (mKeyguardShowing || mAodShowing) && !mKeyguardGoingAway
+                && !isDisplayOccluded(displayId);
+    }
+
+    /**
+     * @return {@code true} for default display when AOD is showing. Otherwise, same as
+     *         {@link #isKeyguardOrAodShowing(int)}
+     * TODO(b/125198167): Replace isKeyguardOrAodShowing() by this logic.
+     */
+    boolean isKeyguardUnoccludedOrAodShowing(int displayId) {
+        if (displayId == DEFAULT_DISPLAY && mAodShowing) {
+            return true;
+        }
+        return isKeyguardOrAodShowing(displayId);
     }
 
     /**
@@ -102,7 +115,7 @@ class KeyguardController {
      *         display, false otherwise
      */
     boolean isKeyguardShowing(int displayId) {
-        return mKeyguardShowing && !mKeyguardGoingAway && !isKeyguardOccluded(displayId);
+        return mKeyguardShowing && !mKeyguardGoingAway && !isDisplayOccluded(displayId);
     }
 
     /**
@@ -315,7 +328,7 @@ class KeyguardController {
             return;
         }
 
-        mWindowManager.onKeyguardOccludedChanged(isKeyguardOccluded(DEFAULT_DISPLAY));
+        mWindowManager.onKeyguardOccludedChanged(isDisplayOccluded(DEFAULT_DISPLAY));
         if (isKeyguardLocked()) {
             mWindowManager.deferSurfaceLayout();
             try {
@@ -360,7 +373,7 @@ class KeyguardController {
         }
     }
 
-    private boolean isKeyguardOccluded(int displayId) {
+    private boolean isDisplayOccluded(int displayId) {
         return getDisplay(displayId).mOccluded;
     }
 
@@ -378,13 +391,13 @@ class KeyguardController {
         if (mBeforeUnoccludeTransit != TRANSIT_UNSET
                 && dc.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
                 // TODO(b/113840485): Handle app transition for individual display.
-                && isKeyguardOccluded(DEFAULT_DISPLAY)) {
+                && isDisplayOccluded(DEFAULT_DISPLAY)) {
 
             // Reuse old transit in case we are occluding Keyguard again, meaning that we never
             // actually occclude/unocclude Keyguard, but just run a normal transition.
             return mBeforeUnoccludeTransit;
             // TODO(b/113840485): Handle app transition for individual display.
-        } else if (!isKeyguardOccluded(DEFAULT_DISPLAY)) {
+        } else if (!isDisplayOccluded(DEFAULT_DISPLAY)) {
 
             // Save transit in case we dismiss/occlude Keyguard shortly after.
             mBeforeUnoccludeTransit = dc.mAppTransition.getAppTransition();
@@ -396,7 +409,7 @@ class KeyguardController {
 
     private void dismissDockedStackIfNeeded() {
         // TODO(b/113840485): Handle docked stack for individual display.
-        if (mKeyguardShowing && isKeyguardOccluded(DEFAULT_DISPLAY)) {
+        if (mKeyguardShowing && isDisplayOccluded(DEFAULT_DISPLAY)) {
             // The lock screen is currently showing, but is occluded by a window that can
             // show on top of the lock screen. In this can we want to dismiss the docked
             // stack since it will be complicated/risky to try to put the activity on top
@@ -421,9 +434,9 @@ class KeyguardController {
 
     private void updateKeyguardSleepToken(int displayId) {
         final KeyguardDisplayState state = getDisplay(displayId);
-        if (isKeyguardOrAodShowing(displayId) && state.mSleepToken == null) {
+        if (isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken == null) {
             state.acquiredSleepToken();
-        } else if (!isKeyguardOrAodShowing(displayId) && state.mSleepToken != null) {
+        } else if (!isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken != null) {
             state.releaseSleepToken();
         }
     }
