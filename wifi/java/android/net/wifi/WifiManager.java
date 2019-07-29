@@ -671,6 +671,14 @@ public class WifiManager {
     public static final int IFACE_IP_MODE_LOCAL_ONLY = 2;
 
     /**
+     * Broadcast intent action indicating that the wifi network settings
+     * had been reset.
+     * @hide
+     */
+    public static final String WIFI_NETWORK_SETTINGS_RESET_ACTION =
+            "android.net.wifi.action.NETWORK_SETTINGS_RESET";
+
+    /**
      * Broadcast intent action indicating that a connection to the supplicant has
      * been established (and it is now possible
      * to perform Wi-Fi operations) or the connection to the supplicant has been
