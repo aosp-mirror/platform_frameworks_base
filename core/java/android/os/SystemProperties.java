@@ -88,12 +88,17 @@ public class SystemProperties {
 
     @UnsupportedAppUsage
     private static native String native_get(String key);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native String native_get(String key, String def);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native int native_get_int(String key, int def);
     @UnsupportedAppUsage
     private static native long native_get_long(String key, long def);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native boolean native_get_boolean(String key, boolean def);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_set(String key, String def);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_add_change_callback();
     private static native void native_report_sysprop_change();
 

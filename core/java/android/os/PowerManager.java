@@ -824,6 +824,7 @@ public final class PowerManager {
     final Context mContext;
     @UnsupportedAppUsage
     final IPowerManager mService;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final Handler mHandler;
 
     IThermalService mThermalService;
