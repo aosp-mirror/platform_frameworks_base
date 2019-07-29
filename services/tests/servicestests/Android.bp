@@ -38,6 +38,7 @@ android_test {
         "ub-uiautomator",
         "platformprotosnano",
         "servicestests-utils",
+        "xml-writer-device-lib",
     ],
 
     aidl: {
