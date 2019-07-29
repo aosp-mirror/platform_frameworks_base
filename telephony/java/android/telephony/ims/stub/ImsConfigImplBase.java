@@ -342,6 +342,17 @@ public class ImsConfigImplBase {
     }
 
     /**
+     * The framework has received an RCS autoconfiguration XML file for provisioning.
+     *
+     * @param config The XML file to be read, if not compressed, it should be in ASCII/UTF8 format.
+     * @param isCompressed The XML file is compressed in gzip format and must be decompressed
+     *         before being read.
+     * @hide
+     */
+    public void notifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed) {
+    }
+
+    /**
      * Sets the configuration value for this ImsService.
      *
      * @param item an integer key.
