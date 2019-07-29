@@ -23,6 +23,7 @@
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
+#include "hwui/Paint.h"
 #include "SkiaCanvas.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
@@ -96,7 +97,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto halfGreenNode = TestUtils::createSkiaNode(
             0, 0, 2, 2, [](RenderProperties& props, SkiaRecordingCanvas& bottomHalfGreenCanvas) {
-                SkPaint greenPaint;
+                Paint greenPaint;
                 greenPaint.setColor(SK_ColorGREEN);
                 greenPaint.setStyle(SkPaint::kFill_Style);
                 bottomHalfGreenCanvas.drawRect(0, 1, 2, 2, greenPaint);
@@ -294,7 +295,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, deferRenderNodeScene) {
     };
 
     std::vector<sp<RenderNode>> nodes;
-    SkPaint transparentPaint;
+    Paint transparentPaint;
     transparentPaint.setAlpha(128);
 
     // backdrop

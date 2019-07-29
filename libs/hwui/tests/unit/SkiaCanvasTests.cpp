@@ -16,6 +16,7 @@
 
 #include "tests/common/TestUtils.h"
 
+#include <hwui/Paint.h>
 #include <SkBlurDrawLooper.h>
 #include <SkCanvasStateUtils.h>
 #include <SkPicture.h>
@@ -32,7 +33,7 @@ TEST(SkiaCanvas, drawShadowLayer) {
     // clear to white
     canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrc);
 
-    SkPaint paint;
+    Paint paint;
     // it is transparent to ensure that we still draw the rect since it has a looper
     paint.setColor(SK_ColorTRANSPARENT);
     // this is how view's shadow layers are implemented

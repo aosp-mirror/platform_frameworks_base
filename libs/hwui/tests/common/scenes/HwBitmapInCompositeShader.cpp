@@ -65,7 +65,7 @@ public:
         sk_sp<SkShader> compositeShader(
                 SkShaders::Blend(SkBlendMode::kDstATop, hardwareShader, gradientShader));
 
-        SkPaint paint;
+        Paint paint;
         paint.setShader(std::move(compositeShader));
         canvas.drawRoundRect(0, 0, 400, 200, 10.0f, 10.0f, paint);
     }

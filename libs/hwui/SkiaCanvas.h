@@ -22,8 +22,10 @@
 #include "RenderNode.h"
 #include "VectorDrawable.h"
 #include "hwui/Canvas.h"
+#include "hwui/Paint.h"
 
 #include <SkCanvas.h>
+#include "src/core/SkArenaAlloc.h"
 
 #include <cassert>
 #include <optional>
@@ -99,39 +101,39 @@ public:
     virtual void drawColor(int color, SkBlendMode mode) override;
     virtual void drawPaint(const SkPaint& paint) override;
 
-    virtual void drawPoint(float x, float y, const SkPaint& paint) override;
-    virtual void drawPoints(const float* points, int count, const SkPaint& paint) override;
+    virtual void drawPoint(float x, float y, const Paint& paint) override;
+    virtual void drawPoints(const float* points, int count, const Paint& paint) override;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
-                          const SkPaint& paint) override;
-    virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
+                          const Paint& paint) override;
+    virtual void drawLines(const float* points, int count, const Paint& paint) override;
     virtual void drawRect(float left, float top, float right, float bottom,
-                          const SkPaint& paint) override;
-    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
+                          const Paint& paint) override;
+    virtual void drawRegion(const SkRegion& region, const Paint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
-                               const SkPaint& paint) override;
+                               const Paint& paint) override;
 
    virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
-                               const SkPaint& paint) override;
+                               const Paint& paint) override;
 
-    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
+    virtual void drawCircle(float x, float y, float radius, const Paint& paint) override;
     virtual void drawOval(float left, float top, float right, float bottom,
-                          const SkPaint& paint) override;
+                          const Paint& paint) override;
     virtual void drawArc(float left, float top, float right, float bottom, float startAngle,
-                         float sweepAngle, bool useCenter, const SkPaint& paint) override;
-    virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
-    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) override;
+                         float sweepAngle, bool useCenter, const Paint& paint) override;
+    virtual void drawPath(const SkPath& path, const Paint& paint) override;
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const Paint& paint) override;
 
-    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
-    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
                             float srcBottom, float dstLeft, float dstTop, float dstRight,
-                            float dstBottom, const SkPaint* paint) override;
+                            float dstBottom, const Paint* paint) override;
     virtual void drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
                                 const float* vertices, const int* colors,
-                                const SkPaint* paint) override;
+                                const Paint* paint) override;
     virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk, float dstLeft,
                                float dstTop, float dstRight, float dstBottom,
-                               const SkPaint* paint) override;
+                               const Paint* paint) override;
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) override;
 
     virtual bool drawTextAbsolutePos() const override { return true; }
@@ -208,6 +210,35 @@ protected:
      */
     PaintCoW&& filterPaint(PaintCoW&& paint) const;
 
+    template <typename Proc> void apply_looper(const Paint* paint, Proc proc) {
+        SkPaint skp;
+        SkDrawLooper* looper = nullptr;
+        if (paint) {
+            skp = *filterPaint(paint);
+            looper = paint->getLooper();
+        }
+        if (looper) {
+            SkSTArenaAlloc<256> alloc;
+            SkDrawLooper::Context* ctx = looper->makeContext(&alloc);
+            if (ctx) {
+                SkDrawLooper::Context::Info info;
+                for (;;) {
+                    SkPaint p = skp;
+                    if (!ctx->next(&info, &p)) {
+                        break;
+                    }
+                    mCanvas->save();
+                    mCanvas->translate(info.fTranslate.fX, info.fTranslate.fY);
+                    proc(p);
+                    mCanvas->restore();
+                }
+            }
+        } else {
+            proc(skp);
+        }
+    }
+
+
 private:
     struct SaveRec {
         int saveCount;
@@ -222,7 +253,7 @@ private:
     void recordClip(const T&, SkClipOp);
     void applyPersistentClips(size_t clipStartIndex);
 
-    void drawPoints(const float* points, int count, const SkPaint& paint, SkCanvas::PointMode mode);
+    void drawPoints(const float* points, int count, const Paint& paint, SkCanvas::PointMode mode);
 
     class Clip;
 

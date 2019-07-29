@@ -79,7 +79,7 @@ class ListViewAnimation : public TestListViewSceneBase {
         static sk_sp<Bitmap> filledBox(createBoxBitmap(true));
         static sk_sp<Bitmap> strokedBox(createBoxBitmap(false));
         // TODO: switch to using round rect clipping, once merging correctly handles that
-        SkPaint roundRectPaint;
+        Paint roundRectPaint;
         roundRectPaint.setAntiAlias(true);
         roundRectPaint.setColor(Color::White);
         canvas.drawRoundRect(0, 0, itemWidth, itemHeight, dp(6), dp(6), roundRectPaint);

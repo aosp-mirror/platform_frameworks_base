@@ -45,14 +45,14 @@ public:
 
     virtual uirenderer::DisplayList* finishRecording() override;
 
-    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
-    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
                             float srcBottom, float dstLeft, float dstTop, float dstRight,
-                            float dstBottom, const SkPaint* paint) override;
+                            float dstBottom, const Paint* paint) override;
     virtual void drawNinePatch(Bitmap& hwuiBitmap, const android::Res_png_9patch& chunk,
                                float dstLeft, float dstTop, float dstRight, float dstBottom,
-                               const SkPaint* paint) override;
+                               const Paint* paint) override;
     virtual double drawAnimatedImage(AnimatedImageDrawable* animatedImage) override;
 
     virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
