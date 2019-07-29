@@ -338,8 +338,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
                 || mShowingLaunchAffordance;
         if (mBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
-            if ((mHeadsUpManager.isHeadsUpGoingAway() || mHeadsUpManager.hasPinnedHeadsUp())
-                    && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+            if ((mHeadsUpManager.isHeadsUpGoingAway() || mHeadsUpManager.hasPinnedHeadsUp()
+                    || mStatusBarStateController.getState() == StatusBarState.KEYGUARD)
                     && !mWakeUpCoordinator.getNotificationsFullyHidden()) {
                 invisible = true;
             }
