@@ -224,6 +224,8 @@
     <library name="android.hidl.manager-V1.0-java"
             file="/system/framework/android.hidl.manager-V1.0-java.jar"
             dependency="android.hidl.base-V1.0-java" />
+    <library name="telephony-common"
+        file="/system/framework/telephony-common.jar" />
 
     <!-- These are the standard packages that are white-listed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->

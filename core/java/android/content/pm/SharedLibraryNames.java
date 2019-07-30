@@ -33,4 +33,6 @@ public class SharedLibraryNames {
     static final String ANDROID_TEST_RUNNER = "android.test.runner";
 
     public static final String ORG_APACHE_HTTP_LEGACY = "org.apache.http.legacy";
+
+    public static final String ANDROID_TELEPHONY_COMMON = "telephony-common";
 }

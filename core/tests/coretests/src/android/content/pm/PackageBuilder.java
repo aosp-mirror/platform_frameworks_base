@@ -37,6 +37,8 @@ class PackageBuilder {
 
     private ArrayList<String> mOptionalLibraries;
 
+    private String mSharedUid;
+
     public static PackageBuilder builder() {
         return new PackageBuilder();
     }
@@ -47,11 +49,17 @@ class PackageBuilder {
         pkg.applicationInfo.flags = mFlags;
         pkg.usesLibraries = mRequiredLibraries;
         pkg.usesOptionalLibraries = mOptionalLibraries;
+        pkg.mSharedUserId = mSharedUid;
         return pkg;
     }
 
     PackageBuilder targetSdkVersion(int version) {
         this.mTargetSdkVersion = version;
+        return this;
+    }
+
+    PackageBuilder setSharedUid(String uid) {
+        this.mSharedUid = uid;
         return this;
     }
 
