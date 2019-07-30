@@ -102,10 +102,8 @@ framework_srcs = [
 
     // etc.
     "core/java/**/*.logtags",
-    ":apex-properties",
     ":framework-javastream-protos",
     ":framework-statslog-gen",
-    ":platform-properties",
 ]
 
 framework_aidl_local_include_dirs = [
@@ -208,6 +206,9 @@ java_defaults {
         "android.hardware.vibrator-V1.3-java",
         "android.hardware.wifi-V1.0-java-constants",
         "devicepolicyprotosnano",
+
+        "com.android.sysprop.apex",
+        "PlatformProperties",
     ],
 
     required: [
