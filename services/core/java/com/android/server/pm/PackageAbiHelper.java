@@ -26,7 +26,7 @@ import java.io.File;
 import java.util.Set;
 
 @VisibleForTesting
-interface PackageAbiHelper {
+public interface PackageAbiHelper {
     /**
      * Derive and get the location of native libraries for the given package,
      * which varies depending on where and how the package was installed.
