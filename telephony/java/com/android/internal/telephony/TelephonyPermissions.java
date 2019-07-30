@@ -367,7 +367,7 @@ public final class TelephonyPermissions {
         ApplicationInfo callingPackageInfo = null;
         try {
             callingPackageInfo = context.getPackageManager().getApplicationInfoAsUser(
-                    callingPackage, 0, UserHandle.getUserId(uid));
+                    callingPackage, 0, UserHandle.getUserHandleForUid(uid));
             if (callingPackageInfo != null) {
                 if (callingPackageInfo.isSystemApp()) {
                     isPreinstalled = true;

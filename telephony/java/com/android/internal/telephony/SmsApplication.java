@@ -158,7 +158,7 @@ public final class SmsApplication {
                 ApplicationInfo appInfo;
                 try {
                     appInfo = pm.getApplicationInfoAsUser(mPackageName, 0,
-                            UserHandle.getUserId(mUid));
+                            UserHandle.getUserHandleForUid(mUid));
                 } catch (NameNotFoundException e) {
                     return null;
                 }
@@ -300,7 +300,7 @@ public final class SmsApplication {
                 Uri.fromParts(SCHEME_SMSTO, "", null));
         List<ResolveInfo> respondServices = packageManager.queryIntentServicesAsUser(intent,
                 PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                userId);
+                UserHandle.getUserHandleForUid(userId));
         for (ResolveInfo resolveInfo : respondServices) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo == null) {
