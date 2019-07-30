@@ -255,7 +255,7 @@ public class BubbleView extends FrameLayout {
         iconPath.transform(matrix);
         mBadgedImageView.drawDot(iconPath);
 
-        animateDot(mBubble.showInShadeWhenBubble() /* showDot */, null /* after */);
+        animateDot(mBubble.showBubbleDot() /* showDot */, null /* after */);
     }
 
     int getBadgeColor() {
