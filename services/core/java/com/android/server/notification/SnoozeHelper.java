@@ -17,7 +17,6 @@ package com.android.server.notification;
 
 import android.annotation.NonNull;
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -102,6 +101,46 @@ public class SnoozeHelper {
             return mSnoozedNotifications.get(userId).get(pkg).values();
         }
         return Collections.EMPTY_LIST;
+    }
+
+    @NonNull
+    ArrayList<NotificationRecord> getNotifications(String pkg,
+            String groupKey, Integer userId) {
+        ArrayList<NotificationRecord> records =  new ArrayList<>();
+        if (mSnoozedNotifications.containsKey(userId)
+                && mSnoozedNotifications.get(userId).containsKey(pkg)) {
+            ArrayMap<String, NotificationRecord> packages =
+                    mSnoozedNotifications.get(userId).get(pkg);
+            for (int i = 0; i < packages.size(); i++) {
+                String currentGroupKey = packages.valueAt(i).sbn.getGroup();
+                if (currentGroupKey.equals(groupKey)) {
+                    records.add(packages.valueAt(i));
+                }
+            }
+        }
+        return records;
+    }
+
+    protected NotificationRecord getNotification(String key) {
+        List<NotificationRecord> snoozedForUser = new ArrayList<>();
+        IntArray userIds = mUserProfiles.getCurrentProfileIds();
+        if (userIds != null) {
+            final int userIdsSize = userIds.size();
+            for (int i = 0; i < userIdsSize; i++) {
+                final ArrayMap<String, ArrayMap<String, NotificationRecord>> snoozedPkgs =
+                        mSnoozedNotifications.get(userIds.get(i));
+                if (snoozedPkgs != null) {
+                    final int snoozedPkgsSize = snoozedPkgs.size();
+                    for (int j = 0; j < snoozedPkgsSize; j++) {
+                        final ArrayMap<String, NotificationRecord> records = snoozedPkgs.valueAt(j);
+                        if (records != null) {
+                            return records.get(key);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     protected @NonNull List<NotificationRecord> getSnoozed() {

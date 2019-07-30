@@ -5229,7 +5229,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void run() {
             synchronized (mNotificationLock) {
-                final NotificationRecord r = findNotificationByKeyLocked(mKey);
+                final NotificationRecord r = findInCurrentAndSnoozedNotificationByKeyLocked(mKey);
                 if (r != null) {
                     snoozeLocked(r);
                 }
@@ -5239,33 +5239,34 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mNotificationLock")
         void snoozeLocked(NotificationRecord r) {
             if (r.sbn.isGroup()) {
-                final List<NotificationRecord> groupNotifications = findGroupNotificationsLocked(
+                final List<NotificationRecord> groupNotifications =
+                        findCurrentAndSnoozedGroupNotificationsLocked(
                         r.sbn.getPackageName(), r.sbn.getGroupKey(), r.sbn.getUserId());
                 if (r.getNotification().isGroupSummary()) {
-                    // snooze summary and all children
+                    // snooze all children
                     for (int i = 0; i < groupNotifications.size(); i++) {
-                        snoozeNotificationLocked(groupNotifications.get(i));
+                        if (mKey != groupNotifications.get(i).getKey()) {
+                            snoozeNotificationLocked(groupNotifications.get(i));
+                        }
                     }
                 } else {
                     // if there is a valid summary for this group, and we are snoozing the only
                     // child, also snooze the summary
                     if (mSummaryByGroupKey.containsKey(r.sbn.getGroupKey())) {
-                        if (groupNotifications.size() != 2) {
-                            snoozeNotificationLocked(r);
-                        } else {
+                        if (groupNotifications.size() == 2) {
                             // snooze summary and the one child
                             for (int i = 0; i < groupNotifications.size(); i++) {
-                                snoozeNotificationLocked(groupNotifications.get(i));
+                                if (mKey != groupNotifications.get(i).getKey()) {
+                                    snoozeNotificationLocked(groupNotifications.get(i));
+                                }
                             }
                         }
-                    } else {
-                        snoozeNotificationLocked(r);
                     }
                 }
-            } else {
-                // just snooze the one notification
-                snoozeNotificationLocked(r);
             }
+            // snooze the notification
+            snoozeNotificationLocked(r);
+
         }
 
         @GuardedBy("mNotificationLock")
@@ -7050,6 +7051,15 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
+    @NonNull
+    List<NotificationRecord> findCurrentAndSnoozedGroupNotificationsLocked(String pkg,
+            String groupKey, int userId) {
+        List<NotificationRecord> records = mSnoozeHelper.getNotifications(pkg, groupKey, userId);
+        records.addAll(findGroupNotificationsLocked(pkg, groupKey, userId));
+        return records;
+    }
+
+    @GuardedBy("mNotificationLock")
     @NonNull List<NotificationRecord> findGroupNotificationsLocked(String pkg,
             String groupKey, int userId) {
         List<NotificationRecord> records = new ArrayList<>();
@@ -7059,6 +7069,15 @@ public class NotificationManagerService extends SystemService {
         return records;
     }
 
+    @GuardedBy("mNotificationLock")
+    private NotificationRecord findInCurrentAndSnoozedNotificationByKeyLocked(String key) {
+        NotificationRecord r = findNotificationByKeyLocked(key);
+        if (r == null) {
+            r = mSnoozeHelper.getNotification(key);
+        }
+        return r;
+
+    }
 
     @GuardedBy("mNotificationLock")
     private @NonNull List<NotificationRecord> findGroupNotificationByListLocked(

@@ -264,6 +264,63 @@ public class SnoozeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testGetSnoozedGroupNotifications() throws Exception {
+        IntArray profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_CURRENT);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
+        NotificationRecord r = getNotificationRecord("pkg", 1, "tag",
+                UserHandle.CURRENT, "group", true);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "tag",
+                UserHandle.CURRENT, "group", true);
+        NotificationRecord r3 = getNotificationRecord("pkg2", 3, "tag",
+                UserHandle.CURRENT, "group", true);
+        NotificationRecord r4 = getNotificationRecord("pkg2", 4, "tag",
+                UserHandle.CURRENT, "group", true);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.snooze(r3, 1000);
+        mSnoozeHelper.snooze(r4, 1000);
+
+        assertEquals(2,
+                mSnoozeHelper.getNotifications("pkg", "group", UserHandle.USER_CURRENT).size());
+    }
+
+    @Test
+    public void testGetSnoozedNotificationByKey() throws Exception {
+        IntArray profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_CURRENT);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
+        NotificationRecord r = getNotificationRecord("pkg", 1, "tag",
+                UserHandle.CURRENT, "group", true);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "tag",
+                UserHandle.CURRENT, "group", true);
+        NotificationRecord r3 = getNotificationRecord("pkg2", 3, "tag",
+                UserHandle.CURRENT, "group", true);
+        NotificationRecord r4 = getNotificationRecord("pkg2", 4, "tag",
+                UserHandle.CURRENT, "group", true);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.snooze(r3, 1000);
+        mSnoozeHelper.snooze(r4, 1000);
+
+        assertEquals(r, mSnoozeHelper.getNotification(r.getKey()));
+    }
+
+    @Test
+    public void testGetUnSnoozedNotificationByKey() throws Exception {
+        IntArray profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_CURRENT);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
+        NotificationRecord r = getNotificationRecord("pkg", 1, "tag",
+                UserHandle.CURRENT, "group", true);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "tag",
+                UserHandle.CURRENT, "group", true);
+        mSnoozeHelper.snooze(r2, 1000);
+
+        assertEquals(null, mSnoozeHelper.getNotification(r.getKey()));
+    }
+
+    @Test
     public void repostGroupSummary_onlyFellowGroupChildren() throws Exception {
         NotificationRecord r = getNotificationRecord(
                 "pkg", 1, "one", UserHandle.SYSTEM, "group1", false);
