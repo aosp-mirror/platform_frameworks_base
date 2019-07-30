@@ -1462,16 +1462,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @Nullable IRecentsAnimationRunner recentsAnimationRunner) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
         final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
                 final int recentsUid = mRecentTasks.getRecentsComponentUid();
+                final WindowProcessController caller = getProcessController(callingPid, callingUid);
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
                         getActivityStartController(), mWindowManager, intent, recentsComponent,
-                        recentsUid, callingPid);
+                        recentsUid, caller);
                 if (recentsAnimationRunner == null) {
                     anim.preloadRecentsActivity();
                 } else {
@@ -4650,7 +4652,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void registerRemoteAnimations(IBinder token, RemoteAnimationDefinition definition) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
-        definition.setCallingPid(Binder.getCallingPid());
+        definition.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
@@ -4670,7 +4672,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimationForNextActivityStart");
-        adapter.setCallingPid(Binder.getCallingPid());
+        adapter.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -4687,7 +4689,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteAnimationDefinition definition) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
-        definition.setCallingPid(Binder.getCallingPid());
+        definition.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final ActivityDisplay display = mRootActivityContainer.getActivityDisplay(displayId);
             if (display == null) {

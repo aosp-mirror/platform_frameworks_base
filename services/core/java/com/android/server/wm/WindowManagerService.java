@@ -4554,7 +4554,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
         public static final int RESTORE_POINTER_ICON = 55;
         public static final int SET_HAS_OVERLAY_UI = 58;
-        public static final int SET_RUNNING_REMOTE_ANIMATION = 59;
         public static final int ANIMATION_FAILSAFE = 60;
         public static final int RECOMPUTE_FOCUS = 61;
         public static final int ON_POINTER_DOWN_OUTSIDE_FOCUS = 62;
@@ -4931,10 +4930,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 case SET_HAS_OVERLAY_UI: {
                     mAmInternal.setHasOverlayUi(msg.arg1, msg.arg2 == 1);
-                    break;
-                }
-                case SET_RUNNING_REMOTE_ANIMATION: {
-                    mAmInternal.setRunningRemoteAnimation(msg.arg1, msg.arg2 == 1);
                     break;
                 }
                 case ANIMATION_FAILSAFE: {
@@ -7621,11 +7616,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SurfaceControl.Builder makeSurfaceBuilder(SurfaceSession s) {
         return mSurfaceBuilderFactory.make(s);
-    }
-
-    void sendSetRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
-        mH.obtainMessage(H.SET_RUNNING_REMOTE_ANIMATION, pid, runningRemoteAnimation ? 1 : 0)
-                .sendToTarget();
     }
 
     void startSeamlessRotation() {
