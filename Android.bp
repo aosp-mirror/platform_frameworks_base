@@ -695,9 +695,6 @@ java_defaults {
         "core/java/com/android/server/DropboxLogTags.logtags",
         "core/java/org/chromium/arc/EventLogTags.logtags",
 
-        ":apex-properties",
-        ":platform-properties",
-
         ":framework-statslog-gen",
     ],
 
@@ -786,6 +783,9 @@ java_defaults {
         "android.hardware.vibrator-V1.3-java",
         "android.hardware.wifi-V1.0-java-constants",
         "devicepolicyprotosnano",
+
+        "com.android.sysprop.apex",
+        "PlatformProperties",
     ],
 
     required: [
