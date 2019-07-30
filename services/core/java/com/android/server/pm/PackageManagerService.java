@@ -3089,8 +3089,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 final List<String> changedAbiCodePath =
-                        mInjector.getAbiHelper().adjustCpuAbisForSharedUser(
-                                setting.packages, null /*scannedPackage*/);
+                        applyAdjustedAbiToSharedUser(setting, null /*scannedPackage*/,
+                        mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
+                                setting.packages, null /*scannedPackage*/));
                 if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
                     for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
                         final String codePathString = changedAbiCodePath.get(i);
@@ -10664,6 +10665,50 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Applies the adjusted ABI calculated by
+     * {@link PackageAbiHelper#getAdjustedAbiForSharedUser(Set, PackageParser.Package)} to all
+     * relevant packages and settings.
+     * @param sharedUserSetting The {@code SharedUserSetting} to adjust
+     * @param scannedPackage the package being scanned or null
+     * @param adjustedAbi the adjusted ABI calculated by {@link PackageAbiHelper}
+     * @return the list of code paths that belong to packages that had their ABIs adjusted.
+     */
+    private static List<String> applyAdjustedAbiToSharedUser(SharedUserSetting sharedUserSetting,
+            PackageParser.Package scannedPackage, String adjustedAbi) {
+        if (scannedPackage != null)  {
+            scannedPackage.applicationInfo.primaryCpuAbi = adjustedAbi;
+        }
+        List<String> changedAbiCodePath = null;
+        for (PackageSetting ps : sharedUserSetting.packages) {
+            if (scannedPackage == null || !scannedPackage.packageName.equals(ps.name)) {
+                if (ps.primaryCpuAbiString != null) {
+                    continue;
+                }
+
+                ps.primaryCpuAbiString = adjustedAbi;
+                if (ps.pkg != null && ps.pkg.applicationInfo != null
+                        && !TextUtils.equals(
+                        adjustedAbi, ps.pkg.applicationInfo.primaryCpuAbi)) {
+                    ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
+                    if (DEBUG_ABI_SELECTION) {
+                        Slog.i(TAG,
+                                "Adjusting ABI for " + ps.name + " to " + adjustedAbi
+                                        + " (scannedPackage="
+                                        + (scannedPackage != null ? scannedPackage : "null")
+                                        + ")");
+                    }
+                    if (changedAbiCodePath == null) {
+                        changedAbiCodePath = new ArrayList<>();
+                    }
+                    changedAbiCodePath.add(ps.codePathString);
+                }
+            }
+        }
+        return changedAbiCodePath;
+    }
+
+
+    /**
      * Just scans the package without any side effects.
      * <p>Not entirely true at the moment. There is still one side effect -- this
      * method potentially modifies a live {@link PackageSetting} object representing
@@ -10835,7 +10880,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (needToDeriveAbi) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
                 final boolean extractNativeLibs = !pkg.isLibrary();
-                packageAbiHelper.derivePackageAbi(pkg, cpuAbiOverride, extractNativeLibs);
+                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
+                        packageAbiHelper.derivePackageAbi(pkg, cpuAbiOverride, extractNativeLibs);
+                derivedAbi.first.applyTo(pkg);
+                derivedAbi.second.applyTo(pkg);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
                 // Some system apps still use directory structure for native libraries
@@ -10843,8 +10891,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 // structure. Try to detect abi based on directory structure.
                 if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp() &&
                         pkg.applicationInfo.primaryCpuAbi == null) {
-                    packageAbiHelper.setBundledAppAbisAndRoots(pkg, pkgSetting);
-                    packageAbiHelper.setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                    final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
+                            pkg);
+                    abis.applyTo(pkg);
+                    abis.applyTo(pkgSetting);
+                    final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                            packageAbiHelper.getNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                    nativeLibraryPaths.applyTo(pkg);
                 }
             } else {
                 // This is not a first boot or an upgrade, don't bother deriving the
@@ -10853,7 +10906,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkg.applicationInfo.primaryCpuAbi = primaryCpuAbiFromSettings;
                 pkg.applicationInfo.secondaryCpuAbi = secondaryCpuAbiFromSettings;
 
-                packageAbiHelper.setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                        packageAbiHelper.getNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                nativeLibraryPaths.applyTo(pkg);
 
                 if (DEBUG_ABI_SELECTION) {
                     Slog.i(TAG, "Using ABIS and native lib paths from settings : " +
@@ -10874,7 +10929,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // ABIs we've determined above. For non-moves, the path will be updated based on the
             // ABIs we determined during compilation, but the path will depend on the final
             // package path (after the rename away from the stage path).
-            packageAbiHelper.setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+            final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                    packageAbiHelper.getNativeLibraryPaths(pkg, sAppLib32InstallDir);
+            nativeLibraryPaths.applyTo(pkg);
         }
 
         // This is a special case for the "system" package, where the ABI is
@@ -10928,8 +10985,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // We also do this *before* we perform dexopt on this package, so that
             // we can avoid redundant dexopts, and also to make sure we've got the
             // code and package path correct.
-            changedAbiCodePath = packageAbiHelper.adjustCpuAbisForSharedUser(
-                            pkgSetting.sharedUser.packages, pkg);
+            changedAbiCodePath = applyAdjustedAbiToSharedUser(pkgSetting.sharedUser, pkg,
+                    packageAbiHelper.getAdjustedAbiForSharedUser(
+                            pkgSetting.sharedUser.packages, pkg));
         }
 
         if (isUnderFactoryTest && pkg.requestedPermissions.contains(
@@ -16534,7 +16592,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 String abiOverride = (TextUtils.isEmpty(pkg.cpuAbiOverride) ?
                         args.abiOverride : pkg.cpuAbiOverride);
                 final boolean extractNativeLibs = !pkg.isLibrary();
-                mInjector.getAbiHelper().derivePackageAbi(pkg, abiOverride, extractNativeLibs);
+                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
+                        derivedAbi = mInjector.getAbiHelper().derivePackageAbi(
+                                pkg, abiOverride, extractNativeLibs);
+                derivedAbi.first.applyTo(pkg);
+                derivedAbi.second.applyTo(pkg);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
