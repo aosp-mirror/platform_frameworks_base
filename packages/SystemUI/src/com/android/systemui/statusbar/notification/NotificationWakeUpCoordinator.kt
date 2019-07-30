@@ -122,6 +122,17 @@ class NotificationWakeUpCoordinator @Inject constructor(
         mHeadsUpManagerPhone.addListener(this)
         statusBarStateController.addCallback(this)
         mDozeParameters = DozeParameters.getInstance(mContext)
+        addListener(object : WakeUpListener {
+            override fun onFullyHiddenChanged(isFullyHidden: Boolean) {
+                if (isFullyHidden && mNotificationsVisibleForExpansion) {
+                    // When the notification becomes fully invisible, let's make sure our expansion
+                    // flag also changes. This can happen if the bouncer shows when dragging down
+                    // and then the screen turning off, where we don't reset this state.
+                    setNotificationsVisibleForExpansion(visible = false, animate = false,
+                            increaseSpeed = false)
+                }
+            }
+        });
     }
 
     fun setStackScroller(stackScroller: NotificationStackScrollLayout) {
