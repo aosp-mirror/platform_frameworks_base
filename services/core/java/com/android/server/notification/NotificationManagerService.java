@@ -457,7 +457,7 @@ public class NotificationManagerService extends SystemService {
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
     private static final IBinder WHITELIST_TOKEN = new Binder();
-    private RankingHandler mRankingHandler;
+    protected RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
 
@@ -1550,10 +1550,12 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     void clearNotifications() {
-        mEnqueuedNotifications.clear();
-        mNotificationList.clear();
-        mNotificationsByKey.clear();
-        mSummaryByGroupKey.clear();
+        synchronized (mNotificationList) {
+            mEnqueuedNotifications.clear();
+            mNotificationList.clear();
+            mNotificationsByKey.clear();
+            mSummaryByGroupKey.clear();
+        }
     }
 
     @VisibleForTesting
@@ -1605,11 +1607,6 @@ public class NotificationManagerService extends SystemService {
     void setPreferencesHelper(PreferencesHelper prefHelper) { mPreferencesHelper = prefHelper; }
 
     @VisibleForTesting
-    void setRankingHandler(RankingHandler rankingHandler) {
-        mRankingHandler = rankingHandler;
-    }
-
-    @VisibleForTesting
     void setZenHelper(ZenModeHelper zenHelper) {
         mZenModeHelper = zenHelper;
     }
@@ -1641,7 +1638,7 @@ public class NotificationManagerService extends SystemService {
 
     // TODO: All tests should use this init instead of the one-off setters above.
     @VisibleForTesting
-    void init(Looper looper, IPackageManager packageManager,
+    void init(Looper looper, RankingHandler rankingHandler, IPackageManager packageManager,
             PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
             NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
@@ -1675,7 +1672,6 @@ public class NotificationManagerService extends SystemService {
         mUm = userManager;
 
         mHandler = new WorkerHandler(looper);
-        mRankingThread.start();
         String[] extractorNames;
         try {
             extractorNames = resources.getStringArray(R.array.config_notificationSignalExtractors);
@@ -1684,7 +1680,7 @@ public class NotificationManagerService extends SystemService {
         }
         mUsageStats = usageStats;
         mMetricsLogger = new MetricsLogger();
-        mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
+        mRankingHandler = rankingHandler;
         mConditionProviders = conditionProviders;
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders);
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
@@ -1829,8 +1825,9 @@ public class NotificationManagerService extends SystemService {
         }, mUserProfiles);
 
         final File systemDir = new File(Environment.getDataDirectory(), "system");
+        mRankingThread.start();
 
-        init(Looper.myLooper(),
+        init(Looper.myLooper(), new RankingHandlerWorker(mRankingThread.getLooper()),
                 AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class),
                 new NotificationListeners(AppGlobals.getPackageManager()),
