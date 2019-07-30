@@ -187,6 +187,7 @@ class ActivityStarter {
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
     private boolean mAvoidMoveToFront;
+    private boolean mFrozeTaskList;
 
     // We must track when we deliver the new intent since multiple code paths invoke
     // {@link #deliverNewIntent}. This is due to early returns in the code path. This flag is used
@@ -483,6 +484,7 @@ class ActivityStarter {
         mNoAnimation = starter.mNoAnimation;
         mKeepCurTransition = starter.mKeepCurTransition;
         mAvoidMoveToFront = starter.mAvoidMoveToFront;
+        mFrozeTaskList = starter.mFrozeTaskList;
 
         mVoiceSession = starter.mVoiceSession;
         mVoiceInteractor = starter.mVoiceInteractor;
@@ -1093,6 +1095,14 @@ class ActivityStarter {
 
     void postStartActivityProcessing(ActivityRecord r, int result,
             ActivityStack startedActivityStack) {
+        if (!ActivityManager.isStartResultSuccessful(result)) {
+            if (mFrozeTaskList) {
+                // If we specifically froze the task list as part of starting an activity, then
+                // reset the frozen list state if it failed to start. This is normally otherwise
+                // called when the freeze-timeout has elapsed.
+                mSupervisor.mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
+            }
+        }
         if (ActivityManager.isStartResultFatalError(result)) {
             return;
         }
@@ -1485,6 +1495,14 @@ class ActivityStarter {
                 mLaunchParams.hasPreferredDisplay() ? mLaunchParams.mPreferredDisplayId
                         : DEFAULT_DISPLAY;
 
+        // If requested, freeze the task list
+        if (mOptions != null && mOptions.freezeRecentTasksReordering()
+                && mSupervisor.mRecentTasks.isCallerRecents(r.launchedFromUid)
+                && !mSupervisor.mRecentTasks.isFreezeTaskListReorderingSet()) {
+            mFrozeTaskList = true;
+            mSupervisor.mRecentTasks.setFreezeTaskListReordering();
+        }
+
         // Do not start home activity if it cannot be launched on preferred display. We are not
         // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
         // fallback to launch on other displays.
@@ -1775,6 +1793,7 @@ class ActivityStarter {
         mNoAnimation = false;
         mKeepCurTransition = false;
         mAvoidMoveToFront = false;
+        mFrozeTaskList = false;
 
         mVoiceSession = null;
         mVoiceInteractor = null;
