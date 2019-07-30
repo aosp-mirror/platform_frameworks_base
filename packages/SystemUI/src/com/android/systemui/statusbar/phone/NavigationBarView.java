@@ -322,7 +322,7 @@ public class NavigationBarView extends FrameLayout implements
 
     public void setComponents(NotificationPanelView panel, AssistManager assistManager) {
         mPanelView = panel;
-        updateSystemUiStateFlags();
+        updatePanelSystemUiStateFlags();
     }
 
     @Override
@@ -586,7 +586,7 @@ public class NavigationBarView extends FrameLayout implements
         updateNavButtonIcons();
         updateSlippery();
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
-        updateSystemUiStateFlags();
+        updateDisabledSystemUiStateFlags();
     }
 
     public void updateNavButtonIcons() {
@@ -709,10 +709,10 @@ public class NavigationBarView extends FrameLayout implements
 
     public void onPanelExpandedChange() {
         updateSlippery();
-        updateSystemUiStateFlags();
+        updatePanelSystemUiStateFlags();
     }
 
-    public void updateSystemUiStateFlags() {
+    public void updateDisabledSystemUiStateFlags() {
         int displayId = mContext.getDisplayId();
         mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SCREEN_PINNING,
                 ActivityManagerWrapper.getInstance().isScreenPinningActive(), displayId);
@@ -722,6 +722,10 @@ public class NavigationBarView extends FrameLayout implements
                 (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0, displayId);
         mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SEARCH_DISABLED,
                 (mDisabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0, displayId);
+    }
+
+    public void updatePanelSystemUiStateFlags() {
+        int displayId = mContext.getDisplayId();
         if (mPanelView != null) {
             mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                     mPanelView.isFullyExpanded() && !mPanelView.isInSettings(), displayId);
