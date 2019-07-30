@@ -297,9 +297,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"录制音频"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;录音吗？"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"健身运动"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"访问您的健身运动"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的健身运动吗？"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活动"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"获取您的身体活动数据"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;获取您的身体活动数据吗？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相机"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍摄照片和录制视频"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;拍摄照片和录制视频吗？"</string>
@@ -428,8 +428,8 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"此应用可随时使用麦克风进行录音。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"向 SIM 卡发送命令"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"允许应用向SIM卡发送命令（此权限具有很高的危险性）。"</string>
-    <string name="permlab_activityRecognition" msgid="3634590230567608356">"识别健身运动"</string>
-    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此应用可以识别您的健身运动。"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"识别身体活动"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此应用可以识别您的身体活动。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"此应用可随时使用相机拍摄照片和录制视频。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制振动"</string>
