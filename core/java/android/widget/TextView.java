@@ -918,6 +918,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mTextSetFromXmlOrResourceId = false;
     // Resource id used to set the text.
     private @StringRes int mTextId = Resources.ID_NULL;
+    // Resource id used to set the hint.
+    private @StringRes int mHintId = Resources.ID_NULL;
     //
     // End of autofill-related attributes
 
@@ -1210,6 +1212,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_hint:
+                    mHintId = a.getResourceId(attr, Resources.ID_NULL);
                     hint = a.getText(attr);
                     break;
 
@@ -6446,6 +6449,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public final void setHint(@StringRes int resid) {
+        mHintId = resid;
         setHint(getContext().getResources().getText(resid));
     }
 
@@ -11596,6 +11600,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
                 structure.setMaxTextLength(maxLength);
+            }
+        }
+        if (mHintId != Resources.ID_NULL) {
+            try {
+                structure.setHintIdEntry(getResources().getResourceEntryName(mHintId));
+            } catch (Resources.NotFoundException e) {
+                if (android.view.autofill.Helper.sVerbose) {
+                    Log.v(LOG_TAG, "onProvideAutofillStructure(): cannot set name for hint id "
+                            + mHintId + ": " + e.getMessage());
+                }
             }
         }
         structure.setHint(getHint());

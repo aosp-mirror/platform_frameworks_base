@@ -8501,7 +8501,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ul>
      *
      * <p>It's also recommended to set the following properties - the more properties the structure
-     * has, the higher the changes of an {@link android.service.autofill.AutofillService} properly
+     * has, the higher the chances of an {@link android.service.autofill.AutofillService} properly
      * using the structure:
      *
      * <ul>
