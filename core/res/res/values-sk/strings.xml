@@ -97,6 +97,8 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Správy hlasovej schránky"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Volanie cez Wi‑Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Stav SIM karty"</string>
+    <!-- no translation found for notification_channel_sim_high_prio (1787666807724243207) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Používateľ, s ktorým komunikujete, požiadal o režim FULL textového telefónu"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Používateľ, s ktorým komunikujete, požiadal o režim HCO textového telefónu"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Používateľ, s ktorým komunikujete, požiadal o režim VCO textového telefónu"</string>

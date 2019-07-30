@@ -95,6 +95,8 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Stemboodskappe"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-oproepe"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM-status"</string>
+    <!-- no translation found for notification_channel_sim_high_prio (1787666807724243207) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Ander party het TTY-modus VOL versoek"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Ander party het TTY-modus GOD versoek"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Ander party het TTY-modus SOD versoek"</string>
