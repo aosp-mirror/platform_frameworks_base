@@ -187,6 +187,9 @@
     <string name="notification_channel_wfc">Wi-Fi calling</string>
     <!-- Telephony notification channel name for a channel containing SIM notifications -->
     <string name="notification_channel_sim">SIM status</string>
+    <!-- Telephony notification channel name for a channel containing high priority SIM notifications -->
+    <string name="notification_channel_sim_high_prio">High priority SIM status</string>
+
 
     <!-- Displayed to tell the user that peer changed TTY mode -->
     <string name="peerTtyModeFull">Peer requested TTY Mode FULL</string>

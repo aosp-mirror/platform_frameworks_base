@@ -344,16 +344,19 @@ public class FaceService extends BiometricServiceBase {
         @Override // Binder call
         public int revokeChallenge(IBinder token) {
             checkPermission(MANAGE_BIOMETRIC);
-            // TODO(b/137106905): Schedule binder calls in FaceService to avoid deadlocks.
-            if (getCurrentClient() == null) {
-                // if we aren't handling any other HIDL calls (mCurrentClient == null), revoke the
-                // challenge right away.
-                return startRevokeChallenge(token);
-            } else {
-                // postpone revoking the challenge until we finish processing the current HIDL call.
-                mRevokeChallengePending = true;
-                return Status.OK;
-            }
+            mHandler.post(() -> {
+                // TODO(b/137106905): Schedule binder calls in FaceService to avoid deadlocks.
+                if (getCurrentClient() == null) {
+                    // if we aren't handling any other HIDL calls (mCurrentClient == null), revoke
+                    // the challenge right away.
+                    startRevokeChallenge(token);
+                } else {
+                    // postpone revoking the challenge until we finish processing the current HIDL
+                    // call.
+                    mRevokeChallengePending = true;
+                }
+            });
+            return Status.OK;
         }
 
         @Override // Binder call

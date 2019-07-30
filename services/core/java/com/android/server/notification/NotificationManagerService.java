@@ -466,6 +466,8 @@ public class NotificationManagerService extends SystemService {
     private MetricsLogger mMetricsLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
 
+    private final SavePolicyFileRunnable mSavePolicyFile = new SavePolicyFileRunnable();
+
     private static class Archive {
         final int mBufferSize;
         final ArrayDeque<StatusBarNotification> mBuffer;
@@ -659,7 +661,14 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void handleSavePolicyFile() {
-        IoThread.getHandler().post(() -> {
+        if (!IoThread.getHandler().hasCallbacks(mSavePolicyFile)) {
+            IoThread.getHandler().post(mSavePolicyFile);
+        }
+    }
+
+    private final class SavePolicyFileRunnable implements Runnable {
+        @Override
+        public void run() {
             if (DBG) Slog.d(TAG, "handleSavePolicyFile");
             synchronized (mPolicyFile) {
                 final FileOutputStream stream;
@@ -679,7 +688,7 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             BackupManager.dataChanged(getContext().getPackageName());
-        });
+        }
     }
 
     private void writePolicyXml(OutputStream stream, boolean forBackup, int userId)
@@ -1824,6 +1833,7 @@ public class NotificationManagerService extends SystemService {
                     }
                     if (properties.getKeyset()
                             .contains(SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE)) {
+                        mAssistants.allowAdjustmentType(Adjustment.KEY_IMPORTANCE);
                         mAssistants.resetDefaultAssistantsIfNecessary();
                     }
                 });

@@ -1027,12 +1027,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 log(str);
             }
             mLocalLog.log(str);
-            // for service state updates, don't notify clients when subId is invalid. This prevents
-            // us from sending incorrect notifications like b/133140128
-            // In the future, we can remove this logic for every notification here and add a
-            // callback so listeners know when their PhoneStateListener's subId becomes invalid, but
-            // for now we use the simplest fix.
-            if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
+            if (validatePhoneId(phoneId)) {
                 mServiceState[phoneId] = state;
 
                 for (Record r : mRecords) {
@@ -1064,8 +1059,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             } else {
-                log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
-                        + " or subId=" + subId);
+                log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId);
             }
             handleRemoveListLocked();
         }
