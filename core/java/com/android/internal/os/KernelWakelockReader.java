@@ -76,28 +76,13 @@ public class KernelWakelockReader {
         boolean useSystemSuspend = (new File(sSysClassWakeupDir)).exists();
 
         if (useSystemSuspend) {
-            WakeLockInfo[] wlStats = null;
-            if (mSuspendControlService == null) {
-                try {
-                    mSuspendControlService = ISuspendControlService.Stub.asInterface(
-                        ServiceManager.getServiceOrThrow("suspend_control"));
-                } catch (ServiceNotFoundException e) {
-                    Slog.wtf(TAG, "Required service suspend_control not available", e);
-                    return null;
-                }
-            }
-
-            try {
-                wlStats = mSuspendControlService.getWakeLockStats();
-                updateVersion(staleStats);
-                updateWakelockStats(wlStats, staleStats);
-            } catch (RemoteException e) {
-                Slog.wtf(TAG, "Failed to obtain wakelock stats from ISuspendControlService", e);
+            // Get both kernel and native wakelock stats from SystemSuspend
+            updateVersion(staleStats);
+            if (getWakelockStatsFromSystemSuspend(staleStats) == null) {
+                Slog.w(TAG, "Failed to get wakelock stats from SystemSuspend");
                 return null;
             }
-
             return removeOldStats(staleStats);
-
         } else {
             byte[] buffer = new byte[32*1024];
             int len = 0;
@@ -153,9 +138,41 @@ public class KernelWakelockReader {
             }
 
             updateVersion(staleStats);
+            // Get native wakelock stats from SystemSuspend
+            if (getWakelockStatsFromSystemSuspend(staleStats) == null) {
+                Slog.w(TAG, "Failed to get Native wakelock stats from SystemSuspend");
+            }
+            // Get kernel wakelock stats
             parseProcWakelocks(buffer, len, wakeup_sources, staleStats);
             return removeOldStats(staleStats);
         }
+    }
+
+    /**
+     * On success, returns the updated stats from SystemSupend, else returns null.
+     */
+    private KernelWakelockStats getWakelockStatsFromSystemSuspend(
+            final KernelWakelockStats staleStats) {
+        WakeLockInfo[] wlStats = null;
+        if (mSuspendControlService == null) {
+            try {
+                mSuspendControlService = ISuspendControlService.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow("suspend_control"));
+            } catch (ServiceNotFoundException e) {
+                Slog.wtf(TAG, "Required service suspend_control not available", e);
+                return null;
+            }
+        }
+
+        try {
+            wlStats = mSuspendControlService.getWakeLockStats();
+            updateWakelockStats(wlStats, staleStats);
+        } catch (RemoteException e) {
+            Slog.wtf(TAG, "Failed to obtain wakelock stats from ISuspendControlService", e);
+            return null;
+        }
+
+        return staleStats;
     }
 
     /**
