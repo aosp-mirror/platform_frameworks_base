@@ -323,6 +323,24 @@ public class AppsFilterTest {
         assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, null, target, 0));
     }
 
+    @Test
+    public void testNoTargetPackage_filters() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mConfigProviderMock, mPermissionManagerMock, mAppOpsManager,
+                        new String[]{}, false);
+
+        PackageSetting target = new PackageSettingBuilder()
+                .setName("com.some.package")
+                .setCodePath("/")
+                .setResourcePath("/")
+                .setPVersionCode(1L)
+                .build();
+        PackageSetting calling = simulateAddPackage(appsFilter,
+                pkg("com.some.other.package", new Intent("TEST_ACTION"))).build();
+
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
     private PackageSettingBuilder simulateAddPackage(AppsFilter filter,
             PackageBuilder newPkgBuilder) {
         PackageParser.Package newPkg = newPkgBuilder.build();
