@@ -177,6 +177,13 @@ public class ActivityOptions {
     private static final String KEY_LAUNCH_DISPLAY_ID = "android.activity.launchDisplayId";
 
     /**
+     * The id of the display where the caller was on.
+     * @see #setCallerDisplayId(int)
+     * @hide
+     */
+    private static final String KEY_CALLER_DISPLAY_ID = "android.activity.callerDisplayId";
+
+    /**
      * The windowing mode the activity should be launched into.
      * @hide
      */
@@ -269,6 +276,8 @@ public class ActivityOptions {
             = "android:activity.remoteAnimationAdapter";
 
     /** @hide */
+    public static final int ANIM_UNDEFINED = -1;
+    /** @hide */
     public static final int ANIM_NONE = 0;
     /** @hide */
     public static final int ANIM_CUSTOM = 1;
@@ -299,7 +308,7 @@ public class ActivityOptions {
 
     private String mPackageName;
     private Rect mLaunchBounds;
-    private int mAnimationType = ANIM_NONE;
+    private int mAnimationType = ANIM_UNDEFINED;
     private int mCustomEnterResId;
     private int mCustomExitResId;
     private int mCustomInPlaceResId;
@@ -318,6 +327,7 @@ public class ActivityOptions {
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
     private int mLaunchDisplayId = INVALID_DISPLAY;
+    private int mCallerDisplayId = INVALID_DISPLAY;
     @WindowConfiguration.WindowingMode
     private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
     @WindowConfiguration.ActivityType
@@ -896,7 +906,7 @@ public class ActivityOptions {
             Slog.w(TAG, e);
         }
         mLaunchBounds = opts.getParcelable(KEY_LAUNCH_BOUNDS);
-        mAnimationType = opts.getInt(KEY_ANIM_TYPE);
+        mAnimationType = opts.getInt(KEY_ANIM_TYPE, ANIM_UNDEFINED);
         switch (mAnimationType) {
             case ANIM_CUSTOM:
                 mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
@@ -945,6 +955,7 @@ public class ActivityOptions {
         }
         mLockTaskMode = opts.getBoolean(KEY_LOCK_TASK_MODE, false);
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
+        mCallerDisplayId = opts.getInt(KEY_CALLER_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
@@ -1204,6 +1215,17 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public int getCallerDisplayId() {
+        return mCallerDisplayId;
+    }
+
+    /** @hide */
+    public ActivityOptions setCallerDisplayId(int callerDisplayId) {
+        mCallerDisplayId = callerDisplayId;
+        return this;
+    }
+
+    /** @hide */
     public int getLaunchWindowingMode() {
         return mLaunchWindowingMode;
     }
@@ -1447,7 +1469,9 @@ public class ActivityOptions {
         if (mLaunchBounds != null) {
             b.putParcelable(KEY_LAUNCH_BOUNDS, mLaunchBounds);
         }
-        b.putInt(KEY_ANIM_TYPE, mAnimationType);
+        if (mAnimationType != ANIM_UNDEFINED) {
+            b.putInt(KEY_ANIM_TYPE, mAnimationType);
+        }
         if (mUsageTimeReport != null) {
             b.putParcelable(KEY_USAGE_TIME_REPORT, mUsageTimeReport);
         }
@@ -1505,6 +1529,9 @@ public class ActivityOptions {
         }
         if (mLaunchDisplayId != INVALID_DISPLAY) {
             b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
+        }
+        if (mCallerDisplayId != INVALID_DISPLAY) {
+            b.putInt(KEY_CALLER_DISPLAY_ID, mCallerDisplayId);
         }
         if (mLaunchWindowingMode != WINDOWING_MODE_UNDEFINED) {
             b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
