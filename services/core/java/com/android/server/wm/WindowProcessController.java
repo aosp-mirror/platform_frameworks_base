@@ -565,7 +565,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      * activities are allowed to be resumed per process.
      * @return {@code true} if the activity is allowed to be resumed by compatibility
      * restrictions, which the activity was the topmost visible activity in process or the app is
-     * targeting after Q.
+     * targeting after Q. Note that non-focusable activity, in picture-in-picture mode for instance,
+     * does not count as a topmost activity.
      */
     boolean updateTopResumingActivityInProcessIfNeeded(@NonNull ActivityRecord activity) {
         if (mInfo.targetSdkVersion >= Q || mPreQTopResumedActivity == activity) {
@@ -581,9 +582,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         boolean canUpdate = false;
         final ActivityDisplay topDisplay =
                 mPreQTopResumedActivity != null ? mPreQTopResumedActivity.getDisplay() : null;
-        // Update the topmost activity if current top activity was not on any display or no
-        // longer visible.
-        if (topDisplay == null || !mPreQTopResumedActivity.visible) {
+        // Update the topmost activity if current top activity is
+        // - not on any display OR
+        // - no longer visible OR
+        // - not focusable (in PiP mode for instance)
+        if (topDisplay == null
+                || !mPreQTopResumedActivity.visible
+                || !mPreQTopResumedActivity.isFocusable()) {
             canUpdate = true;
         }
 
