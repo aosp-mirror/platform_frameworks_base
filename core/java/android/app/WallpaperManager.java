@@ -930,6 +930,9 @@ public class WallpaperManager {
      * {@link android.service.wallpaper.WallpaperService.Engine#onComputeColors()
      *     WallpaperService.Engine#onComputeColors()}.</li>
      * </ul>
+     * <p>Please note that this API will go through IPC and may take some time to
+     * calculate the wallpaper color, which could block the caller thread, so it is
+     * not recommended to call this in the UI thread.</p>
      *
      * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or
      *     {@link #FLAG_LOCK}.
