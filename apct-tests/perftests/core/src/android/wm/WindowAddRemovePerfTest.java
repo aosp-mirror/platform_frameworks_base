@@ -60,7 +60,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase {
     }
 
     @Test
-    @ManualBenchmarkTest(warmupDurationNs = WARMUP_DURATION, targetTestDurationNs = TEST_DURATION)
+    @ManualBenchmarkTest(warmupDurationNs = TIME_1_S_IN_NS, targetTestDurationNs = TIME_5_S_IN_NS)
     public void testAddRemoveWindow() throws Throwable {
         new TestWindow().runBenchmark(mPerfStatusReporter.getBenchmarkState());
     }
