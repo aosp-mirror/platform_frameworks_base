@@ -104,7 +104,6 @@ framework_srcs = [
     "core/java/**/*.logtags",
     ":framework-javastream-protos",
     ":framework-statslog-gen",
-    ":platform-properties",
 ]
 
 framework_aidl_local_include_dirs = [
@@ -199,6 +198,8 @@ java_defaults {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.wifi-V1.0-java-constants",
+
+        "PlatformProperties",
     ],
 
     required: [
