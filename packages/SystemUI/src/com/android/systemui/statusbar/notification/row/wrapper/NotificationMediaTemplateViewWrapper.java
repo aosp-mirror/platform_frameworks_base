@@ -95,7 +95,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         @Override
         public void onAggregatedVisibilityChanged(boolean isVisible) {
             mIsViewVisible = isVisible;
-            if (isVisible) {
+            if (isVisible && mMediaController != null) {
                 // Restart timer if we're currently playing and didn't already have one going
                 PlaybackState state = mMediaController.getPlaybackState();
                 if (state != null && state.getState() == PlaybackState.STATE_PLAYING

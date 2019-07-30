@@ -175,8 +175,10 @@ public class MediaNotificationView extends FrameLayout {
     @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
-        for (int i = 0; i < mListeners.size(); i++) {
-            mListeners.get(i).onAggregatedVisibilityChanged(isVisible);
+        if (mListeners != null) {
+            for (int i = 0; i < mListeners.size(); i++) {
+                mListeners.get(i).onAggregatedVisibilityChanged(isVisible);
+            }
         }
     }
 
