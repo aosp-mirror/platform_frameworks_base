@@ -161,6 +161,7 @@ public class StackScrollAlgorithm {
                 : 0;
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
+        boolean firstHeadsUp = true;
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState state = child.getViewState();
@@ -173,7 +174,7 @@ public class StackScrollAlgorithm {
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow)
                     && ((ExpandableNotificationRow) child).isPinned();
             if (mClipNotificationScrollToTop
-                    && (!state.inShelf || isHeadsUp)
+                    && (!state.inShelf || (isHeadsUp && !firstHeadsUp))
                     && newYTranslation < clipStart) {
                 // The previous view is overlapping on top, clip!
                 float overlapAmount = clipStart - newYTranslation;
@@ -181,7 +182,9 @@ public class StackScrollAlgorithm {
             } else {
                 state.clipTopAmount = 0;
             }
-
+            if (isHeadsUp) {
+                firstHeadsUp = false;
+            }
             if (!child.isTransparent()) {
                 // Only update the previous values if we are not transparent,
                 // otherwise we would clip to a transparent view.
