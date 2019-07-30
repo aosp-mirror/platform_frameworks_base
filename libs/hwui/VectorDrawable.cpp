@@ -17,6 +17,7 @@
 #include "VectorDrawable.h"
 
 #include <utils/Log.h>
+#include "hwui/Paint.h"
 #include "PathParser.h"
 #include "SkColorFilter.h"
 #include "SkImageInfo.h"
@@ -458,8 +459,12 @@ void Tree::drawStaging(Canvas* outCanvas) {
         mStagingCache.dirty = false;
     }
 
-    SkPaint paint;
-    getPaintFor(&paint, mStagingProperties);
+    SkPaint skp;
+    getPaintFor(&skp, mStagingProperties);
+    Paint paint;
+    paint.setFilterQuality(skp.getFilterQuality());
+    paint.setColorFilter(skp.refColorFilter());
+    paint.setAlpha(skp.getAlpha());
     outCanvas->drawBitmap(*mStagingCache.bitmap, 0, 0, mStagingCache.bitmap->width(),
                           mStagingCache.bitmap->height(), mStagingProperties.getBounds().left(),
                           mStagingProperties.getBounds().top(),

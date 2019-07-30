@@ -411,6 +411,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 outline.setRoundRect(mBackgroundAnimationRect,
                         MathUtils.lerp(mCornerRadius / 2.0f, mCornerRadius,
                                 xProgress));
+                outline.setAlpha(1.0f - mAmbientState.getHideAmount());
             } else {
                 ViewOutlineProvider.BACKGROUND.getOutline(view, outline);
             }
@@ -1044,6 +1045,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         requestChildrenUpdate();
         updateFirstAndLastBackgroundViews();
         updateAlgorithmLayoutMinHeight();
+        updateOwnTranslationZ();
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4776,6 +4778,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateAlgorithmHeightAndPadding();
         updateBackgroundDimming();
         requestChildrenUpdate();
+        updateOwnTranslationZ();
+    }
+
+    private void updateOwnTranslationZ() {
+        // Since we are clipping to the outline we need to make sure that the shadows aren't
+        // clipped when pulsing
+        float ownTranslationZ = 0;
+        if (mKeyguardBypassController.getBypassEnabled() && mAmbientState.isHiddenAtAll()) {
+            ExpandableView firstChildNotGone = getFirstChildNotGone();
+            if (firstChildNotGone != null && firstChildNotGone.showingPulsing()) {
+                ownTranslationZ = firstChildNotGone.getTranslationZ();
+            }
+        }
+        setTranslationZ(ownTranslationZ);
     }
 
     private void updateVisibility() {

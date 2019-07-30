@@ -51,7 +51,7 @@ private:
                 [width, height](RenderProperties& props, Canvas& canvas) {
                     float pos[] = {0, 1};
                     SkPoint pts[] = {SkPoint::Make(0, 0), SkPoint::Make(width, height)};
-                    SkPaint paint;
+                    Paint paint;
                     // overdraw several times to emphasize shader cost
                     for (int i = 0; i < 10; i++) {
                         // use i%2 start position to pick 2 color combo with black in it

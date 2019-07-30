@@ -22,8 +22,16 @@ import android.content.pm.ApplicationInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.compat.annotation.Change;
+import com.android.compat.annotation.XmlWriter;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.UUID;
 
 @RunWith(AndroidJUnit4.class)
 public class CompatConfigTest {
@@ -33,6 +41,27 @@ public class CompatConfigTest {
         ai.packageName = pName;
         ai.targetSdkVersion = targetSdkVersion;
         return ai;
+    }
+
+    private File createTempDir() {
+        String base = System.getProperty("java.io.tmpdir");
+        File dir = new File(base, UUID.randomUUID().toString());
+        assertThat(dir.mkdirs()).isTrue();
+        return dir;
+    }
+
+    private void writeChangesToFile(Change[] changes, File f) {
+        XmlWriter writer = new XmlWriter();
+        for (Change change: changes) {
+            writer.addChange(change);
+        }
+        try {
+            f.createNewFile();
+            writer.write(new FileOutputStream(f));
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Encountered an error while writing compat config file", e);
+        }
     }
 
     @Test
@@ -170,4 +199,45 @@ public class CompatConfigTest {
         sysApp.flags |= ApplicationInfo.FLAG_SYSTEM;
         assertThat(pc.isChangeEnabled(1234L, sysApp)).isTrue();
     }
+
+    @Test
+    public void testReadConfig() {
+        Change[] changes = {new Change(1234L, "MY_CHANGE1", false, 2), new Change(1235L,
+                "MY_CHANGE2", true, null), new Change(1236L, "MY_CHANGE3", false, null)};
+
+        File dir = createTempDir();
+        writeChangesToFile(changes, new File(dir.getPath() + "/platform_compat_config.xml"));
+
+        CompatConfig pc = new CompatConfig();
+        pc.initConfigFromLib(dir);
+
+        assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isFalse();
+        assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 3))).isTrue();
+        assertThat(pc.isChangeEnabled(1235L, makeAppInfo("com.some.package", 5))).isFalse();
+        assertThat(pc.isChangeEnabled(1236L, makeAppInfo("com.some.package", 1))).isTrue();
+    }
+
+    @Test
+    public void testReadConfigMultipleFiles() {
+        Change[] changes1 = {new Change(1234L, "MY_CHANGE1", false, 2)};
+        Change[] changes2 = {new Change(1235L, "MY_CHANGE2", true, null), new Change(1236L,
+                "MY_CHANGE3", false, null)};
+
+        File dir = createTempDir();
+        writeChangesToFile(changes1,
+                new File(dir.getPath() + "/libcore_platform_compat_config.xml"));
+        writeChangesToFile(changes2,
+                new File(dir.getPath() + "/frameworks_platform_compat_config.xml"));
+
+
+        CompatConfig pc = new CompatConfig();
+        pc.initConfigFromLib(dir);
+
+        assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isFalse();
+        assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 3))).isTrue();
+        assertThat(pc.isChangeEnabled(1235L, makeAppInfo("com.some.package", 5))).isFalse();
+        assertThat(pc.isChangeEnabled(1236L, makeAppInfo("com.some.package", 1))).isTrue();
+    }
 }
+
+

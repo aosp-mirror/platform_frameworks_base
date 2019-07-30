@@ -217,7 +217,7 @@ private:
             std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
                     image->stagingProperties().getWidth(), image->stagingProperties().getHeight(),
                     image.get()));
-            SkPaint paint;
+            Paint paint;
             sk_sp<SkColorFilter> filter(
                     SkColorFilters::Blend((curFrame % 150) << 24, SkBlendMode::kSrcATop));
             paint.setColorFilter(filter);

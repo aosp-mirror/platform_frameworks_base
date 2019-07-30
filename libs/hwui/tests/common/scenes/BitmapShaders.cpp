@@ -15,6 +15,7 @@
  */
 
 #include <SkImagePriv.h>
+#include "hwui/Paint.h"
 #include "TestSceneBase.h"
 #include "tests/common/BitmapAllocationTestUtils.h"
 #include "utils/Color.h"
@@ -43,7 +44,7 @@ public:
                     skCanvas.drawRect(SkRect::MakeXYWH(100, 100, 100, 100), skPaint);
                 });
 
-        SkPaint paint;
+        Paint paint;
         sk_sp<SkImage> image = hwuiBitmap->makeImage();
         sk_sp<SkShader> repeatShader =
                 image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat);

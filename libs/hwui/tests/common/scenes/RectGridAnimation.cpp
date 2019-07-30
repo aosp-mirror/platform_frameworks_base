@@ -41,7 +41,7 @@ public:
                 }
             }
 
-            SkPaint paint;
+            Paint paint;
             paint.setColor(0xff00ffff);
             canvas.drawRegion(region, paint);
         });

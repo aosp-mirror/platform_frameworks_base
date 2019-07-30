@@ -557,12 +557,17 @@ public class BugreportProgressService extends Service {
         }
     }
 
+    private String getBugreportName() {
+        String buildId = SystemProperties.get("ro.build.id", "UNKNOWN_BUILD");
+        String deviceName = SystemProperties.get("ro.product.name", "UNKNOWN_DEVICE");
+        String currentTimestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+        return String.format("bugreport-%s-%s-%s", deviceName, buildId, currentTimestamp);
+    }
+
     private void startBugreportAPI(Intent intent) {
         mUsingBugreportApi = true;
-        String bugreportName = "bugreport-" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(
-                new Date());
+        String bugreportName = getBugreportName();
 
-        // TODO(b/126862297): Make file naming same as dumpstate triggered bugreports
         ParcelFileDescriptor bugreportFd = createReadWriteFile(BUGREPORT_DIR,
                 bugreportName + ".zip");
         if (bugreportFd == null) {

@@ -313,6 +313,8 @@ import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.permission.PermissionsState;
+import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -770,6 +772,8 @@ public class PackageManagerService extends IPackageManager.Stub
             return mAbiHelper;
         }
     }
+
+    private final AppsFilter mAppsFilter;
 
     class PackageParserCallback implements PackageParser.Callback {
         @Override public final boolean hasFeature(String feature) {
@@ -2057,7 +2061,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         for (String packageName : packages) {
             PackageSetting setting = mSettings.mPackages.get(packageName);
-            if (setting != null && filterAppAccessLPr(setting, callingUid, callingUserId)) {
+            if (setting != null
+                    && shouldFilterApplicationLocked(setting, callingUid, callingUserId)) {
                 notifyInstallObserver(packageName);
             }
         }
@@ -2431,6 +2436,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mProtectedPackages = new ProtectedPackages(mContext);
 
         mApexManager = ApexManager.create(context);
+        mAppsFilter = AppsFilter.create(context);
+
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         // writer
@@ -4028,7 +4035,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //     and 2) ephemeral apps that have explicitly interacted with it
         //   * Ephemeral apps can only see their own data and exposed installed apps
         //   * Holding a signature permission allows seeing instant apps
-        if (filterAppAccessLPr(ps, callingUid, userId)) {
+        if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
             return null;
         }
 
@@ -4095,7 +4102,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean userKeyUnlocked = StorageManager.isUserKeyUnlocked(userId);
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
+            if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
                 throw new SecurityException("Package " + packageName + " was not found!");
             }
 
@@ -4128,7 +4135,7 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageParser.Package p = mPackages.get(packageName);
             if (p != null) {
                 final PackageSetting ps = (PackageSetting) p.mExtras;
-                if (filterAppAccessLPr(ps, callingUid, userId)) {
+                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return false;
                 }
                 if (ps != null) {
@@ -4185,7 +4192,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                         return null;
                     }
-                    if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
+                    if (shouldFilterApplicationLocked(ps, filterCallingUid, userId)) {
                         return null;
                     }
                     return generatePackageInfo(ps, flags, userId);
@@ -4203,7 +4210,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                     return null;
                 }
-                if (ps != null && filterAppAccessLPr(ps, filterCallingUid, userId)) {
+                if (ps != null && shouldFilterApplicationLocked(ps, filterCallingUid, userId)) {
                     return null;
                 }
                 return generatePackageInfo((PackageSetting)p.mExtras, flags, userId);
@@ -4214,7 +4221,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                     return null;
                 }
-                if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
+                if (shouldFilterApplicationLocked(ps, filterCallingUid, userId)) {
                     return null;
                 }
                 return generatePackageInfo(ps, flags, userId);
@@ -4286,7 +4293,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @see #canViewInstantApps(int, int)
      */
     @GuardedBy("mLock")
-    private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid,
+    private boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps, int callingUid,
             @Nullable ComponentName component, @ComponentType int componentType, int userId) {
         // if we're in an isolated process, get the real calling UID
         if (Process.isIsolated(callingUid)) {
@@ -4337,15 +4344,18 @@ public class PackageManagerService extends IPackageManager.Stub
             return !mInstantAppRegistry.isInstantAccessGranted(
                     userId, UserHandle.getAppId(callingUid), ps.appId);
         }
-        return false;
+        int appId = UserHandle.getAppId(callingUid);
+        final SettingBase callingPs = mSettings.getSettingLPr(appId);
+        return mAppsFilter.shouldFilterApplication(callingUid, callingPs, ps, userId);
     }
 
     /**
-     * @see #filterAppAccessLPr(PackageSetting, int, ComponentName, int, int)
+     * @see #shouldFilterApplicationLocked(PackageSetting, int, ComponentName, int, int)
      */
     @GuardedBy("mLock")
-    private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid, int userId) {
-        return filterAppAccessLPr(ps, callingUid, null, TYPE_UNKNOWN, userId);
+    private boolean shouldFilterApplicationLocked(
+            @Nullable PackageSetting ps, int callingUid, int userId) {
+        return shouldFilterApplicationLocked(ps, callingUid, null, TYPE_UNKNOWN, userId);
     }
 
     @GuardedBy("mLock")
@@ -4472,7 +4482,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageParser.Package p = mPackages.get(packageName);
             if (p != null && p.isMatch(flags)) {
                 PackageSetting ps = (PackageSetting) p.mExtras;
-                if (filterAppAccessLPr(ps, callingUid, userId)) {
+                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return -1;
                 }
                 return UserHandle.getUid(userId, p.applicationInfo.uid);
@@ -4480,7 +4490,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null && ps.isMatch(flags)
-                        && !filterAppAccessLPr(ps, callingUid, userId)) {
+                        && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return UserHandle.getUid(userId, ps.appId);
                 }
             }
@@ -4502,7 +4512,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageParser.Package p = mPackages.get(packageName);
             if (p != null && p.isMatch(flags)) {
                 PackageSetting ps = (PackageSetting) p.mExtras;
-                if (filterAppAccessLPr(ps, callingUid, userId)) {
+                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return null;
                 }
                 // TODO: Shouldn't this be checking for package installed state for userId and
@@ -4512,7 +4522,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null && ps.isMatch(flags)
-                        && !filterAppAccessLPr(ps, callingUid, userId)) {
+                        && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return ps.getPermissionsState().computeGids(userId);
                 }
             }
@@ -4541,7 +4551,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                 return null;
             }
-            if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
+            if (shouldFilterApplicationLocked(ps, filterCallingUid, userId)) {
                 return null;
             }
             if (ps.pkg == null) {
@@ -4599,7 +4609,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                     return null;
                 }
-                if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
+                if (shouldFilterApplicationLocked(ps, filterCallingUid, userId)) {
                     return null;
                 }
                 // Note: isEnabledLP() does not apply here - always return info
@@ -5022,7 +5032,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                if (filterAppAccessLPr(ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
+                if (shouldFilterApplicationLocked(
+                        ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
                     return null;
                 }
                 return PackageParser.generateActivityInfo(
@@ -5070,7 +5081,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps == null) {
                 return false;
             }
-            if (filterAppAccessLPr(ps, callingUid, component, TYPE_ACTIVITY, callingUserId)) {
+            if (shouldFilterApplicationLocked(
+                    ps, callingUid, component, TYPE_ACTIVITY, callingUserId)) {
                 return false;
             }
             for (int i=0; i<a.intents.size(); i++) {
@@ -5097,7 +5109,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                if (filterAppAccessLPr(ps, callingUid, component, TYPE_RECEIVER, userId)) {
+                if (shouldFilterApplicationLocked(
+                        ps, callingUid, component, TYPE_RECEIVER, userId)) {
                     return null;
                 }
                 return PackageParser.generateActivityInfo(
@@ -5311,7 +5324,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (s != null && mSettings.isEnabledAndMatchLPr(s.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                if (filterAppAccessLPr(ps, callingUid, component, TYPE_SERVICE, userId)) {
+                if (shouldFilterApplicationLocked(
+                        ps, callingUid, component, TYPE_SERVICE, userId)) {
                     return null;
                 }
                 return PackageParser.generateServiceInfo(
@@ -5335,7 +5349,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (p != null && mSettings.isEnabledAndMatchLPr(p.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                if (filterAppAccessLPr(ps, callingUid, component, TYPE_PROVIDER, userId)) {
+                if (shouldFilterApplicationLocked(
+                        ps, callingUid, component, TYPE_PROVIDER, userId)) {
                     return null;
                 }
                 return PackageParser.generateProviderInfo(
@@ -5607,8 +5622,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final int callingUserId = UserHandle.getUserId(callingUid);
             final PackageSetting ps1 = (PackageSetting) p1.mExtras;
             final PackageSetting ps2 = (PackageSetting) p2.mExtras;
-            if (filterAppAccessLPr(ps1, callingUid, callingUserId)
-                    || filterAppAccessLPr(ps2, callingUid, callingUserId)) {
+            if (shouldFilterApplicationLocked(ps1, callingUid, callingUserId)
+                    || shouldFilterApplicationLocked(ps2, callingUid, callingUserId)) {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
             return compareSignatures(p1.mSigningDetails.signatures, p2.mSigningDetails.signatures);
@@ -5636,7 +5651,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     s1 = ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
-                    if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
                     s1 = ps.signatures.mSigningDetails.signatures;
@@ -5655,7 +5670,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     s2 = ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
-                    if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
                     s2 = ps.signatures.mSigningDetails.signatures;
@@ -5681,7 +5696,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
             final PackageSetting ps = (PackageSetting) p.mExtras;
-            if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+            if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                 return false;
             }
             switch (type) {
@@ -5715,7 +5730,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     signingDetails = ((SharedUserSetting)obj).signatures.mSigningDetails;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
-                    if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return false;
                     }
                     signingDetails = ps.signatures.mSigningDetails;
@@ -5832,7 +5847,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return res;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                if (ps.getInstalled(userId) && !filterAppAccessLPr(ps, callingUid, userId)) {
+                if (ps.getInstalled(userId)
+                        && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return new String[]{ps.name};
                 }
             }
@@ -5854,7 +5870,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return sus.name + ":" + sus.userId;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                if (shouldFilterApplicationLocked(
+                        ps, callingUid, UserHandle.getUserId(callingUid))) {
                     return null;
                 }
                 return ps.name;
@@ -5882,7 +5899,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     names[i] = "shared:" + sus.name;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
-                    if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                    if (shouldFilterApplicationLocked(
+                            ps, callingUid, UserHandle.getUserId(callingUid))) {
                         names[i] = null;
                     } else {
                         names[i] = ps.name;
@@ -5932,7 +5950,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return sus.pkgFlags;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                if (shouldFilterApplicationLocked(
+                        ps, callingUid, UserHandle.getUserId(callingUid))) {
                     return 0;
                 }
                 return ps.pkgFlags;
@@ -5955,7 +5974,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return sus.pkgPrivateFlags;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                if (shouldFilterApplicationLocked(
+                        ps, callingUid, UserHandle.getUserId(callingUid))) {
                     return 0;
                 }
                 return ps.pkgPrivateFlags;
@@ -7974,7 +7994,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
                         continue;
                     }
-                    if (filterAppAccessLPr(ps, callingUid, userId)) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                         continue;
                     }
                     final PackageInfo pi = generatePackageInfo(ps, flags, userId);
@@ -7989,7 +8009,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
                         continue;
                     }
-                    if (filterAppAccessLPr(ps, callingUid, userId)) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                         continue;
                     }
                     final PackageInfo pi = generatePackageInfo((PackageSetting)
@@ -8123,7 +8143,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
                             continue;
                         }
-                        if (filterAppAccessLPr(ps, callingUid, userId)) {
+                        if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                             continue;
                         }
                         ai = PackageParser.generateApplicationInfo(ps.pkg, effectiveFlags,
@@ -8149,7 +8169,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
                             continue;
                         }
-                        if (filterAppAccessLPr(ps, callingUid, userId)) {
+                        if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                             continue;
                         }
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
@@ -8341,7 +8361,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting ps = mSettings.mPackages.get(providerInfo.packageName);
             final ComponentName component =
                     new ComponentName(providerInfo.packageName, providerInfo.name);
-            if (filterAppAccessLPr(ps, callingUid, component, TYPE_PROVIDER, userId)) {
+            if (shouldFilterApplicationLocked(ps, callingUid, component, TYPE_PROVIDER, userId)) {
                 return null;
             }
             return providerInfo;
@@ -8381,7 +8401,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final PackageSetting ps = mSettings.mPackages.get(providerInfo.packageName);
                 final ComponentName component =
                         new ComponentName(providerInfo.packageName, providerInfo.name);
-                if (filterAppAccessLPr(ps, callingUid, component, TYPE_PROVIDER, userId)) {
+                if (shouldFilterApplicationLocked(
+                        ps, callingUid, component, TYPE_PROVIDER, userId)) {
                     continue;
                 }
                 if (finalList == null) {
@@ -8407,7 +8428,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final int callingUserId = UserHandle.getUserId(callingUid);
             final PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
             if (ps == null) return null;
-            if (filterAppAccessLPr(ps, callingUid, component, TYPE_UNKNOWN, callingUserId)) {
+            if (shouldFilterApplicationLocked(
+                    ps, callingUid, component, TYPE_UNKNOWN, callingUserId)) {
                 return null;
             }
             final PackageParser.Instrumentation i = mInstrumentation.get(component);
@@ -8421,7 +8443,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         final PackageSetting ps = mSettings.mPackages.get(targetPackage);
-        if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+        if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
             return ParceledListSlice.emptyList();
         }
         return new ParceledListSlice<>(queryInstrumentationInternal(targetPackage, flags));
@@ -11678,6 +11700,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ksms.addScannedPackageLPw(pkg);
 
             mComponentResolver.addAllComponents(pkg, chatty);
+            mAppsFilter.addPackage(pkg, mPackages);
 
             // Don't allow ephemeral applications to define new permissions groups.
             if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
@@ -11888,7 +11911,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     void cleanPackageDataStructuresLILPw(PackageParser.Package pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
-
+        mAppsFilter.removePackage(pkg.packageName);
         mPermissionManager.removeAllPermissions(pkg, chatty);
 
         final int instrumentationSize = pkg.instrumentation.size();
@@ -12272,7 +12295,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (pkgSetting == null) {
                     return false;
                 }
-                if (filterAppAccessLPr(pkgSetting, callingUid, userId)) {
+                if (shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
                     return false;
                 }
                 // Do not allow "android" is being disabled
@@ -12447,7 +12470,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps == null) {
                     return true;
                 }
-                if (filterAppAccessLPr(ps, callingUid, userId)) {
+                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return true;
                 }
                 return ps.getHidden(userId);
@@ -12639,7 +12662,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting pkgSetting;
             synchronized (mLock) {
                 pkgSetting = mSettings.mPackages.get(packageName);
-                if (pkgSetting == null || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
+                if (pkgSetting == null
+                        || shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
                     Slog.w(TAG, "Could not find package setting for package: " + packageName
                             + ". Skipping...");
                     unactionedPackages.add(packageName);
@@ -12731,7 +12755,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting pkgSetting;
             synchronized (mLock) {
                 pkgSetting = mSettings.mPackages.get(packageName);
-                if (pkgSetting == null || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
+                if (pkgSetting == null
+                        || shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
                     Slog.w(TAG, "Could not find package setting for package: " + packageName
                             + ". Skipping suspending/un-suspending.");
                     unactionedPackages.add(packageName);
@@ -12772,7 +12797,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
+            if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
                 throw new IllegalArgumentException("Unknown target package: " + packageName);
             }
             final PackageUserState packageUserState = ps.readUserState(userId);
@@ -12824,7 +12849,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "isPackageSuspendedForUser for user " + userId);
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
+            if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
                 throw new IllegalArgumentException("Unknown target package: " + packageName);
             }
             return ps.getSuspended(userId);
@@ -13292,7 +13317,8 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null
-                    || filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                    || shouldFilterApplicationLocked(
+                    ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
             }
             return mSettings.getIntentFilterVerificationStatusLPr(packageName, userId);
@@ -13307,7 +13333,8 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean result = false;
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (filterAppAccessLPr(ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+            if (shouldFilterApplicationLocked(
+                    ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 return false;
             }
             result = mSettings.updateIntentFilterVerificationStatusLPw(packageName, status, userId);
@@ -13327,7 +13354,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+            if (shouldFilterApplicationLocked(ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return ParceledListSlice.emptyList();
             }
             return new ParceledListSlice<>(mSettings.getIntentFilterVerificationsLPr(packageName));
@@ -13350,7 +13377,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return ParceledListSlice.emptyList();
             }
             final PackageSetting ps = (PackageSetting) pkg.mExtras;
-            if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+            if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                 return ParceledListSlice.emptyList();
             }
             final int count = pkg.activities.size();
@@ -13386,7 +13413,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             PackageSetting targetPackageSetting = mSettings.mPackages.get(targetPackage);
             if (targetPackageSetting == null
-                    || filterAppAccessLPr(
+                    || shouldFilterApplicationLocked(
                             targetPackageSetting, callingUid, UserHandle.getUserId(callingUid))) {
                 throw new IllegalArgumentException("Unknown target package: " + targetPackage);
             }
@@ -13470,7 +13497,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps == null) {
                 throw new IllegalArgumentException("Unknown target package " + packageName);
             }
-            if (filterAppAccessLPr(ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+            if (shouldFilterApplicationLocked(
+                    ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 throw new IllegalArgumentException("Unknown target package " + packageName);
             }
             if (!Objects.equals(callerPackageName, ps.installerPackageName)) {
@@ -18155,7 +18183,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public boolean getBlockUninstallForUser(String packageName, int userId) {
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || filterAppAccessLPr(ps, Binder.getCallingUid(), userId)) {
+            if (ps == null || shouldFilterApplicationLocked(ps, Binder.getCallingUid(), userId)) {
                 return false;
             }
             return mSettings.getBlockUninstallLPr(userId, packageName);
@@ -18547,7 +18575,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 true /* requireFullPermission */, false /* checkShell */, "clear application data");
 
         final PackageSetting ps = mSettings.getPackageLPr(packageName);
-        final boolean filterApp = (ps != null && filterAppAccessLPr(ps, callingUid, userId));
+        final boolean filterApp =
+                (ps != null && shouldFilterApplicationLocked(ps, callingUid, userId));
         if (!filterApp && mProtectedPackages.isPackageDataProtected(userId, packageName)) {
             throw new SecurityException("Cannot clear data for a protected package: "
                     + packageName);
@@ -18987,7 +19016,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
             if (ps != null
-                    && filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                    && shouldFilterApplicationLocked(
+                            ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return;
             }
         }
@@ -19896,7 +19926,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!UserHandle.isSameApp(callingUid, pkgSetting.appId)) {
             // Don't allow apps that don't have permission to modify other apps
             if (!allowedByPermission
-                    || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
+                    || shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
                 throw new SecurityException(
                         "Attempt to change component state; "
                         + "pid=" + Binder.getCallingPid()
@@ -20117,7 +20147,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (!filterAppAccessLPr(ps, callingUid, userId)
+            if (!shouldFilterApplicationLocked(ps, callingUid, userId)
                     && mSettings.setPackageStoppedStateLPw(this, packageName, stopped,
                             allowedByPermission, callingUid, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -20130,7 +20160,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+            if (shouldFilterApplicationLocked(
+                    ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return null;
             }
             // InstallerPackageName for Apex is not stored in PackageManager
@@ -20159,7 +20190,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /* requireFullPermission */, false /* checkShell */, "get enabled");
         // reader
         synchronized (mLock) {
-            if (filterAppAccessLPr(mSettings.getPackageLPr(packageName), callingUid, userId)) {
+            if (shouldFilterApplicationLocked(
+                    mSettings.getPackageLPr(packageName), callingUid, userId)) {
                 return COMPONENT_ENABLED_STATE_DISABLED;
             }
             return mSettings.getApplicationEnabledSettingLPr(packageName, userId);
@@ -20174,7 +20206,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/, "getComponentEnabled");
         synchronized (mLock) {
-            if (filterAppAccessLPr(mSettings.getPackageLPr(component.getPackageName()), callingUid,
+            if (shouldFilterApplicationLocked(
+                    mSettings.getPackageLPr(component.getPackageName()), callingUid,
                     component, TYPE_UNKNOWN, userId)) {
                 return COMPONENT_ENABLED_STATE_DISABLED;
             }
@@ -20273,6 +20306,16 @@ public class PackageManagerService extends IPackageManager.Stub
         // try optimizing this.
         synchronized (mLock) {
             mPermissionManager.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false);
+
+            final PermissionPolicyInternal permissionPolicyInternal =
+                    LocalServices.getService(PermissionPolicyInternal.class);
+            permissionPolicyInternal.setOnInitializedCallback(userId -> {
+                // The SDK updated case is already handled when we run during the ctor.
+                synchronized (mPackages) {
+                    mPermissionManager.updateAllPermissions(
+                            StorageManager.UUID_PRIVATE_INTERNAL, false);
+                }
+            });
         }
 
         // Watch for external volumes that come and go over time
@@ -21911,7 +21954,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (pkg == null
                     || ps == null
-                    || filterAppAccessLPr(ps, callingUid, user.getIdentifier())) {
+                    || shouldFilterApplicationLocked(ps, callingUid, user.getIdentifier())) {
                 throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
             }
             if (pkg.applicationInfo.isSystemApp()) {
@@ -22368,7 +22411,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             final PackageSetting ps = (PackageSetting) pkg.mExtras;
-            if (filterAppAccessLPr(ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+            if (shouldFilterApplicationLocked(
+                    ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 Slog.w(TAG, "KeySet requested for filtered package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
@@ -22391,7 +22435,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             final PackageSetting ps = (PackageSetting) pkg.mExtras;
-            if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+            if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                 // filter and pretend the package doesn't exist
                 Slog.w(TAG, "KeySet requested for filtered package: " + packageName
                         + ", uid:" + callingUid);
@@ -22418,7 +22462,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null
-                    || filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid,
+                    || shouldFilterApplicationLocked((PackageSetting) pkg.mExtras, callingUid,
                             UserHandle.getUserId(callingUid))) {
                 Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
@@ -22444,7 +22488,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null
-                    || filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid,
+                    || shouldFilterApplicationLocked((PackageSetting) pkg.mExtras, callingUid,
                             UserHandle.getUserId(callingUid))) {
                 Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
@@ -22768,8 +22812,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean filterAppAccess(PackageParser.Package pkg, int callingUid, int userId) {
             synchronized (mLock) {
-                return PackageManagerService.this
-                        .filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid, userId);
+                return PackageManagerService.this.shouldFilterApplicationLocked(
+                        (PackageSetting) pkg.mExtras, callingUid, userId);
             }
         }
 
@@ -22781,7 +22825,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return false;
                 }
                 return PackageManagerService.this
-                        .filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid, userId);
+                        .shouldFilterApplicationLocked(
+                                (PackageSetting) pkg.mExtras, callingUid, userId);
             }
         }
 
@@ -23264,7 +23309,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean canAccessComponent(int callingUid, ComponentName component, int userId) {
             synchronized (mLock) {
                 final PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
-                return ps != null && !PackageManagerService.this.filterAppAccessLPr(
+                return ps != null && !PackageManagerService.this.shouldFilterApplicationLocked(
                         ps, callingUid, component, TYPE_UNKNOWN, userId);
             }
         }
@@ -23699,7 +23744,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "get install reason");
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (filterAppAccessLPr(ps, callingUid, userId)) {
+            if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                 return PackageManager.INSTALL_REASON_UNKNOWN;
             }
             if (ps != null) {

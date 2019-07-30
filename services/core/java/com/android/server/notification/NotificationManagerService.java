@@ -1854,6 +1854,7 @@ public class NotificationManagerService extends SystemService {
                     }
                     if (properties.getKeyset()
                             .contains(SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE)) {
+                        mAssistants.allowAdjustmentType(Adjustment.KEY_IMPORTANCE);
                         mAssistants.resetDefaultAssistantsIfNecessary();
                     }
                 });

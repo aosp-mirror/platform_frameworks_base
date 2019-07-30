@@ -16,6 +16,7 @@
 
 package com.android.systemui
 
+import android.util.ArraySet
 import android.util.Log
 import androidx.annotation.GuardedBy
 import com.android.internal.util.Preconditions
@@ -39,38 +40,39 @@ class DumpController @Inject constructor() : Dumpable {
     }
 
     @GuardedBy("listeners")
-    private val listeners = mutableListOf<WeakReference<Dumpable>>()
+    private val listeners = mutableListOf<RegisteredDumpable>()
     val numListeners: Int
         get() = listeners.size
 
     /**
-     * Adds a [Dumpable] listener to be dumped. It will only be added if it is not already tracked.
+     * Adds a [Dumpable] dumpable to be dumped.
      *
-     * @param listener the [Dumpable] to be added
+     * @param tag a string tag to associate with this dumpable. Tags must be globally unique; this
+     *      method will throw if the same tag has already been registered. Tags can be used to
+     *      filter output when debugging.
+     * @param dumpable the [Dumpable] to be added
      */
-    fun addListener(listener: Dumpable) {
-        Preconditions.checkNotNull(listener, "The listener to be added cannot be null")
-        if (DEBUG) Log.v(TAG, "*** register callback for $listener")
+    fun registerDumpable(tag: String, dumpable: Dumpable) {
+        Preconditions.checkNotNull(dumpable, "The dumpable to be added cannot be null")
+        if (DEBUG) Log.v(TAG, "*** register callback for $dumpable")
         synchronized<Unit>(listeners) {
-            if (listeners.any { it.get() == listener }) {
-                if (DEBUG) {
-                    Log.e(TAG, "Object tried to add another callback")
-                }
+            if (listeners.any { it.tag == tag }) {
+                throw IllegalArgumentException("Duplicate dumpable tag registered: $tag")
             } else {
-                listeners.add(WeakReference(listener))
+                listeners.add(RegisteredDumpable(tag, WeakReference(dumpable)))
             }
         }
     }
 
     /**
-     * Removes a listener from the list of elements to be dumped.
+     * Removes a dumpable from the list of elements to be dumped.
      *
-     * @param listener the [Dumpable] to be removed.
+     * @param dumpable the [Dumpable] to be removed.
      */
-    fun removeListener(listener: Dumpable) {
-        if (DEBUG) Log.v(TAG, "*** unregister callback for $listener")
+    fun unregisterDumpable(dumpable: Dumpable) {
+        if (DEBUG) Log.v(TAG, "*** unregister callback for $dumpable")
         synchronized(listeners) {
-            listeners.removeAll { it.get() == listener || it.get() == null }
+            listeners.removeAll { it.dumpable.get() == dumpable || it.dumpable.get() == null }
         }
     }
 
@@ -79,8 +81,22 @@ class DumpController @Inject constructor() : Dumpable {
      */
     override fun dump(fd: FileDescriptor?, pw: PrintWriter, args: Array<String>?) {
         pw.println("DumpController state:")
+
+        val filter = if (args != null && args.size >= 3 &&
+                args[0] == "dependency" && args[1] == "DumpController") {
+            ArraySet(args[2].split(',').map { it.toLowerCase() })
+        } else {
+            null
+        }
+
         synchronized(listeners) {
-            listeners.forEach { it.get()?.dump(fd, pw, args) }
+            listeners.forEach {
+                if (filter == null || filter.contains(it.tag.toLowerCase())) {
+                    it.dumpable.get()?.dump(fd, pw, args)
+                }
+            }
         }
     }
+
+    data class RegisteredDumpable(val tag: String, val dumpable: WeakReference<Dumpable>)
 }

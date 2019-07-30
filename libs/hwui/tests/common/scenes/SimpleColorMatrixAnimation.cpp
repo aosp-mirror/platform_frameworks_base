@@ -52,7 +52,7 @@ private:
         return TestUtils::createNode(
                 x, y, x + width, y + height,
                 [width, height](RenderProperties& props, Canvas& canvas) {
-                    SkPaint paint;
+                    Paint paint;
                     // Simple scale/translate case where R, G, and B are all treated equivalently
                     SkColorMatrix cm;
                     cm.setScale(1.1f, 1.1f, 1.1f, 0.5f);

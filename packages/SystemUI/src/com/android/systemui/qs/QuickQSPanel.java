@@ -96,6 +96,11 @@ public class QuickQSPanel extends QSPanel {
         Dependency.get(TunerService.class).removeTunable(mNumTiles);
     }
 
+    @Override
+    protected String getDumpableTag() {
+        return TAG;
+    }
+
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
         mFullPanel = fullPanel;
     }

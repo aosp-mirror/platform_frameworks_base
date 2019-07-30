@@ -18,7 +18,6 @@ package com.android.systemui
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,6 +36,7 @@ class DumpControllerTest : SysuiTestCase() {
     private lateinit var controller: DumpController
     @Mock private lateinit var callback1: Dumpable
     @Mock private lateinit var callback2: Dumpable
+    @Mock private lateinit var callback3: Dumpable
     @Mock private lateinit var fd: FileDescriptor
     @Mock private lateinit var pw: PrintWriter
     private val args = emptyArray<String>()
@@ -46,26 +46,19 @@ class DumpControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         controller = DumpController()
-//        Debug.waitForDebugger()
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException::class)
     fun testListenerOnlyAddedOnce() {
-        controller.apply {
-            addListener(callback1)
-            addListener(callback1)
-        }
-        assertEquals(1, controller.numListeners)
-
-        controller.dump(fd, pw, args)
-        verify(callback1 /* only once */).dump(fd, pw, args)
+        controller.registerDumpable("cb1", callback1)
+        controller.registerDumpable("cb1", callback2)
     }
 
     @Test
     fun testListenersCalledOnDump() {
         controller.apply {
-            addListener(callback1)
-            addListener(callback2)
+            registerDumpable("cb1", callback1)
+            registerDumpable("cb2", callback2)
         }
 
         controller.dump(fd, pw, args)
@@ -75,11 +68,59 @@ class DumpControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testListenersAreFiltered() {
+        controller.apply {
+            registerDumpable("cb1", callback1)
+            registerDumpable("cb2", callback2)
+            registerDumpable("cb3", callback3)
+        }
+
+        val args = arrayOf("dependency", "DumpController", "cb3,cb1")
+        controller.dump(fd, pw, args)
+
+        verify(callback1 /* only once */).dump(fd, pw, args)
+        verify(callback2, never()).dump(fd, pw, args)
+        verify(callback3 /* only once */).dump(fd, pw, args)
+    }
+
+    @Test
+    fun testFiltersAreNotCaseSensitive() {
+        controller.apply {
+            registerDumpable("cb1", callback1)
+            registerDumpable("cb2", callback2)
+            registerDumpable("cb3", callback3)
+        }
+
+        val args = arrayOf("dependency", "DumpController", "CB3")
+        controller.dump(fd, pw, args)
+
+        verify(callback1, never()).dump(fd, pw, args)
+        verify(callback2, never()).dump(fd, pw, args)
+        verify(callback3 /* only once */).dump(fd, pw, args)
+    }
+
+    @Test
+    fun testFiltersAreIgnoredIfPrecedingArgsDontMatch() {
+        controller.apply {
+            registerDumpable("cb1", callback1)
+            registerDumpable("cb2", callback2)
+            registerDumpable("cb3", callback3)
+        }
+
+        val args = arrayOf("", "", "cb2")
+        controller.dump(fd, pw, args)
+
+        verify(callback1 /* only once */).dump(fd, pw, args)
+        verify(callback2 /* only once */).dump(fd, pw, args)
+        verify(callback3 /* only once */).dump(fd, pw, args)
+    }
+
+    @Test
     fun testRemoveListener() {
         controller.apply {
-            addListener(callback1)
-            addListener(callback2)
-            removeListener(callback1)
+            registerDumpable("cb1", callback1)
+            registerDumpable("cb2", callback2)
+            unregisterDumpable(callback1)
         }
 
         controller.dump(fd, pw, args)

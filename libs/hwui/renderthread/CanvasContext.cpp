@@ -450,20 +450,38 @@ void CanvasContext::draw() {
     waitOnFences();
 
     bool requireSwap = false;
+    int error = OK;
     bool didSwap =
             mRenderPipeline->swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo, &requireSwap);
 
     mIsDirty = false;
 
     if (requireSwap) {
-        if (!didSwap) {  // some error happened
+        bool didDraw = true;
+        // Handle any swapchain errors
+        error = mNativeSurface->getAndClearError();
+        if (error == TIMED_OUT) {
+            // Try again
+            mRenderThread.postFrameCallback(this);
+            // But since this frame didn't happen, we need to mark full damage in the swap
+            // history
+            didDraw = false;
+
+        } else if (error != OK || !didSwap) {
+            // Unknown error, abandon the surface
             setSurface(nullptr);
+            didDraw = false;
         }
+
         SwapHistory& swap = mSwapHistory.next();
-        swap.damage = windowDirty;
+        if (didDraw) {
+            swap.damage = windowDirty;
+        } else {
+            swap.damage = SkRect::MakeWH(INT_MAX, INT_MAX);
+        }
         swap.swapCompletedTime = systemTime(SYSTEM_TIME_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
-        if (mNativeSurface.get()) {
+        if (didDraw) {
             int durationUs;
             nsecs_t dequeueStart = mNativeSurface->getLastDequeueStartTime();
             if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::SyncStart)) {

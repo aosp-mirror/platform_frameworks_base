@@ -16,9 +16,15 @@
 
 package com.android.server.pm;
 
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageParser;
 
 import com.android.internal.util.ArrayUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 class PackageBuilder {
     final PackageParser.Package mPkg;
@@ -117,6 +123,54 @@ class PackageBuilder {
 
     public PackageBuilder addApplicationInfoFlag(int flag) {
         mPkg.applicationInfo.flags |= flag;
+        return this;
+    }
+
+    public PackageBuilder setApplicationInfoTargetSdkVersion(int versionCode) {
+        mPkg.applicationInfo.targetSdkVersion = versionCode;
+        return this;
+    }
+
+    public PackageBuilder setQueriesIntents(Collection<Intent> queriesIntents) {
+        mPkg.mQueriesIntents = new ArrayList<>(queriesIntents);
+        return this;
+    }
+
+    public PackageBuilder setQueriesIntents(Intent... intents) {
+        return setQueriesIntents(Arrays.asList(intents));
+    }
+
+    public PackageBuilder setQueriesPackages(Collection<String> queriesPackages) {
+        mPkg.mQueriesPackages = new ArrayList<>(queriesPackages);
+        return this;
+    }
+
+    public PackageBuilder setQueriesPackages(String... queriesPackages) {
+        return setQueriesPackages(Arrays.asList(queriesPackages));
+    }
+
+    public PackageBuilder setForceQueryable(boolean forceQueryable) {
+        mPkg.mForceQueryable = forceQueryable;
+        return this;
+    }
+
+    public interface ParseComponentArgsCreator {
+        PackageParser.ParseComponentArgs create(PackageParser.Package pkg);
+    }
+
+    public PackageBuilder addActivity(ParseComponentArgsCreator argsCreator, ActivityInfo info) {
+        mPkg.activities.add(new PackageParser.Activity(argsCreator.create(mPkg), info));
+        return this;
+    }
+
+    public interface ActivityIntentInfoCreator {
+        PackageParser.ActivityIntentInfo create(PackageParser.Activity activity);
+    }
+
+    public PackageBuilder addActivityIntentInfo(
+            int activityIndex, ActivityIntentInfoCreator creator) {
+        final PackageParser.Activity activity = mPkg.activities.get(activityIndex);
+        activity.intents.add(creator.create(activity));
         return this;
     }
 }

@@ -87,19 +87,19 @@ void ReliableSurface::perform(int operation, va_list args) {
 }
 
 int ReliableSurface::reserveNext() {
+    if constexpr (DISABLE_BUFFER_PREFETCH) {
+        return OK;
+    }
     {
         std::lock_guard _lock{mMutex};
         if (mReservedBuffer) {
             ALOGW("reserveNext called but there was already a buffer reserved?");
             return OK;
         }
-        if (mInErrorState) {
+        if (mBufferQueueState != OK) {
             return UNKNOWN_ERROR;
         }
         if (mHasDequeuedBuffer) {
-            return OK;
-        }
-        if constexpr (DISABLE_BUFFER_PREFETCH) {
             return OK;
         }
     }
@@ -165,10 +165,11 @@ int ReliableSurface::dequeueBuffer(ANativeWindowBuffer** buffer, int* fenceFd) {
         }
     }
 
+
     int result = callProtected(mSurface, dequeueBuffer, buffer, fenceFd);
     if (result != OK) {
         ALOGW("dequeueBuffer failed, error = %d; switching to fallback", result);
-        *buffer = acquireFallbackBuffer();
+        *buffer = acquireFallbackBuffer(result);
         *fenceFd = -1;
         return *buffer ? OK : INVALID_OPERATION;
     } else {
@@ -201,9 +202,9 @@ bool ReliableSurface::isFallbackBuffer(const ANativeWindowBuffer* windowBuffer) 
     return windowBuffer == scratchBuffer;
 }
 
-ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer() {
+ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
     std::lock_guard _lock{mMutex};
-    mInErrorState = true;
+    mBufferQueueState = error;
 
     if (mScratchBuffer) {
         return AHardwareBuffer_to_ANativeWindowBuffer(mScratchBuffer.get());
