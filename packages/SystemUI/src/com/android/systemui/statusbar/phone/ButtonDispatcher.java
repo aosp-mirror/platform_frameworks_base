@@ -16,6 +16,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.Interpolators.ALPHA_IN;
 import static com.android.systemui.Interpolators.ALPHA_OUT;
+import static com.android.systemui.Interpolators.LINEAR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
  */
 public class ButtonDispatcher {
     private final static int FADE_DURATION_IN = 150;
-    private final static int FADE_DURATION_OUT = 100;
+    private final static int FADE_DURATION_OUT = 1000;
 
     private final ArrayList<View> mViews = new ArrayList<>();
 
@@ -178,7 +179,7 @@ public class ButtonDispatcher {
             setVisibility(View.VISIBLE);
             mFadeAnimator = ValueAnimator.ofFloat(getAlpha(), alpha);
             mFadeAnimator.setDuration(duration);
-            mFadeAnimator.setInterpolator(getAlpha() < alpha ? ALPHA_IN : ALPHA_OUT);
+            mFadeAnimator.setInterpolator(LINEAR);
             mFadeAnimator.addListener(mFadeListener);
             mFadeAnimator.addUpdateListener(mAlphaListener);
             mFadeAnimator.start();
