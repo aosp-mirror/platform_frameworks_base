@@ -23,25 +23,6 @@ namespace startop {
 
 using android::base::StringPrintf;
 
-void LayoutValidationVisitor::VisitStartTag(const std::u16string& name) {
-  if (0 == name.compare(u"merge")) {
-    message_ = "Merge tags are not supported";
-    can_compile_ = false;
-  }
-  if (0 == name.compare(u"include")) {
-    message_ = "Include tags are not supported";
-    can_compile_ = false;
-  }
-  if (0 == name.compare(u"view")) {
-    message_ = "View tags are not supported";
-    can_compile_ = false;
-  }
-  if (0 == name.compare(u"fragment")) {
-    message_ = "Fragment tags are not supported";
-    can_compile_ = false;
-  }
-}
-
 DexViewBuilder::DexViewBuilder(dex::MethodBuilder* method)
     : method_{method},
       context_{dex::Value::Parameter(0)},
