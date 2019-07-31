@@ -18,7 +18,6 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
 
 import android.graphics.GraphicBuffer;
-import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -37,20 +36,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     private int mWidth;
     private int mHeight;
 
-    public static TaskScreenshotAnimatable create(Task task) {
-        return new TaskScreenshotAnimatable(task, getBufferFromTask(task));
-    }
-
-    private static SurfaceControl.ScreenshotGraphicBuffer getBufferFromTask(Task task) {
-        if (task == null) {
-            return null;
-        }
-        final Rect tmpRect = task.getBounds();
-        tmpRect.offset(0, 0);
-        return SurfaceControl.captureLayers(task.getSurfaceControl(), tmpRect, 1f);
-    }
-
-    private TaskScreenshotAnimatable(Task task,
+    TaskScreenshotAnimatable(Task task,
             SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
         GraphicBuffer buffer = screenshotBuffer == null
                 ? null : screenshotBuffer.getGraphicBuffer();
