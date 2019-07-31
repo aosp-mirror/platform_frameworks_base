@@ -25,8 +25,8 @@ import org.junit.Before;
 public class WindowManagerPerfTestBase {
     static final UiAutomation sUiAutomation = getInstrumentation().getUiAutomation();
     static final long NANOS_PER_S = 1000L * 1000 * 1000;
-    static final long WARMUP_DURATION = 1 * NANOS_PER_S;
-    static final long TEST_DURATION = 5 * NANOS_PER_S;
+    static final long TIME_1_S_IN_NS = 1 * NANOS_PER_S;
+    static final long TIME_5_S_IN_NS = 5 * NANOS_PER_S;
 
     @Before
     public void setUp() {

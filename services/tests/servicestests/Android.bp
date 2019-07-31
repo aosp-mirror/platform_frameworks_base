@@ -40,6 +40,7 @@ android_test {
         "hamcrest-library",
         "servicestests-utils",
         "xml-writer-device-lib",
+        "jobscheduler-service",
     ],
 
     aidl: {

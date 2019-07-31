@@ -10,7 +10,7 @@ else
         return $?
     }
 
-    header_and_eval m -j16 codegen && \
+    header_and_eval m -j16 codegen_cli && \
         header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/SampleDataClass.java && \
         cd $ANDROID_BUILD_TOP &&
         header_and_eval mmma -j16 frameworks/base/tests/Codegen && \

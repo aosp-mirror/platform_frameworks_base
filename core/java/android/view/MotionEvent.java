@@ -1471,6 +1471,10 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @UnsupportedAppUsage
     private static final int HISTORY_CURRENT = -0x80000000;
 
+    // This is essentially the same as native AMOTION_EVENT_INVALID_CURSOR_POSITION as they're all
+    // NaN and we use isnan() everywhere to check validity.
+    private static final float INVALID_CURSOR_POSITION = Float.NaN;
+
     private static final int MAX_RECYCLED = 10;
     private static final Object gRecyclerLock = new Object();
     private static int gRecyclerUsed;
@@ -1590,6 +1594,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @CriticalNative
     private static native float nativeGetYPrecision(long nativePtr);
     @CriticalNative
+    private static native float nativeGetXCursorPosition(long nativePtr);
+    @CriticalNative
+    private static native float nativeGetYCursorPosition(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetCursorPosition(long nativePtr, float x, float y);
+    @CriticalNative
     private static native long nativeGetDownTimeNanos(long nativePtr);
     @CriticalNative
     private static native void nativeSetDownTimeNanos(long nativePtr, long downTime);
@@ -1674,12 +1684,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float xPrecision, float yPrecision, int deviceId,
             int edgeFlags, int source, int displayId, int flags) {
         MotionEvent ev = obtain();
-        ev.mNativePtr = nativeInitialize(ev.mNativePtr,
-                deviceId, source, displayId, action, flags, edgeFlags, metaState, buttonState,
-                CLASSIFICATION_NONE, 0, 0, xPrecision, yPrecision,
+        final boolean success = ev.initialize(deviceId, source, displayId, action, flags, edgeFlags,
+                metaState, buttonState, CLASSIFICATION_NONE, 0, 0, xPrecision, yPrecision,
                 downTime * NS_PER_MS, eventTime * NS_PER_MS,
                 pointerCount, pointerProperties, pointerCoords);
-        if (ev.mNativePtr == 0) {
+        if (!success) {
             Log.e(TAG, "Could not initialize MotionEvent");
             ev.recycle();
             return null;
@@ -1859,8 +1868,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             pc[0].pressure = pressure;
             pc[0].size = size;
 
-            ev.mNativePtr = nativeInitialize(ev.mNativePtr,
-                    deviceId, source, displayId,
+            ev.initialize(deviceId, source, displayId,
                     action, 0, edgeFlags, metaState, 0 /*buttonState*/, CLASSIFICATION_NONE,
                     0, 0, xPrecision, yPrecision,
                     downTime * NS_PER_MS, eventTime * NS_PER_MS,
@@ -1958,6 +1966,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         return ev;
     }
 
+    private boolean initialize(int deviceId, int source, int displayId, int action, int flags,
+            int edgeFlags, int metaState, int buttonState, @Classification int classification,
+            float xOffset, float yOffset, float xPrecision, float yPrecision,
+            long downTimeNanos, long eventTimeNanos,
+            int pointerCount, PointerProperties[] pointerIds, PointerCoords[] pointerCoords) {
+        mNativePtr = nativeInitialize(mNativePtr, deviceId, source, displayId, action, flags,
+                edgeFlags, metaState, buttonState, classification, xOffset, yOffset,
+                xPrecision, yPrecision, downTimeNanos, eventTimeNanos, pointerCount, pointerIds,
+                pointerCoords);
+        if (mNativePtr == 0) {
+            return false;
+        }
+        updateCursorPosition();
+        return true;
+    }
+
     /** @hide */
     @Override
     @UnsupportedAppUsage
@@ -2015,7 +2039,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     /** {@inheritDoc} */
     @Override
     public final void setSource(int source) {
+        if (source == getSource()) {
+            return;
+        }
         nativeSetSource(mNativePtr, source);
+        updateCursorPosition();
     }
 
     /** @hide */
@@ -2670,6 +2698,39 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Returns the x coordinate of mouse cursor position when this event is
+     * reported. This value is only valid if {@link #getSource()} returns
+     * {@link InputDevice#SOURCE_MOUSE}.
+     *
+     * @hide
+     */
+    public float getXCursorPosition() {
+        return nativeGetXCursorPosition(mNativePtr);
+    }
+
+    /**
+     * Returns the y coordinate of mouse cursor position when this event is
+     * reported. This value is only valid if {@link #getSource()} returns
+     * {@link InputDevice#SOURCE_MOUSE}.
+     *
+     * @hide
+     */
+    public float getYCursorPosition() {
+        return nativeGetYCursorPosition(mNativePtr);
+    }
+
+    /**
+     * Sets cursor position to given coordinates. The coordinate in parameters should be after
+     * offsetting. In other words, the effect of this function is {@link #getXCursorPosition()} and
+     * {@link #getYCursorPosition()} will return the same value passed in the parameters.
+     *
+     * @hide
+     */
+    private void setCursorPosition(float x, float y) {
+        nativeSetCursorPosition(mNativePtr, x, y);
+    }
+
+    /**
      * Returns the number of historical points in this event.  These are
      * movements that have occurred between this event and the previous event.
      * This only applies to ACTION_MOVE events -- all other actions will have
@@ -3305,8 +3366,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 pc[i].x = clamp(pc[i].x, left, right);
                 pc[i].y = clamp(pc[i].y, top, bottom);
             }
-            ev.mNativePtr = nativeInitialize(ev.mNativePtr,
-                    nativeGetDeviceId(mNativePtr), nativeGetSource(mNativePtr),
+            ev.initialize(nativeGetDeviceId(mNativePtr), nativeGetSource(mNativePtr),
                     nativeGetDisplayId(mNativePtr),
                     nativeGetAction(mNativePtr), nativeGetFlags(mNativePtr),
                     nativeGetEdgeFlags(mNativePtr), nativeGetMetaState(mNativePtr),
@@ -3399,8 +3459,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
                 final long eventTimeNanos = nativeGetEventTimeNanos(mNativePtr, historyPos);
                 if (h == 0) {
-                    ev.mNativePtr = nativeInitialize(ev.mNativePtr,
-                            nativeGetDeviceId(mNativePtr), nativeGetSource(mNativePtr),
+                    ev.initialize(nativeGetDeviceId(mNativePtr), nativeGetSource(mNativePtr),
                             nativeGetDisplayId(mNativePtr),
                             newAction, nativeGetFlags(mNativePtr),
                             nativeGetEdgeFlags(mNativePtr), nativeGetMetaState(mNativePtr),
@@ -3415,6 +3474,38 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             }
             return ev;
         }
+    }
+
+    /**
+     * Calculate new cursor position for events from mouse. This is used to split, clamp and inject
+     * events.
+     *
+     * <p>If the source is mouse, it sets cursor position to the centroid of all pointers because
+     * InputReader maps multiple fingers on a touchpad to locations around cursor position in screen
+     * coordinates so that the mouse cursor is at the centroid of all pointers.
+     *
+     * <p>If the source is not mouse it sets cursor position to NaN.
+     */
+    private void updateCursorPosition() {
+        if (getSource() != InputDevice.SOURCE_MOUSE) {
+            setCursorPosition(INVALID_CURSOR_POSITION, INVALID_CURSOR_POSITION);
+            return;
+        }
+
+        float x = 0;
+        float y = 0;
+
+        final int pointerCount = getPointerCount();
+        for (int i = 0; i < pointerCount; ++i) {
+            x += getX(i);
+            y += getY(i);
+        }
+
+        // If pointer count is 0, divisions below yield NaN, which is an acceptable result for this
+        // corner case.
+        x /= pointerCount;
+        y /= pointerCount;
+        setCursorPosition(x, y);
     }
 
     @Override

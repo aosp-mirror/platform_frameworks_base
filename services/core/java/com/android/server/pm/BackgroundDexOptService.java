@@ -345,40 +345,55 @@ public class BackgroundDexOptService extends JobService {
     private int optimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
             long lowStorageThreshold, boolean isForPrimaryDex) {
         ArraySet<String> updatedPackages = new ArraySet<>();
-        Set<String> unusedPackages = pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
-        boolean hadSomeLowSpaceFailure = false;
-        Log.d(TAG, "Unsused Packages " +  String.join(",", unusedPackages));
-        // Only downgrade apps when space is low on device.
-        // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
-        // up disk before user hits the actual lowStorageThreshold.
-        final long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE *
-                lowStorageThreshold;
-        boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
-        Log.d(TAG, "Should Downgrade " + shouldDowngrade);
-        boolean dex_opt_performed = false;
-        for (String pkg : pkgs) {
-            int abort_code = abortIdleOptimizations(lowStorageThreshold);
-            if (abort_code == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
-                return abort_code;
-            }
-            // Downgrade unused packages.
-            if (unusedPackages.contains(pkg) && shouldDowngrade) {
-                dex_opt_performed = downgradePackage(pm, pkg, isForPrimaryDex);
-            } else {
-                if (abort_code == OPTIMIZE_ABORT_NO_SPACE_LEFT) {
-                    // can't dexopt because of low space.
-                    hadSomeLowSpaceFailure = true;
-                    continue;
-                }
-                dex_opt_performed = optimizePackage(pm, pkg, isForPrimaryDex);
-            }
-            if (dex_opt_performed) {
-                updatedPackages.add(pkg);
-            }
-        }
 
-        notifyPinService(updatedPackages);
-        return hadSomeLowSpaceFailure ? OPTIMIZE_ABORT_NO_SPACE_LEFT : OPTIMIZE_PROCESSED;
+        try {
+            // Only downgrade apps when space is low on device.
+            // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
+            // up disk before user hits the actual lowStorageThreshold.
+            final long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE
+                    * lowStorageThreshold;
+            boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
+            Log.d(TAG, "Should Downgrade " + shouldDowngrade);
+            if (shouldDowngrade) {
+                Set<String> unusedPackages =
+                        pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
+                Log.d(TAG, "Unsused Packages " +  String.join(",", unusedPackages));
+
+                for (String pkg : unusedPackages) {
+                    int abortCode = abortIdleOptimizations(/*lowStorageThreshold*/ -1);
+                    if (abortCode != OPTIMIZE_CONTINUE) {
+                        // Should be aborted by the scheduler.
+                        return abortCode;
+                    }
+                    if (downgradePackage(pm, pkg, isForPrimaryDex)) {
+                        updatedPackages.add(pkg);
+                    }
+                }
+
+                if (!unusedPackages.isEmpty()) {
+                    pkgs = new ArraySet<>(pkgs);
+                    pkgs.removeAll(unusedPackages);
+                }
+            }
+
+            for (String pkg : pkgs) {
+                int abortCode = abortIdleOptimizations(lowStorageThreshold);
+                if (abortCode != OPTIMIZE_CONTINUE) {
+                    // Either aborted by the scheduler or no space left.
+                    return abortCode;
+                }
+
+                boolean dexOptPerformed = optimizePackage(pm, pkg, isForPrimaryDex);
+                if (dexOptPerformed) {
+                    updatedPackages.add(pkg);
+                }
+            }
+
+            return OPTIMIZE_PROCESSED;
+        } finally {
+            // Always let the pinner service know about changes.
+            notifyPinService(updatedPackages);
+        }
     }
 
 

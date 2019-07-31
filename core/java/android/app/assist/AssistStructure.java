@@ -641,6 +641,7 @@ public class AssistStructure implements Parcelable {
         int mMaxEms = -1;
         int mMaxLength = -1;
         @Nullable String mTextIdEntry;
+        @Nullable String mHintIdEntry;
         @AutofillImportance int mImportantForAutofill;
 
         // POJO used to override some autofill-related values when the node is parcelized.
@@ -688,18 +689,19 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_LOCALE_LIST = 0x00010000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
-        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID =         0x001;
-        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID = 0x002;
-        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE =           0x004;
-        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE =            0x008;
-        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_HINTS =           0x010;
-        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_OPTIONS =         0x020;
-        static final int AUTOFILL_FLAGS_HAS_HTML_INFO =                0x040;
-        static final int AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY =            0x080;
-        static final int AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS =             0x100;
-        static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_EMS =             0x200;
-        static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_LENGTH =          0x400;
-        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_SESSION_ID =      0x800;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID =         0x0001;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID = 0x0002;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE =           0x0004;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE =            0x0008;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_HINTS =           0x0010;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_OPTIONS =         0x0020;
+        static final int AUTOFILL_FLAGS_HAS_HTML_INFO =                0x0040;
+        static final int AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY =            0x0080;
+        static final int AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS =             0x0100;
+        static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_EMS =             0x0200;
+        static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_LENGTH =          0x0400;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_SESSION_ID =      0x0800;
+        static final int AUTOFILL_FLAGS_HAS_HINT_ID_ENTRY =            0x1000;
 
         int mFlags;
         int mAutofillFlags;
@@ -785,6 +787,9 @@ public class AssistStructure implements Parcelable {
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY) != 0) {
                     mTextIdEntry = preader.readString();
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_HINT_ID_ENTRY) != 0) {
+                    mHintIdEntry = preader.readString();
                 }
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
@@ -934,6 +939,9 @@ public class AssistStructure implements Parcelable {
             if (mTextIdEntry != null) {
                 autofillFlags |= AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY;
             }
+            if (mHintIdEntry != null) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_HINT_ID_ENTRY;
+            }
 
             pwriter.writeString(mClassName);
 
@@ -1010,6 +1018,9 @@ public class AssistStructure implements Parcelable {
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY) != 0) {
                     pwriter.writeString(mTextIdEntry);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_HINT_ID_ENTRY) != 0) {
+                    pwriter.writeString(mHintIdEntry);
                 }
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
@@ -1586,6 +1597,17 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * Gets the identifier used to set the hint associated with this view.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        @Nullable
+        public String getHintIdEntry() {
+            return mHintIdEntry;
+        }
+
+        /**
          * Return a Bundle containing optional vendor-specific extension information.
          */
         public Bundle getExtras() {
@@ -1850,6 +1872,11 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setHint(CharSequence hint) {
             getNodeText().mHint = hint != null ? hint.toString() : null;
+        }
+
+        @Override
+        public void setHintIdEntry(@NonNull String entryName) {
+            mNode.mHintIdEntry = Preconditions.checkNotNull(entryName);
         }
 
         @Override
@@ -2266,6 +2293,7 @@ public class AssistStructure implements Parcelable {
         String hint = node.getHint();
         if (hint != null) {
             Log.i(TAG, prefix + "  Hint: " + hint);
+            Log.i(TAG, prefix + "  Resource id: " + node.getHintIdEntry());
         }
         Bundle extras = node.getExtras();
         if (extras != null) {
