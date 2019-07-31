@@ -20,7 +20,6 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 #include "android_hardware_input_InputWindowHandle.h"
-#include "android/graphics/Bitmap.h"
 #include "android/graphics/Region.h"
 #include "core_jni_helpers.h"
 

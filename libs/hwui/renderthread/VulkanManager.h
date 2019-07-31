@@ -31,6 +31,7 @@
 #include "Frame.h"
 #include "IRenderPipeline.h"
 #include "VulkanSurface.h"
+#include "private/hwui/DrawVkInfo.h"
 
 class GrVkExtensions;
 
