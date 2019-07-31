@@ -2607,7 +2607,8 @@ public class SubscriptionManager {
         PackageManager packageManager = mContext.getPackageManager();
         PackageInfo packageInfo;
         try {
-            packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            packageInfo = packageManager.getPackageInfo(packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES);
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException("Unknown package: " + packageName, e);
         }
