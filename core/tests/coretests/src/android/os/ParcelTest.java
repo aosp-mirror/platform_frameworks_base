@@ -56,10 +56,8 @@ public class ParcelTest {
     @Test
     public void testCallingWorkSourceUidAfterEnforce() {
         Parcel p = Parcel.obtain();
-        // Write headers manually so that we do not invoke #writeInterfaceToken.
-        p.writeInt(1);  // strict mode header
-        p.writeInt(WORK_SOURCE_1);  // worksource header.
-        p.writeString(INTERFACE_TOKEN_1);  // interface token.
+        p.writeInterfaceToken(INTERFACE_TOKEN_1);
+        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_1));
         p.setDataPosition(0);
 
         p.enforceInterface(INTERFACE_TOKEN_1);
