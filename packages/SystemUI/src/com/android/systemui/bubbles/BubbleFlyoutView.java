@@ -112,7 +112,6 @@ public class BubbleFlyoutView extends FrameLayout {
      */
     private float mFlyoutToDotWidthDelta = 0f;
     private float mFlyoutToDotHeightDelta = 0f;
-    private float mFlyoutToDotCornerRadiusDelta;
 
     /** The translation values when the flyout is completely transitioned into the dot. */
     private float mTranslationXWhenDot = 0f;
@@ -168,7 +167,6 @@ public class BubbleFlyoutView extends FrameLayout {
                         android.R.attr.dialogCornerRadius});
         mFloatingBackgroundColor = ta.getColor(0, Color.WHITE);
         mCornerRadius = ta.getDimensionPixelSize(1, 0);
-        mFlyoutToDotCornerRadiusDelta = mNewDotRadius - mCornerRadius;
         ta.recycle();
 
         // Add padding for the pointer on either side, onDraw will draw it in this space.
@@ -317,8 +315,8 @@ public class BubbleFlyoutView extends FrameLayout {
         // percentage.
         final float width = getWidth() - (mFlyoutToDotWidthDelta * mPercentTransitionedToDot);
         final float height = getHeight() - (mFlyoutToDotHeightDelta * mPercentTransitionedToDot);
-        final float cornerRadius = mCornerRadius
-                - (mFlyoutToDotCornerRadiusDelta * mPercentTransitionedToDot);
+        final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
+                + mCornerRadius * (1 - mPercentTransitionedToDot);
 
         // Translate the flyout background towards the collapsed 'dot' state.
         mBgTranslationX = mTranslationXWhenDot * mPercentTransitionedToDot;
@@ -342,7 +340,7 @@ public class BubbleFlyoutView extends FrameLayout {
         canvas.save();
         canvas.translate(mBgTranslationX, mBgTranslationY);
         renderPointerTriangle(canvas, width, height);
-        canvas.drawRoundRect(mBgRect, cornerRadius, cornerRadius, mBgPaint);
+        canvas.drawRoundRect(mBgRect, interpolatedRadius, interpolatedRadius, mBgPaint);
         canvas.restore();
     }
 
@@ -385,7 +383,10 @@ public class BubbleFlyoutView extends FrameLayout {
         if (!mTriangleOutline.isEmpty()) {
             // Draw the rect into the outline as a path so we can merge the triangle path into it.
             final Path rectPath = new Path();
-            rectPath.addRoundRect(mBgRect, mCornerRadius, mCornerRadius, Path.Direction.CW);
+            final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
+                    + mCornerRadius * (1 - mPercentTransitionedToDot);
+            rectPath.addRoundRect(mBgRect, interpolatedRadius,
+                    interpolatedRadius, Path.Direction.CW);
             outline.setConvexPath(rectPath);
 
             // Get rid of the triangle path once it has disappeared behind the flyout.
