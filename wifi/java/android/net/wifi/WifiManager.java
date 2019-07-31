@@ -1722,6 +1722,21 @@ public class WifiManager {
     }
 
     /**
+     * Get all network suggestions provided by the calling app.
+     * See {@link #addNetworkSuggestions(List)}
+     * See {@link #removeNetworkSuggestions(List)}
+     * @return a list of {@link WifiNetworkSuggestion}
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public @NonNull List<WifiNetworkSuggestion> getNetworkSuggestions() {
+        try {
+            return mService.getNetworkSuggestions(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
      * Returns the max number of network suggestions that are allowed per app on the device.
      * @see #addNetworkSuggestions(List)
      * @see #removeNetworkSuggestions(List)
