@@ -298,7 +298,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"運動データ"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活動"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"運動データにアクセス"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>

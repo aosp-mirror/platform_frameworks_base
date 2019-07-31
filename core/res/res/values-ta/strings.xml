@@ -366,7 +366,7 @@
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"பிற பயன்பாடுகளை மூடுதல்"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற பயன்பாடுகளின் பின்புலச் செயல்முறைகளை நிறுத்த ஆப்ஸை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே தோன்றலாம்"</string>
-    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான பயன்பாட்டு உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான ஆப்ஸ் உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"பின்னணியில் இயக்கு"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"இந்த ஆப்ஸ், பின்னணியில் இயங்கலாம். இதனால் பேட்டரி விரைவாகத் தீர்ந்துவிடக்கூடும்."</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"பின்னணியில் தரவைப் பயன்படுத்து"</string>
