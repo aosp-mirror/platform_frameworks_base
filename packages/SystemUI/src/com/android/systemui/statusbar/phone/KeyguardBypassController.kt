@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
-import android.hardware.face.FaceManager
 import android.provider.Settings
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -34,6 +33,7 @@ class KeyguardBypassController {
 
     private val unlockMethodCache: UnlockMethodCache
     private val statusBarStateController: StatusBarStateController
+    private var hasFaceFeature: Boolean
 
     /**
      * The pending unlock type which is set if the bypass was blocked when it happened.
@@ -71,11 +71,8 @@ class KeyguardBypassController {
         unlockMethodCache = UnlockMethodCache.getInstance(context)
         this.statusBarStateController = statusBarStateController
 
-        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            return
-        }
-        val faceManager = context.getSystemService(FaceManager::class.java)
-        if (faceManager?.isHardwareDetected != true) {
+        hasFaceFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)
+        if (!hasFaceFeature) {
             return
         }
 
@@ -165,7 +162,7 @@ class KeyguardBypassController {
         pw.print("  isPulseExpanding: "); pw.println(isPulseExpanding)
         pw.print("  launchingAffordance: "); pw.println(launchingAffordance)
         pw.print("  qSExpanded: "); pw.println(qSExpanded)
-        pw.print("  bouncerShowing: "); pw.println(bouncerShowing)
+        pw.print("  hasFaceFeature: "); pw.println(hasFaceFeature)
     }
 
     companion object {
