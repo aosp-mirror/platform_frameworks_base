@@ -150,8 +150,6 @@ public:
 
     void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
 
-    RenderState& getRenderState() { return mRenderThread.renderState(); }
-
     void addFrameMetricsObserver(FrameMetricsObserver* observer) {
         if (mFrameMetricsReporter.get() == nullptr) {
             mFrameMetricsReporter.reset(new FrameMetricsReporter());
