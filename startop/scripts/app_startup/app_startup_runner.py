@@ -33,12 +33,12 @@ import os
 import sys
 import tempfile
 from typing import Any, Callable, Iterable, List, NamedTuple, TextIO, Tuple, \
-    TypeVar, Union
+    TypeVar, Union, Optional
 
 # local import
 DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(DIR))
-import app_startup.run_app_with_prefetch as run_app_with_prefetch
+from app_startup.run_app_with_prefetch import PrefetchAppRunner
 import app_startup.lib.args_utils as args_utils
 from app_startup.lib.data_frame import DataFrame
 import lib.cmd_utils as cmd_utils
@@ -61,6 +61,16 @@ _COLLECTOR_TIMEOUT_MULTIPLIER = 10  # take the regular --timeout and multiply
 
 _UNLOCK_SCREEN_SCRIPT = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'unlock_screen')
+
+RunCommandArgs = NamedTuple('RunCommandArgs',
+                            [('package', str),
+                             ('readahead', str),
+                             ('activity', Optional[str]),
+                             ('compiler_filter', Optional[str]),
+                             ('timeout', Optional[int]),
+                             ('debug', bool),
+                             ('simulate', bool),
+                             ('input', Optional[str])])
 
 # This must be the only mutable global variable. All other global variables are constants to avoid magic literals.
 _debug = False  # See -d/--debug flag.
@@ -207,8 +217,7 @@ def parse_run_script_csv_file(csv_file: TextIO) -> DataFrame:
   return DataFrame(d)
 
 def execute_run_combos(
-    grouped_run_combos: Iterable[Tuple[CollectorPackageInfo, Iterable[
-      run_app_with_prefetch.RunCommandArgs]]],
+    grouped_run_combos: Iterable[Tuple[CollectorPackageInfo, Iterable[RunCommandArgs]]],
     simulate: bool,
     inodes_path: str,
     timeout: int):
@@ -229,7 +238,7 @@ def execute_run_combos(
         combos = combos._replace(input=collector_tmp_output_file.name)
 
       print_utils.debug_print(combos)
-      output = run_app_with_prefetch.run_test(combos)
+      output = PrefetchAppRunner(**combos._asdict()).run()
 
       yield DataFrame(dict((x, [y]) for x, y in output)) if output else None
 
@@ -307,7 +316,7 @@ def main():
   output_file = opts.output and open(opts.output, 'w') or sys.stdout
 
   combos = lambda: args_utils.generate_run_combinations(
-      run_app_with_prefetch.RunCommandArgs,
+      RunCommandArgs,
       coerce_to_list(vars(opts)),
       opts.loop_count)
   print_utils.debug_print_gen("run combinations: ", combos())
