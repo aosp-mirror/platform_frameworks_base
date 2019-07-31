@@ -1853,26 +1853,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             return VerifyCredentialResponse.ERROR;
         }
 
-        boolean shouldReEnrollBaseZero = storedHash.type == CREDENTIAL_TYPE_PATTERN
-                && storedHash.isBaseZeroPattern;
-
-        byte[] credentialToVerify;
-        if (shouldReEnrollBaseZero) {
-            credentialToVerify = LockPatternUtils.patternByteArrayToBaseZero(credential);
-        } else {
-            credentialToVerify = credential;
-        }
-
-        response = verifyCredential(userId, storedHash, credentialToVerify,
+        response = verifyCredential(userId, storedHash, credential,
                 challengeType, challenge, progressCallback);
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
             mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
-            if (shouldReEnrollBaseZero) {
-                setLockCredentialInternal(credential, storedHash.type, credentialToVerify,
-                        DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId, false,
-                        /* isLockTiedToParent= */ false);
-            }
         }
 
         return response;

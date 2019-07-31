@@ -77,7 +77,6 @@ class LockSettingsStorage {
 
     private static final String SYSTEM_DIRECTORY = "/system/";
     private static final String LOCK_PATTERN_FILE = "gatekeeper.pattern.key";
-    private static final String BASE_ZERO_LOCK_PATTERN_FILE = "gatekeeper.gesture.key";
     private static final String LOCK_PASSWORD_FILE = "gatekeeper.password.key";
     private static final String CHILD_PROFILE_LOCK_FILE = "gatekeeper.profile.key";
 
@@ -98,33 +97,23 @@ class LockSettingsStorage {
         private static final int VERSION_GATEKEEPER = 1;
 
         private CredentialHash(byte[] hash, @CredentialType int type) {
-            this(hash, type, false /* isBaseZeroPattern */);
-        }
-
-        private CredentialHash(
-                byte[] hash, @CredentialType int type, boolean isBaseZeroPattern) {
             if (type != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 if (hash == null) {
-                    throw new RuntimeException("Empty hash for CredentialHash");
+                    throw new IllegalArgumentException("Empty hash for CredentialHash");
                 }
             } else /* type == LockPatternUtils.CREDENTIAL_TYPE_NONE */ {
                 if (hash != null) {
-                    throw new RuntimeException("None type CredentialHash should not have hash");
+                    throw new IllegalArgumentException(
+                            "None type CredentialHash should not have hash");
                 }
             }
             this.hash = hash;
             this.type = type;
-            this.isBaseZeroPattern = isBaseZeroPattern;
-        }
-
-        private static CredentialHash createBaseZeroPattern(byte[] hash) {
-            return new CredentialHash(hash, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                    true /* isBaseZeroPattern */);
         }
 
         static CredentialHash create(byte[] hash, int type) {
             if (type == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
-                throw new RuntimeException("Bad type for CredentialHash");
+                throw new IllegalArgumentException("Bad type for CredentialHash");
             }
             return new CredentialHash(hash, type);
         }
@@ -135,11 +124,8 @@ class LockSettingsStorage {
 
         byte[] hash;
         @CredentialType int type;
-        boolean isBaseZeroPattern;
 
         public byte[] toBytes() {
-            Preconditions.checkState(!isBaseZeroPattern, "base zero patterns are not serializable");
-
             try {
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
                 DataOutputStream dos = new DataOutputStream(os);
@@ -274,12 +260,6 @@ class LockSettingsStorage {
         if (!ArrayUtils.isEmpty(stored)) {
             return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
         }
-
-        stored = readFile(getBaseZeroLockPatternFilename(userId));
-        if (!ArrayUtils.isEmpty(stored)) {
-            return CredentialHash.createBaseZeroPattern(stored);
-        }
-
         return null;
     }
 
@@ -323,8 +303,7 @@ class LockSettingsStorage {
     }
 
     public boolean hasPattern(int userId) {
-        return hasFile(getLockPatternFilename(userId)) ||
-            hasFile(getBaseZeroLockPatternFilename(userId));
+        return hasFile(getLockPatternFilename(userId));
     }
 
     public boolean hasCredential(int userId) {
@@ -442,10 +421,6 @@ class LockSettingsStorage {
     @VisibleForTesting
     String getLockPasswordFilename(int userId) {
         return getLockCredentialFilePathForUser(userId, LOCK_PASSWORD_FILE);
-    }
-
-    private String getBaseZeroLockPatternFilename(int userId) {
-        return getLockCredentialFilePathForUser(userId, BASE_ZERO_LOCK_PATTERN_FILE);
     }
 
     @VisibleForTesting
