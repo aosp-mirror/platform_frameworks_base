@@ -830,6 +830,9 @@ public class UsageStatsService extends SystemService implements
                             mUserState.get(user).dumpDatabaseInfo(ipw);
                         }
                         return;
+                    } else if ("appstandby".equals(arg)) {
+                        mAppStandby.dumpState(args, pw);
+                        return;
                     } else if (arg != null && !arg.startsWith("-")) {
                         // Anything else that doesn't start with '-' is a pkg to filter
                         pkg = arg;
