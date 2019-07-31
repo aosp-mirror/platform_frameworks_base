@@ -400,22 +400,7 @@ public class ConnectivityControllerTest {
     }
 
     @Test
-    public void testEvaluateStateLocked_HeartbeatsOn() {
-        mConstants.USE_HEARTBEATS = true;
-        final ConnectivityController controller = new ConnectivityController(mService);
-        final JobStatus red = createJobStatus(createJob()
-                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED), UID_RED);
-
-        controller.evaluateStateLocked(red);
-        assertFalse(controller.isStandbyExceptionRequestedLocked(UID_RED));
-        verify(mNetPolicyManagerInternal, never())
-                .setAppIdleWhitelist(eq(UID_RED), anyBoolean());
-    }
-
-    @Test
     public void testEvaluateStateLocked_JobWithoutConnectivity() {
-        mConstants.USE_HEARTBEATS = false;
         final ConnectivityController controller = new ConnectivityController(mService);
         final JobStatus red = createJobStatus(createJob().setMinimumLatency(1));
 
@@ -427,7 +412,6 @@ public class ConnectivityControllerTest {
 
     @Test
     public void testEvaluateStateLocked_JobWouldBeReady() {
-        mConstants.USE_HEARTBEATS = false;
         final ConnectivityController controller = spy(new ConnectivityController(mService));
         doReturn(true).when(controller).wouldBeReadyWithConnectivityLocked(any());
         final JobStatus red = createJobStatus(createJob()
@@ -466,7 +450,6 @@ public class ConnectivityControllerTest {
 
     @Test
     public void testEvaluateStateLocked_JobWouldNotBeReady() {
-        mConstants.USE_HEARTBEATS = false;
         final ConnectivityController controller = spy(new ConnectivityController(mService));
         doReturn(false).when(controller).wouldBeReadyWithConnectivityLocked(any());
         final JobStatus red = createJobStatus(createJob()
@@ -502,7 +485,6 @@ public class ConnectivityControllerTest {
 
     @Test
     public void testReevaluateStateLocked() {
-        mConstants.USE_HEARTBEATS = false;
         final ConnectivityController controller = spy(new ConnectivityController(mService));
         final JobStatus redOne = createJobStatus(createJob(1)
                 .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
@@ -625,7 +607,7 @@ public class ConnectivityControllerTest {
 
     private static JobStatus createJobStatus(JobInfo.Builder job, int uid,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
-        return new JobStatus(job.build(), uid, null, -1, 0, 0, null,
+        return new JobStatus(job.build(), uid, null, -1, 0, null,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis, 0, 0, null, 0);
     }
 }

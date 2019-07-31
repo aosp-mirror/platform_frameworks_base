@@ -169,12 +169,6 @@ public final class JobStatus {
     private final int numFailures;
 
     /**
-     * Current standby heartbeat when this job was scheduled or last ran.  Used to
-     * pin the runnability check regardless of the job's app moving between buckets.
-     */
-    private final long baseHeartbeat;
-
-    /**
      * Which app standby bucket this job's app is in.  Updated when the app is moved to a
      * different bucket.
      */
@@ -350,8 +344,6 @@ public final class JobStatus {
      * @param standbyBucket The standby bucket that the source package is currently assigned to,
      *     cached here for speed of handling during runnability evaluations (and updated when bucket
      *     assignments are changed)
-     * @param heartbeat Timestamp of when the job was created, in the standby-related
-     *     timebase.
      * @param tag A string associated with the job for debugging/logging purposes.
      * @param numFailures Count of how many times this job has requested a reschedule because
      *     its work was not yet finished.
@@ -364,13 +356,12 @@ public final class JobStatus {
      * @param internalFlags Non-API property flags about this job
      */
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId, int standbyBucket, long heartbeat, String tag, int numFailures,
+            int sourceUserId, int standbyBucket, String tag, int numFailures,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags) {
         this.job = job;
         this.callingUid = callingUid;
         this.standbyBucket = standbyBucket;
-        this.baseHeartbeat = heartbeat;
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -440,7 +431,7 @@ public final class JobStatus {
     public JobStatus(JobStatus jobStatus) {
         this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
-                jobStatus.getStandbyBucket(), jobStatus.getBaseHeartbeat(),
+                jobStatus.getStandbyBucket(),
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
@@ -462,13 +453,13 @@ public final class JobStatus {
      * standby bucket is whatever the OS thinks it should be at this moment.
      */
     public JobStatus(JobInfo job, int callingUid, String sourcePkgName, int sourceUserId,
-            int standbyBucket, long baseHeartbeat, String sourceTag,
+            int standbyBucket, String sourceTag,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
             Pair<Long, Long> persistedExecutionTimesUTC,
             int innerFlags) {
         this(job, callingUid, sourcePkgName, sourceUserId,
-                standbyBucket, baseHeartbeat,
+                standbyBucket,
                 sourceTag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime, innerFlags);
@@ -486,13 +477,13 @@ public final class JobStatus {
     }
 
     /** Create a new job to be rescheduled with the provided parameters. */
-    public JobStatus(JobStatus rescheduling, long newBaseHeartbeat,
+    public JobStatus(JobStatus rescheduling,
             long newEarliestRuntimeElapsedMillis,
             long newLatestRuntimeElapsedMillis, int backoffAttempt,
             long lastSuccessfulRunTime, long lastFailedRunTime) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
-                rescheduling.getStandbyBucket(), newBaseHeartbeat,
+                rescheduling.getStandbyBucket(),
                 rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime, rescheduling.getInternalFlags());
@@ -529,11 +520,8 @@ public final class JobStatus {
         int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
                 sourceUserId, elapsedNow);
         JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-        long currentHeartbeat = js != null
-                ? js.baseHeartbeatForApp(jobPackage, sourceUserId, standbyBucket)
-                : 0;
         return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
-                standbyBucket, currentHeartbeat, tag, 0,
+                standbyBucket, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
                 /*innerFlags=*/ 0);
@@ -712,10 +700,6 @@ public final class JobStatus {
 
     public int getStandbyBucket() {
         return standbyBucket;
-    }
-
-    public long getBaseHeartbeat() {
-        return baseHeartbeat;
     }
 
     public void setStandbyBucket(int newBucket) {
@@ -1631,10 +1615,6 @@ public final class JobStatus {
         }
         pw.print(prefix); pw.print("Standby bucket: ");
         pw.println(getBucketName());
-        if (standbyBucket > 0) {
-            pw.print(prefix); pw.print("Base heartbeat: ");
-            pw.println(baseHeartbeat);
-        }
         if (whenStandbyDeferred != 0) {
             pw.print(prefix); pw.print("  Deferred since: ");
             TimeUtils.formatDuration(whenStandbyDeferred, elapsedRealtimeMillis, pw);

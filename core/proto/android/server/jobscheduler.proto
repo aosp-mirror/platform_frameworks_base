@@ -38,10 +38,10 @@ message JobSchedulerServiceDumpProto {
 
     optional ConstantsProto settings = 1;
 
-    optional int32 current_heartbeat = 14;
-    repeated int32 next_heartbeat = 15;
-    optional int64 last_heartbeat_time_millis = 16;
-    optional int64 next_heartbeat_time_millis = 17;
+    reserved 14; // current_heartbeat
+    reserved 15; // next_heartbeat
+    reserved 16; // last_heartbeat_time_millis
+    reserved 17; // next_heartbeat_time_millis
     optional bool in_parole = 18;
     optional bool in_thermal = 19;
 
@@ -64,7 +64,7 @@ message JobSchedulerServiceDumpProto {
         optional bool is_uid_backing_up = 7;
         optional bool is_component_present = 8;
 
-        optional int64 last_run_heartbeat = 9;
+        reserved 9; // last_run_heartbeat
     }
     repeated RegisteredJob registered_jobs = 3;
 
@@ -214,13 +214,13 @@ message ConstantsProto {
     // assignment. This should be prime relative to common time interval lengths
     // such as a quarter-hour or day, so that the heartbeat drifts relative to
     // wall-clock milestones.
-    optional int64 standby_heartbeat_time_ms = 19;
+    reserved 19; // standby_heartbeat_time_ms
     // Mapping: standby bucket -> number of heartbeats between each sweep of
     // that bucket's jobs.
     // Bucket assignments as recorded in the JobStatus objects are normalized to
     // be indices into this array, rather than the raw constants used by
     // AppIdleHistory.
-    repeated int32 standby_beats = 20;
+    reserved 20; // standby_beats
     // The fraction of a job's running window that must pass before we
     // consider running it when the network is congested.
     optional double conn_congestion_delay_frac = 21;
@@ -229,7 +229,7 @@ message ConstantsProto {
     optional double conn_prefetch_relax_frac = 22;
     // Whether to use heartbeats or rolling window for quota management. True
     // will use heartbeats, false will use a rolling window.
-    optional bool use_heartbeats = 23;
+    reserved 23; // use_heartbeats
 
     message QuotaController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;

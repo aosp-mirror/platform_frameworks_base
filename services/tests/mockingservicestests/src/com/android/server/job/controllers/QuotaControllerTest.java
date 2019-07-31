@@ -107,7 +107,6 @@ public class QuotaControllerTest {
     private static final int SOURCE_USER_ID = 0;
 
     private BroadcastReceiver mChargingReceiver;
-    private Constants mJsConstants;
     private QuotaController mQuotaController;
     private QuotaController.QcConstants mQcConstants;
     private int mSourceUid;
@@ -134,14 +133,11 @@ public class QuotaControllerTest {
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
                 .startMocking();
-        // Make sure constants turn on QuotaController.
-        mJsConstants = new Constants();
-        mJsConstants.USE_HEARTBEATS = false;
 
         // Called in StateController constructor.
         when(mJobSchedulerService.getTestableContext()).thenReturn(mContext);
         when(mJobSchedulerService.getLock()).thenReturn(mJobSchedulerService);
-        when(mJobSchedulerService.getConstants()).thenReturn(mJsConstants);
+        when(mJobSchedulerService.getConstants()).thenReturn(mock(Constants.class));
         // Called in QuotaController constructor.
         IActivityManager activityManager = ActivityManager.getService();
         spyOn(activityManager);
@@ -1807,30 +1803,6 @@ public class QuotaControllerTest {
                 standbyBucket);
         verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
-    }
-
-    /** Tests that QuotaController doesn't throttle if throttling is turned off. */
-    @Test
-    public void testThrottleToggling() throws Exception {
-        setDischarging();
-        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
-                createTimingSession(
-                        JobSchedulerService.sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS,
-                        10 * MINUTE_IN_MILLIS, 4));
-        JobStatus jobStatus = createJobStatus("testThrottleToggling", 1);
-        setStandbyBucket(WORKING_INDEX, jobStatus); // 2 hour window
-        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
-        assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
-
-        mJsConstants.USE_HEARTBEATS = true;
-        mQuotaController.onConstantsUpdatedLocked();
-        Thread.sleep(SECOND_IN_MILLIS); // Job updates are done in the background.
-        assertTrue(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
-
-        mJsConstants.USE_HEARTBEATS = false;
-        mQuotaController.onConstantsUpdatedLocked();
-        Thread.sleep(SECOND_IN_MILLIS); // Job updates are done in the background.
-        assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
     }
 
     @Test

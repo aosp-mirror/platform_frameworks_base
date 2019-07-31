@@ -285,9 +285,6 @@ public final class JobServiceContext implements ServiceConnection {
             UsageStatsManagerInternal usageStats =
                     LocalServices.getService(UsageStatsManagerInternal.class);
             usageStats.setLastJobRunTime(jobPackage, jobUserId, mExecutionStartTimeElapsed);
-            JobSchedulerInternal jobScheduler =
-                    LocalServices.getService(JobSchedulerInternal.class);
-            jobScheduler.noteJobStart(jobPackage, jobUserId);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
