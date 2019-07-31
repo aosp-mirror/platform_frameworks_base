@@ -19,11 +19,10 @@
 #include <utils/Color.h>
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
-#include "GraphicBuffer.h"
 #include <binder/Parcel.h>
 #include <renderthread/RenderProxy.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
-
 #include <private/android/AHardwareBufferHelpers.h>
 #endif
 
@@ -1129,12 +1128,10 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
 static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject hardwareBuffer,
                                                jlong colorSpacePtr) {
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer
-    AHardwareBuffer* hwBuf = android_hardware_HardwareBuffer_getNativeHardwareBuffer(env,
+    AHardwareBuffer* buffer = android_hardware_HardwareBuffer_getNativeHardwareBuffer(env,
         hardwareBuffer);
-    sp<GraphicBuffer> buffer(AHardwareBuffer_to_GraphicBuffer(hwBuf));
-    SkColorType ct = uirenderer::PixelFormatToColorType(buffer->getPixelFormat());
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, ct,
-            GraphicsJNI::getNativeColorSpace(colorSpacePtr));
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer,
+                                              GraphicsJNI::getNativeColorSpace(colorSpacePtr));
     if (!bitmap.get()) {
         ALOGW("failed to create hardware bitmap from hardware buffer");
         return NULL;
@@ -1151,9 +1148,8 @@ static jobject Bitmap_createGraphicBufferHandle(JNIEnv* env, jobject, jlong bitm
     LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
             "Hardware config is only supported config in Bitmap_getGraphicBuffer");
 
-    Bitmap& hwuiBitmap = bitmapHandle->bitmap();
-    sp<GraphicBuffer> buffer(hwuiBitmap.graphicBuffer());
-    return createJavaGraphicBuffer(env, buffer);
+    Bitmap& bitmap = bitmapHandle->bitmap();
+    return android_graphics_GraphicBuffer_createFromAHardwareBuffer(env, bitmap.hardwareBuffer());
 #else
     return NULL;
 #endif
