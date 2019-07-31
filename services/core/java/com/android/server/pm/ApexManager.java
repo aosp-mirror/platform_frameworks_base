@@ -282,30 +282,39 @@ abstract class ApexManager {
                         if ((new File(ai.modulePath)).isDirectory()) {
                             break;
                         }
+                        int flags = PackageManager.GET_META_DATA
+                                | PackageManager.GET_SIGNING_CERTIFICATES
+                                | PackageManager.GET_SIGNATURES;
+                        PackageParser.Package pkg;
                         try {
-                            final PackageInfo pkg = PackageParser.generatePackageInfoFromApex(
-                                    ai, PackageManager.GET_META_DATA
-                                            | PackageManager.GET_SIGNING_CERTIFICATES);
-                            mAllPackagesCache.add(pkg);
-                            if (ai.isActive) {
-                                if (activePackagesSet.contains(pkg.packageName)) {
-                                    throw new IllegalStateException(
-                                            "Two active packages have the same name: "
-                                                    + pkg.packageName);
-                                }
-                                activePackagesSet.add(pkg.packageName);
-                            }
-                            if (ai.isFactory) {
-                                if (factoryPackagesSet.contains(pkg.packageName)) {
-                                    throw new IllegalStateException(
-                                            "Two factory packages have the same name: "
-                                                    + pkg.packageName);
-                                }
-                                factoryPackagesSet.add(pkg.packageName);
-                            }
+                            File apexFile = new File(ai.modulePath);
+                            PackageParser pp = new PackageParser();
+                            pkg = pp.parsePackage(apexFile, flags, false);
+                            PackageParser.collectCertificates(pkg, false);
                         } catch (PackageParser.PackageParserException pe) {
                             throw new IllegalStateException("Unable to parse: " + ai, pe);
                         }
+
+                        final PackageInfo packageInfo =
+                                PackageParser.generatePackageInfo(pkg, ai, flags);
+                        mAllPackagesCache.add(packageInfo);
+                        if (ai.isActive) {
+                            if (activePackagesSet.contains(packageInfo.packageName)) {
+                                throw new IllegalStateException(
+                                        "Two active packages have the same name: "
+                                                + packageInfo.packageName);
+                            }
+                            activePackagesSet.add(packageInfo.packageName);
+                        }
+                        if (ai.isFactory) {
+                            if (factoryPackagesSet.contains(packageInfo.packageName)) {
+                                throw new IllegalStateException(
+                                        "Two factory packages have the same name: "
+                                                + packageInfo.packageName);
+                            }
+                            factoryPackagesSet.add(packageInfo.packageName);
+                        }
+
                     }
                 } catch (RemoteException re) {
                     Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
