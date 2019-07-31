@@ -22,6 +22,7 @@
 #include "FrameMetricsReporter.h"
 #include "IContextFactory.h"
 #include "IRenderPipeline.h"
+#include "JankTracker.h"
 #include "LayerUpdateQueue.h"
 #include "Lighting.h"
 #include "ReliableSurface.h"
