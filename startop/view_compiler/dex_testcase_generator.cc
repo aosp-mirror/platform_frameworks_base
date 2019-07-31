@@ -282,15 +282,15 @@ void GenerateSimpleTestCases(const string& outdir) {
     method.Encode();
   }(castObjectToString);
 
+  TypeDescriptor test_class = TypeDescriptor::FromClassname("android.startop.test.TestClass");
+
   // Read a static field
-  // integer readStaticField() { return TestClass.staticInteger; }
+  // int readStaticField() { return TestClass.staticInteger; }
   MethodBuilder readStaticField{
       cbuilder.CreateMethod("readStaticField", Prototype{TypeDescriptor::Int()})};
   [&](MethodBuilder& method) {
     const ir::FieldDecl* field =
-        dex_file.GetOrAddField(TypeDescriptor::FromClassname("android.startop.test.TestClass"),
-                               "staticInteger",
-                               TypeDescriptor::Int());
+        dex_file.GetOrAddField(test_class, "staticInteger", TypeDescriptor::Int());
     Value result{method.MakeRegister()};
     method.AddInstruction(Instruction::GetStaticField(field->orig_index, result));
     method.BuildReturn(result, /*is_object=*/false);
@@ -303,15 +303,40 @@ void GenerateSimpleTestCases(const string& outdir) {
       cbuilder.CreateMethod("setStaticField", Prototype{TypeDescriptor::Void()})};
   [&](MethodBuilder& method) {
     const ir::FieldDecl* field =
-        dex_file.GetOrAddField(TypeDescriptor::FromClassname("android.startop.test.TestClass"),
-                               "staticInteger",
-                               TypeDescriptor::Int());
+        dex_file.GetOrAddField(test_class, "staticInteger", TypeDescriptor::Int());
     Value number{method.MakeRegister()};
     method.BuildConst4(number, 7);
     method.AddInstruction(Instruction::SetStaticField(field->orig_index, number));
     method.BuildReturn();
     method.Encode();
   }(setStaticField);
+
+  // Read an instance field
+  // int readInstanceField(TestClass obj) { return obj.instanceField; }
+  MethodBuilder readInstanceField{
+      cbuilder.CreateMethod("readInstanceField", Prototype{TypeDescriptor::Int(), test_class})};
+  [&](MethodBuilder& method) {
+    const ir::FieldDecl* field =
+        dex_file.GetOrAddField(test_class, "instanceField", TypeDescriptor::Int());
+    Value result{method.MakeRegister()};
+    method.AddInstruction(Instruction::GetField(field->orig_index, result, Value::Parameter(0)));
+    method.BuildReturn(result, /*is_object=*/false);
+    method.Encode();
+  }(readInstanceField);
+
+  // Set an instance field
+  // void setInstanceField(TestClass obj) { obj.instanceField = 7; }
+  MethodBuilder setInstanceField{
+      cbuilder.CreateMethod("setInstanceField", Prototype{TypeDescriptor::Void(), test_class})};
+  [&](MethodBuilder& method) {
+    const ir::FieldDecl* field =
+        dex_file.GetOrAddField(test_class, "instanceField", TypeDescriptor::Int());
+    Value number{method.MakeRegister()};
+    method.BuildConst4(number, 7);
+    method.AddInstruction(Instruction::SetField(field->orig_index, Value::Parameter(0), number));
+    method.BuildReturn();
+    method.Encode();
+  }(setInstanceField);
 
   slicer::MemView image{dex_file.CreateImage()};
   std::ofstream out_file(outdir + "/simple.dex");

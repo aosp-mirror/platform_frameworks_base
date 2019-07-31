@@ -190,4 +190,25 @@ public final class DexBuilderTest {
     method.invoke(null);
     Assert.assertEquals(7, TestClass.staticInteger);
   }
+
+  @Test
+  public void readInstanceField() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("readInstanceField", TestClass.class);
+    TestClass obj = new TestClass();
+    obj.instanceField = 5;
+    Assert.assertEquals(5, method.invoke(null, obj));
+  }
+
+  @Test
+  public void setInstanceField() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("setInstanceField", TestClass.class);
+    TestClass obj = new TestClass();
+    obj.instanceField = 5;
+    method.invoke(null, obj);
+    Assert.assertEquals(7, obj.instanceField);
+  }
 }

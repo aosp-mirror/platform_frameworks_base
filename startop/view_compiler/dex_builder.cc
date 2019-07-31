@@ -108,6 +108,12 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
     case Instruction::Op::kSetStaticField:
       out << "kSetStaticField";
       return out;
+    case Instruction::Op::kGetInstanceField:
+      out << "kGetInstanceField";
+      return out;
+    case Instruction::Op::kSetInstanceField:
+      out << "kSetInstanceField";
+      return out;
   }
 }
 
@@ -246,6 +252,7 @@ ir::FieldDecl* DexBuilder::GetOrAddField(TypeDescriptor parent, const std::strin
   field->parent = GetOrAddType(parent);
   field->name = GetOrAddString(name);
   field->type = GetOrAddType(type);
+  field->orig_index = dex_file_->fields_indexes.AllocateIndex();
   dex_file_->fields_map[field->orig_index] = field;
   field_decls_by_key_[key] = field;
   return field;
@@ -384,7 +391,9 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
       return EncodeCast(instruction);
     case Instruction::Op::kGetStaticField:
     case Instruction::Op::kSetStaticField:
-      return EncodeStaticFieldOp(instruction);
+    case Instruction::Op::kGetInstanceField:
+    case Instruction::Op::kSetInstanceField:
+      return EncodeFieldOp(instruction);
   }
 }
 
@@ -539,7 +548,8 @@ void MethodBuilder::EncodeCast(const Instruction& instruction) {
   Encode21c(::art::Instruction::CHECK_CAST, RegisterValue(*instruction.dest()), type.value());
 }
 
-void MethodBuilder::EncodeStaticFieldOp(const Instruction& instruction) {
+void MethodBuilder::EncodeFieldOp(const Instruction& instruction) {
+  const auto& args = instruction.args();
   switch (instruction.opcode()) {
     case Instruction::Op::kGetStaticField: {
       CHECK(instruction.dest().has_value());
@@ -553,18 +563,36 @@ void MethodBuilder::EncodeStaticFieldOp(const Instruction& instruction) {
     }
     case Instruction::Op::kSetStaticField: {
       CHECK(!instruction.dest().has_value());
-      const auto& args = instruction.args();
       CHECK_EQ(1, args.size());
       CHECK(args[0].is_variable());
 
-      Encode21c(::art::Instruction::SPUT,
+      Encode21c(::art::Instruction::SPUT, RegisterValue(args[0]), instruction.index_argument());
+      break;
+    }
+    case Instruction::Op::kGetInstanceField: {
+      CHECK(instruction.dest().has_value());
+      CHECK(instruction.dest()->is_variable());
+      CHECK_EQ(1, instruction.args().size());
+
+      Encode22c(::art::Instruction::IGET,
+                RegisterValue(*instruction.dest()),
                 RegisterValue(args[0]),
                 instruction.index_argument());
       break;
     }
-    default: {
-      LOG(FATAL) << "Unsupported static field operation";
+    case Instruction::Op::kSetInstanceField: {
+      CHECK(!instruction.dest().has_value());
+      CHECK_EQ(2, args.size());
+      CHECK(args[0].is_variable());
+      CHECK(args[1].is_variable());
+
+      Encode22c(::art::Instruction::IPUT,
+                RegisterValue(args[1]),
+                RegisterValue(args[0]),
+                instruction.index_argument());
+      break;
     }
+    default: { LOG(FATAL) << "Unsupported field operation"; }
   }
 }
 
