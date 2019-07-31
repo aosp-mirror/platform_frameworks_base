@@ -29,7 +29,9 @@ import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +59,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -76,6 +79,8 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final WindowManager.LayoutParams mLpChanged;
     private final boolean mKeyguardScreenRotation;
     private final long mLockScreenDisplayTimeout;
+    private final Display.Mode mKeyguardDisplayMode;
+    private final KeyguardBypassController mKeyguardBypassController;
     private ViewGroup mStatusBarView;
     private WindowManager.LayoutParams mLp;
     private boolean mHasTopUi;
@@ -91,14 +96,21 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
     @Inject
-    public StatusBarWindowController(Context context) {
+    public StatusBarWindowController(Context context,
+            StatusBarStateController statusBarStateController,
+            ConfigurationController configurationController,
+            KeyguardBypassController keyguardBypassController) {
         this(context, context.getSystemService(WindowManager.class), ActivityManager.getService(),
-                DozeParameters.getInstance(context));
+                DozeParameters.getInstance(context), statusBarStateController,
+                configurationController, keyguardBypassController);
     }
 
     @VisibleForTesting
     public StatusBarWindowController(Context context, WindowManager windowManager,
-            IActivityManager activityManager, DozeParameters dozeParameters) {
+            IActivityManager activityManager, DozeParameters dozeParameters,
+            StatusBarStateController statusBarStateController,
+            ConfigurationController configurationController,
+            KeyguardBypassController keyguardBypassController) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -106,12 +118,27 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new WindowManager.LayoutParams();
+        mKeyguardBypassController = keyguardBypassController;
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
-        ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
+        ((SysuiStatusBarStateController) statusBarStateController)
                 .addCallback(mStateListener,
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
-        Dependency.get(ConfigurationController.class).addCallback(this);
+        configurationController.addCallback(this);
+
+        Display.Mode[] supportedModes = context.getDisplay().getSupportedModes();
+        Display.Mode currentMode = context.getDisplay().getMode();
+        // Running on the highest frame rate available can be expensive.
+        // Let's specify a preferred refresh rate, and allow higher FPS only when we
+        // know that we're not falsing (because we unlocked.)
+        int keyguardRefreshRate = context.getResources()
+                .getInteger(R.integer.config_keyguardRefreshRate);
+        // Find supported display mode with the same resolution and requested refresh rate.
+        mKeyguardDisplayMode = Arrays.stream(supportedModes).filter(mode ->
+                (int) mode.getRefreshRate() == keyguardRefreshRate
+                        && mode.getPhysicalWidth() == currentMode.getPhysicalWidth()
+                        && mode.getPhysicalHeight() == currentMode.getPhysicalHeight())
+                .findFirst().orElse(null);
     }
 
     /**
@@ -208,6 +235,18 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
             mLpChanged.privateFlags |= LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         } else {
             mLpChanged.privateFlags &= ~LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+        }
+
+        if (mKeyguardDisplayMode != null) {
+            boolean bypassOnKeyguard = mKeyguardBypassController.getBypassEnabled()
+                    && state.statusBarState == StatusBarState.KEYGUARD && !state.keyguardFadingAway
+                    && !state.keyguardGoingAway;
+            if (state.dozing || bypassOnKeyguard) {
+                mLpChanged.preferredDisplayModeId = mKeyguardDisplayMode.getModeId();
+            } else {
+                mLpChanged.preferredDisplayModeId = 0;
+            }
+            Trace.setCounter("display_mode_id", mLpChanged.preferredDisplayModeId);
         }
     }
 
@@ -575,7 +614,8 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("StatusBarWindowController state:");
+        pw.println("StatusBarWindowController:");
+        pw.println("  mKeyguardDisplayMode=" + mKeyguardDisplayMode);
         pw.println(mCurrentState);
     }
 
@@ -594,6 +634,14 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         setKeyguardDark(useDarkText);
     }
 
+    /**
+     * When keyguard will be dismissed but didn't start animation yet.
+     */
+    public void setKeyguardGoingAway(boolean goingAway) {
+        mCurrentState.keyguardGoingAway = goingAway;
+        apply(mCurrentState);
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
@@ -603,6 +651,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         boolean statusBarFocusable;
         boolean bouncerShowing;
         boolean keyguardFadingAway;
+        boolean keyguardGoingAway;
         boolean qsExpanded;
         boolean headsUpShowing;
         boolean forceStatusBarVisible;
