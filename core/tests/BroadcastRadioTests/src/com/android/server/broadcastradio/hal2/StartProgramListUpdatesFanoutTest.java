@@ -17,7 +17,6 @@ package com.android.server.broadcastradio.hal2;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -41,7 +40,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
@@ -49,7 +47,6 @@ import org.mockito.stubbing.Answer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Tests for v2 HAL RadioModule.
@@ -293,61 +290,6 @@ public class StartProgramListUpdatesFanoutTest {
         }
         ProgramList.Chunk expectedChunk = new ProgramList.Chunk(purge, true, modifiedSet,
                 removedSet);
-        verify(clientMock).onProgramListUpdated(argThat(new ChunkMatcher(expectedChunk)));
+        verify(clientMock).onProgramListUpdated(expectedChunk);
     }
-
-    // TODO(b/130750904): Remove this class and replace "argThat(new ChunkMatcher(chunk))" with
-    // "eq(chunk)".
-    //
-    // Ideally, this class wouldn't exist, but currently RadioManager.ProgramInfo#hashCode() can
-    // return different values for objects that satisfy ProgramInfo#equals(). As a short term
-    // workaround, this class performs the O(N^2) comparison between the Chunks' mModified sets.
-    //
-    // To test if ProgramInfo#hashCode() has been fixed, remove commenting from
-    // testProgramInfoHashCode() below.
-    private class ChunkMatcher implements ArgumentMatcher<ProgramList.Chunk> {
-        private final ProgramList.Chunk mExpected;
-
-        ChunkMatcher(ProgramList.Chunk expected) {
-            mExpected = expected;
-        }
-
-        @Override
-        public boolean matches(ProgramList.Chunk actual) {
-            if ((mExpected.isPurge() != actual.isPurge())
-                    || (mExpected.isComplete() != actual.isComplete())
-                    || (!mExpected.getRemoved().equals(actual.getRemoved()))) {
-                return false;
-            }
-            Set<RadioManager.ProgramInfo> expectedModified = mExpected.getModified();
-            Set<RadioManager.ProgramInfo> actualModified = new HashSet<>(actual.getModified());
-            if (expectedModified.size() != actualModified.size()) {
-                return false;
-            }
-            for (RadioManager.ProgramInfo expectedInfo : expectedModified) {
-                boolean found = false;
-                for (RadioManager.ProgramInfo actualInfo : actualModified) {
-                    if (expectedInfo.equals(actualInfo)) {
-                        found = true;
-                        actualModified.remove(actualInfo);
-                        break;
-                    }
-                }
-                if (!found) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    // @Test
-    // public void testProgramInfoHashCode() {
-    //     RadioManager.ProgramInfo info1 = TestUtils.makeProgramInfo(
-    //         ProgramSelector.PROGRAM_TYPE_FM, mAmFmIdentifier, 0);
-    //     RadioManager.ProgramInfo info2 = TestUtils.makeProgramInfo(
-    //         ProgramSelector.PROGRAM_TYPE_FM, mAmFmIdentifier, 0);
-    //     assertEquals(info1, info2);
-    //     assertEquals(info1.hashCode(), info2.hashCode());
-    // }
 }
