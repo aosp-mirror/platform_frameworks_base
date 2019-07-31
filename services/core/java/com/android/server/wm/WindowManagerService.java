@@ -7639,10 +7639,12 @@ public class WindowManagerService extends IWindowManager.Stub
             isDown = motionEvent.getAction() == MotionEvent.ACTION_DOWN;
             isUp = motionEvent.getAction() == MotionEvent.ACTION_UP;
         }
+        final boolean isMouseEvent = ev.getSource() == InputDevice.SOURCE_MOUSE;
 
         // For ACTION_DOWN, syncInputTransactions before injecting input.
+        // For all mouse events, also sync before injecting.
         // For ACTION_UP, sync after injecting.
-        if (isDown) {
+        if (isDown || isMouseEvent) {
             syncInputTransactions();
         }
         final boolean result =
