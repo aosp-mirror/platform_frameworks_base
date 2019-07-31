@@ -41,6 +41,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -54,7 +55,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
@@ -1032,27 +1032,29 @@ class Owners {
                     remoteBugreportHash, canAccessDeviceIds);
         }
 
-        public void dump(String prefix, PrintWriter pw) {
-            pw.println(prefix + "admin=" + admin);
-            pw.println(prefix + "name=" + name);
-            pw.println(prefix + "package=" + packageName);
-            pw.println(prefix + "canAccessDeviceIds=" + canAccessDeviceIds);
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("admin=" + admin);
+            pw.println("name=" + name);
+            pw.println("package=" + packageName);
+            pw.println("canAccessDeviceIds=" + canAccessDeviceIds);
         }
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    public void dump(IndentingPrintWriter pw) {
         boolean needBlank = false;
         if (mDeviceOwner != null) {
-            pw.println(prefix + "Device Owner: ");
-            mDeviceOwner.dump(prefix + "  ", pw);
-            pw.println(prefix + "  User ID: " + mDeviceOwnerUserId);
+            pw.println("Device Owner: ");
+            pw.increaseIndent();
+            mDeviceOwner.dump(pw);
+            pw.println("User ID: " + mDeviceOwnerUserId);
+            pw.decreaseIndent();
             needBlank = true;
         }
         if (mSystemUpdatePolicy != null) {
             if (needBlank) {
                 pw.println();
             }
-            pw.println(prefix + "System Update Policy: " + mSystemUpdatePolicy);
+            pw.println("System Update Policy: " + mSystemUpdatePolicy);
             needBlank = true;
         }
         if (mProfileOwners != null) {
@@ -1060,8 +1062,10 @@ class Owners {
                 if (needBlank) {
                     pw.println();
                 }
-                pw.println(prefix + "Profile Owner (User " + entry.getKey() + "): ");
-                entry.getValue().dump(prefix + "  ", pw);
+                pw.println("Profile Owner (User " + entry.getKey() + "): ");
+                pw.increaseIndent();
+                entry.getValue().dump(pw);
+                pw.decreaseIndent();
                 needBlank = true;
             }
         }
@@ -1069,14 +1073,14 @@ class Owners {
             if (needBlank) {
                 pw.println();
             }
-            pw.println(prefix + "Pending System Update: " + mSystemUpdateInfo);
+            pw.println("Pending System Update: " + mSystemUpdateInfo);
             needBlank = true;
         }
         if (mSystemUpdateFreezeStart != null || mSystemUpdateFreezeEnd != null) {
             if (needBlank) {
                 pw.println();
             }
-            pw.println(prefix + "System update freeze record: "
+            pw.println("System update freeze record: "
                     + getSystemUpdateFreezePeriodRecordAsString());
             needBlank = true;
         }
