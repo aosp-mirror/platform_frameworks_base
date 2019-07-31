@@ -21,31 +21,22 @@ package com.android.systemui.biometrics;
  * FingerprintDialogImpl) and passed into their views (e.g. FingerprintDialogView).
  */
 public interface DialogViewCallback {
-    /**
-     * Invoked when the user cancels authentication by tapping outside the prompt, etc. The dialog
-     * should be dismissed.
-     */
-    void onUserCanceled();
+
+    int DISMISSED_USER_CANCELED = 1;
+    int DISMISSED_BUTTON_NEGATIVE = 2;
+    int DISMISSED_BUTTON_POSITIVE = 3;
+
+    int DISMISSED_AUTHENTICATED = 4;
+    int DISMISSED_ERROR = 5;
 
     /**
-     * Invoked when an error is shown. The dialog should be dismissed after a set amount of time.
+     * Invoked when the dialog is dismissed
+     * @param reason
      */
-    void onErrorShown();
+    void onDismissed(int reason);
 
     /**
-     * Invoked when the negative button is pressed. The client should be notified and the dialog
-     * should be dismissed.
-     */
-    void onNegativePressed();
-
-    /**
-     * Invoked when the positive button is pressed. The client should be notified and the dialog
-     * should be dismissed.
-     */
-    void onPositivePressed();
-
-    /**
-     * Invoked when the "try again" button is pressed.
+     * Invoked when the "try again" button is clicked
      */
     void onTryAgainPressed();
 }

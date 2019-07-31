@@ -1068,7 +1068,7 @@ public class BiometricService extends SystemService {
     }
 
     private void logDialogDismissed(int reason) {
-        if (reason == BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+        if (reason == BiometricPrompt.DISMISSED_REASON_CONFIRMED) {
             // Explicit auth, authentication confirmed.
             // Latency in this case is authenticated -> confirmed. <Biometric>Service
             // should have the first half (first acquired -> authenticated).
@@ -1370,14 +1370,14 @@ public class BiometricService extends SystemService {
 
     private void handleOnDismissed(int reason) {
         if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "onDialogDismissed: " + reason + ", auth session null");
+            Slog.e(TAG, "onDismissed: " + reason + ", auth session null");
             return;
         }
 
         logDialogDismissed(reason);
 
         try {
-            if (reason != BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+            if (reason != BiometricPrompt.DISMISSED_REASON_CONFIRMED) { // TODO: Check
                 // Positive button is used by passive modalities as a "confirm" button,
                 // do not send to client
                 mCurrentAuthSession.mClientReceiver.onDialogDismissed(reason);
@@ -1390,7 +1390,7 @@ public class BiometricService extends SystemService {
                         BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
                         getContext().getString(
                                 com.android.internal.R.string.biometric_error_user_canceled));
-            } else if (reason == BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+            } else if (reason == BiometricPrompt.DISMISSED_REASON_CONFIRMED) {
                 // Have the service send the token to KeyStore, and send onAuthenticated
                 // to the application
                 KeyStore.getInstance().addAuthToken(mCurrentAuthSession.mTokenEscrow);

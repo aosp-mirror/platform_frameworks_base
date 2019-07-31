@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.biometrics;
+package com.android.systemui.biometrics.ui;
 
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.android.systemui.R;
+import com.android.systemui.biometrics.DialogViewCallback;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
@@ -32,7 +33,7 @@ public class FingerprintDialogView extends BiometricDialogView {
 
     private static final String TAG = "FingerprintDialogView";
 
-    public FingerprintDialogView(Context context,
+    protected FingerprintDialogView(Context context,
             DialogViewCallback callback) {
         super(context, callback);
     }

@@ -100,7 +100,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
-    public static final int DISMISSED_REASON_POSITIVE = 1;
+    public static final int DISMISSED_REASON_CONFIRMED = 1;
 
     /**
      * @hide
@@ -111,6 +111,16 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final int DISMISSED_REASON_USER_CANCEL = 3;
+
+    /**
+     * @hide
+     */
+    public static final int DISMISSED_REASON_CONFIRM_NOT_REQUIRED = 4;
+
+    /**
+     * @hide
+     */
+    public static final int DISMISSED_REASON_ERROR = 5;
 
     private static class ButtonInfo {
         Executor executor;
@@ -362,7 +372,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @Override
         public void onDialogDismissed(int reason) throws RemoteException {
             // Check the reason and invoke OnClickListener(s) if necessary
-            if (reason == DISMISSED_REASON_POSITIVE) {
+            if (reason == DISMISSED_REASON_CONFIRMED) {
                 mPositiveButtonInfo.executor.execute(() -> {
                     mPositiveButtonInfo.listener.onClick(null, DialogInterface.BUTTON_POSITIVE);
                 });
