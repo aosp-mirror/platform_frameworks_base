@@ -53,7 +53,12 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#TabWidget_tabStripEnabled
  * @attr ref android.R.styleable#TabWidget_tabStripLeft
  * @attr ref android.R.styleable#TabWidget_tabStripRight
+ *
+ * @deprecated new applications should use fragment APIs instead of this class:
+ * Use <a href="{@docRoot}guide/navigation/navigation-swipe-view">TabLayout and ViewPager</a>
+ * instead.
  */
+@Deprecated
 public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     private final Rect mBounds = new Rect();
 

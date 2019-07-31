@@ -46,7 +46,11 @@ import java.util.List;
  * page. The individual elements are typically controlled using this container object, rather than
  * setting values on the child elements themselves.
  *
+ * @deprecated new applications should use fragment APIs instead of this class:
+ * Use <a href="{@docRoot}guide/navigation/navigation-swipe-view">TabLayout and ViewPager</a>
+ * instead.
  */
+@Deprecated
 public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchModeChangeListener {
 
     private static final int TABWIDGET_LOCATION_LEFT = 0;
