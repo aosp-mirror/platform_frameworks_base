@@ -105,3 +105,20 @@ def blocking_wait_for_logcat_displayed_time(timestamp: datetime.datetime,
   displayed_time = result[result.rfind('+'):]
 
   return parse_time_to_milliseconds(displayed_time)
+
+def delete_file_on_device(file_path: str) -> None:
+  """ Deletes a file on the device. """
+  cmd_utils.run_adb_shell_command(
+    "[[ -f '{file_path}' ]] && rm -f '{file_path}' || "
+    "exit 0".format(file_path=file_path))
+
+def set_prop(property: str, value: str) -> None:
+  """ Sets property using adb shell. """
+  cmd_utils.run_adb_shell_command('setprop "{property}" "{value}"'.format(
+      property=property, value=value))
+
+def pull_file(device_file_path: str, output_file_path: str) -> None:
+  """ Pulls file from device to output """
+  cmd_utils.run_shell_command('adb pull "{device_file_path}" "{output_file_path}"'.
+      format(device_file_path=device_file_path,
+             output_file_path=output_file_path))
