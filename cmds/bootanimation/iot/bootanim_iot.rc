@@ -1,2 +1,0 @@
-on post-fs-data
-    mkdir /data/misc/bootanimation 0777 root root
