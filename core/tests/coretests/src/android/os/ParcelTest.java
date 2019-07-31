@@ -43,8 +43,8 @@ public class ParcelTest {
 
         // WorkSource can be updated.
         p.writeInterfaceToken(INTERFACE_TOKEN_1);
-        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_1));
-        assertEquals(WORK_SOURCE_1, p.readCallingWorkSourceUid());
+        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_2));
+        assertEquals(WORK_SOURCE_2, p.readCallingWorkSourceUid());
 
         // WorkSource can be updated to unset value.
         assertEquals(true, p.replaceCallingWorkSourceUid(Binder.UNSET_WORKSOURCE));
@@ -64,8 +64,8 @@ public class ParcelTest {
         assertEquals(WORK_SOURCE_1, p.readCallingWorkSourceUid());
 
         // WorkSource can be updated.
-        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_1));
-        assertEquals(WORK_SOURCE_1, p.readCallingWorkSourceUid());
+        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_2));
+        assertEquals(WORK_SOURCE_2, p.readCallingWorkSourceUid());
 
         p.recycle();
     }
