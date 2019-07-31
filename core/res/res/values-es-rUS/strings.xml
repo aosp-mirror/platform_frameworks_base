@@ -95,8 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensajes del buzón de voz"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Llamada con Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Estado de SIM"</string>
-    <!-- no translation found for notification_channel_sim_high_prio (1787666807724243207) -->
-    <skip />
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Notificaciones de prioridad alta sobre el estado de la SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"El dispositivo del mismo nivel solicitó el modo TTY FULL."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"El dispositivo del mismo nivel solicitó el modo TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"El dispositivo del mismo nivel solicitó el modo TTY VCO."</string>
