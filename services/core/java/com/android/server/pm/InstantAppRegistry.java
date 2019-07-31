@@ -686,7 +686,7 @@ class InstantAppRegistry {
 
         // Prune first installed instant apps
         synchronized (mService.mLock) {
-            allUsers = PackageManagerService.sUserManager.getUserIds();
+            allUsers = mService.mUserManager.getUserIds();
 
             final int packageCount = mService.mPackages.size();
             for (int i = 0; i < packageCount; i++) {

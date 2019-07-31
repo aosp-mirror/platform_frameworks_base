@@ -47,6 +47,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.service.pm.PackageServiceDumpProto;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -375,10 +376,12 @@ public class PackageManagerServiceUtils {
         }
     }
 
-    public static void enforceShellRestriction(String restriction, int callingUid, int userHandle) {
+    /** Enforces that if the caller is shell, it does not have the provided user restriction. */
+    public static void enforceShellRestriction(
+            UserManagerInternal userManager, String restriction, int callingUid, int userHandle) {
         if (callingUid == Process.SHELL_UID) {
             if (userHandle >= 0
-                    && PackageManagerService.sUserManager.hasUserRestriction(
+                    && userManager.hasUserRestriction(
                             restriction, userHandle)) {
                 throw new SecurityException("Shell does not have permission to access user "
                         + userHandle);

@@ -1557,11 +1557,7 @@ public class UserManagerService extends IUserManager.Stub {
     /** @return a specific user restriction that's in effect currently. */
     @Override
     public boolean hasUserRestriction(String restrictionKey, int userId) {
-        if (!UserRestrictionsUtils.isValidRestriction(restrictionKey)) {
-            return false;
-        }
-        Bundle restrictions = getEffectiveUserRestrictions(userId);
-        return restrictions != null && restrictions.getBoolean(restrictionKey);
+        return mLocalService.hasUserRestriction(restrictionKey, userId);
     }
 
     /** @return if any user has the given restriction. */
@@ -4127,6 +4123,15 @@ public class UserManagerService extends IUserManager.Stub {
                 String value, int callingUid) {
             return UserRestrictionsUtils.isSettingRestrictedForUser(mContext, setting, userId,
                     value, callingUid);
+        }
+
+        @Override
+        public boolean hasUserRestriction(String restrictionKey, int userId) {
+            if (!UserRestrictionsUtils.isValidRestriction(restrictionKey)) {
+                return false;
+            }
+            Bundle restrictions = getEffectiveUserRestrictions(userId);
+            return restrictions != null && restrictions.getBoolean(restrictionKey);
         }
     }
 
