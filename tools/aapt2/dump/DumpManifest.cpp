@@ -468,14 +468,12 @@ class Manifest : public ManifestExtractor::Element {
     }
     if (platformVersionName) {
       printer->Print(StringPrintf(" platformBuildVersionName='%s'", platformVersionName->data()));
-    }
-    if (platformVersionNameInt) {
+    } else if (platformVersionNameInt) {
       printer->Print(StringPrintf(" platformBuildVersionName='%d'", *platformVersionNameInt));
     }
     if (platformVersionCode) {
       printer->Print(StringPrintf(" platformBuildVersionCode='%s'", platformVersionCode->data()));
-    }
-    if (platformVersionCodeInt) {
+    } else if (platformVersionCodeInt) {
       printer->Print(StringPrintf(" platformBuildVersionCode='%d'", *platformVersionCodeInt));
     }
     if (compilesdkVersion) {
