@@ -76,13 +76,13 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
-    private final WindowManager.LayoutParams mLpChanged;
+    private final LayoutParams mLpChanged;
     private final boolean mKeyguardScreenRotation;
     private final long mLockScreenDisplayTimeout;
     private final Display.Mode mKeyguardDisplayMode;
     private final KeyguardBypassController mKeyguardBypassController;
     private ViewGroup mStatusBarView;
-    private WindowManager.LayoutParams mLp;
+    private LayoutParams mLp;
     private boolean mHasTopUi;
     private boolean mHasTopUiChanged;
     private int mBarHeight;
@@ -117,7 +117,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
-        mLpChanged = new WindowManager.LayoutParams();
+        mLpChanged = new LayoutParams();
         mKeyguardBypassController = keyguardBypassController;
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
@@ -171,19 +171,19 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
-        mLp = new WindowManager.LayoutParams(
+        mLp = new LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 barHeight,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+                LayoutParams.TYPE_STATUS_BAR,
+                LayoutParams.FLAG_NOT_FOCUSABLE
+                        | LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                        | LayoutParams.FLAG_SPLIT_TOUCH
+                        | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
-        mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+        mLp.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("StatusBar");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -216,9 +216,9 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
 
     private void applyKeyguardFlags(State state) {
         if (state.keyguardShowing) {
-            mLpChanged.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_KEYGUARD;
         } else {
-            mLpChanged.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_KEYGUARD;
         }
 
         final boolean scrimsOccludingWallpaper =
@@ -226,9 +226,9 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         final boolean keyguardOrAod = state.keyguardShowing
                 || (state.dozing && mDozeParameters.getAlwaysOn());
         if (keyguardOrAod && !state.backdropShowing && !scrimsOccludingWallpaper) {
-            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+            mLpChanged.flags |= LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
-            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+            mLpChanged.flags &= ~LayoutParams.FLAG_SHOW_WALLPAPER;
         }
 
         if (state.dozing) {
@@ -267,17 +267,17 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         if (state.bouncerShowing && (state.keyguardOccluded || state.keyguardNeedsInput)
                 || ENABLE_REMOTE_INPUT && state.remoteInputActive
                 || state.bubbleExpanded) {
-            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
+            mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
-            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
+            mLpChanged.flags |= LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else {
-            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            mLpChanged.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
+            mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         }
 
-        mLpChanged.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+        mLpChanged.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
     }
 
     private void applyForceShowNavigationFlag(State state) {
@@ -335,19 +335,19 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
                 && state.statusBarState == StatusBarState.KEYGUARD
                 && !state.qsExpanded && !state.forceUserActivity) {
             mLpChanged.inputFeatures |=
-                    WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+                    LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
         } else {
             mLpChanged.inputFeatures &=
-                    ~WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+                    ~LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
         }
     }
 
     private void applyStatusBarColorSpaceAgnosticFlag(State state) {
         if (!isExpanded(state)) {
-            mLpChanged.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
+            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
         } else {
             mLpChanged.privateFlags &=
-                    ~WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
+                    ~LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
         }
     }
 
@@ -396,16 +396,16 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
             mLpChanged.privateFlags |= WindowManager
                     .LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
         } else {
-            mLpChanged.privateFlags &= ~WindowManager
-                    .LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+            mLpChanged.privateFlags
+                    &= ~LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
         }
     }
 
     private void applyModalFlag(State state) {
         if (state.headsUpShowing) {
-            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            mLpChanged.flags |= LayoutParams.FLAG_NOT_TOUCH_MODAL;
         } else {
-            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            mLpChanged.flags &= ~LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
     }
 
@@ -413,12 +413,12 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         if (state.forceDozeBrightness) {
             mLpChanged.screenBrightness = mScreenBrightnessDoze;
         } else {
-            mLpChanged.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+            mLpChanged.screenBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
         }
     }
 
     private void applyHasTopUi(State state) {
-        mHasTopUiChanged = isExpanded(state);
+        mHasTopUiChanged = state.forceHasTopUi || isExpanded(state);
     }
 
     private void applyNotTouchable(State state) {
@@ -642,6 +642,15 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         apply(mCurrentState);
     }
 
+    public boolean getForceHasTopUi() {
+        return mCurrentState.forceHasTopUi;
+    }
+
+    public void setForceHasTopUi(boolean forceHasTopUi) {
+        mCurrentState.forceHasTopUi = forceHasTopUi;
+        apply(mCurrentState);
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
@@ -663,6 +672,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         boolean notTouchable;
         boolean bubblesShowing;
         boolean bubbleExpanded;
+        boolean forceHasTopUi;
 
         /**
          * The {@link StatusBar} state from the status bar.
