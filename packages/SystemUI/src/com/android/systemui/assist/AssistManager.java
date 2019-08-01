@@ -440,6 +440,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mAssistUtils.onLockscreenShown();
     }
 
+    public long getAssistHandleShowAndGoRemainingDurationMs() {
+        return mHandleController.getShowAndGoRemainingTimeMs();
+    }
+
     /** Returns the logging flags for the given Assistant invocation type. */
     public int toLoggingSubType(int invocationType) {
         return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
