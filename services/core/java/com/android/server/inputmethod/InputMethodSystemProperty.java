@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.inputmethod;
+package com.android.server.inputmethod;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -23,8 +23,6 @@ import android.os.SystemProperties;
 
 /**
  * Various (pseudo) constants about IME behaviors.
- *
- * @hide
  */
 public class InputMethodSystemProperty {
     /**
@@ -58,23 +56,12 @@ public class InputMethodSystemProperty {
 
     /**
      * {@link ComponentName} of multi-client IME to be used.
-     *
-     * <p>TODO: Move this back to MultiClientInputMethodManagerService once
-     * {@link #PER_PROFILE_IME_ENABLED} always becomes {@code true}.</p>
-     *
-     * @hide
      */
     @Nullable
-    public static final ComponentName sMultiClientImeComponentName =
-            getMultiClientImeComponentName();
+    static final ComponentName sMultiClientImeComponentName = getMultiClientImeComponentName();
 
     /**
      * {@code true} when multi-client IME is enabled.
-     *
-     * <p>TODO: Move this back to MultiClientInputMethodManagerService once
-     * {@link #PER_PROFILE_IME_ENABLED} always becomes {@code true}.</p>
-     *
-     * @hide
      */
     public static final boolean MULTI_CLIENT_IME_ENABLED = (sMultiClientImeComponentName != null);
 }

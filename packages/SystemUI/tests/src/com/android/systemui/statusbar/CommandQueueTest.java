@@ -129,7 +129,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true, false);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(DEFAULT_DISPLAY), eq(null), eq(1), eq(2), eq(true));
@@ -137,7 +137,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButtonForSecondaryDisplay() {
-        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true, false);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(SECONDARY_DISPLAY), eq(null), eq(1), eq(2), eq(true));
