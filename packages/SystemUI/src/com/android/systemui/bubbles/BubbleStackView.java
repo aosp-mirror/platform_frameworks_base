@@ -664,10 +664,6 @@ public class BubbleStackView extends FrameLayout {
         return mIsExpanded;
     }
 
-    void runActionAfterTransientViewAnimations(Runnable after) {
-        mStackAnimationController.runActionAfterAllViewsAndTransientRemoved(after);
-    }
-
     /**
      * The {@link BubbleView} that is expanded, null if one does not exist.
      */
@@ -696,10 +692,6 @@ public class BubbleStackView extends FrameLayout {
             bubbleToExpand.setShowInShadeWhenBubble(false);
             setExpanded(true);
         }
-    }
-
-    boolean hasTransientBubbles() {
-        return mBubbleContainer.getTransientViewCount() > 0;
     }
 
     // via BubbleData.Listener
