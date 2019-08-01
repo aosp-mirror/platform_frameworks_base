@@ -3098,10 +3098,8 @@ public class NotificationPanelView extends PanelView implements
 
     /**
      * Whether the camera application can be launched for the camera launch gesture.
-     *
-     * @param keyguardIsShowing whether keyguard is being shown
      */
-    public boolean canCameraGestureBeLaunched(boolean keyguardIsShowing) {
+    public boolean canCameraGestureBeLaunched() {
         if (!mStatusBar.isCameraAllowedByAdmin()) {
             return false;
         }
@@ -3110,7 +3108,7 @@ public class NotificationPanelView extends PanelView implements
         String packageToLaunch = (resolveInfo == null || resolveInfo.activityInfo == null)
                 ? null : resolveInfo.activityInfo.packageName;
         return packageToLaunch != null &&
-                (keyguardIsShowing || !isForegroundApp(packageToLaunch))
+                (mBarState != StatusBarState.SHADE || !isForegroundApp(packageToLaunch))
                 && !mAffordanceHelper.isSwipingInProgress();
     }
 
