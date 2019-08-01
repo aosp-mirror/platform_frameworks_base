@@ -887,7 +887,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mMetricsLogger.write(log);
         if (intentSender != null) {
             if (sDebug) Slog.d(TAG, "Starting intent sender on save()");
-            startIntentSender(intentSender);
+            startIntentSenderAndFinishSession(intentSender);
         }
 
         // Nothing left to do...
@@ -1101,24 +1101,32 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // AutoFillUiCallback
     @Override
-    public void startIntentSender(IntentSender intentSender) {
+    public void startIntentSenderAndFinishSession(IntentSender intentSender) {
+        startIntentSender(intentSender, null);
+    }
+
+    // AutoFillUiCallback
+    @Override
+    public void startIntentSender(IntentSender intentSender, Intent intent) {
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#startIntentSender() rejected - session: "
                         + id + " destroyed");
                 return;
             }
-            removeSelfLocked();
+            if (intent == null) {
+                removeSelfLocked();
+            }
         }
         mHandler.sendMessage(obtainMessage(
                 Session::doStartIntentSender,
-                this, intentSender));
+                this, intentSender, intent));
     }
 
-    private void doStartIntentSender(IntentSender intentSender) {
+    private void doStartIntentSender(IntentSender intentSender, Intent intent) {
         try {
             synchronized (mLock) {
-                mClient.startIntentSender(intentSender, null);
+                mClient.startIntentSender(intentSender, intent);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Error launching auth intent", e);
@@ -1863,7 +1871,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mHandler.sendMessage(obtainMessage(Session::logSaveShown, this));
 
                 final IAutoFillManagerClient client = getClient();
-                mPendingSaveUi = new PendingUi(mActivityToken, id, client);
+                mPendingSaveUi = new PendingUi(new Binder(), id, client);
 
                 final CharSequence serviceLabel;
                 final Drawable serviceIcon;

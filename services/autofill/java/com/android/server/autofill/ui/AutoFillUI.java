@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
@@ -82,7 +83,8 @@ public final class AutoFillUI {
         void requestShowFillUi(AutofillId id, int width, int height,
                 IAutofillWindowPresenter presenter);
         void requestHideFillUi(AutofillId id);
-        void startIntentSender(IntentSender intentSender);
+        void startIntentSenderAndFinishSession(IntentSender intentSender);
+        void startIntentSender(IntentSender intentSender, Intent intent);
         void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
     }
 
@@ -253,7 +255,7 @@ public final class AutoFillUI {
                 @Override
                 public void startIntentSender(IntentSender intentSender) {
                     if (mCallback != null) {
-                        mCallback.startIntentSender(intentSender);
+                        mCallback.startIntentSenderAndFinishSession(intentSender);
                     }
                 }
 
@@ -337,6 +339,13 @@ public final class AutoFillUI {
                         }
                     }
                     mMetricsLogger.write(log);
+                }
+
+                @Override
+                public void startIntentSender(IntentSender intentSender, Intent intent) {
+                    if (mCallback != null) {
+                        mCallback.startIntentSender(intentSender, intent);
+                    }
                 }
             }, mUiModeMgr.isNightMode(), isUpdate, compatMode);
         });

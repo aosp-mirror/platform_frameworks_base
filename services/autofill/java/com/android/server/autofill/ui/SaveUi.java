@@ -32,7 +32,6 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.service.autofill.BatchUpdates;
 import android.service.autofill.CustomDescription;
 import android.service.autofill.InternalOnClickAction;
@@ -83,6 +82,7 @@ final class SaveUi {
         void onSave();
         void onCancel(IntentSender listener);
         void onDestroy();
+        void startIntentSender(IntentSender intentSender, Intent intent);
     }
 
     /**
@@ -129,6 +129,15 @@ final class SaveUi {
             mDone = true;
             mRealListener.onDestroy();
         }
+
+        @Override
+        public void startIntentSender(IntentSender intentSender, Intent intent) {
+            if (sDebug) Slog.d(TAG, "OneTimeListener.startIntentSender(): " + mDone);
+            if (mDone) {
+                return;
+            }
+            mRealListener.startIntentSender(intentSender, intent);
+        }
     }
 
     private final Handler mHandler = UiThread.getHandler();
@@ -168,8 +177,8 @@ final class SaveUi {
         context = new ContextThemeWrapper(context, mThemeId) {
             @Override
             public void startActivity(Intent intent) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                super.startActivity(intent);
+                PendingIntent p = PendingIntent.getActivity(this, 0, intent, 0);
+                mListener.startIntentSender(p.getIntentSender(), intent);
             }
         };
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -329,21 +338,13 @@ final class SaveUi {
             if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
             final IBinder token = mPendingUi.getToken();
             intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-            try {
-                mPendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
-                        intent);
-                mPendingUi.setState(PendingUi.STATE_PENDING);
-                if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
-                hide();
-                log.setType(MetricsEvent.TYPE_OPEN);
-                mMetricsLogger.write(log);
-                return true;
-            } catch (RemoteException e) {
-                Slog.w(TAG, "error triggering pending intent: " + intent);
-                log.setType(MetricsEvent.TYPE_FAILURE);
-                mMetricsLogger.write(log);
-                return false;
-            }
+            mListener.startIntentSender(pendingIntent.getIntentSender(), intent);
+            mPendingUi.setState(PendingUi.STATE_PENDING);
+            if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
+            hide();
+            log.setType(MetricsEvent.TYPE_OPEN);
+            mMetricsLogger.write(log);
+            return true;
         };
 
         try {
