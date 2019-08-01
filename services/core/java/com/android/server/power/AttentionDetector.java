@@ -156,7 +156,7 @@ public class AttentionDetector {
 
         context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                 Settings.System.ADAPTIVE_SLEEP),
-                false, new ContentObserver(new Handler()) {
+                false, new ContentObserver(new Handler(context.getMainLooper())) {
                     @Override
                     public void onChange(boolean selfChange) {
                         updateEnabledFromSettings(context);
