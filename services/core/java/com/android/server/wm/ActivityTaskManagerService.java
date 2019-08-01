@@ -5460,7 +5460,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             updateOomAdj = true;
         }
         if (updateOomAdj) {
-            mH.post(mAmInternal::updateOomAdj);
+            updateOomAdj();
         }
     }
 
