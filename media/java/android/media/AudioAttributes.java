@@ -824,7 +824,7 @@ public final class AudioAttributes implements Parcelable {
                 if (attributes != null) {
                     mUsage = attributes.mUsage;
                     mContentType = attributes.mContentType;
-                    mFlags = attributes.mFlags;
+                    mFlags = attributes.getAllFlags();
                     mMuteHapticChannels = attributes.areHapticChannelsMuted();
                     mTags = attributes.mTags;
                     mBundle = attributes.mBundle;
