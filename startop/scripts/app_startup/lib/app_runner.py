@@ -51,6 +51,7 @@ class AppRunnerListener(object):
       returns:
         a string in the format of "<metric>=<value>\n<metric>=<value>\n..."
         for further parsing. For example "TotalTime=123\nDisplayedTime=121".
+        Return an empty string if no metrics need to be parsed further.
         """
     pass
 
@@ -61,7 +62,7 @@ class AppRunner(object):
   APP_STARTUP_DIR = os.path.dirname(DIR)
   IORAP_COMMON_BASH_SCRIPT = os.path.realpath(os.path.join(DIR,
                                                            '../../iorap/common'))
-  DEFAULT_TIMEOUT = 30
+  DEFAULT_TIMEOUT = 30 # seconds
 
   def __init__(self,
                package: str,

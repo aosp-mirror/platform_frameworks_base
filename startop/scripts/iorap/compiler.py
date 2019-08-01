@@ -31,8 +31,10 @@ import tempfile
 from pathlib import Path
 from typing import Iterable, Optional, List
 
-from generated.TraceFile_pb2 import *
-from lib.inode2filename import Inode2Filename
+DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(DIR))
+from iorap.generated.TraceFile_pb2 import *
+from iorap.lib.inode2filename import Inode2Filename
 
 parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(parent_dir_name)

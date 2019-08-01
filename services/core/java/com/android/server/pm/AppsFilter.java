@@ -321,14 +321,21 @@ class AppsFilter {
     private boolean shouldFilterApplicationInternal(
             PackageSetting callingPkgSetting, PackageSetting targetPkgSetting, int userId) {
         final String callingName = callingPkgSetting.pkg.packageName;
-        final String targetName = targetPkgSetting.pkg.packageName;
+        final PackageParser.Package targetPkg = targetPkgSetting.pkg;
+
+        // This package isn't technically installed and won't be written to settings, so we can
+        // treat it as filtered until it's available again.
+        if (targetPkg == null) {
+            return true;
+        }
+        final String targetName = targetPkg.packageName;
         if (callingPkgSetting.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.R) {
             return false;
         }
         if (isImplicitlyQueryableSystemApp(targetPkgSetting)) {
             return false;
         }
-        if (targetPkgSetting.pkg.mForceQueryable) {
+        if (targetPkg.mForceQueryable) {
             return false;
         }
         if (mForceQueryable.contains(targetName)) {

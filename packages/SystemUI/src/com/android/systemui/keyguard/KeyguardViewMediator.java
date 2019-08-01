@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
@@ -204,6 +205,8 @@ public class KeyguardViewMediator extends SystemUI {
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
+    private final StatusBarWindowController mStatusBarWindowController =
+            Dependency.get(StatusBarWindowController.class);
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     private boolean mSystemReady;
@@ -1779,6 +1782,7 @@ public class KeyguardViewMediator extends SystemUI {
             adjustStatusBarLocked();
             userActivity();
             mUpdateMonitor.setKeyguardGoingAway(false /* away */);
+            mStatusBarWindowController.setKeyguardGoingAway(false /* goingAway */);
             mShowKeyguardWakeLock.release();
         }
         mKeyguardDisplayManager.show();
@@ -1811,6 +1815,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
             mUpdateMonitor.setKeyguardGoingAway(true /* goingAway */);
+            mStatusBarWindowController.setKeyguardGoingAway(true /* goingAway */);
 
             // Don't actually hide the Keyguard at the moment, wait for window
             // manager until it tells us it's safe to do so with

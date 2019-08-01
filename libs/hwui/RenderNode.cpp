@@ -20,6 +20,7 @@
 #include "Debug.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
+#include "private/hwui/WebViewFunctor.h"
 #ifdef __ANDROID__
 #include "renderthread/CanvasContext.h"
 #else

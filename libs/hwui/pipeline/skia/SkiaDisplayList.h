@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "FunctorDrawable.h"
 #include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
@@ -34,6 +33,7 @@ class CanvasContext;
 }
 
 class Outline;
+struct WebViewSyncData;
 
 namespace VectorDrawable {
 class Tree;
@@ -41,6 +41,8 @@ class Tree;
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 namespace skiapipeline {
+
+class FunctorDrawable;
 
 class SkiaDisplayList {
 public:

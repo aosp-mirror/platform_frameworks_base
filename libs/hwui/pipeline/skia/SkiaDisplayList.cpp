@@ -15,6 +15,7 @@
  */
 
 #include "SkiaDisplayList.h"
+#include "FunctorDrawable.h"
 
 #include "DumpOpsCanvas.h"
 #ifdef __ANDROID__ // Layoutlib does not support SkiaPipeline

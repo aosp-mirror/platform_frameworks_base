@@ -43,7 +43,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.inputmethod.InputMethodSystemProperty;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -481,7 +480,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
     @Override
     public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher) {
+            boolean showImeSwitcher, boolean isMultiClientImeEnabled) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
             SomeArgs args = SomeArgs.obtain();
@@ -489,6 +488,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
             args.argi2 = vis;
             args.argi3 = backDisposition;
             args.argi4 = showImeSwitcher ? 1 : 0;
+            args.argi5 = isMultiClientImeEnabled ? 1 : 0;
             args.arg1 = token;
             Message m = mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, args);
             m.sendToTarget();
@@ -801,11 +801,10 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     private void handleShowImeButton(int displayId, IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher) {
+            boolean showImeSwitcher, boolean isMultiClientImeEnabled) {
         if (displayId == INVALID_DISPLAY) return;
 
-        if (!InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED
-                && mLastUpdatedImeDisplayId != displayId
+        if (!isMultiClientImeEnabled && mLastUpdatedImeDisplayId != displayId
                 && mLastUpdatedImeDisplayId != INVALID_DISPLAY) {
             // Set previous NavBar's IME window status as invisible when IME
             // window switched to another display for single-session IME case.
@@ -891,7 +890,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     args = (SomeArgs) msg.obj;
                     handleShowImeButton(args.argi1 /* displayId */, (IBinder) args.arg1 /* token */,
                             args.argi2 /* vis */, args.argi3 /* backDisposition */,
-                            args.argi4 != 0 /* showImeSwitcher */);
+                            args.argi4 != 0 /* showImeSwitcher */,
+                            args.argi5 != 0 /* isMultiClientImeEnabled */);
                     break;
                 case MSG_SHOW_RECENT_APPS:
                     for (int i = 0; i < mCallbacks.size(); i++) {

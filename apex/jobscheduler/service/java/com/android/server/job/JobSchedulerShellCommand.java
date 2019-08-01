@@ -340,15 +340,8 @@ public final class JobSchedulerShellCommand extends ShellCommand {
     private int doHeartbeat(PrintWriter pw) throws Exception {
         checkPermission("manipulate scheduler heartbeat");
 
-        final String arg = getNextArg();
-        final int numBeats = (arg != null) ? Integer.parseInt(arg) : 0;
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            return mInternal.executeHeartbeatCommand(pw, numBeats);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
+        pw.println("Heartbeat command is no longer supported");
+        return -1;
     }
 
     private int triggerDockState(PrintWriter pw) throws Exception {
@@ -401,8 +394,7 @@ public final class JobSchedulerShellCommand extends ShellCommand {
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
         pw.println("  heartbeat [num]");
-        pw.println("    With no argument, prints the current standby heartbeat.  With a positive");
-        pw.println("    argument, advances the standby heartbeat by that number.");
+        pw.println("    No longer used.");
         pw.println("  monitor-battery [on|off]");
         pw.println("    Control monitoring of all battery changes.  Off by default.  Turning");
         pw.println("    on makes get-battery-seq useful.");

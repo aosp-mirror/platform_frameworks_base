@@ -80,6 +80,7 @@ import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
 import android.graphics.ImageDecoder;
 import android.hardware.display.DisplayManagerGlobal;
+import android.inputmethodservice.InputMethodService;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
@@ -454,6 +455,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     static volatile Handler sMainThreadHandler;  // set once in main()
 
     Bundle mCoreSettings = null;
+
+    boolean mHasImeComponent = false;
 
     /** Activity client record, used for bookkeeping for the real {@link Activity} instance. */
     public static final class ActivityClientRecord {
@@ -5360,7 +5363,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             final int NSVC = mServices.size();
             for (int i=0; i<NSVC; i++) {
-                callbacks.add(mServices.valueAt(i));
+                final ComponentCallbacks2 serviceComp = mServices.valueAt(i);
+                if (serviceComp instanceof InputMethodService) {
+                    mHasImeComponent = true;
+                }
+                callbacks.add(serviceComp);
             }
         }
         synchronized (mProviderMap) {
@@ -5600,6 +5607,10 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
 
             if (config == null) {
+                // TODO (b/135719017): Temporary log for debugging IME service.
+                if (Build.IS_DEBUGGABLE && mHasImeComponent) {
+                    Log.w(TAG, "handleConfigurationChanged for IME app but config is null");
+                }
                 return;
             }
 
@@ -5621,6 +5632,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                 mConfiguration = new Configuration();
             }
             if (!mConfiguration.isOtherSeqNewer(config) && compat == null) {
+                // TODO (b/135719017): Temporary log for debugging IME service.
+                if (Build.IS_DEBUGGABLE && mHasImeComponent) {
+                    Log.w(TAG, "handleConfigurationChanged for IME app but config seq is obsolete "
+                            + ", config=" + config
+                            + ", mConfiguration=" + mConfiguration);
+                }
                 return;
             }
 
@@ -5652,6 +5669,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                             config);
                 } else if (!equivalent) {
                     performConfigurationChanged(cb, config);
+                } else {
+                    // TODO (b/135719017): Temporary log for debugging IME service.
+                    if (Build.IS_DEBUGGABLE && cb instanceof InputMethodService) {
+                        Log.w(TAG, "performConfigurationChanged didn't callback to IME "
+                                + ", configDiff=" + configDiff
+                                + ", mConfiguration=" + mConfiguration);
+                    }
                 }
             }
         }
@@ -7142,6 +7166,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         ViewRootImpl.ConfigChangedCallback configChangedCallback
                 = (Configuration globalConfig) -> {
             synchronized (mResourcesManager) {
+                // TODO (b/135719017): Temporary log for debugging IME service.
+                if (Build.IS_DEBUGGABLE && mHasImeComponent) {
+                    Log.d(TAG, "ViewRootImpl.ConfigChangedCallback for IME, "
+                            + "config=" + globalConfig);
+                }
+
                 // We need to apply this change to the resources immediately, because upon returning
                 // the view hierarchy will be informed about it.
                 if (mResourcesManager.applyConfigurationToResourcesLocked(globalConfig,

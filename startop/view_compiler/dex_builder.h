@@ -153,6 +153,7 @@ class Instruction {
     kBranchEqz,
     kBranchNEqz,
     kCheckCast,
+    kGetInstanceField,
     kGetStaticField,
     kInvokeDirect,
     kInvokeInterface,
@@ -163,6 +164,7 @@ class Instruction {
     kNew,
     kReturn,
     kReturnObject,
+    kSetInstanceField,
     kSetStaticField
   };
 
@@ -195,8 +197,9 @@ class Instruction {
   }
   // Returns an object
   template <typename... T>
-  static inline Instruction InvokeVirtualObject(size_t index_argument, std::optional<const Value> dest,
-                                                Value this_arg, T... args) {
+  static inline Instruction InvokeVirtualObject(size_t index_argument,
+                                                std::optional<const Value> dest, Value this_arg,
+                                                T... args) {
     return Instruction{
         Op::kInvokeVirtual, index_argument, /*result_is_object=*/true, dest, this_arg, args...};
   }
@@ -209,8 +212,9 @@ class Instruction {
   }
   // Returns an object
   template <typename... T>
-  static inline Instruction InvokeDirectObject(size_t index_argument, std::optional<const Value> dest,
-                                               Value this_arg, T... args) {
+  static inline Instruction InvokeDirectObject(size_t index_argument,
+                                               std::optional<const Value> dest, Value this_arg,
+                                               T... args) {
     return Instruction{
         Op::kInvokeDirect, index_argument, /*result_is_object=*/true, dest, this_arg, args...};
   }
@@ -218,20 +222,21 @@ class Instruction {
   template <typename... T>
   static inline Instruction InvokeStatic(size_t index_argument, std::optional<const Value> dest,
                                          T... args) {
-    return Instruction{Op::kInvokeStatic, index_argument, /*result_is_object=*/false, dest, args...};
+    return Instruction{
+        Op::kInvokeStatic, index_argument, /*result_is_object=*/false, dest, args...};
   }
   // Returns an object
   template <typename... T>
-  static inline Instruction InvokeStaticObject(size_t index_argument, std::optional<const Value> dest,
-                                               T... args) {
+  static inline Instruction InvokeStaticObject(size_t index_argument,
+                                               std::optional<const Value> dest, T... args) {
     return Instruction{Op::kInvokeStatic, index_argument, /*result_is_object=*/true, dest, args...};
   }
   // For static calls.
   template <typename... T>
   static inline Instruction InvokeInterface(size_t index_argument, std::optional<const Value> dest,
                                             T... args) {
-    return Instruction{Op::kInvokeInterface, index_argument, /*result_is_object=*/false, dest, args...};
-
+    return Instruction{
+        Op::kInvokeInterface, index_argument, /*result_is_object=*/false, dest, args...};
   }
 
   static inline Instruction GetStaticField(size_t field_id, Value dest) {
@@ -239,9 +244,18 @@ class Instruction {
   }
 
   static inline Instruction SetStaticField(size_t field_id, Value value) {
-    return Instruction{Op::kSetStaticField, field_id, /*result_is_object=*/false, /*dest=*/{}, value};
+    return Instruction{
+        Op::kSetStaticField, field_id, /*result_is_object=*/false, /*dest=*/{}, value};
   }
 
+  static inline Instruction GetField(size_t field_id, Value dest, Value object) {
+    return Instruction{Op::kGetInstanceField, field_id, /*result_is_object=*/false, dest, object};
+  }
+
+  static inline Instruction SetField(size_t field_id, Value object, Value value) {
+    return Instruction{
+        Op::kSetInstanceField, field_id, /*result_is_object=*/false, /*dest=*/{}, object, value};
+  }
 
   ///////////////
   // Accessors //
@@ -255,10 +269,14 @@ class Instruction {
 
  private:
   inline Instruction(Op opcode, size_t index_argument, std::optional<const Value> dest)
-      : opcode_{opcode}, index_argument_{index_argument}, result_is_object_{false}, dest_{dest}, args_{} {}
+      : opcode_{opcode},
+        index_argument_{index_argument},
+        result_is_object_{false},
+        dest_{dest},
+        args_{} {}
 
   template <typename... T>
-  inline constexpr Instruction(Op opcode, size_t index_argument, bool result_is_object,
+  inline Instruction(Op opcode, size_t index_argument, bool result_is_object,
                                std::optional<const Value> dest, T... args)
       : opcode_{opcode},
         index_argument_{index_argument},
@@ -331,7 +349,7 @@ class MethodBuilder {
   void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
   void EncodeNew(const Instruction& instruction);
   void EncodeCast(const Instruction& instruction);
-  void EncodeStaticFieldOp(const Instruction& instruction);
+  void EncodeFieldOp(const Instruction& instruction);
 
   // Low-level instruction format encoding. See
   // https://source.android.com/devices/tech/dalvik/instruction-formats for documentation of
@@ -362,6 +380,14 @@ class MethodBuilder {
     // aa|op|bbbb
     buffer_.push_back((a << 8) | opcode);
     buffer_.push_back(b);
+  }
+
+  inline void Encode22c(art::Instruction::Code opcode, uint8_t a, uint8_t b, uint16_t c) {
+    // b|a|op|bbbb
+    CHECK(IsShortRegister(a));
+    CHECK(IsShortRegister(b));
+    buffer_.push_back((b << 12) | (a << 8) | opcode);
+    buffer_.push_back(c);
   }
 
   inline void Encode32x(art::Instruction::Code opcode, uint16_t a, uint16_t b) {

@@ -22,6 +22,7 @@
 #include "FrameMetricsReporter.h"
 #include "IContextFactory.h"
 #include "IRenderPipeline.h"
+#include "JankTracker.h"
 #include "LayerUpdateQueue.h"
 #include "Lighting.h"
 #include "ReliableSurface.h"
@@ -149,8 +150,6 @@ public:
     void removeRenderNode(RenderNode* node);
 
     void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
-
-    RenderState& getRenderState() { return mRenderThread.renderState(); }
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer) {
         if (mFrameMetricsReporter.get() == nullptr) {

@@ -111,3 +111,50 @@ def disable_iorapd_readahead() -> bool:
   passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
                                        'iorapd_readahead_disable', [])
   return passed
+
+def enable_iorapd_perfetto() -> bool:
+  """
+  Enable Perfetto. Subsequent launches of an application will record a perfetto
+  trace protobuf.
+
+  Returns:
+    A bool indicates whether the enabling is done successfully or not.
+  """
+  passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                       'iorapd_perfetto_enable', [])
+  return passed
+
+def disable_iorapd_perfetto() -> bool:
+  """
+  Disable Perfetto. Subsequent launches of applications will no longer record
+  perfetto trace protobufs.
+
+  Returns:
+    A bool indicates whether the disabling is done successfully or not.
+  """
+  passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                       'iorapd_perfetto_disable', [])
+  return passed
+
+def start_iorapd() -> bool:
+  """
+  Starts iorapd.
+
+  Returns:
+    A bool indicates whether the starting is done successfully or not.
+  """
+  passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                       'iorapd_start', [])
+  return passed
+
+def stop_iorapd() -> bool:
+  """
+  Stops iorapd.
+
+  Returns:
+    A bool indicates whether the stopping is done successfully or not.
+  """
+  passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                       'iorapd_stop', [])
+  return passed
+

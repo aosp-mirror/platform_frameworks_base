@@ -84,7 +84,6 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PRE
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
-import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -226,7 +225,6 @@ import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -263,6 +261,7 @@ import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -1618,8 +1617,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
-                    res = r.finishActivityLocked(resultCode, resultData, "app-request",
-                            true /* oomAdj */) != FINISH_RESULT_CANCELLED;
+                    r.finishActivityLocked(resultCode, resultData, "app-request",
+                            true /* oomAdj */);
+                    res = r.finishing;
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
                     }
@@ -6487,6 +6487,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                     return;
                 }
+                process.mIsImeProcess = true;
                 process.registerDisplayConfigurationListenerLocked(activityDisplay);
             }
         }

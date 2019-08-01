@@ -183,7 +183,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
 
         // Set IME window status for default NavBar.
         mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
-                BACK_DISPOSITION_DEFAULT, true);
+                BACK_DISPOSITION_DEFAULT, true, false);
         Handler.getMain().runWithScissors(() -> { }, 500);
 
         // Verify IME window state will be updated in default NavBar & external NavBar state reset.
@@ -194,7 +194,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
 
         // Set IME window status for external NavBar.
         mCommandQueue.setImeWindowStatus(EXTERNAL_DISPLAY_ID, null,
-                IME_VISIBLE, BACK_DISPOSITION_DEFAULT, true);
+                IME_VISIBLE, BACK_DISPOSITION_DEFAULT, true, false);
         Handler.getMain().runWithScissors(() -> { }, 500);
 
         // Verify IME window state will be updated in external NavBar & default NavBar state reset.
