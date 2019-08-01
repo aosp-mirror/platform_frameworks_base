@@ -2804,6 +2804,23 @@ public class CarrierConfigManager {
             "is_opportunistic_subscription_bool";
 
     /**
+     * Configs used by the IMS stack.
+     */
+    public static final class Ims {
+        /** Prefix of all Ims.KEY_* constants. */
+        public static final String KEY_PREFIX = "ims.";
+
+        //TODO: Add configs related to IMS.
+
+        private Ims() {}
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            return defaults;
+        }
+    }
+
+    /**
      * A list of 4 GSM RSSI thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
      *
@@ -2816,6 +2833,15 @@ public class CarrierConfigManager {
      */
     public static final String KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY =
             "gsm_rssi_thresholds_int_array";
+
+    /**
+     * Determines whether Wireless Priority Service call is supported over IMS.
+     *
+     * See Wireless Priority Service from https://www.fcc.gov/general/wireless-priority-service-wps
+     * @hide
+     */
+    public static final String KEY_SUPPORT_WPS_OVER_IMS_BOOL =
+            "support_wps_over_ims_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -3217,6 +3243,8 @@ public class CarrierConfigManager {
                         -97, /* SIGNAL_STRENGTH_GOOD */
                         -89,  /* SIGNAL_STRENGTH_GREAT */
                 });
+        sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
+        sDefaults.putAll(Ims.getDefaults());
     }
 
     /**
@@ -3412,5 +3440,76 @@ public class CarrierConfigManager {
     private ICarrierConfigLoader getICarrierConfigLoader() {
         return ICarrierConfigLoader.Stub
                 .asInterface(ServiceManager.getService(Context.CARRIER_CONFIG_SERVICE));
+    }
+
+    /**
+     * Gets the configuration values for a component using its prefix.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param prefix prefix of the component.
+     * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
+     *
+     * @see #getConfigForSubId
+     */
+    @Nullable
+    public PersistableBundle getConfigByComponentForSubId(String prefix, int subId) {
+        PersistableBundle configs = getConfigForSubId(subId);
+
+        if (configs == null) {
+            return null;
+        }
+
+        PersistableBundle ret = new PersistableBundle();
+        for (String configKey : configs.keySet()) {
+            if (configKey.startsWith(prefix)) {
+                addConfig(configKey, configs.get(configKey), ret);
+            }
+        }
+
+        return ret;
+    }
+
+    private void addConfig(String key, Object value, PersistableBundle configs) {
+        if (value instanceof String) {
+            configs.putString(key, (String) value);
+        }
+
+        if (value instanceof String[]) {
+            configs.putStringArray(key, (String[]) value);
+        }
+
+        if (value instanceof Integer) {
+            configs.putInt(key, (Integer) value);
+        }
+
+        if (value instanceof Long) {
+            configs.putLong(key, (Long) value);
+        }
+
+        if (value instanceof Double) {
+            configs.putDouble(key, (Double) value);
+        }
+
+        if (value instanceof Boolean) {
+            configs.putBoolean(key, (Boolean) value);
+        }
+
+        if (value instanceof int[]) {
+            configs.putIntArray(key, (int[]) value);
+        }
+
+        if (value instanceof double[]) {
+            configs.putDoubleArray(key, (double[]) value);
+        }
+
+        if (value instanceof boolean[]) {
+            configs.putBooleanArray(key, (boolean[]) value);
+        }
+
+        if (value instanceof long[]) {
+            configs.putLongArray(key, (long[]) value);
+        }
     }
 }
