@@ -157,7 +157,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private NotificationPresenter mNotificationPresenter;
+    @Mock private StatusBarNotificationPresenter mNotificationPresenter;
     @Mock
     private NotificationEntryListener mEntryListener;
     @Mock
@@ -780,7 +780,7 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationShelf notificationShelf,
                 NotificationLockscreenUserManager notificationLockscreenUserManager,
                 CommandQueue commandQueue,
-                NotificationPresenter notificationPresenter,
+                StatusBarNotificationPresenter notificationPresenter,
                 BubbleController bubbleController,
                 NavigationBarController navBarController,
                 AutoHideController autoHideController,
