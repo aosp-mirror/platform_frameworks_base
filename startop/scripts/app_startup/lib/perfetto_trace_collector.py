@@ -14,11 +14,11 @@
 
 """Class to collector perfetto trace."""
 import datetime
-from datetime import timedelta
 import os
 import re
 import sys
 import time
+from datetime import timedelta
 from typing import Optional, List, Tuple
 
 # global variables
@@ -40,7 +40,9 @@ class PerfettoTraceCollector(AppRunnerListener):
   """
   TRACE_FILE_SUFFIX = 'perfetto_trace.pb'
   TRACE_DURATION_PROP = 'iorapd.perfetto.trace_duration_ms'
-  SECONDS_TO_MILLISECONDS = 1000
+  MS_PER_SEC  = 1000
+  DEFAULT_TRACE_DURATION = timedelta(milliseconds=5000) # 5 seconds
+  _COLLECTOR_TIMEOUT_MULTIPLIER = 10  # take the regular timeout and multiply
 
   def __init__(self,
                package: str,
@@ -48,7 +50,7 @@ class PerfettoTraceCollector(AppRunnerListener):
                compiler_filter: Optional[str],
                timeout: Optional[int],
                simulate: bool,
-               trace_duration: timedelta = timedelta(milliseconds=5000),
+               trace_duration: timedelta = DEFAULT_TRACE_DURATION,
                save_destination_file_path: Optional[str] = None):
     """ Initialize the perfetto trace collector. """
     self.app_runner = AppRunner(package,
@@ -89,7 +91,7 @@ class PerfettoTraceCollector(AppRunnerListener):
     # Set perfetto trace duration prop to milliseconds.
     adb_utils.set_prop(PerfettoTraceCollector.TRACE_DURATION_PROP,
                        int(self.trace_duration.total_seconds()*
-                           PerfettoTraceCollector.SECONDS_TO_MILLISECONDS))
+                           PerfettoTraceCollector.MS_PER_SEC))
 
     if not iorapd_utils.stop_iorapd():
       raise RuntimeError('Cannot stop iorapd!')
@@ -122,7 +124,7 @@ class PerfettoTraceCollector(AppRunnerListener):
     manner until all metrics have been found".
 
     Returns:
-      An empty string.
+      An empty string because the metric needs no further parsing.
     """
     if not self._wait_for_perfetto_trace(pre_launch_timestamp):
       raise RuntimeError('Could not save perfetto app trace file!')
@@ -143,14 +145,19 @@ class PerfettoTraceCollector(AppRunnerListener):
                          format(self._get_remote_path()))
 
     # The pre_launch_timestamp is longer than what the datetime can parse. Trim
-    # last three digits to make them align.
+    # last three digits to make them align. For example:
+    # 2019-07-02 23:20:06.972674825999 -> 2019-07-02 23:20:06.972674825
+    assert len(pre_launch_timestamp) == len('2019-07-02 23:20:06.972674825')
     timestamp = datetime.datetime.strptime(pre_launch_timestamp[:-3],
                                            '%Y-%m-%d %H:%M:%S.%f')
-    timeout_dt = timestamp + datetime.timedelta(0, self.app_runner.timeout)
+
+    # The timeout of perfetto trace is longer than the normal app run timeout.
+    timeout_dt = self.app_runner.timeout * PerfettoTraceCollector._COLLECTOR_TIMEOUT_MULTIPLIER
+    timeout_end = timestamp + datetime.timedelta(seconds=timeout_dt)
 
     return logcat_utils.blocking_wait_for_logcat_pattern(timestamp,
                                                          pattern,
-                                                         timeout_dt)
+                                                         timeout_end)
 
   def _get_remote_path(self):
     # For example: android.music%2Fmusic.TopLevelActivity.perfetto_trace.pb

@@ -91,7 +91,8 @@ def default_dict_for_parsed_args(**kwargs):
   # Combine it with all of the "optional" parameters' default values.
   """
   d = {'compiler_filters': None, 'simulate': False, 'debug': False,
-       'output': None, 'timeout': 10, 'loop_count': 1, 'inodes': None}
+       'output': None, 'timeout': 10, 'loop_count': 1, 'inodes': None,
+       'trace_duration': None}
   d.update(kwargs)
   return d
 
@@ -158,19 +159,6 @@ def test_key_to_cmdline_flag():
   assert asr.key_to_cmdline_flag("foos") == "--foo"
   assert asr.key_to_cmdline_flag("ba_r") == "--ba-r"
   assert asr.key_to_cmdline_flag("ba_zs") == "--ba-z"
-
-def test_make_script_command_with_temp_output():
-  cmd_str, tmp_file = asr.make_script_command_with_temp_output("fake_script",
-                                                               args=[], count=1)
-  with tmp_file:
-    assert cmd_str == ["fake_script", "--count", "1", "--output", tmp_file.name]
-
-  cmd_str, tmp_file = asr.make_script_command_with_temp_output("fake_script",
-                                                               args=['a', 'b'],
-                                                               count=2)
-  with tmp_file:
-    assert cmd_str == ["fake_script", "a", "b", "--count", "2", "--output",
-                       tmp_file.name]
 
 def test_parse_run_script_csv_file():
   # empty file -> empty list

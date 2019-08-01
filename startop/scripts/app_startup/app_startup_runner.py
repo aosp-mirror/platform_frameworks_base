@@ -32,21 +32,25 @@ import itertools
 import os
 import sys
 import tempfile
+from datetime import timedelta
 from typing import Any, Callable, Iterable, List, NamedTuple, TextIO, Tuple, \
     TypeVar, Union, Optional
 
 # local import
 DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(DIR))
+import lib.cmd_utils as cmd_utils
+import lib.print_utils as print_utils
+import iorap.compiler as compiler
 from app_startup.run_app_with_prefetch import PrefetchAppRunner
 import app_startup.lib.args_utils as args_utils
 from app_startup.lib.data_frame import DataFrame
-import lib.cmd_utils as cmd_utils
-import lib.print_utils as print_utils
+from app_startup.lib.perfetto_trace_collector import PerfettoTraceCollector
 
 # The following command line options participate in the combinatorial generation.
 # All other arguments have a global effect.
-_COMBINATORIAL_OPTIONS = ['package', 'readahead', 'compiler_filter', 'activity']
+_COMBINATORIAL_OPTIONS = ['package', 'readahead', 'compiler_filter',
+                          'activity', 'trace_duration']
 _TRACING_READAHEADS = ['mlock', 'fadvise']
 _FORWARD_OPTIONS = {'loop_count': '--count'}
 _RUN_SCRIPT = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -54,9 +58,8 @@ _RUN_SCRIPT = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 CollectorPackageInfo = NamedTuple('CollectorPackageInfo',
                                   [('package', str), ('compiler_filter', str)])
-_COLLECTOR_SCRIPT = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 '../iorap/collector')
-_COLLECTOR_TIMEOUT_MULTIPLIER = 10  # take the regular --timeout and multiply
+_COMPILER_SCRIPT = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.realpath(__file__))), 'iorap/compiler.py')
 # by 2; systrace starts up slowly.
 
 _UNLOCK_SCREEN_SCRIPT = os.path.join(
@@ -70,11 +73,14 @@ RunCommandArgs = NamedTuple('RunCommandArgs',
                              ('timeout', Optional[int]),
                              ('debug', bool),
                              ('simulate', bool),
-                             ('input', Optional[str])])
+                             ('input', Optional[str]),
+                             ('trace_duration', Optional[timedelta])])
 
 # This must be the only mutable global variable. All other global variables are constants to avoid magic literals.
 _debug = False  # See -d/--debug flag.
 _DEBUG_FORCE = None  # Ignore -d/--debug if this is not none.
+_PERFETTO_TRACE_DURATION_MS = 5000 # milliseconds
+_PERFETTO_TRACE_DURATION = timedelta(milliseconds=_PERFETTO_TRACE_DURATION_MS)
 
 # Type hinting names.
 T = TypeVar('T')
@@ -123,25 +129,14 @@ def parse_options(argv: List[str] = None):
   optional_named.add_argument('-in', '--inodes', dest='inodes', type=str,
                               action='store',
                               help='Path to inodes file (system/extras/pagecache/pagecache.py -d inodes)')
+  optional_named.add_argument('--compiler-trace-duration-ms',
+                              dest='trace_duration',
+                              type=lambda ms_str: timedelta(milliseconds=int(ms_str)),
+                              action='append',
+                              help='The trace duration (milliseconds) in '
+                                   'compilation')
 
   return parser.parse_args(argv)
-
-def make_script_command_with_temp_output(script: str,
-                                         args: List[str],
-                                         **kwargs) -> Tuple[str, TextIO]:
-  """
-  Create a command to run a script given the args.
-  Appends --count <loop_count> --output <tmp-file-name>.
-  Returns a tuple (cmd, tmp_file)
-  """
-  tmp_output_file = tempfile.NamedTemporaryFile(mode='r')
-  cmd = [script] + args
-  for key, value in kwargs.items():
-    cmd += ['--%s' % (key), "%s" % (value)]
-  if _debug:
-    cmd += ['--verbose']
-  cmd = cmd + ["--output", tmp_output_file.name]
-  return cmd, tmp_output_file
 
 def key_to_cmdline_flag(key: str) -> str:
   """Convert key into a command line flag, e.g. 'foo-bars' -> '--foo-bar' """
@@ -163,26 +158,26 @@ def as_run_command(tpl: NamedTuple) -> List[Union[str, Any]]:
     args.append(value)
   return args
 
-def run_collector_script(collector_info: CollectorPackageInfo,
-                         inodes_path: str,
-                         timeout: int,
-                         simulate: bool) -> Tuple[bool, TextIO]:
-  """Run collector to collect prefetching trace. """
-  # collector_args = ["--package", package_name]
-  collector_args = as_run_command(collector_info)
-  # TODO: forward --wait_time for how long systrace runs?
-  # TODO: forward --trace_buffer_size for size of systrace buffer size?
-  collector_cmd, collector_tmp_output_file = make_script_command_with_temp_output(
-      _COLLECTOR_SCRIPT, collector_args, inodes=inodes_path)
+def run_perfetto_collector(collector_info: CollectorPackageInfo,
+                           timeout: int,
+                           simulate: bool) -> Tuple[bool, TextIO]:
+  """Run collector to collect prefetching trace.
 
-  collector_timeout = timeout and _COLLECTOR_TIMEOUT_MULTIPLIER * timeout
-  (collector_passed, collector_script_output) = \
-    cmd_utils.execute_arbitrary_command(collector_cmd,
-                                        collector_timeout,
-                                        shell=False,
-                                        simulate=simulate)
+  Returns:
+    A tuple of whether the collection succeeds and the generated trace file.
+  """
+  tmp_output_file = tempfile.NamedTemporaryFile()
 
-  return collector_passed, collector_tmp_output_file
+  collector = PerfettoTraceCollector(package=collector_info.package,
+                                     activity=None,
+                                     compiler_filter=collector_info.compiler_filter,
+                                     timeout=timeout,
+                                     simulate=simulate,
+                                     trace_duration=_PERFETTO_TRACE_DURATION,
+                                     save_destination_file_path=tmp_output_file.name)
+  result = collector.run()
+
+  return result is not None, tmp_output_file
 
 def parse_run_script_csv_file(csv_file: TextIO) -> DataFrame:
   """Parse a CSV file full of integers into a DataFrame."""
@@ -216,6 +211,52 @@ def parse_run_script_csv_file(csv_file: TextIO) -> DataFrame:
 
   return DataFrame(d)
 
+def compile_perfetto_trace(inodes_path: str,
+                           perfetto_trace_file: str,
+                           trace_duration: Optional[timedelta]) -> TextIO:
+  compiler_trace_file = tempfile.NamedTemporaryFile()
+  argv = [_COMPILER_SCRIPT, '-i', inodes_path, '--perfetto-trace',
+          perfetto_trace_file, '-o', compiler_trace_file.name]
+
+  if trace_duration is not None:
+    argv += ['--duration', str(int(trace_duration.total_seconds()
+                               * PerfettoTraceCollector.MS_PER_SEC))]
+
+  print_utils.debug_print(argv)
+  compiler.main(argv)
+  return compiler_trace_file
+
+def execute_run_using_perfetto_trace(collector_info,
+                                     run_combos: Iterable[RunCommandArgs],
+                                     simulate: bool,
+                                     inodes_path: str,
+                                     timeout: int) -> DataFrame:
+  """ Executes run based on perfetto trace. """
+  passed, perfetto_trace_file = run_perfetto_collector(collector_info,
+                                                       timeout,
+                                                       simulate)
+  if not passed:
+    raise RuntimeError('Cannot run perfetto collector!')
+
+  with perfetto_trace_file:
+    for combos in run_combos:
+      if combos.readahead in _TRACING_READAHEADS:
+        if simulate:
+          compiler_trace_file = tempfile.NamedTemporaryFile()
+        else:
+          compiler_trace_file = compile_perfetto_trace(inodes_path,
+                                                       perfetto_trace_file.name,
+                                                       combos.trace_duration)
+        with compiler_trace_file:
+          combos = combos._replace(input=compiler_trace_file.name)
+          print_utils.debug_print(combos)
+          output = PrefetchAppRunner(**combos._asdict()).run()
+      else:
+        print_utils.debug_print(combos)
+        output = PrefetchAppRunner(**combos._asdict()).run()
+
+      yield DataFrame(dict((x, [y]) for x, y in output)) if output else None
+
 def execute_run_combos(
     grouped_run_combos: Iterable[Tuple[CollectorPackageInfo, Iterable[RunCommandArgs]]],
     simulate: bool,
@@ -228,19 +269,11 @@ def execute_run_combos(
                                       shell=False)
 
   for collector_info, run_combos in grouped_run_combos:
-    for combos in run_combos:
-      args = as_run_command(combos)
-      if combos.readahead in _TRACING_READAHEADS:
-        passed, collector_tmp_output_file = run_collector_script(collector_info,
-                                                                 inodes_path,
-                                                                 timeout,
-                                                                 simulate)
-        combos = combos._replace(input=collector_tmp_output_file.name)
-
-      print_utils.debug_print(combos)
-      output = PrefetchAppRunner(**combos._asdict()).run()
-
-      yield DataFrame(dict((x, [y]) for x, y in output)) if output else None
+    yield from execute_run_using_perfetto_trace(collector_info,
+                                                run_combos,
+                                                simulate,
+                                                inodes_path,
+                                                timeout)
 
 def gather_results(commands: Iterable[Tuple[DataFrame]],
                    key_list: List[str], value_list: List[Tuple[str, ...]]):
