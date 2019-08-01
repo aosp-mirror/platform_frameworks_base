@@ -144,6 +144,11 @@ public class StackAnimationController extends
      */
     private boolean mFirstBubbleSpringingToTouch = false;
 
+    /**
+     * Action to run after all views, including transient views, have been removed from the layout.
+     */
+    @Nullable private Runnable mAfterAllViewsAndTransientRemoved = null;
+
     /** Horizontal offset of bubbles in the stack. */
     private float mStackOffset;
     /** Diameter of the bubble icon. */
@@ -561,6 +566,14 @@ public class StackAnimationController extends
     }
 
     /**
+     * Sets an action to run after all views, including transient views, have been removed from the
+     * layout.
+     */
+    public void runActionAfterAllViewsAndTransientRemoved(Runnable action) {
+        mAfterAllViewsAndTransientRemoved = action;
+    }
+
+    /**
      * Springs the first bubble to the given final position, with the rest of the stack 'following'.
      */
     protected void springFirstBubbleWithStackFollowing(
@@ -647,13 +660,26 @@ public class StackAnimationController extends
 
     @Override
     void onChildRemoved(View child, int index, Runnable finishRemoval) {
-        // Animate the removing view in the opposite direction of the stack.
-        final float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
         animationForChild(child)
-                .alpha(0f, finishRemoval /* after */)
-                .scaleX(ANIMATE_IN_STARTING_SCALE)
-                .scaleY(ANIMATE_IN_STARTING_SCALE)
-                .translationX(mStackPosition.x - (-xOffset * ANIMATE_TRANSLATION_FACTOR))
+                .alpha(0f,
+                        finishRemoval /* after */,
+                        () -> {
+                            // If this was the last transient view, run the callback.
+                            if (mLayout.getTransientViewCount() == 0
+                                    && mAfterAllViewsAndTransientRemoved != null) {
+
+                                // If a 'real' view was added while we were animating out, don't run
+                                // the callback since all views haven't been removed.
+                                if (mLayout.getChildCount() == 0) {
+                                    mAfterAllViewsAndTransientRemoved.run();
+                                }
+
+                                mAfterAllViewsAndTransientRemoved = null;
+                            }
+                        } /* after */)
+                .scaleX(0f)
+                .scaleY(0f)
+                .withStiffness(ANIMATE_IN_STIFFNESS)
                 .start();
 
         if (mLayout.getChildCount() > 0) {
