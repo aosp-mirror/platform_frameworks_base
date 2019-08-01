@@ -7901,11 +7901,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void reportGlobalUsageEventLocked(int event) {
-        mUsageStatsService.reportEvent(Event.DEVICE_EVENT_PACKAGE_NAME,
-                mUserController.getCurrentUserId(), event);
+        final int currentUserId = mUserController.getCurrentUserId();
+        mUsageStatsService.reportEvent(Event.DEVICE_EVENT_PACKAGE_NAME, currentUserId, event);
         int[] profiles = mUserController.getCurrentProfileIds();
         if (profiles != null) {
             for (int i = profiles.length - 1; i >= 0; i--) {
+                if (profiles[i] == currentUserId) {
+                    continue;
+                }
                 mUsageStatsService.reportEvent(Event.DEVICE_EVENT_PACKAGE_NAME, profiles[i], event);
             }
         }
