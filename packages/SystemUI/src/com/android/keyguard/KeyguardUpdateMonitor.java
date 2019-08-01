@@ -264,11 +264,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     private static final int BIOMETRIC_CONTINUE_DELAY_MS = 500;
 
-    // If FP daemon dies, keyguard should retry after a short delay
+    // If the HAL dies or is unable to authenticate, keyguard should retry after a short delay
     private int mHardwareFingerprintUnavailableRetryCount = 0;
     private int mHardwareFaceUnavailableRetryCount = 0;
-    private static final int HW_UNAVAILABLE_TIMEOUT = 3000; // ms
-    private static final int HW_UNAVAILABLE_RETRY_MAX = 3;
+    private static final int HAL_ERROR_RETRY_TIMEOUT = 500; // ms
+    private static final int HAL_ERROR_RETRY_MAX = 10;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -671,10 +671,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
-            if (mHardwareFingerprintUnavailableRetryCount < HW_UNAVAILABLE_RETRY_MAX) {
+            if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
                 mHardwareFingerprintUnavailableRetryCount++;
                 mHandler.removeCallbacks(mRetryFingerprintAuthentication);
-                mHandler.postDelayed(mRetryFingerprintAuthentication, HW_UNAVAILABLE_TIMEOUT);
+                mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
             }
         }
 
@@ -830,11 +830,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
         }
 
-        if (msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE) {
-            if (mHardwareFaceUnavailableRetryCount < HW_UNAVAILABLE_RETRY_MAX) {
+        if (msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE
+                || msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS) {
+            if (mHardwareFaceUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
                 mHardwareFaceUnavailableRetryCount++;
                 mHandler.removeCallbacks(mRetryFaceAuthentication);
-                mHandler.postDelayed(mRetryFaceAuthentication, HW_UNAVAILABLE_TIMEOUT);
+                mHandler.postDelayed(mRetryFaceAuthentication, HAL_ERROR_RETRY_TIMEOUT);
             }
         }
 
