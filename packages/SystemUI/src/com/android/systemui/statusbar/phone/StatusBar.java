@@ -3787,7 +3787,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         if (!mNotificationPanel.canCameraGestureBeLaunched(
-                mStatusBarKeyguardViewManager.isShowing() && mExpandedVisible)) {
+                mStatusBarKeyguardViewManager.isShowing()
+                        && (mExpandedVisible || mBouncerShowing))) {
             if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Can't launch camera right now, mExpandedVisible: " +
                     mExpandedVisible);
             return;
