@@ -816,7 +816,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
 
-    boolean onGesture(AccessibilityGestureInfo gestureInfo) {
+    public boolean onGesture(AccessibilityGestureInfo gestureInfo) {
         synchronized (mLock) {
             boolean handled = notifyGestureLocked(gestureInfo, false);
             if (!handled) {
@@ -905,15 +905,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return getInteractionBridge().performActionOnAccessibilityFocusedItemNotLocked(action);
     }
 
-    int getActiveWindowId() {
+    public int getActiveWindowId() {
         return mA11yWindowManager.getActiveWindowId(mCurrentUserId);
     }
 
-    void onTouchInteractionStart() {
+    public void onTouchInteractionStart() {
         mA11yWindowManager.onTouchInteractionStart();
     }
 
-    void onTouchInteractionEnd() {
+    public void onTouchInteractionEnd() {
         mA11yWindowManager.onTouchInteractionEnd();
     }
 

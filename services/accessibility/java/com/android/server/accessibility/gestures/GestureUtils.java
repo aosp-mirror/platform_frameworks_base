@@ -1,4 +1,4 @@
-package com.android.server.accessibility;
+package com.android.server.accessibility.gestures;
 
 import android.util.MathUtils;
 import android.view.MotionEvent;
@@ -6,7 +6,7 @@ import android.view.MotionEvent;
 /**
  * Some helper functions for gesture detection.
  */
-final class GestureUtils {
+public final class GestureUtils {
 
     private GestureUtils() {
         /* cannot be instantiated */

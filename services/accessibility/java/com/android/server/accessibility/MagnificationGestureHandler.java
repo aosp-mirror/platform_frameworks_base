@@ -24,7 +24,7 @@ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
-import static com.android.server.accessibility.GestureUtils.distance;
+import static com.android.server.accessibility.gestures.GestureUtils.distance;
 
 import static java.lang.Math.abs;
 import static java.util.Arrays.asList;
@@ -54,6 +54,7 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.accessibility.gestures.GestureUtils;
 
 import java.util.ArrayDeque;
 import java.util.Queue;

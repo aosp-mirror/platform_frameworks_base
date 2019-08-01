@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.gestures;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;

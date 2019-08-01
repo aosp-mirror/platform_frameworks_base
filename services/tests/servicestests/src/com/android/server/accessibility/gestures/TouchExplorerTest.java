@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.gestures;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -30,6 +30,9 @@ import android.view.MotionEvent;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.EventStreamTransformation;
 
 import org.junit.Before;
 import org.junit.Rule;
