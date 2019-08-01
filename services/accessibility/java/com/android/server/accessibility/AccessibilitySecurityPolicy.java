@@ -429,7 +429,7 @@ public class AccessibilitySecurityPolicy {
         if (windowId == mAccessibilityWindowManager.getActiveWindowId(userId)) {
             return true;
         }
-        return mAccessibilityWindowManager.findA11yWindowInfoById(windowId) != null;
+        return mAccessibilityWindowManager.findA11yWindowInfoByIdLocked(windowId) != null;
     }
 
     private boolean isShellAllowedToRetrieveWindowLocked(int userId, int windowId) {
