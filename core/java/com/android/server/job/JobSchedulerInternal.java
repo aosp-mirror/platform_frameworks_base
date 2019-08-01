@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import android.app.job.JobInfo;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.List;
 
@@ -88,6 +89,31 @@ public interface JobSchedulerInternal {
                     + countAllJobsSaved + "/"
                     + countSystemServerJobsSaved + "/"
                     + countSystemSyncManagerJobsSaved;
+        }
+
+        /**
+         * Write the persist stats to the specified field.
+         */
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+
+            final long flToken = proto.start(JobStorePersistStatsProto.FIRST_LOAD);
+            proto.write(JobStorePersistStatsProto.Stats.NUM_TOTAL_JOBS, countAllJobsLoaded);
+            proto.write(JobStorePersistStatsProto.Stats.NUM_SYSTEM_SERVER_JOBS,
+                    countSystemServerJobsLoaded);
+            proto.write(JobStorePersistStatsProto.Stats.NUM_SYSTEM_SYNC_MANAGER_JOBS,
+                    countSystemSyncManagerJobsLoaded);
+            proto.end(flToken);
+
+            final long lsToken = proto.start(JobStorePersistStatsProto.LAST_SAVE);
+            proto.write(JobStorePersistStatsProto.Stats.NUM_TOTAL_JOBS, countAllJobsSaved);
+            proto.write(JobStorePersistStatsProto.Stats.NUM_SYSTEM_SERVER_JOBS,
+                    countSystemServerJobsSaved);
+            proto.write(JobStorePersistStatsProto.Stats.NUM_SYSTEM_SYNC_MANAGER_JOBS,
+                    countSystemSyncManagerJobsSaved);
+            proto.end(lsToken);
+
+            proto.end(token);
         }
     }
 }

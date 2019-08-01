@@ -28,8 +28,9 @@ import "frameworks/base/core/proto/android/net/network.proto";
 import "frameworks/base/core/proto/android/net/networkrequest.proto";
 import "frameworks/base/core/proto/android/os/bundle.proto";
 import "frameworks/base/core/proto/android/os/persistablebundle.proto";
-import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
+import "frameworks/base/core/proto/android/server/appstatetracker.proto";
 import "frameworks/base/core/proto/android/server/job/enums.proto";
+import "frameworks/base/core/proto/android/server/statlogger.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 
 // Next tag: 21
@@ -53,18 +54,22 @@ message JobSchedulerServiceDumpProto {
         optional JobStatusShortInfoProto info = 1;
         optional JobStatusDumpProto dump = 2;
 
+        optional bool is_job_ready_to_be_executed = 10;
         // A job is ready to be executed if:
-        // is_job_ready && is_user_started && !is_job_pending &&
+        // is_job_ready && are_users_started && !is_job_thermal_constrained && !is_job_pending &&
         // !is_job_currently_active && !is_uid_backing_up &&
-        // is_component_present.
+        // is_component_usable.
         optional bool is_job_ready = 3;
-        optional bool is_user_started = 4;
+        optional bool are_users_started = 4;
+        optional bool is_job_thermal_constrained = 11;
         optional bool is_job_pending = 5;
         optional bool is_job_currently_active = 6;
         optional bool is_uid_backing_up = 7;
-        optional bool is_component_present = 8;
+        optional bool is_component_usable = 8;
 
         reserved 9; // last_run_heartbeat
+
+        // Next tag: 12
     }
     repeated RegisteredJob registered_jobs = 3;
 
@@ -95,7 +100,7 @@ message JobSchedulerServiceDumpProto {
         optional JobStatusDumpProto dump = 2;
         optional sint32 evaluated_priority = 3;
         // How long this job has been pending.
-        optional int64 enqueued_duration_ms = 4;
+        optional int64 pending_duration_ms = 4;
     }
     repeated PendingJob pending_jobs = 9;
 
@@ -123,7 +128,7 @@ message JobSchedulerServiceDumpProto {
             optional sint32 evaluated_priority = 5;
 
             optional int64 time_since_made_active_ms = 6;
-            // How long this job has been pending.
+            // How long this job was pending before it became active.
             optional int64 pending_duration_ms = 7;
         }
         oneof job {
@@ -144,6 +149,8 @@ message JobSchedulerServiceDumpProto {
 
     // Dump from JobConcurrencyManager.
     optional JobConcurrencyManagerProto concurrency_manager = 20;
+
+    optional JobStorePersistStatsProto persist_stats = 21;
 }
 
 // A com.android.server.job.JobSchedulerService.Constants object.
@@ -347,7 +354,7 @@ message StateControllerProto {
     message BackgroundJobsController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional com.android.server.ForceAppStandbyTrackerProto force_app_standby_tracker = 1;
+        optional com.android.server.AppStateTrackerProto app_state_tracker = 1;
 
         message TrackedJob {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -386,7 +393,7 @@ message StateControllerProto {
     message ConnectivityController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional bool is_connected = 1;
+        reserved 1; // is_connected
 
         message TrackedJob {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -396,6 +403,12 @@ message StateControllerProto {
             optional .android.net.NetworkRequestProto required_network = 3;
         }
         repeated TrackedJob tracked_jobs = 2;
+
+        // List of the UIDs that ConnectivityController has requested that NetworkPolicyManager
+        // grant an exception to in the app standby chain.
+        repeated int32 requested_standby_exception_uids = 3;
+
+        repeated .android.net.NetworkProto available_networks = 4;
     }
     message ContentObserverController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -480,6 +493,31 @@ message StateControllerProto {
             optional int32 source_uid = 2;
         }
         repeated TrackedJob tracked_jobs = 2;
+
+        message IdlenessTracker {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            message CarIdlenessTracker {
+                option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional bool is_idle = 1;
+                optional bool is_garage_mode_on = 2;
+            }
+
+            message DeviceIdlenessTracker {
+                option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional bool is_idle = 1;
+                optional bool is_screen_on = 2;
+                optional bool is_dock_idle = 3;
+            }
+
+            oneof active_tracker {
+                DeviceIdlenessTracker device_idleness_tracker = 1;
+                CarIdlenessTracker car_idleness_tracker = 2;
+            }
+        }
+        optional IdlenessTracker idleness_tracker = 3;
     }
     message QuotaController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -623,6 +661,17 @@ message StateControllerProto {
             optional AlarmListener in_quota_alarm_listener = 5;
         }
         repeated PackageStats package_stats = 5;
+
+        // Set of package names for each UID.
+        message UidPackageMapping {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 uid = 1;
+            repeated string package_names = 2;
+        }
+        repeated UidPackageMapping uid_to_package_cache = 7;
+
+        // Next tag: 8
     }
     message StorageController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -937,10 +986,15 @@ message JobStatusDumpProto {
     optional sint64 time_until_earliest_runtime_ms = 19;
     // Can be negative if the latest runtime deadline has passed.
     optional sint64 time_until_latest_runtime_ms = 20;
+    // The original latest runtime value, in the elapsed realtime timebase. Valid only for periodic
+    // jobs.
+    optional uint64 original_latest_runtime_elapsed = 30;
 
     optional int32 num_failures = 21;
 
+    // Last time a job finished successfully for a periodic job, in currentTimeMillis time.
     optional int64 last_successful_run_time = 22;
+    // Last time a job finished unsuccessfully, in currentTimeMillis time.
     optional int64 last_failed_run_time = 23;
 
     optional int64 internal_flags = 24;
@@ -953,7 +1007,7 @@ message JobStatusDumpProto {
     // was no attempt.
     optional int64 time_since_first_force_batch_attempt_ms = 29;
 
-    // Next tag: 30
+    // Next tag: 31
 }
 
 // Dump from com.android.server.job.JobConcurrencyManager.
@@ -962,9 +1016,9 @@ message JobConcurrencyManagerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Whether the device is interactive (== screen on) now or not.
-    optional bool current_interactive = 1;
-    // Similar to current_interactive, screen on or not, but it takes into account the off timeout.
-    optional bool effective_interactive = 2;
+    optional bool current_interactive_state = 1;
+    // Similar to current_interactive_state, screen on or not, but it takes into account the off timeout.
+    optional bool effective_interactive_state = 2;
     // How many milliseconds have passed since the last screen on. (i.e. 1000 == 1 sec ago)
     optional int64 time_since_last_screen_on_ms = 3;
     // How many milliseconds have passed since the last screen off. (i.e. 1000 == 1 sec ago)
@@ -973,6 +1027,8 @@ message JobConcurrencyManagerProto {
     optional JobCountTrackerProto job_count_tracker = 5;
     // Current memory trim level.
     optional int32 memory_trim_level = 6;
+    // Performance stats.
+    optional StatLoggerProto stats = 7;
 }
 
 // Dump from com.android.server.job.JobConcurrencyManager.JobCountTracker.
@@ -997,4 +1053,23 @@ message JobCountTrackerProto {
     optional int32 num_pending_fg_jobs = 6;
     // Number of pending background jobs.
     optional int32 num_pending_bg_jobs = 7;
+
+    optional int32 num_actual_max_fg_jobs = 8;
+    optional int32 num_actual_max_bg_jobs = 9;
+
+    optional int32 num_reserved_for_bg = 10;
+
+    optional int32 num_starting_fg_jobs = 11;
+    optional int32 num_starting_bg_jobs = 12;
+}
+
+message JobStorePersistStatsProto {
+    message Stats {
+        optional int32 num_total_jobs = 1;
+        optional int32 num_system_server_jobs = 2;
+        optional int32 num_system_sync_manager_jobs = 3;
+    }
+
+    optional Stats first_load = 1;
+    optional Stats last_save = 2;
 }

@@ -22,9 +22,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 
@@ -86,6 +88,22 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     public void dump(PrintWriter pw) {
         pw.print("  mIdle: "); pw.println(mIdle);
         pw.print("  mGarageModeOn: "); pw.println(mGarageModeOn);
+    }
+
+    @Override
+    public void dump(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        final long ciToken = proto.start(
+                StateControllerProto.IdleController.IdlenessTracker.CAR_IDLENESS_TRACKER);
+
+        proto.write(StateControllerProto.IdleController.IdlenessTracker.CarIdlenessTracker.IS_IDLE,
+                mIdle);
+        proto.write(
+                StateControllerProto.IdleController.IdlenessTracker.CarIdlenessTracker.IS_GARAGE_MODE_ON,
+                mGarageModeOn);
+
+        proto.end(ciToken);
+        proto.end(token);
     }
 
     @Override

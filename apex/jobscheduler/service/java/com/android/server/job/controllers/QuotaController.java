@@ -2661,16 +2661,30 @@ public final class QuotaController extends StateController {
                     mForegroundUids.keyAt(i));
         }
 
+        for (int i = 0; i < mUidToPackageCache.size(); ++i) {
+            final long upToken = proto.start(
+                    StateControllerProto.QuotaController.UID_TO_PACKAGE_CACHE);
+
+            final int uid = mUidToPackageCache.keyAt(i);
+            ArraySet<String> packages = mUidToPackageCache.get(uid);
+
+            proto.write(StateControllerProto.QuotaController.UidPackageMapping.UID, uid);
+            for (int j = 0; j < packages.size(); ++j) {
+                proto.write(StateControllerProto.QuotaController.UidPackageMapping.PACKAGE_NAMES,
+                        packages.valueAt(j));
+            }
+
+            proto.end(upToken);
+        }
+
         mTrackedJobs.forEach((jobs) -> {
             for (int j = 0; j < jobs.size(); j++) {
                 final JobStatus js = jobs.valueAt(j);
                 if (!predicate.test(js)) {
                     continue;
                 }
-                final long jsToken = proto.start(
-                        StateControllerProto.QuotaController.TRACKED_JOBS);
-                js.writeToShortProto(proto,
-                        StateControllerProto.QuotaController.TrackedJob.INFO);
+                final long jsToken = proto.start(StateControllerProto.QuotaController.TRACKED_JOBS);
+                js.writeToShortProto(proto, StateControllerProto.QuotaController.TrackedJob.INFO);
                 proto.write(StateControllerProto.QuotaController.TrackedJob.SOURCE_UID,
                         js.getSourceUid());
                 proto.write(
