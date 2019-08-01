@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,6 +39,7 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
     private final UnlockMethodCache mUnlockMethodCache;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final StatusBarStateController mStateController;
+    private final KeyguardMonitor mKeyguardMonitor;
     private ArraySet<Listener> mListeners = new ArraySet<>();
 
     private boolean mLastDynamicUnlocked;
@@ -46,19 +48,23 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
 
     @Inject
     DynamicPrivacyController(Context context,
+            KeyguardMonitor keyguardMonitor,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             StatusBarStateController stateController) {
-        this(notificationLockscreenUserManager, UnlockMethodCache.getInstance(context),
+        this(notificationLockscreenUserManager, keyguardMonitor,
+                UnlockMethodCache.getInstance(context),
                 stateController);
     }
 
     @VisibleForTesting
     DynamicPrivacyController(NotificationLockscreenUserManager notificationLockscreenUserManager,
+            KeyguardMonitor keyguardMonitor,
             UnlockMethodCache unlockMethodCache,
             StatusBarStateController stateController) {
         mLockscreenUserManager = notificationLockscreenUserManager;
         mStateController = stateController;
         mUnlockMethodCache = unlockMethodCache;
+        mKeyguardMonitor = keyguardMonitor;
         mUnlockMethodCache.addListener(this);
         mLastDynamicUnlocked = isDynamicallyUnlocked();
     }
@@ -86,7 +92,9 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
     }
 
     public boolean isDynamicallyUnlocked() {
-        return mUnlockMethodCache.canSkipBouncer() && isDynamicPrivacyEnabled();
+        return (mUnlockMethodCache.canSkipBouncer() || mKeyguardMonitor.isKeyguardGoingAway()
+                || mKeyguardMonitor.isKeyguardFadingAway())
+                && isDynamicPrivacyEnabled();
     }
 
     public void addListener(Listener listener) {
