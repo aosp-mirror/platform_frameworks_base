@@ -180,6 +180,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     private static final int DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX = 1;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final DynamicPrivacyController mDynamicPrivacyController;
+    private final SysuiStatusBarStateController mStatusbarStateController;
 
     private ExpandHelper mExpandHelper;
     private final NotificationSwipeHelper mSwipeHelper;
@@ -605,6 +607,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
         });
         dynamicPrivacyController.addListener(this);
+        mDynamicPrivacyController = dynamicPrivacyController;
+        mStatusbarStateController = (SysuiStatusBarStateController) statusBarStateController;
     }
 
     private void updateDismissRtlSetting(boolean dismissRtl) {
@@ -695,6 +699,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
+        if (mDynamicPrivacyController.isInLockedDownShade()) {
+            return false;
+        }
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -5700,7 +5707,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mAnimateBottomOnLayout = true;
         }
         // Let's update the footer once the notifications have been updated (in the next frame)
-        post(this::updateFooter);
+        post(() -> {
+            updateFooter();
+            updateSectionBoundaries();
+        });
     }
 
     public void setOnPulseHeightChangedListener(Runnable listener) {
@@ -6356,6 +6366,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
 
                 return true;
+            } else if (mDynamicPrivacyController.isInLockedDownShade()) {
+                mStatusbarStateController.setLeaveOpenOnKeyguardHide(true);
+                mStatusBar.dismissKeyguardThenExecute(() -> false /* dismissAction */,
+                        null /* cancelRunnable */, false /* afterKeyguardGone */);
+                return true;
             } else {
                 // abort gesture.
                 return false;
@@ -6388,6 +6403,30 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         @Override
         public boolean isFalsingCheckNeeded() {
             return mStatusBarState == StatusBarState.KEYGUARD;
+        }
+
+        @Override
+        public boolean isDragDownEnabledForView(ExpandableView view) {
+            if (isDragDownAnywhereEnabled()) {
+                return true;
+            }
+            if (mDynamicPrivacyController.isInLockedDownShade()) {
+                if (view == null) {
+                    // Dragging down is allowed in general
+                    return true;
+                }
+                if (view instanceof ExpandableNotificationRow) {
+                    // Only drag down on sensitive views, otherwise the ExpandHelper will take this
+                    return ((ExpandableNotificationRow) view).getEntry().isSensitive();
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean isDragDownAnywhereEnabled() {
+            return mStatusbarStateController.getState() == StatusBarState.KEYGUARD
+                    && !mKeyguardBypassController.getBypassEnabled();
         }
     };
 
