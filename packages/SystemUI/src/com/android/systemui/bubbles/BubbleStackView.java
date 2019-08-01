@@ -370,13 +370,7 @@ public class BubbleStackView extends FrameLayout {
         mExpandedViewContainer.setClipChildren(false);
         addView(mExpandedViewContainer);
 
-        mFlyout = new BubbleFlyoutView(context);
-        mFlyout.setVisibility(GONE);
-        mFlyout.animate()
-                .setDuration(FLYOUT_ALPHA_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateDecelerateInterpolator());
-        addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-
+        setUpFlyout();
         mFlyoutTransitionSpring.setSpring(new SpringForce()
                 .setStiffness(SpringForce.STIFFNESS_LOW)
                 .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
@@ -474,12 +468,25 @@ public class BubbleStackView extends FrameLayout {
         });
     }
 
+    private void setUpFlyout() {
+        if (mFlyout != null) {
+            removeView(mFlyout);
+        }
+        mFlyout = new BubbleFlyoutView(getContext());
+        mFlyout.setVisibility(GONE);
+        mFlyout.animate()
+                .setDuration(FLYOUT_ALPHA_ANIMATION_DURATION)
+                .setInterpolator(new AccelerateDecelerateInterpolator());
+        addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+    }
+
     /**
      * Handle theme changes.
      */
     public void onThemeChanged() {
         // Recreate icon factory to update default adaptive icon scale.
         mBubbleIconFactory = new BubbleIconFactory(mContext, mIconBitmapSize);
+        setUpFlyout();
         for (Bubble b: mBubbleData.getBubbles()) {
             b.getIconView().setBubbleIconFactory(mBubbleIconFactory);
             b.getIconView().updateViews();
