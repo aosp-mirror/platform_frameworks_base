@@ -20,10 +20,12 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -33,6 +35,7 @@ import android.util.PathParser;
 import android.widget.FrameLayout;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.launcher3.icons.ShadowGenerator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -235,7 +238,17 @@ public class BubbleView extends FrameLayout {
         Bitmap bubbleIcon = mBubbleIconFactory.createBadgedIconBitmap(iconDrawable,
                 null /* user */,
                 true /* shrinkNonAdaptiveIcons */).icon;
-        mBubbleIconFactory.badgeWithDrawable(bubbleIcon, mUserBadgedAppIcon);
+
+        // Give it a shadow
+        Bitmap userBadgedBitmap = mBubbleIconFactory.createIconBitmap(mUserBadgedAppIcon,
+                1f, mBubbleIconFactory.getBadgeSize());
+        Canvas c = new Canvas();
+        ShadowGenerator shadowGenerator = new ShadowGenerator(mBubbleIconFactory.getBadgeSize());
+        c.setBitmap(userBadgedBitmap);
+        shadowGenerator.recreateIcon(Bitmap.createBitmap(userBadgedBitmap), c);
+
+        mBubbleIconFactory.badgeWithDrawable(bubbleIcon,
+                new BitmapDrawable(mContext.getResources(), userBadgedBitmap));
         mBadgedImageView.setImageBitmap(bubbleIcon);
 
         // Update badge.
