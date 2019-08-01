@@ -366,8 +366,10 @@ public class BugreportProgressService extends Service {
             checkProgressUpdated(mInfo, (int) progress);
         }
 
-        // TODO(b/127431371): Add error code handling for bugreport API errors.
-        // Logging errors and removing progress notification for now.
+        /**
+         * Logs errors and stops the service on which this bugreport was running.
+         * Also stops progress notification (if any).
+         */
         @Override
         public void onError(@BugreportErrorCode int errorCode) {
             trackInfoWithId();
