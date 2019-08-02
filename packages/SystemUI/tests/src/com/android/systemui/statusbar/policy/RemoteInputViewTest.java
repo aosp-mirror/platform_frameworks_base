@@ -26,6 +26,7 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+import android.view.textclassifier.TextClassifier;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -108,5 +109,14 @@ public class RemoteInputViewTest extends SysuiTestCase {
         mView.setOnVisibilityChangedListener(null);
         mView.setVisibility(View.INVISIBLE);
         mView.setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testUsesNoOpTextClassifier() {
+        RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
+        mView.setRemoteInput(new RemoteInput[]{input}, input);
+
+        EditText editText = mView.findViewById(R.id.remote_input_text);
+        assertEquals(TextClassifier.NO_OP, editText.getTextClassifier());
     }
 }
