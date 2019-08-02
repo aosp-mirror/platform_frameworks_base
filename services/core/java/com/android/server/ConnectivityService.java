@@ -5519,7 +5519,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         nai.asyncChannel.connect(mContext, mTrackerHandler, nai.messenger);
         NetworkInfo networkInfo = nai.networkInfo;
-        nai.networkInfo = null;
         updateNetworkInfo(nai, networkInfo);
         updateUids(nai, null, nai.networkCapabilities);
     }
@@ -6518,8 +6517,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (DBG) {
             log(networkAgent.name() + " EVENT_NETWORK_INFO_CHANGED, going from " +
-                    (oldInfo == null ? "null" : oldInfo.getState()) +
-                    " to " + state);
+                    oldInfo.getState() + " to " + state);
         }
 
         if (!networkAgent.created
@@ -6592,8 +6590,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // TODO(b/122649188): send the broadcast only to VPN users.
                 mProxyTracker.sendProxyBroadcast();
             }
-        } else if ((oldInfo != null && oldInfo.getState() == NetworkInfo.State.SUSPENDED) ||
-                state == NetworkInfo.State.SUSPENDED) {
+        } else if (networkAgent.created && (oldInfo.getState() == NetworkInfo.State.SUSPENDED ||
+                state == NetworkInfo.State.SUSPENDED)) {
             // going into or coming out of SUSPEND: re-score and notify
             if (networkAgent.getCurrentScore() != oldScore) {
                 rematchAllNetworksAndRequests(networkAgent, oldScore);

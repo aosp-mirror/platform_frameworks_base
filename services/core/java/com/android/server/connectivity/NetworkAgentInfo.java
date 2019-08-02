@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.net.IDnsResolver;
 import android.net.INetd;
@@ -116,7 +117,7 @@ import java.util.TreeSet;
 // not, ConnectivityService disconnects the NetworkAgent's AsyncChannel.
 public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
-    public NetworkInfo networkInfo;
+    @NonNull public NetworkInfo networkInfo;
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
     // This Network object is always valid.
