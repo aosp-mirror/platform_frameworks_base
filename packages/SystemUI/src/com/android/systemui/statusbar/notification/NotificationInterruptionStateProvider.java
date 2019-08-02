@@ -50,6 +50,7 @@ public class NotificationInterruptionStateProvider {
 
     private static final String TAG = "InterruptionStateProvider";
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_HEADS_UP = true;
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
@@ -211,7 +212,7 @@ public class NotificationInterruptionStateProvider {
         StatusBarNotification sbn = entry.notification;
 
         if (!mUseHeadsUp) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: no huns");
             }
             return false;
@@ -227,7 +228,7 @@ public class NotificationInterruptionStateProvider {
 
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: in unlocked shade where notification is shown as a "
                         + "bubble: " + sbn.getKey());
             }
@@ -235,14 +236,14 @@ public class NotificationInterruptionStateProvider {
         }
 
         if (entry.shouldSuppressPeek()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: unimportant notification: " + sbn.getKey());
             }
             return false;
@@ -257,13 +258,16 @@ public class NotificationInterruptionStateProvider {
         boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
 
         if (!inUse) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: not in use: " + sbn.getKey());
             }
             return false;
         }
 
         if (!mHeadsUpSuppressor.canHeadsUp(entry, sbn)) {
+            if (DEBUG_HEADS_UP) {
+                Log.d(TAG, "No heads up: aborted by suppressor: " + sbn.getKey());
+            }
             return false;
         }
 
@@ -281,28 +285,28 @@ public class NotificationInterruptionStateProvider {
         StatusBarNotification sbn = entry.notification;
 
         if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: disabled by setting: " + sbn.getKey());
             }
             return false;
         }
 
         if (!canAlertCommon(entry)) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: notification shouldn't alert: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.shouldSuppressAmbient()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: ambient effect suppressed: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.importance < NotificationManager.IMPORTANCE_DEFAULT) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: not important enough: " + sbn.getKey());
             }
             return false;
@@ -321,7 +325,7 @@ public class NotificationInterruptionStateProvider {
         StatusBarNotification sbn = entry.notification;
 
         if (mNotificationFilter.shouldFilterOut(entry)) {
-            if (DEBUG) {
+            if (DEBUG || DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: filtered notification: " + sbn.getKey());
             }
             return false;
@@ -329,7 +333,7 @@ public class NotificationInterruptionStateProvider {
 
         // Don't alert notifications that are suppressed due to group alert behavior
         if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            if (DEBUG) {
+            if (DEBUG || DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: suppressed due to group alert behavior");
             }
             return false;
@@ -348,21 +352,21 @@ public class NotificationInterruptionStateProvider {
         StatusBarNotification sbn = entry.notification;
 
         if (mPresenter.isDeviceInVrMode()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: no huns or vr mode");
             }
             return false;
         }
 
         if (isSnoozedPackage(sbn)) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.hasJustLaunchedFullScreenIntent()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: recent fullscreen: " + sbn.getKey());
             }
             return false;
