@@ -2909,7 +2909,7 @@ public class CarrierConfigManager {
             defaults.putString(KEY_SUPL_VER_STRING, "0x20000");
             defaults.putString(KEY_SUPL_MODE_STRING, "1");
             defaults.putString(KEY_SUPL_ES_STRING, "1");
-            defaults.putString(KEY_LPP_PROFILE_STRING, "0");
+            defaults.putString(KEY_LPP_PROFILE_STRING, "2");
             defaults.putString(KEY_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL_STRING, "1");
             defaults.putString(KEY_A_GLONASS_POS_PROTOCOL_SELECT_STRING, "0");
             defaults.putString(KEY_GPS_LOCK_STRING, "3");
