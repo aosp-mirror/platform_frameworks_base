@@ -802,6 +802,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStackView == null) {
             return;
         }
+
         if (mStatusBarStateListener.getCurrentState() == SHADE && hasBubbles()) {
             // Bubbles only appear in unlocked shade
             mStackView.setVisibility(hasBubbles() ? VISIBLE : INVISIBLE);
@@ -812,12 +813,23 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         // Let listeners know if bubble state changed.
         boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
         boolean hasBubblesShowing = hasBubbles() && mStackView.getVisibility() == VISIBLE;
-        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
         if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
             mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
         }
 
         mStackView.updateContentDescription();
+
+        // If we don't have bubbles, but there's transient bubbles, keep the stack view visible and
+        // the status bar window expanded until they finish animating out.
+        if (!hasBubbles() && mStackView.hasTransientBubbles()) {
+            mStackView.setVisibility(VISIBLE);
+            mStackView.runActionAfterTransientViewAnimations(() -> {
+                mStackView.setVisibility(INVISIBLE);
+                mStatusBarWindowController.setBubblesShowing(false);
+            });
+        } else {
+            mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
+        }
     }
 
     /**
