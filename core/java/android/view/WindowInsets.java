@@ -35,6 +35,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.content.Intent;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
@@ -643,6 +644,14 @@ public final class WindowInsets {
      * <p>An app can declare priority over system gestures with
      * {@link View#setSystemGestureExclusionRects} outside of the
      * {@link #getMandatorySystemGestureInsets() mandatory system gesture insets}.
+     *
+     * <p>Note: the system will put a limit of <code>200dp</code> on the vertical extent of the
+     * exclusions it takes into account. The limit does not apply while the navigation
+     * bar is {@link View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY stickily} hidden, nor to the
+     * {@link android.inputmethodservice.InputMethodService input method} and
+     * {@link Intent#CATEGORY_HOME home activity}.
+     * </p>
+     *
      *
      * <p>Simple taps are guaranteed to reach the window even within the system gesture insets,
      * as long as they are outside the {@link #getTappableElementInsets() system window insets}.
