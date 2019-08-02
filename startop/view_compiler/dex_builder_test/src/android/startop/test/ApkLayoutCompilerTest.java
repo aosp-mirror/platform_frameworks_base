@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -20,21 +20,26 @@ import android.view.View;
 import dalvik.system.PathClassLoader;
 import java.lang.reflect.Method;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.reflect.Method;
-
-// Adding tests here requires changes in several other places. See README.md in
-// the view_compiler directory for more information.
-public class LayoutCompilerTest {
-    static ClassLoader loadDexFile(String filename) throws Exception {
-        return new PathClassLoader("/data/local/tmp/dex-builder-test/" + filename,
+public class ApkLayoutCompilerTest {
+    static ClassLoader loadDexFile() throws Exception {
+        Context context = InstrumentationRegistry.getTargetContext();
+        return new PathClassLoader(context.getCodeCacheDir() + "/compiled_view.dex",
                 ClassLoader.getSystemClassLoader());
+    }
+
+    @BeforeClass
+    public static void setup() throws Exception {
+        // ensure PackageManager has compiled the layouts.
+        Process pm = Runtime.getRuntime().exec("pm compile --compile-layouts android.startop.test");
+        pm.waitFor();
     }
 
     @Test
     public void loadAndInflateLayout1() throws Exception {
-        ClassLoader dex_file = loadDexFile("layout1.dex");
+        ClassLoader dex_file = loadDexFile();
         Class compiled_view = dex_file.loadClass("android.startop.test.CompiledView");
         Method layout1 = compiled_view.getMethod("layout1", Context.class, int.class);
         Context context = InstrumentationRegistry.getTargetContext();
@@ -43,10 +48,10 @@ public class LayoutCompilerTest {
 
     @Test
     public void loadAndInflateLayout2() throws Exception {
-        ClassLoader dex_file = loadDexFile("layout2.dex");
+        ClassLoader dex_file = loadDexFile();
         Class compiled_view = dex_file.loadClass("android.startop.test.CompiledView");
-        Method layout1 = compiled_view.getMethod("layout2", Context.class, int.class);
+        Method layout2 = compiled_view.getMethod("layout2", Context.class, int.class);
         Context context = InstrumentationRegistry.getTargetContext();
-        layout1.invoke(null, context, R.layout.layout1);
+        layout2.invoke(null, context, R.layout.layout2);
     }
 }

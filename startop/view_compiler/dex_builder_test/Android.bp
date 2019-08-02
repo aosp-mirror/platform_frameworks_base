@@ -37,15 +37,21 @@ genrule {
 android_test {
     name: "dex-builder-test",
     srcs: [
+        "src/android/startop/test/ApkLayoutCompilerTest.java",
         "src/android/startop/test/DexBuilderTest.java",
         "src/android/startop/test/LayoutCompilerTest.java",
         "src/android/startop/test/TestClass.java",
     ],
     sdk_version: "current",
-    data: [":generate_dex_testcases", ":generate_compiled_layout1", ":generate_compiled_layout2"],
+    data: [
+        ":generate_dex_testcases",
+        ":generate_compiled_layout1",
+        ":generate_compiled_layout2",
+    ],
     static_libs: [
-        "androidx.test.rules",
-        "guava",
+        "androidx.test.core",
+        "androidx.test.runner",
+        "junit",
     ],
     manifest: "AndroidManifest.xml",
     resource_dirs: ["res"],
