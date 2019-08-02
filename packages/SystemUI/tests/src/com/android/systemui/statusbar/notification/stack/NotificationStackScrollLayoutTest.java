@@ -137,7 +137,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mDependency.injectTestDependency(
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);
-        mDependency.injectTestDependency(StatusBarStateController.class, mBarState);
+        mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(NotificationRemoteInputManager.class,
                 mRemoteInputManager);
@@ -163,7 +163,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(DynamicPrivacyController.class),
                 mock(ConfigurationController.class),
                 mock(ActivityStarterDelegate.class),
-                mock(StatusBarStateController.class),
+                mock(SysuiStatusBarStateController.class),
                 mHeadsUpManager,
                 mKeyguardBypassController,
                 new FalsingManagerFake());
