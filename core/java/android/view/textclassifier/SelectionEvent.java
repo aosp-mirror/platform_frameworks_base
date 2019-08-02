@@ -410,6 +410,15 @@ public final class SelectionEvent implements Parcelable {
     }
 
     /**
+     * Sets the id of this event's user.
+     * <p>
+     * Package-private for SystemTextClassifier's use.
+     */
+    void setUserId(@UserIdInt int userId) {
+        mUserId = userId;
+    }
+
+    /**
      * Returns the id of this event's user.
      * @hide
      */

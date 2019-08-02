@@ -457,12 +457,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             Preconditions.checkArgument(userId != UserHandle.USER_NULL, "Null userId");
             final int callingUserId = UserHandle.getCallingUserId();
             if (callingUserId != userId) {
-                context.enforceCallingPermission(
+                context.enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                         "Invalid userId. UserId=" + userId + ", CallingUserId=" + callingUserId);
             }
         } catch (Exception e) {
-            throw new RemoteException("Invalid request", e,
+            throw new RemoteException("Invalid request: " + e.getMessage(), e,
                     /* enableSuppression */ true, /* writableStackTrace */ true);
         }
     }

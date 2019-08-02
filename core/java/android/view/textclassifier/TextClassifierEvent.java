@@ -139,7 +139,7 @@ public abstract class TextClassifierEvent implements Parcelable {
     @Nullable
     private final String[] mEntityTypes;
     @Nullable
-    private final TextClassificationContext mEventContext;
+    private TextClassificationContext mEventContext;
     @Nullable
     private final String mResultId;
     private final int mEventIndex;
@@ -286,6 +286,15 @@ public abstract class TextClassifierEvent implements Parcelable {
     @Nullable
     public TextClassificationContext getEventContext() {
         return mEventContext;
+    }
+
+    /**
+     * Sets the event context.
+     * <p>
+     * Package-private for SystemTextClassifier's use.
+     */
+    void setEventContext(@Nullable TextClassificationContext eventContext) {
+        mEventContext = eventContext;
     }
 
     /**
