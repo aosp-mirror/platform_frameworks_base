@@ -192,7 +192,8 @@ public class AccessibilityServiceConnectionTest {
         when(parceledListSlice.getList()).thenReturn(gestureSteps);
         mConnection.dispatchGesture(0, parceledListSlice, Display.DEFAULT_DISPLAY);
 
-        verify(mMockMotionEventInjector).injectEvents(gestureSteps, mMockServiceClient, 0);
+        verify(mMockMotionEventInjector).injectEvents(gestureSteps, mMockServiceClient, 0,
+                Display.DEFAULT_DISPLAY);
     }
 
     @Test
@@ -209,7 +210,8 @@ public class AccessibilityServiceConnectionTest {
         when(parceledListSlice.getList()).thenReturn(gestureSteps);
         mConnection.dispatchGesture(0, parceledListSlice, Display.DEFAULT_DISPLAY);
 
-        verify(mMockMotionEventInjector, never()).injectEvents(gestureSteps, mMockServiceClient, 0);
+        verify(mMockMotionEventInjector, never()).injectEvents(gestureSteps, mMockServiceClient, 0,
+                Display.DEFAULT_DISPLAY);
         verify(mMockServiceClient).onPerformGestureResult(0, false);
     }
 
