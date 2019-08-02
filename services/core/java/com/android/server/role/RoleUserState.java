@@ -121,8 +121,6 @@ public class RoleUserState {
      */
     public int getVersion() {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             return mVersion;
         }
     }
@@ -134,8 +132,6 @@ public class RoleUserState {
      */
     public void setVersion(int version) {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             if (mVersion == version) {
                 return;
             }
@@ -163,8 +159,6 @@ public class RoleUserState {
      */
     public void setPackagesHash(@Nullable String packagesHash) {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             if (Objects.equals(mPackagesHash, packagesHash)) {
                 return;
             }
@@ -182,8 +176,6 @@ public class RoleUserState {
      */
     public boolean isRoleAvailable(@NonNull String roleName) {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             return mRoles.containsKey(roleName);
         }
     }
@@ -198,8 +190,6 @@ public class RoleUserState {
     @Nullable
     public ArraySet<String> getRoleHolders(@NonNull String roleName) {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             ArraySet<String> packageNames = mRoles.get(roleName);
             if (packageNames == null) {
                 return null;
@@ -217,8 +207,6 @@ public class RoleUserState {
      */
     public boolean addRoleName(@NonNull String roleName) {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             if (!mRoles.containsKey(roleName)) {
                 mRoles.put(roleName, new ArraySet<>());
                 Slog.i(LOG_TAG, "Added new role: " + roleName);
@@ -237,8 +225,6 @@ public class RoleUserState {
      */
     public void setRoleNames(@NonNull List<String> roleNames) {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             boolean changed = false;
 
             for (int i = mRoles.size() - 1; i >= 0; i--) {
@@ -279,8 +265,6 @@ public class RoleUserState {
         boolean changed;
 
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             ArraySet<String> roleHolders = mRoles.get(roleName);
             if (roleHolders == null) {
                 Slog.e(LOG_TAG, "Cannot add role holder for unknown role, role: " + roleName
@@ -312,8 +296,6 @@ public class RoleUserState {
         boolean changed;
 
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             ArraySet<String> roleHolders = mRoles.get(roleName);
             if (roleHolders == null) {
                 Slog.e(LOG_TAG, "Cannot remove role holder for unknown role, role: " + roleName
@@ -338,14 +320,16 @@ public class RoleUserState {
      */
     @NonNull
     public List<String> getHeldRoles(@NonNull String packageName) {
-        ArrayList<String> result = new ArrayList<>();
-        int size = mRoles.size();
-        for (int i = 0; i < size; i++) {
-            if (mRoles.valueAt(i).contains(packageName)) {
-                result.add(mRoles.keyAt(i));
+        synchronized (mLock) {
+            List<String> roleNames = new ArrayList<>();
+            int size = mRoles.size();
+            for (int i = 0; i < size; i++) {
+                if (mRoles.valueAt(i).contains(packageName)) {
+                    roleNames.add(mRoles.keyAt(i));
+                }
             }
+            return roleNames;
         }
-        return result;
     }
 
     /**
@@ -353,7 +337,9 @@ public class RoleUserState {
      */
     @GuardedBy("mLock")
     private void scheduleWriteFileLocked() {
-        throwIfDestroyedLocked();
+        if (mDestroyed) {
+            return;
+        }
 
         if (!mWriteScheduled) {
             mWriteHandler.sendMessageDelayed(PooledLambda.obtainMessage(RoleUserState::writeFile,
@@ -537,8 +523,6 @@ public class RoleUserState {
         String packagesHash;
         ArrayMap<String, ArraySet<String>> roles;
         synchronized (mLock) {
-            throwIfDestroyedLocked();
-
             version = mVersion;
             packagesHash = mPackagesHash;
             roles = snapshotRolesLocked();
@@ -602,17 +586,12 @@ public class RoleUserState {
      */
     public void destroy() {
         synchronized (mLock) {
-            throwIfDestroyedLocked();
+            if (mDestroyed) {
+                throw new IllegalStateException("This RoleUserState has already been destroyed");
+            }
             mWriteHandler.removeCallbacksAndMessages(null);
             getFile(mUserId).delete();
             mDestroyed = true;
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void throwIfDestroyedLocked() {
-        if (mDestroyed) {
-            throw new IllegalStateException("This RoleUserState has already been destroyed");
         }
     }
 
