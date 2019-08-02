@@ -387,10 +387,12 @@ cc_library_static {
     local_include_dirs: [
         "include",  // NEEDED FOR ANDROID RUNTIME
         "android/graphics",
+        "android/graphics/apex/include",
     ],
 
     export_include_dirs: [
         ".",
+        "android/graphics/apex/include",
     ],
 
     include_dirs: [
@@ -418,6 +420,8 @@ cc_library_static {
     target: {
         android: {
             srcs: [ // sources that depend on android only libraries
+                "android/graphics/apex/android_canvas.cpp",
+
                 "android_view_TextureLayer.cpp",
                 "android_view_ThreadedRenderer.cpp",
                 "android/graphics/BitmapRegionDecoder.cpp",
