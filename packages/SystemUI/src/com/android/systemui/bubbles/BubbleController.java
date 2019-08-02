@@ -455,7 +455,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         NotificationEntry entry = mNotificationEntryManager.getNotificationData().get(key);
         String groupKey = entry != null ? entry.notification.getGroupKey() : null;
         boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey);
-        return isSuppressedSummary || isBubbleAndSuppressed;
+        boolean isSummary = key.equals(mBubbleData.getSummaryKey(groupKey));
+        return (isSummary && isSuppressedSummary) || isBubbleAndSuppressed;
     }
 
     void selectBubble(Bubble bubble) {
@@ -731,10 +732,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         mBubbleData.removeSuppressedSummary(groupKey);
                         NotificationEntry entry =
                                 mNotificationEntryManager.getNotificationData().get(notifKey);
-                        if (entry == null) {
-                            Log.w("mady", "WTF summary isn't in data... " + notifKey);
-                            return;
-                        }
                         mNotificationEntryManager.performRemoveNotification(
                                 entry.notification, UNDEFINED_DISMISS_REASON);
                     }
@@ -745,7 +742,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     if (summary != null) {
                         ArrayList<NotificationEntry> summaryChildren =
                                 mNotificationGroupManager.getLogicalChildren(summary.notification);
-                        if (summaryChildren == null || summaryChildren.isEmpty()) {
+                        boolean isSummaryThisNotif = summary.key.equals(bubble.getEntry().key);
+                        if (!isSummaryThisNotif
+                                && (summaryChildren == null || summaryChildren.isEmpty())) {
                             mNotificationEntryManager.performRemoveNotification(
                                     summary.notification, UNDEFINED_DISMISS_REASON);
                         }
