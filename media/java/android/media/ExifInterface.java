@@ -37,6 +37,7 @@ import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -1866,14 +1867,17 @@ public class ExifInterface {
 
         FileInputStream in = null;
         FileOutputStream out = null;
+        File originalFile = null;
+        if (mFilename != null) {
+            originalFile = new File(mFilename);
+        }
         File tempFile = null;
         try {
             // Move the original file to temporary file.
             if (mFilename != null) {
                 tempFile = new File(mFilename + ".tmp");
-                File originalFile = new File(mFilename);
                 if (!originalFile.renameTo(tempFile)) {
-                    throw new IOException("Could'nt rename to " + tempFile.getAbsolutePath());
+                    throw new IOException("Couldn't rename to " + tempFile.getAbsolutePath());
                 }
             } else if (mSeekableFileDescriptor != null) {
                 tempFile = File.createTempFile("temp", "jpg");
@@ -1882,8 +1886,8 @@ public class ExifInterface {
                 out = new FileOutputStream(tempFile);
                 Streams.copy(in, out);
             }
-        } catch (ErrnoException e) {
-            throw e.rethrowAsIOException();
+        } catch (Exception e) {
+            throw new IOException("Failed to copy original file to temp file", e);
         } finally {
             IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(out);
@@ -1900,9 +1904,18 @@ public class ExifInterface {
                 Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
                 out = new FileOutputStream(mSeekableFileDescriptor);
             }
-            saveJpegAttributes(in, out);
-        } catch (ErrnoException e) {
-            throw e.rethrowAsIOException();
+            try (BufferedInputStream bufferedIn = new BufferedInputStream(in);
+                 BufferedOutputStream bufferedOut = new BufferedOutputStream(out)) {
+                saveJpegAttributes(bufferedIn, bufferedOut);
+            }
+        } catch (Exception e) {
+            if (mFilename != null) {
+                if (!tempFile.renameTo(originalFile)) {
+                    throw new IOException("Couldn't restore original file: "
+                            + originalFile.getAbsolutePath());
+                }
+            }
+            throw new IOException("Failed to save new file", e);
         } finally {
             IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(out);
