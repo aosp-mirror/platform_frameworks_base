@@ -72,9 +72,11 @@ interface IDynamicSystemService
     /**
      * Enable or disable DynamicSystem.
      *
+     * @param oneShot       If true, the GSI will boot once and then disable itself.
+     *
      * @return true if the call succeeds
      */
-    boolean setEnable(boolean enable);
+    boolean setEnable(boolean enable, boolean oneShot);
 
     /**
      * Write a chunk of the DynamicSystem system image
@@ -83,10 +85,4 @@ interface IDynamicSystemService
      */
     boolean write(in byte[] buf);
 
-    /**
-     * Finish write and make device to boot into the it after reboot.
-     *
-     * @return true if the call succeeds
-     */
-    boolean commit();
 }
