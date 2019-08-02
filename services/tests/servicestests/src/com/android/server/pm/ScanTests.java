@@ -70,6 +70,14 @@ public class ScanTests {
     PackageAbiHelper mMockPackageAbiHelper;
     @Mock
     UserManagerInternal mMockUserManager;
+    @Mock
+    PackageManagerService.Injector mMockInjector;
+
+    @Before
+    public void setupInjector() {
+        when(mMockInjector.getAbiHelper()).thenReturn(mMockPackageAbiHelper);
+        when(mMockInjector.getUserManager()).thenReturn(mMockUserManager);
+    }
 
     @Before
     public void setupDefaultUser() {
@@ -401,7 +409,7 @@ public class ScanTests {
 
         final PackageManagerService.ScanResult scanResult = PackageManagerService.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
-                new PackageManagerService.Injector(mMockUserManager, mMockPackageAbiHelper),
+                mMockInjector,
                 true /*isUnderFactoryTest*/,
                 System.currentTimeMillis());
 
@@ -448,7 +456,7 @@ public class ScanTests {
             PackageManagerService.ScanRequest scanRequest) throws PackageManagerException {
         return PackageManagerService.scanPackageOnlyLI(
                 scanRequest,
-                new PackageManagerService.Injector(mMockUserManager, mMockPackageAbiHelper),
+                mMockInjector,
                 false /*isUnderFactoryTest*/,
                 System.currentTimeMillis());
     }
