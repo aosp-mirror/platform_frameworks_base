@@ -407,8 +407,18 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return;
         }
 
+        cancelAllAnimationsOfProperties(
+                mController.getAnimatedProperties().toArray(new DynamicAnimation.ViewProperty[]{}));
+    }
+
+    /** Cancels all animations that are running on all child views, for the given properties. */
+    public void cancelAllAnimationsOfProperties(DynamicAnimation.ViewProperty... properties) {
+        if (mController == null) {
+            return;
+        }
+
         for (int i = 0; i < getChildCount(); i++) {
-            for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
+            for (DynamicAnimation.ViewProperty property : properties) {
                 final DynamicAnimation anim = getAnimationAtIndex(property, i);
                 if (anim != null) {
                     anim.cancel();
