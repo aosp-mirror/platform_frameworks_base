@@ -25,27 +25,32 @@
 //
 // READ ME: ########################################################
 
+filegroup {
+    name: "framework-defaults-java-srcs",
+    srcs: [
+        // java sources under this directory
+        "core/java/**/*.java",
+        "drm/java/**/*.java",
+        "graphics/java/**/*.java",
+        "keystore/java/**/*.java",
+        "location/java/**/*.java",
+        "lowpan/java/**/*.java",
+        "media/java/**/*.java",
+        "media/mca/effect/java/**/*.java",
+        "media/mca/filterfw/java/**/*.java",
+        "media/mca/filterpacks/java/**/*.java",
+        "opengl/java/**/*.java",
+        "rs/java/**/*.java",
+        "sax/java/**/*.java",
+        "telecomm/java/**/*.java",
+        "telephony/java/**/*.java",
+        "wifi/java/**/*.java",
+    ],
+}
+
 // TODO(b/70046217): make these as filegroups where the base directory for aidl files
 // is given as 'path'. Eliminate the need for aidl_local_include_dirs.
 framework_srcs = [
-    // java sources under this directory
-    "core/java/**/*.java",
-    "drm/java/**/*.java",
-    "graphics/java/**/*.java",
-    "keystore/java/**/*.java",
-    "location/java/**/*.java",
-    "lowpan/java/**/*.java",
-    "media/java/**/*.java",
-    "media/mca/effect/java/**/*.java",
-    "media/mca/filterfw/java/**/*.java",
-    "media/mca/filterpacks/java/**/*.java",
-    "opengl/java/**/*.java",
-    "rs/java/**/*.java",
-    "sax/java/**/*.java",
-    "telecomm/java/**/*.java",
-    "telephony/java/**/*.java",
-    "wifi/java/**/*.java",
-
     // aidl under this directory
     // b/70046217#comment15 These MUST come after all java srcs.
     // TODO(b/70046217) remove the above requirement
@@ -132,7 +137,9 @@ java_defaults {
     defaults: ["framework-aidl-export-defaults"],
     installable: true,
 
-    srcs: framework_srcs,
+    srcs: [
+        ":framework-defaults-java-srcs",
+    ] + framework_srcs,
 
     aidl: {
         local_include_dirs: framework_aidl_local_include_dirs,
@@ -1165,10 +1172,10 @@ droidstubs {
     name: "hiddenapi-mappings",
     defaults: ["metalava-api-stubs-default"],
     srcs: [
-        ":openjdk_java_files",
+        ":framework-defaults-java-srcs",
         ":non_openjdk_java_files",
+        ":openjdk_java_files",
         ":opt-telephony-common-srcs",
-        "core/java/**/*.java",
     ],
     arg_files: [
         "core/res/AndroidManifest.xml",
