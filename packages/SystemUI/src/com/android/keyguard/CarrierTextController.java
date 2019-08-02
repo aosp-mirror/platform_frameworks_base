@@ -400,8 +400,11 @@ public class CarrierTextController {
             }
         }
 
+        if (TextUtils.isEmpty(displayText)) displayText = joinNotEmpty(mSeparator, carrierNames);
+
         displayText = updateCarrierTextWithSimIoError(displayText, carrierNames, subOrderBySlot,
                 allSimsMissing);
+
         boolean airplaneMode = false;
         // APM (airplane mode) != no carrier state. There are carrier services
         // (e.g. WFC = Wi-Fi calling) which may operate in APM.
@@ -410,9 +413,6 @@ public class CarrierTextController {
             airplaneMode = true;
         }
 
-        if (TextUtils.isEmpty(displayText) && !airplaneMode) {
-            displayText = joinNotEmpty(mSeparator, carrierNames);
-        }
         final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
                 displayText,
                 carrierNames,
