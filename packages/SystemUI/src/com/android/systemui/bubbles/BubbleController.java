@@ -806,34 +806,30 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStatusBarStateListener.getCurrentState() == SHADE && hasBubbles()) {
             // Bubbles only appear in unlocked shade
             mStackView.setVisibility(hasBubbles() ? VISIBLE : INVISIBLE);
-        } else if (!hasBubbles() && mStackView.hasTransientBubbles()) {
-            // If we only have transient bubbles, then wait until they're gone.
-            mStackView.runActionAfterTransientViewAnimations(() -> {
-                mStackView.setVisibility(INVISIBLE);
-                updateBubblesShowing();
-            });
-        } else {
+        } else if (mStackView != null) {
             mStackView.setVisibility(INVISIBLE);
         }
 
-        updateBubblesShowing();
-    }
-
-    /**
-     * Updates the status bar window controller and the state change listener with whether bubbles
-     * are currently showing.
-     */
-    public void updateBubblesShowing() {
+        // Let listeners know if bubble state changed.
         boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
-        boolean hasBubblesShowing =
-                (hasBubbles() || mStackView.hasTransientBubbles())
-                        && mStackView.getVisibility() == VISIBLE;
-        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
+        boolean hasBubblesShowing = hasBubbles() && mStackView.getVisibility() == VISIBLE;
         if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
             mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
         }
 
         mStackView.updateContentDescription();
+
+        // If we don't have bubbles, but there's transient bubbles, keep the stack view visible and
+        // the status bar window expanded until they finish animating out.
+        if (!hasBubbles() && mStackView.hasTransientBubbles()) {
+            mStackView.setVisibility(VISIBLE);
+            mStackView.runActionAfterTransientViewAnimations(() -> {
+                mStackView.setVisibility(INVISIBLE);
+                mStatusBarWindowController.setBubblesShowing(false);
+            });
+        } else {
+            mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
+        }
     }
 
     /**
