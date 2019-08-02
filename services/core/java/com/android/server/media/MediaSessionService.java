@@ -1912,16 +1912,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                     && AudioSystem.isStreamActive(suggestedStream, 0)) {
                 preferSuggestedStream = true;
             }
-            if (DEBUG_KEY_EVENT) {
-                Log.d(TAG, "Adjusting " + session + " by " + direction + ". flags="
-                        + flags + ", suggestedStream=" + suggestedStream
-                        + ", preferSuggestedStream=" + preferSuggestedStream);
-            }
             if (session == null || preferSuggestedStream) {
+                if (DEBUG_KEY_EVENT) {
+                    Log.d(TAG, "Adjusting suggestedStream=" + suggestedStream + " by " + direction
+                            + ". flags=" + flags + ", preferSuggestedStream="
+                            + preferSuggestedStream + ", session=" + session);
+                }
                 if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0
                         && !AudioSystem.isStreamActive(AudioManager.STREAM_MUSIC, 0)) {
-                    if (DEBUG) {
-                        Log.d(TAG, "No active session to adjust, skipping media only volume event");
+                    if (DEBUG_KEY_EVENT) {
+                        Log.d(TAG, "Nothing is playing on the music stream. Skipping volume event,"
+                                + " flags=" + flags);
                     }
                     return;
                 }
@@ -1955,6 +1956,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 });
             } else {
+                if (DEBUG_KEY_EVENT) {
+                    Log.d(TAG, "Adjusting " + session + " by " + direction + ". flags="
+                            + flags + ", suggestedStream=" + suggestedStream
+                            + ", preferSuggestedStream=" + preferSuggestedStream);
+                }
                 session.adjustVolume(packageName, opPackageName, pid, uid, null, asSystemService,
                         direction, flags, true);
             }
