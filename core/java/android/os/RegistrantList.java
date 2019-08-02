@@ -70,6 +70,7 @@ public class RegistrantList
         return registrants.size();
     }
 
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public synchronized Object
     get(int index)
     {

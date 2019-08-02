@@ -999,6 +999,7 @@ public class Process {
      * your own log, or the Android Illuminati will find you some night and
      * beat you up.
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static final native void sendSignalQuiet(int pid, int signal);
     
     /** @hide */
