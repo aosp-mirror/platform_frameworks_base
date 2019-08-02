@@ -484,15 +484,13 @@ public final class ViewRootImpl implements ViewParent,
      */
     private final Transaction mSurfaceChangedTransaction = new Transaction();
     /**
-     * Child surface of {@code mSurface} with the same bounds as its parent, and crop bounds
-     * are set to the parent's bounds adjusted for surface insets. This surface is created when
-     * {@link ViewRootImpl#createBoundsSurface(int)} is called.
-     * By parenting to this bounds surface, child surfaces can ensure they do not draw into the
-     * surface inset regions set by the parent window.
+     * Child container layer of {@code mSurface} with the same bounds as its parent, and cropped to
+     * the surface insets. This surface is created only if a client requests it via {@link
+     * #getBoundsLayer()}. By parenting to this bounds surface, child surfaces can ensure they do
+     * not draw into the surface inset region set by the parent window.
      */
-    public final Surface mBoundsSurface = new Surface();
-    private SurfaceSession mSurfaceSession;
-    private SurfaceControl mBoundsSurfaceControl;
+    private SurfaceControl mBoundsLayer;
+    private final SurfaceSession mSurfaceSession = new SurfaceSession();
     private final Transaction mTransaction = new Transaction();
 
     @UnsupportedAppUsage
@@ -1614,66 +1612,55 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-
     /**
-     * Creates a surface as a child of {@code mSurface} with the same bounds as its parent and
-     * crop bounds set to the parent's bounds adjusted for surface insets.
+     * @return child layer with the same bounds as its parent {@code mSurface} and cropped to the
+     * surface insets. If the layer does not exist, it is created.
      *
-     * @param zOrderLayer Z order relative to the parent surface.
+     * <p>Parenting to this layer will ensure that its children are cropped by the view's surface
+     * insets.
      */
-    public void createBoundsSurface(int zOrderLayer) {
-        if (mSurfaceSession == null) {
-            mSurfaceSession = new SurfaceSession();
+    public SurfaceControl getBoundsLayer() {
+        if (mBoundsLayer == null) {
+            mBoundsLayer = new SurfaceControl.Builder(mSurfaceSession)
+                    .setContainerLayer()
+                    .setName("Bounds for - " + getTitle().toString())
+                    .setParent(mSurfaceControl)
+                    .build();
+            setBoundsLayerCrop();
+            mTransaction.show(mBoundsLayer).apply();
         }
-        if (mBoundsSurfaceControl != null && mBoundsSurface.isValid()) {
-            return; // surface control for bounds surface already exists.
-        }
-
-        mBoundsSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
-                .setName("Bounds for - " + getTitle().toString())
-                .setParent(mSurfaceControl)
-                .build();
-
-        setBoundsSurfaceCrop();
-        mTransaction.setLayer(mBoundsSurfaceControl, zOrderLayer)
-                    .show(mBoundsSurfaceControl)
-                    .apply();
-        mBoundsSurface.copyFrom(mBoundsSurfaceControl);
+        return mBoundsLayer;
     }
 
-    private void setBoundsSurfaceCrop() {
+    private void setBoundsLayerCrop() {
         // mWinFrame is already adjusted for surface insets. So offset it and use it as
         // the cropping bounds.
         mTempBoundsRect.set(mWinFrame);
         mTempBoundsRect.offsetTo(mWindowAttributes.surfaceInsets.left,
                 mWindowAttributes.surfaceInsets.top);
-        mTransaction.setWindowCrop(mBoundsSurfaceControl, mTempBoundsRect);
+        mTransaction.setWindowCrop(mBoundsLayer, mTempBoundsRect);
     }
 
     /**
-     * Called after window layout to update the bounds surface. If the surface insets have
-     * changed or the surface has resized, update the bounds surface.
+     * Called after window layout to update the bounds surface. If the surface insets have changed
+     * or the surface has resized, update the bounds surface.
      */
-    private void updateBoundsSurface() {
-        if (mBoundsSurfaceControl != null && mSurface.isValid()) {
-            setBoundsSurfaceCrop();
-            mTransaction.deferTransactionUntilSurface(mBoundsSurfaceControl,
+    private void updateBoundsLayer() {
+        if (mBoundsLayer != null) {
+            setBoundsLayerCrop();
+            mTransaction.deferTransactionUntilSurface(mBoundsLayer,
                     mSurface, mSurface.getNextFrameNumber())
                     .apply();
         }
     }
 
     private void destroySurface() {
+        if (mBoundsLayer != null) {
+            mBoundsLayer.release();
+            mBoundsLayer = null;
+        }
         mSurface.release();
         mSurfaceControl.release();
-
-        mSurfaceSession = null;
-
-        if (mBoundsSurfaceControl != null) {
-            mTransaction.remove(mBoundsSurfaceControl).apply();
-            mBoundsSurface.release();
-            mBoundsSurfaceControl = null;
-        }
     }
 
     /**
@@ -2649,8 +2636,8 @@ public final class ViewRootImpl implements ViewParent,
             maybeHandleWindowMove(frame);
         }
 
-        if (surfaceSizeChanged) {
-            updateBoundsSurface();
+        if (surfaceSizeChanged || surfaceReplaced || surfaceCreated || windowAttributesChanged) {
+            updateBoundsLayer();
         }
 
         final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);

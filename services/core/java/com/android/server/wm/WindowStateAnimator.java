@@ -329,9 +329,14 @@ class WindowStateAnimator {
             }
             mDrawState = COMMIT_DRAW_PENDING;
             layoutNeeded = true;
-        }
-        if (postDrawTransaction != null) {
-            mPostDrawTransaction.merge(postDrawTransaction);
+
+            if (postDrawTransaction != null) {
+                mPostDrawTransaction.merge(postDrawTransaction);
+            }
+        } else if (postDrawTransaction != null) {
+            // If draw state is not pending we may delay applying this transaction from the client,
+            // so apply it now.
+            postDrawTransaction.apply();
         }
 
         return layoutNeeded;
@@ -1296,7 +1301,7 @@ class WindowStateAnimator {
         // if we are transparent.
         if (mPendingDestroySurface != null && mDestroyPreservedSurfaceUponRedraw) {
             final SurfaceControl pendingSurfaceControl = mPendingDestroySurface.mSurfaceControl;
-            mPostDrawTransaction.hide(pendingSurfaceControl);
+            mPostDrawTransaction.reparent(pendingSurfaceControl, null);
             mPostDrawTransaction.reparentChildren(pendingSurfaceControl,
                     mSurfaceController.mSurfaceControl);
         }
