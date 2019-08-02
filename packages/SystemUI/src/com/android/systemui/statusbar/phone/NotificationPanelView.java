@@ -41,6 +41,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.provider.DeviceConfig;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -54,6 +55,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardClockSwitch;
@@ -134,6 +136,8 @@ public class NotificationPanelView extends PanelView implements
      * Fling until QS is completely hidden.
      */
     public static final int FLING_HIDE = 2;
+
+    private double mQqsSplitFraction;
 
     // Cap and total height of Roboto font. Needs to be adjusted when font for the big clock is
     // changed.
@@ -527,6 +531,9 @@ public class NotificationPanelView extends PanelView implements
                 com.android.internal.R.dimen.status_bar_height);
         mHeadsUpInset = statusbarHeight + getResources().getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+        mQqsSplitFraction = ((float) getResources().getInteger(R.integer.qqs_split_fraction)) / (
+                getResources().getInteger(R.integer.qqs_split_fraction)
+                        + getResources().getInteger(R.integer.qs_split_fraction));
     }
 
     /**
@@ -1269,6 +1276,17 @@ public class NotificationPanelView extends PanelView implements
                 || y <= mQs.getView().getY() + mQs.getView().getHeight());
     }
 
+    private boolean isOnQsEndArea(float x) {
+        if (!isQsSplitEnabled()) return false;
+        if (getLayoutDirection() == LAYOUT_DIRECTION_LTR) {
+            return x >= mQsFrame.getX() + mQqsSplitFraction * mQsFrame.getWidth()
+                    && x <= mQsFrame.getX() + mQsFrame.getWidth();
+        } else {
+            return x >= mQsFrame.getX()
+                    && x <= mQsFrame.getX() + (1 - mQqsSplitFraction) * mQsFrame.getWidth();
+        }
+    }
+
     private boolean isOpenQsEvent(MotionEvent event) {
         final int pointerCount = event.getPointerCount();
         final int action = event.getActionMasked();
@@ -1284,7 +1302,9 @@ public class NotificationPanelView extends PanelView implements
                 && (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
                 || event.isButtonPressed(MotionEvent.BUTTON_TERTIARY));
 
-        return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
+        final boolean onHeaderRight = isOnQsEndArea(event.getX());
+
+        return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag || onHeaderRight;
     }
 
     private void handleQsDown(MotionEvent event) {
@@ -1538,6 +1558,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             mKeyguardStatusBar.setAlpha(1f);
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
+            ((PhoneStatusBarView) mBar).maybeShowDivider(keyguardShowing);
             if (keyguardShowing && oldState != mBarState) {
                 if (mQs != null) {
                     mQs.hideImmediately();
@@ -3422,4 +3443,8 @@ public class NotificationPanelView extends PanelView implements
         mOnReinflationListener = onReinflationListener;
     }
 
+    public static boolean isQsSplitEnabled() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.QS_SPLIT_ENABLED, false);
+    }
 }

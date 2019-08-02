@@ -47,6 +47,13 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_MAX_SUGGESTIONS = "nas_max_suggestions";
 
+    // Flags related to controls
+
+    /**
+     * (boolean) Wether to have split behavior when opening QS
+     */
+    public static final String QS_SPLIT_ENABLED = "qs_split_enabled";
+
     // Flags related to Smart Suggestions - these are read in SmartReplyConstants.
 
     /** (boolean) Whether to enable smart suggestions in notifications. */
