@@ -1102,10 +1102,13 @@ public final class OomAdjuster {
         // this gives us a baseline and makes sure we don't get into an
         // infinite recursion. If we're re-evaluating due to cycles, use the previously computed
         // values.
-        app.setCurRawAdj(!cycleReEval ? adj : Math.min(adj, app.getCurRawAdj()));
-        app.setCurRawProcState(!cycleReEval
-                ? procState
-                : Math.min(procState, app.getCurRawProcState()));
+        if (cycleReEval) {
+            procState = Math.min(procState, app.getCurRawProcState());
+            adj = Math.min(adj, app.getCurRawAdj());
+            schedGroup = Math.max(schedGroup, app.getCurrentSchedulingGroup());
+        }
+        app.setCurRawAdj(adj);
+        app.setCurRawProcState(procState);
 
         app.hasStartedServices = false;
         app.adjSeq = mAdjSeq;
