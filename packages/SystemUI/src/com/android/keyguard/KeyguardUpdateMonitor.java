@@ -182,6 +182,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public static final int BIOMETRIC_HELP_FACE_NOT_RECOGNIZED = -2;
 
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
+    /**
+     * If no cancel signal has been received after this amount of time, set the biometric running
+     * state to stopped to allow Keyguard to retry authentication.
+     */
+    private static final int DEFAULT_CANCEL_SIGNAL_TIMEOUT = 3000;
 
     private static final ComponentName FALLBACK_HOME_COMPONENT = new ComponentName(
             "com.android.settings", "com.android.settings.FallbackHome");
@@ -269,6 +274,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private int mHardwareFaceUnavailableRetryCount = 0;
     private static final int HAL_ERROR_RETRY_TIMEOUT = 500; // ms
     private static final int HAL_ERROR_RETRY_MAX = 10;
+
+    private final Runnable mCancelNotReceived = new Runnable() {
+        @Override
+        public void run() {
+            Log.w(TAG, "Cancel not received, transitioning to STOPPED");
+            mFingerprintRunningState = mFaceRunningState = BIOMETRIC_STATE_STOPPED;
+            updateBiometricListeningState();
+        }
+    };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -662,6 +676,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     };
 
     private void handleFingerprintError(int msgId, String errString) {
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED && mHandler.hasCallbacks(
+                mCancelNotReceived)) {
+            mHandler.removeCallbacks(mCancelNotReceived);
+        }
+
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
                 && mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
@@ -822,6 +841,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private void handleFaceError(int msgId, String errString) {
         if (DEBUG_FACE) Log.d(TAG, "Face error received: " + errString);
+        if (msgId == FaceManager.FACE_ERROR_CANCELED && mHandler.hasCallbacks(mCancelNotReceived)) {
+            mHandler.removeCallbacks(mCancelNotReceived);
+        }
+
         if (msgId == FaceManager.FACE_ERROR_CANCELED
                 && mFaceRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
@@ -1803,6 +1826,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
                 mFingerprintCancelSignal = null;
+                if (!mHandler.hasCallbacks(mCancelNotReceived)) {
+                    mHandler.postDelayed(mCancelNotReceived, DEFAULT_CANCEL_SIGNAL_TIMEOUT);
+                }
             }
             setFingerprintRunningState(BIOMETRIC_STATE_CANCELLING);
         }
@@ -1817,6 +1843,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (mFaceCancelSignal != null) {
                 mFaceCancelSignal.cancel();
                 mFaceCancelSignal = null;
+                if (!mHandler.hasCallbacks(mCancelNotReceived)) {
+                    mHandler.postDelayed(mCancelNotReceived, DEFAULT_CANCEL_SIGNAL_TIMEOUT);
+                }
             }
             setFaceRunningState(BIOMETRIC_STATE_CANCELLING);
         }
