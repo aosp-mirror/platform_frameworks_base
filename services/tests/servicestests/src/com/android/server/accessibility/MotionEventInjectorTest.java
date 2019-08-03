@@ -47,6 +47,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -709,7 +710,8 @@ public class MotionEventInjectorTest {
 
     private void injectEventsSync(List<GestureStep> gestureSteps,
             IAccessibilityServiceClient serviceInterface, int sequence) {
-        mMotionEventInjector.injectEvents(gestureSteps, serviceInterface, sequence);
+        mMotionEventInjector.injectEvents(gestureSteps, serviceInterface, sequence,
+                Display.DEFAULT_DISPLAY);
         // Dispatch the message sent by the injector. Our simple handler doesn't guarantee stuff
         // happens in order.
         mMessageCapturingHandler.sendLastMessage();

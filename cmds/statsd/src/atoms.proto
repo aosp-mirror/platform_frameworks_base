@@ -56,6 +56,7 @@ import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/wifi/enums.proto";
+import "frameworks/base/core/proto/android/stats/textclassifier/textclassifier_enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -319,6 +320,16 @@ message Atom {
             217 [(log_from_module) = "permissioncontroller"];
         PermissionAppsFragmentViewed permission_apps_fragment_viewed =
             218  [(log_from_module) = "permissioncontroller"];
+        TextSelectionEvent text_selection_event =
+            219  [(log_from_module) = "textclassifier"];
+        TextLinkifyEvent text_linkify_event =
+            220  [(log_from_module) = "textclassifier"];
+        ConversationActionsEvent conversation_actions_event =
+            221  [(log_from_module) = "textclassifier"];
+        LanguageDetectionEvent language_detection_event =
+            222  [(log_from_module) = "textclassifier"];
+        ExclusionRectStateChanged exclusion_rect_state_changed = 223;
+        BackGesture back_gesture_reported_reported = 224;
     }
 
     // Pulled events will start at field 10000.
@@ -2498,6 +2509,41 @@ message PhoneStateChanged {
         ON = 1;
     }
     optional State state = 1;
+}
+
+message BackGesture {
+    enum BackType {
+          DEFAULT_BACK_TYPE = 0;
+          COMPLETED = 1;
+          COMPLETED_REJECTED = 2; // successful because coming from rejected area
+          INCOMPLETE_EXCLUDED = 3; // would have been successful but in the exclusion area
+          INCOMPLETE = 4;
+    }
+    optional BackType type = 1;
+
+    optional int32 y_coordinate = 2; // y coordinate for ACTION_DOWN event
+    enum WindowHorizontalLocation {
+        DEFAULT_LOCATION = 0;
+        LEFT = 1;
+        RIGHT = 2;
+    }
+    optional WindowHorizontalLocation x_location = 3;
+}
+
+message ExclusionRectStateChanged {
+    optional string component_name = 1;    // if not available, simply packageName
+    optional int32 requested_height = 2;   // px
+    optional int32 rejected_height = 3;    // px
+
+    enum WindowHorizontalLocation {
+        DEFAULT_LOCATION = 0;
+        LEFT = 1;
+        RIGHT = 2;
+    }
+    optional WindowHorizontalLocation x_location = 4;
+    optional bool landscape = 5;
+    optional bool splitscreen = 6;
+    optional int32 duration_millis = 7;
 }
 
 message LauncherUIChanged {
@@ -6789,4 +6835,137 @@ message PermissionAppsFragmentViewed {
         DENIED = 3;
     }
     optional Category category = 6;
+}
+
+/**
+ * Logs when there is a smart selection related event.
+ * See frameworks/base/core/java/android/view/textclassifier/TextClassifierEvent.java
+ * Logged from: TextClassifierEventLogger.java
+ */
+message TextSelectionEvent {
+    // A session ID.
+    optional string session_id = 1;
+
+    // Event type of this event.
+    optional android.stats.textclassifier.EventType event_type = 2;
+
+    // Name of the model that is involved in this event.
+    optional string model_name = 3;
+
+    // Type of widget that was involved in triggering this event.
+    optional android.stats.textclassifier.WidgetType widget_type = 4;
+
+    // Index of this event in a session.
+    optional int32 event_index = 5;
+
+    // Entity type that is involved.
+    optional string entity_type = 6;
+
+    // Relative word index of the start of the selection.
+    optional int32 relative_word_start_index = 7;
+
+    // Relative word (exclusive) index of the end of the selection.
+    optional int32 relative_word_end_index = 8;
+
+    // Relative word index of the start of the smart selection.
+    optional int32 relative_suggested_word_start_index = 9;
+
+    // Relative word (exclusive) index of the end of the smart selection.
+    optional int32 relative_suggested_word_end_index = 10;
+}
+
+/**
+ * Logs when there is a smart linkify related event.
+ * See frameworks/base/core/java/android/view/textclassifier/TextClassifierEvent.java
+ * Logged from: TextClassifierEventLogger.java
+ */
+message TextLinkifyEvent {
+    // A session ID.
+    optional string session_id = 1;
+
+    // Event type of this event.
+    optional android.stats.textclassifier.EventType event_type = 2;
+
+    // Name of the model that is involved in this event.
+    optional string model_name = 3;
+
+    // Type of widget that was involved in triggering this event.
+    optional android.stats.textclassifier.WidgetType widget_type = 4;
+
+    // Index of this event in a session.
+    optional int32 event_index = 5;
+
+    // Entity type that is involved.
+    optional string entity_type = 6;
+
+    // Number of links detected.
+    optional int32 num_links = 7;
+
+    // The total length of all links.
+    optional int32 linked_text_length = 8;
+
+    // Length of input text.
+    optional int32 text_length = 9;
+
+    // Time spent on generating links in ms.
+    optional int64 latency_millis = 10;
+}
+
+/**
+ * Logs when there is a conversation actions related event.
+ * See frameworks/base/core/java/android/view/textclassifier/TextClassifierEvent.java
+ * Logged from: TextClassifierEventLogger.java
+ */
+message ConversationActionsEvent {
+    // A session ID.
+    optional string session_id = 1;
+
+    // Event type of this event.
+    optional android.stats.textclassifier.EventType event_type = 2;
+
+    // Name of the model that is involved in this event.
+    optional string model_name = 3;
+
+    // Type of widget that was involved in triggering this event.
+    optional android.stats.textclassifier.WidgetType widget_type = 4;
+
+    // The first entity type that is involved.
+    optional string first_entity_type = 5;
+
+    // The second entity type that is involved.
+    optional string second_entity_type = 6;
+
+    // The third entity type that is involved.
+    optional string third_entity_type = 7;
+
+    // The score of the first entity type.
+    optional float score = 8;
+}
+
+/**
+ * Logs when there is a language detection related event.
+ * See frameworks/base/core/java/android/view/textclassifier/TextClassifierEvent.java
+ * Logged from: TextClassifierEventLogger.java
+ */
+message LanguageDetectionEvent {
+    // A session ID.
+    optional string session_id = 1;
+
+    // Event type of this event.
+    optional android.stats.textclassifier.EventType event_type = 2;
+
+    // Name of the model that is involved in this event.
+    optional string model_name = 3;
+
+    // Type of widget that was involved in triggering this event.
+    optional android.stats.textclassifier.WidgetType widget_type = 4;
+
+    // Detected language.
+    optional string language_tag = 5;
+
+    // Score of the detected language.
+    optional float score = 6;
+
+    // Position of this action.
+    optional int32 action_index = 7;
 }

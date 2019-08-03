@@ -27,4 +27,9 @@
          performance issues arise. -->
     <integer name="bubbles_max_rendered">5</integer>
 
+    <!-- Ratio of "left" end of status bar that will swipe to QQS. -->
+    <integer name="qqs_split_fraction">3</integer>
+    <!-- Ratio of "right" end of status bar that will swipe to QS. -->
+    <integer name="qs_split_fraction">2</integer>
+
 </resources>

@@ -92,6 +92,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
@@ -314,7 +315,6 @@ import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.policy.PermissionPolicyInternal;
-import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -663,7 +663,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // Lock for state used when installing and doing other long running
     // operations.  Methods that must be called with this lock held have
     // the suffix "LI".
-    final Object mInstallLock = new Object();
+    final Object mInstallLock;
 
     // ----------------------------------------------------------------
 
@@ -696,6 +696,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * Whether or not system app permissions should be promoted from install to runtime.
      */
     boolean mPromoteSystemApps;
+
+    private final PackageManagerInternal mPmInternal;
+
 
     @GuardedBy("mLock")
     final Settings mSettings;
@@ -752,24 +755,111 @@ public class PackageManagerService extends IPackageManager.Stub
     private final Injector mInjector;
 
     /**
-     * Unit tests will instantiate and / or extend to mock dependencies / behaviors.
+     * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
+     *
+     * NOTE: All getters should return the same instance for every call.
      */
-    @VisibleForTesting
-    static class Injector {
-        private final UserManagerInternal mUserManager;
-        private final PackageAbiHelper mAbiHelper;
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class Injector {
 
-        Injector(UserManagerInternal userManager, PackageAbiHelper abiHelper) {
-            mUserManager = userManager;
+        @VisibleForTesting(visibility = Visibility.PRIVATE)
+        interface Producer<T> {
+            /** Produce an instance of type {@link T} */
+            T produce(Injector injector, PackageManagerService packageManager);
+        }
+
+        @VisibleForTesting(visibility = Visibility.PRIVATE)
+        static class Singleton<T> {
+            private final Producer<T> mProducer;
+            private volatile T mInstance = null;
+            Singleton(Producer<T> producer) {
+                this.mProducer = producer;
+            }
+            T get(Injector injector, PackageManagerService packageManagerService) {
+                if (mInstance == null) {
+                    mInstance = mProducer.produce(injector, packageManagerService);
+                }
+                return mInstance;
+            }
+        }
+
+        private final PackageAbiHelper mAbiHelper;
+        private final Context mContext;
+        private final Object mLock;
+        private final Installer mInstaller;
+        private final Object mInstallLock;
+
+        // ----- producers -----
+
+        private final Singleton<ComponentResolver> mComponentResolverProducer;
+        private final Singleton<PermissionManagerServiceInternal> mPermissionManagerProducer;
+        private final Singleton<UserManagerService> mUserManagerProducer;
+        private final Singleton<Settings> mSettingsProducer;
+        private PackageManagerService mPackageManager;
+
+        Injector(Context context, Object lock, Installer installer,
+                Object installLock, PackageAbiHelper abiHelper,
+                Producer<ComponentResolver> componentResolverProducer,
+                Producer<PermissionManagerServiceInternal> permissionManagerProducer,
+                Producer<UserManagerService> userManagerProducer,
+                Producer<Settings> settingsProducer) {
+            mContext = context;
+            mLock = lock;
+            mInstaller = installer;
             mAbiHelper = abiHelper;
+            mInstallLock = installLock;
+            mComponentResolverProducer = new Singleton<>(componentResolverProducer);
+            mPermissionManagerProducer = new Singleton<>(permissionManagerProducer);
+            mUserManagerProducer = new Singleton<>(userManagerProducer);
+            mSettingsProducer = new Singleton<>(settingsProducer);
+        }
+
+        /**
+         * Bootstraps this injector with the {@link PackageManagerService instance to which it
+         * belongs.
+         */
+        public void bootstrap(PackageManagerService pm) {
+            this.mPackageManager = pm;
         }
 
         public UserManagerInternal getUserManager() {
-            return mUserManager;
+            return getUserManagerService().getInternalForInjectorOnly();
         }
 
         public PackageAbiHelper getAbiHelper() {
             return mAbiHelper;
+        }
+
+        public Object getInstallLock() {
+            return mInstallLock;
+        }
+
+        public UserManagerService getUserManagerService() {
+            return mUserManagerProducer.get(this, mPackageManager);
+        }
+
+        public Object getLock() {
+            return mLock;
+        }
+
+        public Installer getInstaller() {
+            return mInstaller;
+        }
+
+        public ComponentResolver getComponentResolver() {
+            return mComponentResolverProducer.get(this, mPackageManager);
+        }
+
+        public PermissionManagerServiceInternal getPermissionManagerServiceInternal() {
+            return mPermissionManagerProducer.get(this, mPackageManager);
+        }
+
+        public Context getContext() {
+            return mContext;
+        }
+
+        public Settings getSettings() {
+            return mSettingsProducer.get(this, mPackageManager);
         }
     }
 
@@ -987,7 +1077,6 @@ public class PackageManagerService extends IPackageManager.Stub
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
 
-    private UserManagerInternal mUserManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private StorageManagerInternal mStorageManagerInternal;
@@ -2239,10 +2328,30 @@ public class PackageManagerService extends IPackageManager.Stub
             boolean factoryTest, boolean onlyCore) {
         // Self-check for initial settings.
         PackageManagerServiceCompilerMapping.checkProperties();
-        final Object packageLock = new Object();
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
+                Trace.TRACE_TAG_PACKAGE_MANAGER);
+        t.traceBegin("create package manager");
+        final Object lock = new Object();
+        final Object installLock = new Object();
 
-        PackageManagerService m = new PackageManagerService(context, installer,
-                factoryTest, onlyCore, packageLock);
+        Injector injector = new Injector(context, lock, installer, installLock,
+                new PackageAbiHelperImpl(),
+                (i, pm) ->
+                        new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
+                (i, pm) ->
+                        PermissionManagerService.create(context, lock),
+                (i, pm) ->
+                        new UserManagerService(context, pm,
+                                new UserDataPreparer(installer, installLock, context, onlyCore),
+                                lock),
+                (i, pm) ->
+                        new Settings(Environment.getDataDirectory(),
+                                i.getPermissionManagerServiceInternal().getPermissionSettings(),
+                                lock));
+
+        PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);
+        t.traceEnd(); // "create package manager"
+
         m.enableSystemUserPackages();
         ServiceManager.addService("package", m);
         final PackageManagerNative pmn = m.new PackageManagerNative();
@@ -2333,12 +2442,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    public PackageManagerService(Context context, Installer installer, boolean factoryTest,
-            boolean onlyCore, Object packageLock) {
+    public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
-        t.traceBegin("create package manager");
-        mLock = packageLock;
+        mInjector = injector;
+        mInjector.bootstrap(this);
+        mLock = injector.getLock();
+        mInstallLock = injector.getInstallLock();
         LockGuard.installLock(mLock, LockGuard.INDEX_PACKAGES);
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
@@ -2347,38 +2457,25 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
         }
 
-        mContext = context;
+        mContext = injector.getContext();
         mFactoryTest = factoryTest;
         mOnlyCore = onlyCore;
         mMetrics = new DisplayMetrics();
-        mInstaller = installer;
+        mInstaller = injector.getInstaller();
 
         // Create sub-components that provide services / data. Order here is important.
         t.traceBegin("createSubComponents");
-        // CHECKSTYLE:OFF IndentationCheck
-        synchronized (mInstallLock) {
-        synchronized (mLock) {
-            // Expose private service for system components to use.
-            LocalServices.addService(
-                    PackageManagerInternal.class, new PackageManagerInternalImpl());
-            sUserManager = new UserManagerService(context, this,
-                    new UserDataPreparer(mInstaller, mInstallLock, mContext, mOnlyCore),
-                    mLock);
-            mComponentResolver = new ComponentResolver(sUserManager,
-                    LocalServices.getService(PackageManagerInternal.class),
-                    mLock);
-            mPermissionManager = PermissionManagerService.create(context,
-                    mLock /*externalLock*/);
-            mPermissionManagerService =
-                    (IPermissionManager) ServiceManager.getService("permissionmgr");
-            mSettings = new Settings(Environment.getDataDirectory(),
-                    mPermissionManager.getPermissionSettings(), mLock);
-        }
-        }
 
-        // TODO(b/137961986): We should pass this via constructor, but would first need to create
-        // a packages lock that could also be passed in.
-        mInjector = new Injector(getUserManagerInternal(), new PackageAbiHelperImpl());
+        // Expose private service for system components to use.
+        mPmInternal = new PackageManagerInternalImpl();
+        LocalServices.addService(PackageManagerInternal.class, mPmInternal);
+        sUserManager = injector.getUserManagerService();
+        mComponentResolver = injector.getComponentResolver();
+        mPermissionManager = injector.getPermissionManagerServiceInternal();
+        mSettings = injector.getSettings();
+        mPermissionManagerService = (IPermissionManager) ServiceManager.getService("permissionmgr");
+
+
         // CHECKSTYLE:ON IndentationCheck
         t.traceEnd();
 
@@ -2418,15 +2515,16 @@ public class PackageManagerService extends IPackageManager.Stub
             mSeparateProcesses = null;
         }
 
-        mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
+        mPackageDexOptimizer = new PackageDexOptimizer(mInstaller, mInstallLock, mContext,
                 "*dexopt*");
-        mDexManager = new DexManager(mContext, this, mPackageDexOptimizer, installer, mInstallLock);
-        mArtManagerService = new ArtManagerService(mContext, this, installer, mInstallLock);
+        mDexManager =
+                new DexManager(mContext, this, mPackageDexOptimizer, mInstaller, mInstallLock);
+        mArtManagerService = new ArtManagerService(mContext, this, mInstaller, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mViewCompiler = new ViewCompiler(mInstallLock, mInstaller);
 
-        getDefaultDisplayMetrics(context, mMetrics);
+        getDefaultDisplayMetrics(mContext, mMetrics);
 
         t.traceBegin("get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
@@ -2435,8 +2533,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
-        mApexManager = ApexManager.create(context);
-        mAppsFilter = AppsFilter.create(context);
+        mApexManager = ApexManager.create(mContext);
+        mAppsFilter = AppsFilter.create(mContext);
 
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
@@ -3136,7 +3234,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If this is the first boot or an update from pre-M, and it is a normal
             // boot, then we need to initialize the default preferred apps across
             // all defined users.
-            if (!onlyCore && (mPromoteSystemApps || mFirstBoot)) {
+            if (!mOnlyCore && (mPromoteSystemApps || mFirstBoot)) {
                 for (UserInfo user : sUserManager.getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(user.id);
                     primeDomainVerificationsLPw(user.id);
@@ -3197,7 +3295,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Note that we do *not* clear the application profiles. These remain valid
             // across OTAs and are used to drive profile verification (post OTA) and
             // profile compilation (without waiting to collect a fresh set of profiles).
-            if (mIsUpgrade && !onlyCore) {
+            if (mIsUpgrade && !mOnlyCore) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (int i = 0; i < mSettings.mPackages.size(); i++) {
                     final PackageSetting ps = mSettings.mPackages.valueAt(i);
@@ -3214,7 +3312,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Grandfather existing (installed before Q) non-system apps to hide
             // their icons in launcher.
-            if (!onlyCore && mIsPreQUpgrade) {
+            if (!mOnlyCore && mIsPreQUpgrade) {
                 Slog.i(TAG, "Whitelisting all existing apps to hide their icons");
                 int size = mSettings.mPackages.size();
                 for (int i = 0; i < size; i++) {
@@ -3286,7 +3384,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mInstallerService = new PackageInstallerService(context, this, mApexManager);
+            mInstallerService = new PackageInstallerService(mContext, this, mApexManager);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
@@ -3342,8 +3440,6 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageParser.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
-
-        t.traceEnd(); // "create package manager"
     }
 
     /**
@@ -4861,20 +4957,13 @@ public class PackageManagerService extends IPackageManager.Stub
             // give them what they want
         } else {
             // Caller expressed no opinion, so match based on user state
-            if (getUserManagerInternal().isUserUnlockingOrUnlocked(userId)) {
+            if (mInjector.getUserManager().isUserUnlockingOrUnlocked(userId)) {
                 flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
             } else {
                 flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE;
             }
         }
         return flags;
-    }
-
-    private UserManagerInternal getUserManagerInternal() {
-        if (mUserManagerInternal == null) {
-            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
-        }
-        return mUserManagerInternal;
     }
 
     private ActivityManagerInternal getActivityManagerInternal() {
@@ -10834,7 +10923,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!createNewPackage) {
             final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
             final boolean fullApp = (scanFlags & SCAN_AS_FULL_APP) != 0;
-            setInstantAppForUser(userManager, pkgSetting, userId, instantApp, fullApp);
+            setInstantAppForUser(injector, pkgSetting, userId, instantApp, fullApp);
         }
         // TODO(patb): see if we can do away with disabled check here.
         if (disabledPkgSetting != null
@@ -12299,7 +12388,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void sendBootCompletedBroadcastToSystemApp(String packageName, boolean includeStopped,
             int userId) {
         // If user is not running, the app didn't miss any broadcast
-        if (!mUserManagerInternal.isUserRunning(userId)) {
+        if (!mInjector.getUserManager().isUserRunning(userId)) {
             return;
         }
         final IActivityManager am = ActivityManager.getService();
@@ -12315,7 +12404,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     android.app.AppOpsManager.OP_NONE, null, false, false, userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
-            if (mUserManagerInternal.isUserUnlockingOrUnlocked(userId)) {
+            if (mInjector.getUserManager().isUserUnlockingOrUnlocked(userId)) {
                 Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
@@ -12614,8 +12703,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // upgrade app from instant to full; we don't allow app downgrade
                     installed = true;
                 }
-                setInstantAppForUser(
-                        getUserManagerInternal(), pkgSetting, userId, instantApp, fullApp);
+                setInstantAppForUser(mInjector, pkgSetting, userId, instantApp, fullApp);
             }
 
             if (installed) {
@@ -12663,7 +12751,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    static void setInstantAppForUser(UserManagerInternal userManager, PackageSetting pkgSetting,
+    static void setInstantAppForUser(Injector injector, PackageSetting pkgSetting,
             int userId, boolean instantApp, boolean fullApp) {
         // no state specified; do nothing
         if (!instantApp && !fullApp) {
@@ -12676,7 +12764,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgSetting.setInstantApp(false /*instantApp*/, userId);
             }
         } else {
-            for (int currentUserId : userManager.getUserIds()) {
+            for (int currentUserId : injector.getUserManager().getUserIds()) {
                 if (instantApp && !pkgSetting.getInstantApp(currentUserId)) {
                     pkgSetting.setInstantApp(true /*instantApp*/, currentUserId);
                 } else if (fullApp && pkgSetting.getInstantApp(currentUserId)) {
@@ -18714,7 +18802,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         removeKeystoreDataIfNeeded(userId, appId);
 
-        UserManagerInternal umInternal = getUserManagerInternal();
+        UserManagerInternal umInternal = mInjector.getUserManager();
         final int flags;
         if (umInternal.isUserUnlockingOrUnlocked(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
@@ -21342,7 +21430,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Reconcile app data for all started/unlocked users
         final StorageManager sm = mContext.getSystemService(StorageManager.class);
         final UserManager um = mContext.getSystemService(UserManager.class);
-        UserManagerInternal umInternal = getUserManagerInternal();
+        UserManagerInternal umInternal = mInjector.getUserManager();
         for (UserInfo user : um.getUsers()) {
             final int flags;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
@@ -21663,7 +21751,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final UserManager um = mContext.getSystemService(UserManager.class);
-        UserManagerInternal umInternal = getUserManagerInternal();
+        UserManagerInternal umInternal = mInjector.getUserManager();
         for (UserInfo user : um.getUsers()) {
             final int flags;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {

@@ -361,7 +361,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                         mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
                 if (motionEventInjector != null && isTouchableDisplay) {
                     motionEventInjector.injectEvents(
-                            gestureSteps.getList(), mServiceInterface, sequence);
+                            gestureSteps.getList(), mServiceInterface, sequence, displayId);
                 } else {
                     try {
                         mServiceInterface.onPerformGestureResult(sequence, false);

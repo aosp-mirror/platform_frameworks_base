@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -105,7 +106,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private StatusBar mBar;
-    @Mock private StatusBarStateController mBarState;
+    @Mock private SysuiStatusBarStateController mBarState;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
     @Mock private NotificationGroupManager mGroupManager;
@@ -136,7 +137,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mDependency.injectTestDependency(
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);
-        mDependency.injectTestDependency(StatusBarStateController.class, mBarState);
+        mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(NotificationRemoteInputManager.class,
                 mRemoteInputManager);
@@ -162,7 +163,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(DynamicPrivacyController.class),
                 mock(ConfigurationController.class),
                 mock(ActivityStarterDelegate.class),
-                mock(StatusBarStateController.class),
+                mock(SysuiStatusBarStateController.class),
                 mHeadsUpManager,
                 mKeyguardBypassController,
                 new FalsingManagerFake());

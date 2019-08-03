@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.provider.DeviceConfig;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Pair;
@@ -40,6 +41,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.systemui.DarkReceiverImpl;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -78,6 +81,10 @@ public class PhoneStatusBarView extends PanelBar {
     private View mCutoutSpace;
     @Nullable
     private DisplayCutout mDisplayCutout;
+
+    private DarkReceiverImpl mSplitDivider;
+    private View mDividerContainer;
+    private QsSplitPropertyListener mPropertyListener;
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
@@ -109,6 +116,10 @@ public class PhoneStatusBarView extends PanelBar {
         mBattery = findViewById(R.id.battery);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
         mCenterIconSpace = findViewById(R.id.centered_icon_area);
+        mSplitDivider = findViewById(R.id.divider);
+        mDividerContainer = findViewById(R.id.divider_container);
+        maybeShowDivider(true);
+        mPropertyListener = new QsSplitPropertyListener(mDividerContainer);
 
         updateResources();
     }
@@ -118,8 +129,14 @@ public class PhoneStatusBarView extends PanelBar {
         super.onAttachedToWindow();
         // Always have Battery meters in the status bar observe the dark/light modes.
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
+        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSplitDivider);
+        maybeShowDivider(true);
         if (updateOrientationAndCutout(getResources().getConfiguration().orientation)) {
             updateLayoutForCutout();
+        }
+        if (mPropertyListener != null) {
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    mContext.getMainExecutor(), mPropertyListener);
         }
     }
 
@@ -127,7 +144,11 @@ public class PhoneStatusBarView extends PanelBar {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mBattery);
+        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mSplitDivider);
         mDisplayCutout = null;
+        if (mPropertyListener != null) {
+            DeviceConfig.removeOnPropertiesChangedListener(mPropertyListener);
+        }
     }
 
     @Override
@@ -196,6 +217,7 @@ public class PhoneStatusBarView extends PanelBar {
     public void onPanelPeeked() {
         super.onPanelPeeked();
         mBar.makeExpandedVisible(false);
+        maybeShowDivider(!mBar.mPanelExpanded);
     }
 
     @Override
@@ -204,6 +226,7 @@ public class PhoneStatusBarView extends PanelBar {
         // Close the status bar in the next frame so we can show the end of the animation.
         post(mHideExpandedRunnable);
         mIsFullyOpenedPanel = false;
+        maybeShowDivider(!mBar.mPanelExpanded);
     }
 
     public void removePendingHideExpandedRunnables() {
@@ -217,6 +240,7 @@ public class PhoneStatusBarView extends PanelBar {
             mPanel.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
         mIsFullyOpenedPanel = true;
+        maybeShowDivider(!mBar.mPanelExpanded);
     }
 
     @Override
@@ -240,24 +264,28 @@ public class PhoneStatusBarView extends PanelBar {
         mBar.onTrackingStarted();
         mScrimController.onTrackingStarted();
         removePendingHideExpandedRunnables();
+        maybeShowDivider(!mBar.mPanelExpanded);
     }
 
     @Override
     public void onClosingFinished() {
         super.onClosingFinished();
         mBar.onClosingFinished();
+        maybeShowDivider(!mBar.mPanelExpanded);
     }
 
     @Override
     public void onTrackingStopped(boolean expand) {
         super.onTrackingStopped(expand);
         mBar.onTrackingStopped(expand);
+        maybeShowDivider(!mBar.mPanelExpanded);
     }
 
     @Override
     public void onExpandingFinished() {
         super.onExpandingFinished();
         mScrimController.onExpandingFinished();
+        maybeShowDivider(!mBar.mPanelExpanded);
     }
 
     @Override
@@ -389,5 +417,31 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     protected boolean shouldPanelBeVisible() {
         return mHeadsUpVisible || super.shouldPanelBeVisible();
+    }
+
+    void maybeShowDivider(boolean showDivider) {
+        int state =
+                showDivider && NotificationPanelView.isQsSplitEnabled() ? View.VISIBLE : View.GONE;
+        mDividerContainer.setVisibility(state);
+    }
+
+    private static class QsSplitPropertyListener implements
+            DeviceConfig.OnPropertiesChangedListener {
+        private final View mDivider;
+
+        QsSplitPropertyListener(View divider) {
+            mDivider = divider;
+        }
+
+        @Override
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            if (properties.getNamespace().equals(DeviceConfig.NAMESPACE_SYSTEMUI)
+                    && properties.getKeyset().contains(
+                    SystemUiDeviceConfigFlags.QS_SPLIT_ENABLED)) {
+                boolean splitEnabled = properties.getBoolean(
+                        SystemUiDeviceConfigFlags.QS_SPLIT_ENABLED, false);
+                mDivider.setVisibility(splitEnabled ? VISIBLE : GONE);
+            }
+        }
     }
 }

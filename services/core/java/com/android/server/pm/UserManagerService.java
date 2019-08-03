@@ -576,6 +576,14 @@ public class UserManagerService extends IUserManager.Stub {
                 null, mHandler);
     }
 
+    /**
+     * This method retrieves the  {@link UserManagerInternal} only for the purpose of
+     * PackageManagerService construction.
+     */
+    UserManagerInternal getInternalForInjectorOnly() {
+        return mLocalService;
+    }
+
     void cleanupPartialUsers() {
         // Prune out any partially created, partially removed and ephemeral users.
         ArrayList<UserInfo> partials = new ArrayList<>();

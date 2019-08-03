@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Missatges de veu"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Trucades per Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Estat de la SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Estat de la SIM d\'alta prioritat"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"L\'altre dispositiu ha sol·licitat el mode TTY COMPLET."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"L\'altre dispositiu ha sol·licitat el mode TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"L\'altre dispositiu ha sol·licitat el mode TTY VCO."</string>
@@ -573,9 +574,9 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Torna a registrar la teva cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ja no es reconeix la teva cara. Torna-ho a provar."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"És massa semblant; canvia de postura."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Inclina el cap una mica menys."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Inclina el cap una mica menys."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"No inclinis tant el cap."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"No giris tant el cap."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"No inclinis tant el cap."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"No giris tant el cap."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Suprimeix qualsevol cosa que amagui la teva cara."</string>
     <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Neteja la part superior de la pantalla, inclosa la barra negra"</string>
   <string-array name="face_acquired_vendor">
@@ -1483,7 +1484,7 @@
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Omet"</string>
-    <string name="no_matches" msgid="8129421908915840737">"Cap coincidència"</string>
+    <string name="no_matches" msgid="8129421908915840737">"No s\'ha trobat cap coincidència"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Troba-ho a la pàgina"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>

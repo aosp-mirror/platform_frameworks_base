@@ -264,9 +264,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         //TODO gradually add more role migrations statements here for remaining roles
         // Make sure to implement LegacyRoleResolutionPolicy#getRoleHolders
         // for a given role before adding a migration statement for it here
-        maybeMigrateRole(RoleManager.ROLE_SMS, userId);
         maybeMigrateRole(RoleManager.ROLE_ASSISTANT, userId);
+        maybeMigrateRole(RoleManager.ROLE_BROWSER, userId);
         maybeMigrateRole(RoleManager.ROLE_DIALER, userId);
+        maybeMigrateRole(RoleManager.ROLE_SMS, userId);
         maybeMigrateRole(RoleManager.ROLE_EMERGENCY, userId);
 
         // Some package state has changed, so grant default roles again.

@@ -14,7 +14,7 @@
  ** limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.gestures;
 
 import android.accessibilityservice.AccessibilityGestureInfo;
 import android.accessibilityservice.AccessibilityService;

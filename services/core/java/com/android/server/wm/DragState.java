@@ -147,12 +147,6 @@ class DragState {
         return mIsClosing;
     }
 
-    private void hideInputSurface() {
-        if (mInputSurface != null) {
-            mTransaction.hide(mInputSurface).apply();
-        }
-    }
-
     private void showInputSurface() {
         if (mInputSurface == null) {
             mInputSurface = mService.makeSurfaceBuilder(
@@ -198,8 +192,6 @@ class DragState {
             mInputInterceptor = null;
         }
 
-        hideInputSurface();
-
         // Send drag end broadcast if drag start has been sent.
         if (mDragInProgress) {
             final int myPid = Process.myPid();
@@ -239,6 +231,10 @@ class DragState {
         }
 
         // Clear the internal variables.
+        if (mInputSurface != null) {
+            mTransaction.remove(mInputSurface).apply();
+            mInputSurface = null;
+        }
         if (mSurfaceControl != null) {
             mTransaction.reparent(mSurfaceControl, null).apply();
             mSurfaceControl = null;

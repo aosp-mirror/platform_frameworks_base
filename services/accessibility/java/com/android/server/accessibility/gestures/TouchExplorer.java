@@ -14,11 +14,11 @@
  ** limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.gestures;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
-import static com.android.server.accessibility.TouchState.ALL_POINTER_ID_BITS;
+import static com.android.server.accessibility.gestures.TouchState.ALL_POINTER_ID_BITS;
 
 import android.accessibilityservice.AccessibilityGestureInfo;
 import android.content.Context;
@@ -34,6 +34,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.BaseEventStreamTransformation;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
@@ -58,7 +60,7 @@ import java.util.List;
  *
  * @hide
  */
-class TouchExplorer extends BaseEventStreamTransformation
+public class TouchExplorer extends BaseEventStreamTransformation
         implements AccessibilityGestureDetector.Listener {
 
     private static final boolean DEBUG = false;

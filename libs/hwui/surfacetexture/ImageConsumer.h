@@ -26,11 +26,6 @@
 #include <gui/BufferItem.h>
 #include <system/graphics.h>
 
-namespace GrAHardwareBufferUtils {
-typedef void* DeleteImageCtx;
-typedef void (*DeleteImageProc)(DeleteImageCtx);
-}
-
 namespace android {
 
 namespace uirenderer {

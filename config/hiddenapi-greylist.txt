@@ -121,8 +121,6 @@ Landroid/bluetooth/IBluetoothManagerCallback$Stub;-><init>()V
 Landroid/bluetooth/IBluetoothPbap$Stub;->asInterface(Landroid/os/IBinder;)Landroid/bluetooth/IBluetoothPbap;
 Landroid/bluetooth/IBluetoothStateChangeCallback$Stub;-><init>()V
 Landroid/companion/ICompanionDeviceDiscoveryService$Stub;-><init>()V
-Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelected(Ljava/lang/String;ILjava/lang/String;)V
-Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelectionCancel()V
 Landroid/content/IClipboard$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/IClipboard$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/IClipboard;
 Landroid/content/IContentService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
@@ -194,7 +192,6 @@ Landroid/content/res/DrawableCache;-><init>()V
 Landroid/content/UndoManager;-><init>()V
 Landroid/database/IContentObserver$Stub;-><init>()V
 Landroid/database/IContentObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/database/IContentObserver;
-Landroid/database/IContentObserver;->onChange(ZLandroid/net/Uri;I)V
 Landroid/database/sqlite/SQLiteConnectionPool;->$assertionsDisabled:Z
 Landroid/database/sqlite/SQLiteDatabase;->$assertionsDisabled:Z
 Landroid/hardware/display/IDisplayManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/display/IDisplayManager;
@@ -723,9 +720,6 @@ Lcom/android/internal/location/GpsNetInitiatedHandler;->handleNiNotification(Lco
 Lcom/android/internal/location/GpsNetInitiatedHandler;->mIsHexInput:Z
 Lcom/android/internal/location/ILocationProvider$Stub;-><init>()V
 Lcom/android/internal/location/ILocationProvider$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/location/ILocationProvider;
-Lcom/android/internal/location/ILocationProvider;->sendExtraCommand(Ljava/lang/String;Landroid/os/Bundle;)V
-Lcom/android/internal/location/ILocationProvider;->setLocationProviderManager(Lcom/android/internal/location/ILocationProviderManager;)V
-Lcom/android/internal/location/ILocationProvider;->setRequest(Lcom/android/internal/location/ProviderRequest;Landroid/os/WorkSource;)V
 Lcom/android/internal/location/ILocationProviderManager$Stub;-><init>()V
 Lcom/android/internal/location/ILocationProviderManager$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/location/ILocationProviderManager;
 Lcom/android/internal/logging/MetricsLogger;-><init>()V
@@ -736,7 +730,6 @@ Lcom/android/internal/os/BatterySipper$DrainType;->values()[Lcom/android/interna
 Lcom/android/internal/os/IDropBoxManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/os/IDropBoxManagerService;
 Lcom/android/internal/policy/IKeyguardService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/policy/IKeyguardService;
 Lcom/android/internal/policy/IKeyguardStateCallback$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/policy/IKeyguardStateCallback;
-Lcom/android/internal/preference/YesNoPreference;-><init>(Landroid/content/Context;Landroid/util/AttributeSet;)V
 Lcom/android/internal/R$anim;->fade_in:I
 Lcom/android/internal/R$array;->config_autoBrightnessLcdBacklightValues:I
 Lcom/android/internal/R$array;->config_autoBrightnessLevels:I
