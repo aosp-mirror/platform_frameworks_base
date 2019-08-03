@@ -1,12 +1,12 @@
 android_library {
-    name: "SettingsLibEntityHeaderWidgets",
+    name: "SettingsLibRadioButtonPreference",
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
 
     static_libs: [
-          "androidx.annotation_annotation",
-          "SettingsLibSettingsTheme"
+          "androidx.preference_preference",
+          "SettingsLibSettingsTheme",
     ],
 
     sdk_version: "system_current",
