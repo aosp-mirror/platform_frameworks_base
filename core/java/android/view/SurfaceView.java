@@ -38,6 +38,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -118,7 +119,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     boolean mDrawFinished = false;
 
     final Rect mScreenRect = new Rect();
-    SurfaceSession mSurfaceSession;
+    private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
     SurfaceControl mSurfaceControl;
     // In the case of format changes we switch out the surface in-place
@@ -193,6 +194,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
     private SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
+    private int mParentSurfaceGenerationId;
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -644,13 +646,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    private void updateBackgroundVisibilityInTransaction(SurfaceControl viewRoot) {
+    private void updateBackgroundVisibilityInTransaction() {
         if (mBackgroundControl == null) {
             return;
         }
         if ((mSubLayer < 0) && ((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)) {
             mBackgroundControl.show();
-            mBackgroundControl.setRelativeLayer(viewRoot, Integer.MIN_VALUE);
         } else {
             mBackgroundControl.hide();
         }
@@ -742,11 +743,24 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mScreenRect.offset(surfaceInsets.left, surfaceInsets.top);
 
                 if (creating) {
-                    viewRoot.createBoundsSurface(mSubLayer);
-                    mSurfaceSession = new SurfaceSession();
                     mDeferredDestroySurfaceControl = mSurfaceControl;
 
                     updateOpaqueFlag();
+                    // SurfaceView hierarchy
+                    // ViewRootImpl surface
+                    //   - bounds layer (crops all child surfaces to parent surface insets)
+                    //     - SurfaceView surface (drawn relative to ViewRootImpl surface)
+                    //     - Background color layer (drawn behind all SurfaceView surfaces)
+                    //
+                    // The bounds layer is used to crop the surface view so it does not draw into
+                    // the parent surface inset region. Since there can be multiple surface views
+                    // below or above the parent surface, one option is to create multiple bounds
+                    // layer for each z order. The other option, the one implement is to create
+                    // a single bounds layer and set z order for each child surface relative to the
+                    // parent surface.
+                    // When creating the surface view, we parent it to the bounds layer and then
+                    // set the relative z order. When the parent surface changes, we have to
+                    // make sure to update the relative z via ViewRootImpl.SurfaceChangedCallback.
                     final String name = "SurfaceView - " + viewRoot.getTitle().toString();
 
                     mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
@@ -754,7 +768,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         .setOpaque((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)
                         .setBufferSize(mSurfaceWidth, mSurfaceHeight)
                         .setFormat(mFormat)
-                        .setParent(viewRoot.getSurfaceControl())
+                        .setParent(viewRoot.getBoundsLayer())
                         .setFlags(mSurfaceFlags)
                         .build();
                     mBackgroundControl = new SurfaceControl.Builder(mSurfaceSession)
@@ -779,14 +793,23 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
                     SurfaceControl.openTransaction();
                     try {
-                        mSurfaceControl.setLayer(mSubLayer);
+                        // If we are creating the surface control or the parent surface has not
+                        // changed, then set relative z. Otherwise allow the parent
+                        // SurfaceChangedCallback to update the relative z. This is needed so that
+                        // we do not change the relative z before the server is ready to swap the
+                        // parent surface.
+                        if (creating || (mParentSurfaceGenerationId
+                                == viewRoot.mSurface.getGenerationId())) {
+                            SurfaceControl.mergeToGlobalTransaction(updateRelativeZ());
+                        }
+                        mParentSurfaceGenerationId = viewRoot.mSurface.getGenerationId();
 
                         if (mViewVisibility) {
                             mSurfaceControl.show();
                         } else {
                             mSurfaceControl.hide();
                         }
-                        updateBackgroundVisibilityInTransaction(viewRoot.getSurfaceControl());
+                        updateBackgroundVisibilityInTransaction();
                         if (mUseAlpha) {
                             mSurfaceControl.setAlpha(alpha);
                             mSurfaceAlpha = alpha;
@@ -1369,11 +1392,22 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     /**
-     * Called when a valid ViewRootImpl surface is replaced by another valid surface.
+     * Called when a valid ViewRootImpl surface is replaced by another valid surface. In this
+     * case update relative z to the new parent surface.
      * @hide
      */
     @Override
-    public void surfaceReplaced(SurfaceControl.Transaction t) {
+    public void surfaceReplaced(Transaction t) {
+        if (mSurfaceControl != null && mBackgroundControl != null) {
+            t.merge(updateRelativeZ());
+        }
+    }
 
+    private Transaction updateRelativeZ() {
+        Transaction t = new Transaction();
+        SurfaceControl viewRoot = getViewRootImpl().getSurfaceControl();
+        t.setRelativeLayer(mBackgroundControl, viewRoot, Integer.MIN_VALUE);
+        t.setRelativeLayer(mSurfaceControl, viewRoot, mSubLayer);
+        return t;
     }
 }
