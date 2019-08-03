@@ -728,6 +728,7 @@ public class DisplayModeDirector {
 
         private SensorManager mSensorManager;
         private Sensor mLightSensor;
+        private LightSensorEventListener mLightSensorListener = new LightSensorEventListener();
         // Take it as low brightness before valid sensor data comes
         private float mAmbientLux = -1.0f;
         private AmbientFilter mAmbientFilter;
@@ -907,19 +908,40 @@ public class DisplayModeDirector {
                 mSensorManager.registerListener(mLightSensorListener,
                         mLightSensor, LIGHT_SENSOR_RATE_MS * 1000, mHandler);
             } else {
+                mLightSensorListener.removeCallbacks();
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
         }
 
-        private final SensorEventListener mLightSensorListener = new SensorEventListener() {
+        private final class LightSensorEventListener implements SensorEventListener {
+            final private static int INJECT_EVENTS_INTERVAL_MS = LIGHT_SENSOR_RATE_MS;
+            private float mLastSensorData;
+
             @Override
             public void onSensorChanged(SensorEvent event) {
-                long now = SystemClock.uptimeMillis();
-                mAmbientFilter.addValue(now, event.values[0]);
-                mAmbientLux = mAmbientFilter.getEstimate(now);
+                mLastSensorData = event.values[0];
+                if (DEBUG) {
+                    Slog.d(TAG, "On sensor changed: " + mLastSensorData);
+                }
 
-                synchronized (mLock) {
-                    onBrightnessChangedLocked();
+                boolean zoneChanged = isDifferentZone(mLastSensorData, mAmbientLux);
+                if (zoneChanged && mLastSensorData < mAmbientLux) {
+                    // Easier to see flicker at lower brightness environment. Forget the history to
+                    // get immediate response.
+                    mAmbientFilter.clear();
+                }
+
+                long now = SystemClock.uptimeMillis();
+                mAmbientFilter.addValue(now, mLastSensorData);
+
+                mHandler.removeCallbacks(mInjectSensorEventRunnable);
+                processSensorData(now);
+
+                if (zoneChanged && mLastSensorData > mAmbientLux) {
+                    // Sensor may not report new event if there is no brightness change.
+                    // Need to keep querying the temporal filter for the latest estimation,
+                    // until enter in higher lux zone or is interrupted by a new sensor event.
+                    mHandler.postDelayed(mInjectSensorEventRunnable, INJECT_EVENTS_INTERVAL_MS);
                 }
             }
 
@@ -927,6 +949,47 @@ public class DisplayModeDirector {
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
                 // Not used.
             }
+
+            public void removeCallbacks() {
+                mHandler.removeCallbacks(mInjectSensorEventRunnable);
+            }
+
+            private void processSensorData(long now) {
+                mAmbientLux = mAmbientFilter.getEstimate(now);
+
+                synchronized (mLock) {
+                    onBrightnessChangedLocked();
+                }
+            }
+
+            private boolean isDifferentZone(float lux1, float lux2) {
+                for (int z = 0; z < mAmbientBrightnessThresholds.length; z++) {
+                    final float boundary = mAmbientBrightnessThresholds[z];
+
+                    // Test each boundary. See if the current value and the new value are at
+                    // different sides.
+                    if ((lux1 <= boundary && lux2 > boundary)
+                            || (lux1 > boundary && lux2 <= boundary)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            private Runnable mInjectSensorEventRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    long now = SystemClock.uptimeMillis();
+                    // No need to really inject the last event into a temporal filter.
+                    processSensorData(now);
+
+                    // Inject next event if there is a possible zone change.
+                    if (isDifferentZone(mLastSensorData, mAmbientLux)) {
+                        mHandler.postDelayed(mInjectSensorEventRunnable, INJECT_EVENTS_INTERVAL_MS);
+                    }
+                }
+            };
         };
 
         private final class ScreenStateReceiver extends BroadcastReceiver {

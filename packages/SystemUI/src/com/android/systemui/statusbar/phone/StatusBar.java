@@ -194,6 +194,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
@@ -375,6 +376,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     KeyguardBypassController mKeyguardBypassController;
     @Inject
     protected HeadsUpManagerPhone mHeadsUpManager;
+    @Inject
+    DynamicPrivacyController mDynamicPrivacyController;
     @Inject
     BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     @Nullable
@@ -592,7 +595,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mVibrateOnOpening;
     private VibratorHelper mVibratorHelper;
     private ActivityLaunchAnimator mActivityLaunchAnimator;
-    protected NotificationPresenter mPresenter;
+    protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private boolean mPulsing;
     protected BubbleController mBubbleController;
@@ -1067,7 +1070,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
-                mScrimController, mActivityLaunchAnimator, mStatusBarKeyguardViewManager,
+                mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
                 mNotificationAlertingManager, rowBinder);
 
         mNotificationListController =
@@ -1244,6 +1247,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputManager.getController().addCallback(mStatusBarKeyguardViewManager);
+        mDynamicPrivacyController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
@@ -3787,7 +3791,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         if (!mNotificationPanel.canCameraGestureBeLaunched(
-                mStatusBarKeyguardViewManager.isShowing() && mExpandedVisible)) {
+                mStatusBarKeyguardViewManager.isShowing()
+                        && (mExpandedVisible || mBouncerShowing))) {
             if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Can't launch camera right now, mExpandedVisible: " +
                     mExpandedVisible);
             return;
