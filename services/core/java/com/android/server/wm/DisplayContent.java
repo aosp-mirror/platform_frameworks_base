@@ -4845,9 +4845,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         //
         // In the case where we have no IME target we assign it where it's base layer would
         // place it in the AboveAppWindowContainers.
-        if (imeTarget != null && !(imeTarget.inSplitScreenWindowingMode()
-                || imeTarget.mToken.isAppAnimating())
-                && (imeTarget.getSurfaceControl() != null)) {
+        //
+        // Keep IME window in mAboveAppWindowsContainers as long as app's starting window exists
+        // so it get's layered above the starting window.
+        if (imeTarget != null
+                && !(imeTarget.mAppToken != null && imeTarget.mAppToken.hasStartingWindow())
+                && (!(imeTarget.inSplitScreenWindowingMode() || imeTarget.mToken.isAppAnimating())
+                && (imeTarget.getSurfaceControl() != null))) {
             mImeWindowsContainers.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
                     // TODO: We need to use an extra level on the app surface to ensure
                     // this is always above SurfaceView but always below attached window.

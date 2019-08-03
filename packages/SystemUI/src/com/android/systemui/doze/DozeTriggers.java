@@ -113,11 +113,13 @@ public class DozeTriggers implements DozeMachine.Part {
         if (!sWakeDisplaySensorState) {
             Log.d(TAG, "Wake display false. Pulse denied.");
             runIfNotNull(onPulseSuppressedListener);
+            DozeLog.tracePulseDropped(mContext, "wakeDisplaySensor");
             return;
         }
         mNotificationPulseTime = SystemClock.elapsedRealtime();
         if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
             runIfNotNull(onPulseSuppressedListener);
+            DozeLog.tracePulseDropped(mContext, "pulseOnNotificationsDisabled");
             return;
         }
         requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */,
@@ -376,6 +378,7 @@ public class DozeTriggers implements DozeMachine.Part {
         proximityCheckThenCall((result) -> {
             if (result == ProximityCheck.RESULT_NEAR) {
                 // in pocket, abort pulse
+                DozeLog.tracePulseDropped(mContext, "inPocket");
                 mPulsePending = false;
                 runIfNotNull(onPulseSuppressedListener);
             } else {

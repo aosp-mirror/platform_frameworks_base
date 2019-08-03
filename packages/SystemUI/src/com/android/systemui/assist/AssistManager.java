@@ -82,7 +82,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         void processBundle(Bundle hints);
 
         /**
-         * Hides the UI.
+         * Hides any SysUI for the assistant, but _does not_ close the assistant itself.
          */
         void hide();
     }
@@ -438,6 +438,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
     public void onLockscreenShown() {
         mAssistUtils.onLockscreenShown();
+    }
+
+    public long getAssistHandleShowAndGoRemainingDurationMs() {
+        return mHandleController.getShowAndGoRemainingTimeMs();
     }
 
     /** Returns the logging flags for the given Assistant invocation type. */
