@@ -364,7 +364,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"Wezesha mtindo wa gari"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Inaruhusu programu kuwawezesha mtindo wa gari."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"funga programu zingine"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Inaruhusu programu kukamilisha michakato ya usuli ya programu nyingine. Hii inaweza kusababisha programu nyingine kukoma kufanyakazi."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Huruhusu programu kukamilisha michakato ya chinichini ya programu nyingine. Hii inaweza kusababisha programu nyingine kuacha kufanya kazi."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Programu hii inaweza kuonekana juu ya programu zingine"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Programu hii inaweza kuonekana juu ya programu zingine au sehemu zingine za skrini. Hii huenda ikaathiri matumizi ya kawaida ya programu na kubadilisha jinsi ambavyo programu zingine zinavyoonekana."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"tumia chini chini"</string>
