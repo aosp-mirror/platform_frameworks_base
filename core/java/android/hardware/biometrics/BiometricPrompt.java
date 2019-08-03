@@ -103,6 +103,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public static final int DISMISSED_REASON_CONFIRMED = 1;
 
     /**
+     * Dialog is done animating away after user clicked on the button set via
+     * {@link BiometricPrompt.Builder#setNegativeButton(CharSequence, Executor,
+     * DialogInterface.OnClickListener)}.
      * @hide
      */
     public static final int DISMISSED_REASON_NEGATIVE = 2;
@@ -113,11 +116,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public static final int DISMISSED_REASON_USER_CANCEL = 3;
 
     /**
+     * Authenticated, confirmation not required. Dialog animated away.
      * @hide
      */
     public static final int DISMISSED_REASON_CONFIRM_NOT_REQUIRED = 4;
 
     /**
+     * Error message shown on SystemUI. When BiometricService receives this, the UI is already
+     * gone.
      * @hide
      */
     public static final int DISMISSED_REASON_ERROR = 5;

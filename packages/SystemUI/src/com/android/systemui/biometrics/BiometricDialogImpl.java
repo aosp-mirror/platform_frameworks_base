@@ -73,15 +73,10 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
             case DialogViewCallback.DISMISSED_AUTHENTICATED:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED);
-                // TODO: BiometricService currently sends the result immediately. This should
-                // actually happen when the animation is completed.
                 break;
 
             case DialogViewCallback.DISMISSED_ERROR:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_ERROR);
-                // TODO: Make sure error isn't received until dialog is dismissed
-                // TODO: Similarly, BiometricService currently sends the result immediately.
-                // This should happen when the animation is completed.
                 break;
             default:
                 Log.e(TAG, "Unhandled reason: " + reason);

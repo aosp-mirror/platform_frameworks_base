@@ -337,6 +337,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         }
 
         mNegativeButton.setVisibility(View.VISIBLE);
+        mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
 
         if (RotationUtils.getRotation(mContext) != RotationUtils.ROTATION_NONE) {
             mDialog.getLayoutParams().width = (int) mDialogWidth;
@@ -344,7 +345,6 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
 
         if (mRestoredState == null) {
             updateState(STATE_AUTHENTICATING);
-            mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
             final int hint = getHintStringResourceId();
             if (hint != 0) {
                 mErrorText.setText(hint);
@@ -570,7 +570,6 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         showTemporaryMessage(error);
         showTryAgainButton(false /* show */);
 
-        // TODO: Is this still used to synchronize animation and client onError timing?
         mHandler.postDelayed(() -> {
             animateAway(DialogViewCallback.DISMISSED_ERROR);
         }, BiometricPrompt.HIDE_DIALOG_DELAY);
