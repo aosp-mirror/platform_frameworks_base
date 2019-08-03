@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ujumbe wa sauti"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kupiga simu kupitia Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Hali ya SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Hali ya SIM ya kipaumbele cha juu"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Hali ya TTY iliyoombwa na mtandao mwenza KAMILI"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Hali ya TTY iliyoombwa na mtandao mwenza HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Hali ya TTY iliyoombwa na mtandao mwenza VCO"</string>
@@ -364,7 +365,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"Wezesha mtindo wa gari"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Inaruhusu programu kuwawezesha mtindo wa gari."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"funga programu zingine"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Inaruhusu programu kukamilisha michakato ya usuli ya programu nyingine. Hii inaweza kusababisha programu nyingine kukoma kufanyakazi."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Huruhusu programu kukamilisha michakato ya chinichini ya programu nyingine. Hii inaweza kusababisha programu nyingine kuacha kufanya kazi."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Programu hii inaweza kuonekana juu ya programu zingine"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Programu hii inaweza kuonekana juu ya programu zingine au sehemu zingine za skrini. Hii huenda ikaathiri matumizi ya kawaida ya programu na kubadilisha jinsi ambavyo programu zingine zinavyoonekana."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"tumia chini chini"</string>
