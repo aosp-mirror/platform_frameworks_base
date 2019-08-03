@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ਵੌਇਸਮੇਲ ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"ਸਿਮ ਅਵਸਥਾ"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ਉੱਚ ਤਰਜੀਹੀ ਸਿਮ ਸਥਿਤੀ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ਪੀਅਰ ਨੇ TTY Mode FULL ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ਪੀਅਰ ਨੇ TTY Mode HCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ਪੀਅਰ ਨੇ TTY Mode VCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
