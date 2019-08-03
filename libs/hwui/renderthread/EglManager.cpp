@@ -29,7 +29,6 @@
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
 
-#include <gui/Surface.h>
 #include <system/window.h>
 #include <string>
 #include <vector>
