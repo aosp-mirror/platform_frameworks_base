@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"음성사서함 메시지"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 통화"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM 상태"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"우선순위가 높은 SIM 상태"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"피어가 TTY 모드 FULL을 요청했습니다."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"피어가 TTY 모드 HCO를 요청했습니다."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"피어가 TTY 모드 VCO를 요청했습니다."</string>
