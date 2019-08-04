@@ -2869,6 +2869,11 @@ package android.telephony {
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);
   }
 
+  public class PhoneNumberUtils {
+    method public static int getMinMatchForTest();
+    method public static void setMinMatchForTest(int);
+  }
+
   public class ServiceState implements android.os.Parcelable {
     method public void addNetworkRegistrationInfo(android.telephony.NetworkRegistrationInfo);
     method public void setCdmaSystemAndNetworkId(int, int);
