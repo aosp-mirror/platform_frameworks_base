@@ -20,6 +20,8 @@ import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.SurfaceControl.Transaction;
@@ -79,6 +81,7 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
+import static com.android.server.wm.DisplayContent.logsGestureExclusionRestrictions;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -173,6 +176,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -225,6 +229,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // The thickness of a window resize handle outside the window bounds on the free form workspace
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
+
+    static final int EXCLUSION_LEFT = 0;
+    static final int EXCLUSION_RIGHT = 1;
 
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -395,6 +402,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Coordinates are relative to the window's position.
      */
     private final List<Rect> mExclusionRects = new ArrayList<>();
+
+    // 0 = left, 1 = right
+    private final int[] mLastRequestedExclusionHeight = {0, 0};
+    private final int[] mLastGrantedExclusionHeight = {0, 0};
+    private final long[] mLastExclusionLogUptimeMillis = {0, 0};
+
+    private boolean mLastShownChangedReported;
 
     // If a window showing a wallpaper: the requested offset for the
     // wallpaper; if a wallpaper window: the currently applied offset.
@@ -676,6 +690,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 (mSystemUiVisibility & immersiveStickyFlags) == immersiveStickyFlags;
         return immersiveSticky && mWmService.mSystemGestureExcludedByPreQStickyImmersive
                 && mAppToken != null && mAppToken.mTargetSdk < Build.VERSION_CODES.Q;
+    }
+
+    void setLastExclusionHeights(int side, int requested, int granted) {
+        boolean changed = mLastGrantedExclusionHeight[side] != granted
+                || mLastRequestedExclusionHeight[side] != requested;
+
+        if (changed) {
+            if (mLastShownChangedReported) {
+                logExclusionRestrictions(side);
+            }
+
+            mLastGrantedExclusionHeight[side] = granted;
+            mLastRequestedExclusionHeight[side] = requested;
+        }
     }
 
     interface PowerManagerWrapper {
@@ -2959,6 +2987,49 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Clear animating flags now, since the surface is now gone. (Note this is true even
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
         mAnimatingExit = false;
+    }
+
+    void onSurfaceShownChanged(boolean shown) {
+        if (mLastShownChangedReported == shown) {
+            return;
+        }
+        mLastShownChangedReported = shown;
+
+        if (shown) {
+            initExclusionRestrictions();
+        } else {
+            logExclusionRestrictions(EXCLUSION_LEFT);
+            logExclusionRestrictions(EXCLUSION_RIGHT);
+        }
+    }
+
+    private void logExclusionRestrictions(int side) {
+        if (!logsGestureExclusionRestrictions(this)
+                || SystemClock.uptimeMillis() < mLastExclusionLogUptimeMillis[side]
+                + mWmService.mSystemGestureExclusionLogDebounceTimeoutMillis) {
+            // Drop the log if we have just logged; this is okay, because what we would have logged
+            // was true only for a short duration.
+            return;
+        }
+
+        final long now = SystemClock.uptimeMillis();
+        final long duration = now - mLastExclusionLogUptimeMillis[side];
+        mLastExclusionLogUptimeMillis[side] = now;
+
+        final int requested = mLastRequestedExclusionHeight[side];
+        final int granted = mLastGrantedExclusionHeight[side];
+
+        StatsLog.write(StatsLog.EXCLUSION_RECT_STATE_CHANGED,
+                mAttrs.packageName, requested, requested - granted /* rejected */,
+                side + 1 /* Sides are 1-indexed in atoms.proto */,
+                (getConfiguration().orientation == ORIENTATION_LANDSCAPE),
+                isSplitScreenWindowingMode(getWindowingMode()), (int) duration);
+    }
+
+    private void initExclusionRestrictions() {
+        final long now = SystemClock.uptimeMillis();
+        mLastExclusionLogUptimeMillis[EXCLUSION_LEFT] = now;
+        mLastExclusionLogUptimeMillis[EXCLUSION_RIGHT] = now;
     }
 
     @Override

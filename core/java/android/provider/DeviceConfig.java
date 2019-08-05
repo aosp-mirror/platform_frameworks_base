@@ -346,6 +346,20 @@ public final class DeviceConfig {
                 "system_gestures_excluded_by_pre_q_sticky_immersive";
 
         /**
+         * The minimum duration between gesture exclusion logging for a given window in
+         * milliseconds.
+         *
+         * Events that happen in-between will be silently dropped.
+         *
+         * A non-positive value disables logging.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
+         * @hide
+         */
+        String KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS =
+                "system_gesture_exclusion_log_debounce_millis";
+
+        /**
          * Key for controlling which packages are explicitly blocked from running at refresh rates
          * higher than 90hz.
          *

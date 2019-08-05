@@ -34,6 +34,7 @@ import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE;
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP;
+import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -848,6 +849,16 @@ public class WindowManagerService extends IWindowManager.Stub
     int mSystemGestureExclusionLimitDp;
     boolean mSystemGestureExcludedByPreQStickyImmersive;
 
+    /**
+     * The minimum duration between gesture exclusion logging for a given window in
+     * milliseconds.
+     *
+     * Events that happen in-between will be silently dropped.
+     *
+     * A non-positive value disables logging.
+     */
+    public long mSystemGestureExclusionLogDebounceTimeoutMillis;
+
     public interface WindowChangeListener {
         public void windowsChanged();
         public void focusChanged();
@@ -1147,6 +1158,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mSystemGestureExclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
                 DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                         KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
+        mSystemGestureExclusionLogDebounceTimeoutMillis =
+                DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS, 0);
         mSystemGestureExcludedByPreQStickyImmersive =
                 DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                         KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
@@ -1164,6 +1178,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             mSystemGestureExcludedByPreQStickyImmersive = excludedByPreQSticky;
                             mRoot.forAllDisplays(DisplayContent::updateSystemGestureExclusionLimit);
                         }
+
+                        mSystemGestureExclusionLogDebounceTimeoutMillis =
+                                DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                                        KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS, 0);
                     }
                 });
 
