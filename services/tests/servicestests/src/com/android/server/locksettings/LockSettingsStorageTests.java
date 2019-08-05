@@ -436,7 +436,6 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
         assertArrayEquals(PAYLOAD, deserialized.hash);
-        assertFalse(deserialized.isBaseZeroPattern);
     }
 
     public void testCredentialHash_unserialize_versionGatekeeper() {
@@ -452,7 +451,6 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
         assertArrayEquals(PAYLOAD, deserialized.hash);
-        assertFalse(deserialized.isBaseZeroPattern);
 
         // Make sure the constants we use on the wire do not change.
         assertEquals(-1, LockPatternUtils.CREDENTIAL_TYPE_NONE);
