@@ -7898,6 +7898,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        // Let the ART runtime in zygote and system_server know that the boot completed.
+        ZYGOTE_PROCESS.bootCompleted();
+        VMRuntime.bootCompleted();
+
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
         pkgFilter.addDataScheme("package");
