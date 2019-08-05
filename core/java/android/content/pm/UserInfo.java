@@ -24,6 +24,18 @@ import android.os.UserManager;
 
 /**
  * Per-user information.
+ *
+ * <p>There are 3 base properties of users: {@link #FLAG_SYSTEM}, {@link #FLAG_FULL}, and
+ * {@link #FLAG_MANAGED_PROFILE}. Every user must have one of the following combination of these
+ * flags:
+ * <ul>
+ *    <li>FLAG_SYSTEM (user {@link UserHandle#USER_SYSTEM} on a headless-user-0 device)</li>
+ *    <li>FLAG_SYSTEM and FLAG_FULL (user {@link UserHandle#USER_SYSTEM} on a regular device)</li>
+ *    <li>FLAG_FULL (non-profile secondary user)</li>
+ *    <li>FLAG_MANAGED_PROFILE (profile users)</li>
+ * </ul>
+ * Users can have also have additional flags (such as FLAG_GUEST) as appropriate.
+ *
  * @hide
  */
 public class UserInfo implements Parcelable {
@@ -92,6 +104,20 @@ public class UserInfo implements Parcelable {
      * User is for demo purposes only and can be removed at any time.
      */
     public static final int FLAG_DEMO = 0x00000200;
+
+    /**
+     * Indicates that this user is a non-profile human user.
+     *
+     * <p>When creating a new (non-system) user, this flag will always be forced true unless the
+     * user is a {@link #FLAG_MANAGED_PROFILE}. If user {@link UserHandle#USER_SYSTEM} is also a
+     * human user, it must also be flagged as FULL.
+     */
+    public static final int FLAG_FULL = 0x00000400;
+
+    /**
+     * Indicates that this user is {@link UserHandle#USER_SYSTEM}. Not applicable to created users.
+     */
+    public static final int FLAG_SYSTEM = 0x00000800;
 
     public static final int NO_PROFILE_GROUP_ID = UserHandle.USER_NULL;
 
