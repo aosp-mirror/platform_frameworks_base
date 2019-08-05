@@ -196,7 +196,6 @@ public abstract class WallpaperService extends Service {
         final WindowManager.LayoutParams mLayout
                 = new WindowManager.LayoutParams();
         IWindowSession mSession;
-        InputChannel mInputChannel;
 
         final Object mLock = new Object();
         boolean mOffsetMessageEnqueued;
@@ -819,11 +818,11 @@ public abstract class WallpaperService extends Service {
                         mLayout.setTitle(WallpaperService.this.getClass().getName());
                         mLayout.windowAnimations =
                                 com.android.internal.R.style.Animation_Wallpaper;
-                        mInputChannel = new InputChannel();
+                        InputChannel inputChannel = new InputChannel();
 
                         if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mWinFrame, mContentInsets, mStableInsets,
-                                mOutsets, mDisplayCutout, mInputChannel,
+                                mOutsets, mDisplayCutout, inputChannel,
                                 mInsetsState) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
@@ -831,7 +830,7 @@ public abstract class WallpaperService extends Service {
                         mCreated = true;
 
                         mInputEventReceiver = new WallpaperInputEventReceiver(
-                                mInputChannel, Looper.myLooper());
+                                inputChannel, Looper.myLooper());
                     }
 
                     mSurfaceHolder.mSurfaceLock.lock();
@@ -1267,13 +1266,6 @@ public abstract class WallpaperService extends Service {
                 }
                 mSurfaceHolder.mSurface.release();
                 mCreated = false;
-
-                // Dispose the input channel after removing the window so the Window Manager
-                // doesn't interpret the input channel being closed as an abnormal termination.
-                if (mInputChannel != null) {
-                    mInputChannel.dispose();
-                    mInputChannel = null;
-                }
             }
         }
 
