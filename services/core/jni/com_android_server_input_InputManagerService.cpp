@@ -166,6 +166,7 @@ static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextOb
             outPointerIcon->bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
                     bitmapCopy->rowBytes(), 0, 0);
         }
+        outSpriteIcon->style = outPointerIcon->style;
         outSpriteIcon->hotSpotX = outPointerIcon->hotSpotX;
         outSpriteIcon->hotSpotY = outPointerIcon->hotSpotY;
     }
@@ -1252,7 +1253,8 @@ void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
     status_t status = android_view_PointerIcon_load(env, pointerIconObj.get(),
             displayContext.get(), &pointerIcon);
     if (!status && !pointerIcon.isNullIcon()) {
-        *icon = SpriteIcon(pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
+        *icon = SpriteIcon(
+                pointerIcon.bitmap, pointerIcon.style, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
     } else {
         *icon = SpriteIcon();
     }
@@ -1293,10 +1295,12 @@ void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIc
                     milliseconds_to_nanoseconds(pointerIcon.durationPerFrame);
             animationData.animationFrames.reserve(numFrames);
             animationData.animationFrames.push_back(SpriteIcon(
-                    pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+                    pointerIcon.bitmap, pointerIcon.style,
+                    pointerIcon.hotSpotX, pointerIcon.hotSpotY));
             for (size_t i = 0; i < numFrames - 1; ++i) {
               animationData.animationFrames.push_back(SpriteIcon(
-                      pointerIcon.bitmapFrames[i], pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+                      pointerIcon.bitmapFrames[i], pointerIcon.style,
+                      pointerIcon.hotSpotX, pointerIcon.hotSpotY));
             }
         }
     }
@@ -1732,6 +1736,7 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
         pointerIcon.bitmap.readPixels(spriteInfo, spriteIcon.bitmap.getPixels(),
                 spriteIcon.bitmap.rowBytes(), 0, 0);
     }
+    spriteIcon.style = pointerIcon.style;
     spriteIcon.hotSpotX = pointerIcon.hotSpotX;
     spriteIcon.hotSpotY = pointerIcon.hotSpotY;
     im->setCustomPointerIcon(spriteIcon);

@@ -1,4 +1,4 @@
-// Copyright (C) 2010 The Android Open Source Project
+// Copyright (C) 2019 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,35 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-cc_library_shared {
-    name: "libinputservice",
+cc_test {
+    name: "libinputservice_test",
     srcs: [
-        "PointerController.cpp",
-        "SpriteController.cpp",
+        "PointerController_test.cpp",
     ],
-
     shared_libs: [
-        "libbinder",
-        "libcutils",
-        "liblog",
-        "libutils",
-        "libhwui",
+        "libinputservice",
         "libgui",
-        "libui",
-        "libinput",
-        "libnativewindow",
+        "libhwui",
+        "libutils",
     ],
-
+    static_libs: [
+        "libgmock",
+        "libgtest",
+    ],
     header_libs: [
+        "libbase_headers",
         "libinputflinger_headers",
     ],
-
-    include_dirs: ["frameworks/native/services"],
-
+    include_dirs: [
+        "frameworks/base/libs",
+    ],
     cflags: [
         "-Wall",
-        "-Wextra",
         "-Werror",
+        "-Wextra",
     ],
-
+    test_suites: [
+        "general-tests",
+    ],
 }

@@ -245,7 +245,8 @@ void SpriteController::doUpdateSprites() {
         if (update.state.surfaceControl != NULL && (becomingVisible || becomingHidden
                 || (wantSurfaceVisibleAndDrawn && (update.state.dirty & (DIRTY_ALPHA
                         | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER
-                        | DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID))))) {
+                        | DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID
+                        | DIRTY_ICON_STYLE))))) {
             needApplyTransaction = true;
 
             if (wantSurfaceVisibleAndDrawn
@@ -272,6 +273,21 @@ void SpriteController::doUpdateSprites() {
                         update.state.transformationMatrix.dtdx,
                         update.state.transformationMatrix.dsdy,
                         update.state.transformationMatrix.dtdy);
+            }
+
+            if (wantSurfaceVisibleAndDrawn
+                    && (becomingVisible
+                            || (update.state.dirty & (DIRTY_HOTSPOT | DIRTY_ICON_STYLE)))) {
+                Parcel p;
+                p.writeInt32(update.state.icon.style);
+                p.writeFloat(update.state.icon.hotSpotX);
+                p.writeFloat(update.state.icon.hotSpotY);
+
+                // Pass cursor metadata in the sprite surface so that when Android is running as a
+                // client OS (e.g. ARC++) the host OS can get the requested cursor metadata and
+                // update mouse cursor in the host OS.
+                t.setMetadata(
+                        update.state.surfaceControl, METADATA_MOUSE_CURSOR, p);
             }
 
             int32_t surfaceLayer = mOverlayLayer + update.state.layer;
@@ -397,9 +413,14 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
         } else {
             dirty = DIRTY_BITMAP;
         }
+
+        if (mLocked.state.icon.style != icon.style) {
+            mLocked.state.icon.style = icon.style;
+            dirty |= DIRTY_ICON_STYLE;
+        }
     } else if (mLocked.state.icon.isValid()) {
         mLocked.state.icon.bitmap.reset();
-        dirty = DIRTY_BITMAP | DIRTY_HOTSPOT;
+        dirty = DIRTY_BITMAP | DIRTY_HOTSPOT | DIRTY_ICON_STYLE;
     } else {
         return; // setting to invalid icon and already invalid so nothing to do
     }
