@@ -485,15 +485,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationMediaManager mMediaManager;
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
+    private boolean mWallpaperSupported;
 
     private final BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
-            if (wallpaperManager == null) {
-                Log.w(TAG, "WallpaperManager not available");
+            if (!mWallpaperSupported) {
+                // Receiver should not have been registered at all...
+                Log.wtf(TAG, "WallpaperManager not supported");
                 return;
             }
+            WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
             WallpaperInfo info = wallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
             final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
@@ -705,11 +707,18 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         createAndAddWindows(result);
 
-        // Make sure we always have the most current wallpaper info.
-        IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-        mContext.registerReceiverAsUser(mWallpaperChangedReceiver, UserHandle.ALL,
-                wallpaperChangedFilter, null /* broadcastPermission */, null /* scheduler */);
-        mWallpaperChangedReceiver.onReceive(mContext, null);
+        mWallpaperSupported =
+                mContext.getSystemService(WallpaperManager.class).isWallpaperSupported();
+
+        if (mWallpaperSupported) {
+            // Make sure we always have the most current wallpaper info.
+            IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
+            mContext.registerReceiverAsUser(mWallpaperChangedReceiver, UserHandle.ALL,
+                    wallpaperChangedFilter, null /* broadcastPermission */, null /* scheduler */);
+            mWallpaperChangedReceiver.onReceive(mContext, null);
+        } else if (DEBUG) {
+            Log.v(TAG, "start(): no wallpaper service ");
+        }
 
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
@@ -744,12 +753,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mContext.registerReceiver(mBannerActionBroadcastReceiver, internalFilter, PERMISSION_SELF,
                 null);
 
-        IWallpaperManager wallpaperManager = IWallpaperManager.Stub.asInterface(
-                ServiceManager.getService(Context.WALLPAPER_SERVICE));
-        try {
-            wallpaperManager.setInAmbientMode(false /* ambientMode */, 0L /* duration */);
-        } catch (RemoteException e) {
-            // Just pass, nothing critical.
+        if (mWallpaperSupported) {
+            IWallpaperManager wallpaperManager = IWallpaperManager.Stub.asInterface(
+                    ServiceManager.getService(Context.WALLPAPER_SERVICE));
+            try {
+                wallpaperManager.setInAmbientMode(false /* ambientMode */, 0L /* duration */);
+            } catch (RemoteException e) {
+                // Just pass, nothing critical.
+            }
         }
 
         // end old BaseStatusBar.start().
@@ -2354,6 +2365,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.println(Settings.Global.zenModeToString(Settings.Global.getInt(
                 mContext.getContentResolver(), Settings.Global.ZEN_MODE,
                 Settings.Global.ZEN_MODE_OFF)));
+        pw.print("  mWallpaperSupported= "); pw.println(mWallpaperSupported);
 
         if (mStatusBarView != null) {
             dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
@@ -2738,7 +2750,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void setLockscreenUser(int newUserId) {
         mLockscreenWallpaper.setCurrentUser(newUserId);
         mScrimController.setCurrentUser(newUserId);
-        mWallpaperChangedReceiver.onReceive(mContext, null);
+        if (mWallpaperSupported) {
+            mWallpaperChangedReceiver.onReceive(mContext, null);
+        }
     }
 
     /**
