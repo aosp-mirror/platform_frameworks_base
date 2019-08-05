@@ -20,6 +20,7 @@ package android.providers.settings;
 option java_multiple_files = true;
 option java_outer_classname = "SettingsServiceProto";
 
+import "frameworks/base/core/proto/android/providers/settings/config.proto";
 import "frameworks/base/core/proto/android/providers/settings/global.proto";
 import "frameworks/base/core/proto/android/providers/settings/secure.proto";
 import "frameworks/base/core/proto/android/providers/settings/system.proto";
@@ -33,6 +34,9 @@ message SettingsServiceDumpProto {
 
     // Global settings
     optional GlobalSettingsProto global_settings = 2;
+
+    // Config settings
+    optional ConfigSettingsProto config_settings = 3;
 }
 
 message UserSettingsProto {
