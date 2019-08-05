@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ボイスメール メッセージ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM のステータス"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"高優先度: SIM のステータス"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ピアから、TTY モードを FULL にするようリクエストされました"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ピアから、TTYモードをHCOにするようリクエストされました"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ピアから、TTYモードをVCOにするようリクエストされました"</string>
@@ -297,7 +298,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"運動データ"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活動"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"運動データにアクセス"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指紋アイコン"</string>
-    <string name="permlab_manageFace" msgid="7262837876352591553">"フェイスアンロック ハードウェアの管理"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"顔認証ハードウェアの管理"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"使用する顔テンプレートの追加や削除を行うメソッドの呼び出しをアプリに許可します。"</string>
-    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"フェイスアンロック ハードウェアの使用"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"フェイスアンロック ハードウェアを認証に使用することをアプリに許可します"</string>
-    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"フェイスアンロック"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"顔認証ハードウェアの使用"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"顔認証ハードウェアを認証に使用することをアプリに許可します"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"顔認証"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"顔の再登録"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"認識を改善するには、顔を再登録してください"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"顔を認識できませんでした。もう一度お試しください。"</string>
@@ -580,15 +581,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"顔を確認できません。ハードウェアを利用できません。"</string>
-    <string name="face_error_timeout" msgid="981512090365729465">"フェイスアンロックをもう一度お試しください。"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"顔認証をもう一度お試しください。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"新しい顔データを保存できません。古いデータを削除してください。"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"顔の操作をキャンセルしました。"</string>
-    <string name="face_error_user_canceled" msgid="5317030072349668946">"フェイスアンロックはユーザーによりキャンセルされました。"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"顔認証はユーザーによりキャンセルされました。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"試行回数の上限です。後でもう一度お試しください。"</string>
-    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"試行回数が上限を超えました。フェイスアンロックを無効にしました。"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"試行回数が上限を超えたため、顔認証を無効にしました。"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"顔を確認できません。もう一度お試しください。"</string>
-    <string name="face_error_not_enrolled" msgid="4016937174832839540">"フェイスアンロックを設定していません。"</string>
-    <string name="face_error_hw_not_present" msgid="8302690289757559738">"このデバイスでは、フェイスアンロックはご利用いただけません。"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"顔認証を設定していません。"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"このデバイスでは、顔認証はご利用いただけません。"</string>
     <string name="face_name_template" msgid="7004562145809595384">"顔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -817,7 +818,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"もう一度お試しください"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"もう一度お試しください"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"すべての機能とデータを利用するにはロック解除"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"フェイスアンロックの最大試行回数を超えました"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"顔認証の最大試行回数を超えました"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"タブレット内にSIMカードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"テレビにSIMカードが挿入されていません。"</string>
@@ -887,7 +888,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"ロック解除エリアを拡大します。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"スライドロックを解除します。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"パターンロックを解除します。"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"フェイスアンロックを行います。"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"顔認証を行います。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PINロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM PIN のロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM PUK のロックを解除します。"</string>
