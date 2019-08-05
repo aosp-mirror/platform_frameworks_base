@@ -82,6 +82,8 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    data: [":JobTestApp"],
 }
 
 java_library {
