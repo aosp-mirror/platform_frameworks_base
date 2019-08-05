@@ -3930,7 +3930,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
         if (checkShell) {
-            PackageManagerServiceUtils.enforceShellRestriction(
+            PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
                     UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
         if (!requirePermissionWhenSameUser && userId == UserHandle.getUserId(callingUid)) return;

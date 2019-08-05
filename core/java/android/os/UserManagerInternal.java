@@ -221,4 +221,7 @@ public abstract class UserManagerInternal {
      */
     public abstract boolean isSettingRestrictedForUser(String setting, int userId, String value,
             int callingUid);
+
+    /** @return a specific user restriction that's in effect currently. */
+    public abstract boolean hasUserRestriction(String restriction, int userId);
 }
