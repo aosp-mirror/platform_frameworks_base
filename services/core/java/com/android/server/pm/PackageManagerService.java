@@ -137,7 +137,6 @@ import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.AppsQueryHelper;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
@@ -2473,54 +2472,21 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);
         t.traceEnd(); // "create package manager"
 
-        m.enableSystemUserPackages();
+        m.installWhitelistedSystemPackages();
         ServiceManager.addService("package", m);
         final PackageManagerNative pmn = m.new PackageManagerNative();
         ServiceManager.addService("package_native", pmn);
         return m;
     }
 
-    private void enableSystemUserPackages() {
-        if (!UserManager.isSplitSystemUser()) {
-            return;
-        }
-        // For system user, enable apps based on the following conditions:
-        // - app is whitelisted or belong to one of these groups:
-        //   -- system app which has no launcher icons
-        //   -- system app which has INTERACT_ACROSS_USERS permission
-        //   -- system IME app
-        // - app is not in the blacklist
-        AppsQueryHelper queryHelper = new AppsQueryHelper(this);
-        Set<String> enableApps = new ArraySet<>();
-        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
-                | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM
-                | AppsQueryHelper.GET_IMES, /* systemAppsOnly */ true, UserHandle.SYSTEM));
-        ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
-        enableApps.addAll(wlApps);
-        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER,
-                /* systemAppsOnly */ false, UserHandle.SYSTEM));
-        ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
-        enableApps.removeAll(blApps);
-        Log.i(TAG, "Applications installed for system user: " + enableApps);
-        List<String> allAps = queryHelper.queryApps(0, /* systemAppsOnly */ false,
-                UserHandle.SYSTEM);
-        final int allAppsSize = allAps.size();
+    /** Install/uninstall system packages for all users based on their user-type, as applicable. */
+    private void installWhitelistedSystemPackages() {
         synchronized (mLock) {
-            for (int i = 0; i < allAppsSize; i++) {
-                String pName = allAps.get(i);
-                PackageSetting pkgSetting = mSettings.mPackages.get(pName);
-                // Should not happen, but we shouldn't be failing if it does
-                if (pkgSetting == null) {
-                    continue;
-                }
-                boolean install = enableApps.contains(pName);
-                if (pkgSetting.getInstalled(UserHandle.USER_SYSTEM) != install) {
-                    Log.i(TAG, (install ? "Installing " : "Uninstalling ") + pName
-                            + " for system user");
-                    pkgSetting.setInstalled(install, UserHandle.USER_SYSTEM);
-                }
+            final boolean scheduleWrite = mUserManager.installWhitelistedSystemPackages(
+                    isFirstBoot(), isDeviceUpgrading());
+            if (scheduleWrite) {
+                scheduleWritePackageRestrictionsLocked(UserHandle.USER_ALL);
             }
-            scheduleWritePackageRestrictionsLocked(UserHandle.USER_SYSTEM);
         }
     }
 
@@ -22307,10 +22273,19 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    /** Called by UserManagerService */
-    void createNewUser(int userId, String[] disallowedPackages) {
+    /**
+     * Called by UserManagerService.
+     *
+     * @param installablePackages system packages that should be initially installed for this user,
+     *                            or {@code null} if all system packages should be installed
+     * @param disallowedPackages packages that should not be initially installed. Takes precedence
+     *                           over installablePackages.
+     */
+    void createNewUser(int userId, @Nullable Set<String> installablePackages,
+            String[] disallowedPackages) {
         synchronized (mInstallLock) {
-            mSettings.createNewUserLI(this, mInstaller, userId, disallowedPackages);
+            mSettings.createNewUserLI(this, mInstaller, userId,
+                    installablePackages, disallowedPackages);
         }
         synchronized (mLock) {
             scheduleWritePackageRestrictionsLocked(userId);
@@ -23116,6 +23091,19 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public String getNameForUid(int uid) {
             return PackageManagerService.this.getNameForUid(uid);
+        }
+
+        @Override
+        public boolean setInstalled(PackageParser.Package pkg, @UserIdInt int userId,
+                boolean installed) {
+            synchronized (mLock) {
+                final PackageSetting ps = mSettings.mPackages.get(pkg.packageName);
+                if (ps.getInstalled(userId) != installed) {
+                    ps.setInstalled(installed, userId);
+                    return true;
+                }
+                return false;
+            }
         }
 
         @Override

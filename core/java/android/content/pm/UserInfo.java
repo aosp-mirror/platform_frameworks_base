@@ -126,6 +126,13 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_SYSTEM = 0x00000800;
 
     /**
+     * Indicates that this user is some sort of profile. Right now, the only profile type is
+     * {@link #FLAG_MANAGED_PROFILE}, but this can include other types of profiles too if any
+     * are created in the future. This is therefore not a flag, but an OR of several flags.
+     */
+    public static final int PROFILE_FLAGS_MASK = FLAG_MANAGED_PROFILE;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = "FLAG_", value = {

@@ -4014,8 +4014,9 @@ public final class Settings {
         }
     }
 
-    void createNewUserLI(@NonNull PackageManagerService service,
-            @NonNull Installer installer, int userHandle, String[] disallowedPackages) {
+    void createNewUserLI(@NonNull PackageManagerService service, @NonNull Installer installer,
+            @UserIdInt int userHandle, @Nullable Set<String> installablePackages,
+            String[] disallowedPackages) {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
         t.traceBegin("createNewUser-" + userHandle);
@@ -4025,6 +4026,7 @@ public final class Settings {
         String[] seinfos;
         int[] targetSdkVersions;
         int packagesCount;
+        final boolean skipPackageWhitelist = installablePackages == null;
         synchronized (mLock) {
             Collection<PackageSetting> packages = mPackages.values();
             packagesCount = packages.size();
@@ -4040,6 +4042,7 @@ public final class Settings {
                     continue;
                 }
                 final boolean shouldInstall = ps.isSystem() &&
+                        (skipPackageWhitelist || installablePackages.contains(ps.name)) &&
                         !ArrayUtils.contains(disallowedPackages, ps.name) &&
                         !ps.pkg.applicationInfo.hiddenUntilInstalled;
                 // Only system apps are initially installed.

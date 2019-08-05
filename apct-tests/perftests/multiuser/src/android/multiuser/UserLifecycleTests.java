@@ -38,8 +38,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.perftests.utils.ShellHelper;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 
@@ -84,6 +86,14 @@ public class UserLifecycleTests {
     private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
     private static final String DUMMY_PACKAGE_NAME = "perftests.multiuser.apps.dummyapp";
+
+    // Copy of UserSystemPackageInstaller whitelist mode constants.
+    private static final String PACKAGE_WHITELIST_MODE_PROP =
+            "persist.debug.user.package_whitelist_mode";
+    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE = 0;
+    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE = 0b001;
+    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST = 0b100;
+    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT = -1;
 
     private UserManager mUm;
     private ActivityManager mAm;
@@ -442,6 +452,55 @@ public class UserLifecycleTests {
         }
     }
 
+    // TODO: This is just a POC. Do this properly and add more.
+    /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-whitelist. */
+    @Test
+    public void managedProfileUnlock_usingWhitelist() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+        final int origMode = getUserTypePackageWhitelistMode();
+        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE
+                | USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST);
+
+        try {
+            while (mRunner.keepRunning()) {
+                mRunner.pauseTiming();
+                final int userId = createManagedProfile();
+                mRunner.resumeTiming();
+
+                startUserInBackground(userId);
+
+                mRunner.pauseTiming();
+                removeUser(userId);
+                mRunner.resumeTiming();
+            }
+        } finally {
+            setUserTypePackageWhitelistMode(origMode);
+        }
+    }
+    /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-whitelist. */
+    @Test
+    public void managedProfileUnlock_notUsingWhitelist() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+        final int origMode = getUserTypePackageWhitelistMode();
+        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE);
+
+        try {
+            while (mRunner.keepRunning()) {
+                mRunner.pauseTiming();
+                final int userId = createManagedProfile();
+                mRunner.resumeTiming();
+
+                startUserInBackground(userId);
+
+                mRunner.pauseTiming();
+                removeUser(userId);
+                mRunner.resumeTiming();
+            }
+        } finally {
+            setUserTypePackageWhitelistMode(origMode);
+        }
+    }
+
     /** Creates a new user, returning its userId. */
     private int createUserNoFlags() {
         return createUserWithFlags(/* flags= */ 0);
@@ -458,6 +517,10 @@ public class UserLifecycleTests {
     private int createManagedProfile() {
         final UserInfo userInfo = mUm.createProfileForUser("TestProfile",
                 UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
+        if (userInfo == null) {
+            throw new IllegalStateException("Creating managed profile failed. Most likely there is "
+                    + "already a pre-existing profile on the device.");
+        }
         mUsersToRemove.add(userInfo.id);
         return userInfo.id;
     }
@@ -625,6 +688,20 @@ public class UserLifecycleTests {
                 return false;
             }
         }
+    }
+
+    /** Gets the PACKAGE_WHITELIST_MODE_PROP System Property. */
+    private int getUserTypePackageWhitelistMode() {
+        return SystemProperties.getInt(PACKAGE_WHITELIST_MODE_PROP,
+                USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT);
+    }
+
+    /** Sets the PACKAGE_WHITELIST_MODE_PROP System Property to the given value. */
+    private void setUserTypePackageWhitelistMode(int mode) {
+        String result = ShellHelper.runShellCommand(
+                String.format("setprop %s %d", PACKAGE_WHITELIST_MODE_PROP, mode));
+        attestFalse("Failed to set sysprop " + PACKAGE_WHITELIST_MODE_PROP + ": " + result,
+                result != null && result.contains("Failed"));
     }
 
     private void removeUser(int userId) {

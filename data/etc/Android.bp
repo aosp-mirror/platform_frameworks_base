@@ -22,6 +22,12 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "preinstalled-packages-platform.xml",
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-platform.xml",
+}
+
+prebuilt_etc {
     name: "hiddenapi-package-whitelist.xml",
     sub_dir: "sysconfig",
     src: "hiddenapi-package-whitelist.xml",
