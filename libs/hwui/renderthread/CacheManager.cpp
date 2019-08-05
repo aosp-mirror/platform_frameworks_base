@@ -28,7 +28,6 @@
 #include <SkExecutor.h>
 #include <SkGraphics.h>
 #include <SkMathPriv.h>
-#include <gui/Surface.h>
 #include <math.h>
 #include <set>
 

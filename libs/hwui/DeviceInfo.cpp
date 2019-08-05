@@ -18,7 +18,6 @@
 
 #include "Properties.h"
 
-#include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <ui/GraphicTypes.h>
 
