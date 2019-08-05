@@ -93,19 +93,19 @@ public class BadgedImageView extends ImageView {
     /**
      * Set whether the dot should appear on left or right side of the view.
      */
-    public void setDotPosition(boolean onLeft) {
+    void setDotOnLeft(boolean onLeft) {
         mOnLeft = onLeft;
         invalidate();
     }
 
-    public boolean getDotPosition() {
+    boolean getDotOnLeft() {
         return mOnLeft;
     }
 
     /**
      * Set whether the dot should show or not.
      */
-    public void setShowDot(boolean showDot) {
+    void setShowDot(boolean showDot) {
         mShowDot = showDot;
         invalidate();
     }
@@ -113,7 +113,7 @@ public class BadgedImageView extends ImageView {
     /**
      * @return whether the dot is being displayed.
      */
-    public boolean isShowingDot() {
+    boolean isShowingDot() {
         return mShowDot;
     }
 
@@ -136,8 +136,24 @@ public class BadgedImageView extends ImageView {
     /**
      * How big the dot should be, fraction from 0 to 1.
      */
-    public void setDotScale(float fraction) {
+    void setDotScale(float fraction) {
         mDotScale = fraction;
         invalidate();
+    }
+
+    /**
+     * Return dot position relative to bubble view container bounds.
+     */
+    float[] getDotCenter() {
+        float[] dotPosition;
+        if (mOnLeft) {
+            dotPosition = mDotRenderer.getLeftDotPosition();
+        } else {
+            dotPosition =  mDotRenderer.getRightDotPosition();
+        }
+        getDrawingRect(mTempBounds);
+        float dotCenterX = mTempBounds.width() * dotPosition[0];
+        float dotCenterY = mTempBounds.height() * dotPosition[1];
+        return new float[]{dotCenterX, dotCenterY};
     }
 }

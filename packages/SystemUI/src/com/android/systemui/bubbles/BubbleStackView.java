@@ -181,7 +181,6 @@ public class BubbleStackView extends FrameLayout {
     private float mVerticalPosPercentBeforeRotation = -1;
 
     private int mBubbleSize;
-    private int mIconBitmapSize;
     private int mBubblePaddingTop;
     private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
@@ -360,8 +359,7 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
-        mIconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
-        mBubbleIconFactory = new BubbleIconFactory(context, mIconBitmapSize);
+        mBubbleIconFactory = new BubbleIconFactory(context);
 
         mExpandedViewContainer = new FrameLayout(context);
         mExpandedViewContainer.setElevation(elevation);
@@ -485,7 +483,7 @@ public class BubbleStackView extends FrameLayout {
      */
     public void onThemeChanged() {
         // Recreate icon factory to update default adaptive icon scale.
-        mBubbleIconFactory = new BubbleIconFactory(mContext, mIconBitmapSize);
+        mBubbleIconFactory = new BubbleIconFactory(mContext);
         setUpFlyout();
         for (Bubble b: mBubbleData.getBubbles()) {
             b.getIconView().setBubbleIconFactory(mBubbleIconFactory);
@@ -1096,7 +1094,7 @@ public class BubbleStackView extends FrameLayout {
                 onLeft ? -deltaX / mFlyout.getWidth() : deltaX / mFlyout.getWidth();
         mFlyout.setCollapsePercent(Math.min(1f, Math.max(0f, collapsePercent)));
 
-        // Calculate how to translate the flyout if it has been dragged too far in etiher direction.
+        // Calculate how to translate the flyout if it has been dragged too far in either direction.
         float overscrollTranslation = 0f;
         if (collapsePercent < 0f || collapsePercent > 1f) {
             // Whether we are more than 100% transitioned to the dot.
@@ -1449,7 +1447,8 @@ public class BubbleStackView extends FrameLayout {
                         mStackAnimationController.isStackOnLeftSide(),
                         bubble.getIconView().getBadgeColor(),
                         afterShow,
-                        mAfterFlyoutHides);
+                        mAfterFlyoutHides,
+                        bubble.getIconView().getDotCenter());
                 mFlyout.bringToFront();
             });
         }

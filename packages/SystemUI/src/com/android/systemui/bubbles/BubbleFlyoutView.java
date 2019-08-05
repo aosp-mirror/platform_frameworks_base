@@ -124,16 +124,15 @@ public class BubbleFlyoutView extends FrameLayout {
     private float mBgTranslationX;
     private float mBgTranslationY;
 
+    private float[] mDotCenter;
+
     /** The flyout's X translation when at rest (not animating or dragging). */
     private float mRestingTranslationX = 0f;
 
     /** The badge sizes are defined as percentages of the app icon size. Same value as Launcher3. */
     private static final float SIZE_PERCENTAGE = 0.228f;
 
-    /** Extra scale down of the dot provides room for error in estimating actual dot location.
-     * At the end of the flyout-to-dot animation, wherever the small dot ends up, its disappearance
-     * and the appearance of the larger real dot forms a cohesive animation.*/
-    private static final float DOT_SCALE = 0.8f;
+    private static final float DOT_SCALE = 1f;
 
     /** Callback to run when the flyout is hidden. */
     @Nullable private Runnable mOnHide;
@@ -207,10 +206,11 @@ public class BubbleFlyoutView extends FrameLayout {
     void setupFlyoutStartingAsDot(
             CharSequence updateMessage, PointF stackPos, float parentWidth,
             boolean arrowPointingLeft, int dotColor, @Nullable Runnable onLayoutComplete,
-            @Nullable Runnable onHide) {
+            @Nullable Runnable onHide, float[] dotCenter) {
         mArrowPointingLeft = arrowPointingLeft;
         mDotColor = dotColor;
         mOnHide = onHide;
+        mDotCenter = dotCenter;
 
         setCollapsePercent(1f);
 
@@ -223,14 +223,16 @@ public class BubbleFlyoutView extends FrameLayout {
 
         // Wait for the TextView to lay out so we know its line count.
         post(() -> {
+            float restingTranslationY;
             // Multi line flyouts get top-aligned to the bubble.
             if (mFlyoutText.getLineCount() > 1) {
-                setTranslationY(stackPos.y + mBubbleIconTopPadding);
+                restingTranslationY = stackPos.y + mBubbleIconTopPadding;
             } else {
                 // Single line flyouts are vertically centered with respect to the bubble.
-                setTranslationY(
-                        stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f);
+                restingTranslationY =
+                        stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
             }
+            setTranslationY(restingTranslationY);
 
             // Calculate the translation required to position the flyout next to the bubble stack,
             // with the desired padding.
@@ -244,19 +246,14 @@ public class BubbleFlyoutView extends FrameLayout {
             mFlyoutToDotHeightDelta = getHeight() - mNewDotSize;
 
             // Calculate the translation values needed to be in the correct 'new dot' position.
-            final float distanceFromFlyoutLeftToDotCenterX =
-                    mFlyoutSpaceFromBubble + mBubbleIconTopPadding + mOriginalDotSize / 2;
-            if (mArrowPointingLeft) {
-                mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX - (mOriginalDotSize / 2);
-            } else {
-                mTranslationXWhenDot =
-                        getWidth() + distanceFromFlyoutLeftToDotCenterX - (mOriginalDotSize / 2);
-            }
-            mTranslationYWhenDot =
-                    getHeight() / 2f
-                            - mBubbleSize / 2f
-                            + mOriginalDotSize / 2;
+            final float dotPositionX = stackPos.x + mDotCenter[0] - (mOriginalDotSize / 2f);
+            final float dotPositionY = stackPos.y + mDotCenter[1] - (mOriginalDotSize / 2f);
 
+            final float distanceFromFlyoutLeftToDotCenterX = mRestingTranslationX - dotPositionX;
+            final float distanceFromLayoutTopToDotCenterY = restingTranslationY - dotPositionY;
+
+            mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX;
+            mTranslationYWhenDot = -distanceFromLayoutTopToDotCenterY;
             if (onLayoutComplete != null) {
                 onLayoutComplete.run();
             }
