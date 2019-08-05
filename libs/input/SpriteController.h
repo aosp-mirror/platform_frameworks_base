@@ -55,11 +55,12 @@ struct SpriteTransformationMatrix {
  * Icon that a sprite displays, including its hotspot.
  */
 struct SpriteIcon {
-    inline SpriteIcon() : hotSpotX(0), hotSpotY(0) { }
-    inline SpriteIcon(const SkBitmap& bitmap, float hotSpotX, float hotSpotY) :
-            bitmap(bitmap), hotSpotX(hotSpotX), hotSpotY(hotSpotY) { }
+    inline SpriteIcon() : style(0), hotSpotX(0), hotSpotY(0) { }
+    inline SpriteIcon(const SkBitmap& bitmap, int32_t style, float hotSpotX, float hotSpotY) :
+            bitmap(bitmap), style(style), hotSpotX(hotSpotX), hotSpotY(hotSpotY) { }
 
     SkBitmap bitmap;
+    int32_t style;
     float hotSpotX;
     float hotSpotY;
 
@@ -69,11 +70,12 @@ struct SpriteIcon {
             bitmap.readPixels(bitmapCopy.info(), bitmapCopy.getPixels(), bitmapCopy.rowBytes(),
                     0, 0);
         }
-        return SpriteIcon(bitmapCopy, hotSpotX, hotSpotY);
+        return SpriteIcon(bitmapCopy, style, hotSpotX, hotSpotY);
     }
 
     inline void reset() {
         bitmap.reset();
+        style = 0;
         hotSpotX = 0;
         hotSpotY = 0;
     }
@@ -149,15 +151,15 @@ public:
     SpriteController(const sp<Looper>& looper, int32_t overlayLayer);
 
     /* Creates a new sprite, initially invisible. */
-    sp<Sprite> createSprite();
+    virtual sp<Sprite> createSprite();
 
     /* Opens or closes a transaction to perform a batch of sprite updates as part of
      * a single operation such as setPosition and setAlpha.  It is not necessary to
      * open a transaction when updating a single property.
      * Calls to openTransaction() nest and must be matched by an equal number
      * of calls to closeTransaction(). */
-    void openTransaction();
-    void closeTransaction();
+    virtual void openTransaction();
+    virtual void closeTransaction();
 
 private:
     enum {
@@ -174,6 +176,7 @@ private:
         DIRTY_VISIBILITY = 1 << 5,
         DIRTY_HOTSPOT = 1 << 6,
         DIRTY_DISPLAY_ID = 1 << 7,
+        DIRTY_ICON_STYLE = 1 << 8,
     };
 
     /* Describes the state of a sprite.
