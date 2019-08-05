@@ -25,7 +25,7 @@ java_sdk_library {
         "android.test.mock",
     ],
 
-    srcs_lib: "framework",
+    srcs_lib: "framework-minus-apex",
     srcs_lib_whitelist_dirs: ["core/java"],
     srcs_lib_whitelist_pkgs: ["android"],
     compile_dex: true,

@@ -26,7 +26,35 @@
 // READ ME: ########################################################
 
 java_defaults {
+    name: "framework-aidl-export-defaults",
+
+    aidl: {
+        export_include_dirs: [
+            // From build/make/core/pathmap.mk FRAMEWORK_BASE_SUBDIRS
+            "core/java",
+            "graphics/java",
+            "location/java",
+            "lowpan/java",
+            "media/java",
+            "media/apex/java",
+            "media/mca/effect/java",
+            "media/mca/filterfw/java",
+            "media/mca/filterpacks/java",
+            "drm/java",
+            "opengl/java",
+            "sax/java",
+            "telecomm/java",
+            "telephony/java",
+            "wifi/java",
+            "keystore/java",
+            "rs/java",
+        ],
+    },
+}
+
+java_defaults {
     name: "framework-defaults",
+    defaults: ["framework-aidl-export-defaults"],
     installable: true,
 
     srcs: [
@@ -78,9 +106,6 @@ java_defaults {
         "core/java/android/app/ISearchManagerCallback.aidl",
         "core/java/android/app/IServiceConnection.aidl",
         "core/java/android/app/IStopUserCallback.aidl",
-        "core/java/android/app/job/IJobCallback.aidl",
-        "core/java/android/app/job/IJobScheduler.aidl",
-        "core/java/android/app/job/IJobService.aidl",
         "core/java/android/app/ITransientNotification.aidl",
         "core/java/android/app/IUidObserver.aidl",
         "core/java/android/app/IUiAutomationConnection.aidl",
@@ -702,27 +727,6 @@ java_defaults {
     ],
 
     aidl: {
-        export_include_dirs: [
-            // From build/make/core/pathmap.mk FRAMEWORK_BASE_SUBDIRS
-            "core/java",
-            "graphics/java",
-            "location/java",
-            "lowpan/java",
-            "media/java",
-            "media/apex/java",
-            "media/mca/effect/java",
-            "media/mca/filterfw/java",
-            "media/mca/filterpacks/java",
-            "drm/java",
-            "opengl/java",
-            "sax/java",
-            "telecomm/java",
-            "telephony/java",
-            "wifi/java",
-            "keystore/java",
-            "rs/java",
-        ],
-
         include_dirs: [
             "system/update_engine/binder_bindings",
             "frameworks/native/aidl/binder",
@@ -838,13 +842,24 @@ filegroup {
 }
 
 java_library {
-    name: "framework",
+    name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     javac_shard_size: 150,
     required: [
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
     ],
+}
+
+java_library {
+    name: "framework",
+    defaults: ["framework-aidl-export-defaults"],
+    installable: true,
+    static_libs: [
+        "framework-minus-apex",
+        "jobscheduler-framework",
+    ],
+    sdk_version: "core_platform",
 }
 
 java_library {
@@ -1371,8 +1386,9 @@ stubs_defaults {
         ":updatable-media-srcs-without-aidls",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
+        ":jobscheduler-framework-source",
     ],
-    srcs_lib: "framework",
+    srcs_lib: "framework-minus-apex",
     srcs_lib_whitelist_dirs: frameworks_base_subdirs,
     srcs_lib_whitelist_pkgs: packages_to_document,
     libs: framework_docs_only_libs,
@@ -1428,8 +1444,9 @@ stubs_defaults {
         ":opt-net-voip-srcs",
         ":core_public_api_files",
         ":updatable-media-srcs-without-aidls",
+        ":jobscheduler-framework-source",
     ],
-    srcs_lib: "framework",
+    srcs_lib: "framework-minus-apex",
     srcs_lib_whitelist_dirs: frameworks_base_subdirs,
     srcs_lib_whitelist_pkgs: packages_to_document,
     local_sourcepaths: frameworks_base_subdirs,
