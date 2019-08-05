@@ -806,7 +806,7 @@ public final class SmsApplication {
             if (userId != UserHandle.USER_SYSTEM) {
                 try {
                     userContext = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
-                            new UserHandle(userId));
+                        UserHandle.of(userId));
                 } catch (NameNotFoundException nnfe) {
                     if (DEBUG_MULTIUSER) {
                         Log.w(LOG_TAG, "Unable to create package context for user " + userId);
