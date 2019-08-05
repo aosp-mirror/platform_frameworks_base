@@ -25,6 +25,7 @@ import android.gsi.IGsid;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -195,7 +196,20 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     }
 
     @Override
-    public boolean write(byte[] buf) throws RemoteException {
-        return getGsiService().commitGsiChunkFromMemory(buf);
+    public boolean setAshmem(ParcelFileDescriptor ashmem, long size) {
+        try {
+            return getGsiService().setGsiAshmem(ashmem, size);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    @Override
+    public boolean submitFromAshmem(long size) {
+        try {
+            return getGsiService().commitGsiChunkFromAshmem(size);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
     }
 }

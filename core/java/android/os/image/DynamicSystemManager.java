@@ -20,6 +20,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.gsi.GsiProgress;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
 /**
@@ -52,21 +53,38 @@ public class DynamicSystemManager {
     /** The DynamicSystemManager.Session represents a started session for the installation. */
     public class Session {
         private Session() {}
+
         /**
-         * Write a chunk of the DynamicSystem system image
+         * Set the file descriptor that points to a ashmem which will be used
+         * to fetch data during the submitFromAshmem.
          *
-         * @return {@code true} if the call succeeds. {@code false} if there is any native runtime
-         *     error.
+         * @param ashmem fd that points to a ashmem
+         * @param size size of the ashmem file
          */
         @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-        public boolean write(byte[] buf) {
+        public boolean setAshmem(ParcelFileDescriptor ashmem, long size) {
             try {
-                return mService.write(buf);
+                return mService.setAshmem(ashmem, size);
             } catch (RemoteException e) {
                 throw new RuntimeException(e.toString());
             }
         }
 
+        /**
+         * Submit bytes to the DSU partition from the ashmem previously set with
+         * setAshmem.
+         *
+         * @param size Number of bytes
+         * @return true on success, false otherwise.
+         */
+        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+        public boolean submitFromAshmem(int size) {
+            try {
+                return mService.submitFromAshmem(size);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e.toString());
+            }
+        }
         /**
          * Finish write and make device to boot into the it after reboot.
          *
