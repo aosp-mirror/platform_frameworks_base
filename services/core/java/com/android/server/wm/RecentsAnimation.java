@@ -33,6 +33,7 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_O
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
 
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -60,7 +61,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private final Intent mTargetIntent;
     private final ComponentName mRecentsComponent;
     private final int mRecentsUid;
-    private final int mCallingPid;
+    private final @Nullable WindowProcessController mCaller;
     private final int mUserId;
     private final int mTargetActivityType;
 
@@ -76,7 +77,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
     RecentsAnimation(ActivityTaskManagerService atm, ActivityStackSupervisor stackSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
-            Intent targetIntent, ComponentName recentsComponent, int recentsUid, int callingPid) {
+            Intent targetIntent, ComponentName recentsComponent, int recentsUid,
+            @Nullable WindowProcessController caller) {
         mService = atm;
         mStackSupervisor = stackSupervisor;
         mDefaultDisplay = mService.mRootActivityContainer.getDefaultDisplay();
@@ -85,7 +87,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         mTargetIntent = targetIntent;
         mRecentsComponent = recentsComponent;
         mRecentsUid = recentsUid;
-        mCallingPid = callingPid;
+        mCaller = caller;
         mUserId = atm.getCurrentUserId();
         mTargetActivityType = targetIntent.getComponent() != null
                 && recentsComponent.equals(targetIntent.getComponent())
@@ -190,7 +192,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mTargetIntent);
 
-        mService.mH.post(() -> mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, true));
+        if (mCaller != null) {
+            mCaller.setRunningRecentsAnimation(true);
+        }
 
         mWindowManager.deferSurfaceLayout();
         try {
@@ -286,8 +290,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 mService.stopAppSwitches();
             }
 
-            mService.mH.post(
-                    () -> mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, false));
+            if (mCaller != null) {
+                mCaller.setRunningRecentsAnimation(false);
+            }
 
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
@@ -453,7 +458,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     /**
      * Called only when the animation should be canceled prior to starting.
      */
-    private void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
+    static void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
         try {
             recentsAnimationRunner.onAnimationCanceled(false /* deferredWithScreenshot */);
         } catch (RemoteException e) {

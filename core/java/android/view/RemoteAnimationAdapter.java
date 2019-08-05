@@ -55,6 +55,7 @@ public class RemoteAnimationAdapter implements Parcelable {
 
     /** @see #getCallingPid */
     private int mCallingPid;
+    private int mCallingUid;
 
     /**
      * @param runner The interface that gets notified when we actually need to start the animation.
@@ -103,10 +104,11 @@ public class RemoteAnimationAdapter implements Parcelable {
     }
 
     /**
-     * To be called by system_server to keep track which pid is running this animation.
+     * To be called by system_server to keep track which pid and uid is running this animation.
      */
-    public void setCallingPid(int pid) {
+    public void setCallingPidUid(int pid, int uid) {
         mCallingPid = pid;
+        mCallingUid = uid;
     }
 
     /**
@@ -114,6 +116,13 @@ public class RemoteAnimationAdapter implements Parcelable {
      */
     public int getCallingPid() {
         return mCallingPid;
+    }
+
+    /**
+     * @return The uid of the process running the animation.
+     */
+    public int getCallingUid() {
+        return mCallingUid;
     }
 
     @Override
