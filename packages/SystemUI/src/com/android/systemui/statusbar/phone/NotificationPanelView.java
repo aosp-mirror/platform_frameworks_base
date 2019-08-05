@@ -1266,6 +1266,15 @@ public class NotificationPanelView extends PanelView implements
             // earlier so the state is already up to date when dragging down.
             setListening(true);
         }
+        if (isQsSplitEnabled() && !mKeyguardShowing) {
+            if (mQsExpandImmediate) {
+                mNotificationStackScroller.setVisibility(View.GONE);
+                mQsFrame.setVisibility(View.VISIBLE);
+            } else {
+                mNotificationStackScroller.setVisibility(View.VISIBLE);
+                mQsFrame.setVisibility(View.GONE);
+            }
+        }
         return false;
     }
 
@@ -1539,6 +1548,10 @@ public class NotificationPanelView extends PanelView implements
 
         mBarState = statusBarState;
         mKeyguardShowing = keyguardShowing;
+        if (mKeyguardShowing && isQsSplitEnabled()) {
+            mNotificationStackScroller.setVisibility(View.VISIBLE);
+            mQsFrame.setVisibility(View.VISIBLE);
+        }
 
         if (oldState == StatusBarState.KEYGUARD
                 && (goingToFullShade || statusBarState == StatusBarState.SHADE_LOCKED)) {
