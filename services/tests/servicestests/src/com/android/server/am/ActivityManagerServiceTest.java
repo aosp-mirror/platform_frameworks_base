@@ -70,13 +70,14 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.appop.AppOpsService;
 import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
+import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -114,6 +115,8 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_ACTIVE
     };
 
+    @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+
     private Context mContext = getInstrumentation().getTargetContext();
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManager mPackageManager;
@@ -131,7 +134,7 @@ public class ActivityManagerServiceTest {
         mHandlerThread.start();
         mHandler = new TestHandler(mHandlerThread.getLooper());
         mInjector = new TestInjector();
-        mAms = new ActivityManagerService(mInjector);
+        mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
         mAms.mWaitForNetworkTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());

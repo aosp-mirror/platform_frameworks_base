@@ -2373,11 +2373,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    @VisibleForTesting
-    public ActivityManagerService(Injector injector) {
-        this(injector, null /* handlerThread */);
-    }
-
     /**
      * Provides the basic functionality for activity task related tests when a handler thread is
      * given to initialize the dependency members.

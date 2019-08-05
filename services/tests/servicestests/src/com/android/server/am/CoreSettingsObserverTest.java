@@ -39,6 +39,7 @@ import com.android.server.appop.AppOpsService;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -60,6 +61,8 @@ public class CoreSettingsObserverTest {
     private static final int TEST_INT = 111;
     private static final float TEST_FLOAT = 3.14f;
     private static final String TEST_STRING = "testString";
+
+    @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
 
     private ActivityManagerService mAms;
     @Mock private Context mContext;
@@ -90,7 +93,7 @@ public class CoreSettingsObserverTest {
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
 
-        mAms = new ActivityManagerService(new TestInjector());
+        mAms = new ActivityManagerService(new TestInjector(), mServiceThreadRule.getThread());
         mCoreSettingsObserver = new CoreSettingsObserver(mAms);
     }
 
@@ -157,7 +160,7 @@ public class CoreSettingsObserverTest {
     private class TestInjector extends Injector {
         @Override
         public Context getContext() {
-            return mContext;
+            return getInstrumentation().getContext();
         }
 
         @Override
@@ -167,7 +170,7 @@ public class CoreSettingsObserverTest {
 
         @Override
         public Handler getUiHandler(ActivityManagerService service) {
-            return null;
+            return mServiceThreadRule.getThread().getThreadHandler();
         }
     }
 }
