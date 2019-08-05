@@ -582,9 +582,9 @@ public class BugreportProgressService extends Service {
         ParcelFileDescriptor screenshotFd = createReadWriteFile(BUGREPORT_DIR,
                 bugreportName + ".png");
         if (screenshotFd == null) {
-            Log.e(TAG, "Screenshot parcel file descriptor is null.");
-            // TODO(b/123617758): Delete bugreport file created above
+            Log.e(TAG, "Screenshot parcel file descriptor is null. Deleting bugreport file");
             FileUtils.closeQuietly(bugreportFd);
+            new File(BUGREPORT_DIR, String.format("%s.zip", bugreportName)).delete();
             return;
         }
         mBugreportManager = (BugreportManager) mContext.getSystemService(
@@ -972,18 +972,8 @@ public class BugreportProgressService extends Service {
     private void onBugreportFinished(int id) {
         BugreportInfo info = getInfo(id);
         final File bugreportFile = new File(BUGREPORT_DIR, info.name + ".zip");
-        if (bugreportFile == null) {
-            // Should never happen, an id always has a file linked to it.
-            Log.wtf(TAG, "Missing file " + bugreportFile.getPath() + " does not exist.");
-            return;
-        }
         final int max = -1; // this is to log metrics for dumpstate duration.
         File screenshotFile = new File(BUGREPORT_DIR, info.name + ".png");
-        if (screenshotFile == null) {
-            // Should never happen, an id always has a file linked to it.
-            Log.wtf(TAG, "Missing file " + screenshotFile.getPath() + " does not exist.");
-            return;
-        }
         // If the screenshot file did not get populated implies this type of bugreport does not
         // need the screenshot file; setting the file to null so that empty file doesnt get shared
         if (screenshotFile.length() == 0) {
