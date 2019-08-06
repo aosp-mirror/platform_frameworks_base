@@ -16,6 +16,7 @@
 
 #include "optimize/ResourcePathShortener.h"
 
+#include <set>
 #include <unordered_set>
 
 #include "androidfw/StringPiece.h"
@@ -71,10 +72,19 @@ std::string GetShortenedPath(const android::StringPiece& shortened_filename,
   return shortened_path;
 }
 
+// implement custom comparator of FileReference pointers so as to use the
+// underlying filepath as key rather than the integer address. This is to ensure
+// determinism of output for colliding files.
+struct PathComparator {
+    bool operator() (const FileReference* lhs, const FileReference* rhs) const {
+        return lhs->path->compare(*rhs->path);
+    }
+};
+
 bool ResourcePathShortener::Consume(IAaptContext* context, ResourceTable* table) {
   // used to detect collisions
   std::unordered_set<std::string> shortened_paths;
-  std::unordered_set<FileReference*> file_refs;
+  std::set<FileReference*, PathComparator> file_refs;
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
