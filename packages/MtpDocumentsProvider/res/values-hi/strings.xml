@@ -19,7 +19,7 @@
     <string name="app_label" msgid="6271216747302322594">"MTP होस्ट"</string>
     <string name="downloads_app_label" msgid="7120690641874849726">"डाउनलोड"</string>
     <string name="root_name" msgid="5819495383921089536">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> <xliff:g id="STORAGE_NAME">%2$s</xliff:g>"</string>
-    <string name="accessing_notification_title" msgid="3030133609230917944">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> से फ़ाइलें एक्सेस कर रहा है"</string>
+    <string name="accessing_notification_title" msgid="3030133609230917944">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> से फ़ाइलें ऐक्सेस कर रहा है"</string>
     <string name="error_busy_device" msgid="3997316850357386589">"दूसरा डिवाइस व्यस्त है. आप उसके उपलब्ध हो जाने तक फ़ाइलें ट्रांसफ़र नहीं कर सकते."</string>
     <string name="error_locked_device" msgid="7557872102188356147">"कोई फ़ाइल नहीं मिली. हो सकता है कि दूसरा डिवाइस लॉक हो. अगर ऐसा है, तो उसे अनलॉक करें और दोबारा कोशिश करें."</string>
 </resources>
