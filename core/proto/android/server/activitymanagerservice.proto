@@ -261,6 +261,8 @@ message MemInfoDumpProto {
                 // The dirty the pages that have been swapped out, proportional.
                 int32 dirty_swap_pss_kb = 9;
             }
+            // The rss set size for the heap.
+            optional int32 total_rss_kb = 10;
         }
         message HeapInfo {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -294,6 +296,12 @@ message MemInfoDumpProto {
                 int32 total_swap_pss = 8;
                 int32 total_swap_kb = 9;
             }
+            optional int32 java_heap_rss_kb = 10;
+            optional int32 native_heap_rss_kb = 11;
+            optional int32 code_rss_kb = 12;
+            optional int32 stack_rss_kb = 13;
+            optional int32 graphics_rss_kb = 14;
+            optional int32 unknown_rss_kb = 15;
         }
         optional AppSummary app_summary = 9;
     }
@@ -359,10 +367,16 @@ message MemInfoDumpProto {
         optional int32 id = 3;
         optional bool is_proc = 4;
         optional bool has_activities = 5;
-        optional int64 pss_kb = 6;
+        oneof ss_kb {
+            int64 pss_kb = 6;
+            int64 rss_kb = 9;
+        }
         optional int64 swap_pss_kb = 7;
         repeated MemItem sub_items = 8;
     }
+    repeated MemItem total_rss_by_process = 29;
+    repeated MemItem total_rss_by_oom_adjustment = 30;
+    repeated MemItem total_rss_by_category = 31;
     repeated MemItem total_pss_by_process = 5;
     repeated MemItem total_pss_by_oom_adjustment = 6;
     repeated MemItem total_pss_by_category = 7;
@@ -414,6 +428,8 @@ message MemInfoDumpProto {
 
     optional bool is_low_ram_device = 27;
     optional bool is_high_end_gfx = 28;
+
+    // Next Tag: 32
 }
 
 message StickyBroadcastProto {
