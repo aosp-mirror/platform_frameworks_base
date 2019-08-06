@@ -261,6 +261,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
         mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
+    /**
+     * Called to indicate this view is removed
+     */
+    public void setRemoved() {
+    }
+
     public int getCustomBackgroundColor() {
         // Parent notifications should always use the normal background color
         return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
