@@ -621,6 +621,8 @@ public class NotificationManagerService extends SystemService {
                 mConditionProviders.readXml(
                         parser, mAllowedManagedServicePackages, forRestore, userId);
                 migratedManagedServices = true;
+            } else if (mSnoozeHelper.XML_TAG_NAME.equals(parser.getName())) {
+                mSnoozeHelper.readXml(parser);
             }
             if (LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG.equals(parser.getName())) {
                 if (forRestore && userId != UserHandle.USER_SYSTEM) {
@@ -709,6 +711,7 @@ public class NotificationManagerService extends SystemService {
         mPreferencesHelper.writeXml(out, forBackup, userId);
         mListeners.writeXml(out, forBackup, userId);
         mAssistants.writeXml(out, forBackup, userId);
+        mSnoozeHelper.writeXml(out);
         mConditionProviders.writeXml(out, forBackup, userId);
         if (!forBackup || userId == UserHandle.USER_SYSTEM) {
             writeSecureNotificationsPolicy(out);
@@ -1753,6 +1756,7 @@ public class NotificationManagerService extends SystemService {
                 com.android.internal.R.integer.config_notificationWarnRemoteViewSizeBytes);
         mStripRemoteViewsSizeBytes = getContext().getResources().getInteger(
                 com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
+
     }
 
     @Override
@@ -5284,7 +5288,7 @@ public class NotificationManagerService extends SystemService {
             updateLightsLocked();
             if (mSnoozeCriterionId != null) {
                 mAssistants.notifyAssistantSnoozedLocked(r.sbn, mSnoozeCriterionId);
-                mSnoozeHelper.snooze(r);
+                mSnoozeHelper.snooze(r, mSnoozeCriterionId);
             } else {
                 mSnoozeHelper.snooze(r, mDuration);
             }
@@ -5387,6 +5391,27 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void run() {
             synchronized (mNotificationLock) {
+                final Long snoozeAt =
+                        mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
+                                r.getUser().getIdentifier(),
+                                r.sbn.getPackageName(), r.sbn.getKey());
+                final long currentTime = System.currentTimeMillis();
+                if (snoozeAt.longValue() > currentTime) {
+                    (new SnoozeNotificationRunnable(r.sbn.getKey(),
+                            snoozeAt.longValue() - currentTime, null)).snoozeLocked(r);
+                    return;
+                }
+
+                final String contextId =
+                        mSnoozeHelper.getSnoozeContextForUnpostedNotification(
+                                r.getUser().getIdentifier(),
+                                r.sbn.getPackageName(), r.sbn.getKey());
+                if (contextId != null) {
+                    (new SnoozeNotificationRunnable(r.sbn.getKey(),
+                            0, contextId)).snoozeLocked(r);
+                    return;
+                }
+
                 mEnqueuedNotifications.add(r);
                 scheduleTimeoutLocked(r);
 
@@ -6937,6 +6962,7 @@ public class NotificationManagerService extends SystemService {
         if (DBG) {
             Slog.d(TAG, String.format("unsnooze event(%s, %s)", key, listenerName));
         }
+        mSnoozeHelper.cleanupPersistedContext(key);
         mSnoozeHelper.repost(key);
         handleSavePolicyFile();
     }
