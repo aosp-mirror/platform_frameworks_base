@@ -98,7 +98,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             return;
         }
         try {
-            mClient.notifyProviderInfoUpdated(mProviderInfo);
+            mClient.updateProviderInfo(mProviderInfo);
         } catch (RemoteException ex) {
             Log.w(TAG, "Failed to send onProviderInfoUpdated");
         }

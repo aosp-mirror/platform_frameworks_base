@@ -43,7 +43,7 @@ import java.util.Objects;
  * Maintains a connection to a particular media route provider service.
  */
 final class MediaRoute2ProviderProxy implements ServiceConnection {
-    private static final String TAG = "MediaRoute2ProviderProxy";
+    private static final String TAG = "MediaRoute2Provider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
@@ -54,7 +54,6 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
     private Callback mCallback;
 
-    //TODO: make it nonnull
     private MediaRoute2ProviderInfo mProviderInfo;
 
     // Connection state
@@ -246,12 +245,20 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         if (mActiveConnection != connection) {
             return;
         }
-        // Set a unique provider id for identifying providers.
-        mProviderInfo = new MediaRoute2ProviderInfo.Builder(info)
-                .setUniqueId(mUniqueId)
-                .build();
         if (DEBUG) {
             Slog.d(TAG, this + ": State changed ");
+        }
+        setAndNotifyProviderInfo(info);
+    }
+
+    private void setAndNotifyProviderInfo(MediaRoute2ProviderInfo info) {
+        //TODO: check if info is not updated
+        if (info == null) {
+            mProviderInfo = null;
+        } else {
+            mProviderInfo = new MediaRoute2ProviderInfo.Builder(info)
+                .setUniqueId(mUniqueId)
+                .build();
         }
         mHandler.post(mStateChanged);
     }
@@ -261,6 +268,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
             mConnectionReady = false;
             mActiveConnection.dispose();
             mActiveConnection = null;
+            setAndNotifyProviderInfo(null);
         }
     }
 
@@ -337,7 +345,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
             mHandler.post(() -> onConnectionDied(Connection.this));
         }
 
-        void postProviderUpdated(MediaRoute2ProviderInfo info) {
+        void postProviderInfoUpdated(MediaRoute2ProviderInfo info) {
             mHandler.post(() -> onProviderInfoUpdated(Connection.this, info));
         }
     }
@@ -354,10 +362,10 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         }
 
         @Override
-        public void notifyProviderInfoUpdated(MediaRoute2ProviderInfo info) {
+        public void updateProviderInfo(MediaRoute2ProviderInfo info) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
-                connection.postProviderUpdated(info);
+                connection.postProviderInfoUpdated(info);
             }
         }
     }

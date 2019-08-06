@@ -16,13 +16,16 @@
 
 package android.media;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -58,6 +61,12 @@ public class MediaRouter2 {
     private Client mClient;
 
     private final String mPackageName;
+    final Handler mHandler;
+
+    List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
+    volatile List<MediaRoute2Info> mRoutes = Collections.emptyList();
+
+    MediaRoute2Info mSelectedRoute;
 
     /**
      * Gets an instance of the media router associated with the context.
@@ -78,6 +87,7 @@ public class MediaRouter2 {
                 ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
         mPackageName = mContext.getPackageName();
         //TODO: read control categories from the manifest
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     /**
@@ -100,25 +110,10 @@ public class MediaRouter2 {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(callback, "callback must not be null");
 
+        CallbackRecord record;
         // This is required to prevent adding the same callback twice.
         synchronized (mCallbackRecords) {
-            if (mCallbackRecords.size() == 0) {
-                synchronized (sLock) {
-                    Client client = new Client();
-                    try {
-                        mMediaRouterService.registerClient2AsUser(client, mPackageName,
-                                UserHandle.myUserId());
-                        //TODO: We should merge control categories of callbacks.
-                        mMediaRouterService.setControlCategories(client, mControlCategories);
-                        mClient = client;
-                    } catch (RemoteException ex) {
-                        Log.e(TAG, "Unable to register media router.", ex);
-                    }
-                }
-            }
-
             final int index = findCallbackRecordIndexLocked(callback);
-            CallbackRecord record;
             if (index < 0) {
                 record = new CallbackRecord(callback);
                 mCallbackRecords.add(record);
@@ -128,6 +123,20 @@ public class MediaRouter2 {
             record.mExecutor = executor;
             record.mFlags = flags;
         }
+
+        synchronized (sLock) {
+            if (mClient == null) {
+                Client client = new Client();
+                try {
+                    mMediaRouterService.registerClient2(client, mPackageName);
+                    mMediaRouterService.setControlCategories(client, mControlCategories);
+                    mClient = client;
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to register media router.", ex);
+                }
+            }
+        }
+        record.notifyRoutes();
 
         //TODO: Update discovery request here.
     }
@@ -172,10 +181,9 @@ public class MediaRouter2 {
         Objects.requireNonNull(controlCategories, "control categories must not be null");
 
         Client client;
-        List<String> newControlCategories;
+        List<String> newControlCategories = new ArrayList<>(controlCategories);
         synchronized (sLock) {
-            mControlCategories = new ArrayList<>(controlCategories);
-            newControlCategories = mControlCategories;
+            mControlCategories = newControlCategories;
             client = mClient;
         }
         if (client != null) {
@@ -185,8 +193,29 @@ public class MediaRouter2 {
                 Log.e(TAG, "Unable to set control categories.", ex);
             }
         }
+        mHandler.sendMessage(obtainMessage(MediaRouter2::refreshAndNotifyRoutes, this));
     }
 
+    /**
+     * Gets the list of {@link MediaRoute2Info routes} currently known to the media router.
+     *
+     * @return the list of routes that support at least one of the control categories set by
+     * the application
+     */
+    @NonNull
+    public List<MediaRoute2Info> getRoutes() {
+        return mRoutes;
+    }
+
+    /**
+     * Gets the currently selected route.
+     *
+     * @return the selected route
+     */
+    @NonNull
+    public MediaRoute2Info getSelectedRoute() {
+        return mSelectedRoute;
+    }
 
     /**
      * Selects the specified route.
@@ -199,6 +228,7 @@ public class MediaRouter2 {
 
         Client client;
         synchronized (sLock) {
+            mSelectedRoute = route;
             client = mClient;
         }
         if (client != null) {
@@ -247,6 +277,61 @@ public class MediaRouter2 {
         return -1;
     }
 
+    void onProviderInfosUpdated(List<MediaRoute2ProviderInfo> providers) {
+        if (providers == null) {
+            Log.w(TAG, "Providers info is null.");
+            return;
+        }
+
+        mProviders = providers;
+        refreshAndNotifyRoutes();
+    }
+
+    void refreshAndNotifyRoutes() {
+        ArrayList<MediaRoute2Info> routes = new ArrayList<>();
+
+        List<String> controlCategories;
+        synchronized (sLock) {
+            controlCategories = mControlCategories;
+        }
+
+        for (MediaRoute2ProviderInfo provider : mProviders) {
+            updateProvider(provider, controlCategories, routes);
+        }
+
+        //TODO: Can orders be changed?
+        if (!Objects.equals(mRoutes, routes)) {
+            mRoutes = Collections.unmodifiableList(routes);
+            notifyRouteListChanged(mRoutes);
+        }
+    }
+
+    void updateProvider(MediaRoute2ProviderInfo provider, List<String> controlCategories,
+            List<MediaRoute2Info> outRoutes) {
+        if (provider == null || !provider.isValid()) {
+            Log.w(TAG, "Ignoring invalid provider : " + provider);
+        }
+
+        final Collection<MediaRoute2Info> routes = provider.getRoutes();
+        for (MediaRoute2Info route : routes) {
+            if (!route.isValid()) {
+                Log.w(TAG, "Ignoring invalid route : " + route);
+                continue;
+            }
+            if (!route.supportsControlCategory(controlCategories)) {
+                continue;
+            }
+            outRoutes.add(route);
+        }
+    }
+
+    void notifyRouteListChanged(List<MediaRoute2Info> routes) {
+        for (CallbackRecord record: mCallbackRecords) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onRoutesChanged(routes));
+        }
+    }
+
     /**
      * Interface for receiving events about media routing changes.
      */
@@ -265,9 +350,14 @@ public class MediaRouter2 {
          * Called when a route is removed.
          */
         public void onRouteRemoved(MediaRoute2Info routeInfo) {}
+
+        /**
+         * Called when the list of routes is changed.
+         */
+        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
     }
 
-    static final class CallbackRecord {
+    final class CallbackRecord {
         public final Callback mCallback;
         public Executor mExecutor;
         public int mFlags;
@@ -275,13 +365,25 @@ public class MediaRouter2 {
         CallbackRecord(@NonNull Callback callback) {
             mCallback = callback;
         }
+
+        void notifyRoutes() {
+            final List<MediaRoute2Info> routes = mRoutes;
+            // notify only when bound to media router service.
+            //TODO: Correct the condition when control category, default rotue, .. are finalized.
+            if (routes.size() > 0) {
+                mExecutor.execute(() -> mCallback.onRoutesChanged(routes));
+            }
+        }
     }
 
     class Client extends IMediaRouter2Client.Stub {
         @Override
-        public void notifyStateChanged() throws RemoteException {}
+        public void notifyRestoreRoute() throws RemoteException {}
 
         @Override
-        public void notifyRestoreRoute() throws RemoteException {}
+        public void notifyProviderInfosUpdated(List<MediaRoute2ProviderInfo> info) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2::onProviderInfosUpdated,
+                    MediaRouter2.this, info));
+        }
     }
 }
