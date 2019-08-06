@@ -219,7 +219,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         intent.setComponent(assistComponent);
         intent.putExtras(args);
 
-        if (structureEnabled) {
+        if (structureEnabled && AssistUtils.isDisclosureEnabled(mContext)) {
             showDisclosure();
         }
 
