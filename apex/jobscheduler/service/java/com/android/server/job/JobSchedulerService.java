@@ -1943,7 +1943,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 } catch (RemoteException e) {
                 }
                 if (mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
-                        && job.getStandbyBucket() != ACTIVE_INDEX
+                        && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
                         && (job.getFirstForceBatchedTimeElapsed() == 0
                         || sElapsedRealtimeClock.millis() - job.getFirstForceBatchedTimeElapsed()
                                 < mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS)) {

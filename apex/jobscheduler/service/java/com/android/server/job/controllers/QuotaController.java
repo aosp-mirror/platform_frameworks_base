@@ -608,7 +608,7 @@ public final class QuotaController extends StateController {
         final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
         setConstraintSatisfied(jobStatus, isWithinQuota);
         if (!isWithinQuota) {
-            maybeScheduleStartAlarmLocked(userId, pkgName, getEffectiveStandbyBucket(jobStatus));
+            maybeScheduleStartAlarmLocked(userId, pkgName, jobStatus.getEffectiveStandbyBucket());
         }
     }
 
@@ -719,22 +719,9 @@ public final class QuotaController extends StateController {
         return getRemainingExecutionTimeLocked(jobStatus);
     }
 
-    /**
-     * Returns an appropriate standby bucket for the job, taking into account any standby
-     * exemptions.
-     */
-    private int getEffectiveStandbyBucket(@NonNull final JobStatus jobStatus) {
-        if (jobStatus.uidActive || jobStatus.getJob().isExemptedFromAppStandby()) {
-            // Treat these cases as if they're in the ACTIVE bucket so that they get throttled
-            // like other ACTIVE apps.
-            return ACTIVE_INDEX;
-        }
-        return jobStatus.getStandbyBucket();
-    }
-
     @VisibleForTesting
     boolean isWithinQuotaLocked(@NonNull final JobStatus jobStatus) {
-        final int standbyBucket = getEffectiveStandbyBucket(jobStatus);
+        final int standbyBucket = jobStatus.getEffectiveStandbyBucket();
         // A job is within quota if one of the following is true:
         //   1. it was started while the app was in the TOP state
         //   2. the app is currently in the foreground
@@ -784,7 +771,7 @@ public final class QuotaController extends StateController {
     long getRemainingExecutionTimeLocked(@NonNull final JobStatus jobStatus) {
         return getRemainingExecutionTimeLocked(jobStatus.getSourceUserId(),
                 jobStatus.getSourcePackageName(),
-                getEffectiveStandbyBucket(jobStatus));
+                jobStatus.getEffectiveStandbyBucket());
     }
 
     @VisibleForTesting
@@ -1258,7 +1245,7 @@ public final class QuotaController extends StateController {
                 // finish.
                 changed |= js.setQuotaConstraintSatisfied(true);
             } else if (realStandbyBucket != ACTIVE_INDEX
-                    && realStandbyBucket == getEffectiveStandbyBucket(js)) {
+                    && realStandbyBucket == js.getEffectiveStandbyBucket()) {
                 // An app in the ACTIVE bucket may be out of quota while the job could be in quota
                 // for some reason. Therefore, avoid setting the real value here and check each job
                 // individually.
@@ -2563,7 +2550,7 @@ public final class QuotaController extends StateController {
                 pw.println();
 
                 pw.increaseIndent();
-                pw.print(JobStatus.bucketName(getEffectiveStandbyBucket(js)));
+                pw.print(JobStatus.bucketName(js.getEffectiveStandbyBucket()));
                 pw.print(", ");
                 if (js.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
                     pw.print("within quota");
@@ -2675,7 +2662,7 @@ public final class QuotaController extends StateController {
                         js.getSourceUid());
                 proto.write(
                         StateControllerProto.QuotaController.TrackedJob.EFFECTIVE_STANDBY_BUCKET,
-                        getEffectiveStandbyBucket(js));
+                        js.getEffectiveStandbyBucket());
                 proto.write(StateControllerProto.QuotaController.TrackedJob.IS_TOP_STARTED_JOB,
                         mTopStartedJobs.contains(js));
                 proto.write(StateControllerProto.QuotaController.TrackedJob.HAS_QUOTA,
