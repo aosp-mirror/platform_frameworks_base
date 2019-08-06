@@ -232,5 +232,13 @@ void JankTracker::reset() {
                                                     : FrameInfoIndex::IntendedVsync;
 }
 
+void JankTracker::finishGpuDraw(const FrameInfo& frame) {
+    int64_t totalGPUDrawTime = frame.gpuDrawTime();
+    if (totalGPUDrawTime >= 0) {
+        mData->reportGPUFrame(totalGPUDrawTime);
+        (*mGlobalData)->reportGPUFrame(totalGPUDrawTime);
+    }
+}
+
 } /* namespace uirenderer */
 } /* namespace android */

@@ -29,6 +29,7 @@
 #include "RenderNode.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "utils/RingBuffer.h"
 
 #include <SkBitmap.h>
 #include <SkRect.h>
@@ -41,6 +42,7 @@
 #include <future>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace android {
@@ -260,6 +262,7 @@ private:
     std::vector<sp<RenderNode>> mRenderNodes;
 
     FrameInfo* mCurrentFrameInfo = nullptr;
+    RingBuffer<std::pair<FrameInfo*, int64_t>, 4> mLast4FrameInfos;
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
