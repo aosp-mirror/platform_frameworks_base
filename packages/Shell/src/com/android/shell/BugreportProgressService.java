@@ -199,9 +199,9 @@ public class BugreportProgressService extends Service {
     // Passed to Message.obtain() when msg.arg2 is not used.
     private static final int UNUSED_ARG2 = -2;
 
-    // Maximum progress displayed (like 99.00%).
-    private static final int CAPPED_PROGRESS = 9900;
-    private static final int CAPPED_MAX = 10000;
+    // Maximum progress displayed in %.
+    private static final int CAPPED_PROGRESS = 99;
+    private static final int CAPPED_MAX = 100;
 
     /** Show the progress log every this percent. */
     private static final int LOG_PROGRESS_STEP = 10;
@@ -2154,8 +2154,7 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void onProgress(int progress) throws RemoteException {
-            updateProgressInfo(info, progress, 100 /* progress is already a percentage;
-                    so max = 100 */);
+            checkProgressUpdated(info, progress);
         }
 
         @Override
@@ -2168,26 +2167,6 @@ public class BugreportProgressService extends Service {
             // TODO(b/111441001): implement
         }
 
-        @Override
-        public void onProgressUpdated(int progress) throws RemoteException {
-            checkProgressUpdated(info, progress);
-        }
-
-        @Override
-        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
-            Log.d(TAG, "onMaxProgressUpdated: " + maxProgress);
-            info.realMax = maxProgress;
-        }
-
-        @Override
-        public void onSectionComplete(String title, int status, int size, int durationMs)
-                throws RemoteException {
-            if (DEBUG) {
-                Log.v(TAG, "Title: " + title + " Status: " + status + " Size: " + size
-                        + " Duration: " + durationMs + "ms");
-            }
-        }
-
         public void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("token: "); pw.println(token);
         }
@@ -2195,27 +2174,10 @@ public class BugreportProgressService extends Service {
     }
 
     private void checkProgressUpdated(BugreportInfo info, int progress) {
-        /*
-         * Checks whether the progress changed in a way that should be displayed to the user:
-         * - info.progress / info.max represents the displayed progress
-         * - info.realProgress / info.realMax represents the real progress
-         * - since the real progress can decrease, the displayed progress is only updated if it
-         *   increases
-         * - the displayed progress is capped at a maximum (like 99%)
-         */
-        info.realProgress = progress;
-        final int oldPercentage = (CAPPED_MAX * info.progress) / info.max;
-        int newPercentage = (CAPPED_MAX * info.realProgress) / info.realMax;
-        int max = info.realMax;
-
-        if (newPercentage > CAPPED_PROGRESS) {
-            progress = newPercentage = CAPPED_PROGRESS;
-            max = CAPPED_MAX;
+        if (progress > CAPPED_PROGRESS) {
+            progress = CAPPED_PROGRESS;
         }
-
-        if (progress == 0 || newPercentage > oldPercentage) {
-            updateProgressInfo(info, progress, max);
-        }
+        updateProgressInfo(info, progress, CAPPED_MAX);
     }
 
     private void updateProgressInfo(BugreportInfo info, int progress, int max) {
