@@ -16,6 +16,9 @@
 
 package android.security;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -36,9 +39,12 @@ public final class AttestedKeyPair {
     private final Certificate[] mAttestationRecord;
 
     /**
-     * @hide Only created by the platform, no need to expose as public API.
+     * Public constructor for creating a new instance (useful for testing).
+     *
+     * @param keyPair the key pair associated with the attestation record.
+     * @param attestationRecord attestation record for the provided key pair.
      */
-    public AttestedKeyPair(KeyPair keyPair, Certificate[] attestationRecord) {
+    public AttestedKeyPair(@Nullable KeyPair keyPair, @Nullable Certificate[] attestationRecord) {
         mKeyPair = keyPair;
         mAttestationRecord = attestationRecord;
     }
@@ -47,7 +53,7 @@ public final class AttestedKeyPair {
      * Returns the generated key pair associated with the attestation record
      * in this instance.
      */
-    public KeyPair getKeyPair() {
+    public @Nullable KeyPair getKeyPair() {
         return mKeyPair;
     }
 
@@ -66,7 +72,7 @@ public final class AttestedKeyPair {
      * and  <a href="https://developer.android.com/training/articles/security-key-attestation.html">
      * Key Attestation</a> for the format of the attestation record inside the certificate.
      */
-    public List<Certificate> getAttestationRecord() {
+    public @NonNull List<Certificate> getAttestationRecord() {
         if (mAttestationRecord == null) {
             return new ArrayList();
         }
