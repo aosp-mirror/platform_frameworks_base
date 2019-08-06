@@ -36,7 +36,6 @@ static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
     android::uirenderer::renderthread::RenderProxy::dumpGraphicsMemory(fd);
-    minikin::Layout::dumpMinikinStats(fd);
 }
 
 static void android_app_ActivityThread_initZygoteChildHeapProfiling(JNIEnv* env, jobject clazz) {
