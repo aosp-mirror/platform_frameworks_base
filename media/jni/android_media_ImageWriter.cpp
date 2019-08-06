@@ -126,7 +126,7 @@ private:
             Condition mCondition;
             std::deque<wp<Surface>> mQueue;
 
-            static const nsecs_t kWaitDuration = 20000000; // 20 ms
+            static const nsecs_t kWaitDuration = 500000000; // 500 ms
         };
         sp<DetachThread> mThread;
 
