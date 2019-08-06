@@ -105,7 +105,6 @@ public final class SystemFonts {
             final long fontSize = fileChannel.size();
             return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
         } catch (IOException e) {
-            Log.e(TAG, "Error mapping font file " + fullPath);
             return null;
         }
     }
