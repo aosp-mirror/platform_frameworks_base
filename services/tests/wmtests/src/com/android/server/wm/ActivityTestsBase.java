@@ -467,6 +467,7 @@ class ActivityTestsBase {
 
             spyOn(getLifecycleManager());
             spyOn(getLockTaskController());
+            spyOn(getTaskChangeNotificationController());
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
             // allow background activity starts by default
             doReturn(true).when(this).isBackgroundActivityStartsEnabled();

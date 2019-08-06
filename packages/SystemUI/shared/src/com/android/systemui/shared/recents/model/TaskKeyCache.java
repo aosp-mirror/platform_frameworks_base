@@ -21,6 +21,9 @@ import android.util.SparseArray;
 
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * Base class for both strong and LRU task key cache.
  */
@@ -74,6 +77,15 @@ public abstract class TaskKeyCache<V> {
         // Remove the key after the cache value because we need it to make the callback
         removeCacheEntry(key.id);
         mKeys.remove(key.id);
+    }
+
+    /** @return {@link Collection} of {@link TaskKey} */
+    public Collection<TaskKey> getValues() {
+        Collection<TaskKey> result = new ArrayList<>(mKeys.size());
+        for (int i = 0; i < mKeys.size(); i++) {
+            result.add(mKeys.valueAt(i));
+        }
+        return result;
     }
 
     /** Removes all the entries in the cache. */

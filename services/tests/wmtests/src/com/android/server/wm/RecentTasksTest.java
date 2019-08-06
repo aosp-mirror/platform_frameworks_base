@@ -43,6 +43,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -898,6 +900,46 @@ public class RecentTasksTest extends ActivityTestsBase {
                         SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
                         false /* toTop */, false /* animate */, null /* initialBounds */,
                         true /* showRecents */));
+    }
+
+    @Test
+    public void addTask_callsTaskNotificationController() {
+        final TaskRecord task = createTaskBuilder(".Task").build();
+
+        mRecentTasks.add(task);
+        mRecentTasks.remove(task);
+
+        TaskChangeNotificationController controller =
+                mTestService.getTaskChangeNotificationController();
+        verify(controller, times(2)).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void removeTask_callsTaskNotificationController() {
+        final TaskRecord task = createTaskBuilder(".Task").build();
+
+        mRecentTasks.add(task);
+        mRecentTasks.remove(task);
+
+        // 2 calls - Once for add and once for remove
+        TaskChangeNotificationController controller =
+                mTestService.getTaskChangeNotificationController();
+        verify(controller, times(2)).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void removeALlVisibleTask_callsTaskNotificationController_twice() {
+        final TaskRecord task1 = createTaskBuilder(".Task").build();
+        final TaskRecord task2 = createTaskBuilder(".Task2").build();
+
+        mRecentTasks.add(task1);
+        mRecentTasks.add(task2);
+        mRecentTasks.removeAllVisibleTasks(TEST_USER_0_ID);
+
+        // 4 calls - Twice for add and twice for remove
+        TaskChangeNotificationController controller =
+                mTestService.getTaskChangeNotificationController();
+        verify(controller, times(4)).notifyTaskListUpdated();
     }
 
     /**

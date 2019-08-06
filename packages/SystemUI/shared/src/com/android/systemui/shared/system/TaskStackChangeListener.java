@@ -95,6 +95,11 @@ public abstract class TaskStackChangeListener {
     public void onTaskDisplayChanged(int taskId, int newDisplayId) { }
 
     /**
+     * Called when any additions or deletions to the recent tasks list have been made.
+     */
+    public void onRecentTaskListUpdated() { }
+
+    /**
      * Checks that the current user matches the process. Since
      * {@link android.app.ITaskStackListener} is not multi-user aware, handlers of
      * {@link TaskStackChangeListener} should make this call to verify that we don't act on events

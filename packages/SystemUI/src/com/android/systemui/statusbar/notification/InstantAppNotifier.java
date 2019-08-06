@@ -54,7 +54,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUI;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.util.NotificationChannels;
@@ -138,15 +137,6 @@ public class InstantAppNotifier extends SystemUI
                 }
             };
 
-    private final TaskStackChangeListener mTaskListener =
-            new TaskStackChangeListener() {
-                @Override
-                public void onTaskStackChanged() {
-                    // Listen for changes to stacks and then check which instant apps are
-                    // foreground.
-                    updateForegroundInstantApps();
-                }
-            };
 
     private void updateForegroundInstantApps() {
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
