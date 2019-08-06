@@ -31,11 +31,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * Ignore {@link #sInstanceCount} - used for testing.
  */
-public class DateParcelling implements Parcelling<Date> {
+public class MyDateParcelling implements Parcelling<Date> {
 
     static AtomicInteger sInstanceCount = new AtomicInteger(0);
 
-    public DateParcelling() {
+    public MyDateParcelling() {
         sInstanceCount.getAndIncrement();
     }
 

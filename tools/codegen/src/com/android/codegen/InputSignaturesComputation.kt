@@ -1,6 +1,6 @@
 package com.android.codegen
 
-import com.github.javaparser.ast.body.TypeDeclaration
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations
 import com.github.javaparser.ast.type.ClassOrInterfaceType
@@ -8,9 +8,17 @@ import com.github.javaparser.ast.type.Type
 
 
 fun ClassPrinter.getInputSignatures(): List<String> {
+    return generateInputSignaturesForClass(classAst) +
+            annotationToString(classAst.annotations.find { it.nameAsString == DataClass }) +
+            generateInputSignaturesForClass(customBaseBuilderAst)
+}
+
+private fun ClassPrinter.generateInputSignaturesForClass(classAst: ClassOrInterfaceDeclaration?): List<String> {
+    if (classAst == null) return emptyList()
+
     return classAst.fields.map { fieldAst ->
         buildString {
-            append(fieldAst.modifiers.joinToString(" ") {it.asString()})
+            append(fieldAst.modifiers.joinToString(" ") { it.asString() })
             append(" ")
             append(annotationsToString(fieldAst))
             append(" ")
@@ -20,7 +28,7 @@ fun ClassPrinter.getInputSignatures(): List<String> {
         }
     } + classAst.methods.map { methodAst ->
         buildString {
-            append(methodAst.modifiers.joinToString(" ") {it.asString()})
+            append(methodAst.modifiers.joinToString(" ") { it.asString() })
             append(" ")
             append(annotationsToString(methodAst))
             append(" ")
@@ -28,19 +36,26 @@ fun ClassPrinter.getInputSignatures(): List<String> {
             append(" ")
             append(methodAst.nameAsString)
             append("(")
-            append(methodAst.parameters.joinToString(",") {getFullClassName(it.type)})
+            append(methodAst.parameters.joinToString(",") { getFullClassName(it.type) })
             append(")")
         }
-    }
+    } + ("class ${classAst.nameAsString}" +
+            " extends ${classAst.extendedTypes.map { getFullClassName(it) }.ifEmpty { listOf("java.lang.Object") }.joinToString(", ")}" +
+            " implements [${classAst.implementedTypes.joinToString(", ") { getFullClassName(it) }}]")
 }
 
 private fun ClassPrinter.annotationsToString(annotatedAst: NodeWithAnnotations<*>): String {
-    return annotatedAst.annotations.joinToString(" ") {
-        annotationToString(it)
-    }
+    return annotatedAst
+            .annotations
+            .groupBy { it.nameAsString } // dedupe annotations by name (javaparser bug?)
+            .values
+            .joinToString(" ") {
+                annotationToString(it[0])
+            }
 }
 
-private fun ClassPrinter.annotationToString(ann: AnnotationExpr): String {
+private fun ClassPrinter.annotationToString(ann: AnnotationExpr?): String {
+    if (ann == null) return ""
     return buildString {
         append("@")
         append(getFullClassName(ann.nameAsString))
@@ -78,9 +93,9 @@ private fun ClassPrinter.appendExpr(sb: StringBuilder, ex: Expression?) {
 
 private fun ClassPrinter.getFullClassName(type: Type): String {
     return if (type is ClassOrInterfaceType) {
+
         getFullClassName(buildString {
             type.scope.ifPresent { append(it).append(".") }
-            type.isArrayType
             append(type.nameAsString)
         }) + (type.typeArguments.orElse(null)?.let { args -> args.joinToString(", ") {getFullClassName(it)}}?.let { "<$it>" } ?: "")
     } else getFullClassName(type.asString())
@@ -100,9 +115,15 @@ private fun ClassPrinter.getFullClassName(className: String): String {
     val thisPackagePrefix = fileAst.packageDeclaration.map { it.nameAsString + "." }.orElse("")
     val thisClassPrefix = thisPackagePrefix + classAst.nameAsString + "."
 
-    classAst.childNodes.filterIsInstance<TypeDeclaration<*>>().find {
+    if (classAst.nameAsString == className) return thisPackagePrefix + classAst.nameAsString
+
+    nestedClasses.find {
         it.nameAsString == className
     }?.let { return thisClassPrefix + it.nameAsString }
+
+    if (className == CANONICAL_BUILDER_CLASS || className == BASE_BUILDER_CLASS) {
+        return thisClassPrefix + className
+    }
 
     constDefs.find { it.AnnotationName == className }?.let { return thisClassPrefix + className }
 
