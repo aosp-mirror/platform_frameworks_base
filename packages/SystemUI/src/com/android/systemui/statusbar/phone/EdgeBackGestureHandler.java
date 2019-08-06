@@ -103,7 +103,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
             new ISystemGestureExclusionListener.Stub() {
                 @Override
                 public void onSystemGestureExclusionChanged(int displayId,
-                        Region systemGestureExclusion) {
+                        Region systemGestureExclusion, Region unrestrictedOrNull) {
                     if (displayId == mDisplayId) {
                         mMainExecutor.execute(() -> mExcludeRegion.set(systemGestureExclusion));
                     }
