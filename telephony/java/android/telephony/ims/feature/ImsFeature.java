@@ -34,7 +34,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -106,6 +108,16 @@ public abstract class ImsFeature {
     public static final int FEATURE_MAX = 3;
 
     /**
+     * Used for logging purposes.
+     * @hide
+     */
+    public static final Map<Integer, String> FEATURE_LOG_MAP = new HashMap<Integer, String>() {{
+            put(FEATURE_EMERGENCY_MMTEL, "EMERGENCY_MMTEL");
+            put(FEATURE_MMTEL, "MMTEL");
+            put(FEATURE_RCS, "RCS");
+        }};
+
+    /**
      * Integer values defining IMS features that are supported in ImsFeature.
      * @hide
      */
@@ -148,6 +160,16 @@ public abstract class ImsFeature {
      * until {@link #onFeatureReady()} is called.
      */
     public static final int STATE_READY = 2;
+
+    /**
+     * Used for logging purposes.
+     * @hide
+     */
+    public static final Map<Integer, String> STATE_LOG_MAP = new HashMap<Integer, String>() {{
+            put(STATE_UNAVAILABLE, "UNAVAILABLE");
+            put(STATE_INITIALIZING, "INITIALIZING");
+            put(STATE_READY, "READY");
+        }};
 
     /**
      * Integer values defining the result codes that should be returned from
