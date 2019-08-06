@@ -844,11 +844,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     getCurrentUser());
         }
 
-        // The face timeout message is not very actionable, let's ask the user to
-        // manually retry.
-        if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
-            errString = mContext.getString(R.string.keyguard_unlock);
-        }
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
