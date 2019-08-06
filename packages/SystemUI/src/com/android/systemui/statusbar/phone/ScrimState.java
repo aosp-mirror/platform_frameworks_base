@@ -203,7 +203,7 @@ public enum ScrimState {
 
             mFrontAlpha = ScrimController.TRANSPARENT;
             mBehindAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
-            mBubbleAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
+            mBubbleAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION;
             mBlankScreen = false;
