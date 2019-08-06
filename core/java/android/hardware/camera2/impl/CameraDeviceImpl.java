@@ -2568,4 +2568,10 @@ public class CameraDeviceImpl extends CameraDevice
             Binder.restoreCallingIdentity(ident);
         }
     }
+
+    @Override
+    public void setCameraAudioRestriction(@CAMERA_AUDIO_RESTRICTION int mode) {
+        // To be implemented.
+        return;
+    }
 }
