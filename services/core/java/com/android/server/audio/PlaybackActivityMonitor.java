@@ -425,7 +425,8 @@ public final class PlaybackActivityMonitor
     private final DuckingManager mDuckingManager = new DuckingManager();
 
     @Override
-    public boolean duckPlayers(FocusRequester winner, FocusRequester loser, boolean forceDuck) {
+    public boolean duckPlayers(@NonNull FocusRequester winner, @NonNull FocusRequester loser,
+                               boolean forceDuck) {
         if (DEBUG) {
             Log.v(TAG, String.format("duckPlayers: uids winner=%d loser=%d",
                     winner.getClientUid(), loser.getClientUid()));
@@ -473,7 +474,7 @@ public final class PlaybackActivityMonitor
     }
 
     @Override
-    public void unduckPlayers(FocusRequester winner) {
+    public void unduckPlayers(@NonNull FocusRequester winner) {
         if (DEBUG) { Log.v(TAG, "unduckPlayers: uids winner=" + winner.getClientUid()); }
         synchronized (mPlayerLock) {
             mDuckingManager.unduckUid(winner.getClientUid(), mPlayers);

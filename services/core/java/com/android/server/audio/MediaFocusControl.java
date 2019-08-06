@@ -105,12 +105,13 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     //=================================================================
     // PlayerFocusEnforcer implementation
     @Override
-    public boolean duckPlayers(FocusRequester winner, FocusRequester loser, boolean forceDuck) {
+    public boolean duckPlayers(@NonNull FocusRequester winner, @NonNull FocusRequester loser,
+                               boolean forceDuck) {
         return mFocusEnforcer.duckPlayers(winner, loser, forceDuck);
     }
 
     @Override
-    public void unduckPlayers(FocusRequester winner) {
+    public void unduckPlayers(@NonNull FocusRequester winner) {
         mFocusEnforcer.unduckPlayers(winner);
     }
 
@@ -742,7 +743,20 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         }
     }
 
-    /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int, int) */
+    /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int, int)
+     * @param aa
+     * @param focusChangeHint
+     * @param cb
+     * @param fd
+     * @param clientId
+     * @param callingPackageName
+     * @param flags
+     * @param sdk
+     * @param forceDuck only true if
+     *     {@link android.media.AudioFocusRequest.Builder#setFocusGain(int)} was set to true for
+     *                  accessibility.
+     * @return
+     */
     protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
             int flags, int sdk, boolean forceDuck) {
