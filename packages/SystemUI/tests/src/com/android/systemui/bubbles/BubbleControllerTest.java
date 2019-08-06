@@ -224,6 +224,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
 
         mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_USER_GESTURE);
+        assertFalse(mStatusBarWindowController.getBubblesShowing());
         assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         verify(mNotificationEntryManager, times(2)).updateNotifications();
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
@@ -261,6 +262,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
+        assertFalse(mStatusBarWindowController.getBubblesShowing());
         verify(mNotificationEntryManager, times(3)).updateNotifications();
         assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         assertNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().key));
