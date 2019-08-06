@@ -858,7 +858,10 @@ public final class BluetoothAdapter {
         if (DBG) {
             Log.d(TAG, "isLeEnabled(): " + BluetoothAdapter.nameForState(state));
         }
-        return (state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_BLE_ON);
+        return (state == BluetoothAdapter.STATE_ON
+                || state == BluetoothAdapter.STATE_BLE_ON
+                || state == BluetoothAdapter.STATE_TURNING_ON
+                || state == BluetoothAdapter.STATE_TURNING_OFF);
     }
 
     /**
