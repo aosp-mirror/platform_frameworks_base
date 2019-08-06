@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
+ *               2019 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +85,7 @@ public class OutdoorModeController extends LiveDisplayFeature {
     @Override
     public boolean getCapabilities(final BitSet caps) {
         if (mUseOutdoorMode) {
+            caps.set(LiveDisplayManager.MODE_AUTO);
             caps.set(LiveDisplayManager.MODE_OUTDOOR);
             if (mSelfManaged) {
                 caps.set(LiveDisplayManager.FEATURE_MANAGED_OUTDOOR_MODE);
