@@ -40,8 +40,10 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -75,6 +77,11 @@ public class CellularTile extends QSTileImpl<SignalState> {
     @Override
     public SignalState newTileState() {
         return new SignalState();
+    }
+
+    @Override
+    public QSIconView createTileView(Context context) {
+        return new SignalTileView(context);
     }
 
     @Override
