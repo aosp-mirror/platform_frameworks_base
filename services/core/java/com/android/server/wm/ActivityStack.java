@@ -4940,12 +4940,6 @@ class ActivityStack extends ConfigurationContainer {
         }
     }
 
-
-    Rect getDefaultPictureInPictureBounds(float aspectRatio) {
-        if (getTaskStack() == null) return null;
-        return getTaskStack().getPictureInPictureBounds(aspectRatio, null /* currentStackBounds */);
-    }
-
     void animateResizePinnedStack(Rect sourceHintBounds, Rect toBounds, int animationDuration,
             boolean fromFullscreen) {
         if (!inPinnedWindowingMode()) return;
