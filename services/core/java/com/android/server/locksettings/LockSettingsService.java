@@ -2071,7 +2071,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // since the user never unlock the device manually. In this case, always
             // return a default metrics object. This is to distinguish this case from
             // the case where during boot user password is unknown yet (returning null here)
-            return new PasswordMetrics();
+            return new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         }
         synchronized (this) {
             return mUserPasswordMetrics.get(userHandle);
