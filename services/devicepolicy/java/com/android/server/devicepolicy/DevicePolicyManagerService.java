@@ -5727,6 +5727,59 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return false;
     }
 
+    @Override
+    public boolean setKeyGrantForApp(
+            ComponentName who, String callerPackage, String alias, String packageName,
+            boolean hasGrant) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_CERT_SELECTION);
+
+        if (TextUtils.isEmpty(alias)) {
+            throw new IllegalArgumentException("Alias to grant cannot be empty.");
+        }
+
+        if (TextUtils.isEmpty(packageName)) {
+            throw new IllegalArgumentException("Package to grant to cannot be empty.");
+        }
+
+        final int userId = mInjector.userHandleGetCallingUserId();
+        final int granteeUid;
+        try {
+            ApplicationInfo ai = mInjector.getIPackageManager().getApplicationInfo(
+                    packageName, 0, userId);
+            if (ai == null) {
+                throw new IllegalArgumentException(
+                        String.format("Provided package %s is not installed", packageName));
+            }
+            granteeUid = ai.uid;
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failure getting grantee uid", e);
+        }
+
+        final int callingUid = mInjector.binderGetCallingUid();
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            final KeyChainConnection keyChainConnection =
+                    KeyChain.bindAsUser(mContext, UserHandle.getUserHandleForUid(callingUid));
+            try {
+                IKeyChainService keyChain = keyChainConnection.getService();
+                keyChain.setGrant(granteeUid, alias, hasGrant);
+                return true;
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Setting grant for package.", e);
+                return  false;
+            } finally {
+                keyChainConnection.close();
+            }
+        } catch (InterruptedException e) {
+            Log.w(LOG_TAG, "Interrupted while setting key grant", e);
+            Thread.currentThread().interrupt();
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+        return false;
+    }
+
     /**
      * Enforce one the following conditions are met:
      * (1) The device has a Device Owner, and one of the following holds:

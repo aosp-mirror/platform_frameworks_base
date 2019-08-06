@@ -76,7 +76,7 @@ public class ScanTests {
     @Before
     public void setupInjector() {
         when(mMockInjector.getAbiHelper()).thenReturn(mMockPackageAbiHelper);
-        when(mMockInjector.getUserManager()).thenReturn(mMockUserManager);
+        when(mMockInjector.getUserManagerInternal()).thenReturn(mMockUserManager);
     }
 
     @Before

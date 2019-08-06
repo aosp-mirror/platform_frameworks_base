@@ -335,18 +335,12 @@ public class ArrayUtils {
         }
 
         int totalLength = 0;
-        int maxLength = 0;
-        T[] maxLengthArray = arrays[0];
         for (T[] item : arrays) {
             if (item == null) {
                 continue;
             }
 
             totalLength += item.length;
-            if (item.length > maxLength) {
-                maxLengthArray = item;
-                maxLength = item.length;
-            }
         }
 
         // Optimization for entirely empty arrays.

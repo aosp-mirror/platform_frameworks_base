@@ -16,6 +16,7 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.IDevicePolicyManager;
+import android.content.ComponentName;
 
 import com.android.server.SystemService;
 
@@ -55,5 +56,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     abstract void handleStopUser(int userId);
 
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
+    }
+
+    public boolean setKeyGrantForApp(ComponentName admin, String callerPackage, String alias,
+            String packageName, boolean hasGrant) {
+        return false;
     }
 }

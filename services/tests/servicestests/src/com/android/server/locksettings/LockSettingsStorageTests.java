@@ -311,8 +311,6 @@ public class LockSettingsStorageTests extends AndroidTestCase {
     public void testFileLocation_Owner() {
         LockSettingsStorage storage = new LockSettingsStorage(getContext());
 
-        assertEquals("/data/system/gesture.key", storage.getLegacyLockPatternFilename(0));
-        assertEquals("/data/system/password.key", storage.getLegacyLockPasswordFilename(0));
         assertEquals("/data/system/gatekeeper.pattern.key", storage.getLockPatternFilename(0));
         assertEquals("/data/system/gatekeeper.password.key", storage.getLockPasswordFilename(0));
     }
@@ -436,10 +434,8 @@ public class LockSettingsStorageTests extends AndroidTestCase {
                 PAYLOAD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD).toBytes();
         CredentialHash deserialized = CredentialHash.fromBytes(serialized);
 
-        assertEquals(CredentialHash.VERSION_GATEKEEPER, deserialized.version);
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
         assertArrayEquals(PAYLOAD, deserialized.hash);
-        assertFalse(deserialized.isBaseZeroPattern);
     }
 
     public void testCredentialHash_unserialize_versionGatekeeper() {
@@ -453,10 +449,8 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         };
         CredentialHash deserialized = CredentialHash.fromBytes(serialized);
 
-        assertEquals(CredentialHash.VERSION_GATEKEEPER, deserialized.version);
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
         assertArrayEquals(PAYLOAD, deserialized.hash);
-        assertFalse(deserialized.isBaseZeroPattern);
 
         // Make sure the constants we use on the wire do not change.
         assertEquals(-1, LockPatternUtils.CREDENTIAL_TYPE_NONE);

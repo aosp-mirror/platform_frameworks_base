@@ -95,6 +95,16 @@ public final class PinnerService extends SystemService {
     private static final int KEY_CAMERA = 0;
     private static final int KEY_HOME = 1;
 
+    // Pin the camera application.
+    private static boolean PROP_PIN_CAMERA = SystemProperties.getBoolean(
+            "pinner.pin_camera", true);
+    // Pin using pinlist.meta when pinning apps.
+    private static boolean PROP_PIN_PINLIST = SystemProperties.getBoolean(
+            "pinner.use_pinlist", true);
+    // Pin the whole odex/vdex/etc file when pinning apps.
+    private static boolean PROP_PIN_ODEX = SystemProperties.getBoolean(
+            "pinner.whole_odex", true);
+
     private static final int MAX_CAMERA_PIN_SIZE = 80 * (1 << 20); // 80MB max for camera app.
     private static final int MAX_HOME_PIN_SIZE = 6 * (1 << 20); // 6MB max for home app.
 
@@ -158,7 +168,11 @@ public final class PinnerService extends SystemService {
         boolean shouldPinHome = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerHomeApp);
         if (shouldPinCamera) {
-            mPinKeys.add(KEY_CAMERA);
+            if (PROP_PIN_CAMERA) {
+                mPinKeys.add(KEY_CAMERA);
+            } else if (DEBUG) {
+                Slog.i(TAG, "Pinner - skip pinning camera app");
+            }
         }
         if (shouldPinHome) {
             mPinKeys.add(KEY_HOME);
@@ -589,10 +603,16 @@ public final class PinnerService extends SystemService {
             pf = pinFile(file, pinSizeLimit, /*attemptPinIntrospection=*/false);
             if (pf != null) {
                 synchronized (this) {
-                    pinnedApp.mFiles.add(pf);
+                    if (PROP_PIN_ODEX) {
+                      pinnedApp.mFiles.add(pf);
+                    }
                 }
                 if (DEBUG) {
-                    Slog.i(TAG, "Pinned " + pf.fileName);
+                    if (PROP_PIN_ODEX) {
+                        Slog.i(TAG, "Pinned " + pf.fileName);
+                    } else {
+                        Slog.i(TAG, "Pinned [skip] " + pf.fileName);
+                    }
                 }
             }
         }
@@ -686,6 +706,13 @@ public final class PinnerService extends SystemService {
      * @return Open input stream or null on any error
      */
     private static InputStream maybeOpenPinMetaInZip(ZipFile zipFile, String fileName) {
+        if (!PROP_PIN_PINLIST) {
+            if (DEBUG) {
+                Slog.i(TAG, "Pin - skip pinlist.meta in " + fileName);
+            }
+            return null;
+        }
+
         ZipEntry pinMetaEntry = zipFile.getEntry(PIN_META_FILENAME);
         InputStream pinMetaStream = null;
         if (pinMetaEntry != null) {

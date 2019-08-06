@@ -20,7 +20,6 @@ java_test_helper_library {
 
     sdk_version: "current",
     srcs: ["src/**/*.java"],
-    test_suites: ["general-tests"],
     dex_preopt: {
         enabled: false,
     },

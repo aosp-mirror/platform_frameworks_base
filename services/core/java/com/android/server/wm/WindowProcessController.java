@@ -58,6 +58,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.IRemoteAnimationRunner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
@@ -179,6 +180,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final Configuration mLastReportedConfiguration;
     // Registered display id as a listener to override config change
     private int mDisplayId;
+
+    /** Whether our process is currently running a {@link RecentsAnimation} */
+    private boolean mRunningRecentsAnimation;
+
+    /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
+    private boolean mRunningRemoteAnimation;
 
     public WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner, WindowProcessListener listener) {
@@ -1096,6 +1103,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return this == mAtm.mPreviousProcess;
         }
+    }
+
+    void setRunningRecentsAnimation(boolean running) {
+        if (mRunningRecentsAnimation == running) {
+            return;
+        }
+        mRunningRecentsAnimation = running;
+        updateRunningRemoteOrRecentsAnimation();
+    }
+
+    void setRunningRemoteAnimation(boolean running) {
+        if (mRunningRemoteAnimation == running) {
+            return;
+        }
+        mRunningRemoteAnimation = running;
+        updateRunningRemoteOrRecentsAnimation();
+    }
+
+    private void updateRunningRemoteOrRecentsAnimation() {
+
+        // Posting on handler so WM lock isn't held when we call into AM.
+        mAtm.mH.sendMessage(PooledLambda.obtainMessage(
+                WindowProcessListener::setRunningRemoteAnimation, mListener,
+                mRunningRecentsAnimation || mRunningRemoteAnimation));
     }
 
     @Override

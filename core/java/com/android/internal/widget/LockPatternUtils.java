@@ -558,7 +558,7 @@ public class LockPatternUtils {
 
     /**
      * Returns the password history hash factor, needed to check new password against password
-     * history with {@link #checkPasswordHistory(String, byte[], int)}
+     * history with {@link #checkPasswordHistory(byte[], byte[], int)}
      */
     public byte[] getPasswordHistoryHashFactor(byte[] currentPassword, int userId) {
         try {
@@ -1238,23 +1238,6 @@ public class LockPatternUtils {
         for (int i = 0; i < patternSize; i++) {
             LockPatternView.Cell cell = pattern.get(i);
             res[i] = (byte) (cell.getRow() * 3 + cell.getColumn() + '1');
-        }
-        return res;
-    }
-
-    /**
-     * Transform a pattern byte array to base zero form.
-     * @param bytes pattern byte array.
-     * @return The pattern in base zero form.
-     */
-    public static byte[] patternByteArrayToBaseZero(byte[] bytes) {
-        if (bytes == null) {
-            return new byte[0];
-        }
-        final int patternSize = bytes.length;
-        byte[] res = new byte[patternSize];
-        for (int i = 0; i < patternSize; i++) {
-            res[i] = (byte) (bytes[i] - '1');
         }
         return res;
     }

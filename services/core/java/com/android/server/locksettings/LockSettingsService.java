@@ -182,7 +182,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @IntDef({CHALLENGE_NONE,
             CHALLENGE_FROM_CALLER,
             CHALLENGE_INTERNAL})
-    @interface ChallengeType {};
+    @interface ChallengeType {}
 
     // Order of holding lock: mSeparateChallengeLock -> mSpManager -> this
     // Do not call into ActivityManager while holding mSpManager lock.
@@ -1853,26 +1853,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             return VerifyCredentialResponse.ERROR;
         }
 
-        boolean shouldReEnrollBaseZero = storedHash.type == CREDENTIAL_TYPE_PATTERN
-                && storedHash.isBaseZeroPattern;
-
-        byte[] credentialToVerify;
-        if (shouldReEnrollBaseZero) {
-            credentialToVerify = LockPatternUtils.patternByteArrayToBaseZero(credential);
-        } else {
-            credentialToVerify = credential;
-        }
-
-        response = verifyCredential(userId, storedHash, credentialToVerify,
+        response = verifyCredential(userId, storedHash, credential,
                 challengeType, challenge, progressCallback);
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
             mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
-            if (shouldReEnrollBaseZero) {
-                setLockCredentialInternal(credential, storedHash.type, credentialToVerify,
-                        DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId, false,
-                        /* isLockTiedToParent= */ false);
-            }
         }
 
         return response;
@@ -1937,46 +1922,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         // of unlocking the user, so yell if calling from the main thread.
         StrictMode.noteDiskRead();
 
-        if (storedHash.version == CredentialHash.VERSION_LEGACY) {
-            final byte[] hash;
-            if (storedHash.type == CREDENTIAL_TYPE_PATTERN) {
-                hash = LockPatternUtils.patternToHash(
-                        LockPatternUtils.byteArrayToPattern(credential));
-            } else {
-                hash = mLockPatternUtils.legacyPasswordToHash(credential, userId).getBytes();
-            }
-            if (Arrays.equals(hash, storedHash.hash)) {
-                if (storedHash.type == CREDENTIAL_TYPE_PATTERN) {
-                    unlockKeystore(LockPatternUtils.patternByteArrayToBaseZero(credential), userId);
-                } else {
-                    unlockKeystore(credential, userId);
-                }
-                // Users with legacy credentials don't have credential-backed
-                // FBE keys, so just pass through a fake token/secret
-                Slog.i(TAG, "Unlocking user with fake token: " + userId);
-                final byte[] fakeToken = String.valueOf(userId).getBytes();
-                unlockUser(userId, fakeToken, fakeToken);
-
-                // migrate credential to GateKeeper
-                setLockCredentialInternal(credential, storedHash.type, null,
-                        storedHash.type == CREDENTIAL_TYPE_PATTERN
-                                ? DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
-                                : DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
-                                /* TODO(roosa): keep the same password quality */,
-                        userId, false, /* isLockTiedToParent= */ false);
-                if (challengeType == CHALLENGE_NONE) {
-                    notifyActivePasswordMetricsAvailable(storedHash.type, credential, userId);
-                    // Use credentials to create recoverable keystore snapshot.
-                    sendCredentialsOnUnlockIfRequired(storedHash.type, credential, userId);
-                    return VerifyCredentialResponse.OK;
-                }
-                // Fall through to get the auth token. Technically this should never happen,
-                // as a user that had a legacy credential would have to unlock their device
-                // before getting to a flow with a challenge, but supporting for consistency.
-            } else {
-                return VerifyCredentialResponse.ERROR;
-            }
-        }
         GateKeeperResponse gateKeeperResponse = getGateKeeperService()
                 .verifyChallenge(userId, challenge, storedHash.hash, credential);
         VerifyCredentialResponse response = convertResponse(gateKeeperResponse);

@@ -17,7 +17,8 @@
 #include "VulkanManager.h"
 
 #include <android/sync.h>
-#include <gui/Surface.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include "Properties.h"
 #include "RenderThread.h"

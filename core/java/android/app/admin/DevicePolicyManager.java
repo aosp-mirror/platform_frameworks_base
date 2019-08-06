@@ -4981,6 +4981,42 @@ public class DevicePolicyManager {
         return null;
     }
 
+
+    /**
+     * Called by a device or profile owner, or delegated certificate chooser (an app that has been
+     * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to grant an application access
+     * to an already-installed (or generated) KeyChain key.
+     * This is useful (in combination with {@link #installKeyPair} or {@link #generateKeyPair}) to
+     * let an application call {@link android.security.KeyChain#getPrivateKey} without having to
+     * call {@link android.security.KeyChain#choosePrivateKeyAlias} first.
+     *
+     * The grantee app will receive the {@link android.security.KeyChain#ACTION_KEY_ACCESS_CHANGED}
+     * broadcast when access to a key is granted or revoked.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *        {@code null} if calling from a delegated certificate installer.
+     * @param alias The alias of the key to grant access to.
+     * @param packageName The name of the (already installed) package to grant access to.
+     * @param hasGrant Whether to grant access to the alias or revoke it.
+     * @return {@code true} if the grant was set successfully, {@code false} otherwise.
+     *
+     * @throws SecurityException if the caller is not a device owner, a profile  owner or
+     *         delegated certificate chooser.
+     * @throws IllegalArgumentException if {@code packageName} or {@code alias} are empty, or if
+     *         {@code packageName} is not a name of an installed package.
+     */
+    public boolean setKeyGrantForApp(@Nullable ComponentName admin, @NonNull String alias,
+            @NonNull String packageName, boolean hasGrant) {
+        throwIfParentInstance("addKeyGrant");
+        try {
+            return mService.setKeyGrantForApp(
+                    admin, mContext.getPackageName(), alias, packageName, hasGrant);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
     /**
      * Returns {@code true} if the device supports attestation of device identifiers in addition
      * to key attestation.
