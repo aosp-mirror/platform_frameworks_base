@@ -27,18 +27,14 @@ namespace statsd {
 MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const MetricDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex,
-                                       const vector<Matcher>& dimensionInCondition, bool nesting,
+                                       bool nesting,
                                        int64_t currentBucketStartNs, int64_t currentBucketNum,
                                        int64_t startTimeNs, int64_t bucketSizeNs,
                                        bool conditionSliced, bool fullLink,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-    : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
+    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting,
                       currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
                       conditionSliced, fullLink, anomalyTrackers) {
-    if (mWizard != nullptr) {
-        mSameConditionDimensionsInTracker =
-            mWizard->equalOutputDimensions(conditionIndex, mDimensionInCondition);
-    }
 }
 
 unique_ptr<DurationTracker> MaxDurationTracker::clone(const int64_t eventTime) {
@@ -252,17 +248,11 @@ void MaxDurationTracker::onSlicedConditionMayChange(bool overallCondition,
         if (pair.second.state == kStopped) {
             continue;
         }
-        std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
         ConditionState conditionState = mWizard->query(
-            mConditionTrackerIndex, pair.second.conditionKeys, mDimensionInCondition,
-            !mSameConditionDimensionsInTracker,
-            !mHasLinksToAllConditionDimensionsInTracker,
-            &conditionDimensionKeySet);
-        bool conditionMet =
-                (conditionState == ConditionState::kTrue) &&
-                (mDimensionInCondition.size() == 0 ||
-                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
-                         conditionDimensionKeySet.end());
+            mConditionTrackerIndex, pair.second.conditionKeys,
+            !mHasLinksToAllConditionDimensionsInTracker);
+        bool conditionMet = (conditionState == ConditionState::kTrue);
+
         VLOG("key: %s, condition: %d", pair.first.toString().c_str(), conditionMet);
         noteConditionChanged(pair.first, conditionMet, timestamp);
     }

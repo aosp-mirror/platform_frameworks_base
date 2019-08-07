@@ -26,11 +26,9 @@ namespace statsd {
 
 class MockConditionWizard : public ConditionWizard {
 public:
-    MOCK_METHOD6(query,
+    MOCK_METHOD3(query,
                  ConditionState(const int conditionIndex, const ConditionKey& conditionParameters,
-                                const vector<Matcher>& dimensionFields,
-                                const bool isSubsetDim, const bool isPartialLink,
-                                std::unordered_set<HashableDimensionKey>* dimensionKeySet));
+                                const bool isPartialLink));
 };
 
 class MockStatsPullerManager : public StatsPullerManager {

@@ -51,7 +51,6 @@ const int FIELD_ID_VALUE_METRICS = 7;
 const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
-const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
 const int FIELD_ID_IS_ACTIVE = 14;
 // for ValueMetricDataWrapper
 const int FIELD_ID_DATA = 1;
@@ -127,10 +126,6 @@ ValueMetricProducer::ValueMetricProducer(
         mContainANYPositionInDimensionsInWhat = HasPositionANY(metric.dimensions_in_what());
     }
 
-    if (metric.has_dimensions_in_condition()) {
-        translateFieldMatcher(metric.dimensions_in_condition(), &mDimensionsInCondition);
-    }
-
     if (metric.links().size() > 0) {
         for (const auto& link : metric.links()) {
             Metric2Condition mc;
@@ -139,11 +134,10 @@ ValueMetricProducer::ValueMetricProducer(
             translateFieldMatcher(link.fields_in_condition(), &mc.conditionFields);
             mMetric2ConditionLinks.push_back(mc);
         }
+        mConditionSliced = true;
     }
 
-    mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
-    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what()) ||
-                          HasPositionALL(metric.dimensions_in_condition());
+    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what());
 
     int64_t numBucketsForward = calcBucketsForwardCount(startTimeNs);
     mCurrentBucketNum += numBucketsForward;
@@ -241,12 +235,6 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
             uint64_t dimenPathToken =
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_PATH_IN_WHAT);
             writeDimensionPathToProto(mDimensionsInWhat, protoOutput);
-            protoOutput->end(dimenPathToken);
-        }
-        if (!mDimensionsInCondition.empty()) {
-            uint64_t dimenPathToken =
-                    protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_PATH_IN_CONDITION);
-            writeDimensionPathToProto(mDimensionsInCondition, protoOutput);
             protoOutput->end(dimenPathToken);
         }
     }

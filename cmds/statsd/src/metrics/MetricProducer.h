@@ -88,7 +88,6 @@ public:
           mConditionTrackerIndex(conditionIndex),
           mContainANYPositionInDimensionsInWhat(false),
           mSliceByPositionALL(false),
-          mSameConditionDimensionsInTracker(false),
           mHasLinksToAllConditionDimensionsInTracker(false),
           mIsActive(true) {
     }
@@ -349,14 +348,9 @@ protected:
     int mConditionTrackerIndex;
 
     vector<Matcher> mDimensionsInWhat;       // The dimensions_in_what defined in statsd_config
-    vector<Matcher> mDimensionsInCondition;  // The dimensions_in_condition defined in statsd_config
 
     bool mContainANYPositionInDimensionsInWhat;
     bool mSliceByPositionALL;
-
-    // True iff the condition dimensions equal to the sliced dimensions in the simple condition
-    // tracker. This field is always false for combinational condition trackers.
-    bool mSameConditionDimensionsInTracker;
 
     // True iff the metric to condition links cover all dimension fields in the condition tracker.
     // This field is always false for combinational condition trackers.
