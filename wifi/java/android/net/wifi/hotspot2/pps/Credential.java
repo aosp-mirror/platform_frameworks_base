@@ -1135,6 +1135,7 @@ public final class Credential implements Parcelable {
             Log.d(TAG, "Missing CA Certificate for user credential");
             return false;
         }
+
         return true;
     }
 
