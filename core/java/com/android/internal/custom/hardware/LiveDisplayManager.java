@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- *               2018 The LineageOS Project
+ *               2018-2019 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class LiveDisplayManager {
     private static final String TAG = "LiveDisplay";
 
     private final Context mContext;
-    private final LiveDisplayConfig mConfig;
+    private LiveDisplayConfig mConfig;
 
     private static LiveDisplayManager sInstance;
     private static ILiveDisplayService sService;
@@ -160,15 +160,6 @@ public class LiveDisplayManager {
             Log.wtf(TAG, "Unable to get LiveDisplayService. The service either" +
                     " crashed, was not started, or the interface has been called to early in" +
                     " SystemServer init");
-        }
-
-        try {
-            mConfig = sService.getConfig();
-            if (mConfig == null) {
-                Log.w(TAG, "Unable to get LiveDisplay configuration!");
-            }
-        } catch (RemoteException e) {
-            throw new RuntimeException("Unable to fetch LiveDisplay configuration!", e);
         }
     }
 
@@ -214,7 +205,14 @@ public class LiveDisplayManager {
      * @return the configuration
      */
     public LiveDisplayConfig getConfig() {
-        return mConfig;
+        try {
+            if (mConfig == null) {
+                mConfig = checkService() ? sService.getConfig() : null;
+            }
+            return mConfig;
+        } catch (RemoteException e) {
+            return null;
+        }
     }
 
     /**
