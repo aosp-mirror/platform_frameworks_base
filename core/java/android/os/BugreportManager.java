@@ -233,22 +233,5 @@ public final class BugreportManager {
                 Binder.restoreCallingIdentity(identity);
             }
         }
-
-        // Old methods; should go away
-        @Override
-        public void onProgressUpdated(int progress) throws RemoteException {
-            // TODO(b/111441001): remove from interface
-        }
-
-        @Override
-        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
-            // TODO(b/111441001): remove from interface
-        }
-
-        @Override
-        public void onSectionComplete(String title, int status, int size, int durationMs)
-                throws RemoteException {
-            // TODO(b/111441001): remove from interface
-        }
     }
 }
