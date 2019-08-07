@@ -57,6 +57,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageParserCacheHelper.ReadHelper;
 import android.content.pm.PackageParserCacheHelper.WriteHelper;
+import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ApkParseUtils;
+import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.PackageImpl;
+import android.content.pm.parsing.PackageInfoUtils;
+import android.content.pm.parsing.ParsedPackage;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
@@ -67,7 +73,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -156,21 +161,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @hide
  */
 public class PackageParser {
-    private static final boolean DEBUG_JAR = false;
-    private static final boolean DEBUG_PARSER = false;
-    private static final boolean DEBUG_BACKUP = false;
-    private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
-    private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
+
+    public static final boolean DEBUG_JAR = false;
+    public static final boolean DEBUG_PARSER = false;
+    public static final boolean DEBUG_BACKUP = false;
+    public static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
+    public static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
 
     private static final String PROPERTY_CHILD_PACKAGES_ENABLED =
             "persist.sys.child_packages_enabled";
 
-    private static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
+    public static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
             SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
 
-    private static final float DEFAULT_PRE_O_MAX_ASPECT_RATIO = 1.86f;
-    private static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO = 1.333f;
-    private static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH = 1f;
+    public static final float DEFAULT_PRE_O_MAX_ASPECT_RATIO = 1.86f;
+    public static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO = 1.333f;
+    public static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH = 1f;
 
     private static final int DEFAULT_MIN_SDK_VERSION = 1;
     private static final int DEFAULT_TARGET_SDK_VERSION = 0;
@@ -182,37 +188,38 @@ public class PackageParser {
     public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
 
     /** Path prefix for apps on expanded storage */
-    private static final String MNT_EXPAND = "/mnt/expand/";
+    public static final String MNT_EXPAND = "/mnt/expand/";
 
-    private static final String TAG_MANIFEST = "manifest";
-    private static final String TAG_APPLICATION = "application";
-    private static final String TAG_PACKAGE_VERIFIER = "package-verifier";
-    private static final String TAG_OVERLAY = "overlay";
-    private static final String TAG_KEY_SETS = "key-sets";
-    private static final String TAG_PERMISSION_GROUP = "permission-group";
-    private static final String TAG_PERMISSION = "permission";
-    private static final String TAG_PERMISSION_TREE = "permission-tree";
-    private static final String TAG_USES_PERMISSION = "uses-permission";
-    private static final String TAG_USES_PERMISSION_SDK_M = "uses-permission-sdk-m";
-    private static final String TAG_USES_PERMISSION_SDK_23 = "uses-permission-sdk-23";
-    private static final String TAG_USES_CONFIGURATION = "uses-configuration";
-    private static final String TAG_USES_FEATURE = "uses-feature";
-    private static final String TAG_FEATURE_GROUP = "feature-group";
-    private static final String TAG_USES_SDK = "uses-sdk";
-    private static final String TAG_SUPPORT_SCREENS = "supports-screens";
-    private static final String TAG_PROTECTED_BROADCAST = "protected-broadcast";
-    private static final String TAG_INSTRUMENTATION = "instrumentation";
-    private static final String TAG_ORIGINAL_PACKAGE = "original-package";
-    private static final String TAG_ADOPT_PERMISSIONS = "adopt-permissions";
-    private static final String TAG_USES_GL_TEXTURE = "uses-gl-texture";
-    private static final String TAG_COMPATIBLE_SCREENS = "compatible-screens";
-    private static final String TAG_SUPPORTS_INPUT = "supports-input";
-    private static final String TAG_EAT_COMMENT = "eat-comment";
-    private static final String TAG_PACKAGE = "package";
-    private static final String TAG_RESTRICT_UPDATE = "restrict-update";
-    private static final String TAG_USES_SPLIT = "uses-split";
+    public static final String TAG_ADOPT_PERMISSIONS = "adopt-permissions";
+    public static final String TAG_APPLICATION = "application";
+    public static final String TAG_COMPATIBLE_SCREENS = "compatible-screens";
+    public static final String TAG_EAT_COMMENT = "eat-comment";
+    public static final String TAG_FEATURE_GROUP = "feature-group";
+    public static final String TAG_INSTRUMENTATION = "instrumentation";
+    public static final String TAG_KEY_SETS = "key-sets";
+    public static final String TAG_MANIFEST = "manifest";
+    public static final String TAG_ORIGINAL_PACKAGE = "original-package";
+    public static final String TAG_OVERLAY = "overlay";
+    public static final String TAG_PACKAGE = "package";
+    public static final String TAG_PACKAGE_VERIFIER = "package-verifier";
+    public static final String TAG_PERMISSION = "permission";
+    public static final String TAG_PERMISSION_GROUP = "permission-group";
+    public static final String TAG_PERMISSION_TREE = "permission-tree";
+    public static final String TAG_PROTECTED_BROADCAST = "protected-broadcast";
+    public static final String TAG_QUERIES = "queries";
+    public static final String TAG_RESTRICT_UPDATE = "restrict-update";
+    public static final String TAG_SUPPORT_SCREENS = "supports-screens";
+    public static final String TAG_SUPPORTS_INPUT = "supports-input";
+    public static final String TAG_USES_CONFIGURATION = "uses-configuration";
+    public static final String TAG_USES_FEATURE = "uses-feature";
+    public static final String TAG_USES_GL_TEXTURE = "uses-gl-texture";
+    public static final String TAG_USES_PERMISSION = "uses-permission";
+    public static final String TAG_USES_PERMISSION_SDK_23 = "uses-permission-sdk-23";
+    public static final String TAG_USES_PERMISSION_SDK_M = "uses-permission-sdk-m";
+    public static final String TAG_USES_SDK = "uses-sdk";
+    public static final String TAG_USES_SPLIT = "uses-split";
 
-    private static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
+    public static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
 
     /**
      * Bit mask of all the valid bits that can be set in recreateOnConfigChanges.
@@ -222,25 +229,25 @@ public class PackageParser {
             ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
 
     // These are the tags supported by child packages
-    private static final Set<String> CHILD_PACKAGE_TAGS = new ArraySet<>();
+    public static final Set<String> CHILD_PACKAGE_TAGS = new ArraySet<>();
     static {
         CHILD_PACKAGE_TAGS.add(TAG_APPLICATION);
-        CHILD_PACKAGE_TAGS.add(TAG_USES_PERMISSION);
-        CHILD_PACKAGE_TAGS.add(TAG_USES_PERMISSION_SDK_M);
-        CHILD_PACKAGE_TAGS.add(TAG_USES_PERMISSION_SDK_23);
+        CHILD_PACKAGE_TAGS.add(TAG_COMPATIBLE_SCREENS);
+        CHILD_PACKAGE_TAGS.add(TAG_EAT_COMMENT);
+        CHILD_PACKAGE_TAGS.add(TAG_FEATURE_GROUP);
+        CHILD_PACKAGE_TAGS.add(TAG_INSTRUMENTATION);
+        CHILD_PACKAGE_TAGS.add(TAG_SUPPORT_SCREENS);
+        CHILD_PACKAGE_TAGS.add(TAG_SUPPORTS_INPUT);
         CHILD_PACKAGE_TAGS.add(TAG_USES_CONFIGURATION);
         CHILD_PACKAGE_TAGS.add(TAG_USES_FEATURE);
-        CHILD_PACKAGE_TAGS.add(TAG_FEATURE_GROUP);
-        CHILD_PACKAGE_TAGS.add(TAG_USES_SDK);
-        CHILD_PACKAGE_TAGS.add(TAG_SUPPORT_SCREENS);
-        CHILD_PACKAGE_TAGS.add(TAG_INSTRUMENTATION);
         CHILD_PACKAGE_TAGS.add(TAG_USES_GL_TEXTURE);
-        CHILD_PACKAGE_TAGS.add(TAG_COMPATIBLE_SCREENS);
-        CHILD_PACKAGE_TAGS.add(TAG_SUPPORTS_INPUT);
-        CHILD_PACKAGE_TAGS.add(TAG_EAT_COMMENT);
+        CHILD_PACKAGE_TAGS.add(TAG_USES_PERMISSION);
+        CHILD_PACKAGE_TAGS.add(TAG_USES_PERMISSION_SDK_23);
+        CHILD_PACKAGE_TAGS.add(TAG_USES_PERMISSION_SDK_M);
+        CHILD_PACKAGE_TAGS.add(TAG_USES_SDK);
     }
 
-    private static final boolean LOG_UNSAFE_BROADCASTS = false;
+    public static final boolean LOG_UNSAFE_BROADCASTS = false;
 
     /**
      * Total number of packages that were read from the cache.  We use it only for logging.
@@ -248,7 +255,7 @@ public class PackageParser {
     public static final AtomicInteger sCachedPackageReadCount = new AtomicInteger();
 
     // Set of broadcast actions that are safe for manifest receivers
-    private static final Set<String> SAFE_BROADCASTS = new ArraySet<>();
+    public static final Set<String> SAFE_BROADCASTS = new ArraySet<>();
     static {
         SAFE_BROADCASTS.add(Intent.ACTION_BOOT_COMPLETED);
     }
@@ -295,26 +302,29 @@ public class PackageParser {
      * @deprecated callers should move to explicitly passing around source path.
      */
     @Deprecated
-    private String mArchiveSourcePath;
+    public String mArchiveSourcePath;
 
-    private String[] mSeparateProcesses;
+    public String[] mSeparateProcesses;
     private boolean mOnlyCoreApps;
     private DisplayMetrics mMetrics;
     @UnsupportedAppUsage
-    private Callback mCallback;
+    public Callback mCallback;
     private File mCacheDir;
 
-    private static final int SDK_VERSION = Build.VERSION.SDK_INT;
-    private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
+    public static final int SDK_VERSION = Build.VERSION.SDK_INT;
+    public static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
 
-    private int mParseError = PackageManager.INSTALL_SUCCEEDED;
+    public int mParseError = PackageManager.INSTALL_SUCCEEDED;
 
-    private static boolean sCompatibilityModeEnabled = true;
-    private static boolean sUseRoundIcon = false;
+    public ThreadLocal<ApkParseUtils.ParseResult> mSharedResult
+            = ThreadLocal.withInitial(ApkParseUtils.ParseResult::new);
 
-    private static final int PARSE_DEFAULT_INSTALL_LOCATION =
+    public static boolean sCompatibilityModeEnabled = true;
+    public static boolean sUseRoundIcon = false;
+
+    public static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
-    private static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
+    public static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
 
     static class ParsePackageItemArgs {
         final Package owner;
@@ -536,7 +546,7 @@ public class PackageParser {
      *  the DTD.  Otherwise, we try to get as much from the package as we
      *  can without failing.  This should normally be set to false, to
      *  support extensions to the DTD in future versions. */
-    private static final boolean RIGID_PARSER = false;
+    public static final boolean RIGID_PARSER = false;
 
     private static final String TAG = "PackageParser";
 
@@ -897,7 +907,7 @@ public class PackageParser {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ParseFlags {}
 
-    private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
+    public static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 
     /**
      * Used to sort a set of APKs based on their split names, always placing the
@@ -1043,7 +1053,7 @@ public class PackageParser {
      * and unique split names.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #collectCertificates(Package, int)}.
+     * must be done separately in {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}.
      *
      * If {@code useCaches} is true, the package parser might return a cached
      * result from a previous parse of the same {@code packageFile} with the same
@@ -1051,21 +1061,54 @@ public class PackageParser {
      * has changed since the last parse, it's up to callers to do so.
      *
      * @see #parsePackageLite(File, int)
+     * @deprecated use {@link #parseParsedPackage(File, int, boolean)}
      */
     @UnsupportedAppUsage
+    @Deprecated
     public Package parsePackage(File packageFile, int flags, boolean useCaches)
             throws PackageParserException {
-        Package parsed = useCaches ? getCachedResult(packageFile, flags) : null;
+        if (packageFile.isDirectory()) {
+            return parseClusterPackage(packageFile, flags);
+        } else {
+            return parseMonolithicPackage(packageFile, flags);
+        }
+    }
+
+    /**
+     * Equivalent to {@link #parsePackage(File, int, boolean)} with {@code useCaches == false}.
+     * @deprecated use {@link #parseParsedPackage(File, int, boolean)}
+     */
+    @UnsupportedAppUsage
+    @Deprecated
+    public Package parsePackage(File packageFile, int flags) throws PackageParserException {
+        return parsePackage(packageFile, flags, false /* useCaches */);
+    }
+
+    /**
+     * Updated method which returns {@link ParsedPackage}, the current representation of a
+     * package parsed from disk.
+     *
+     * @see #parsePackage(File, int, boolean)
+     */
+    public ParsedPackage parseParsedPackage(File packageFile, int flags, boolean useCaches)
+            throws PackageParserException {
+        ParsedPackage parsed = useCaches ? getCachedResult(packageFile, flags) : null;
         if (parsed != null) {
             return parsed;
         }
 
         long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
-        if (packageFile.isDirectory()) {
-            parsed = parseClusterPackage(packageFile, flags);
-        } else {
-            parsed = parseMonolithicPackage(packageFile, flags);
-        }
+        ApkParseUtils.ParseInput parseInput = mSharedResult.get().reset();
+        parsed = ApkParseUtils.parsePackage(
+                parseInput,
+                mSeparateProcesses,
+                mCallback,
+                mMetrics,
+                mOnlyCoreApps,
+                packageFile,
+                flags
+        )
+                .hideAsParsed();
 
         long cacheTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         cacheResult(packageFile, flags, parsed);
@@ -1077,19 +1120,12 @@ public class PackageParser {
                         + "ms, update_cache=" + cacheTime + " ms");
             }
         }
+
         return parsed;
     }
 
     /**
-     * Equivalent to {@link #parsePackage(File, int, boolean)} with {@code useCaches == false}.
-     */
-    @UnsupportedAppUsage
-    public Package parsePackage(File packageFile, int flags) throws PackageParserException {
-        return parsePackage(packageFile, flags, false /* useCaches */);
-    }
-
-    /**
-     * Returns the cache key for a specificied {@code packageFile} and {@code flags}.
+     * Returns the cache key for a specified {@code packageFile} and {@code flags}.
      */
     private String getCacheKey(File packageFile, int flags) {
         StringBuilder sb = new StringBuilder(packageFile.getName());
@@ -1100,13 +1136,13 @@ public class PackageParser {
     }
 
     @VisibleForTesting
-    protected Package fromCacheEntry(byte[] bytes) {
+    protected ParsedPackage fromCacheEntry(byte[] bytes) {
         return fromCacheEntryStatic(bytes);
     }
 
     /** static version of {@link #fromCacheEntry} for unit tests. */
     @VisibleForTesting
-    public static Package fromCacheEntryStatic(byte[] bytes) {
+    public static ParsedPackage fromCacheEntryStatic(byte[] bytes) {
         final Parcel p = Parcel.obtain();
         p.unmarshall(bytes, 0, bytes.length);
         p.setDataPosition(0);
@@ -1114,7 +1150,8 @@ public class PackageParser {
         final ReadHelper helper = new ReadHelper(p);
         helper.startAndInstall();
 
-        PackageParser.Package pkg = new PackageParser.Package(p);
+        // TODO(b/135203078): Hide PackageImpl constructor?
+        ParsedPackage pkg = new PackageImpl(p);
 
         p.recycle();
 
@@ -1124,14 +1161,14 @@ public class PackageParser {
     }
 
     @VisibleForTesting
-    protected byte[] toCacheEntry(Package pkg) {
+    protected byte[] toCacheEntry(ParsedPackage pkg) {
         return toCacheEntryStatic(pkg);
 
     }
 
     /** static version of {@link #toCacheEntry} for unit tests. */
     @VisibleForTesting
-    public static byte[] toCacheEntryStatic(Package pkg) {
+    public static byte[] toCacheEntryStatic(ParsedPackage pkg) {
         final Parcel p = Parcel.obtain();
         final WriteHelper helper = new WriteHelper(p);
 
@@ -1180,7 +1217,7 @@ public class PackageParser {
      * Returns the cached parse result for {@code packageFile} for parse flags {@code flags},
      * or {@code null} if no cached result exists.
      */
-    private Package getCachedResult(File packageFile, int flags) {
+    public ParsedPackage getCachedResult(File packageFile, int flags) {
         if (mCacheDir == null) {
             return null;
         }
@@ -1195,9 +1232,9 @@ public class PackageParser {
             }
 
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
-            Package p = fromCacheEntry(bytes);
+            ParsedPackage p = fromCacheEntry(bytes);
             if (mCallback != null) {
-                String[] overlayApks = mCallback.getOverlayApks(p.packageName);
+                String[] overlayApks = mCallback.getOverlayApks(p.getPackageName());
                 if (overlayApks != null && overlayApks.length > 0) {
                     for (String overlayApk : overlayApks) {
                         // If a static RRO is updated, return null.
@@ -1221,7 +1258,7 @@ public class PackageParser {
     /**
      * Caches the parse result for {@code packageFile} with flags {@code flags}.
      */
-    private void cacheResult(File packageFile, int flags, Package parsed) {
+    public void cacheResult(File packageFile, int flags, ParsedPackage parsed) {
         if (mCacheDir == null) {
             return;
         }
@@ -1260,7 +1297,8 @@ public class PackageParser {
      * split names.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #collectCertificates(Package, int)}.
+     * must be done separately in
+     * {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}.
      */
     private Package parseClusterPackage(File packageDir, int flags) throws PackageParserException {
         final PackageLite lite = parseClusterPackageLite(packageDir, 0);
@@ -1324,10 +1362,11 @@ public class PackageParser {
      * Parse the given APK file, treating it as as a single monolithic package.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #collectCertificates(Package, int)}.
+     * must be done separately in
+     * {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}.
      *
      * @deprecated external callers should move to
-     *             {@link #parsePackage(File, int)}. Eventually this method will
+     *             {@link #parseParsedPackage(File, int, boolean)}. Eventually this method will
      *             be marked private.
      */
     @Deprecated
@@ -1527,8 +1566,11 @@ public class PackageParser {
      * Collect certificates from all the APKs described in the given package,
      * populating {@link Package#mSigningDetails}. Also asserts that all APK
      * contents are signed correctly and consistently.
+     *
+     * @deprecated use {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}
      */
     @UnsupportedAppUsage
+    @Deprecated
     public static void collectCertificates(Package pkg, boolean skipVerify)
             throws PackageParserException {
         collectCertificatesInternal(pkg, skipVerify);
@@ -1707,7 +1749,7 @@ public class PackageParser {
                 ? null : "must have at least one '.' separator";
     }
 
-    private static Pair<String, String> parsePackageSplitNames(XmlPullParser parser,
+    public static Pair<String, String> parsePackageSplitNames(XmlPullParser parser,
             AttributeSet attrs) throws IOException, XmlPullParserException,
             PackageParserException {
 
@@ -2487,8 +2529,6 @@ public class PackageParser {
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return null;
 
-            } else if (tagName.equals("queries")) {
-                parseQueries(pkg, res, parser, flags, outError);
             } else {
                 Slog.w(TAG, "Unknown element under <manifest>: " + parser.getName()
                         + " at " + mArchiveSourcePath + " "
@@ -2958,7 +2998,7 @@ public class PackageParser {
         return true;
     }
 
-    private static String buildClassName(String pkg, CharSequence clsSeq,
+    public static String buildClassName(String pkg, CharSequence clsSeq,
             String[] outError) {
         if (clsSeq == null || clsSeq.length() <= 0) {
             outError[0] = "Empty class name in package " + pkg;
@@ -3006,7 +3046,7 @@ public class PackageParser {
         return proc;
     }
 
-    private static String buildProcessName(String pkg, String defProc,
+    public static String buildProcessName(String pkg, String defProc,
             CharSequence procSeq, int flags, String[] separateProcesses,
             String[] outError) {
         if ((flags&PARSE_IGNORE_PROCESSES) != 0 && !"system".equals(procSeq)) {
@@ -3026,7 +3066,7 @@ public class PackageParser {
         return TextUtils.safeIntern(buildCompoundName(pkg, procSeq, "process", outError));
     }
 
-    private static String buildTaskAffinityName(String pkg, String defProc,
+    public static String buildTaskAffinityName(String pkg, String defProc,
             CharSequence procSeq, String[] outError) {
         if (procSeq == null) {
             return defProc;
@@ -3588,9 +3628,6 @@ public class PackageParser {
             owner.mRequiredAccountType = requiredAccountType;
         }
 
-        owner.mForceQueryable =
-                sa.getBoolean(R.styleable.AndroidManifestApplication_forceQueryable, false);
-
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_debuggable,
                 false)) {
@@ -4049,89 +4086,6 @@ public class PackageParser {
             owner.applicationInfo.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
         }
 
-        return true;
-    }
-
-    private boolean parseQueries(Package owner, Resources res, XmlResourceParser parser, int flags,
-            String[] outError)
-            throws IOException, XmlPullParserException {
-
-        final int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG
-                || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            if (parser.getName().equals("intent")) {
-                QueriesIntentInfo intentInfo = new QueriesIntentInfo();
-                if (!parseIntent(res, parser, true /*allowGlobs*/, true /*allowAutoVerify*/,
-                        intentInfo, outError)) {
-                    return false;
-                }
-
-                Uri data = null;
-                String dataType = null;
-                String host = "";
-                final int numActions = intentInfo.countActions();
-                final int numSchemes = intentInfo.countDataSchemes();
-                final int numTypes = intentInfo.countDataTypes();
-                final int numHosts = intentInfo.getHosts().length;
-                if ((numSchemes == 0 && numTypes == 0 && numActions == 0)) {
-                    outError[0] = "intent tags must contain either an action or data.";
-                    return false;
-                }
-                if (numActions > 1) {
-                    outError[0] = "intent tag may have at most one action.";
-                    return false;
-                }
-                if (numTypes > 1) {
-                    outError[0] = "intent tag may have at most one data type.";
-                    return false;
-                }
-                if (numSchemes > 1) {
-                    outError[0] = "intent tag may have at most one data scheme.";
-                    return false;
-                }
-                if (numHosts > 1) {
-                    outError[0] = "intent tag may have at most one data host.";
-                    return false;
-                }
-                Intent intent = new Intent();
-                for (int i = 0, max = intentInfo.countCategories(); i < max; i++) {
-                    intent.addCategory(intentInfo.getCategory(i));
-                }
-                if (numHosts == 1) {
-                    host = intentInfo.getHosts()[0];
-                }
-                if (numSchemes == 1) {
-                    data = new Uri.Builder()
-                            .scheme(intentInfo.getDataScheme(0))
-                            .authority(host)
-                            .build();
-                }
-                if (numTypes == 1) {
-                    dataType = intentInfo.getDataType(0);
-                }
-                intent.setDataAndType(data, dataType);
-                if (numActions == 1) {
-                    intent.setAction(intentInfo.getAction(0));
-                }
-                owner.mQueriesIntents = ArrayUtils.add(owner.mQueriesIntents, intent);
-            } else if (parser.getName().equals("package")) {
-                final TypedArray sa = res.obtainAttributes(parser,
-                        com.android.internal.R.styleable.AndroidManifestQueriesPackage);
-                final String packageName =
-                        sa.getString(R.styleable.AndroidManifestQueriesPackage_name);
-                if (TextUtils.isEmpty(packageName)) {
-                    outError[0] = "Package name is missing from package tag.";
-                    return false;
-                }
-                owner.mQueriesPackages =
-                        ArrayUtils.add(owner.mQueriesPackages, packageName.intern());
-            }
-        }
         return true;
     }
 
@@ -5846,7 +5800,7 @@ public class PackageParser {
         return null;
     }
 
-    private static final String ANDROID_RESOURCES
+    public static final String ANDROID_RESOURCES
             = "http://schemas.android.com/apk/res/android";
 
     private boolean parseIntent(Resources res, XmlResourceParser parser, boolean allowGlobs,
@@ -6541,7 +6495,10 @@ public class PackageParser {
     /**
      * Representation of a full package parsed from APK files on disk. A package
      * consists of a single base APK, and zero or more split APKs.
+     *
+     * @deprecated use an {@link AndroidPackage}
      */
+    @Deprecated
     public final static class Package implements Parcelable {
 
         @UnsupportedAppUsage
@@ -6649,9 +6606,6 @@ public class PackageParser {
         // The major version code declared for this package.
         public int mVersionCodeMajor;
 
-        // Whether the package declares that it should be queryable by all normal apps on device.
-        public boolean mForceQueryable;
-
         // Return long containing mVersionCode and mVersionCodeMajor.
         public long getLongVersionCode() {
             return PackageInfo.composeLongVersionCode(mVersionCodeMajor, mVersionCode);
@@ -6756,9 +6710,6 @@ public class PackageParser {
         public boolean visibleToInstantApps;
         /** Whether or not the package is a stub and must be replaced by the full version. */
         public boolean isStub;
-
-        public ArrayList<String> mQueriesPackages;
-        public ArrayList<Intent> mQueriesIntents;
 
         @UnsupportedAppUsage
         public Package(String packageName) {
@@ -7263,9 +7214,6 @@ public class PackageParser {
             use32bitAbi = (dest.readInt() == 1);
             restrictUpdateHash = dest.createByteArray();
             visibleToInstantApps = dest.readInt() == 1;
-            mForceQueryable = dest.readBoolean();
-            mQueriesIntents = dest.createTypedArrayList(Intent.CREATOR);
-            mQueriesPackages = dest.createStringArrayList();
         }
 
         private static void internStringArrayList(List<String> list) {
@@ -7281,7 +7229,7 @@ public class PackageParser {
          * Sets the package owner and the the {@code applicationInfo} for every component
          * owner by this package.
          */
-        private void fixupOwner(List<? extends Component<?>> list) {
+        public void fixupOwner(List<? extends Component<?>> list) {
             if (list != null) {
                 for (Component<?> c : list) {
                     c.owner = this;
@@ -7391,11 +7339,7 @@ public class PackageParser {
             dest.writeInt(use32bitAbi ? 1 : 0);
             dest.writeByteArray(restrictUpdateHash);
             dest.writeInt(visibleToInstantApps ? 1 : 0);
-            dest.writeBoolean(mForceQueryable);
-            dest.writeTypedList(mQueriesIntents);
-            dest.writeList(mQueriesPackages);
         }
-
 
         /**
          * Writes the keyset mapping to the provided package. {@code null} mappings are permitted.
@@ -7468,6 +7412,10 @@ public class PackageParser {
         };
     }
 
+    /**
+     * @deprecated use a {@link ComponentParseUtils.ParsedComponent}
+     */
+    @Deprecated
     public static abstract class Component<II extends IntentInfo> {
         @UnsupportedAppUsage
         public final ArrayList<II> intents;
@@ -7648,6 +7596,10 @@ public class PackageParser {
         }
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedPermission}
+     */
+    @Deprecated
     public final static class Permission extends Component<IntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final PermissionInfo info;
@@ -7722,6 +7674,10 @@ public class PackageParser {
         };
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedPermissionGroup}
+     */
+    @Deprecated
     public final static class PermissionGroup extends Component<IntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final PermissionGroupInfo info;
@@ -7821,7 +7777,12 @@ public class PackageParser {
         return false;
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateApplicationInfo(
+     *      AndroidPackage, int, PackageUserState, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state) {
         return generateApplicationInfo(p, flags, state, UserHandle.getCallingUserId());
@@ -7878,7 +7839,12 @@ public class PackageParser {
         ai.icon = (sUseRoundIcon && ai.roundIconRes != 0) ? ai.roundIconRes : ai.iconRes;
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateApplicationInfo(
+     *      AndroidPackage, int, PackageUserState, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
@@ -7918,6 +7884,11 @@ public class PackageParser {
         return ai;
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateApplicationInfo(
+     *      AndroidPackage, int, PackageUserState, int)}
+     */
+    @Deprecated
     public static ApplicationInfo generateApplicationInfo(ApplicationInfo ai, int flags,
             PackageUserState state, int userId) {
         if (ai == null) return null;
@@ -7937,7 +7908,12 @@ public class PackageParser {
         return ai;
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generatePermissionInfo(
+     *      ComponentParseUtils.ParsedPermission, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static final PermissionInfo generatePermissionInfo(
             Permission p, int flags) {
         if (p == null) return null;
@@ -7949,7 +7925,12 @@ public class PackageParser {
         return pi;
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generatePermissionGroupInfo(
+     *      ComponentParseUtils.ParsedPermissionGroup, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static final PermissionGroupInfo generatePermissionGroupInfo(
             PermissionGroup pg, int flags) {
         if (pg == null) return null;
@@ -7961,6 +7942,10 @@ public class PackageParser {
         return pgi;
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedActivity}
+     */
+    @Deprecated
     public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final ActivityInfo info;
@@ -8076,7 +8061,12 @@ public class PackageParser {
         };
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateActivityInfo(
+     *      AndroidPackage, ComponentParseUtils.ParsedActivity, int, PackageUserState, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
             PackageUserState state, int userId) {
         if (a == null) return null;
@@ -8094,6 +8084,11 @@ public class PackageParser {
         return ai;
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateActivityInfo(
+     *      AndroidPackage, ComponentParseUtils.ParsedActivity, int, PackageUserState, int)}
+     */
+    @Deprecated
     public static final ActivityInfo generateActivityInfo(ActivityInfo ai, int flags,
             PackageUserState state, int userId) {
         if (ai == null) return null;
@@ -8107,6 +8102,10 @@ public class PackageParser {
         return ai;
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedService}
+     */
+    @Deprecated
     public final static class Service extends Component<ServiceIntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final ServiceInfo info;
@@ -8168,7 +8167,12 @@ public class PackageParser {
         };
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateServiceInfo(
+     * AndroidPackage, ComponentParseUtils.ParsedService, int, PackageUserState, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
             PackageUserState state, int userId) {
         if (s == null) return null;
@@ -8186,6 +8190,10 @@ public class PackageParser {
         return si;
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedProvider}
+     */
+    @Deprecated
     public final static class Provider extends Component<ProviderIntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final ProviderInfo info;
@@ -8266,7 +8274,12 @@ public class PackageParser {
         };
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateProviderInfo(
+     *      AndroidPackage, ComponentParseUtils.ParsedProvider, int, PackageUserState, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
@@ -8289,6 +8302,10 @@ public class PackageParser {
         return pi;
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedInstrumentation}
+     */
+    @Deprecated
     public final static class Instrumentation extends Component<IntentInfo> implements
             Parcelable {
         @UnsupportedAppUsage
@@ -8349,7 +8366,12 @@ public class PackageParser {
         };
     }
 
+    /**
+     * @deprecated use {@link PackageInfoUtils#generateInstrumentationInfo(
+     *      ComponentParseUtils.ParsedInstrumentation, int)}
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public static final InstrumentationInfo generateInstrumentationInfo(
             Instrumentation i, int flags) {
         if (i == null) return null;
@@ -8361,6 +8383,10 @@ public class PackageParser {
         return ii;
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedIntentInfo}
+     */
+    @Deprecated
     public static abstract class IntentInfo extends IntentFilter {
         @UnsupportedAppUsage
         public boolean hasDefault;
@@ -8404,8 +8430,10 @@ public class PackageParser {
         }
     }
 
-    public static final class QueriesIntentInfo extends IntentInfo {}
-
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedActivityIntentInfo}
+     */
+    @Deprecated
     public final static class ActivityIntentInfo extends IntentInfo {
         @UnsupportedAppUsage
         public Activity activity;
@@ -8429,6 +8457,10 @@ public class PackageParser {
         }
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedServiceIntentInfo}
+     */
+    @Deprecated
     public final static class ServiceIntentInfo extends IntentInfo {
         @UnsupportedAppUsage
         public Service service;
@@ -8452,6 +8484,10 @@ public class PackageParser {
         }
     }
 
+    /**
+     * @deprecated use {@link ComponentParseUtils.ParsedProviderIntentInfo}
+     */
+    @Deprecated
     public static final class ProviderIntentInfo extends IntentInfo {
         @UnsupportedAppUsage
         public Provider provider;

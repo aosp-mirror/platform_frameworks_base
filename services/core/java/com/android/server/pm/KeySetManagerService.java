@@ -20,22 +20,25 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 
-import com.android.internal.util.Preconditions;
 import android.content.pm.PackageParser;
+import android.content.pm.parsing.AndroidPackage;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
-import android.util.Slog;
 import android.util.LongSparseArray;
+import android.util.Slog;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.security.PublicKey;
-import java.util.Set;
+import com.android.internal.util.Preconditions;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.security.PublicKey;
+import java.util.Map;
+import java.util.Set;
 
 /*
  * Manages system-wide KeySet state.
@@ -182,33 +185,31 @@ public class KeySetManagerService {
      *
      * Returns true if the package can safely be added to the keyset metadata.
      */
-    public void assertScannedPackageValid(PackageParser.Package pkg)
+    public void assertScannedPackageValid(AndroidPackage pkg)
             throws PackageManagerException {
-        if (pkg == null || pkg.packageName == null) {
+        if (pkg == null || pkg.getPackageName() == null) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Passed invalid package to keyset validation.");
         }
-        ArraySet<PublicKey> signingKeys = pkg.mSigningDetails.publicKeys;
+        ArraySet<PublicKey> signingKeys = pkg.getSigningDetails().publicKeys;
         if (signingKeys == null || !(signingKeys.size() > 0) || signingKeys.contains(null)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Package has invalid signing-key-set.");
         }
-        ArrayMap<String, ArraySet<PublicKey>> definedMapping = pkg.mKeySetMapping;
+        Map<String, ArraySet<PublicKey>> definedMapping = pkg.getKeySetMapping();
         if (definedMapping != null) {
             if (definedMapping.containsKey(null) || definedMapping.containsValue(null)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Package has null defined key set.");
             }
-            int defMapSize = definedMapping.size();
-            for (int i = 0; i < defMapSize; i++) {
-                if (!(definedMapping.valueAt(i).size() > 0)
-                        || definedMapping.valueAt(i).contains(null)) {
+            for (ArraySet<PublicKey> value : definedMapping.values()) {
+                if (!(value.size() > 0) || value.contains(null)) {
                     throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                             "Package has null/no public keys for defined key-sets.");
                 }
             }
         }
-        ArraySet<String> upgradeAliases = pkg.mUpgradeKeySets;
+        Set<String> upgradeAliases = pkg.getUpgradeKeySets();
         if (upgradeAliases != null) {
             if (definedMapping == null || !(definedMapping.keySet().containsAll(upgradeAliases))) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
@@ -217,17 +218,17 @@ public class KeySetManagerService {
         }
     }
 
-    public void addScannedPackageLPw(PackageParser.Package pkg) {
+    public void addScannedPackageLPw(AndroidPackage pkg) {
         Preconditions.checkNotNull(pkg, "Attempted to add null pkg to ksms.");
-        Preconditions.checkNotNull(pkg.packageName, "Attempted to add null pkg to ksms.");
-        PackageSetting ps = mPackages.get(pkg.packageName);
-        Preconditions.checkNotNull(ps, "pkg: " + pkg.packageName
+        Preconditions.checkNotNull(pkg.getPackageName(), "Attempted to add null pkg to ksms.");
+        PackageSetting ps = mPackages.get(pkg.getPackageName());
+        Preconditions.checkNotNull(ps, "pkg: " + pkg.getPackageName()
                     + "does not have a corresponding entry in mPackages.");
-        addSigningKeySetToPackageLPw(ps, pkg.mSigningDetails.publicKeys);
-        if (pkg.mKeySetMapping != null) {
-            addDefinedKeySetsToPackageLPw(ps, pkg.mKeySetMapping);
-            if (pkg.mUpgradeKeySets != null) {
-                addUpgradeKeySetsToPackageLPw(ps, pkg.mUpgradeKeySets);
+        addSigningKeySetToPackageLPw(ps, pkg.getSigningDetails().publicKeys);
+        if (pkg.getKeySetMapping() != null) {
+            addDefinedKeySetsToPackageLPw(ps, pkg.getKeySetMapping());
+            if (pkg.getUpgradeKeySets() != null) {
+                addUpgradeKeySetsToPackageLPw(ps, pkg.getUpgradeKeySets());
             }
         }
     }
@@ -280,15 +281,14 @@ public class KeySetManagerService {
      * Remove any KeySets the package no longer defines.
      */
     void addDefinedKeySetsToPackageLPw(PackageSetting pkg,
-            ArrayMap<String, ArraySet<PublicKey>> definedMapping) {
+            Map<String, ArraySet<PublicKey>> definedMapping) {
         ArrayMap<String, Long> prevDefinedKeySets = pkg.keySetData.getAliases();
 
         /* add all of the newly defined KeySets */
-        ArrayMap<String, Long> newKeySetAliases = new ArrayMap<String, Long>();
-        final int defMapSize = definedMapping.size();
-        for (int i = 0; i < defMapSize; i++) {
-            String alias = definedMapping.keyAt(i);
-            ArraySet<PublicKey> pubKeys = definedMapping.valueAt(i);
+        Map<String, Long> newKeySetAliases = new ArrayMap<>();
+        for (Map.Entry<String, ArraySet<PublicKey>> entry : definedMapping.entrySet()) {
+            String alias = entry.getKey();
+            ArraySet<PublicKey> pubKeys = entry.getValue();
             if (alias != null && pubKeys != null && pubKeys.size() > 0) {
                 KeySetHandle ks = addKeySetLPw(pubKeys);
                 newKeySetAliases.put(alias, ks.getId());
@@ -313,12 +313,10 @@ public class KeySetManagerService {
      * after all of the defined KeySets have been added.
      */
     void addUpgradeKeySetsToPackageLPw(PackageSetting pkg,
-            ArraySet<String> upgradeAliases) {
-        final int uaSize = upgradeAliases.size();
-        for (int i = 0; i < uaSize; i++) {
-            pkg.keySetData.addUpgradeKeySet(upgradeAliases.valueAt(i));
+            Set<String> upgradeAliases) {
+        for (String upgradeAlias : upgradeAliases) {
+            pkg.keySetData.addUpgradeKeySet(upgradeAlias);
         }
-        return;
     }
 
     /**
@@ -364,14 +362,14 @@ public class KeySetManagerService {
         return true;
     }
 
-    public boolean checkUpgradeKeySetLocked(PackageSettingBase oldPS,
-            PackageParser.Package newPkg) {
+    public boolean checkUpgradeKeySetLocked(PackageSettingBase oldPS, AndroidPackage pkg) {
         // Upgrade keysets are being used.  Determine if new package has a superset of the
         // required keys.
         long[] upgradeKeySets = oldPS.keySetData.getUpgradeKeySets();
         for (int i = 0; i < upgradeKeySets.length; i++) {
             Set<PublicKey> upgradeSet = getPublicKeysFromKeySetLPr(upgradeKeySets[i]);
-            if (upgradeSet != null && newPkg.mSigningDetails.publicKeys.containsAll(upgradeSet)) {
+            if (upgradeSet != null
+                    && pkg.getSigningDetails().publicKeys.containsAll(upgradeSet)) {
                 return true;
             }
         }

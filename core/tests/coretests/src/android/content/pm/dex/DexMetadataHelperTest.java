@@ -25,9 +25,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
-import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.parsing.ParsedPackage;
 import android.os.FileUtils;
 
 import androidx.test.InstrumentationRegistry;
@@ -36,7 +36,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -95,13 +94,13 @@ public class DexMetadataHelperTest {
     public void testParsePackageWithDmFileValid() throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk");
-        Package pkg = new PackageParser().parsePackage(mTmpDir, 0 /* flags */);
+        ParsedPackage pkg = new PackageParser().parseParsedPackage(mTmpDir, 0 /* flags */, false);
 
         Map<String, String> packageDexMetadata = DexMetadataHelper.getPackageDexMetadata(pkg);
         assertEquals(1, packageDexMetadata.size());
-        String baseDexMetadata = packageDexMetadata.get(pkg.baseCodePath);
+        String baseDexMetadata = packageDexMetadata.get(pkg.getBaseCodePath());
         assertNotNull(baseDexMetadata);
-        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.baseCodePath));
+        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.getBaseCodePath()));
     }
 
     @Test
@@ -111,17 +110,17 @@ public class DexMetadataHelperTest {
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_base.apk");
         createDexMetadataFile("install_split_feature_a.apk");
-        Package pkg = new PackageParser().parsePackage(mTmpDir, 0 /* flags */);
+        ParsedPackage pkg = new PackageParser().parseParsedPackage(mTmpDir, 0 /* flags */, false);
 
         Map<String, String> packageDexMetadata = DexMetadataHelper.getPackageDexMetadata(pkg);
         assertEquals(2, packageDexMetadata.size());
-        String baseDexMetadata = packageDexMetadata.get(pkg.baseCodePath);
+        String baseDexMetadata = packageDexMetadata.get(pkg.getBaseCodePath());
         assertNotNull(baseDexMetadata);
-        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.baseCodePath));
+        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.getBaseCodePath()));
 
-        String splitDexMetadata = packageDexMetadata.get(pkg.splitCodePaths[0]);
+        String splitDexMetadata = packageDexMetadata.get(pkg.getSplitCodePaths()[0]);
         assertNotNull(splitDexMetadata);
-        assertTrue(isDexMetadataForApk(splitDexMetadata, pkg.splitCodePaths[0]));
+        assertTrue(isDexMetadataForApk(splitDexMetadata, pkg.getSplitCodePaths()[0]));
     }
 
     @Test
@@ -130,14 +129,14 @@ public class DexMetadataHelperTest {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_feature_a.apk");
-        Package pkg = new PackageParser().parsePackage(mTmpDir, 0 /* flags */);
+        ParsedPackage pkg = new PackageParser().parseParsedPackage(mTmpDir, 0 /* flags */, false);
 
         Map<String, String> packageDexMetadata = DexMetadataHelper.getPackageDexMetadata(pkg);
         assertEquals(1, packageDexMetadata.size());
 
-        String splitDexMetadata = packageDexMetadata.get(pkg.splitCodePaths[0]);
+        String splitDexMetadata = packageDexMetadata.get(pkg.getSplitCodePaths()[0]);
         assertNotNull(splitDexMetadata);
-        assertTrue(isDexMetadataForApk(splitDexMetadata, pkg.splitCodePaths[0]));
+        assertTrue(isDexMetadataForApk(splitDexMetadata, pkg.getSplitCodePaths()[0]));
     }
 
     @Test
@@ -146,7 +145,8 @@ public class DexMetadataHelperTest {
         File invalidDmFile = new File(mTmpDir, "install_split_base.dm");
         Files.createFile(invalidDmFile.toPath());
         try {
-            PackageParser.Package pkg = new PackageParser().parsePackage(mTmpDir, 0 /* flags */);
+            ParsedPackage pkg = new PackageParser()
+                    .parseParsedPackage(mTmpDir, 0 /* flags */, false);
             DexMetadataHelper.validatePackageDexMetadata(pkg);
         } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
@@ -163,7 +163,8 @@ public class DexMetadataHelperTest {
         Files.createFile(invalidDmFile.toPath());
 
         try {
-            PackageParser.Package pkg = new PackageParser().parsePackage(mTmpDir, 0 /* flags */);
+            ParsedPackage pkg = new PackageParser()
+                    .parseParsedPackage(mTmpDir, 0 /* flags */, false);
             DexMetadataHelper.validatePackageDexMetadata(pkg);
         } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);

@@ -36,6 +36,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.UserHandle;
 
@@ -242,6 +243,87 @@ public abstract class SoftRestrictedPermissionPolicy {
                     @Override
                     public boolean canBeGranted() {
                         return isWhiteListed || targetSDK >= Build.VERSION_CODES.Q;
+                    }
+                };
+            }
+            default:
+                return DUMMY_POLICY;
+        }
+    }
+
+    /**
+     * Get the policy for a soft restricted permission.
+     *
+     * @param context A context to use
+     * @param pkg The application the permission belongs to. Can be {@code null}, but then
+     *                only {@link #resolveAppOp} will work.
+     * @param user The user the app belongs to. Can be {@code null}, but then only
+     *             {@link #resolveAppOp} will work.
+     * @param permission The name of the permission
+     *
+     * @return The policy for this permission
+     */
+    public static @NonNull SoftRestrictedPermissionPolicy forPermission(@NonNull Context context,
+            @Nullable AndroidPackage pkg, @Nullable UserHandle user,
+            @NonNull String permission) {
+        switch (permission) {
+            // Storage uses a special app op to decide the mount state and supports soft restriction
+            // where the restricted state allows the permission but only for accessing the medial
+            // collections.
+            case READ_EXTERNAL_STORAGE:
+            case WRITE_EXTERNAL_STORAGE: {
+                final int flags;
+                final boolean applyRestriction;
+                final boolean isWhiteListed;
+                final boolean hasRequestedLegacyExternalStorage;
+                final int targetSDK;
+
+                if (pkg != null) {
+                    flags = context.getPackageManager().getPermissionFlags(permission,
+                            pkg.getPackageName(), user);
+                    applyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                    isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
+                    hasRequestedLegacyExternalStorage = pkg.hasRequestedLegacyExternalStorage();
+                    targetSDK = pkg.getTargetSdkVersion();
+                } else {
+                    flags = 0;
+                    applyRestriction = false;
+                    isWhiteListed = false;
+                    hasRequestedLegacyExternalStorage = false;
+                    targetSDK = 0;
+                }
+
+                return new SoftRestrictedPermissionPolicy() {
+                    @Override
+                    public int resolveAppOp() {
+                        return OP_LEGACY_STORAGE;
+                    }
+
+                    @Override
+                    public int getDesiredOpMode() {
+                        if (applyRestriction) {
+                            return MODE_DEFAULT;
+                        } else if (hasRequestedLegacyExternalStorage) {
+                            return MODE_ALLOWED;
+                        } else {
+                            return MODE_IGNORED;
+                        }
+                    }
+
+                    @Override
+                    public boolean shouldSetAppOpIfNotDefault() {
+                        // Do not switch from allowed -> ignored as this would mean to retroactively
+                        // turn on isolated storage. This will make the app loose all its files.
+                        return getDesiredOpMode() != MODE_IGNORED;
+                    }
+
+                    @Override
+                    public boolean canBeGranted() {
+                        if (isWhiteListed || targetSDK >= Build.VERSION_CODES.Q) {
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 };
             }
