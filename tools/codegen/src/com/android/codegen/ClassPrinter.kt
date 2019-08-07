@@ -122,8 +122,12 @@ class ClassPrinter(
         if (cliArgs.contains("--$kebabCase")) return true
 
         val annotationKey = "gen$upperCamelCase"
+        val annotationHiddenKey = "genHidden$upperCamelCase"
         if (dataClassAnnotationFeatures.containsKey(annotationKey)) {
             return dataClassAnnotationFeatures[annotationKey]!!
+        }
+        if (dataClassAnnotationFeatures.containsKey(annotationHiddenKey)) {
+            return dataClassAnnotationFeatures[annotationHiddenKey]!!
         }
 
         if (cliArgs.contains("--all")) return true
@@ -144,11 +148,17 @@ class ClassPrinter(
         }
     }
 
-    val FeatureFlag.hidden
-        get(): Boolean = when {
-            cliArgs.contains("--hidden-$kebabCase") -> true
-            this == FeatureFlag.BUILD_UPON -> FeatureFlag.BUILDER.hidden
-            else -> false
+    val FeatureFlag.hidden: Boolean
+        get(): Boolean {
+            val annotationHiddenKey = "genHidden$upperCamelCase"
+            if (dataClassAnnotationFeatures.containsKey(annotationHiddenKey)) {
+                return dataClassAnnotationFeatures[annotationHiddenKey]!!
+            }
+            return when {
+                cliArgs.contains("--hidden-$kebabCase") -> true
+                this == FeatureFlag.BUILD_UPON -> FeatureFlag.BUILDER.hidden
+                else -> false
+            }
         }
 
     var currentIndent = INDENT_SINGLE

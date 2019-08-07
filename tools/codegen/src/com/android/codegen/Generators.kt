@@ -68,12 +68,15 @@ fun ClassPrinter.generateConstDef(consts: List<Pair<VariableDeclarator, FieldDec
         }
     }
 
-    val visibility = if (consts[0].second.isPublic) "public" else "/* package-*/"
+    val visibility = if (consts[0].second.isPublic) "public" else "/* package-private */"
 
     val Retention = classRef("java.lang.annotation.Retention")
     val RetentionPolicySource = memberRef("java.lang.annotation.RetentionPolicy.SOURCE")
     val ConstDef = classRef("android.annotation.${type.capitalize()}Def")
 
+    if (FeatureFlag.CONST_DEFS.hidden) {
+        +"/** @hide */"
+    }
     "@$ConstDef(${if_(flag, "flag = true, ")}prefix = \"${prefix}_\", value = {" {
         names.forEachLastAware { name, isLast ->
             +"$name${if_(!isLast, ",")}"
@@ -85,6 +88,9 @@ fun ClassPrinter.generateConstDef(consts: List<Pair<VariableDeclarator, FieldDec
     +""
 
     if (type == "int") {
+        if (FeatureFlag.CONST_DEFS.hidden) {
+            +"/** @hide */"
+        }
         +GENERATED_MEMBER_HEADER
         val methodDefLine = "$visibility static String ${AnnotationName.decapitalize()}ToString(" +
                 "@$AnnotationName int value)"

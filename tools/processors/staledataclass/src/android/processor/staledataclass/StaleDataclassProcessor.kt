@@ -66,10 +66,14 @@ class StaleDataclassProcessor: AbstractProcessor() {
         if (dataClassAnnotation == null) {
             dataClassAnnotation = annotations.find {
                 it.qualifiedName.toString() == DATACLASS_ANNOTATION_NAME
-            }
+            } ?: return true
         }
 
-        val generatedAnnotatedElements = roundEnv.getElementsAnnotatedWith(generatedAnnotation)
+        val generatedAnnotatedElements = if (generatedAnnotation != null) {
+            roundEnv.getElementsAnnotatedWith(generatedAnnotation)
+        } else {
+            emptySet()
+        }
         generatedAnnotatedElements.forEach {
             processSingleFile(it)
         }
