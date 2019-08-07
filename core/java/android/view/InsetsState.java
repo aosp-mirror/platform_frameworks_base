@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SIZE;
@@ -161,13 +162,15 @@ public class InsetsState implements Parcelable {
                 continue;
             }
 
+            boolean skipNonImeInImeMode = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_IME
+                    && source.getType() != TYPE_IME;
             boolean skipSystemBars = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
                     && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR);
             boolean skipIme = source.getType() == TYPE_IME
                     && (legacySoftInputMode & LayoutParams.SOFT_INPUT_ADJUST_RESIZE) == 0;
             boolean skipLegacyTypes = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
                     && (toPublicType(type) & Type.compatSystemInsets()) != 0;
-            if (skipSystemBars || skipIme || skipLegacyTypes) {
+            if (skipSystemBars || skipIme || skipLegacyTypes || skipNonImeInImeMode) {
                 typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
                 continue;
             }

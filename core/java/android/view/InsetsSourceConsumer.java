@@ -58,6 +58,7 @@ public class InsetsSourceConsumer {
     private final @InternalInsetType int mType;
     private final InsetsState mState;
     private @Nullable InsetsSourceControl mSourceControl;
+    private boolean mHasWindowFocus;
 
     public InsetsSourceConsumer(@InternalInsetType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
@@ -104,12 +105,20 @@ public class InsetsSourceConsumer {
     /**
      * Called when current window gains focus
      */
-    public void onWindowFocusGained() {}
+    public void onWindowFocusGained() {
+        mHasWindowFocus = true;
+    }
 
     /**
      * Called when current window loses focus.
      */
-    public void onWindowFocusLost() {}
+    public void onWindowFocusLost() {
+        mHasWindowFocus = false;
+    }
+
+    boolean hasWindowFocus() {
+        return mHasWindowFocus;
+    }
 
     boolean applyLocalVisibilityOverride() {
 
@@ -153,7 +162,6 @@ public class InsetsSourceConsumer {
             return;
         }
         mVisible = visible;
-        applyHiddenToControl();
         applyLocalVisibilityOverride();
         mController.notifyVisibilityChanged();
     }

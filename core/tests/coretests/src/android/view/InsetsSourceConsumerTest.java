@@ -18,8 +18,10 @@ package android.view;
 
 import static android.view.InsetsState.TYPE_TOP_BAR;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -40,6 +42,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -60,6 +63,7 @@ public class InsetsSourceConsumerTest {
     private SurfaceSession mSession = new SurfaceSession();
     private SurfaceControl mLeash;
     @Mock Transaction mMockTransaction;
+    private InsetsSource mSpyInsetsSource;
 
     @Before
     public void setup() {
@@ -77,7 +81,11 @@ public class InsetsSourceConsumerTest {
             } catch (BadTokenException e) {
                 // activity isn't running, lets ignore BadTokenException.
             }
-            mConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, new InsetsState(),
+            InsetsState state = new InsetsState();
+            mSpyInsetsSource = Mockito.spy(new InsetsSource(TYPE_TOP_BAR));
+            state.addSource(mSpyInsetsSource);
+
+            mConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, state,
                     () -> mMockTransaction, new InsetsController(viewRootImpl));
         });
         instrumentation.waitForIdleSync();
@@ -88,14 +96,15 @@ public class InsetsSourceConsumerTest {
     @Test
     public void testHide() {
         mConsumer.hide();
-        verify(mMockTransaction).hide(eq(mLeash));
+        assertFalse("Consumer should not be visible", mConsumer.isVisible());
+        verify(mSpyInsetsSource).setVisible(eq(false));
     }
 
     @Test
     public void testShow() {
-        mConsumer.hide();
         mConsumer.show();
-        verify(mMockTransaction, atLeastOnce()).show(eq(mLeash));
+        assertTrue("Consumer should be visible", mConsumer.isVisible());
+        verify(mSpyInsetsSource).setVisible(eq(true));
     }
 
     @Test
