@@ -55,4 +55,9 @@ public interface KeyguardSecurityCallback {
     default void onCancelClicked() {
         // No-op
     }
+
+    /**
+     * Invoked whenever users are typing their password or drawing a pattern.
+     */
+    void onUserInput();
 }
