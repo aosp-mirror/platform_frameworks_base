@@ -31,7 +31,6 @@ import java.util.ArrayList;
  */
 public final class UsbDeviceDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbDeviceDescriptor";
-    private static final boolean DEBUG = false;
 
     public static final int USBSPEC_1_0 = 0x0100;
     public static final int USBSPEC_1_1 = 0x0110;
@@ -136,19 +135,19 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
      * @hide
      */
     public UsbDevice.Builder toAndroid(UsbDescriptorParser parser) {
-        if (DEBUG) {
+        if (UsbDescriptorParser.DEBUG) {
             Log.d(TAG, "toAndroid()");
         }
 
         String mfgName = getMfgString(parser);
         String prodName = getProductString(parser);
-        if (DEBUG) {
+        if (UsbDescriptorParser.DEBUG) {
             Log.d(TAG, "  mfgName:" + mfgName + " prodName:" + prodName);
         }
 
         String versionString = getDeviceReleaseString();
         String serialStr = getSerialString(parser);
-        if (DEBUG) {
+        if (UsbDescriptorParser.DEBUG) {
             Log.d(TAG, "  versionString:" + versionString + " serialStr:" + serialStr);
         }
 
