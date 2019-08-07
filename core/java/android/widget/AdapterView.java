@@ -1106,7 +1106,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             checkSelectionChanged();
         }
 
-        notifySubtreeAccessibilityStateChangedIfNeeded();
+        notifySubtreeAccessibilityStateChanged(
+                this, this, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
     }
 
     /**
