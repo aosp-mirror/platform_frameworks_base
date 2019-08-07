@@ -2266,7 +2266,7 @@ public class NotificationManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             final boolean isSystemToast = isCallerSystemOrPhone()
                     || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
-            final boolean isPackageSuspended = isPackageSuspendedForUser(pkg, callingUid);
+            final boolean isPackageSuspended = isPackagePaused(pkg);
             final boolean notificationsDisabledForPackage = !areNotificationsEnabledForPackage(pkg,
                     callingUid);
 
@@ -4120,17 +4120,7 @@ public class NotificationManagerService extends SystemService {
             Preconditions.checkNotNull(pkg);
             checkCallerIsSameApp(pkg);
 
-            boolean isPaused;
-
-            final PackageManagerInternal pmi = LocalServices.getService(
-                    PackageManagerInternal.class);
-            int flags = pmi.getDistractingPackageRestrictions(
-                    pkg, Binder.getCallingUserHandle().getIdentifier());
-            isPaused = ((flags & PackageManager.RESTRICTION_HIDE_NOTIFICATIONS) != 0);
-
-            isPaused |= isPackageSuspendedForUser(pkg, Binder.getCallingUid());
-
-            return isPaused;
+            return isPackagePausedOrSuspended(pkg, Binder.getCallingUid());
         }
 
         private void verifyPrivilegedListener(INotificationListener token, UserHandle user,
@@ -5352,11 +5342,18 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
-    private boolean isPackageSuspendedLocked(NotificationRecord r) {
-        final String pkg = r.sbn.getPackageName();
-        final int callingUid = r.sbn.getUid();
+    boolean isPackagePausedOrSuspended(String pkg, int uid) {
+        boolean isPaused;
 
-        return isPackageSuspendedForUser(pkg, callingUid);
+        final PackageManagerInternal pmi = LocalServices.getService(
+                PackageManagerInternal.class);
+        int flags = pmi.getDistractingPackageRestrictions(
+                pkg, Binder.getCallingUserHandle().getIdentifier());
+        isPaused = ((flags & PackageManager.RESTRICTION_HIDE_NOTIFICATIONS) != 0);
+
+        isPaused |= isPackageSuspendedForUser(pkg, uid);
+
+        return isPaused;
     }
 
     protected class PostNotificationRunnable implements Runnable {
@@ -5389,7 +5386,8 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
 
-                    final boolean isPackageSuspended = isPackageSuspendedLocked(r);
+                    final boolean isPackageSuspended =
+                            isPackagePausedOrSuspended(r.sbn.getPackageName(), r.getUid());
                     r.setHidden(isPackageSuspended);
                     if (isPackageSuspended) {
                         mUsageStats.registerSuspendedByAdmin(r);
