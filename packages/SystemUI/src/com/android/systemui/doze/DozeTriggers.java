@@ -41,6 +41,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
@@ -156,8 +157,7 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     @VisibleForTesting
-    void onSensor(int pulseReason, boolean sensorPerformedProxCheck,
-            float screenX, float screenY, float[] rawValues) {
+    void onSensor(int pulseReason, float screenX, float screenY, float[] rawValues) {
         boolean isDoubleTap = pulseReason == DozeLog.REASON_SENSOR_DOUBLE_TAP;
         boolean isTap = pulseReason == DozeLog.REASON_SENSOR_TAP;
         boolean isPickup = pulseReason == DozeLog.REASON_SENSOR_PICKUP;
@@ -169,10 +169,11 @@ public class DozeTriggers implements DozeMachine.Part {
         if (isWakeDisplay) {
             onWakeScreen(wakeEvent, mMachine.isExecutingTransition() ? null : mMachine.getState());
         } else if (isLongPress) {
-            requestPulse(pulseReason, sensorPerformedProxCheck, null /* onPulseSupressedListener */);
+            requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
+                    null /* onPulseSupressedListener */);
         } else if (isWakeLockScreen) {
             if (wakeEvent) {
-                requestPulse(pulseReason, sensorPerformedProxCheck,
+                requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
                         null /* onPulseSupressedListener */);
             }
         } else {
@@ -191,8 +192,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 } else {
                     mDozeHost.extendPulse(pulseReason);
                 }
-            }, sensorPerformedProxCheck
-                    || (mDockManager != null && mDockManager.isDocked()), pulseReason);
+            }, true /* alreadyPerformedProxCheck */, pulseReason);
         }
 
         if (isPickup) {
@@ -278,7 +278,7 @@ public class DozeTriggers implements DozeMachine.Part {
                             .setType(MetricsEvent.TYPE_OPEN)
                             .setSubtype(DozeLog.REASON_SENSOR_WAKE_UP));
                 }
-            }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
+            }, true /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
         } else {
             boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
             boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
@@ -433,7 +433,11 @@ public class DozeTriggers implements DozeMachine.Part {
 
         public void check() {
             Preconditions.checkState(!mFinished && !mRegistered);
-            final Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            Sensor sensor = DozeSensors.findSensorWithType(mSensorManager,
+                    mContext.getString(R.string.doze_brightness_sensor_type));
+            if (sensor == null) {
+                sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            }
             if (sensor == null) {
                 if (DozeMachine.DEBUG) Log.d(TAG, "ProxCheck: No sensor found");
                 finishWithResult(RESULT_UNKNOWN);
