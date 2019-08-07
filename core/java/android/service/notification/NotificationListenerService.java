@@ -1272,6 +1272,10 @@ public abstract class NotificationListenerService extends Service {
                 Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification", e);
                 return;
             }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification");
+                return;
+            }
 
             try {
                 // convert icon metadata to legacy format for older clients
@@ -1311,6 +1315,10 @@ public abstract class NotificationListenerService extends Service {
                 sbn = sbnHolder.get();
             } catch (RemoteException e) {
                 Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification", e);
+                return;
+            }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification");
                 return;
             }
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
