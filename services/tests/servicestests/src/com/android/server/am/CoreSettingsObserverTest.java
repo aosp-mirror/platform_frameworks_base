@@ -93,7 +93,8 @@ public class CoreSettingsObserverTest {
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
 
-        mAms = new ActivityManagerService(new TestInjector(), mServiceThreadRule.getThread());
+        mAms = new ActivityManagerService(new TestInjector(mContext),
+                mServiceThreadRule.getThread());
         mCoreSettingsObserver = new CoreSettingsObserver(mAms);
     }
 
@@ -158,9 +159,9 @@ public class CoreSettingsObserverTest {
     }
 
     private class TestInjector extends Injector {
-        @Override
-        public Context getContext() {
-            return getInstrumentation().getContext();
+
+        TestInjector(Context context) {
+            super(context);
         }
 
         @Override

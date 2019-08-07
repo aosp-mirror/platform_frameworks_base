@@ -98,7 +98,7 @@ class ActivityTestsBase {
             new DexmakerShareClassLoaderRule();
 
     final Context mContext = getInstrumentation().getTargetContext();
-    final TestInjector mTestInjector = new TestInjector();
+    final TestInjector mTestInjector = new TestInjector(mContext);
 
     ActivityTaskManagerService mService;
     RootActivityContainer mRootActivityContainer;
@@ -568,9 +568,8 @@ class ActivityTestsBase {
     private static class TestInjector extends ActivityManagerService.Injector {
         private ServiceThread mHandlerThread;
 
-        @Override
-        public Context getContext() {
-            return getInstrumentation().getTargetContext();
+        TestInjector(Context context) {
+            super(context);
         }
 
         @Override
