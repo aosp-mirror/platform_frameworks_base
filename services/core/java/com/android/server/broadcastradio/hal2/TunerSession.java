@@ -31,6 +31,7 @@ import android.util.MutableBoolean;
 import android.util.MutableInt;
 import android.util.Slog;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -186,6 +187,12 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void startProgramListUpdates(ProgramList.Filter filter) throws RemoteException {
+        // If the AIDL client provides a null filter, it wants all updates, so use the most broad
+        // filter.
+        if (filter == null) {
+            filter = new ProgramList.Filter(new HashSet<Integer>(),
+                    new HashSet<android.hardware.radio.ProgramSelector.Identifier>(), true, false);
+        }
         synchronized (mLock) {
             checkNotClosedLocked();
             mProgramInfoCache = new ProgramInfoCache(filter);
