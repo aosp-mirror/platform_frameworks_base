@@ -36,6 +36,8 @@ import static com.android.server.custom.display.LiveDisplayService.DISPLAY_CHANG
 import static com.android.server.custom.display.LiveDisplayService.MODE_CHANGED;
 import static com.android.server.custom.display.LiveDisplayService.TWILIGHT_CHANGED;
 
+import com.android.internal.app.ColorDisplayController;
+
 public abstract class LiveDisplayFeature {
 
     protected static final String TAG = "LiveDisplay";
@@ -43,6 +45,7 @@ public abstract class LiveDisplayFeature {
 
     protected final Context mContext;
     protected final Handler mHandler;
+    protected final boolean mNightDisplayAvailable;
 
     private SettingsObserver mSettingsObserver;
     private State mState;
@@ -50,6 +53,7 @@ public abstract class LiveDisplayFeature {
     public LiveDisplayFeature(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;
+        mNightDisplayAvailable = ColorDisplayController.isAvailable(mContext);
     }
 
     public abstract void onStart();
