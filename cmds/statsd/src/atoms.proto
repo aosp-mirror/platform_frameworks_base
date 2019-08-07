@@ -6872,6 +6872,9 @@ message TextSelectionEvent {
 
     // Relative word (exclusive) index of the end of the smart selection.
     optional int32 relative_suggested_word_end_index = 10;
+
+    // Name of source package.
+    optional string package_name = 11;
 }
 
 /**
@@ -6909,6 +6912,9 @@ message TextLinkifyEvent {
 
     // Time spent on generating links in ms.
     optional int64 latency_millis = 10;
+
+    // Name of source package.
+    optional string package_name = 11;
 }
 
 /**
@@ -6940,6 +6946,9 @@ message ConversationActionsEvent {
 
     // The score of the first entity type.
     optional float score = 8;
+
+    // Name of source package.
+    optional string package_name = 9;
 }
 
 /**
@@ -6968,4 +6977,7 @@ message LanguageDetectionEvent {
 
     // Position of this action.
     optional int32 action_index = 7;
+
+    // Name of source package.
+    optional string package_name = 8;
 }
