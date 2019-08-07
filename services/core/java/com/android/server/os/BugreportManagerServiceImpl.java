@@ -297,19 +297,5 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             }
             mDs.asBinder().unlinkToDeath(this, 0);
         }
-
-        // Old methods; unused in the API flow.
-        @Override
-        public void onProgressUpdated(int progress) throws RemoteException {
-        }
-
-        @Override
-        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
-        }
-
-        @Override
-        public void onSectionComplete(String title, int status, int size, int durationMs)
-                throws RemoteException {
-        }
     }
 }
