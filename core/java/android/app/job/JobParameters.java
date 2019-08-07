@@ -50,6 +50,19 @@ public class JobParameters implements Parcelable {
     /** @hide */
     public static final int REASON_DEVICE_THERMAL = JobProtoEnums.STOP_REASON_DEVICE_THERMAL; // 5.
 
+    /**
+     * All the stop reason codes. This should be regarded as an immutable array at runtime.
+     * @hide
+     */
+    public static final int[] JOB_STOP_REASON_CODES = {
+            REASON_CANCELED,
+            REASON_CONSTRAINTS_NOT_SATISFIED,
+            REASON_PREEMPT,
+            REASON_TIMEOUT,
+            REASON_DEVICE_IDLE,
+            REASON_DEVICE_THERMAL,
+    };
+
     /** @hide */
     public static String getReasonName(int reason) {
         switch (reason) {
@@ -58,6 +71,7 @@ public class JobParameters implements Parcelable {
             case REASON_PREEMPT: return "preempt";
             case REASON_TIMEOUT: return "timeout";
             case REASON_DEVICE_IDLE: return "device_idle";
+            case REASON_DEVICE_THERMAL: return "thermal";
             default: return "unknown:" + reason;
         }
     }
