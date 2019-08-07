@@ -40,12 +40,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
@@ -73,9 +73,6 @@ import java.io.PrintWriter;
  * Temporary disabling is controlled by {@link #setBackupServiceActive(int, boolean)} through
  * privileged callers (currently {@link DevicePolicyManager}). This is called on {@link
  * UserHandle#USER_SYSTEM} and disables backup for all users.
- *
- * <p>Creation of the backup service is done when {@link UserHandle#USER_SYSTEM} is unlocked. The
- * system user is unlocked before any other users.
  */
 public class Trampoline extends IBackupManager.Stub {
     /**
@@ -109,7 +106,10 @@ public class Trampoline extends IBackupManager.Stub {
     // TODD(b/121198006): remove this object and synchronized all methods on "this".
     private final Object mStateLock = new Object();
 
-    private volatile BackupManagerService mService;
+    // TODO: This is not marked as final because of test code. Since we'll merge BMS and Trampoline,
+    // it doesn't make sense to refactor for final. It's never null.
+    @VisibleForTesting
+    protected volatile BackupManagerService mService;
     private final Handler mHandler;
 
     public Trampoline(Context context) {
@@ -120,6 +120,13 @@ public class Trampoline extends IBackupManager.Stub {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
         mUserManager = UserManager.get(context);
+        mService = new BackupManagerService(mContext, this);
+    }
+
+    // TODO: Remove this when we implement DI by injecting in the construtor.
+    @VisibleForTesting
+    Handler getBackupHandler() {
+        return mHandler;
     }
 
     protected boolean isBackupDisabled() {
@@ -205,7 +212,7 @@ public class Trampoline extends IBackupManager.Stub {
     // This method should not perform any I/O (e.g. do not call isBackupActivatedForUser),
     // it's used in multiple places where I/O waits would cause system lock-ups.
     private boolean isUserReadyForBackup(int userId) {
-        return mService != null && mService.isAbleToServeUser(userId);
+        return mService.isAbleToServeUser(userId);
     }
 
     /**
@@ -230,66 +237,53 @@ public class Trampoline extends IBackupManager.Stub {
         return mUserManager;
     }
 
-    protected BackupManagerService createBackupManagerService() {
-        return new BackupManagerService(mContext, this);
-    }
-
     protected void postToHandler(Runnable runnable) {
         mHandler.post(runnable);
     }
 
     /**
-     * Called from {@link BackupManagerService.Lifecycle} when the system user is unlocked. Attempts
-     * to initialize {@link BackupManagerService}. Offloads work onto the handler thread {@link
-     * #mHandlerThread} to keep unlock time low.
-     */
-    void initializeService() {
-        postToHandler(
-                () -> {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
-                    if (mGlobalDisable) {
-                        Slog.i(TAG, "Backup service not supported");
-                        return;
-                    }
-                    synchronized (mStateLock) {
-                        if (mService == null) {
-                            mService = createBackupManagerService();
-                        }
-                    }
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                });
-    }
-
-    /**
      * Called from {@link BackupManagerService.Lifecycle} when a user {@code userId} is unlocked.
      * Starts the backup service for this user if backup is active for this user. Offloads work onto
-     * the handler thread {@link #mHandlerThread} to keep unlock time low.
+     * the handler thread {@link #mHandlerThread} to keep unlock time low since backup is not
+     * essential for device functioning.
      */
-    void unlockUser(int userId) {
+    void onUnlockUser(int userId) {
         postToHandler(() -> startServiceForUser(userId));
     }
 
     private void startServiceForUser(int userId) {
         // We know that the user is unlocked here because it is called from setBackupServiceActive
         // and unlockUser which have these guarantees. So we can check if the file exists.
-        if (mService != null && isBackupActivatedForUser(userId)) {
-            Slog.i(TAG, "Starting service for user: " + userId);
-            mService.startServiceForUser(userId);
+        if (mGlobalDisable) {
+            Slog.i(TAG, "Backup service not supported");
+            return;
         }
+        if (!isBackupActivatedForUser(userId)) {
+            Slog.i(TAG, "Backup not activated for user " + userId);
+            return;
+        }
+        Slog.i(TAG, "Starting service for user: " + userId);
+        mService.startServiceForUser(userId);
     }
 
     /**
      * Called from {@link BackupManagerService.Lifecycle} when a user {@code userId} is stopped.
      * Offloads work onto the handler thread {@link #mHandlerThread} to keep stopping time low.
      */
-    void stopUser(int userId) {
+    void onStopUser(int userId) {
         postToHandler(
                 () -> {
-                    if (mService != null) {
+                    if (!mGlobalDisable) {
                         Slog.i(TAG, "Stopping service for user: " + userId);
                         mService.stopServiceForUser(userId);
                     }
                 });
+    }
+
+    /** Returns {@link UserBackupManagerService} for user {@code userId}. */
+    @Nullable
+    public UserBackupManagerService getUserService(int userId) {
+        return mService.getUserServices().get(userId);
     }
 
     /**
@@ -350,9 +344,6 @@ public class Trampoline extends IBackupManager.Stub {
         synchronized (mStateLock) {
             Slog.i(TAG, "Making backup " + (makeActive ? "" : "in") + "active");
             if (makeActive) {
-                if (mService == null) {
-                    mService = createBackupManagerService();
-                }
                 try {
                     activateBackupForUserLocked(userId);
                 } catch (IOException e) {
@@ -380,7 +371,7 @@ public class Trampoline extends IBackupManager.Stub {
                 }
                 //TODO(b/121198006): loop through active users that have work profile and
                 // stop them as well.
-                stopUser(userId);
+                onStopUser(userId);
             }
         }
     }
@@ -388,8 +379,7 @@ public class Trampoline extends IBackupManager.Stub {
     // IBackupManager binder API
 
     /**
-     * Querying activity state of backup service. Calling this method before initialize yields
-     * undefined result.
+     * Querying activity state of backup service.
      *
      * @param userId The user in which the activity state of backup service is queried.
      * @return true if the service is active.
@@ -397,7 +387,7 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public boolean isBackupServiceActive(int userId) {
         synchronized (mStateLock) {
-            return mService != null && isBackupActivatedForUser(userId);
+            return !mGlobalDisable && isBackupActivatedForUser(userId);
         }
     }
 
@@ -598,8 +588,8 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     @Nullable
     public ComponentName getCurrentTransportComponentForUser(int userId) {
-        return (isUserReadyForBackup(userId)) ? mService.getCurrentTransportComponent(userId)
-                : null;
+        return (isUserReadyForBackup(userId))
+                ? mService.getCurrentTransportComponent(userId) : null;
     }
 
     @Override
@@ -614,8 +604,8 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public ComponentName[] listAllTransportComponentsForUser(int userId) throws RemoteException {
-        return (isUserReadyForBackup(userId)) ? mService.listAllTransportComponents(userId)
-                : null;
+        return (isUserReadyForBackup(userId))
+                ? mService.listAllTransportComponents(userId) : null;
     }
 
     @Override
@@ -648,8 +638,8 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public String selectBackupTransportForUser(int userId, String transport)
             throws RemoteException {
-        return (isUserReadyForBackup(userId)) ? mService.selectBackupTransport(userId, transport)
-                : null;
+        return (isUserReadyForBackup(userId))
+                ? mService.selectBackupTransport(userId, transport) : null;
     }
 
     @Override
@@ -700,8 +690,8 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public Intent getDataManagementIntentForUser(int userId, String transport)
             throws RemoteException {
-        return isUserReadyForBackup(userId) ? mService.getDataManagementIntent(userId, transport)
-                : null;
+        return isUserReadyForBackup(userId)
+                ? mService.getDataManagementIntent(userId, transport) : null;
     }
 
     @Override
@@ -784,15 +774,15 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     @Nullable public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
-        if (mService != null) {
-            return mService.getUserForAncestralSerialNumber(ancestralSerialNumber);
+        if (mGlobalDisable) {
+            return null;
         }
-        return null;
+        return mService.getUserForAncestralSerialNumber(ancestralSerialNumber);
     }
 
     @Override
     public void setAncestralSerialNumber(long ancestralSerialNumber) {
-        if (mService != null) {
+        if (!mGlobalDisable) {
             mService.setAncestralSerialNumber(ancestralSerialNumber);
         }
     }

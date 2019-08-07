@@ -1,6 +1,7 @@
 package com.android.codegen
 
 import com.github.javaparser.ast.body.FieldDeclaration
+import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.*
 import java.io.File
@@ -16,7 +17,7 @@ fun ClassPrinter.generateConstDefs() {
             val isLiteral = initializer is LiteralExpr
                     || (initializer is UnaryExpr && initializer.expression is LiteralExpr)
             isLiteral && variable.type.asString() in listOf("int", "String")
-        }
+        } && it.annotations.none { it.nameAsString == DataClassSuppressConstDefs }
     }.flatMap { field -> field.variables.map { it to field } }
     val intConsts = consts.filter { it.first.type.asString() == "int" }
     val strConsts = consts.filter { it.first.type.asString() == "String" }
@@ -131,7 +132,7 @@ fun ClassPrinter.generateAidl(javaFile: File) {
 fun ClassPrinter.generateWithers() {
     fields.forEachApply {
         val metodName = "with$NameUpperCamel"
-        if (!hasMethod(metodName, Type)) {
+        if (!isMethodGenerationSuppressed(metodName, Type)) {
             generateFieldJavadoc(forceHide = FeatureFlag.WITHERS.hidden)
             """@$NonNull
                         $GENERATED_MEMBER_HEADER
@@ -171,7 +172,7 @@ fun ClassPrinter.generateCopyConstructor() {
  * ```
  */
 fun ClassPrinter.generateBuildUpon() {
-    if (hasMethod("buildUpon")) return
+    if (isMethodGenerationSuppressed("buildUpon")) return
 
     +"/**"
     +" * Provides an instance of {@link $BuilderClass} with state corresponding to this instance."
@@ -195,7 +196,15 @@ fun ClassPrinter.generateBuilder() {
     val constructorVisibility = if (BuilderClass == CANONICAL_BUILDER_CLASS)
         "public" else "/* package-*/"
 
-    val OneTimeUseBuilder = classRef("android.provider.OneTimeUseBuilder")
+    val providedSubclassAst = nestedClasses.find {
+        it.extendedTypes.any { it.nameAsString == BASE_BUILDER_CLASS }
+    }
+
+    val BuilderSupertype = if (customBaseBuilderAst != null) {
+        customBaseBuilderAst!!.nameAsString
+    } else {
+        "Object"
+    }
 
     +"/**"
     +" * A builder for {@link $ClassName}"
@@ -203,26 +212,83 @@ fun ClassPrinter.generateBuilder() {
     +" */"
     +"@SuppressWarnings(\"WeakerAccess\")"
     +GENERATED_MEMBER_HEADER
-    "public static class $BuilderClass$genericArgs" {
-        +"extends $OneTimeUseBuilder<$ClassType>"
+    !"public static class $BuilderClass$genericArgs"
+    if (BuilderSupertype != "Object") {
+        appendSameLine(" extends $BuilderSupertype")
     }
     " {" {
 
         +""
         fields.forEachApply {
-            +"protected $annotationsAndType $name;"
+            +"private $annotationsAndType $name;"
         }
         +""
-        +"protected long mBuilderFieldsSet = 0L;"
+        +"private long mBuilderFieldsSet = 0L;"
         +""
-        +"$constructorVisibility $BuilderClass() {};"
-        +""
+
+        val requiredFields = fields.filter { !it.hasDefault }
+
+        generateConstructorJavadoc(
+                fields = requiredFields,
+                ClassName = BuilderClass,
+                hidden = false)
+        "$constructorVisibility $BuilderClass(" {
+            requiredFields.forEachLastAware { field, isLast ->
+                +"${field.annotationsAndType} ${field._name}${if_(!isLast, ",")}"
+            }
+        }; " {" {
+            requiredFields.forEachApply {
+                generateSetFrom(_name)
+            }
+        }
 
         generateBuilderSetters(setterVisibility)
 
         generateBuilderBuild()
 
+        "private void checkNotUsed() {" {
+            "if ((mBuilderFieldsSet & ${bitAtExpr(fields.size)}) != 0)" {
+                "throw new IllegalStateException(" {
+                    +"\"This Builder should not be reused. Use a new Builder instance instead\""
+                }
+                +";"
+            }
+        }
+
         rmEmptyLine()
+    }
+}
+
+private fun ClassPrinter.generateBuilderMethod(
+        defVisibility: String,
+        name: String,
+        ParamAnnotations: String? = null,
+        paramTypes: List<String>,
+        paramNames: List<String> = listOf("value"),
+        genJavadoc: ClassPrinter.() -> Unit,
+        genBody: ClassPrinter.() -> Unit) {
+
+    val providedMethod = customBaseBuilderAst?.members?.find {
+        it is MethodDeclaration
+                && it.nameAsString == name
+                && it.parameters.map { it.typeAsString } == paramTypes.toTypedArray().toList()
+    } as? MethodDeclaration
+
+    if ((providedMethod == null || providedMethod.isAbstract)
+            && name !in builderSuppressedMembers) {
+        val visibility = providedMethod?.visibility?.asString() ?: defVisibility
+        val ReturnType = providedMethod?.typeAsString ?: CANONICAL_BUILDER_CLASS
+        val Annotations = providedMethod?.annotations?.joinToString("\n")
+
+        genJavadoc()
+        +GENERATED_MEMBER_HEADER
+        if (providedMethod?.isAbstract == true) +"@Override"
+        if (!Annotations.isNullOrEmpty()) +Annotations
+        "$visibility @$NonNull $ReturnType $name(${if_(!ParamAnnotations.isNullOrEmpty(), "$ParamAnnotations ")}${
+                paramTypes.zip(paramNames).joinToString(", ") { (Type, paramName) -> "$Type $paramName" }
+        })" {
+            genBody()
+        }
     }
 }
 
@@ -232,58 +298,54 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
         val maybeCast =
                 if_(BuilderClass != CANONICAL_BUILDER_CLASS, " ($CANONICAL_BUILDER_CLASS)")
 
-        generateFieldJavadoc()
-        +GENERATED_MEMBER_HEADER
-        "$visibility $CANONICAL_BUILDER_CLASS set$NameUpperCamel($annotatedTypeForSetterParam value)" {
+        val setterName = "set$NameUpperCamel"
+
+        generateBuilderMethod(
+                name = setterName,
+                defVisibility = visibility,
+                ParamAnnotations = annotationsNoInternal.joinToString(" "),
+                paramTypes = listOf(SetterParamType),
+                genJavadoc = { generateFieldJavadoc() }) {
             +"checkNotUsed();"
             +"mBuilderFieldsSet |= $fieldBit;"
             +"$name = value;"
             +"return$maybeCast this;"
         }
 
+        val javadocSeeSetter = "/** @see #$setterName */"
+        val adderName = "add$SingularName"
 
-        val javadocSeeSetter = "/** @see #set$NameUpperCamel */"
         val singularNameCustomizationHint = if (SingularNameOrNull == null) {
             "// You can refine this method's name by providing item's singular name, e.g.:\n" +
                     "// @DataClass.PluralOf(\"item\")) mItems = ...\n\n"
         } else ""
 
-        if (isList && FieldInnerType != null) {
 
-            +javadocSeeSetter
-            +GENERATED_MEMBER_HEADER
-            "$visibility $CANONICAL_BUILDER_CLASS add$SingularName(@$NonNull $FieldInnerType value)" {
+        if (isList && FieldInnerType != null) {
+            generateBuilderMethod(
+                    name = adderName,
+                    defVisibility = visibility,
+                    paramTypes = listOf(FieldInnerType),
+                    genJavadoc = { +javadocSeeSetter }) {
+
                 !singularNameCustomizationHint
-                +"if ($name == null) set$NameUpperCamel(new $ArrayList<>());"
+                +"if ($name == null) $setterName(new $ArrayList<>());"
                 +"$name.add(value);"
                 +"return$maybeCast this;"
             }
         }
 
         if (Type.contains("Map<")) {
-            val (Key, Value) = fieldTypeGenegicArgs
-
-            +javadocSeeSetter
-            +GENERATED_MEMBER_HEADER
-            "$visibility $CANONICAL_BUILDER_CLASS add$SingularName($Key key, $Value value)" {
+            generateBuilderMethod(
+                    name = adderName,
+                    defVisibility = visibility,
+                    paramTypes = fieldTypeGenegicArgs,
+                    paramNames = listOf("key", "value"),
+                    genJavadoc = { +javadocSeeSetter }) {
                 !singularNameCustomizationHint
-                +"if ($name == null) set$NameUpperCamel(new $LinkedHashMap());"
+                +"if ($name == null) $setterName(new $LinkedHashMap());"
                 +"$name.put(key, value);"
                 +"return$maybeCast this;"
-            }
-        }
-
-        if (Type == "boolean") {
-            +javadocSeeSetter
-            +GENERATED_MEMBER_HEADER
-            "$visibility $CANONICAL_BUILDER_CLASS mark$NameUpperCamel()" {
-                +"return set$NameUpperCamel(true);"
-            }
-
-            +javadocSeeSetter
-            +GENERATED_MEMBER_HEADER
-            "$visibility $CANONICAL_BUILDER_CLASS markNot$NameUpperCamel()" {
-                +"return set$NameUpperCamel(false);"
             }
         }
     }
@@ -292,15 +354,13 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
 private fun ClassPrinter.generateBuilderBuild() {
     +"/** Builds the instance. This builder should not be touched after calling this! */"
     "public $ClassType build()" {
-        +"markUsed();"
+        +"checkNotUsed();"
+        +"mBuilderFieldsSet |= ${bitAtExpr(fields.size)}; // Mark builder used"
+        +""
         fields.forEachApply {
-            if (!isNullable || hasDefault) {
+            if (hasDefault) {
                 "if ((mBuilderFieldsSet & $fieldBit) == 0)" {
-                    if (!isNullable && !hasDefault) {
-                        +"throw new IllegalStateException(\"Required field not set: $nameLowerCamel\");"
-                    } else {
-                        +"$name = $defaultExpr;"
-                    }
+                    +"$name = $defaultExpr;"
                 }
             }
         }
@@ -348,7 +408,7 @@ fun ClassPrinter.generateParcelable() {
     }
 
     val Parcel = classRef("android.os.Parcel")
-    if (!hasMethod("writeToParcel", Parcel, "int")) {
+    if (!isMethodGenerationSuppressed("writeToParcel", Parcel, "int")) {
         +"@Override"
         +GENERATED_MEMBER_HEADER
         "public void writeToParcel($Parcel dest, int flags)" {
@@ -390,7 +450,7 @@ fun ClassPrinter.generateParcelable() {
         }
     }
 
-    if (!hasMethod("describeContents")) {
+    if (!isMethodGenerationSuppressed("describeContents")) {
         +"@Override"
         +GENERATED_MEMBER_HEADER
         +"public int describeContents() { return 0; }"
@@ -442,8 +502,6 @@ fun ClassPrinter.generateParcelable() {
                             FieldClass.endsWith("Map") -> "new $LinkedHashMap<>()"
                             FieldClass == "List" || FieldClass == "ArrayList" ->
                                 "new ${classRef("java.util.ArrayList")}<>()"
-//                            isArray && FieldInnerType in (PRIMITIVE_TYPES + "String") ->
-//                                "new $FieldInnerType[in.readInt()]"
                             else -> ""
                         }
                         val passContainer = containerInitExpr.isNotEmpty()
@@ -519,7 +577,7 @@ fun ClassPrinter.generateParcelable() {
 }
 
 fun ClassPrinter.generateEqualsHashcode() {
-    if (!hasMethod("equals", "Object")) {
+    if (!isMethodGenerationSuppressed("equals", "Object")) {
         +"@Override"
         +GENERATED_MEMBER_HEADER
         "public boolean equals(Object o)" {
@@ -546,7 +604,7 @@ fun ClassPrinter.generateEqualsHashcode() {
         }
     }
 
-    if (!hasMethod("hashCode")) {
+    if (!isMethodGenerationSuppressed("hashCode")) {
         +"@Override"
         +GENERATED_MEMBER_HEADER
         "public int hashCode()" {
@@ -572,7 +630,7 @@ fun ClassPrinter.generateEqualsHashcode() {
 
 //TODO support IntDef flags?
 fun ClassPrinter.generateToString() {
-    if (!hasMethod("toString")) {
+    if (!isMethodGenerationSuppressed("toString")) {
         +"@Override"
         +GENERATED_MEMBER_HEADER
         "public String toString()" {
@@ -599,7 +657,7 @@ fun ClassPrinter.generateToString() {
 
 fun ClassPrinter.generateSetters() {
     fields.forEachApply {
-        if (!hasMethod("set$NameUpperCamel", Type)
+        if (!isMethodGenerationSuppressed("set$NameUpperCamel", Type)
                 && !fieldAst.isPublic
                 && !isFinal) {
 
@@ -618,7 +676,7 @@ fun ClassPrinter.generateGetters() {
         val methodPrefix = if (Type == "boolean") "is" else "get"
         val methodName = methodPrefix + NameUpperCamel
 
-        if (!hasMethod(methodName) && !fieldAst.isPublic) {
+        if (!isMethodGenerationSuppressed(methodName) && !fieldAst.isPublic) {
 
             generateFieldJavadoc(forceHide = FeatureFlag.GETTERS.hidden)
             +GENERATED_MEMBER_HEADER
@@ -662,23 +720,8 @@ fun FieldInfo.generateFieldJavadoc(forceHide: Boolean = false) = classPrinter {
 }
 
 fun FieldInfo.generateSetFrom(source: String) = classPrinter {
-    !"$name = "
-    if (Type in PRIMITIVE_TYPES || mayBeNull) {
-        +"$source;"
-    } else if (defaultExpr != null) {
-        "$source != null" {
-            +"? $source"
-            +": $defaultExpr;"
-        }
-    } else {
-        val checkNotNull = memberRef("com.android.internal.util.Preconditions.checkNotNull")
-        +"$checkNotNull($source);"
-    }
-    if (isNonEmpty) {
-        "if ($isEmptyExpr)" {
-            +"throw new IllegalArgumentException(\"$nameLowerCamel cannot be empty\");"
-        }
-    }
+    +"$name = $source;"
+    generateFieldValidation(field = this@generateSetFrom)
 }
 
 fun ClassPrinter.generateConstructor(visibility: String = "public") {
@@ -697,15 +740,18 @@ fun ClassPrinter.generateConstructor(visibility: String = "public") {
             generateSetFrom(nameLowerCamel)
         }
 
-        generateStateValidation()
-
         generateOnConstructedCallback()
     }
 }
 
-private fun ClassPrinter.generateConstructorJavadoc() {
+private fun ClassPrinter.generateConstructorJavadoc(
+        fields: List<FieldInfo> = this.fields,
+        ClassName: String = this.ClassName,
+        hidden: Boolean = FeatureFlag.CONSTRUCTOR.hidden) {
     if (fields.all { it.javadoc == null } && !FeatureFlag.CONSTRUCTOR.hidden) return
     +"/**"
+    +" * Creates a new $ClassName."
+    +" *"
     fields.filter { it.javadoc != null }.forEachApply {
         javadocTextNoAnnotationLines?.apply {
             +" * @param $nameLowerCamel"
@@ -718,87 +764,97 @@ private fun ClassPrinter.generateConstructorJavadoc() {
     +" */"
 }
 
-private fun ClassPrinter.generateStateValidation() {
-    val Size = classRef("android.annotation.Size")
-    val knownNonValidationAnnotations = internalAnnotations + Nullable
-
-    val validate = memberRef("com.android.internal.util.AnnotationValidations.validate")
-    fun appendValidateCall(annotation: AnnotationExpr, valueToValidate: String) {
-        "$validate(" {
-            !"${annotation.nameAsString}.class, null, $valueToValidate"
-            val params = when (annotation) {
-                is MarkerAnnotationExpr -> emptyMap()
-                is SingleMemberAnnotationExpr -> mapOf("value" to annotation.memberValue)
-                is NormalAnnotationExpr ->
-                    annotation.pairs.map { it.name.asString() to it.value }.toMap()
-                else -> throw IllegalStateException()
-            }
-            params.forEach { name, value ->
-                !",\n\"$name\", $value"
+private fun ClassPrinter.appendLinesWithContinuationIndent(text: String) {
+    val lines = text.lines()
+    if (lines.isNotEmpty()) {
+        !lines[0]
+    }
+    if (lines.size >= 2) {
+        "" {
+            lines.drop(1).forEach {
+                +it
             }
         }
-        +";"
     }
+}
 
-    fields.forEachApply {
-        if (intOrStringDef != null) {
-            if (intOrStringDef!!.type == ConstDef.Type.INT_FLAGS) {
-                +""
-                +"//noinspection PointlessBitwiseExpression"
-                "$Preconditions.checkFlagsArgument(" {
-                    "$name, 0" {
-                        intOrStringDef!!.CONST_NAMES.forEach {
-                            +"| $it"
+private fun ClassPrinter.generateFieldValidation(field: FieldInfo) = field.run {
+    if (isNonEmpty) {
+        "if ($isEmptyExpr)" {
+            +"throw new IllegalArgumentException(\"$nameLowerCamel cannot be empty\");"
+        }
+    }
+    if (intOrStringDef != null) {
+        if (intOrStringDef!!.type == ConstDef.Type.INT_FLAGS) {
+            +""
+            "$Preconditions.checkFlagsArgument(" {
+                +"$name, "
+                appendLinesWithContinuationIndent(intOrStringDef!!.CONST_NAMES.joinToString("\n| "))
+            }
+            +";"
+        } else {
+            +""
+            !"if ("
+            appendLinesWithContinuationIndent(intOrStringDef!!.CONST_NAMES.joinToString("\n&& ") {
+                "!(${isEqualToExpr(it)})"
+            })
+            rmEmptyLine(); ") {" {
+                "throw new ${classRef<IllegalArgumentException>()}(" {
+                    "\"$nameLowerCamel was \" + $internalGetter + \" but must be one of: \"" {
+
+                        intOrStringDef!!.CONST_NAMES.forEachLastAware { CONST_NAME, isLast ->
+                            +"""+ "$CONST_NAME(" + $CONST_NAME + ")${if_(!isLast, ", ")}""""
                         }
                     }
                 }
                 +";"
-            } else {
-                +""
-                +"//noinspection PointlessBooleanExpression"
-                "if (true" {
-                    intOrStringDef!!.CONST_NAMES.forEach { CONST_NAME ->
-                        +"&& !(${isEqualToExpr(CONST_NAME)})"
-                    }
-                }; rmEmptyLine(); ") {" {
-                    "throw new ${classRef<IllegalArgumentException>()}(" {
-                        "\"$nameLowerCamel was \" + $internalGetter + \" but must be one of: \"" {
-
-                            intOrStringDef!!.CONST_NAMES.forEachLastAware { CONST_NAME, isLast ->
-                                +"""+ "$CONST_NAME(" + $CONST_NAME + ")${if_(!isLast, ", ")}""""
-                            }
-                        }
-                    }
-                    +";"
-                }
-            }
-        }
-
-        val eachLine = fieldAst.annotations.find { it.nameAsString == Each }?.range?.orElse(null)?.end?.line
-        val perElementValidations = if (eachLine == null) emptyList() else fieldAst.annotations.filter {
-            it.nameAsString != Each &&
-                it.range.orElse(null)?.begin?.line?.let { it >= eachLine } ?: false
-        }
-
-        fieldAst.annotations.filterNot {
-            it.nameAsString == intOrStringDef?.AnnotationName
-                    || it.nameAsString in knownNonValidationAnnotations
-                    || it in perElementValidations
-        }.forEach { annotation ->
-            appendValidateCall(annotation,
-                    valueToValidate = if (annotation.nameAsString == Size) sizeExpr else name)
-        }
-
-        if (perElementValidations.isNotEmpty()) {
-            +"int ${nameLowerCamel}Size = $sizeExpr;"
-            "for (int i = 0; i < ${nameLowerCamel}Size; i++) {" {
-                perElementValidations.forEach { annotation ->
-                    appendValidateCall(annotation,
-                            valueToValidate = elemAtIndexExpr("i"))
-                }
             }
         }
     }
+
+    val eachLine = fieldAst.annotations.find { it.nameAsString == Each }?.range?.orElse(null)?.end?.line
+    val perElementValidations = if (eachLine == null) emptyList() else fieldAst.annotations.filter {
+        it.nameAsString != Each &&
+                it.range.orElse(null)?.begin?.line?.let { it >= eachLine } ?: false
+    }
+
+    val Size = classRef("android.annotation.Size")
+    fieldAst.annotations.filterNot {
+        it.nameAsString == intOrStringDef?.AnnotationName
+                || it.nameAsString in knownNonValidationAnnotations
+                || it in perElementValidations
+    }.forEach { annotation ->
+        appendValidateCall(annotation,
+                valueToValidate = if (annotation.nameAsString == Size) sizeExpr else name)
+    }
+
+    if (perElementValidations.isNotEmpty()) {
+        +"int ${nameLowerCamel}Size = $sizeExpr;"
+        "for (int i = 0; i < ${nameLowerCamel}Size; i++) {" {
+            perElementValidations.forEach { annotation ->
+                appendValidateCall(annotation,
+                        valueToValidate = elemAtIndexExpr("i"))
+            }
+        }
+    }
+}
+
+fun ClassPrinter.appendValidateCall(annotation: AnnotationExpr, valueToValidate: String) {
+    val validate = memberRef("com.android.internal.util.AnnotationValidations.validate")
+    "$validate(" {
+        !"${annotation.nameAsString}.class, null, $valueToValidate"
+        val params = when (annotation) {
+            is MarkerAnnotationExpr -> emptyMap()
+            is SingleMemberAnnotationExpr -> mapOf("value" to annotation.memberValue)
+            is NormalAnnotationExpr ->
+                annotation.pairs.map { it.name.asString() to it.value }.toMap()
+            else -> throw IllegalStateException()
+        }
+        params.forEach { name, value ->
+            !",\n\"$name\", $value"
+        }
+    }
+    +";"
 }
 
 private fun ClassPrinter.generateOnConstructedCallback(prefix: String = "") {
@@ -844,4 +900,16 @@ fun ClassPrinter.generateForEachField() {
             }
         }
     }
+}
+
+fun ClassPrinter.generateMetadata(file: File) {
+    "@$DataClassGenerated(" {
+        +"time = ${System.currentTimeMillis()}L,"
+        +"codegenVersion = \"$CODEGEN_VERSION\","
+        +"sourceFile = \"${file.relativeTo(File(System.getenv("ANDROID_BUILD_TOP")))}\","
+        +"inputSignatures = \"${getInputSignatures().joinToString("\\n")}\""
+    }
+    +""
+    +"@Deprecated"
+    +"private void __metadata() {}\n"
 }

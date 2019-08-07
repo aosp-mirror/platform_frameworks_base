@@ -16,6 +16,7 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AppGlobals;
@@ -698,6 +699,20 @@ public final class JobStatus {
         return UserHandle.getUserId(callingUid);
     }
 
+    /**
+     * Returns an appropriate standby bucket for the job, taking into account any standby
+     * exemptions.
+     */
+    public int getEffectiveStandbyBucket() {
+        if (uidActive || getJob().isExemptedFromAppStandby()) {
+            // Treat these cases as if they're in the ACTIVE bucket so that they get throttled
+            // like other ACTIVE apps.
+            return ACTIVE_INDEX;
+        }
+        return getStandbyBucket();
+    }
+
+    /** Returns the real standby bucket of the job. */
     public int getStandbyBucket() {
         return standbyBucket;
     }

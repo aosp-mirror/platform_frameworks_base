@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 /**
  * Describes a 2-way parcelling contract of type {@code T} into/out of a {@link Parcel}
  *
+ * Implementations should be stateless.
+ *
  * @param <T> the type being [un]parcelled
  */
 public interface Parcelling<T> {
@@ -69,6 +71,7 @@ public interface Parcelling<T> {
          * instance or reflectively creating one.
          */
         public static <P extends Parcelling<?>> P getOrCreate(Class<P> clazz) {
+            // No synchronization - creating an extra instance in a race case is ok
             P cached = get(clazz);
             if (cached != null) {
                 return cached;

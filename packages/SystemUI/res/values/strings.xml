@@ -958,6 +958,9 @@
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
+    <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
+    <string name="keyguard_retry">Swipe up to try again</string>
+
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device is managed by your organization</string>
 

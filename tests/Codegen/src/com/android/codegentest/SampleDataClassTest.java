@@ -49,7 +49,7 @@ public class SampleDataClassTest {
     private SampleDataClass mSpecimen = newBuilder().build();
 
     private static SampleDataClass.Builder newBuilder() {
-        return newIncompleteBuilder()
+        return newInvalidBuilder()
                 .setNum(42)
                 .setNum2(42)
                 .setNum4(42)
@@ -57,9 +57,8 @@ public class SampleDataClassTest {
                 .setLinkAddresses5();
     }
 
-    private static SampleDataClass.Builder newIncompleteBuilder() {
-        return new SampleDataClass.Builder()
-                .markActive()
+    private static SampleDataClass.Builder newInvalidBuilder() {
+        return new SampleDataClass.Builder(1, 2, 3, "a", 0, null)
                 .setName("some parcelable")
                 .setFlags(SampleDataClass.FLAG_MANUAL_REQUEST);
     }
@@ -91,7 +90,7 @@ public class SampleDataClassTest {
     public void testCustomParcelling_instanceIsCached() {
         parcelAndUnparcel(mSpecimen, SampleDataClass.CREATOR);
         parcelAndUnparcel(mSpecimen, SampleDataClass.CREATOR);
-        assertEquals(1, DateParcelling.sInstanceCount.get());
+        assertEquals(1, MyDateParcelling.sInstanceCount.get());
     }
 
     @Test
@@ -149,8 +148,8 @@ public class SampleDataClassTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testBuilder_throwsWhenRequiredFieldMissing() {
-        newIncompleteBuilder().build();
+    public void testBuilder_performsValidation() {
+        newInvalidBuilder().build();
     }
 
     @Test
@@ -203,6 +202,11 @@ public class SampleDataClassTest {
 
         int[] tmpStorageAgain = mSpecimen.getTmpStorage();
         assertSame(tmpStorage, tmpStorageAgain);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testCustomAnnotationValidation_isRun() {
+        newBuilder().setDayOfWeek(42).build();
     }
 
     private static <T extends Parcelable> T parcelAndUnparcel(

@@ -1,8 +1,10 @@
 package com.android.codegen
 
+import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr
+import com.github.javaparser.ast.nodeTypes.NodeWithModifiers
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -21,6 +23,8 @@ fun Char.isNewline() = this == '\n' || this == '\r'
 fun Char.isWhitespaceNonNewline() = isWhitespace() && !isNewline()
 
 fun if_(cond: Boolean, then: String) = if (cond) then else ""
+
+fun <T> Any?.as_(): T = this as T
 
 inline infix fun Int.times(action: () -> Unit) {
     for (i in 1..this) action()
@@ -74,3 +78,14 @@ fun currentTimestamp() = DateTimeFormatter
         .ofLocalizedDateTime(/* date */ FormatStyle.MEDIUM, /* time */ FormatStyle.LONG)
         .withZone(ZoneId.systemDefault())
         .format(Instant.now())
+
+val NodeWithModifiers<*>.visibility get() = Modifier.getAccessSpecifier(modifiers)
+
+fun abort(msg: String): Nothing {
+    System.err.println("ERROR: $msg")
+    System.exit(1)
+    throw InternalError() // can't get here
+}
+
+fun bitAtExpr(bitIndex: Int) = "0x${java.lang.Long.toHexString(1L shl bitIndex)}"
+

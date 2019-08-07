@@ -9,7 +9,6 @@ import com.github.javaparser.ast.expr.StringLiteralExpr
 import com.github.javaparser.ast.type.ArrayType
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.javadoc.Javadoc
-import java.lang.Long
 
 data class FieldInfo(
     val index: Int,
@@ -85,7 +84,7 @@ data class FieldInfo(
             variableAst.initializer.orElse(null)?.let { return it }
             classInfo.classAst.methods.find {
                 it.nameAsString == "default$NameUpperCamel" && it.parameters.isEmpty()
-            }?.run { "$nameAsString()" }?.let { return it }
+            }?.run { return "$nameAsString()" }
             if (FieldClass == "List") return "${classPrinter.memberRef("java.util.Collections.emptyList")}()"
             return null
         }
@@ -95,7 +94,7 @@ data class FieldInfo(
     // Generic args
     val isArray = Type.endsWith("[]")
     val isList = FieldClass == "List" || FieldClass == "ArrayList"
-    val fieldBit = "0x${Long.toHexString(1L shl index)}"
+    val fieldBit = bitAtExpr(index)
     var isLast = false
     val isFinal = fieldAst.isFinal
     val fieldTypeGenegicArgs = when (typeAst) {
@@ -143,8 +142,10 @@ data class FieldInfo(
     }
     val annotationsAndType by lazy { (annotationsNoInternal + Type).joinToString(" ") }
     val sParcelling by lazy { customParcellingClass?.let { "sParcellingFor$NameUpperCamel" } }
+
+    val SetterParamType = if (isArray) "$FieldInnerType..." else Type
     val annotatedTypeForSetterParam by lazy {
-        (annotationsNoInternal + if (isArray) "$FieldInnerType..." else Type).joinToString(" ")
+        (annotationsNoInternal + SetterParamType).joinToString(" ")
     }
 
     // Utilities

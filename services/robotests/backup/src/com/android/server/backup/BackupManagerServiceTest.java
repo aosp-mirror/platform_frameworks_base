@@ -26,8 +26,12 @@ import static com.android.server.backup.testing.TransportData.backupTransport;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
@@ -121,7 +125,7 @@ public class BackupManagerServiceTest {
     public void testConstructor_doesNotRegisterUsers() throws Exception {
         BackupManagerService backupManagerService = createService();
 
-        assertThat(backupManagerService.getServiceUsers().size()).isEqualTo(0);
+        assertThat(backupManagerService.getUserServices().size()).isEqualTo(0);
     }
 
     /** Test that the constructor handles {@code null} parameters. */
@@ -152,7 +156,7 @@ public class BackupManagerServiceTest {
 
         backupManagerService.startServiceForUser(mUserOneId);
 
-        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getServiceUsers();
+        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getUserServices();
         assertThat(serviceUsers.size()).isEqualTo(1);
         assertThat(serviceUsers.get(mUserOneId)).isNotNull();
     }
@@ -164,7 +168,7 @@ public class BackupManagerServiceTest {
 
         backupManagerService.startServiceForUser(mUserOneId, mUserOneService);
 
-        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getServiceUsers();
+        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getUserServices();
         assertThat(serviceUsers.size()).isEqualTo(1);
         assertThat(serviceUsers.get(mUserOneId)).isEqualTo(mUserOneService);
     }
@@ -178,7 +182,7 @@ public class BackupManagerServiceTest {
 
         backupManagerService.stopServiceForUser(mUserOneId);
 
-        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getServiceUsers();
+        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getUserServices();
         assertThat(serviceUsers.size()).isEqualTo(1);
         assertThat(serviceUsers.get(mUserOneId)).isNull();
         assertThat(serviceUsers.get(mUserTwoId)).isEqualTo(mUserTwoService);
@@ -204,7 +208,7 @@ public class BackupManagerServiceTest {
 
         backupManagerService.stopServiceForUser(mUserOneId);
 
-        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getServiceUsers();
+        SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getUserServices();
         assertThat(serviceUsers.size()).isEqualTo(0);
     }
 
@@ -1497,6 +1501,48 @@ public class BackupManagerServiceTest {
                         "currentPassword",
                         "encryptionPassword",
                         observer);
+    }
+
+    // ---------------------------------------------
+    //  Lifecycle tests
+    // ---------------------------------------------
+
+
+    /** testOnStart_publishesService */
+    @Test
+    public void testOnStart_publishesService() {
+        Trampoline trampoline = mock(Trampoline.class);
+        BackupManagerService.Lifecycle lifecycle =
+                spy(new BackupManagerService.Lifecycle(mContext, trampoline));
+        doNothing().when(lifecycle).publishService(anyString(), any());
+
+        lifecycle.onStart();
+
+        verify(lifecycle).publishService(Context.BACKUP_SERVICE, trampoline);
+    }
+
+    /** testOnUnlockUser_forwards */
+    @Test
+    public void testOnUnlockUser_forwards() {
+        Trampoline trampoline = mock(Trampoline.class);
+        BackupManagerService.Lifecycle lifecycle =
+                new BackupManagerService.Lifecycle(mContext, trampoline);
+
+        lifecycle.onUnlockUser(UserHandle.USER_SYSTEM);
+
+        verify(trampoline).onUnlockUser(UserHandle.USER_SYSTEM);
+    }
+
+    /** testOnStopUser_forwards */
+    @Test
+    public void testOnStopUser_forwards() {
+        Trampoline trampoline = mock(Trampoline.class);
+        BackupManagerService.Lifecycle lifecycle =
+                new BackupManagerService.Lifecycle(mContext, trampoline);
+
+        lifecycle.onStopUser(UserHandle.USER_SYSTEM);
+
+        verify(trampoline).onStopUser(UserHandle.USER_SYSTEM);
     }
 
     // ---------------------------------------------
