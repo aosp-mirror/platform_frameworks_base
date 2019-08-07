@@ -680,6 +680,7 @@ public class DisplayModeDirector {
         @Override
         public void onDisplayChanged(int displayId) {
             updateDisplayModes(displayId);
+            mBrightnessObserver.onDisplayChanged(displayId);
         }
 
         private void updateDisplayModes(int displayId) {
@@ -734,8 +735,6 @@ public class DisplayModeDirector {
         private AmbientFilter mAmbientFilter;
 
         private final Context mContext;
-        private ScreenStateReceiver mScreenStateReceiver;
-
         // Enable light sensor only when screen is on, peak refresh rate enabled and low power mode
         // off. After initialization, these states will be updated from the same handler thread.
         private boolean mScreenOn = false;
@@ -793,11 +792,7 @@ public class DisplayModeDirector {
                     mSensorManager = sensorManager;
                     mLightSensor = lightSensor;
 
-                    // Intent.ACTION_SCREEN_ON is not sticky. Check current screen status.
-                    if (mContext.getSystemService(PowerManager.class).isInteractive()) {
-                        onScreenOn(true);
-                    }
-                    mScreenStateReceiver = new ScreenStateReceiver(mContext);
+                    onScreenOn(isDefaultDisplayOn());
                 }
             }
 
@@ -819,6 +814,12 @@ public class DisplayModeDirector {
             if (mShouldObserveAmbientChange && mLowPowerModeEnabled != b) {
                 mLowPowerModeEnabled = b;
                 updateSensorStatus();
+            }
+        }
+
+        public void onDisplayChanged(int displayId) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                onScreenOn(isDefaultDisplayOn());
             }
         }
 
@@ -891,8 +892,6 @@ public class DisplayModeDirector {
         }
 
         private void onScreenOn(boolean on) {
-            // Not check mShouldObserveAmbientChange because Screen status receiver is registered
-            // only when it is true.
             if (mScreenOn != on) {
                 mScreenOn = on;
                 updateSensorStatus();
@@ -911,6 +910,13 @@ public class DisplayModeDirector {
                 mLightSensorListener.removeCallbacks();
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
+        }
+
+        private boolean isDefaultDisplayOn() {
+            final Display display = mContext.getSystemService(DisplayManager.class)
+                    .getDisplay(Display.DEFAULT_DISPLAY);
+            return display.getState() != Display.STATE_OFF
+                    && mContext.getSystemService(PowerManager.class).isInteractive();
         }
 
         private final class LightSensorEventListener implements SensorEventListener {
@@ -991,20 +997,5 @@ public class DisplayModeDirector {
                 }
             };
         };
-
-        private final class ScreenStateReceiver extends BroadcastReceiver {
-            public ScreenStateReceiver(Context context) {
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(Intent.ACTION_SCREEN_OFF);
-                filter.addAction(Intent.ACTION_SCREEN_ON);
-                filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-                context.registerReceiver(this, filter, null, mHandler);
-            }
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onScreenOn(Intent.ACTION_SCREEN_ON.equals(intent.getAction()));
-            }
-        }
     }
 }
