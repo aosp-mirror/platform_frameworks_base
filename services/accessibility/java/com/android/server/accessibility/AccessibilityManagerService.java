@@ -2535,10 +2535,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     // to create event handler per display. The events should be handled by the
                     // display which is overlaid by it.
                     final Display display = displays[i];
-                    if (display.getType() == Display.TYPE_OVERLAY) {
-                        continue;
+                    if (isValidDisplay(display)) {
+                        mDisplaysList.add(display);
                     }
-                    mDisplaysList.add(display);
                 }
             }
         }
@@ -2546,7 +2545,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         @Override
         public void onDisplayAdded(int displayId) {
             final Display display = mDisplayManager.getDisplay(displayId);
-            if (display == null || display.getType() == Display.TYPE_OVERLAY) {
+            if (!isValidDisplay(display)) {
                 return;
             }
 
@@ -2596,6 +2595,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         @Override
         public void onDisplayChanged(int displayId) {
             /* do nothing */
+        }
+
+        private boolean isValidDisplay(@Nullable Display display) {
+            if (display == null || display.getType() == Display.TYPE_OVERLAY) {
+                return false;
+            }
+            // Private virtual displays are created by the ap and is not allowed to access by other
+            // aps. We assume we could ignore them.
+            if ((display.getType() == Display.TYPE_VIRTUAL
+                    && (display.getFlags() & Display.FLAG_PRIVATE) != 0)) {
+                return false;
+            }
+            return true;
         }
     }
 
