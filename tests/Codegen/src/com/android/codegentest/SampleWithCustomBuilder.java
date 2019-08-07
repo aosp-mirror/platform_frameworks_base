@@ -176,7 +176,7 @@ public class SampleWithCustomBuilder {
     }
 
     @DataClass.Generated(
-            time = 1565048799396L,
+            time = 1565126123496L,
             codegenVersion = "1.0.0",
             sourceFile = "frameworks/base/tests/Codegen/src/com/android/codegentest/SampleWithCustomBuilder.java",
             inputSignatures = "  long delayAmount\n @android.annotation.NonNull java.util.concurrent.TimeUnit delayUnit\n  long creationTimestamp\nclass SampleWithCustomBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true)\nabstract  com.android.codegentest.SampleWithCustomBuilder.Builder setDelayAmount(long)\npublic abstract  com.android.codegentest.SampleWithCustomBuilder.Builder setDelayUnit(java.util.concurrent.TimeUnit)\npublic  com.android.codegentest.SampleWithCustomBuilder.Builder setDelay(long,java.util.concurrent.TimeUnit)\nclass BaseBuilder extends java.lang.Object implements []")
