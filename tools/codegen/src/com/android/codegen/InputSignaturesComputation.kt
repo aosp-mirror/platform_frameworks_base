@@ -97,7 +97,7 @@ private fun ClassPrinter.getFullClassName(type: Type): String {
         getFullClassName(buildString {
             type.scope.ifPresent { append(it).append(".") }
             append(type.nameAsString)
-        }) + (type.typeArguments.orElse(null)?.let { args -> args.joinToString(", ") {getFullClassName(it)}}?.let { "<$it>" } ?: "")
+        }) + (type.typeArguments.orElse(null)?.let { args -> args.joinToString(",") {getFullClassName(it)}}?.let { "<$it>" } ?: "")
     } else getFullClassName(type.asString())
 }
 

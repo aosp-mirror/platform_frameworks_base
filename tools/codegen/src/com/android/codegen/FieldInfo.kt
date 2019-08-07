@@ -85,7 +85,6 @@ data class FieldInfo(
             classInfo.classAst.methods.find {
                 it.nameAsString == "default$NameUpperCamel" && it.parameters.isEmpty()
             }?.run { return "$nameAsString()" }
-            if (FieldClass == "List") return "${classPrinter.memberRef("java.util.Collections.emptyList")}()"
             return null
         }
     val hasDefault get() = defaultExpr != null
