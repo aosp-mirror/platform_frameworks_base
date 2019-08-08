@@ -76,7 +76,7 @@ public class DynamicSystemManager {
         @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
         public boolean commit() {
             try {
-                return mService.commit();
+                return mService.setEnable(true, true);
             } catch (RemoteException e) {
                 throw new RuntimeException(e.toString());
             }
@@ -188,9 +188,9 @@ public class DynamicSystemManager {
      * @return {@code true} if the call succeeds. {@code false} if there is no installed image.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public boolean setEnable(boolean enable) {
+    public boolean setEnable(boolean enable, boolean oneShot) {
         try {
-            return mService.setEnable(enable);
+            return mService.setEnable(enable, oneShot);
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());
         }
