@@ -629,7 +629,7 @@ public final class Telephony {
         }
 
         /**
-         * Contains all sent text-based SMS messages in the SMS app.
+         * Contains all draft text-based SMS messages in the SMS app.
          */
         public static final class Draft implements BaseColumns, TextBasedSmsColumns {
 
@@ -745,7 +745,15 @@ public final class Telephony {
         }
 
         /**
-         * Contains all sent text-based SMS messages in the SMS app.
+         * Contains a view of SMS conversations (also referred to as threads). This is similar to
+         * {@link Threads}, but only includes SMS messages and columns relevant to SMS
+         * conversations.
+         * <p>
+         * Note that this view ignores any information about MMS messages, it is a
+         * view of conversations as if MMS messages did not exist at all. This means that all
+         * relevant information, such as snippets and message count, will ignore any MMS messages
+         * that might be in the same thread through other views and present only data based on the
+         * SMS messages in that thread.
          */
         public static final class Conversations
                 implements BaseColumns, TextBasedSmsColumns {
