@@ -65,9 +65,19 @@ public @interface DataClass {
     boolean genGetters() default true;
 
     /**
+     * {@link #genGetters} with @hide
+     */
+    boolean genHiddenGetters() default false;
+
+    /**
      * Generates setters for each field.
      */
     boolean genSetters() default false;
+
+    /**
+     * {@link #genSetters} with @hide
+     */
+    boolean genHiddenSetters() default false;
 
     /**
      * Generates a public constructor with each field initialized from a parameter and optionally
@@ -85,12 +95,22 @@ public @interface DataClass {
     boolean genConstructor() default true;
 
     /**
+     * {@link #genConstructor} with @hide
+     */
+    boolean genHiddenConstructor() default false;
+
+    /**
      * Generates a Builder for your class.
      *
      * Uses a package-private constructor under the hood, so same rules hold as for
      * {@link #genConstructor()}
      */
     boolean genBuilder() default false;
+
+    /**
+     * {@link #genBuilder} with @hide
+     */
+    boolean genHiddenBuilder() default false;
 
     /**
      * Generates a structural {@link Object#equals} + {@link Object#hashCode}.
@@ -126,6 +146,11 @@ public @interface DataClass {
     boolean genCopyConstructor() default false;
 
     /**
+     * {@link #genCopyConstructor} with @hide
+     */
+    boolean genHiddenCopyConstructor() default false;
+
+    /**
      * Generates constant annotations({@link IntDef}/{@link StringDef}) for any constant groups
      * with common prefix.
      * The annotation names are based on the common prefix.
@@ -145,6 +170,11 @@ public @interface DataClass {
      * Unless suppressed, is implied by presence of constants with common prefix.
      */
     boolean genConstDefs() default true;
+
+    /**
+     * {@link #genConstDefs} with @hide
+     */
+    boolean genHiddenConstDefs() default false;
 
 
     /**

@@ -213,6 +213,11 @@ public class TaskStackChangeListeners extends TaskStackListener {
         mHandler.obtainMessage(H.ON_TASK_DISPLAY_CHANGED, taskId, newDisplayId).sendToTarget();
     }
 
+    @Override
+    public void onRecentTaskListUpdated() throws RemoteException {
+        mHandler.obtainMessage(H.ON_TASK_LIST_UPDATED).sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -234,6 +239,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 18;
         private static final int ON_SINGLE_TASK_DISPLAY_DRAWN = 19;
         private static final int ON_TASK_DISPLAY_CHANGED = 20;
+        private static final int ON_TASK_LIST_UPDATED = 21;
 
 
         public H(Looper looper) {
@@ -379,6 +385,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
                     case ON_TASK_DISPLAY_CHANGED: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onTaskDisplayChanged(msg.arg1, msg.arg2);
+                        }
+                        break;
+                    }
+                    case ON_TASK_LIST_UPDATED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onRecentTaskListUpdated();
                         }
                         break;
                     }

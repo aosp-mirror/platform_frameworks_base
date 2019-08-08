@@ -51,6 +51,9 @@ message GraphicsStatsProto {
 
     // The frame time histogram for the package.
     repeated GraphicsStatsHistogramBucketProto histogram = 6;
+
+    // The gpu frame time histogram for the package
+    repeated GraphicsStatsHistogramBucketProto gpu_histogram = 7;
 }
 
 message GraphicsStatsJankSummaryProto {

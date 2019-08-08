@@ -370,7 +370,7 @@
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="watch">Watch storage is full. Delete some files to free space.</string>
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
-    <string name="low_memory" product="tv">TV storage is full. Delete some files to free space.</string>
+    <string name="low_memory" product="tv">Android TV device storage is full. Delete some files to free space.</string>
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="default">Phone storage is full. Delete some files to free space.</string>
 
@@ -430,7 +430,7 @@
     <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
     <string name="power_dialog" product="tablet">Tablet options</string>
     <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
-    <string name="power_dialog" product="tv">TV options</string>
+    <string name="power_dialog" product="tv">Android TV options</string>
     <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
     <string name="power_dialog" product="default">Phone options</string>
     <!-- Button to turn on silent mode, within the Phone Options dialog -->
@@ -468,7 +468,7 @@
     <string name="shutdown_confirm" product="tablet">Your tablet will shut down.</string>
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the TV, there will
          be a confirmation dialog.  This is the message. -->
-    <string name="shutdown_confirm" product="tv">Your TV will shut down.</string>
+    <string name="shutdown_confirm" product="tv">Your Android TV device will shut down.</string>
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the watch, there will
          be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm" product="watch">Your watch will shut down.</string>
@@ -505,7 +505,7 @@
     <!-- Title of the Global Actions Dialog -->
     <string name="global_actions" product="tablet">Tablet options</string>
     <!-- Title of the Global Actions Dialog -->
-    <string name="global_actions" product="tv">TV options</string>
+    <string name="global_actions" product="tv">Android TV options</string>
     <!-- Title of the Global Actions Dialog -->
     <string name="global_actions" product="default">Phone options</string>
 
@@ -916,7 +916,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readSms" product="tablet">This app can read all SMS (text) messages stored on your tablet.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readSms" product="tv">This app can read all SMS (text) messages stored on your TV.</string>
+    <string name="permdesc_readSms" product="tv">This app can read all SMS (text) messages stored on your Android TV device.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readSms" product="default">This app can read all SMS (text) messages stored on your phone.</string>
 
@@ -979,7 +979,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_persistentActivity" product="tablet">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down the tablet.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_persistentActivity" product="tv">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down the TV.</string>
+    <string name="permdesc_persistentActivity" product="tv">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down your Android TV device.</string>
     <string name="permdesc_persistentActivity" product="default">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down the phone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1009,8 +1009,8 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_receiveBootCompleted" product="tv">Allows the app to
         have itself started as soon as the system has finished booting.
-        This can make it take longer to start the TV and allow the
-        app to slow down the overall tablet by always running.</string>
+        This can make it take longer to start your Android TV device and allow the
+        app to slow down the overall device by always running.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_receiveBootCompleted" product="default">Allows the app to
         have itself started as soon as the system has finished booting.
@@ -1027,7 +1027,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_broadcastSticky" product="tv">Allows the app to
     send sticky broadcasts, which remain after the broadcast ends. Excessive use
-    may make the TV slow or unstable by causing it to use too much memory.
+    may make your Android TV device slow or unstable by causing it to use too much memory.
     </string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_broadcastSticky" product="default">Allows the app to
@@ -1046,7 +1046,7 @@
       knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readContacts" product="tv">Allows the app to read
-      data about your contacts stored on your TV, including the frequency
+      data about your contacts stored on your Android TV device, including the frequency
       with which you\'ve called, emailed, or communicated in other ways with
       specific individuals. This permission allows apps to save your contact
       data, and malicious apps may share contact data without your
@@ -1069,7 +1069,7 @@
       data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeContacts" product="tv">Allows the app to
-      modify the data about your contacts stored on your TV, including the
+      modify the data about your contacts stored on your Android TV device, including the
       frequency with which you\'ve called, emailed, or communicated in other ways
       with specific contacts. This permission allows apps to delete contact
       data.</string>
@@ -1091,7 +1091,7 @@
     <string name="permdesc_writeCallLog" product="tablet">Allows the app to modify your tablet\'s call log, including data about incoming and outgoing calls.
         Malicious apps may use this to erase or modify your call log.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCallLog" product="tv">Allows the app to modify your TV\'s call log, including data about incoming and outgoing calls.
+    <string name="permdesc_writeCallLog" product="tv">Allows the app to modify your Android TV device\'s call log, including data about incoming and outgoing calls.
         Malicious apps may use this to erase or modify your call log.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCallLog" product="default">Allows the app to modify your phone\'s call log, including data about incoming and outgoing calls.
@@ -1109,7 +1109,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar" product="tablet">This app can read all calendar events stored on your tablet and share or save your calendar data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readCalendar" product="tv">This app can read all calendar events stored on your TV and share or save your calendar data.</string>
+    <string name="permdesc_readCalendar" product="tv">This app can read all calendar events stored on your Android TV device and share or save your calendar data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar" product="default">This app can read all calendar events stored on your phone and share or save your calendar data.</string>
 
@@ -1118,7 +1118,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCalendar" product="tablet">This app can add, remove, or change calendar events on your tablet. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCalendar" product="tv">This app can add, remove, or change calendar events on your TV. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
+    <string name="permdesc_writeCalendar" product="tv">This app can add, remove, or change calendar events on your Android TV device. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCalendar" product="default">This app can add, remove, or change calendar events on your phone. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
 
@@ -1139,7 +1139,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessCoarseLocation" product="tablet">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your tablet for the app to be able to use them.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="tv">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your TV for the app to be able to use them.</string>
+    <string name="permdesc_accessCoarseLocation" product="tv">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your Android TV device for the app to be able to use them.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessCoarseLocation" product="default">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them.</string>
 
@@ -1236,13 +1236,13 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_wakeLock" product="tv">prevent TV from sleeping</string>
+    <string name="permlab_wakeLock" product="tv">prevent your Android TV device from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="default">prevent phone from sleeping</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_wakeLock" product="tablet">Allows the app to prevent the tablet from going to sleep.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_wakeLock" product="tv">Allows the app to prevent the TV from going to sleep.</string>
+    <string name="permdesc_wakeLock" product="tv">Allows the app to prevent your Android TV device from going to sleep.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_wakeLock" product="default">Allows the app to prevent the phone from going to sleep.</string>
 
@@ -1251,7 +1251,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_transmitIr" product="tablet">Allows the app to use the tablet\'s infrared transmitter.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_transmitIr" product="tv">Allows the app to use the TV\'s infrared transmitter.</string>
+    <string name="permdesc_transmitIr" product="tv">Allows the app to use your Android TV device\'s infrared transmitter.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_transmitIr" product="default">Allows the app to use the phone\'s infrared transmitter.</string>
 
@@ -1270,7 +1270,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setTimeZone" product="tablet">Allows the app to change the tablet\'s time zone.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setTimeZone" product="tv">Allows the app to change the TV\'s time zone.</string>
+    <string name="permdesc_setTimeZone" product="tv">Allows the app to change your Android TV device\'s time zone.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setTimeZone" product="default">Allows the app to change the phone\'s time zone.</string>
 
@@ -1282,7 +1282,7 @@
       created by applications you have installed.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getAccounts" product="tv">Allows the app to get
-      the list of accounts known by the TV.  This may include any accounts
+      the list of accounts known by your Android TV device.  This may include any accounts
       created by applications you have installed.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getAccounts" product="default">Allows the app to get
@@ -1337,7 +1337,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_changeWifiMulticastState" product="tv">Allows the app to receive
       packets sent to all devices on a Wi-Fi network using multicast addresses,
-      not just your TV.  It uses more power than the non-multicast mode.</string>
+      not just your Android TV device.  It uses more power than the non-multicast mode.</string>
     <string name="permdesc_changeWifiMulticastState" product="default">Allows the app to receive
       packets sent to all devices on a Wi-Fi network using multicast addresses,
       not just your phone.  It uses more power than the non-multicast mode.</string>
@@ -1350,7 +1350,7 @@
       devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin" product="tv">Allows the app to
-      configure the local Bluetooth TV, and to discover and pair with remote
+      configure Bluetooth on your Android TV device, and to discover and pair with remote
       devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin" product="default">Allows the app to configure
@@ -1365,7 +1365,7 @@
     <string name="permdesc_changeWimaxState" product="tablet">Allows the app to
       connect the tablet to and disconnect the tablet from WiMAX networks.</string>
     <string name="permdesc_changeWimaxState" product="tv">Allows the app to
-      connect the TV to and disconnect the TV from WiMAX networks.</string>
+      connect your Android TV device to and disconnect your Android TV device from WiMAX networks.</string>
     <string name="permdesc_changeWimaxState" product="default">Allows the app to
       connect the phone to and disconnect the phone from WiMAX networks.</string>
 
@@ -1377,7 +1377,7 @@
       connections with paired devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetooth" product="tv">Allows the app to view the
-      configuration of Bluetooth on the TV, and to make and accept
+      configuration of Bluetooth on your Android TV device, and to make and accept
       connections with paired devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetooth" product="default">Allows the app to view the
@@ -1753,8 +1753,8 @@
     typed when unlocking the screen, and lock the tablet or erase all the tablet\'s
     data if too many incorrect passwords are typed.</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin" product="TV">Monitor the number of incorrect passwords
-    typed when unlocking the screen, and lock the TV or erase all the TV\'s
+    <string name="policydesc_watchLogin" product="tv">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock your Android TV device or erase all your Android TV device\'s
     data if too many incorrect passwords are typed.</string>
     <!-- Description of policy access to watch user login attempts -->
     <string name="policydesc_watchLogin" product="default">Monitor the number of incorrect passwords
@@ -1763,8 +1763,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet">Monitor the number of incorrect passwords
     typed when unlocking the screen, and lock the tablet or erase all this user\'s data
     if too many incorrect passwords are typed.</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV">Monitor the number of incorrect passwords
-    typed when unlocking the screen, and lock the TV or erase all this user\'s data
+    <string name="policydesc_watchLogin_secondaryUser" product="tv">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock your Android TV device or erase all this user\'s data
     if too many incorrect passwords are typed.</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default">Monitor the number of incorrect passwords
     typed when unlocking the screen, and lock the phone or erase all this user\'s data
@@ -1782,7 +1782,7 @@
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning by performing a factory data reset.</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData" product="tv">Erase the TV\'s data without warning by performing a factory data reset.</string>
+    <string name="policydesc_wipeData" product="tv">Erase your Android TV device\'s data without warning by performing a factory data reset.</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning by performing a factory data reset.</string>
     <!-- Title of policy access to wipe secondary user's data -->
@@ -1790,7 +1790,7 @@
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData_secondaryUser" product="tablet">Erase this user\'s data on this tablet without warning.</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData_secondaryUser" product="tv">Erase this user\'s data on this TV without warning.</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv">Erase this user\'s data on this Android TV device without warning.</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData_secondaryUser" product="default">Erase this user\'s data on this phone without warning.</string>
     <!-- Title of policy access to set global proxy -->
@@ -2103,7 +2103,7 @@
     <!-- Shown in the lock screen when there is no SIM card. -->
     <string name="lockscreen_missing_sim_message" product="tablet">No SIM card in tablet.</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message" product="tv">No SIM card in TV.</string>
+    <string name="lockscreen_missing_sim_message" product="tv">No SIM card in your Android TV device.</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
     <string name="lockscreen_missing_sim_message" product="default">No SIM card in phone.</string>
     <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
@@ -2188,7 +2188,7 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       you will be asked to unlock your TV using your Google signin.\n\n
+       you will be asked to unlock your Android TV device using your Google signin.\n\n
        Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
@@ -2212,9 +2212,9 @@
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where the device will be wiped. -->
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%1$d</xliff:g> times.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       the TV will be reset to factory default and all user data will be lost.
+       your Android TV device will be reset to factory default and all user data will be lost.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
@@ -2235,8 +2235,8 @@
     <!-- For the unlock screen, informational message shown in dialog when user has exceeded the
         maximum attempts and the device will now be wiped -->
     <string name="lockscreen_failed_attempts_now_wiping" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%d</xliff:g> times.
-       The TV will now be reset to factory default.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%d</xliff:g> times.
+       Your Android TV device will now be reset to factory default.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user has exceeded the
@@ -2603,7 +2603,7 @@
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permdesc_writeHistoryBookmarks" product="tv">Allows the
-        app to modify the Browser\'s history or bookmarks stored on your TV.
+        app to modify the Browser\'s history or bookmarks stored on your Android TV device.
         This may allow the app to erase or modify Browser data.  Note: this
         permission may note be enforced by third-party browsers or other
         applications with web browsing capabilities.</string>
@@ -3506,7 +3506,7 @@
     <string name="wifi_p2p_show_pin_message">PIN: </string>
 
     <string name="wifi_p2p_frequency_conflict_message" product="tablet">The tablet will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv">The TV will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv">Your Android TV device will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
     <string name="wifi_p2p_frequency_conflict_message" product="default">The phone will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
 
     <!-- Name of the dialog that lets the user choose an accented character to insert -->
@@ -4404,9 +4404,9 @@
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
     <string name="kg_failed_attempts_almost_at_wipe" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%1$d</xliff:g> times.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       the TV will be reset to factory default and all user data will be lost.
+       your Android TV device will be reset to factory default and all user data will be lost.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
     <string name="kg_failed_attempts_almost_at_wipe" product="default">
@@ -4421,8 +4421,8 @@
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped -->
     <string name="kg_failed_attempts_now_wiping" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%d</xliff:g> times.
-       The TV will now be reset to factory default.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%d</xliff:g> times.
+       Your Android TV device will now be reset to factory default.
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped -->
     <string name="kg_failed_attempts_now_wiping" product="default">
@@ -4442,7 +4442,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv">
        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       you will be asked to unlock your TV using an email account.\n\n
+       you will be asked to unlock your Android TV device using an email account.\n\n
        Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
     <!-- Message shown in dialog when user is almost at the limit where they will be

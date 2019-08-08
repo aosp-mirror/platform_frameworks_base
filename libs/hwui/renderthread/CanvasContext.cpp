@@ -147,6 +147,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
         mNativeSurface = new ReliableSurface{std::move(surface)};
         // TODO: Fix error handling & re-shorten timeout
         mNativeSurface->setDequeueTimeout(4000_ms);
+        mNativeSurface->enableFrameTimestamps(true);
     } else {
         mNativeSurface = nullptr;
     }
@@ -294,6 +295,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     // just keep using the previous frame's structure instead
     if (!wasSkipped(mCurrentFrameInfo)) {
         mCurrentFrameInfo = mJankTracker.startFrame();
+        mLast4FrameInfos.next().first = mCurrentFrameInfo;
     }
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
     mCurrentFrameInfo->set(FrameInfoIndex::SyncQueued) = syncQueued;
@@ -445,7 +447,7 @@ void CanvasContext::draw() {
                                       mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,
                                       &(profiler()));
 
-    int64_t frameCompleteNr = mFrameCompleteCallbacks.size() ? getFrameNumber() : -1;
+    int64_t frameCompleteNr = getFrameNumber();
 
     waitOnFences();
 
@@ -500,11 +502,13 @@ void CanvasContext::draw() {
         }
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = swap.dequeueDuration;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = swap.queueDuration;
+        mLast4FrameInfos[-1].second = frameCompleteNr;
         mHaveNewSurface = false;
         mFrameNumber = -1;
     } else {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
+        mLast4FrameInfos[-1].second = -1;
     }
 
     // TODO: Use a fence for real completion?
@@ -535,6 +539,19 @@ void CanvasContext::draw() {
     mJankTracker.finishFrame(*mCurrentFrameInfo);
     if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
         mFrameMetricsReporter->reportFrameMetrics(mCurrentFrameInfo->data());
+    }
+
+    if (mLast4FrameInfos.size() == mLast4FrameInfos.capacity()) {
+        // By looking 4 frames back, we guarantee all SF stats are available. There are at
+        // most 3 buffers in BufferQueue. Surface object keeps stats for the last 8 frames.
+        FrameInfo* forthBehind = mLast4FrameInfos.front().first;
+        int64_t composedFrameId = mLast4FrameInfos.front().second;
+        nsecs_t acquireTime = -1;
+        mNativeSurface->getFrameTimestamps(composedFrameId, nullptr, &acquireTime, nullptr, nullptr,
+            nullptr, nullptr, nullptr, nullptr, nullptr);
+        // Ignore default -1, NATIVE_WINDOW_TIMESTAMP_INVALID and NATIVE_WINDOW_TIMESTAMP_PENDING
+        forthBehind->set(FrameInfoIndex::GpuCompleted) = acquireTime > 0 ? acquireTime : -1;
+        mJankTracker.finishGpuDraw(*forthBehind);
     }
 
     GpuMemoryTracker::onFrameCompleted();

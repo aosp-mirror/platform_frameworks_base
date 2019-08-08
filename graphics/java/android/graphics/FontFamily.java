@@ -21,7 +21,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontVariationAxis;
 import android.text.TextUtils;
-import android.util.Log;
 
 import dalvik.annotation.optimization.CriticalNative;
 
@@ -145,7 +144,6 @@ public class FontFamily {
             }
             return nAddFont(mBuilderPtr, fontBuffer, ttcIndex, weight, italic);
         } catch (IOException e) {
-            Log.e(TAG, "Error mapping font file " + path);
             return false;
         }
     }

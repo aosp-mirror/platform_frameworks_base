@@ -56,6 +56,7 @@ android_test {
         "androidx.test.rules",
         "FrameworksNetCommonTests",
         "frameworks-base-testutils",
+        "frameworks-net-integration-testutils",
         "framework-protos",
         "mockito-target-minus-junit4",
         "net-tests-utils",

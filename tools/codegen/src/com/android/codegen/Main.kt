@@ -1,5 +1,6 @@
 package com.android.codegen
 
+import com.github.javaparser.JavaParser
 import java.io.File
 
 
@@ -14,6 +15,7 @@ val BUILTIN_SPECIAL_PARCELLINGS = listOf("Pattern")
 const val FLAG_BUILDER_PROTECTED_SETTERS = "--builder-protected-setters"
 const val FLAG_NO_FULL_QUALIFIERS = "--no-full-qualifiers"
 
+val JAVA_PARSER = JavaParser()
 
 /** @see [FeatureFlag] */
 val USAGE = """

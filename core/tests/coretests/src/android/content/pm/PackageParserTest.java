@@ -428,6 +428,18 @@ public class PackageParserTest {
                 "com.android.frameworks.coretests.install_complete_package_info.test_permission",
                 packageName, PermissionInfo.PROTECTION_NORMAL, p.permissions.get(0));
 
+        // Hidden "app details" activity is added to every package.
+        boolean foundAppDetailsActivity = false;
+        for (int i = 0; i < p.activities.size(); i++) {
+            if (p.activities.get(i).className.equals(
+                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME)) {
+                foundAppDetailsActivity = true;
+                p.activities.remove(i);
+                break;
+            }
+        }
+        assertTrue("Did not find app details activity", foundAppDetailsActivity);
+
         assertOneComponentOfEachType("com.android.frameworks.coretests.Test%s", p);
 
         assertMetadata(p.mAppMetaData,

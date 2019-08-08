@@ -185,4 +185,9 @@ oneway interface ITaskStackListener {
      * @param newDisplayId id of the new display.
      */
     void onTaskDisplayChanged(int taskId, int newDisplayId);
+
+    /**
+     * Called when any additions or deletions to the recent tasks list have been made.
+     */
+    void onRecentTaskListUpdated();
 }

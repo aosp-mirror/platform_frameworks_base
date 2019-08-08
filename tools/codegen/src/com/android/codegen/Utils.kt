@@ -79,7 +79,7 @@ fun currentTimestamp() = DateTimeFormatter
         .withZone(ZoneId.systemDefault())
         .format(Instant.now())
 
-val NodeWithModifiers<*>.visibility get() = Modifier.getAccessSpecifier(modifiers)
+val NodeWithModifiers<*>.visibility get() = accessSpecifier
 
 fun abort(msg: String): Nothing {
     System.err.println("ERROR: $msg")
@@ -88,4 +88,3 @@ fun abort(msg: String): Nothing {
 }
 
 fun bitAtExpr(bitIndex: Int) = "0x${java.lang.Long.toHexString(1L shl bitIndex)}"
-

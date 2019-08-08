@@ -293,6 +293,11 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 Log.w(TAG, "onNotificationEnqueued: Error receiving StatusBarNotification", e);
                 return;
             }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationEnqueuedWithChannel: "
+                        + "Error receiving StatusBarNotification");
+                return;
+            }
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = sbn;
@@ -309,6 +314,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 sbn = sbnHolder.get();
             } catch (RemoteException e) {
                 Log.w(TAG, "onNotificationSnoozed: Error receiving StatusBarNotification", e);
+                return;
+            }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationSnoozed: Error receiving StatusBarNotification");
                 return;
             }
 

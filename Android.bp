@@ -798,7 +798,10 @@ java_defaults {
         "--multi-dex",
     ],
 
-    plugins: ["view-inspector-annotation-processor"],
+    plugins: [
+        "view-inspector-annotation-processor",
+        "staledataclass-annotation-processor",
+    ],
 }
 
 filegroup {

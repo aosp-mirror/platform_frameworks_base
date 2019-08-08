@@ -1,22 +1,37 @@
 package com.android.codegen
 
-import com.github.javaparser.JavaParser
 import com.github.javaparser.ParseProblemException
+import com.github.javaparser.ParseResult
+import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 
 open class ClassInfo(val sourceLines: List<String>) {
 
     private val userSourceCode = (sourceLines + "}").joinToString("\n")
-    val fileAst = try {
-        JavaParser.parse(userSourceCode)!!
+    val fileAst: CompilationUnit = try {
+        JAVA_PARSER.parse(userSourceCode).throwIfFailed()
     } catch (e: ParseProblemException) {
-        throw RuntimeException("Failed to parse code:\n" +
+        throw parseFailed(cause = e)
+    }
+
+    fun <T> ParseResult<T>.throwIfFailed(): T {
+        if (problems.isNotEmpty()) {
+            throw parseFailed(
+                    desc = this@throwIfFailed.problems.joinToString("\n"),
+                    cause = this@throwIfFailed.problems.mapNotNull { it.cause.orElse(null) }.firstOrNull())
+        }
+        return result.get()
+    }
+
+    private fun parseFailed(cause: Throwable? = null, desc: String = ""): RuntimeException {
+        return RuntimeException("Failed to parse code:\n" +
                 userSourceCode
                         .lines()
                         .mapIndexed { lnNum, ln -> "/*$lnNum*/$ln" }
-                        .joinToString("\n"),
-                e)
+                        .joinToString("\n") + "\n$desc",
+                cause)
     }
+
     val classAst = fileAst.types[0] as ClassOrInterfaceDeclaration
     val nestedClasses = classAst.members.filterIsInstance<ClassOrInterfaceDeclaration>()
 

@@ -18,7 +18,7 @@ private fun ClassPrinter.generateInputSignaturesForClass(classAst: ClassOrInterf
 
     return classAst.fields.map { fieldAst ->
         buildString {
-            append(fieldAst.modifiers.joinToString(" ") { it.asString() })
+            append(fieldAst.modifiers.joinToString(" ") { it.keyword.asString() })
             append(" ")
             append(annotationsToString(fieldAst))
             append(" ")
@@ -28,7 +28,7 @@ private fun ClassPrinter.generateInputSignaturesForClass(classAst: ClassOrInterf
         }
     } + classAst.methods.map { methodAst ->
         buildString {
-            append(methodAst.modifiers.joinToString(" ") { it.asString() })
+            append(methodAst.modifiers.joinToString(" ") { it.keyword.asString() })
             append(" ")
             append(annotationsToString(methodAst))
             append(" ")
@@ -97,7 +97,7 @@ private fun ClassPrinter.getFullClassName(type: Type): String {
         getFullClassName(buildString {
             type.scope.ifPresent { append(it).append(".") }
             append(type.nameAsString)
-        }) + (type.typeArguments.orElse(null)?.let { args -> args.joinToString(", ") {getFullClassName(it)}}?.let { "<$it>" } ?: "")
+        }) + (type.typeArguments.orElse(null)?.let { args -> args.joinToString(",") {getFullClassName(it)}}?.let { "<$it>" } ?: "")
     } else getFullClassName(type.asString())
 }
 
