@@ -169,6 +169,11 @@ class ZygoteArguments {
     boolean mPidQuery;
 
     /**
+     * Whether the current arguments constitute a notification that boot completed.
+     */
+    boolean mBootCompleted;
+
+    /**
      * Exemptions from API blacklisting. These are sent to the pre-forked zygote at boot time, or
      * when they change, via --set-api-blacklist-exemptions.
      */
@@ -330,6 +335,8 @@ class ZygoteArguments {
                 mAbiListQuery = true;
             } else if (arg.equals("--get-pid")) {
                 mPidQuery = true;
+            } else if (arg.equals("--boot-completed")) {
+                mBootCompleted = true;
             } else if (arg.startsWith("--instruction-set=")) {
                 mInstructionSet = arg.substring(arg.indexOf('=') + 1);
             } else if (arg.startsWith("--app-data-dir=")) {
@@ -364,7 +371,11 @@ class ZygoteArguments {
             }
         }
 
-        if (mAbiListQuery || mPidQuery) {
+        if (mBootCompleted) {
+            if (args.length - curArg > 0) {
+                throw new IllegalArgumentException("Unexpected arguments after --boot-completed");
+            }
+        } else if (mAbiListQuery || mPidQuery) {
             if (args.length - curArg > 0) {
                 throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
             }
