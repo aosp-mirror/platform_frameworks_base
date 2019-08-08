@@ -1641,6 +1641,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         updateFaceListeningState();
     }
 
+    /**
+     * In case face auth is running, cancel it.
+     */
+    public void cancelFaceAuth() {
+        stopListeningForFace();
+    }
+
     private void updateFaceListeningState() {
         // If this message exists, we should not authenticate again until this message is
         // consumed by the handler
