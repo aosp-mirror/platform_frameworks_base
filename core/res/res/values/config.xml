@@ -4270,6 +4270,10 @@
     (default 2MB) -->
     <integer name="config_notificationStripRemoteViewSizeBytes">2000000</integer>
 
+    <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
+         grants, even if the UICC claims that the app should be privileged. See b/138150105 -->
+    <string-array name="config_restrictedPreinstalledCarrierApps" translatable="false"/>
+
     <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
     <integer name="config_maxShortcutTargetsPerApp">3</integer>
 
