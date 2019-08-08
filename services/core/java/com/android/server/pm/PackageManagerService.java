@@ -320,7 +320,6 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.policy.PermissionPolicyInternal;
-import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -11033,14 +11032,15 @@ public class PackageManagerService extends IPackageManager.Stub
         final String realPkgName = request.realPkgName;
         final List<String> changedAbiCodePath = result.changedAbiCodePath;
         final PackageSetting pkgSetting;
+        if (request.pkgSetting != null && request.pkgSetting.sharedUser != null
+                && request.pkgSetting.sharedUser != result.pkgSetting.sharedUser) {
+            // shared user changed, remove from old shared user
+            request.pkgSetting.sharedUser.removePackage(request.pkgSetting);
+        }
         if (result.existingSettingCopied) {
             pkgSetting = request.pkgSetting;
             pkgSetting.updateFrom(result.pkgSetting);
             pkg.mExtras = pkgSetting;
-            if (pkgSetting.sharedUser != null
-                    && pkgSetting.sharedUser.removePackage(result.pkgSetting)) {
-                pkgSetting.sharedUser.addPackage(pkgSetting);
-            }
         } else {
             pkgSetting = result.pkgSetting;
             if (originalPkgSetting != null) {
@@ -11049,6 +11049,9 @@ public class PackageManagerService extends IPackageManager.Stub
             if (originalPkgSetting != null && (scanFlags & SCAN_CHECK_ONLY) == 0) {
                 mTransferedPackages.add(originalPkgSetting.name);
             }
+        }
+        if (pkgSetting.sharedUser != null) {
+            pkgSetting.sharedUser.addPackage(pkgSetting);
         }
         // TODO(toddke): Consider a method specifically for modifying the Package object
         // post scan; or, moving this stuff out of the Package object since it has nothing
