@@ -622,6 +622,19 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void resetUsbGadget() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mDeviceManager.resetUsbGadget();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public List<ParcelableUsbPort> getPorts() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
