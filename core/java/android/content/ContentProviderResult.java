@@ -16,6 +16,8 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,12 +29,12 @@ import com.android.internal.util.Preconditions;
  * to have exactly one of {@link #uri} or {@link #count} set.
  */
 public class ContentProviderResult implements Parcelable {
-    public final Uri uri;
-    public final Integer count;
+    public final @Nullable Uri uri;
+    public final @Nullable Integer count;
     /** {@hide} */
-    public final String failure;
+    public final @Nullable String failure;
 
-    public ContentProviderResult(Uri uri) {
+    public ContentProviderResult(@NonNull Uri uri) {
         this(Preconditions.checkNotNull(uri), null, null);
     }
 
@@ -41,7 +43,7 @@ public class ContentProviderResult implements Parcelable {
     }
 
     /** {@hide} */
-    public ContentProviderResult(String failure) {
+    public ContentProviderResult(@NonNull String failure) {
         this(null, null, failure);
     }
 

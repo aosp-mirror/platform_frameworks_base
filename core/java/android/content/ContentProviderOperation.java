@@ -16,6 +16,8 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.database.Cursor;
 import android.net.Uri;
@@ -168,7 +170,7 @@ public class ContentProviderOperation implements Parcelable {
      * @param uri The {@link Uri} that is the target of the insert.
      * @return a {@link Builder}
      */
-    public static Builder newInsert(Uri uri) {
+    public static @NonNull Builder newInsert(@NonNull Uri uri) {
         return new Builder(TYPE_INSERT, uri);
     }
 
@@ -177,7 +179,7 @@ public class ContentProviderOperation implements Parcelable {
      * @param uri The {@link Uri} that is the target of the update.
      * @return a {@link Builder}
      */
-    public static Builder newUpdate(Uri uri) {
+    public static @NonNull Builder newUpdate(@NonNull Uri uri) {
         return new Builder(TYPE_UPDATE, uri);
     }
 
@@ -186,7 +188,7 @@ public class ContentProviderOperation implements Parcelable {
      * @param uri The {@link Uri} that is the target of the delete.
      * @return a {@link Builder}
      */
-    public static Builder newDelete(Uri uri) {
+    public static @NonNull Builder newDelete(@NonNull Uri uri) {
         return new Builder(TYPE_DELETE, uri);
     }
 
@@ -195,14 +197,14 @@ public class ContentProviderOperation implements Parcelable {
      * {@link ContentProviderOperation} to assert a set of values as provided
      * through {@link Builder#withValues(ContentValues)}.
      */
-    public static Builder newAssertQuery(Uri uri) {
+    public static @NonNull Builder newAssertQuery(@NonNull Uri uri) {
         return new Builder(TYPE_ASSERT, uri);
     }
 
     /**
      * Gets the Uri for the target of the operation.
      */
-    public Uri getUri() {
+    public @NonNull Uri getUri() {
         return mUri;
     }
 
@@ -297,8 +299,9 @@ public class ContentProviderOperation implements Parcelable {
      * @throws OperationApplicationException thrown if either the insert fails or
      * if the number of rows affected didn't match the expected count
      */
-    public ContentProviderResult apply(ContentProvider provider, ContentProviderResult[] backRefs,
-            int numBackRefs) throws OperationApplicationException {
+    public @NonNull ContentProviderResult apply(@NonNull ContentProvider provider,
+            @NonNull ContentProviderResult[] backRefs, int numBackRefs)
+            throws OperationApplicationException {
         if (mFailureAllowed) {
             try {
                 return applyInternal(provider, backRefs, numBackRefs);
@@ -388,8 +391,8 @@ public class ContentProviderOperation implements Parcelable {
      * expansion of back references. This can be called if either mValues or mValuesBackReferences
      * is null
      */
-    public ContentValues resolveValueBackReferences(
-            ContentProviderResult[] backRefs, int numBackRefs) {
+    public @Nullable ContentValues resolveValueBackReferences(
+            @NonNull ContentProviderResult[] backRefs, int numBackRefs) {
         if (mValuesBackReferences == null) {
             return mValues;
         }
@@ -425,8 +428,8 @@ public class ContentProviderOperation implements Parcelable {
      * expansion of back references. This can be called if either mValues or mValuesBackReferences
      * is null
      */
-    public String[] resolveSelectionArgsBackReferences(
-            ContentProviderResult[] backRefs, int numBackRefs) {
+    public @Nullable String[] resolveSelectionArgsBackReferences(
+            @NonNull ContentProviderResult[] backRefs, int numBackRefs) {
         if (mSelectionArgsBackReferences == null) {
             return mSelectionArgs;
         }
@@ -526,7 +529,7 @@ public class ContentProviderOperation implements Parcelable {
         }
 
         /** Create a ContentProviderOperation from this {@link Builder}. */
-        public ContentProviderOperation build() {
+        public @NonNull ContentProviderOperation build() {
             if (mType == TYPE_UPDATE) {
                 if ((mValues == null || mValues.isEmpty())
                       && (mValuesBackReferences == null || mValuesBackReferences.isEmpty())) {
@@ -552,7 +555,7 @@ public class ContentProviderOperation implements Parcelable {
          * This can only be used with builders of type insert, update, or assert.
          * @return this builder, to allow for chaining.
          */
-        public Builder withValueBackReferences(ContentValues backReferences) {
+        public @NonNull Builder withValueBackReferences(@NonNull ContentValues backReferences) {
             if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
                         "only inserts, updates, and asserts can have value back-references");
@@ -568,7 +571,7 @@ public class ContentProviderOperation implements Parcelable {
          * This can only be used with builders of type insert, update, or assert.
          * @return this builder, to allow for chaining.
          */
-        public Builder withValueBackReference(String key, int previousResult) {
+        public @NonNull Builder withValueBackReference(@NonNull String key, int previousResult) {
             if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
                         "only inserts, updates, and asserts can have value back-references");
@@ -586,7 +589,8 @@ public class ContentProviderOperation implements Parcelable {
          * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
          */
-        public Builder withSelectionBackReference(int selectionArgIndex, int previousResult) {
+        public @NonNull Builder withSelectionBackReference(int selectionArgIndex,
+                int previousResult) {
             if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException("only updates, deletes, and asserts "
                         + "can have selection back-references");
@@ -605,7 +609,7 @@ public class ContentProviderOperation implements Parcelable {
          * This can only be used with builders of type insert, update, or assert.
          * @return this builder, to allow for chaining.
          */
-        public Builder withValues(ContentValues values) {
+        public @NonNull Builder withValues(@NonNull ContentValues values) {
             if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
                         "only inserts, updates, and asserts can have values");
@@ -626,7 +630,7 @@ public class ContentProviderOperation implements Parcelable {
          * {@link ContentValues#put}
          * @return this builder, to allow for chaining.
          */
-        public Builder withValue(String key, Object value) {
+        public @NonNull Builder withValue(@NonNull String key, @Nullable Object value) {
             if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException("only inserts and updates can have values");
             }
@@ -667,7 +671,8 @@ public class ContentProviderOperation implements Parcelable {
          * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
          */
-        public Builder withSelection(String selection, String[] selectionArgs) {
+        public @NonNull Builder withSelection(@Nullable String selection,
+                @Nullable String[] selectionArgs) {
             if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
                         "only updates, deletes, and asserts can have selections");
@@ -688,7 +693,7 @@ public class ContentProviderOperation implements Parcelable {
          * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
          */
-        public Builder withExpectedCount(int count) {
+        public @NonNull Builder withExpectedCount(int count) {
             if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
                         "only updates, deletes, and asserts can have expected counts");
@@ -703,13 +708,13 @@ public class ContentProviderOperation implements Parcelable {
          * @return this builder, to allow for chaining.
          * @see android.database.sqlite.SQLiteDatabase#yieldIfContendedSafely()
          */
-        public Builder withYieldAllowed(boolean yieldAllowed) {
+        public @NonNull Builder withYieldAllowed(boolean yieldAllowed) {
             mYieldAllowed = yieldAllowed;
             return this;
         }
 
         /** {@hide} */
-        public Builder withFailureAllowed(boolean failureAllowed) {
+        public @NonNull Builder withFailureAllowed(boolean failureAllowed) {
             mFailureAllowed = failureAllowed;
             return this;
         }
