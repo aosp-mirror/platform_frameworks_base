@@ -63,6 +63,7 @@ import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
+import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -88,7 +89,12 @@ import java.util.List;
  * UserBackupManagerService} that performs operations for its target user.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowAppBackupUtils.class, ShadowApplicationPackageManager.class})
+@Config(
+        shadows = {
+            ShadowAppBackupUtils.class,
+            ShadowApplicationPackageManager.class,
+            ShadowSystemServiceRegistry.class
+        })
 @Presubmit
 public class UserBackupManagerServiceTest {
     private static final String TAG = "BMSTest";
