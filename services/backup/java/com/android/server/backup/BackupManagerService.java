@@ -49,13 +49,11 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
-import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -80,8 +78,6 @@ public class BackupManagerService {
     // Keeps track of all unlocked users registered with this service. Indexed by user id.
     private final SparseArray<UserBackupManagerService> mServiceUsers = new SparseArray<>();
 
-    private Set<ComponentName> mTransportWhitelist;
-
     private final BroadcastReceiver mUserRemovedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -98,13 +94,6 @@ public class BackupManagerService {
     public BackupManagerService(Context context, Trampoline trampoline) {
         mContext = checkNotNull(context);
         mTrampoline = checkNotNull(trampoline);
-
-        // Set up our transport options.
-        SystemConfig systemConfig = SystemConfig.getInstance();
-        mTransportWhitelist = systemConfig.getBackupTransportWhitelist();
-        if (mTransportWhitelist == null) {
-            mTransportWhitelist = Collections.emptySet();
-        }
 
         mContext.registerReceiver(mUserRemovedReceiver,
                 new IntentFilter(Intent.ACTION_USER_REMOVED));
@@ -147,7 +136,7 @@ public class BackupManagerService {
      * UserBackupManagerService} and registering it with this service.
      */
     @VisibleForTesting
-    protected void startServiceForUser(int userId) {
+    protected void startServiceForUser(int userId, Set<ComponentName> transportWhitelist) {
         if (mServiceUsers.get(userId) != null) {
             Slog.i(TAG, "userId " + userId + " already started, so not starting again");
             return;
@@ -155,7 +144,7 @@ public class BackupManagerService {
 
         UserBackupManagerService userBackupManagerService =
                 UserBackupManagerService.createAndInitializeService(
-                        userId, mContext, mTrampoline, mTransportWhitelist);
+                        userId, mContext, mTrampoline, transportWhitelist);
         startServiceForUser(userId, userBackupManagerService);
     }
 
@@ -362,19 +351,6 @@ public class BackupManagerService {
         return userBackupManagerService == null
                 ? null
                 : userBackupManagerService.listAllTransportComponents();
-    }
-
-    /** Report all system whitelisted transports. */
-    @Nullable
-    public String[] getTransportWhitelist() {
-        // No permission check, intentionally.
-        String[] whitelistedTransports = new String[mTransportWhitelist.size()];
-        int i = 0;
-        for (ComponentName component : mTransportWhitelist) {
-            whitelistedTransports[i] = component.flattenToShortString();
-            i++;
-        }
-        return whitelistedTransports;
     }
 
     /**

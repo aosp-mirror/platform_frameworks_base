@@ -36,6 +36,8 @@ import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
+import static java.util.Collections.emptySet;
+
 import android.annotation.UserIdInt;
 import android.app.Application;
 import android.app.backup.IBackupManagerMonitor;
@@ -154,7 +156,7 @@ public class BackupManagerServiceTest {
     public void testStartServiceForUser_registersUser() throws Exception {
         BackupManagerService backupManagerService = createService();
 
-        backupManagerService.startServiceForUser(mUserOneId);
+        backupManagerService.startServiceForUser(mUserOneId, emptySet());
 
         SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getUserServices();
         assertThat(serviceUsers.size()).isEqualTo(1);

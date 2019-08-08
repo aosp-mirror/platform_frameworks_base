@@ -19,6 +19,8 @@ package com.android.server.backup;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.backup.BackupManagerService.TAG;
 
+import static java.util.Collections.emptySet;
+
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -48,12 +50,14 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.server.SystemConfig;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * A proxy to the {@link BackupManagerService} implementation.
@@ -118,6 +122,7 @@ public class Trampoline extends IBackupManager.Stub {
     @VisibleForTesting
     protected volatile BackupManagerService mService;
     private final Handler mHandler;
+    private final Set<ComponentName> mTransportWhitelist;
 
     public Trampoline(Context context) {
         mContext = context;
@@ -128,6 +133,9 @@ public class Trampoline extends IBackupManager.Stub {
         mHandler = new Handler(handlerThread.getLooper());
         mUserManager = UserManager.get(context);
         mService = new BackupManagerService(mContext, this);
+        Set<ComponentName> transportWhitelist =
+                SystemConfig.getInstance().getBackupTransportWhitelist();
+        mTransportWhitelist = (transportWhitelist == null) ? emptySet() : transportWhitelist;
     }
 
     // TODO: Remove this when we implement DI by injecting in the construtor.
@@ -270,7 +278,7 @@ public class Trampoline extends IBackupManager.Stub {
             return;
         }
         Slog.i(TAG, "Starting service for user: " + userId);
-        mService.startServiceForUser(userId);
+        mService.startServiceForUser(userId, mTransportWhitelist);
     }
 
     /**
@@ -618,7 +626,17 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public String[] getTransportWhitelist() {
         int userId = binderGetCallingUserId();
-        return (isUserReadyForBackup(userId)) ? mService.getTransportWhitelist() : null;
+        if (!isUserReadyForBackup(userId)) {
+            return null;
+        }
+        // No permission check, intentionally.
+        String[] whitelistedTransports = new String[mTransportWhitelist.size()];
+        int i = 0;
+        for (ComponentName component : mTransportWhitelist) {
+            whitelistedTransports[i] = component.flattenToShortString();
+            i++;
+        }
+        return whitelistedTransports;
     }
 
     @Override
