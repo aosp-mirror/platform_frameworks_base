@@ -820,4 +820,40 @@ public final class DisplayManager {
          */
         void onDisplayChanged(int displayId);
     }
+
+    /**
+     * Interface for accessing keys belonging to {@link
+     * android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER}.
+     * @hide
+     */
+    public interface DeviceConfig {
+
+        /**
+         * Key for accessing the 60 hz only regions.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.array#config_brightnessThresholdsOfPeakRefreshRate
+         * @hide
+         */
+        String KEY_PEAK_REFRESH_RATE_BRIGHTNESS_THRESHOLDS =
+                "peak_refresh_rate_brightness_thresholds";
+
+        /**
+         * Key for accessing the 60 hz only regions.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.array#config_brightnessThresholdsOfPeakRefreshRate
+         * @hide
+         */
+        String KEY_PEAK_REFRESH_RATE_AMBIENT_THRESHOLDS = "peak_refresh_rate_ambient_thresholds";
+
+        /**
+         * Key for default peak refresh rate
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.integer#config_defaultPeakRefreshRate
+         * @hide
+         */
+        String KEY_PEAK_REFRESH_RATE_DEFAULT = "peak_refresh_rate_default";
+    }
 }
