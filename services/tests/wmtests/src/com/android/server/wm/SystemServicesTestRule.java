@@ -63,6 +63,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.server.AnimationThread;
+import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.ServiceThread;
@@ -299,6 +301,13 @@ public class SystemServicesTestRule implements TestRule {
 
         tearDownLocalServices();
         tearDownSystemCore();
+
+        // Needs to explicitly dispose current static threads because there could be messages
+        // scheduled at a later time, and all mocks are invalid when it's executed.
+        DisplayThread.dispose();
+        AnimationThread.dispose();
+        // Reset priority booster because animation thread has been changed.
+        WindowManagerService.sThreadPriorityBooster = new WindowManagerThreadPriorityBooster();
 
         Mockito.framework().clearInlineMocks();
     }
