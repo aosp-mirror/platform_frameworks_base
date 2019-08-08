@@ -144,7 +144,7 @@ public class KeyValueBackupJob extends JobService {
         }
 
         // Time to run a key/value backup!
-        Trampoline service = BackupManagerService.getInstance();
+        Trampoline service = Trampoline.getInstance();
         try {
             service.backupNowForUser(userId);
         } catch (RemoteException e) {}

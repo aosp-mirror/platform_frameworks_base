@@ -74,16 +74,6 @@ public class BackupManagerService {
     @VisibleForTesting
     static final String DUMP_RUNNING_USERS_MESSAGE = "Backup Manager is running for users:";
 
-    // The published binder is a singleton Trampoline object that calls through to the proper code.
-    // This indirection lets us turn down the heavy implementation object on the fly without
-    // disturbing binders that have been cached elsewhere in the system.
-    private static Trampoline sInstance;
-
-    static Trampoline getInstance() {
-        // Always constructed during system bring up, so no need to lazy-init.
-        return sInstance;
-    }
-
     private final Context mContext;
     private final Trampoline mTrampoline;
 
@@ -895,22 +885,22 @@ public class BackupManagerService {
         @VisibleForTesting
         Lifecycle(Context context, Trampoline trampoline) {
             super(context);
-            sInstance = trampoline;
+            Trampoline.sInstance = trampoline;
         }
 
         @Override
         public void onStart() {
-            publishService(Context.BACKUP_SERVICE, sInstance);
+            publishService(Context.BACKUP_SERVICE, Trampoline.sInstance);
         }
 
         @Override
         public void onUnlockUser(int userId) {
-            sInstance.onUnlockUser(userId);
+            Trampoline.sInstance.onUnlockUser(userId);
         }
 
         @Override
         public void onStopUser(int userId) {
-            sInstance.onStopUser(userId);
+            Trampoline.sInstance.onStopUser(userId);
         }
 
         @VisibleForTesting
