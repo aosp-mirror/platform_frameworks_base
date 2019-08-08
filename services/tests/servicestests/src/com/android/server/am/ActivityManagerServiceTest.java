@@ -133,7 +133,7 @@ public class ActivityManagerServiceTest {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
         mHandler = new TestHandler(mHandlerThread.getLooper());
-        mInjector = new TestInjector();
+        mInjector = new TestInjector(mContext);
         mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
         mAms.mWaitForNetworkTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
@@ -920,9 +920,8 @@ public class ActivityManagerServiceTest {
     private class TestInjector extends Injector {
         private boolean mRestricted = true;
 
-        @Override
-        public Context getContext() {
-            return mContext;
+        TestInjector(Context context) {
+            super(context);
         }
 
         @Override
