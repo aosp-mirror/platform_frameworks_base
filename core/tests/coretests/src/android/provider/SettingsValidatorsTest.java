@@ -255,6 +255,55 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testTTSListValidator_withValidInput_returnsTrue() {
+        Validator v = new SettingsValidators.TTSListValidator();
+
+        assertTrue(v.validate("com.foo.ttsengine:en-US,com.bar.ttsengine:es_ES"));
+    }
+
+    @Test
+    public void testTTSListValidator_withInvalidInput_returnsFalse() {
+        Validator v = new SettingsValidators.TTSListValidator();
+
+        assertFalse(v.validate("com.foo.ttsengine:eng-USA,INVALID"));
+    }
+
+    @Test
+    public void testTTSListValidator_withEmptyInput_returnsFalse() {
+        Validator v = new SettingsValidators.TTSListValidator();
+
+        assertFalse(v.validate(""));
+    }
+
+    @Test
+    public void testTTSListValidator_withNullInput_returnsFalse() {
+        Validator v = new SettingsValidators.TTSListValidator();
+
+        assertFalse(v.validate(null));
+    }
+
+    @Test
+    public void testTileListValidator_withValidInput_returnsTrue() {
+        Validator v = new SettingsValidators.TileListValidator();
+
+        assertTrue(v.validate("1,2,3,4"));
+    }
+
+    @Test
+    public void testTileListValidator_withMissingValue_returnsFalse() {
+        Validator v = new SettingsValidators.TileListValidator();
+
+        assertFalse(v.validate("1,,3"));
+    }
+
+    @Test
+    public void testTileListValidator_withNullInput_returnsFalse() {
+        Validator v = new SettingsValidators.TileListValidator();
+
+        assertFalse(v.validate(null));
+    }
+
+    @Test
     public void ensureAllBackedUpGlobalSettingsHaveValidators() {
         String offenders = getOffenders(concat(Settings.Global.SETTINGS_TO_BACKUP,
                 Settings.Global.LEGACY_RESTORE_SETTINGS), Settings.Global.VALIDATORS);
