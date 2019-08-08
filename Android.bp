@@ -841,14 +841,26 @@ java_library {
     name: "framework",
     defaults: ["framework-defaults"],
     javac_shard_size: 150,
+    required: [
+        "framework-platform-compat-config",
+        "libcore-platform-compat-config",
+    ],
 }
 
 java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
     installable: false,
-    // Use UsedByApps annotation processor
-    plugins: ["unsupportedappusage-annotation-processor"],
+    plugins: [
+        "unsupportedappusage-annotation-processor",
+        "compat-changeid-annotation-processor",
+    ],
+}
+
+platform_compat_config {
+    name: "framework-platform-compat-config",
+    prefix: "framework",
+    src: ":framework-annotation-proc",
 }
 
 // A library including just UnsupportedAppUsage.java classes.
