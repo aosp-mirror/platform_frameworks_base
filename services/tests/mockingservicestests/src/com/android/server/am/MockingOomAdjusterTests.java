@@ -1486,6 +1486,45 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoAll_ServiceB() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        long now = SystemClock.uptimeMillis();
+        ServiceRecord s = bindService(app, app2, null, 0, mock(IBinder.class));
+        s.startRequested = true;
+        s.lastActivity = now;
+        s = bindService(app2, app, null, 0, mock(IBinder.class));
+        s.startRequested = true;
+        s.lastActivity = now;
+        ProcessRecord app3 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        s = mock(ServiceRecord.class);
+        s.app = app3;
+        setFieldValue(ServiceRecord.class, s, "connections",
+                new ArrayMap<IBinder, ArrayList<ConnectionRecord>>());
+        app3.services.add(s);
+        doCallRealMethod().when(s).getConnections();
+        s.startRequested = true;
+        s.lastActivity = now;
+        ArrayList<ProcessRecord> lru = sService.mProcessList.mLruProcesses;
+        lru.clear();
+        lru.add(app3);
+        lru.add(app2);
+        lru.add(app);
+        sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
+        sService.mOomAdjuster.mNumServiceProcs = 3;
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+        lru.clear();
+
+        assertEquals(SERVICE_B_ADJ, app3.setAdj);
+        assertEquals(SERVICE_ADJ, app2.setAdj);
+        assertEquals(SERVICE_ADJ, app.setAdj);
+    }
+
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,
             String packageName, boolean hasShownUi) {
         long now = SystemClock.uptimeMillis();
