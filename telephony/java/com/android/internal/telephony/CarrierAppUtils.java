@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -28,7 +29,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
@@ -140,9 +143,12 @@ public final class CarrierAppUtils {
         try {
             for (ApplicationInfo ai : candidates) {
                 String packageName = ai.packageName;
-                boolean hasPrivileges = telephonyManager != null &&
-                        telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName) ==
-                                TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+                String[] restrictedCarrierApps = Resources.getSystem().getStringArray(
+                        R.array.config_restrictedPreinstalledCarrierApps);
+                boolean hasPrivileges = telephonyManager != null
+                        && telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName)
+                                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS
+                        && !ArrayUtils.contains(restrictedCarrierApps, packageName);
 
                 // add hiddenUntilInstalled flag for carrier apps and associated apps
                 packageManager.setSystemAppHiddenUntilInstalled(packageName, true);
