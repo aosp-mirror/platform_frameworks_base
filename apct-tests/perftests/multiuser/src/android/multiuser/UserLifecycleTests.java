@@ -15,6 +15,8 @@
  */
 package android.multiuser;
 
+import static org.junit.Assume.assumeTrue;
+
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -86,7 +88,9 @@ public class UserLifecycleTests {
     private UserManager mUm;
     private ActivityManager mAm;
     private IActivityManager mIam;
+    private PackageManager mPm;
     private ArrayList<Integer> mUsersToRemove;
+    private boolean mHasManagedUserFeature;
 
     private final BenchmarkRunner mRunner = new BenchmarkRunner();
     @Rule
@@ -99,6 +103,8 @@ public class UserLifecycleTests {
         mAm = context.getSystemService(ActivityManager.class);
         mIam = ActivityManager.getService();
         mUsersToRemove = new ArrayList<>();
+        mPm = context.getPackageManager();
+        mHasManagedUserFeature = mPm.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
     }
 
     @After
@@ -260,6 +266,8 @@ public class UserLifecycleTests {
     /** Tests creating a new profile. */
     @Test
     public void managedProfileCreate() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         while (mRunner.keepRunning()) {
             final int userId = createManagedProfile();
 
@@ -273,6 +281,8 @@ public class UserLifecycleTests {
     /** Tests starting (unlocking) a newly-created profile. */
     @Test
     public void managedProfileUnlock() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
@@ -289,6 +299,8 @@ public class UserLifecycleTests {
     /** Tests starting (unlocking) an already-created, but no-longer-running, profile. */
     @Test
     public void managedProfileUnlock_stopped() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
@@ -310,6 +322,8 @@ public class UserLifecycleTests {
      */
     @Test
     public void managedProfileUnlockAndLaunchApp() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
@@ -334,6 +348,8 @@ public class UserLifecycleTests {
      */
     @Test
     public void managedProfileUnlockAndLaunchApp_stopped() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
@@ -357,6 +373,8 @@ public class UserLifecycleTests {
     /** Tests installing a pre-existing app in a newly-created profile. */
     @Test
     public void managedProfileInstall() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
@@ -376,6 +394,8 @@ public class UserLifecycleTests {
      */
     @Test
     public void managedProfileCreateUnlockInstallAndLaunchApp() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         final String packageName = "perftests.multiuser.apps.dummyapp";
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -396,6 +416,8 @@ public class UserLifecycleTests {
     /** Tests stopping a profile. */
     @Test
     public void managedProfileStopped() throws Exception {
+        assumeTrue(mHasManagedUserFeature);
+
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
