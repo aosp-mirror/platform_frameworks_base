@@ -3592,10 +3592,23 @@ public final class MediaStore {
     }
 
     /** @hide */
+    public static Uri scanFile(ContentProviderClient client, File file) {
+        return scan(client, SCAN_FILE_CALL, file, false);
+    }
+
+    /** @hide */
     private static Uri scan(Context context, String method, File file,
             boolean originatedFromShell) {
         final ContentResolver resolver = context.getContentResolver();
         try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
+            return scan(client, method, file, originatedFromShell);
+        }
+    }
+
+    /** @hide */
+    private static Uri scan(ContentProviderClient client, String method, File file,
+            boolean originatedFromShell) {
+        try {
             final Bundle in = new Bundle();
             in.putParcelable(Intent.EXTRA_STREAM, Uri.fromFile(file));
             in.putBoolean(EXTRA_ORIGINATED_FROM_SHELL, originatedFromShell);
