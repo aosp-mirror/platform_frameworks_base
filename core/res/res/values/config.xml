@@ -3483,6 +3483,9 @@
     <!-- True if home app should be pinned via Pinner Service -->
     <bool name="config_pinnerHomeApp">false</bool>
 
+    <!-- True if assistant app should be pinned via Pinner Service -->
+    <bool name="config_pinnerAssistantApp">false</bool>
+
     <!-- List of files pinned by the Pinner Service with the apex boot image b/119800099 -->
     <string-array translatable="false" name="config_apexBootImagePinnerServiceFiles">
     </string-array>

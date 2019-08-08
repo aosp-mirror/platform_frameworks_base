@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -94,6 +95,7 @@ public final class PinnerService extends SystemService {
 
     private static final int KEY_CAMERA = 0;
     private static final int KEY_HOME = 1;
+    private static final int KEY_ASSISTANT = 2;
 
     // Pin the camera application.
     private static boolean PROP_PIN_CAMERA = SystemProperties.getBoolean(
@@ -107,8 +109,9 @@ public final class PinnerService extends SystemService {
 
     private static final int MAX_CAMERA_PIN_SIZE = 80 * (1 << 20); // 80MB max for camera app.
     private static final int MAX_HOME_PIN_SIZE = 6 * (1 << 20); // 6MB max for home app.
+    private static final int MAX_ASSISTANT_PIN_SIZE = 60 * (1 << 20); // 60MB max for assistant app.
 
-    @IntDef({KEY_CAMERA, KEY_HOME})
+    @IntDef({KEY_CAMERA, KEY_HOME, KEY_ASSISTANT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AppKey {}
 
@@ -117,6 +120,7 @@ public final class PinnerService extends SystemService {
     private final ActivityManagerInternal mAmInternal;
     private final IActivityManager mAm;
     private final UserManager mUserManager;
+    private SearchManager mSearchManager;
 
     /** The list of the statically pinned files. */
     @GuardedBy("this")
@@ -167,6 +171,8 @@ public final class PinnerService extends SystemService {
                 com.android.internal.R.bool.config_pinnerCameraApp);
         boolean shouldPinHome = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerHomeApp);
+        boolean shouldPinAssistant = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_pinnerAssistantApp);
         if (shouldPinCamera) {
             if (PROP_PIN_CAMERA) {
                 mPinKeys.add(KEY_CAMERA);
@@ -176,6 +182,9 @@ public final class PinnerService extends SystemService {
         }
         if (shouldPinHome) {
             mPinKeys.add(KEY_HOME);
+        }
+        if (shouldPinAssistant) {
+            mPinKeys.add(KEY_ASSISTANT);
         }
         mPinnerHandler = new PinnerHandler(BackgroundThread.get().getLooper());
 
@@ -205,6 +214,15 @@ public final class PinnerService extends SystemService {
 
         mPinnerHandler.obtainMessage(PinnerHandler.PIN_ONSTART_MSG).sendToTarget();
         sendPinAppsMessage(UserHandle.USER_SYSTEM);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        // SearchManagerService is started after PinnerService, wait for PHASE_SYSTEM_SERVICES_READY
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+            sendPinAppsMessage(UserHandle.USER_SYSTEM);
+        }
     }
 
     /**
@@ -408,6 +426,14 @@ public final class PinnerService extends SystemService {
         return getApplicationInfoForIntent(intent, userHandle, false);
     }
 
+    private ApplicationInfo getAssistantInfo(int userHandle) {
+        if (mSearchManager != null) {
+            Intent intent = mSearchManager.getAssistIntent(false);
+            return getApplicationInfoForIntent(intent, userHandle, true);
+        }
+        return null;
+    }
+
     private ApplicationInfo getApplicationInfoForIntent(Intent intent, int userHandle,
             boolean defaultToSystemApp) {
         if (intent == null) {
@@ -520,6 +546,8 @@ public final class PinnerService extends SystemService {
                 return getCameraInfo(userHandle);
             case KEY_HOME:
                 return getHomeInfo(userHandle);
+            case KEY_ASSISTANT:
+                return getAssistantInfo(userHandle);
             default:
                 return null;
         }
@@ -534,6 +562,8 @@ public final class PinnerService extends SystemService {
                 return "Camera";
             case KEY_HOME:
                 return "Home";
+            case KEY_ASSISTANT:
+                return "Assistant";
             default:
                 return null;
         }
@@ -548,6 +578,8 @@ public final class PinnerService extends SystemService {
                 return MAX_CAMERA_PIN_SIZE;
             case KEY_HOME:
                 return MAX_HOME_PIN_SIZE;
+            case KEY_ASSISTANT:
+                return MAX_ASSISTANT_PIN_SIZE;
             default:
                 return 0;
         }
