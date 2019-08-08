@@ -369,9 +369,11 @@ public class CommandQueueTest extends SysuiTestCase {
     @Test
     public void testShowBiometricDialog() {
         Bundle bundle = new Bundle();
-        mCommandQueue.showBiometricDialog(bundle, null /* receiver */, 1, true, 3);
+        String packageName = "test";
+        mCommandQueue.showBiometricDialog(bundle, null /* receiver */, 1, true, 3, packageName);
         waitForIdleSync();
-        verify(mCallbacks).showBiometricDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3));
+        verify(mCallbacks).showBiometricDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3),
+                eq(packageName));
     }
 
     @Test

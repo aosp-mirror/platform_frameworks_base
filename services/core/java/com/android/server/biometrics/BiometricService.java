@@ -25,12 +25,9 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.IActivityTaskManager;
 import android.app.KeyguardManager;
-import android.app.TaskStackListener;
 import android.app.UserSwitchObserver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -90,7 +87,6 @@ public class BiometricService extends SystemService {
     private static final String TAG = "BiometricService";
     private static final boolean DEBUG = true;
 
-    private static final int MSG_ON_TASK_STACK_CHANGED = 1;
     private static final int MSG_ON_AUTHENTICATION_SUCCEEDED = 2;
     private static final int MSG_ON_AUTHENTICATION_REJECTED = 3;
     private static final int MSG_ON_ERROR = 4;
@@ -258,13 +254,6 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private final class BiometricTaskStackListener extends TaskStackListener {
-        @Override
-        public void onTaskStackChanged() {
-            mHandler.sendEmptyMessage(MSG_ON_TASK_STACK_CHANGED);
-        }
-    }
-
     private final Injector mInjector;
     @VisibleForTesting
     final IBiometricService.Stub mImpl;
@@ -275,15 +264,12 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     SettingObserver mSettingObserver;
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
-    private final BiometricTaskStackListener mTaskStackListener = new BiometricTaskStackListener();
     private final Random mRandom = new Random();
 
     @VisibleForTesting
     IFingerprintService mFingerprintService;
     @VisibleForTesting
     IFaceService mFaceService;
-    @VisibleForTesting
-    IActivityTaskManager mActivityTaskManager;
     @VisibleForTesting
     IStatusBarService mStatusBarService;
     @VisibleForTesting
@@ -313,11 +299,6 @@ public class BiometricService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ON_TASK_STACK_CHANGED: {
-                    handleTaskStackChanged();
-                    break;
-                }
-
                 case MSG_ON_AUTHENTICATION_SUCCEEDED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticationSucceeded(
@@ -911,10 +892,6 @@ public class BiometricService extends SystemService {
             return ActivityManager.getService();
         }
 
-        IActivityTaskManager getActivityTaskManagerService() {
-            return ActivityTaskManager.getService();
-        }
-
         IStatusBarService getStatusBarService() {
             return IStatusBarService.Stub.asInterface(
                     ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -1002,7 +979,6 @@ public class BiometricService extends SystemService {
         }
 
         mKeyStore = mInjector.getKeyStore();
-        mActivityTaskManager = mInjector.getActivityTaskManagerService();
         mStatusBarService = mInjector.getStatusBarService();
 
         // Cache the authenticators
@@ -1225,30 +1201,6 @@ public class BiometricService extends SystemService {
         return modality;
     }
 
-    private void handleTaskStackChanged() {
-        try {
-            final List<ActivityManager.RunningTaskInfo> runningTasks =
-                    mActivityTaskManager.getTasks(1);
-            if (!runningTasks.isEmpty()) {
-                final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                if (mCurrentAuthSession != null
-                        && !topPackage.contentEquals(mCurrentAuthSession.mOpPackageName)) {
-                    mStatusBarService.hideBiometricDialog();
-                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                    mCurrentAuthSession.mClientReceiver.onError(
-                            BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                            getContext().getString(
-                                    com.android.internal.R.string.biometric_error_canceled)
-                    );
-                    mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                    mCurrentAuthSession = null;
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to get running tasks", e);
-        }
-    }
-
     private void handleAuthenticationSucceeded(boolean requireConfirmation, byte[] token) {
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
@@ -1324,10 +1276,8 @@ public class BiometricService extends SystemService {
             return;
         }
         try {
-            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
             mConfirmDeviceCredentialReceiver.onAuthenticationSucceeded();
             if (mCurrentAuthSession != null) {
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                 mCurrentAuthSession = null;
             }
         } catch (RemoteException e) {
@@ -1343,10 +1293,8 @@ public class BiometricService extends SystemService {
             return;
         }
         try {
-            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
             mConfirmDeviceCredentialReceiver.onError(error, message);
             if (mCurrentAuthSession != null) {
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                 mCurrentAuthSession = null;
             }
         } catch (RemoteException e) {
@@ -1376,6 +1324,9 @@ public class BiometricService extends SystemService {
         try {
             if (mCurrentAuthSession != null && mCurrentAuthSession.containsCookie(cookie)) {
 
+                mCurrentAuthSession.mErrorEscrow = error;
+                mCurrentAuthSession.mErrorStringEscrow = message;
+
                 if (mCurrentAuthSession.isFromConfirmDeviceCredential()) {
                     // If we were invoked by ConfirmDeviceCredential, do not delete the current
                     // auth session since we still need to respond to cancel signal while
@@ -1387,18 +1338,11 @@ public class BiometricService extends SystemService {
                     mCurrentAuthSession.mState = STATE_BIOMETRIC_AUTH_CANCELED_SHOWING_CDC;
                     mStatusBarService.hideBiometricDialog();
                 } else if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
-                    mStatusBarService.onBiometricError(message);
+                    mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
                     if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                        mActivityTaskManager.unregisterTaskStackListener(
-                                mTaskStackListener);
-                        mCurrentAuthSession.mClientReceiver.onError(error, message);
-                        mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                        mCurrentAuthSession = null;
                         mStatusBarService.hideBiometricDialog();
                     } else {
-                        mCurrentAuthSession.mErrorEscrow = error;
-                        mCurrentAuthSession.mErrorStringEscrow = message;
-                        mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
+                        mStatusBarService.onBiometricError(message);
                     }
                 } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED) {
                     // In the "try again" state, we should forward canceled errors to
@@ -1406,9 +1350,6 @@ public class BiometricService extends SystemService {
                     // ERROR_CANCELED due to another client kicking us out.
                     mCurrentAuthSession.mClientReceiver.onError(error, message);
                     mStatusBarService.hideBiometricDialog();
-                    mActivityTaskManager.unregisterTaskStackListener(
-                            mTaskStackListener);
-                    mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                     mCurrentAuthSession = null;
                 } else {
                     Slog.e(TAG, "Impossible session error state: "
@@ -1418,7 +1359,6 @@ public class BiometricService extends SystemService {
                     && mPendingAuthSession.containsCookie(cookie)) {
                 if (mPendingAuthSession.mState == STATE_AUTH_CALLED) {
                     mPendingAuthSession.mClientReceiver.onError(error, message);
-                    mPendingAuthSession.mState = STATE_AUTH_IDLE;
                     mPendingAuthSession = null;
                 } else {
                     Slog.e(TAG, "Impossible pending session error state: "
@@ -1483,6 +1423,7 @@ public class BiometricService extends SystemService {
                     cancelInternal(null /* token */, null /* package */, false /* fromClient */);
                     break;
 
+                case BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED:
                 case BiometricPrompt.DISMISSED_REASON_ERROR:
                     mCurrentAuthSession.mClientReceiver.onError(mCurrentAuthSession.mErrorEscrow,
                             mCurrentAuthSession.mErrorStringEscrow);
@@ -1494,8 +1435,6 @@ public class BiometricService extends SystemService {
             }
 
             // Dialog is gone, auth session is done.
-            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-            mCurrentAuthSession.mState = STATE_AUTH_IDLE;
             mCurrentAuthSession = null;
 
         } catch (RemoteException e) {
@@ -1564,8 +1503,8 @@ public class BiometricService extends SystemService {
 
                 if (!continuing) {
                     mStatusBarService.showBiometricDialog(mCurrentAuthSession.mBundle,
-                            mInternalReceiver, modality, requireConfirmation, userId);
-                    mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+                            mInternalReceiver, modality, requireConfirmation, userId,
+                            mCurrentAuthSession.mOpPackageName);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
@@ -1700,7 +1639,6 @@ public class BiometricService extends SystemService {
                                 com.android.internal.R.string.biometric_error_user_canceled)
                 );
 
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                 mCurrentAuthSession = null;
                 mStatusBarService.hideBiometricDialog();
             } catch (RemoteException e) {
@@ -1729,7 +1667,10 @@ public class BiometricService extends SystemService {
         final int callingUserId = UserHandle.getCallingUserId();
 
         try {
-            if (mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
+            if (mCurrentAuthSession == null) {
+                Slog.w(TAG, "Skipping cancelInternal");
+                return;
+            } else if (mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
                 Slog.w(TAG, "Skipping cancelInternal, state: " + mCurrentAuthSession.mState);
                 return;
             }

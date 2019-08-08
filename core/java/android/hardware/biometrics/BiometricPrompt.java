@@ -128,6 +128,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      */
     public static final int DISMISSED_REASON_ERROR = 5;
 
+    /**
+     * Dialog dismissal requested by BiometricService.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_SERVER_REQUESTED = 6;
+
     private static class ButtonInfo {
         Executor executor;
         DialogInterface.OnClickListener listener;

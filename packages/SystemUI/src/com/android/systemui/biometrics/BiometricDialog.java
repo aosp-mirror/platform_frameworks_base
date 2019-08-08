@@ -57,11 +57,14 @@ public interface BiometricDialog {
     void show(WindowManager wm, boolean skipIntroAnimation);
 
     /**
-     * Dismiss the dialog without sending a callback. Only used when the system detects a case
-     * where the error won't come from the UI (e.g. task stack changed).
-     * @param animate
+     * Dismiss the dialog without sending a callback.
      */
     void dismissWithoutCallback(boolean animate);
+
+    /**
+     * Dismiss the dialog. Animate away.
+     */
+    void dismissFromSystemServer();
 
     /**
      * Biometric authenticated. May be pending user confirmation, or completed.
@@ -97,4 +100,9 @@ public interface BiometricDialog {
      * @param savedState
      */
     void restoreState(Bundle savedState);
+
+    /**
+     * Get the client's package name
+     */
+    String getOpPackageName();
 }

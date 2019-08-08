@@ -16,20 +16,29 @@
 
 package com.android.systemui.biometrics;
 
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.app.IActivityTaskManager;
+import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
 import com.android.systemui.biometrics.ui.BiometricDialogView;
 import com.android.systemui.statusbar.CommandQueue;
+
+import java.util.List;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -40,12 +49,51 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private static final String TAG = "BiometricDialogImpl";
     private static final boolean DEBUG = true;
 
+    private final Injector mInjector;
+
     // TODO: These should just be saved from onSaveState
     private SomeArgs mCurrentDialogArgs;
-    private BiometricDialog mCurrentDialog;
+    @VisibleForTesting
+    BiometricDialog mCurrentDialog;
 
+    private Handler mHandler = new Handler(Looper.getMainLooper());
     private WindowManager mWindowManager;
-    private IBiometricServiceReceiverInternal mReceiver;
+    @VisibleForTesting
+    IActivityTaskManager mActivityTaskManager;
+    @VisibleForTesting
+    BiometricTaskStackListener mTaskStackListener;
+    @VisibleForTesting
+    IBiometricServiceReceiverInternal mReceiver;
+
+    public class BiometricTaskStackListener extends TaskStackListener {
+        @Override
+        public void onTaskStackChanged() {
+            mHandler.post(mTaskStackChangedRunnable);
+        }
+    }
+
+    private final Runnable mTaskStackChangedRunnable = () -> {
+        if (mCurrentDialog != null) {
+            try {
+                final String clientPackage = mCurrentDialog.getOpPackageName();
+                Log.w(TAG, "Task stack changed, current client: " + clientPackage);
+                final List<ActivityManager.RunningTaskInfo> runningTasks =
+                        mActivityTaskManager.getTasks(1);
+                if (!runningTasks.isEmpty()) {
+                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
+                    if (!topPackage.contentEquals(clientPackage)) {
+                        Log.w(TAG, "Evicting client due to: " + topPackage);
+                        mCurrentDialog.dismissWithoutCallback(true /* animate */);
+                        mCurrentDialog = null;
+                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                        mReceiver = null;
+                    }
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception", e);
+            }
+        }
+    };
 
     @Override
     public void onTryAgainPressed() {
@@ -57,7 +105,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     }
 
     @Override
-    public void onDismissed(int reason) {
+    public void onDismissed(@DismissedReason int reason) {
         switch (reason) {
             case DialogViewCallback.DISMISSED_USER_CANCELED:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
@@ -78,23 +126,43 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             case DialogViewCallback.DISMISSED_ERROR:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_ERROR);
                 break;
+
+            case DialogViewCallback.DISMISSED_BY_SYSTEM_SERVER:
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
+                break;
+
             default:
                 Log.e(TAG, "Unhandled reason: " + reason);
                 break;
         }
     }
 
-    private void sendResultAndCleanUp(int result) {
+    private void sendResultAndCleanUp(@DismissedReason int reason) {
         if (mReceiver == null) {
             Log.e(TAG, "Receiver is null");
             return;
         }
         try {
-            mReceiver.onDialogDismissed(result);
+            mReceiver.onDialogDismissed(reason);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception", e);
         }
-        onDialogDismissed();
+        onDialogDismissed(reason);
+    }
+
+    public static class Injector {
+        IActivityTaskManager getActivityTaskManager() {
+            return ActivityTaskManager.getService();
+        }
+    }
+
+    public BiometricDialogImpl() {
+        this(new Injector());
+    }
+
+    @VisibleForTesting
+    BiometricDialogImpl(Injector injector) {
+        mInjector = injector;
     }
 
     @Override
@@ -105,12 +173,20 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                 || pm.hasSystemFeature(PackageManager.FEATURE_IRIS)) {
             getComponent(CommandQueue.class).addCallback(this);
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            mActivityTaskManager = mInjector.getActivityTaskManager();
+
+            try {
+                mTaskStackListener = new BiometricTaskStackListener();
+                mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to register task stack listener", e);
+            }
         }
     }
 
     @Override
     public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int type, boolean requireConfirmation, int userId) {
+            int type, boolean requireConfirmation, int userId, String opPackageName) {
         if (DEBUG) {
             Log.d(TAG, "showBiometricDialog, type: " + type
                     + ", requireConfirmation: " + requireConfirmation);
@@ -121,13 +197,14 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         args.argi1 = type;
         args.arg3 = requireConfirmation;
         args.argi2 = userId;
+        args.arg4 = opPackageName;
 
         boolean skipAnimation = false;
         if (mCurrentDialog != null) {
             Log.w(TAG, "mCurrentDialog: " + mCurrentDialog);
             skipAnimation = true;
         }
-        showDialog(args, skipAnimation /* skipAnimation */, null /* savedState */);
+        showDialog(args, skipAnimation, null /* savedState */);
     }
 
     @Override
@@ -159,20 +236,24 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     public void hideBiometricDialog() {
         if (DEBUG) Log.d(TAG, "hideBiometricDialog");
 
-        // TODO: I think we need to remove this interface
-        mCurrentDialog.dismissWithoutCallback(true /* animate */);
+        mCurrentDialog.dismissFromSystemServer();
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
         mCurrentDialogArgs = args;
         final int type = args.argi1;
+        final Bundle biometricPromptBundle = (Bundle) args.arg1;
+        final boolean requireConfirmation = (boolean) args.arg3;
+        final int userId = args.argi2;
+        final String opPackageName = (String) args.arg4;
 
         // Create a new dialog but do not replace the current one yet.
         final BiometricDialog newDialog = buildDialog(
-                (Bundle) args.arg1 /* bundle */,
-                (boolean) args.arg3 /* requireConfirmation */,
-                args.argi2 /* userId */,
-                type);
+                biometricPromptBundle,
+                requireConfirmation,
+                userId,
+                type,
+                opPackageName);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type: " + type);
@@ -204,8 +285,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mCurrentDialog.show(mWindowManager, skipAnimation);
     }
 
-    private void onDialogDismissed() {
-        if (DEBUG) Log.d(TAG, "onDialogDismissed");
+    private void onDialogDismissed(@DismissedReason int reason) {
+        if (DEBUG) Log.d(TAG, "onDialogDismissed: " + reason);
         if (mCurrentDialog == null) {
             Log.w(TAG, "Dialog already dismissed");
         }
@@ -229,12 +310,13 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     }
 
     protected BiometricDialog buildDialog(Bundle biometricPromptBundle,
-            boolean requireConfirmation, int userId, int type) {
+            boolean requireConfirmation, int userId, int type, String opPackageName) {
         return new BiometricDialogView.Builder(mContext)
                 .setCallback(this)
                 .setBiometricPromptBundle(biometricPromptBundle)
                 .setRequireConfirmation(requireConfirmation)
                 .setUserId(userId)
+                .setOpPackageName(opPackageName)
                 .build(type);
     }
 }

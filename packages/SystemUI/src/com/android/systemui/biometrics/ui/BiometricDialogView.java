@@ -109,6 +109,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
 
     private Bundle mBundle;
     private Bundle mRestoredState;
+    private String mOpPackageName;
 
     private int mState = STATE_IDLE;
     private boolean mWasForceRemoved;
@@ -180,6 +181,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         private Bundle mBundle;
         private boolean mRequireConfirmation;
         private int mUserId;
+        private String mOpPackageName;
 
         public Builder(Context context) {
             mContext = context;
@@ -205,6 +207,11 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             return this;
         }
 
+        public Builder setOpPackageName(String opPackageName) {
+            mOpPackageName = opPackageName;
+            return this;
+        }
+
         public BiometricDialogView build(int type) {
             BiometricDialogView dialog;
             if (type == TYPE_FINGERPRINT) {
@@ -217,6 +224,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             dialog.setBundle(mBundle);
             dialog.setRequireConfirmation(mRequireConfirmation);
             dialog.setUserId(mUserId);
+            dialog.setOpPackageName(mOpPackageName);
             return dialog;
         }
     }
@@ -246,18 +254,12 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         addView(mLayout);
 
         mLayout.setOnKeyListener(new View.OnKeyListener() {
-            boolean mDownPressed = false;
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode != KeyEvent.KEYCODE_BACK) {
                     return false;
                 }
-                if (event.getAction() == KeyEvent.ACTION_DOWN && mDownPressed == false) {
-                    mDownPressed = true;
-                } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    mDownPressed = false;
-                } else if (event.getAction() == KeyEvent.ACTION_UP && mDownPressed == true) {
-                    mDownPressed = false;
+                if (event.getAction() == KeyEvent.ACTION_UP) {
                     animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
                 }
                 return true;
@@ -421,14 +423,15 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         });
     }
 
-    private void animateAway(int reason) {
+    private void animateAway(@DialogViewCallback.DismissedReason int reason) {
         animateAway(true /* sendReason */, reason);
     }
+
     /**
      * Animate the dialog away
      * @param reason one of the {@link DialogViewCallback} codes
      */
-    private void animateAway(boolean sendReason, int reason) {
+    private void animateAway(boolean sendReason, @DialogViewCallback.DismissedReason int reason) {
         if (!mCompletedAnimatingIn) {
             Log.w(TAG, "startDismiss(): waiting for onDialogAnimatedIn");
             mPendingDismissDialog = true;
@@ -493,6 +496,10 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         mUserId = userId;
     }
 
+    private void setOpPackageName(String opPackageName) {
+        mOpPackageName = opPackageName;
+    }
+
     // Shows an error/help message
     protected void showTemporaryMessage(String message) {
         mHandler.removeMessages(MSG_RESET_MESSAGE);
@@ -518,13 +525,18 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
     @Override
     public void dismissWithoutCallback(boolean animate) {
         if (animate) {
-            animateAway(false /* sendReason */, 0);
+            animateAway(false /* sendReason */, 0 /* reason */);
         } else {
             mLayout.animate().cancel();
             mDialog.animate().cancel();
             mWindowManager.removeView(BiometricDialogView.this);
             mWasForceRemoved = true;
         }
+    }
+
+    @Override
+    public void dismissFromSystemServer() {
+        animateAway(DialogViewCallback.DISMISSED_BY_SYSTEM_SERVER);
     }
 
     @Override
@@ -611,6 +623,11 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_RESET_MESSAGE),
                     BiometricPrompt.HIDE_DIALOG_DELAY);
         }
+    }
+
+    @Override
+    public String getOpPackageName() {
+        return mOpPackageName;
     }
 
     protected void updateState(int newState) {
