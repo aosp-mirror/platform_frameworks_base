@@ -731,7 +731,9 @@ public class StackAnimationController extends
 
         // If we're not the active controller, we don't want to physically move the bubble views.
         if (isActiveController()) {
-            mLayout.cancelAllAnimations();
+            // Cancel animations that could be moving the views.
+            mLayout.cancelAllAnimationsOfProperties(
+                    DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
             cancelStackPositionAnimations();
 
             // Since we're not using the chained animations, apply the offsets manually.
