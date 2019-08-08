@@ -56,8 +56,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
-import com.android.server.ForceAppStandbyTrackerProto.ExemptedPackage;
-import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrictedPackages;
+import com.android.server.AppStateTrackerProto.ExemptedPackage;
+import com.android.server.AppStateTrackerProto.RunAnyInBackgroundRestrictedPackages;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -1308,43 +1308,42 @@ public class AppStateTracker {
         synchronized (mLock) {
             final long token = proto.start(fieldId);
 
-            proto.write(ForceAppStandbyTrackerProto.FORCE_ALL_APPS_STANDBY, mForceAllAppsStandby);
-            proto.write(ForceAppStandbyTrackerProto.IS_SMALL_BATTERY_DEVICE,
-                    isSmallBatteryDevice());
-            proto.write(ForceAppStandbyTrackerProto.FORCE_ALL_APPS_STANDBY_FOR_SMALL_BATTERY,
+            proto.write(AppStateTrackerProto.FORCED_APP_STANDBY_FEATURE_ENABLED,
+                    mForcedAppStandbyEnabled);
+            proto.write(AppStateTrackerProto.FORCE_ALL_APPS_STANDBY,
+                    isForceAllAppsStandbyEnabled());
+            proto.write(AppStateTrackerProto.IS_SMALL_BATTERY_DEVICE, isSmallBatteryDevice());
+            proto.write(AppStateTrackerProto.FORCE_ALL_APPS_STANDBY_FOR_SMALL_BATTERY,
                     mForceAllAppStandbyForSmallBattery);
-            proto.write(ForceAppStandbyTrackerProto.IS_PLUGGED_IN, mIsPluggedIn);
+            proto.write(AppStateTrackerProto.IS_PLUGGED_IN, mIsPluggedIn);
 
             for (int i = 0; i < mActiveUids.size(); i++) {
                 if (mActiveUids.valueAt(i)) {
-                    proto.write(ForceAppStandbyTrackerProto.ACTIVE_UIDS,
-                            mActiveUids.keyAt(i));
+                    proto.write(AppStateTrackerProto.ACTIVE_UIDS, mActiveUids.keyAt(i));
                 }
             }
 
             for (int i = 0; i < mForegroundUids.size(); i++) {
                 if (mForegroundUids.valueAt(i)) {
-                    proto.write(ForceAppStandbyTrackerProto.FOREGROUND_UIDS,
-                            mForegroundUids.keyAt(i));
+                    proto.write(AppStateTrackerProto.FOREGROUND_UIDS, mForegroundUids.keyAt(i));
                 }
             }
 
             for (int appId : mPowerWhitelistedAllAppIds) {
-                proto.write(ForceAppStandbyTrackerProto.POWER_SAVE_WHITELIST_APP_IDS, appId);
+                proto.write(AppStateTrackerProto.POWER_SAVE_WHITELIST_APP_IDS, appId);
             }
 
             for (int appId : mPowerWhitelistedUserAppIds) {
-                proto.write(ForceAppStandbyTrackerProto.POWER_SAVE_USER_WHITELIST_APP_IDS, appId);
+                proto.write(AppStateTrackerProto.POWER_SAVE_USER_WHITELIST_APP_IDS, appId);
             }
 
             for (int appId : mTempWhitelistedAppIds) {
-                proto.write(ForceAppStandbyTrackerProto.TEMP_POWER_SAVE_WHITELIST_APP_IDS, appId);
+                proto.write(AppStateTrackerProto.TEMP_POWER_SAVE_WHITELIST_APP_IDS, appId);
             }
 
             for (int i = 0; i < mExemptedPackages.size(); i++) {
                 for (int j = 0; j < mExemptedPackages.sizeAt(i); j++) {
-                    final long token2 = proto.start(
-                            ForceAppStandbyTrackerProto.EXEMPTED_PACKAGES);
+                    final long token2 = proto.start(AppStateTrackerProto.EXEMPTED_PACKAGES);
 
                     proto.write(ExemptedPackage.USER_ID, mExemptedPackages.keyAt(i));
                     proto.write(ExemptedPackage.PACKAGE_NAME, mExemptedPackages.valueAt(i, j));
@@ -1355,14 +1354,14 @@ public class AppStateTracker {
 
             for (Pair<Integer, String> uidAndPackage : mRunAnyRestrictedPackages) {
                 final long token2 = proto.start(
-                        ForceAppStandbyTrackerProto.RUN_ANY_IN_BACKGROUND_RESTRICTED_PACKAGES);
+                        AppStateTrackerProto.RUN_ANY_IN_BACKGROUND_RESTRICTED_PACKAGES);
                 proto.write(RunAnyInBackgroundRestrictedPackages.UID, uidAndPackage.first);
                 proto.write(RunAnyInBackgroundRestrictedPackages.PACKAGE_NAME,
                         uidAndPackage.second);
                 proto.end(token2);
             }
 
-            mStatLogger.dumpProto(proto, ForceAppStandbyTrackerProto.STATS);
+            mStatLogger.dumpProto(proto, AppStateTrackerProto.STATS);
 
             proto.end(token);
         }

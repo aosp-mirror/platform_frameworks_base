@@ -23,11 +23,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-
 import android.util.Log;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
+
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 
@@ -98,6 +100,25 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         pw.print("  mIdle: "); pw.println(mIdle);
         pw.print("  mScreenOn: "); pw.println(mScreenOn);
         pw.print("  mDockIdle: "); pw.println(mDockIdle);
+    }
+
+    @Override
+    public void dump(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        final long diToken = proto.start(
+                StateControllerProto.IdleController.IdlenessTracker.DEVICE_IDLENESS_TRACKER);
+
+        proto.write(StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker.IS_IDLE,
+                mIdle);
+        proto.write(
+                StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker.IS_SCREEN_ON,
+                mScreenOn);
+        proto.write(
+                StateControllerProto.IdleController.IdlenessTracker.DeviceIdlenessTracker.IS_DOCK_IDLE,
+                mDockIdle);
+
+        proto.end(diToken);
+        proto.end(token);
     }
 
     @Override

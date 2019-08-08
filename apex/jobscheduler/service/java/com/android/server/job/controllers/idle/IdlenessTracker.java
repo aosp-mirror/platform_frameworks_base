@@ -17,6 +17,7 @@
 package com.android.server.job.controllers.idle;
 
 import android.content.Context;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 
@@ -43,4 +44,9 @@ public interface IdlenessTracker {
      * Dump useful information about tracked idleness-related state in plaintext.
      */
     void dump(PrintWriter pw);
+
+    /**
+     * Dump useful information about tracked idleness-related state to proto.
+     */
+    void dump(ProtoOutputStream proto, long fieldId);
 }

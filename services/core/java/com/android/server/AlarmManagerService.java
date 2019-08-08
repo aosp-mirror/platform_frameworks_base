@@ -2604,8 +2604,7 @@ class AlarmManagerService extends SystemService {
             mConstants.dumpProto(proto, AlarmManagerServiceDumpProto.SETTINGS);
 
             if (mAppStateTracker != null) {
-                mAppStateTracker.dumpProto(proto,
-                        AlarmManagerServiceDumpProto.FORCE_APP_STANDBY_TRACKER);
+                mAppStateTracker.dumpProto(proto, AlarmManagerServiceDumpProto.APP_STATE_TRACKER);
             }
 
             proto.write(AlarmManagerServiceDumpProto.IS_INTERACTIVE, mInteractive);

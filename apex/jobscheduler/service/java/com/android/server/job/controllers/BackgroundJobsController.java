@@ -115,32 +115,27 @@ public final class BackgroundJobsController extends StateController {
         final long mToken = proto.start(StateControllerProto.BACKGROUND);
 
         mAppStateTracker.dumpProto(proto,
-                StateControllerProto.BackgroundJobsController.FORCE_APP_STANDBY_TRACKER);
+                StateControllerProto.BackgroundJobsController.APP_STATE_TRACKER);
 
         mService.getJobStore().forEachJob(predicate, (jobStatus) -> {
             final long jsToken =
                     proto.start(StateControllerProto.BackgroundJobsController.TRACKED_JOBS);
 
-            jobStatus.writeToShortProto(proto,
-                    TrackedJob.INFO);
+            jobStatus.writeToShortProto(proto, TrackedJob.INFO);
             final int sourceUid = jobStatus.getSourceUid();
             proto.write(TrackedJob.SOURCE_UID, sourceUid);
             final String sourcePkg = jobStatus.getSourcePackageName();
             proto.write(TrackedJob.SOURCE_PACKAGE_NAME, sourcePkg);
 
-            proto.write(TrackedJob.IS_IN_FOREGROUND,
-                    mAppStateTracker.isUidActive(sourceUid));
+            proto.write(TrackedJob.IS_IN_FOREGROUND, mAppStateTracker.isUidActive(sourceUid));
             proto.write(TrackedJob.IS_WHITELISTED,
                     mAppStateTracker.isUidPowerSaveWhitelisted(sourceUid) ||
                     mAppStateTracker.isUidTempPowerSaveWhitelisted(sourceUid));
 
-            proto.write(
-                    TrackedJob.CAN_RUN_ANY_IN_BACKGROUND,
-                    mAppStateTracker.isRunAnyInBackgroundAppOpsAllowed(
-                            sourceUid, sourcePkg));
+            proto.write(TrackedJob.CAN_RUN_ANY_IN_BACKGROUND,
+                    mAppStateTracker.isRunAnyInBackgroundAppOpsAllowed(sourceUid, sourcePkg));
 
-            proto.write(
-                    TrackedJob.ARE_CONSTRAINTS_SATISFIED,
+            proto.write(TrackedJob.ARE_CONSTRAINTS_SATISFIED,
                     (jobStatus.satisfiedConstraints &
                             JobStatus.CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0);
 

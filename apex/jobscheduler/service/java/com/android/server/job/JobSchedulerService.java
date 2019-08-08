@@ -3011,6 +3011,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print(job.isReady());
                     pw.print(" user=");
                     pw.print(areUsersStartedLocked(job));
+                    pw.print(" !thermal=");
+                    pw.print(!isJobThermalConstrainedLocked(job));
                     pw.print(" !pending=");
                     pw.print(!mPendingJobs.contains(job));
                     pw.print(" !active=");
@@ -3018,15 +3020,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print(" !backingup=");
                     pw.print(!(mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0));
                     pw.print(" comp=");
-                    boolean componentPresent = false;
-                    try {
-                        componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
-                                job.getServiceComponent(),
-                                PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                                job.getUserId()) != null);
-                    } catch (RemoteException e) {
-                    }
-                    pw.print(componentPresent);
+                    pw.print(isComponentUsable(job));
                     pw.println(")");
                 }
             } else {
@@ -3177,27 +3171,24 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                     job.dump(proto, JobSchedulerServiceDumpProto.RegisteredJob.DUMP, true, nowElapsed);
 
-                    // isReadyToBeExecuted
+                    proto.write(
+                            JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_READY_TO_BE_EXECUTED,
+                            isReadyToBeExecutedLocked(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_READY,
                             job.isReady());
-                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_USER_STARTED,
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.ARE_USERS_STARTED,
                             areUsersStartedLocked(job));
+                    proto.write(
+                            JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_THERMAL_CONSTRAINED,
+                            isJobThermalConstrainedLocked(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_PENDING,
                             mPendingJobs.contains(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_CURRENTLY_ACTIVE,
                             isCurrentlyActiveLocked(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_UID_BACKING_UP,
                             mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0);
-                    boolean componentPresent = false;
-                    try {
-                        componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
-                                job.getServiceComponent(),
-                                PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                                job.getUserId()) != null);
-                    } catch (RemoteException e) {
-                    }
-                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_COMPONENT_PRESENT,
-                            componentPresent);
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_COMPONENT_USABLE,
+                            isComponentUsable(job));
 
                     proto.end(rjToken);
                 }
@@ -3234,7 +3225,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 job.writeToShortProto(proto, PendingJob.INFO);
                 job.dump(proto, PendingJob.DUMP, false, nowElapsed);
                 proto.write(PendingJob.EVALUATED_PRIORITY, evaluateJobPriorityLocked(job));
-                proto.write(PendingJob.ENQUEUED_DURATION_MS, nowUptime - job.madePending);
+                proto.write(PendingJob.PENDING_DURATION_MS, nowUptime - job.madePending);
 
                 proto.end(pjToken);
             }
@@ -3283,6 +3274,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             mConcurrencyManager.dumpProtoLocked(proto,
                     JobSchedulerServiceDumpProto.CONCURRENCY_MANAGER, now, nowElapsed);
+
+            mJobs.getPersistStats().writeToProto(proto, JobSchedulerServiceDumpProto.PERSIST_STATS);
         }
 
         proto.flush();
