@@ -11,6 +11,7 @@
                  android:restoreAnyVersion="true"
                  android:icon="@mipmap/ic_launcher_settings"
                  android:defaultToDeviceProtectedStorage="true"
+                 android:forceQueryable="true"
                  android:directBootAware="true">
 
         <provider android:name="SettingsProvider"
