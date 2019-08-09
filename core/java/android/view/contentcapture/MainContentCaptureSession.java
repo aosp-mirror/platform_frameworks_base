@@ -480,6 +480,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             return;
         }
 
+        mNextFlushForTextChanged = false;
+
         final int numberEvents = mEvents.size();
         final String reasonString = getFlushReasonAsString(reason);
         if (sDebug) {
@@ -494,10 +496,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         try {
             mHandler.removeMessages(MSG_FLUSH);
-
-            if (reason == FLUSH_REASON_TEXT_CHANGE_TIMEOUT) {
-                mNextFlushForTextChanged = false;
-            }
 
             final ParceledListSlice<ContentCaptureEvent> events = clearEvents();
             mDirectServiceInterface.sendEvents(events, reason, mManager.mOptions);
