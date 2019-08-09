@@ -39,6 +39,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -297,9 +298,6 @@ public class AppStandbyControllerTests {
         mInjector.setDisplayOn(true);
         setChargingState(controller, false);
         controller.checkIdleStates(USER_ID);
-        assertEquals(STANDBY_BUCKET_EXEMPTED,
-                controller.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
-                        mInjector.mElapsedRealtime, false));
         assertNotEquals(STANDBY_BUCKET_EXEMPTED,
                 controller.getAppStandbyBucket(PACKAGE_1, USER_ID,
                         mInjector.mElapsedRealtime, false));
@@ -375,6 +373,14 @@ public class AppStandbyControllerTests {
                 }
             }
         }
+    }
+
+    @Test
+    public void testBoundWidgetPackageExempt() throws Exception {
+        assumeTrue(mInjector.getContext().getSystemService(AppWidgetManager.class) != null);
+        assertEquals(STANDBY_BUCKET_EXEMPTED,
+                mController.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
+                        mInjector.mElapsedRealtime, false));
     }
 
     @Test
