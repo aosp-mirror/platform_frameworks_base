@@ -28,7 +28,7 @@
     <string name="recents_empty_message" msgid="7967713254531861311">"No hay elementos recientes"</string>
     <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"Has borrado todo"</string>
     <string name="recents_app_info_button_label" msgid="8732926607391786762">"Información de la aplicación"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"fijación de pantalla"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"fijar pantalla"</string>
     <string name="recents_search_bar_label" msgid="638132045925945941">"buscar"</string>
     <string name="recents_launch_error_message" msgid="9107963563503438012">"No se ha podido iniciar la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="826461671965217243">"La aplicación <xliff:g id="APP">%s</xliff:g> se ha inhabilitado en modo seguro."</string>
