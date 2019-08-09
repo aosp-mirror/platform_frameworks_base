@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -58,8 +59,8 @@ public class AppDataRollbackHelperTest {
         // All users are unlocked so we should snapshot data for them.
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
         doReturn(true).when(helper).isUserCredentialLocked(eq(11));
-        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar", new int[]{10, 11});
-        helper.snapshotAppData(5, info);
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
+        helper.snapshotAppData(5, info, new int[]{10, 11});
 
         assertEquals(2, info.getPendingBackups().size());
         assertEquals(10, info.getPendingBackups().get(0));
@@ -79,8 +80,8 @@ public class AppDataRollbackHelperTest {
         doReturn(true).when(helper).isUserCredentialLocked(eq(11));
         when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(239L);
 
-        PackageRollbackInfo info2 = createPackageRollbackInfo("com.foo.bar", new int[]{10, 11});
-        helper.snapshotAppData(7, info2);
+        PackageRollbackInfo info2 = createPackageRollbackInfo("com.foo.bar");
+        helper.snapshotAppData(7, info2, new int[]{10, 11});
         assertEquals(1, info2.getPendingBackups().size());
         assertEquals(11, info2.getPendingBackups().get(0));
 
@@ -277,5 +278,16 @@ public class AppDataRollbackHelperTest {
         assertNull(pendingRestore.getRestoreInfo(37));
 
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void snapshotAddDataSavesSnapshottedUsersToInfo() {
+        Installer installer = mock(Installer.class);
+        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
+
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
+        helper.snapshotAppData(5, info, new int[]{10, 11});
+
+        assertArrayEquals(info.getSnapshottedUsers().toArray(), new int[]{10, 11});
     }
 }
