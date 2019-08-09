@@ -327,8 +327,8 @@ public final class ParcelNullabilityTest {
         Parcel p = Parcel.obtain();
         p.writeParcelableList(null, 0);
 
-        List<Object> list = new ArrayList<>();
-        throughBytes(p).readParcelableList(null, null);
+        List<Parcelable> list = new ArrayList<>();
+        throughBytes(p).readParcelableList(list, null);
         assertTrue(list.isEmpty());
     }
 
