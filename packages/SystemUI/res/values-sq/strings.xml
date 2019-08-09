@@ -543,7 +543,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Kreu\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Për të hequr gozhdimin e këtij ekrani, prek dhe mbaj butonat \"Prapa\" dhe \"Përmbledhja\"."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Për të hequr gozhdimin e këtij ekrani, prek dhe mbaj butonat \"Prapa\" dhe \"Kreu\"."</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"E kuptova!"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"E kuptova"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Jo, faleminderit!"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekrani u gozhdua"</string>
     <string name="screen_pinning_exit" msgid="5187339744262325372">"Ekrani u hoq nga gozhdimi"</string>
