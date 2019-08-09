@@ -9139,8 +9139,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
             t.traceEnd();
 
-            boolean isSystemUser = currentUserId == UserHandle.USER_SYSTEM;
-            if (isSystemUser) {
+            // Some systems - like automotive - will explicitly unlock system user then switch
+            // to a secondary user. Hence, we don't want to send duplicate broadcasts for the
+            // system user here.
+            boolean sendSystemUserBroadcasts = currentUserId == UserHandle.USER_SYSTEM;
+
+            if (sendSystemUserBroadcasts) {
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
@@ -9181,7 +9185,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             t.traceEnd();
 
-            if (isSystemUser) {
+            if (sendSystemUserBroadcasts) {
                 t.traceBegin("sendUserSwitchBroadcasts");
                 mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
                 t.traceEnd();
