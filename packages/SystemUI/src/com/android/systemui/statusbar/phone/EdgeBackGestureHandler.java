@@ -31,6 +31,7 @@ import android.hardware.input.InputManager;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.Gravity;
@@ -66,7 +67,8 @@ import java.util.concurrent.Executor;
 public class EdgeBackGestureHandler implements DisplayListener {
 
     private static final String TAG = "EdgeBackGestureHandler";
-    private static final int MAX_LONG_PRESS_TIMEOUT = 250;
+    private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
+            "gestures.back_timeout", 250);
 
     private final IPinnedStackListener.Stub mImeChangedListener = new IPinnedStackListener.Stub() {
         @Override
