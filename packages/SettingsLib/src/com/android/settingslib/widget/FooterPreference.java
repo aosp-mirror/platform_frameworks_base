@@ -99,7 +99,7 @@ public class FooterPreference extends Preference {
          * To set the key value of the {@link FooterPreference}.
          * @param key The key value.
          */
-        public Builder setKey(String key) {
+        public Builder setKey(@NonNull String key) {
             mKey = key;
             return this;
         }
@@ -128,11 +128,12 @@ public class FooterPreference extends Preference {
         public FooterPreference build() {
             final FooterPreference footerPreference = new FooterPreference(mContext);
             footerPreference.setSelectable(false);
+            if (TextUtils.isEmpty(mTitle)) {
+                throw new IllegalArgumentException("Footer title cannot be empty!");
+            }
+            footerPreference.setTitle(mTitle);
             if (!TextUtils.isEmpty(mKey)) {
                 footerPreference.setKey(mKey);
-            }
-            if (!TextUtils.isEmpty(mTitle)) {
-                footerPreference.setTitle(mTitle);
             }
             return footerPreference;
         }
