@@ -746,7 +746,7 @@
     <string name="data_saver" msgid="5037565123367048522">"डेटा सेव्हर"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा सेव्हर चालू आहे"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा सेव्हर बंद आहे"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"चालू"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"सुरू"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"बंद"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नॅव्हिगेशन बार"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"लेआउट"</string>
