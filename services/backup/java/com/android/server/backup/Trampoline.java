@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.Manifest;
@@ -97,6 +98,12 @@ public class Trampoline extends IBackupManager.Stub {
     private static final String BACKUP_DISABLE_PROPERTY = "ro.backup.disable";
 
     private static final String BACKUP_THREAD = "backup";
+
+    static Trampoline sInstance;
+
+    static Trampoline getInstance() {
+        return checkNotNull(sInstance);
+    }
 
     private final Context mContext;
     private final UserManager mUserManager;
