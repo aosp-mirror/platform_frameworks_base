@@ -31,14 +31,11 @@ import android.app.backup.ISelectBackupTransportCallback;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Trace;
@@ -51,7 +48,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Set;
@@ -78,39 +74,10 @@ public class BackupManagerService {
     // Keeps track of all unlocked users registered with this service. Indexed by user id.
     private final SparseArray<UserBackupManagerService> mServiceUsers = new SparseArray<>();
 
-    private final BroadcastReceiver mUserRemovedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
-                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                if (userId > 0) { // for only non system users
-                    onRemovedNonSystemUser(userId);
-                }
-            }
-        }
-    };
-
     /** Instantiate a new instance of {@link BackupManagerService}. */
     public BackupManagerService(Context context, Trampoline trampoline) {
         mContext = checkNotNull(context);
         mTrampoline = checkNotNull(trampoline);
-
-        mContext.registerReceiver(mUserRemovedReceiver,
-                new IntentFilter(Intent.ACTION_USER_REMOVED));
-    }
-
-    /**
-     * Remove backup state for non system {@code userId} when the user is removed from the device.
-     * For non system users, backup state is stored in both the user's own dir and the system dir.
-     * When the user is removed, the user's own dir gets removed by the OS. This method ensures that
-     * the part of the user backup state which is in the system dir also gets removed.
-     */
-    private void onRemovedNonSystemUser(int userId) {
-        Slog.i(TAG, "Removing state for non system user " + userId);
-        File dir = UserBackupManagerFiles.getStateDirInSystemDir(userId);
-        if (!FileUtils.deleteContentsAndDir(dir)) {
-            Slog.w(TAG, "Failed to delete state dir for removed user: " + userId);
-        }
     }
 
     /**
