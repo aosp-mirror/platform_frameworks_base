@@ -21,7 +21,6 @@ import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCAT
 
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
-import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.server.ServerProtoEnums;
@@ -45,6 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -56,6 +56,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * A class providing access to battery usage statistics, including information on
@@ -405,6 +406,40 @@ public abstract class BatteryStats implements Parcelable {
             8 * 60 * 60 * 1000L,
             Long.MAX_VALUE
     };
+
+    /**
+     * "Job stop reason codes" from the job scheduler subsystem, which we can't refer to from this
+     * class, so we initialize it from the job scheduler side at runtime using
+     * {@link #setJobStopReasons}.
+     */
+    private static int[] sJobStopReasonCodes = {0};
+
+    /**
+     * A function that converts the "job stop reason codes" to their names.
+     *
+     * Similarly to {@link #sJobStopReasonCodes} it's initialized by the job scheduler subsystem
+     * using {@link #setJobStopReasons}.
+     */
+    private static Function<Integer, String> sJobStopReasonNameConverter = (x) -> "unknown";
+
+    /**
+     * Set by the job scheduler subsystem to "push" job stop reasons, and a function that returns
+     * the "name" of each code. We do it this way to remove a build time dependency from this
+     * class to the job scheduler framework code.
+     *
+     * Note the passed array will be used as-is, without copying. The caller must not change
+     * the array it passed to it.
+     *
+     * @hide
+     */
+    public static void setJobStopReasons(int[] reasonCodes,
+            Function<Integer, String> jobStopReasonNameConverter) {
+        Preconditions.checkArgument(reasonCodes.length > 0);
+        Preconditions.checkArgument(jobStopReasonNameConverter != null);
+
+        sJobStopReasonCodes = reasonCodes;
+        sJobStopReasonNameConverter = jobStopReasonNameConverter;
+    }
 
     /**
      * State for keeping track of counting information.
@@ -4260,17 +4295,18 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
 
+            final Object[] jobCompletionArgs = new Object[sJobStopReasonCodes.length + 1];
+
             final ArrayMap<String, SparseIntArray> completions = u.getJobCompletionStats();
             for (int ic=completions.size()-1; ic>=0; ic--) {
                 SparseIntArray types = completions.valueAt(ic);
                 if (types != null) {
-                    dumpLine(pw, uid, category, JOB_COMPLETION_DATA,
-                            "\"" + completions.keyAt(ic) + "\"",
-                            types.get(JobParameters.REASON_CANCELED, 0),
-                            types.get(JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED, 0),
-                            types.get(JobParameters.REASON_PREEMPT, 0),
-                            types.get(JobParameters.REASON_TIMEOUT, 0),
-                            types.get(JobParameters.REASON_DEVICE_IDLE, 0));
+                    jobCompletionArgs[0] = "\"" + completions.keyAt(ic) + "\"";
+                    for (int i = 0; i < sJobStopReasonCodes.length; i++) {
+                        jobCompletionArgs[i + 1] = types.get(sJobStopReasonCodes[i], 0);
+                    }
+
+                    dumpLine(pw, uid, category, JOB_COMPLETION_DATA, jobCompletionArgs);
                 }
             }
 
@@ -5887,7 +5923,7 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(":");
                     for (int it=0; it<types.size(); it++) {
                         pw.print(" ");
-                        pw.print(JobParameters.getReasonName(types.keyAt(it)));
+                        pw.print(sJobStopReasonNameConverter.apply(types.keyAt(it)));
                         pw.print("(");
                         pw.print(types.valueAt(it));
                         pw.print("x)");
@@ -7478,13 +7514,6 @@ public abstract class BatteryStats implements Parcelable {
 
             // Job completion (JOB_COMPLETION_DATA)
             final ArrayMap<String, SparseIntArray> completions = u.getJobCompletionStats();
-            final int[] reasons = new int[]{
-                JobParameters.REASON_CANCELED,
-                JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
-                JobParameters.REASON_PREEMPT,
-                JobParameters.REASON_TIMEOUT,
-                JobParameters.REASON_DEVICE_IDLE,
-            };
             for (int ic = 0; ic < completions.size(); ++ic) {
                 SparseIntArray types = completions.valueAt(ic);
                 if (types != null) {
@@ -7492,7 +7521,7 @@ public abstract class BatteryStats implements Parcelable {
 
                     proto.write(UidProto.JobCompletion.NAME, completions.keyAt(ic));
 
-                    for (int r : reasons) {
+                    for (int r : sJobStopReasonCodes) {
                         long rToken = proto.start(UidProto.JobCompletion.REASON_COUNT);
                         proto.write(UidProto.JobCompletion.ReasonCount.NAME, r);
                         proto.write(UidProto.JobCompletion.ReasonCount.COUNT, types.get(r, 0));
