@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -70,6 +71,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -227,7 +229,9 @@ public class TrampolineTest {
         trampoline.getBackupHandler().post(unlocked::open);
         unlocked.block();
         assertNull(trampoline.getUserService(NON_USER_SYSTEM));
-        verify(mBackupManagerServiceMock, never()).startServiceForUser(NON_USER_SYSTEM);
+        //noinspection unchecked
+        verify(mBackupManagerServiceMock, never()).startServiceForUser(
+                eq(NON_USER_SYSTEM), any(Set.class));
     }
 
     @Test
@@ -752,17 +756,7 @@ public class TrampolineTest {
     }
 
     @Test
-    public void getTransportWhitelist_forwarded() {
-        when(mBackupManagerServiceMock.getTransportWhitelist()).thenReturn(TRANSPORTS);
-
-        assertEquals(TRANSPORTS, mTrampoline.getTransportWhitelist());
-        verify(mBackupManagerServiceMock).getTransportWhitelist();
-    }
-
-    @Test
     public void updateTransportAttributesForUser_forwarded() {
-        when(mBackupManagerServiceMock.getTransportWhitelist()).thenReturn(TRANSPORTS);
-
         mTrampoline.updateTransportAttributesForUser(
                 mUserId,
                 TRANSPORT_COMPONENT_NAME,
