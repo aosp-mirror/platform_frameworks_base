@@ -53,6 +53,10 @@ namespace skiapipeline {
 class VkFunctorDrawHandler;
 }
 
+namespace VectorDrawable {
+class Tree;
+}
+
 namespace renderthread {
 
 class CanvasContext;
@@ -138,6 +142,7 @@ private:
     friend class android::uirenderer::TestUtils;
     friend class android::uirenderer::WebViewFunctor;
     friend class android::uirenderer::skiapipeline::VkFunctorDrawHandler;
+    friend class android::uirenderer::VectorDrawable::Tree;
 
     RenderThread();
     virtual ~RenderThread();
