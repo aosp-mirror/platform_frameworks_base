@@ -23,6 +23,8 @@ import android.util.ArrayMap;
 
 import com.android.internal.util.Preconditions;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -136,10 +138,11 @@ public final class AtomicDirectory {
         if (file.isDirectory() || !file.getParentFile().equals(getOrCreateBaseDirectory())) {
             throw new IllegalArgumentException("Must be a file in " + getOrCreateBaseDirectory());
         }
-        final FileOutputStream destination = new FileOutputStream(file);
-        if (mOpenFiles.put(file, destination) != null) {
+        if (mOpenFiles.containsKey(file)) {
             throw new IllegalArgumentException("Already open file" + file.getCanonicalPath());
         }
+        final FileOutputStream destination = new FileOutputStream(file);
+        mOpenFiles.put(file, destination);
         return destination;
     }
 
@@ -152,20 +155,21 @@ public final class AtomicDirectory {
      */
     public void closeWrite(@NonNull FileOutputStream destination) {
         final int indexOfValue = mOpenFiles.indexOfValue(destination);
-        if (mOpenFiles.removeAt(indexOfValue) == null) {
+        if (indexOfValue < 0) {
             throw new IllegalArgumentException("Unknown file stream " + destination);
         }
+        mOpenFiles.removeAt(indexOfValue);
         FileUtils.sync(destination);
-        try {
-            destination.close();
-        } catch (IOException ignored) {}
+        IoUtils.closeQuietly(destination);
     }
 
     public void failWrite(@NonNull FileOutputStream destination) {
         final int indexOfValue = mOpenFiles.indexOfValue(destination);
-        if (indexOfValue >= 0) {
-            mOpenFiles.removeAt(indexOfValue);
+        if (indexOfValue < 0) {
+            throw new IllegalArgumentException("Unknown file stream " + destination);
         }
+        mOpenFiles.removeAt(indexOfValue);
+        IoUtils.closeQuietly(destination);
     }
 
     /**
