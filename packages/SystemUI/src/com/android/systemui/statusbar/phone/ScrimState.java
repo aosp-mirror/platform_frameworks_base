@@ -133,6 +133,12 @@ public enum ScrimState {
             mBlankScreen = mDisplayRequiresBlanking;
             mAnimationDuration = mWakeLockScreenSensorActive
                     ? ScrimController.ANIMATION_DURATION_LONG : ScrimController.ANIMATION_DURATION;
+
+            // Wake sensor will show the wallpaper, let's fade from black. Otherwise it will
+            // feel like the screen is flashing if the wallpaper is light.
+            if (mWakeLockScreenSensorActive && previousState == AOD) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
         }
 
         @Override
