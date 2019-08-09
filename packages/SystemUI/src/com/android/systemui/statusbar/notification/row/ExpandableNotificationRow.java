@@ -1209,12 +1209,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.reInflateViews(mExpandClickListener, mEntry.notification);
         }
         if (mGuts != null) {
-            View oldGuts = mGuts;
+            NotificationGuts oldGuts = mGuts;
             int index = indexOfChild(oldGuts);
             removeView(oldGuts);
             mGuts = (NotificationGuts) LayoutInflater.from(mContext).inflate(
                     R.layout.notification_guts, this, false);
-            mGuts.setVisibility(oldGuts.getVisibility());
+            mGuts.setVisibility(oldGuts.isExposed() ? VISIBLE : GONE);
             addView(mGuts, index);
         }
         View oldMenu = mMenuRow == null ? null : mMenuRow.getMenuView();
