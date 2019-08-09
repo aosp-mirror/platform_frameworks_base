@@ -422,7 +422,14 @@ public class NotificationData {
             }
         }
 
-        Collections.sort(mSortedAndFiltered, mRankingComparator);
+        if (mSortedAndFiltered.size() == 1) {
+            // HACK: We need the comparator to run on all children in order to set the
+            // isHighPriority field. If there is only one child, then the comparison won't be run,
+            // so we have to trigger it manually. Get rid of this code as soon as possible.
+            mRankingComparator.compare(mSortedAndFiltered.get(0), mSortedAndFiltered.get(0));
+        } else {
+            Collections.sort(mSortedAndFiltered, mRankingComparator);
+        }
     }
 
     public void dump(PrintWriter pw, String indent) {
