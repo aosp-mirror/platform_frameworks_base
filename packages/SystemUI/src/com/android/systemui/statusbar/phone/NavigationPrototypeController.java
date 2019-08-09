@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.IntDef;
 import android.content.ComponentCallbacks;
@@ -28,8 +28,6 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
-
-import com.android.systemui.shared.system.QuickStepContract;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -120,8 +118,7 @@ public class NavigationPrototypeController extends ContentObserver implements Co
             } else if (path.endsWith(HIDE_HOME_BUTTON_SETTING)) {
                 mListener.onHomeButtonVisibilityChanged(!hideHomeButton());
             } else if (path.endsWith(NAV_COLOR_ADAPT_ENABLE_SETTING)) {
-                mListener.onColorAdaptChanged(
-                        NavBarTintController.isEnabled(mContext, NAV_BAR_MODE_GESTURAL));
+                mListener.onColorAdaptChanged(mContext.getDisplayId() == DEFAULT_DISPLAY);
             } else if (path.endsWith(SHOW_HOME_HANDLE_SETTING)) {
                 mListener.onHomeHandleVisiblilityChanged(showHomeHandle());
             } else if (path.endsWith(ENABLE_ASSISTANT_GESTURE)) {
