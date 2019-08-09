@@ -5299,6 +5299,13 @@
     <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
     <string name="notification_app_name_settings">Settings</string>
 
+    <!-- Title of the overlay warning the user to interact with the device or it will go into standby. [CHAR LIMIT=25] -->
+    <string name="standby_warning_title">Standby</string>
+    <!-- Message of the overlay warning the user to interact with the device or it will go into standby. [CHAR LIMIT=NONE] -->
+    <string name="standby_warning_message" product="tv">The Android TV device will soon turn off; press a button to keep it on.</string>
+    <!-- Message of the overlay warning the user to interact with the device or it will go into standby. [CHAR LIMIT=NONE] -->
+    <string name="standby_warning_message" product="default">The device will soon turn off; press to keep it on.</string>
+
     <!-- Active Permission - accessibility support -->
     <!-- Content description of the camera icon in the notification. [CHAR LIMIT=NONE] -->
     <string name="notification_appops_camera_active">Camera</string>
