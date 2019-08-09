@@ -22,7 +22,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -58,32 +57,29 @@ public class RadioButtonPreference extends CheckBoxPreference {
     /**
      * Perform inflation from XML and apply a class-specific base style.
      *
-     * @param context      The {@link Context} this is associated with, through which it can
-     *                     access the current theme, resources, {@link SharedPreferences}, etc.
-     * @param attrs        The attributes of the XML tag that is inflating the preference
-     * @param defStyleAttr An attribute in the current theme that contains a reference to a style
-     *                     resource that supplies default values for the view. Can be 0 to not
-     *                     look for defaults.
+     * @param context  The {@link Context} this is associated with, through which it can
+     *                 access the current theme, resources, {@link SharedPreferences}, etc.
+     * @param attrs    The attributes of the XML tag that is inflating the preference
+     * @param defStyle An attribute in the current theme that contains a reference to a style
+     *                 resource that supplies default values for the view. Can be 0 to not
+     *                 look for defaults.
      */
     public RadioButtonPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        setWidgetLayoutResource(R.layout.preference_widget_radiobutton);
-        setLayoutResource(R.layout.preference_radio);
-        setIconSpaceReserved(false);
+        init();
     }
 
 
     /**
      * Perform inflation from XML and apply a class-specific base style.
      *
-     * @param context      The {@link Context} this is associated with, through which it can
-     *                     access the current theme, resources, {@link SharedPreferences}, etc.
-     * @param attrs        The attributes of the XML tag that is inflating the preference
+     * @param context The {@link Context} this is associated with, through which it can
+     *                access the current theme, resources, {@link SharedPreferences}, etc.
+     * @param attrs   The attributes of the XML tag that is inflating the preference
      */
     public RadioButtonPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, TypedArrayUtils.getAttr(context,
-                androidx.preference.R.attr.preferenceStyle,
-                android.R.attr.preferenceStyle));
+        super(context, attrs);
+        init();
     }
 
     /**
@@ -157,5 +153,11 @@ public class RadioButtonPreference extends CheckBoxPreference {
             mAppendix.setVisibility(visibility);
         }
         mAppendixVisibility = visibility;
+    }
+
+    private void init() {
+        setWidgetLayoutResource(R.layout.preference_widget_radiobutton);
+        setLayoutResource(R.layout.preference_radio);
+        setIconSpaceReserved(false);
     }
 }
