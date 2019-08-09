@@ -74,6 +74,6 @@ public class DependencyTest extends SysuiTestCase {
     @Test
     public void testInitDependency() {
         Dependency.clearDependencies();
-        Dependency.initDependencies(mContext);
+        Dependency.initDependencies(SystemUIFactory.getInstance().getRootComponent());
     }
 }
