@@ -388,7 +388,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         // Get a context for the caller to use to install the downgraded
         // version of the package.
-        Context context = null;
+        final Context context;
         try {
             context = mContext.createPackageContext(callerPackageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
@@ -434,7 +434,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
                 int sessionId = packageInstaller.createSession(params);
                 PackageInstaller.Session session = packageInstaller.openSession(sessionId);
-
                 File[] packageCodePaths = RollbackStore.getPackageCodePaths(
                         data, info.getPackageName());
                 if (packageCodePaths == null) {
@@ -504,8 +503,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
 
-                            mContext.sendBroadcastAsUser(broadcast, UserHandle.SYSTEM,
-                                    Manifest.permission.MANAGE_ROLLBACKS);
+                            for (UserInfo userInfo : UserManager.get(mContext).getUsers(true)) {
+                                mContext.sendBroadcastAsUser(broadcast, userInfo.getUserHandle(),
+                                        Manifest.permission.MANAGE_ROLLBACKS);
+                            }
                         });
                     }
             );
