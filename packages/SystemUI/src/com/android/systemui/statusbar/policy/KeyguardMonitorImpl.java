@@ -142,10 +142,10 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     public void notifyKeyguardFadingAway(long delay, long fadeoutDuration, boolean isBypassFading) {
-        setKeyguardFadingAway(true);
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
         mBypassFadingAnimation = isBypassFading;
+        setKeyguardFadingAway(true);
     }
 
     private void setKeyguardFadingAway(boolean keyguardFadingAway) {
