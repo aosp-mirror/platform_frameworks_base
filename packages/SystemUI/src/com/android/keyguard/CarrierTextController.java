@@ -19,6 +19,8 @@ package com.android.keyguard;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 import static android.telephony.PhoneStateListener.LISTEN_NONE;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,6 +35,8 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.WirelessUtils;
@@ -41,8 +45,6 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.util.List;
 import java.util.Objects;
-
-import androidx.annotation.VisibleForTesting;
 
 /**
  * Controller that generates text including the carrier names and/or the status of all the SIM
@@ -220,8 +222,9 @@ public class CarrierTextController {
                 .getSystemService(Context.TELEPHONY_SERVICE));
         if (callback != null) {
             mCarrierTextCallback = callback;
-            if (ConnectivityManager.from(mContext).isNetworkSupported(
-                    ConnectivityManager.TYPE_MOBILE)) {
+            // TODO(b/140034799)
+            if (whitelistIpcs(() -> ConnectivityManager.from(mContext).isNetworkSupported(
+                    ConnectivityManager.TYPE_MOBILE))) {
                 mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
                 mKeyguardUpdateMonitor.registerCallback(mCallback);
                 mWakefulnessLifecycle.addObserver(mWakefulnessObserver);

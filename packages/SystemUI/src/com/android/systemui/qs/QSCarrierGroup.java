@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
@@ -109,7 +110,8 @@ public class QSCarrierGroup extends LinearLayout implements
             return;
         }
         mListening = listening;
-        updateListeners();
+        // TODO(b/140053526)
+        whitelistIpcs(this::updateListeners);
     }
 
     @Override

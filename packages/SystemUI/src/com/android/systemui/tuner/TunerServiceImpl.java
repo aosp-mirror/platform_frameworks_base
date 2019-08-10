@@ -34,6 +34,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -189,7 +190,8 @@ public class TunerServiceImpl extends TunerService {
             mContentResolver.registerContentObserver(uri, false, mObserver, mCurrentUser);
         }
         // Send the first state.
-        String value = Settings.Secure.getStringForUser(mContentResolver, key, mCurrentUser);
+        String value = DejankUtils.whitelistIpcs(() -> Settings.Secure
+                .getStringForUser(mContentResolver, key, mCurrentUser));
         tunable.onTuningChanged(key, value);
     }
 

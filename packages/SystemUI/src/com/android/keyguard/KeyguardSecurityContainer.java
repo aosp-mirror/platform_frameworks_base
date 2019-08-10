@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
@@ -467,8 +469,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
      * @param turningOff true if the device is being turned off
      */
     void showPrimarySecurityScreen(boolean turningOff) {
-        SecurityMode securityMode = mSecurityModel.getSecurityMode(
-                KeyguardUpdateMonitor.getCurrentUser());
+        SecurityMode securityMode = whitelistIpcs(() -> mSecurityModel.getSecurityMode(
+                KeyguardUpdateMonitor.getCurrentUser()));
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
         showSecurityScreen(securityMode);
     }

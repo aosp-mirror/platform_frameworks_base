@@ -25,6 +25,7 @@ import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.BG_HANDLER;
 import static com.android.systemui.Dependency.MAIN_HANDLER;
@@ -131,6 +132,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.AutoReinflateContainer;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
@@ -3680,16 +3682,21 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onStartedGoingToSleep() {
+            String tag = "StatusBar#onStartedGoingToSleep";
+            DejankUtils.startDetectingBlockingIpcs(tag);
             updateNotificationPanelTouchState();
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
             mBypassHeadsUpNotifier.setFullyAwake(false);
             mKeyguardBypassController.onStartedGoingToSleep();
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
         @Override
         public void onStartedWakingUp() {
+            String tag = "StatusBar#onStartedWakingUp";
+            DejankUtils.startDetectingBlockingIpcs(tag);
             mDeviceInteractive = true;
             mWakeUpCoordinator.setWakingUp(true);
             if (!mKeyguardBypassController.getBypassEnabled()) {
@@ -3704,6 +3711,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // once we fully woke up.
             updateNotificationPanelTouchState();
             mPulseExpansionHandler.onStartedWakingUp();
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
         @Override
@@ -3854,18 +3862,20 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     boolean isCameraAllowedByAdmin() {
-        if (mDevicePolicyManager.getCameraDisabled(null,
-                mLockscreenUserManager.getCurrentUserId())) {
-            return false;
-        } else if (mStatusBarKeyguardViewManager == null ||
-                (isKeyguardShowing() && isKeyguardSecure())) {
-            // Check if the admin has disabled the camera specifically for the keyguard
-            return (mDevicePolicyManager.
-                    getKeyguardDisabledFeatures(null, mLockscreenUserManager.getCurrentUserId())
-                    & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
-        }
-
-        return true;
+        // TODO(b/140060745)
+        return whitelistIpcs(() -> {
+            if (mDevicePolicyManager.getCameraDisabled(null,
+                    mLockscreenUserManager.getCurrentUserId())) {
+                return false;
+            } else if (mStatusBarKeyguardViewManager == null
+                    || (isKeyguardShowing() && isKeyguardSecure())) {
+                // Check if the admin has disabled the camera specifically for the keyguard
+                return (mDevicePolicyManager.getKeyguardDisabledFeatures(null,
+                        mLockscreenUserManager.getCurrentUserId())
+                        & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
+            }
+            return true;
+        });
     }
 
     private boolean isGoingToSleep() {

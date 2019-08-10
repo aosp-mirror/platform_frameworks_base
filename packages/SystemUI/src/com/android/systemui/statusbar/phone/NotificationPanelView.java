@@ -666,6 +666,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        DejankUtils.startDetectingBlockingIpcs("NVP#onLayout");
         super.onLayout(changed, left, top, right, bottom);
         setIsFullWidth(mNotificationStackScroller.getWidth() == getWidth());
 
@@ -712,6 +713,7 @@ public class NotificationPanelView extends PanelView implements
             mExpandAfterLayoutRunnable.run();
             mExpandAfterLayoutRunnable = null;
         }
+        DejankUtils.stopDetectingBlockingIpcs("NVP#onLayout");
     }
 
     private void updateGestureExclusionRect() {

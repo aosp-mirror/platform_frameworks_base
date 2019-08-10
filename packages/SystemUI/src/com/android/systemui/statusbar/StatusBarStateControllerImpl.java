@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -137,6 +138,8 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         recordHistoricalState(state, mState);
 
         synchronized (mListeners) {
+            String tag = getClass().getSimpleName() + "#setState(" + state + ")";
+            DejankUtils.startDetectingBlockingIpcs(tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onStatePreChange(mState, state);
             }
@@ -149,6 +152,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onStatePostChange();
             }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
         return true;
@@ -178,9 +182,12 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         mIsDozing = isDozing;
 
         synchronized (mListeners) {
+            String tag = getClass().getSimpleName() + "#setIsDozing";
+            DejankUtils.startDetectingBlockingIpcs(tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onDozingChanged(isDozing);
             }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
         return true;
@@ -220,9 +227,12 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         mDozeAmount = dozeAmount;
         float interpolatedAmount = mDozeInterpolator.getInterpolation(dozeAmount);
         synchronized (mListeners) {
+            String tag = getClass().getSimpleName() + "#setDozeAmount";
+            DejankUtils.startDetectingBlockingIpcs(tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onDozeAmountChanged(mDozeAmount, interpolatedAmount);
             }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
     }
 

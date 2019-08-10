@@ -36,6 +36,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
@@ -997,9 +998,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean isFaceDisabled(int userId) {
         final DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
+        // TODO(b/140035044)
+        return whitelistIpcs(() -> dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
                 & DevicePolicyManager.KEYGUARD_DISABLE_FACE) != 0
-                || isSimPinSecure();
+                || isSimPinSecure());
     }
 
 
@@ -1884,9 +1886,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * If face hardware is available, user has enrolled and enabled auth via setting.
      */
     public boolean isFaceAuthEnabledForUser(int userId) {
-        return mFaceManager != null && mFaceManager.isHardwareDetected()
+        // TODO(b/140034352)
+        return whitelistIpcs(() -> mFaceManager != null && mFaceManager.isHardwareDetected()
                 && mFaceManager.hasEnrolledTemplates(userId)
-                && mFaceSettingEnabledForUser.get(userId);
+                && mFaceSettingEnabledForUser.get(userId));
     }
 
     private void stopListeningForFingerprint() {
