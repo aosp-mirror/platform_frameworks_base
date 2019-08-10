@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.DialogViewCallback;
 
@@ -53,7 +54,8 @@ public class FaceDialogView extends BiometricDialogView {
     private static final int TEXT_ANIMATE_DISTANCE = 32; // dp
 
     private static final int SIZE_UNKNOWN = 0;
-    private static final int SIZE_SMALL = 1;
+    @VisibleForTesting
+    static final int SIZE_SMALL = 1;
     private static final int SIZE_GROWING = 2;
     private static final int SIZE_BIG = 3;
 
@@ -153,13 +155,13 @@ public class FaceDialogView extends BiometricDialogView {
         announceAccessibilityEvent();
     };
 
-    protected FaceDialogView(Context context,
-            DialogViewCallback callback) {
-        super(context, callback);
+    protected FaceDialogView(Context context, DialogViewCallback callback, Injector injector) {
+        super(context, callback, injector);
         mIconController = new IconController();
     }
 
-    private void updateSize(int newSize) {
+    @VisibleForTesting
+    void updateSize(int newSize) {
         final float padding = dpToPixels(IMPLICIT_Y_PADDING);
         final float iconSmallPositionY = mDialog.getHeight() - mBiometricIcon.getHeight() - padding;
 

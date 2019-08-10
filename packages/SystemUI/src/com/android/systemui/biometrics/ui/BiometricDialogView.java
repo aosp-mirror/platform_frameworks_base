@@ -47,6 +47,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -82,7 +83,8 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
     protected static final int STATE_PENDING_CONFIRMATION = 3;
     protected static final int STATE_AUTHENTICATED = 4;
 
-    private final WakefulnessLifecycle mWakefulnessLifecycle;
+    @VisibleForTesting
+    final WakefulnessLifecycle mWakefulnessLifecycle;
     private final AccessibilityManager mAccessibilityManager;
     private final IBinder mWindowToken = new Binder();
     private final Interpolator mLinearOutSlowIn;
@@ -96,14 +98,22 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
 
     protected final ViewGroup mLayout;
     protected final LinearLayout mDialog;
-    protected final TextView mTitleText;
-    protected final TextView mSubtitleText;
-    protected final TextView mDescriptionText;
-    protected final ImageView mBiometricIcon;
-    protected final TextView mErrorText;
-    protected final Button mPositiveButton;
-    protected final Button mNegativeButton;
-    protected final Button mTryAgainButton;
+    @VisibleForTesting
+    final TextView mTitleText;
+    @VisibleForTesting
+    final TextView mSubtitleText;
+    @VisibleForTesting
+    final TextView mDescriptionText;
+    @VisibleForTesting
+    final ImageView mBiometricIcon;
+    @VisibleForTesting
+    final TextView mErrorText;
+    @VisibleForTesting
+    final Button mPositiveButton;
+    @VisibleForTesting
+    final Button mNegativeButton;
+    @VisibleForTesting
+    final Button mTryAgainButton;
 
     protected final int mTextColor;
 
@@ -147,7 +157,8 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         }
     };
 
-    private final WakefulnessLifecycle.Observer mWakefulnessObserver =
+    @VisibleForTesting
+    final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
                 @Override
                 public void onStartedGoingToSleep() {
@@ -213,11 +224,15 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         }
 
         public BiometricDialogView build(int type) {
+            return build(type, new Injector());
+        }
+
+        public BiometricDialogView build(int type, Injector injector) {
             BiometricDialogView dialog;
             if (type == TYPE_FINGERPRINT) {
-                dialog = new FingerprintDialogView(mContext, mCallback);
+                dialog = new FingerprintDialogView(mContext, mCallback, injector);
             } else if (type == TYPE_FACE) {
-                dialog = new FaceDialogView(mContext, mCallback);
+                dialog = new FaceDialogView(mContext, mCallback, injector);
             } else {
                 return null;
             }
@@ -229,9 +244,15 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         }
     }
 
-    protected BiometricDialogView(Context context, DialogViewCallback callback) {
+    public static class Injector {
+        public WakefulnessLifecycle getWakefulnessLifecycle() {
+            return Dependency.get(WakefulnessLifecycle.class);
+        }
+    }
+
+    protected BiometricDialogView(Context context, DialogViewCallback callback, Injector injector) {
         super(context);
-        mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
+        mWakefulnessLifecycle = injector.getWakefulnessLifecycle();
 
         mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;

@@ -33,9 +33,9 @@ public class FingerprintDialogView extends BiometricDialogView {
 
     private static final String TAG = "FingerprintDialogView";
 
-    protected FingerprintDialogView(Context context,
-            DialogViewCallback callback) {
-        super(context, callback);
+    protected FingerprintDialogView(Context context, DialogViewCallback callback,
+            Injector injector) {
+        super(context, callback, injector);
     }
 
     @Override
