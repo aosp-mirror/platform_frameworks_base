@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -120,6 +119,7 @@ public final class IdleController extends StateController implements IdlenessLis
         final long mToken = proto.start(StateControllerProto.IDLE);
 
         proto.write(StateControllerProto.IdleController.IS_IDLE, mIdleTracker.isIdle());
+        mIdleTracker.dump(proto, StateControllerProto.IdleController.IDLENESS_TRACKER);
 
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.valueAt(i);

@@ -250,6 +250,29 @@ public class StartProgramListUpdatesFanoutTest {
         verify(mHalTunerSessionMock).stopProgramListUpdates();
     }
 
+    @Test
+    public void testNullAidlFilter() throws RemoteException {
+        openAidlClients(1);
+        mTunerSessions[0].startProgramListUpdates(null);
+        verify(mHalTunerSessionMock, times(1)).startProgramListUpdates(any());
+
+        // Verify the AIDL client receives all types of updates (e.g. a new program, an update to
+        // that program, and a category).
+        updateHalProgramInfo(true, Arrays.asList(mAmFmInfo, mRdsInfo), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], true, Arrays.asList(
+                mAmFmInfo, mRdsInfo), null);
+        updateHalProgramInfo(false, Arrays.asList(mModifiedAmFmInfo), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], false,
+                Arrays.asList(mModifiedAmFmInfo), null);
+        updateHalProgramInfo(false, Arrays.asList(mDabEnsembleInfo), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], false,
+                Arrays.asList(mDabEnsembleInfo), null);
+
+        // Verify closing the AIDL session also stops HAL updates.
+        mTunerSessions[0].close();
+        verify(mHalTunerSessionMock).stopProgramListUpdates();
+    }
+
     private void openAidlClients(int numClients) throws RemoteException {
         mAidlTunerCallbackMocks = new android.hardware.radio.ITunerCallback[numClients];
         mTunerSessions = new TunerSession[numClients];

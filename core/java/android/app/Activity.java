@@ -808,7 +808,9 @@ public class Activity extends ContextThemeWrapper
     /*package*/ ActivityInfo mActivityInfo;
     @UnsupportedAppUsage
     /*package*/ ActivityThread mMainThread;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.fragment.app.Fragment} and "
+                    + "{@code androidx.fragment.app.FragmentManager} instead")
     Activity mParent;
     @UnsupportedAppUsage
     boolean mCalled;

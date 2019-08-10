@@ -2927,6 +2927,7 @@
     <public type="attr" name="enforceStatusBarContrast" id="0x01010604" />
     <public type="attr" name="enforceNavigationBarContrast" id="0x01010605" />
     <public type="attr" name="identifier" id="0x01010606" />
+    <public type="attr" name="forceQueryable" id="0x01010608" />
 
     <!-- @hide @SystemApi -->
     <public type="drawable" name="ic_info" id="0x010800b4" />

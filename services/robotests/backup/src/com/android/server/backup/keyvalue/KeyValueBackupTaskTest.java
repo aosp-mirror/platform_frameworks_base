@@ -120,6 +120,7 @@ import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 import com.android.server.testing.shadows.ShadowEventLog;
+import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
 
 import com.google.common.truth.IterableSubject;
 
@@ -163,10 +164,11 @@ import java.util.stream.Stream;
             ShadowBackupDataInput.class,
             ShadowBackupDataOutput.class,
             ShadowEventLog.class,
-            ShadowQueuedWork.class
+            ShadowQueuedWork.class,
+            ShadowSystemServiceRegistry.class
         })
 @Presubmit
-public class KeyValueBackupTaskTest {
+public class KeyValueBackupTaskTest  {
     private static final PackageData PACKAGE_1 = keyValuePackage(1);
     private static final PackageData PACKAGE_2 = keyValuePackage(2);
     private static final String BACKUP_AGENT_SHARED_PREFS_SYNCHRONIZER_CLASS =

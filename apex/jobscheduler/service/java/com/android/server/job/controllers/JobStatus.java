@@ -1606,11 +1606,14 @@ public final class JobStatus {
             for (int i=0; i<changedAuthorities.size(); i++) {
                 pw.print(prefix); pw.print("  "); pw.println(changedAuthorities.valueAt(i));
             }
-            if (changedUris != null) {
-                pw.print(prefix); pw.println("Changed URIs:");
-                for (int i=0; i<changedUris.size(); i++) {
-                    pw.print(prefix); pw.print("  "); pw.println(changedUris.valueAt(i));
-                }
+        }
+        if (changedUris != null) {
+            pw.print(prefix);
+            pw.println("Changed URIs:");
+            for (int i = 0; i < changedUris.size(); i++) {
+                pw.print(prefix);
+                pw.print("  ");
+                pw.println(changedUris.valueAt(i));
             }
         }
         if (network != null) {
@@ -1673,7 +1676,6 @@ public final class JobStatus {
         proto.write(JobStatusDumpProto.SOURCE_UID, getSourceUid());
         proto.write(JobStatusDumpProto.SOURCE_USER_ID, getSourceUserId());
         proto.write(JobStatusDumpProto.SOURCE_PACKAGE_NAME, getSourcePackageName());
-        proto.write(JobStatusDumpProto.INTERNAL_FLAGS, getInternalFlags());
 
         if (full) {
             final long jiToken = proto.start(JobStatusDumpProto.JOB_INFO);
@@ -1687,6 +1689,8 @@ public final class JobStatus {
             proto.write(JobStatusDumpProto.JobInfo.IS_PERSISTED, job.isPersisted());
             proto.write(JobStatusDumpProto.JobInfo.PRIORITY, job.getPriority());
             proto.write(JobStatusDumpProto.JobInfo.FLAGS, job.getFlags());
+            proto.write(JobStatusDumpProto.INTERNAL_FLAGS, getInternalFlags());
+            // Foreground exemption can be determined from internal flags value.
 
             proto.write(JobStatusDumpProto.JobInfo.REQUIRES_CHARGING, job.isRequireCharging());
             proto.write(JobStatusDumpProto.JobInfo.REQUIRES_BATTERY_NOT_LOW, job.isRequireBatteryNotLow());
@@ -1798,6 +1802,8 @@ public final class JobStatus {
         proto.write(JobStatusDumpProto.ImplicitConstraints.IS_NOT_DOZING, mReadyNotDozing);
         proto.write(JobStatusDumpProto.ImplicitConstraints.IS_NOT_RESTRICTED_IN_BG,
                 mReadyNotRestrictedInBg);
+        // mReadyDeadlineSatisfied isn't an implicit constraint...and can be determined from other
+        // field values.
         proto.end(icToken);
 
         if (changedAuthorities != null) {
@@ -1816,12 +1822,12 @@ public final class JobStatus {
             network.writeToProto(proto, JobStatusDumpProto.NETWORK);
         }
 
-        if (pendingWork != null && pendingWork.size() > 0) {
+        if (pendingWork != null) {
             for (int i = 0; i < pendingWork.size(); i++) {
                 dumpJobWorkItem(proto, JobStatusDumpProto.PENDING_WORK, pendingWork.get(i));
             }
         }
-        if (executingWork != null && executingWork.size() > 0) {
+        if (executingWork != null) {
             for (int i = 0; i < executingWork.size(); i++) {
                 dumpJobWorkItem(proto, JobStatusDumpProto.EXECUTING_WORK, executingWork.get(i));
             }
@@ -1846,6 +1852,8 @@ public final class JobStatus {
             proto.write(JobStatusDumpProto.TIME_UNTIL_LATEST_RUNTIME_MS,
                     latestRunTimeElapsedMillis - elapsedRealtimeMillis);
         }
+        proto.write(JobStatusDumpProto.ORIGINAL_LATEST_RUNTIME_ELAPSED,
+                mOriginalLatestRunTimeElapsedMillis);
 
         proto.write(JobStatusDumpProto.NUM_FAILURES, numFailures);
         proto.write(JobStatusDumpProto.LAST_SUCCESSFUL_RUN_TIME, mLastSuccessfulRunTime);

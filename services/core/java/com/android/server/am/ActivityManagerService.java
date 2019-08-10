@@ -2419,7 +2419,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // handlers to other threads.  So take care to be explicit about the looper.
     public ActivityManagerService(Context systemContext, ActivityTaskManagerService atm) {
         LockGuard.installLock(this, LockGuard.INDEX_ACTIVITY);
-        mInjector = new Injector();
+        mInjector = new Injector(systemContext);
         mContext = systemContext;
 
         mFactoryTest = FactoryTest.getMode();
@@ -5212,6 +5212,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 completedIsas.add(instructionSet);
             }
         }
+
+        // Let the ART runtime in zygote and system_server know that the boot completed.
+        ZYGOTE_PROCESS.bootCompleted();
+        VMRuntime.bootCompleted();
 
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
@@ -18894,9 +18898,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     public static class Injector {
         private NetworkManagementInternal mNmi;
+        private Context mContext;
+
+        public Injector(Context context) {
+            mContext = context;
+        }
 
         public Context getContext() {
-            return null;
+            return mContext;
         }
 
         public AppOpsService getAppOpsService(File file, Handler handler) {

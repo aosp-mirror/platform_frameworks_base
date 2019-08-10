@@ -656,7 +656,7 @@
     <string name="notification_silence_title" msgid="5763240612242137433">"Lautlos"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"Benachrichtigen"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Benachrichtigungen werden ohne Ton oder Vibration angekündigt, um deine Konzentration nicht zu stören."</string>
-    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Benachrichtigungen werden mit einem Ton oder einer Vibration angekündigt, um dich auf sie aufmerksam zu machen."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Benachrichtigungen werden mit einem Ton oder einer Vibration angekündigt."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Weitergeleitete Benachrichtigung"</string>

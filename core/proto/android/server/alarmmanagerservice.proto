@@ -20,7 +20,7 @@ import "frameworks/base/core/proto/android/app/alarmmanager.proto";
 import "frameworks/base/core/proto/android/app/pendingintent.proto";
 import "frameworks/base/core/proto/android/internal/locallog.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
-import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
+import "frameworks/base/core/proto/android/server/appstatetracker.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 
 package com.android.server;
@@ -38,8 +38,8 @@ message AlarmManagerServiceDumpProto {
     // Current settings
     optional ConstantsProto settings = 5;
 
-    // Dump from ForceAppStandbyTracker.
-    optional ForceAppStandbyTrackerProto force_app_standby_tracker = 6;
+    // Dump from AppStateTracker.
+    optional AppStateTrackerProto app_state_tracker = 6;
 
     optional bool is_interactive = 7;
     // Only valid if is_interactive is false.

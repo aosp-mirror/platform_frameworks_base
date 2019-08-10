@@ -82,7 +82,9 @@ public final class AppCompactorTest {
                 true /* allowIo */);
         mThread.start();
 
-        ActivityManagerService ams = new ActivityManagerService(new TestInjector(), mThread);
+        ActivityManagerService ams = new ActivityManagerService(
+                new TestInjector(InstrumentationRegistry.getInstrumentation().getContext()),
+                mThread);
         mCompactorUnderTest = new AppCompactor(ams,
                 new AppCompactor.PropertyChangedCallbackForTest() {
                     @Override
@@ -660,6 +662,11 @@ public final class AppCompactorTest {
     }
 
     private class TestInjector extends Injector {
+
+        TestInjector(Context context) {
+            super(context);
+        }
+
         @Override
         public AppOpsService getAppOpsService(File file, Handler handler) {
             return mAppOpsService;
@@ -668,11 +675,6 @@ public final class AppCompactorTest {
         @Override
         public Handler getUiHandler(ActivityManagerService service) {
             return mHandler;
-        }
-
-        @Override
-        public Context getContext() {
-            return InstrumentationRegistry.getInstrumentation().getContext();
         }
     }
 }

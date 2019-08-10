@@ -269,8 +269,7 @@ public final class DeviceIdleJobsController extends StateController {
             proto.write(TrackedJob.SOURCE_UID, jobStatus.getSourceUid());
             proto.write(TrackedJob.SOURCE_PACKAGE_NAME, jobStatus.getSourcePackageName());
             proto.write(TrackedJob.ARE_CONSTRAINTS_SATISFIED,
-                    (jobStatus.satisfiedConstraints &
-                        JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
+                    (jobStatus.satisfiedConstraints & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
             proto.write(TrackedJob.IS_DOZE_WHITELISTED, jobStatus.dozeWhitelisted);
             proto.write(TrackedJob.IS_ALLOWED_IN_DOZE, mAllowInIdleJobs.contains(jobStatus));
 

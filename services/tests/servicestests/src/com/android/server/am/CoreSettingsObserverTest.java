@@ -23,9 +23,11 @@ import static com.android.server.am.ActivityManagerService.Injector;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
@@ -92,8 +94,10 @@ public class CoreSettingsObserverTest {
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        when(mContext.getResources()).thenReturn(mock(Resources.class));
 
-        mAms = new ActivityManagerService(new TestInjector(), mServiceThreadRule.getThread());
+        mAms = new ActivityManagerService(new TestInjector(mContext),
+                mServiceThreadRule.getThread());
         mCoreSettingsObserver = new CoreSettingsObserver(mAms);
     }
 
@@ -158,9 +162,9 @@ public class CoreSettingsObserverTest {
     }
 
     private class TestInjector extends Injector {
-        @Override
-        public Context getContext() {
-            return getInstrumentation().getContext();
+
+        TestInjector(Context context) {
+            super(context);
         }
 
         @Override

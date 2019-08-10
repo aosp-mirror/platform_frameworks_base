@@ -36,6 +36,8 @@ import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
+import static java.util.Collections.emptySet;
+
 import android.annotation.UserIdInt;
 import android.app.Application;
 import android.app.backup.IBackupManagerMonitor;
@@ -53,6 +55,7 @@ import android.util.SparseArray;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBinder;
+import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +76,12 @@ import java.io.StringWriter;
 
 /** Tests for the user-aware backup/restore system service {@link BackupManagerService}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowApplicationPackageManager.class, ShadowBinder.class})
+@Config(
+        shadows = {
+            ShadowApplicationPackageManager.class,
+            ShadowBinder.class,
+            ShadowSystemServiceRegistry.class
+        })
 @Presubmit
 public class BackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package";
@@ -154,7 +162,7 @@ public class BackupManagerServiceTest {
     public void testStartServiceForUser_registersUser() throws Exception {
         BackupManagerService backupManagerService = createService();
 
-        backupManagerService.startServiceForUser(mUserOneId);
+        backupManagerService.startServiceForUser(mUserOneId, emptySet());
 
         SparseArray<UserBackupManagerService> serviceUsers = backupManagerService.getUserServices();
         assertThat(serviceUsers.size()).isEqualTo(1);

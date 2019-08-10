@@ -1020,12 +1020,11 @@ public class VolumeDialogImpl implements VolumeDialog,
         row.icon.setAlpha(iconEnabled ? 1 : 0.5f);
         final int iconRes =
                 isRingVibrate ? R.drawable.ic_volume_ringer_vibrate
-                : isRingSilent || zenMuted ? row.iconMuteRes
-                : ss.routedToBluetooth ?
-                        (ss.muted ? R.drawable.ic_volume_media_bt_mute
-                                : R.drawable.ic_volume_media_bt)
-                : mAutomute && ss.level == 0 ? row.iconMuteRes
-                : (ss.muted ? row.iconMuteRes : row.iconRes);
+                        : isRingSilent || zenMuted ? row.iconMuteRes
+                                : ss.routedToBluetooth
+                                        ? isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
+                                                : R.drawable.ic_volume_media_bt
+                                        : isStreamMuted(ss) ? row.iconMuteRes : row.iconRes;
         row.icon.setImageResource(iconRes);
         row.iconState =
                 iconRes == R.drawable.ic_volume_ringer_vibrate ? Events.ICON_STATE_VIBRATE
@@ -1085,6 +1084,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         final int vlevel = row.ss.muted && (!isRingStream && !zenMuted) ? 0
                 : row.ss.level;
         updateVolumeRowSliderH(row, enableSlider, vlevel);
+    }
+
+    private boolean isStreamMuted(final StreamState streamState) {
+        return (mAutomute && streamState.level == 0) || streamState.muted;
     }
 
     private void updateVolumeRowTintH(VolumeRow row, boolean isActive) {

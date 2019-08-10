@@ -3483,6 +3483,9 @@
     <!-- True if home app should be pinned via Pinner Service -->
     <bool name="config_pinnerHomeApp">false</bool>
 
+    <!-- True if assistant app should be pinned via Pinner Service -->
+    <bool name="config_pinnerAssistantApp">false</bool>
+
     <!-- List of files pinned by the Pinner Service with the apex boot image b/119800099 -->
     <string-array translatable="false" name="config_apexBootImagePinnerServiceFiles">
     </string-array>
@@ -4266,6 +4269,10 @@
     <!-- Strip notification RemoteView objects that are larger in bytes than this value (also log)
     (default 2MB) -->
     <integer name="config_notificationStripRemoteViewSizeBytes">2000000</integer>
+
+    <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
+         grants, even if the UICC claims that the app should be privileged. See b/138150105 -->
+    <string-array name="config_restrictedPreinstalledCarrierApps" translatable="false"/>
 
     <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
     <integer name="config_maxShortcutTargetsPerApp">3</integer>

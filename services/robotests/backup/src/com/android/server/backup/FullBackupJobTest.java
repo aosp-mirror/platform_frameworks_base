@@ -25,6 +25,8 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
+import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +38,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowJobScheduler;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowJobScheduler.class})
+@Config(shadows = {ShadowJobScheduler.class, ShadowSystemServiceRegistry.class})
 @Presubmit
 public class FullBackupJobTest {
     private Context mContext;

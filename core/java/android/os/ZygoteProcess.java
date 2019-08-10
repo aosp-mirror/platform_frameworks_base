@@ -738,6 +738,31 @@ public class ZygoteProcess {
     }
 
     /**
+     * Notify the Zygote processes that boot completed.
+     */
+    public void bootCompleted() {
+        // Notify both the 32-bit and 64-bit zygote.
+        if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
+            bootCompleted(Build.SUPPORTED_32_BIT_ABIS[0]);
+        }
+        if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
+            bootCompleted(Build.SUPPORTED_64_BIT_ABIS[0]);
+        }
+    }
+
+    private void bootCompleted(String abi) {
+        try {
+            synchronized (mLock) {
+                ZygoteState state = openZygoteSocketIfNeeded(abi);
+                state.mZygoteOutputWriter.write("1\n--boot-completed\n");
+                state.mZygoteOutputWriter.flush();
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to inform zygote of boot_completed", ex);
+        }
+    }
+
+    /**
      * Push hidden API blacklisting exemptions into the zygote process(es).
      *
      * <p>The list of exemptions will take affect for all new processes forked from the zygote after

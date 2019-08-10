@@ -16,9 +16,6 @@
 
 #define LOG_TAG "OpenGLRenderer"
 #define ATRACE_TAG ATRACE_TAG_VIEW
-#ifdef __ANDROID__ // Layoutlib does not support EGL
-#include <EGL/egl.h>
-#endif
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>

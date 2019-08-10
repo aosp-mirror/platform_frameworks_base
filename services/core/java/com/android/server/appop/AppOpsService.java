@@ -18,9 +18,11 @@ package com.android.server.appop;
 
 import static android.app.AppOpsManager.MAX_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
+import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -171,6 +173,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_RECENT
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_EMPTY
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_NONEXISTENT
+    };
+
+    private static final int[] OPS_RESTRICTED_ON_SUSPEND = {
+            OP_PLAY_AUDIO,
+            OP_RECORD_AUDIO,
+            OP_CAMERA,
     };
 
     Context mContext;
@@ -798,7 +806,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                     final String changedPkg = changedPkgs[i];
                     // We trust packagemanager to insert matching uid and packageNames in the
                     // extras
-                    notifyOpChanged(callbacks, OP_PLAY_AUDIO, changedUid, changedPkg);
+                    for (int code : OPS_RESTRICTED_ON_SUSPEND) {
+                        notifyOpChanged(callbacks, code, changedUid, changedPkg);
+                    }
                 }
             }
         }, packageSuspendFilter);
@@ -1759,6 +1769,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.opToDefaultMode(code);
         }
 
+        if (isOpRestrictedDueToSuspend(code, packageName, uid)) {
+            return AppOpsManager.MODE_IGNORED;
+        }
         synchronized (this) {
             if (isOpRestrictedLocked(uid, code, packageName, isPrivileged)) {
                 return AppOpsManager.MODE_IGNORED;
@@ -1792,20 +1805,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
-        boolean suspended;
-        try {
-            suspended = isPackageSuspendedForUser(packageName, uid);
-        } catch (IllegalArgumentException ex) {
-            // Package not found.
-            suspended = false;
-        }
-
-        if (suspended) {
-            Slog.i(TAG, "Audio disabled for suspended package=" + packageName
-                    + " for uid=" + uid);
-            return AppOpsManager.MODE_IGNORED;
-        }
-
         synchronized (this) {
             final int mode = checkRestrictionLocked(code, usage, uid, packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
@@ -1813,18 +1812,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         return checkOperation(code, uid, packageName);
-    }
-
-    private boolean isPackageSuspendedForUser(String pkg, int uid) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return AppGlobals.getPackageManager().isPackageSuspendedForUser(
-                    pkg, UserHandle.getUserId(uid));
-        } catch (RemoteException re) {
-            throw new SecurityException("Could not talk to package manager service");
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     private int checkRestrictionLocked(int code, int usage, int uid, String packageName) {
@@ -2652,6 +2639,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             scheduleWriteLocked();
         }
         return op;
+    }
+
+    private boolean isOpRestrictedDueToSuspend(int code, String packageName, int uid) {
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        return ArrayUtils.contains(OPS_RESTRICTED_ON_SUSPEND, code)
+                && pmi.isPackageSuspended(packageName, UserHandle.getUserId(uid));
     }
 
     private boolean isOpRestrictedLocked(int uid, int code, String packageName,

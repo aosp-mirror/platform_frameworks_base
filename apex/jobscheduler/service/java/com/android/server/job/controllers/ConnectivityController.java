@@ -631,6 +631,18 @@ public final class ConnectivityController extends StateController implements
         final long token = proto.start(fieldId);
         final long mToken = proto.start(StateControllerProto.CONNECTIVITY);
 
+        for (int i = 0; i < mRequestedWhitelistJobs.size(); i++) {
+            proto.write(
+                    StateControllerProto.ConnectivityController.REQUESTED_STANDBY_EXCEPTION_UIDS,
+                    mRequestedWhitelistJobs.keyAt(i));
+        }
+        for (int i = 0; i < mAvailableNetworks.size(); i++) {
+            Network network = mAvailableNetworks.valueAt(i);
+            if (network != null) {
+                network.writeToProto(proto,
+                        StateControllerProto.ConnectivityController.AVAILABLE_NETWORKS);
+            }
+        }
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
             for (int j = 0; j < jobs.size(); j++) {

@@ -16,7 +16,10 @@
 
 package com.android.server.backup;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.backup.BackupManagerService.TAG;
+
+import static java.util.Collections.emptySet;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -29,10 +32,13 @@ import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -47,12 +53,14 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.server.SystemConfig;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * A proxy to the {@link BackupManagerService} implementation.
@@ -98,6 +106,12 @@ public class Trampoline extends IBackupManager.Stub {
 
     private static final String BACKUP_THREAD = "backup";
 
+    static Trampoline sInstance;
+
+    static Trampoline getInstance() {
+        return checkNotNull(sInstance);
+    }
+
     private final Context mContext;
     private final UserManager mUserManager;
 
@@ -111,6 +125,19 @@ public class Trampoline extends IBackupManager.Stub {
     @VisibleForTesting
     protected volatile BackupManagerService mService;
     private final Handler mHandler;
+    private final Set<ComponentName> mTransportWhitelist;
+
+    private final BroadcastReceiver mUserRemovedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                if (userId > 0) { // for only non system users
+                    mHandler.post(() -> onRemovedNonSystemUser(userId));
+                }
+            }
+        }
+    };
 
     public Trampoline(Context context) {
         mContext = context;
@@ -121,6 +148,11 @@ public class Trampoline extends IBackupManager.Stub {
         mHandler = new Handler(handlerThread.getLooper());
         mUserManager = UserManager.get(context);
         mService = new BackupManagerService(mContext, this);
+        Set<ComponentName> transportWhitelist =
+                SystemConfig.getInstance().getBackupTransportWhitelist();
+        mTransportWhitelist = (transportWhitelist == null) ? emptySet() : transportWhitelist;
+        mContext.registerReceiver(
+                mUserRemovedReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
     }
 
     // TODO: Remove this when we implement DI by injecting in the construtor.
@@ -155,6 +187,20 @@ public class Trampoline extends IBackupManager.Stub {
     /** Stored in the system user's directory and the file is indexed by the user it refers to. */
     protected File getActivatedFileForNonSystemUser(int userId) {
         return UserBackupManagerFiles.getStateFileInSystemDir(BACKUP_ACTIVATED_FILENAME, userId);
+    }
+
+    /**
+     * Remove backup state for non system {@code userId} when the user is removed from the device.
+     * For non system users, backup state is stored in both the user's own dir and the system dir.
+     * When the user is removed, the user's own dir gets removed by the OS. This method ensures that
+     * the part of the user backup state which is in the system dir also gets removed.
+     */
+    private void onRemovedNonSystemUser(int userId) {
+        Slog.i(TAG, "Removing state for non system user " + userId);
+        File dir = UserBackupManagerFiles.getStateDirInSystemDir(userId);
+        if (!FileUtils.deleteContentsAndDir(dir)) {
+            Slog.w(TAG, "Failed to delete state dir for removed user: " + userId);
+        }
     }
 
     // TODO (b/124359804) move to util method in FileUtils
@@ -263,7 +309,7 @@ public class Trampoline extends IBackupManager.Stub {
             return;
         }
         Slog.i(TAG, "Starting service for user: " + userId);
-        mService.startServiceForUser(userId);
+        mService.startServiceForUser(userId, mTransportWhitelist);
     }
 
     /**
@@ -611,7 +657,17 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public String[] getTransportWhitelist() {
         int userId = binderGetCallingUserId();
-        return (isUserReadyForBackup(userId)) ? mService.getTransportWhitelist() : null;
+        if (!isUserReadyForBackup(userId)) {
+            return null;
+        }
+        // No permission check, intentionally.
+        String[] whitelistedTransports = new String[mTransportWhitelist.size()];
+        int i = 0;
+        for (ComponentName component : mTransportWhitelist) {
+            whitelistedTransports[i] = component.flattenToShortString();
+            i++;
+        }
+        return whitelistedTransports;
     }
 
     @Override

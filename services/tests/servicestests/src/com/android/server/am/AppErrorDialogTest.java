@@ -51,7 +51,7 @@ public class AppErrorDialogTest {
     @Before
     public void setUp() throws Exception {
         mContext = getInstrumentation().getTargetContext();
-        mService = new ActivityManagerService(new ActivityManagerService.Injector() {
+        mService = new ActivityManagerService(new ActivityManagerService.Injector(mContext) {
             @Override
             public AppOpsService getAppOpsService(File file, Handler handler) {
                 return null;
@@ -65,11 +65,6 @@ public class AppErrorDialogTest {
             @Override
             public boolean isNetworkRestrictedForUid(int uid) {
                 return false;
-            }
-
-            @Override
-            public Context getContext() {
-                return mContext;
             }
         }, mServiceThreadRule.getThread());
         mService.mActivityTaskManager = new ActivityTaskManagerService(mContext);
