@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.telephony.ServiceState;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.custom.longshot.LongScreenshotManagerService;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 
@@ -294,6 +295,7 @@ public class Utils {
                 || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
                 || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
                 || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || pkg.packageName.equals(LongScreenshotManagerService.PACKAGENAME_LONGSHOT)
                 || isDeviceProvisioningPackage(resources, pkg.packageName);
     }
 

@@ -71,6 +71,7 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
+import com.android.internal.custom.longshot.LongScreenshotManagerService;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
@@ -1090,6 +1091,10 @@ public final class SystemServer {
 
             traceBeginAndSlog("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
+            traceEnd();
+
+            traceBeginAndSlog("LongScreenshotManagerService");
+            ServiceManager.addService(Context.LONGSCREENSHOT_SERVICE, LongScreenshotManagerService.getInstance(context));
             traceEnd();
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");

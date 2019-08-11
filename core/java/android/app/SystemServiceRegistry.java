@@ -193,6 +193,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.custom.longshot.LongScreenshotManager;
 import com.android.internal.net.INetworkWatchlistManager;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
@@ -1293,6 +1294,14 @@ final class SystemServiceRegistry {
                                 Context.DYNAMIC_SYSTEM_SERVICE);
                         return new DynamicSystemManager(
                                 IDynamicSystemService.Stub.asInterface(b));
+                    }});
+
+        registerService(Context.LONGSCREENSHOT_SERVICE, LongScreenshotManager.class,
+                new CachedServiceFetcher<LongScreenshotManager>() {
+                    @Override
+                    public LongScreenshotManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return LongScreenshotManager.getInstance();
                     }});
         //CHECKSTYLE:ON IndentationCheck
     }

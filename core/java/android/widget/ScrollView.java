@@ -49,6 +49,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
+import com.android.internal.custom.longshot.injector.ScrollViewInjector;
 
 import java.util.List;
 
@@ -727,6 +728,8 @@ public class ScrollView extends FrameLayout {
         }
         vtev.offsetLocation(0, mNestedYOffset);
 
+        ScrollViewInjector.ScrollView.isInjection = ev.isFromSource(InputDevice.SOURCE_CLASS_LONGSHOT);
+
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN: {
                 if (getChildCount() == 0) {
@@ -815,12 +818,14 @@ public class ScrollView extends FrameLayout {
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
+                            ScrollViewInjector.ScrollView.onOverScrolled(mContext, true);
                         } else if (pulledToY > range) {
                             mEdgeGlowBottom.onPull((float) deltaY / getHeight(),
                                     1.f - ev.getX(activePointerIndex) / getWidth());
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
+                            ScrollViewInjector.ScrollView.onOverScrolled(mContext, true);
                         }
                         if (shouldDisplayEdgeEffects()
                                 && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())) {

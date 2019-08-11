@@ -323,6 +323,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".screenshot.ScreenshotServiceCaptureErrorReceiver"
+            android:process=":screenshot"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.systemui.screenshot.SHOW_ERROR" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".screenrecord.ScreenRecordDialog"
             android:theme="@style/ScreenRecord" />
         <service android:name=".screenrecord.RecordingService" />

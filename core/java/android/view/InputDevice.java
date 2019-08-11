@@ -139,6 +139,13 @@ public final class InputDevice implements Parcelable {
     public static final int SOURCE_CLASS_JOYSTICK = 0x00000010;
 
     /**
+     * The input source is emulated by Longshot
+     *
+     * @hide
+     */
+    public static final int SOURCE_CLASS_LONGSHOT = 0x10000000;
+
+    /**
      * The input source is unknown.
      */
     public static final int SOURCE_UNKNOWN = 0x00000000;

@@ -71,4 +71,7 @@ interface IInputMethodManager {
 
     void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
             in float[] matrixValues);
+
+    // Long screenshot
+    boolean hideSoftInputForLongshot(int flags, in ResultReceiver resultReceiver);
 }

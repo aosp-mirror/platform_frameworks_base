@@ -696,6 +696,12 @@ java_defaults {
         // LiveDisplay
         "core/java/com/android/internal/custom/hardware/ILineageHardwareService.aidl",
         "core/java/com/android/internal/custom/hardware/ILiveDisplayService.aidl",
+
+        // Long screenshot
+        "core/java/com/android/internal/custom/longshot/ILongScreenshot.aidl",
+        "core/java/com/android/internal/custom/longshot/ILongScreenshotCallback.aidl",
+        "core/java/com/android/internal/custom/longshot/ILongScreenshotListener.aidl",
+        "core/java/com/android/internal/custom/longshot/ILongScreenshotManager.aidl",
     ],
 
     aidl: {
