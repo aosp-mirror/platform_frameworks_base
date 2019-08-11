@@ -741,7 +741,7 @@
     <string name="battery" msgid="7498329822413202973">"Pin"</string>
     <string name="clock" msgid="7416090374234785905">"Đồng hồ"</string>
     <string name="headset" msgid="4534219457597457353">"Tai nghe"</string>
-    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Mở cài đặt"</string>
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Mở phần cài đặt"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Đã kết nối tai nghe"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Đã kết nối tai nghe"</string>
     <string name="data_saver" msgid="5037565123367048522">"Trình tiết kiệm dữ liệu"</string>
@@ -817,7 +817,7 @@
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Ứng dụng không hỗ trợ chia đôi màn hình."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Ứng dụng không hỗ trợ khởi chạy trên màn hình phụ."</string>
-    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Mở cài đặt."</string>
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Mở phần cài đặt."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Mở cài đặt nhanh."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Đóng cài đặt nhanh."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Đã đặt báo thức."</string>
