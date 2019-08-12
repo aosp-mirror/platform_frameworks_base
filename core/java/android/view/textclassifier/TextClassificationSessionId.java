@@ -96,8 +96,6 @@ public final class TextClassificationSessionId implements Parcelable {
      * Flattens this id to a string.
      *
      * @return The flattened id.
-     *
-     * @hide
      */
     public @NonNull String flattenToString() {
         return mValue;
