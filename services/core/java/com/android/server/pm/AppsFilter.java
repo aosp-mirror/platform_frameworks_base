@@ -55,7 +55,14 @@ class AppsFilter {
 
     // Forces filtering logic to run for debug purposes.
     // STOPSHIP (b/136675067): should be false after development is complete
-    private static final boolean DEBUG_FILTERING = true;
+    private static final boolean DEBUG_RUN_WHEN_DISABLED = true;
+
+    // Logs all filtering instead of enforcing
+    private static final boolean DEBUG_ALLOW_ALL = false;
+
+    @SuppressWarnings("ConstantExpression")
+    private static final boolean DEBUG_LOGGING = false | DEBUG_RUN_WHEN_DISABLED | DEBUG_ALLOW_ALL;
+
     /**
      * This contains a list of packages that are implicitly queryable because another app explicitly
      * interacted with it. For example, if application A starts a service in application B,
@@ -278,7 +285,7 @@ class AppsFilter {
             return false;
         }
         final boolean featureEnabled = mConfigProvider.isEnabled();
-        if (!featureEnabled && !DEBUG_FILTERING) {
+        if (!featureEnabled && !DEBUG_RUN_WHEN_DISABLED) {
             return false;
         }
         if (callingSetting == null) {
@@ -328,9 +335,11 @@ class AppsFilter {
                         callingPkgSetting.pkg.packageName);
         switch (mode) {
             case AppOpsManager.MODE_DEFAULT:
-                // if default, let's rely on remote feature toggle to determine whether to
-                // actually filter
-                return true;
+                if (DEBUG_LOGGING) {
+                    Slog.d(TAG, "filtered interaction: " + callingPkgSetting.name + " -> "
+                            + targetPkgSetting.name + (DEBUG_ALLOW_ALL ? " ALLOWED" : ""));
+                }
+                return !DEBUG_ALLOW_ALL;
             case AppOpsManager.MODE_ALLOWED:
                 // explicitly allowed to see all packages, don't filter
                 return false;
