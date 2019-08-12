@@ -6286,6 +6286,7 @@ package android.service.attention {
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
+    ctor public AutofillFieldClassificationService();
     method public android.os.IBinder onBind(android.content.Intent);
     method @Nullable public float[][] onCalculateScores(@NonNull java.util.List<android.view.autofill.AutofillValue>, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>, @Nullable String, @Nullable android.os.Bundle, @Nullable java.util.Map, @Nullable java.util.Map);
     method @Deprecated @Nullable public float[][] onGetScores(@Nullable String, @Nullable android.os.Bundle, @NonNull java.util.List<android.view.autofill.AutofillValue>, @NonNull java.util.List<java.lang.String>);

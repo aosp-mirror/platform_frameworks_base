@@ -2465,6 +2465,7 @@ package android.service.appprediction {
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
+    ctor public AutofillFieldClassificationService();
     method public android.os.IBinder onBind(android.content.Intent);
     field public static final String REQUIRED_ALGORITHM_EDIT_DISTANCE = "EDIT_DISTANCE";
     field public static final String REQUIRED_ALGORITHM_EXACT_MATCH = "EXACT_MATCH";
