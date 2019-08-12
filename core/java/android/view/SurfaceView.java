@@ -166,6 +166,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     boolean mUseAlpha = false;
     float mSurfaceAlpha = 1f;
+    boolean mClipSurfaceToBounds;
 
     @UnsupportedAppUsage
     boolean mHaveFrame = false;
@@ -554,9 +555,52 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         super.dispatchDraw(canvas);
     }
 
+    /**
+     * Control whether the surface is clipped to the same bounds as the View. If true, then
+     * the bounds set by {@link #setClipBounds(Rect)} are applied to the surface as window-crop.
+     *
+     * @param enabled whether to enable surface clipping
+     * @hide
+     */
+    public void setEnableSurfaceClipping(boolean enabled) {
+        mClipSurfaceToBounds = enabled;
+        invalidate();
+    }
+
+    @Override
+    public void setClipBounds(Rect clipBounds) {
+        super.setClipBounds(clipBounds);
+
+        if (!mClipSurfaceToBounds) {
+            return;
+        }
+
+        // When cornerRadius is non-zero, a draw() is required to update
+        // the viewport (rounding the corners of the clipBounds).
+        if (mCornerRadius > 0f && !isAboveParent()) {
+            invalidate();
+        }
+
+        if (mSurfaceControl != null) {
+            if (mClipBounds != null) {
+                mTmpRect.set(mClipBounds);
+            } else {
+                mTmpRect.set(0, 0, mSurfaceWidth, mSurfaceHeight);
+            }
+            SyncRtSurfaceTransactionApplier applier = new SyncRtSurfaceTransactionApplier(this);
+            applier.scheduleApply(
+                    new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(mSurfaceControl)
+                            .withWindowCrop(mTmpRect)
+                            .build());
+        }
+    }
+
     private void clearSurfaceViewPort(Canvas canvas) {
         if (mCornerRadius > 0f) {
             canvas.getClipBounds(mTmpRect);
+            if (mClipSurfaceToBounds && mClipBounds != null) {
+                mTmpRect.intersect(mClipBounds);
+            }
             canvas.drawRoundRect(mTmpRect.left, mTmpRect.top, mTmpRect.right, mTmpRect.bottom,
                     mCornerRadius, mCornerRadius, mRoundedViewportPaint);
         } else {
@@ -579,6 +623,16 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mRoundedViewportPaint.setColor(0);
         }
         invalidate();
+    }
+
+    /**
+     * Returns the corner radius for the SurfaceView.
+
+     * @return the radius of the corners in pixels
+     * @hide
+     */
+    public float getCornerRadius() {
+        return mCornerRadius;
     }
 
     /**
@@ -832,7 +886,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             // crop the buffer to the surface size since the buffer producer may
                             // use SCALING_MODE_SCALE and submit a larger size than the surface
                             // size.
-                            mSurfaceControl.setWindowCrop(mSurfaceWidth, mSurfaceHeight);
+                            if (mClipSurfaceToBounds && mClipBounds != null) {
+                                mSurfaceControl.setWindowCrop(mClipBounds);
+                            } else {
+                                mSurfaceControl.setWindowCrop(mSurfaceWidth, mSurfaceHeight);
+                            }
                         }
                         mSurfaceControl.setCornerRadius(mCornerRadius);
                         if (sizeChanged && !creating) {
