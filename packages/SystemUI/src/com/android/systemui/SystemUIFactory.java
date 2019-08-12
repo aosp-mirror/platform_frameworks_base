@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.volume.VolumeDialogComponent;
 
@@ -145,9 +146,9 @@ public class SystemUIFactory {
             LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-            AlarmManager alarmManager) {
+            AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
         return new ScrimController(scrimBehind, scrimInFront, scrimStateListener,
-                scrimVisibleListener, dozeParameters, alarmManager);
+                scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
