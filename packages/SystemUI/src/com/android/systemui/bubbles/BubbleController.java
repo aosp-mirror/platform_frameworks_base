@@ -903,7 +903,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         @Override
         public void onTaskMovedToFront(RunningTaskInfo taskInfo) {
             if (mStackView != null && taskInfo.displayId == Display.DEFAULT_DISPLAY) {
-                mBubbleData.setExpanded(false);
+                if (!mStackView.isExpansionAnimating()) {
+                    mBubbleData.setExpanded(false);
+                }
             }
         }
 

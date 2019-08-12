@@ -663,6 +663,13 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
+     * Whether the stack of bubbles is animating to or from expansion.
+     */
+    public boolean isExpansionAnimating() {
+        return mIsExpansionAnimating;
+    }
+
+    /**
      * The {@link BubbleView} that is expanded, null if one does not exist.
      */
     BubbleView getExpandedBubbleView() {
