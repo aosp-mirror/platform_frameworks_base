@@ -527,7 +527,7 @@ public class ExifInterface {
     // Names for the data formats for debugging purpose.
     private static final String[] IFD_FORMAT_NAMES = new String[] {
             "", "BYTE", "STRING", "USHORT", "ULONG", "URATIONAL", "SBYTE", "UNDEFINED", "SSHORT",
-            "SLONG", "SRATIONAL", "SINGLE", "DOUBLE"
+            "SLONG", "SRATIONAL", "SINGLE", "DOUBLE", "IFD"
     };
     // Sizes of the components of each IFD value format
     private static final int[] IFD_FORMAT_BYTES_PER_FORMAT = new int[] {
