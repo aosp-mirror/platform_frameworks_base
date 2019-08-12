@@ -20663,6 +20663,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    preferred-xml [--full]: print preferred package settings as xml");
                 pw.println("    prov[iders]: dump content providers");
                 pw.println("    p[ackages]: dump installed packages");
+                pw.println("    q[ueries]: dump app queryability calculations");
                 pw.println("    s[hared-users]: dump shared user IDs");
                 pw.println("    m[essages]: print collected runtime messages");
                 pw.println("    v[erifiers]: print package verifier info");
@@ -20785,6 +20786,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_DOMAIN_PREFERRED);
             } else if ("p".equals(cmd) || "packages".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PACKAGES);
+            } else if ("q".equals(cmd) || "queries".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_QUERIES);
             } else if ("s".equals(cmd) || "shared-users".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_SHARED_USERS);
                 if (opti < args.length && "noperm".equals(args[opti])) {
@@ -21077,6 +21080,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
                 mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
+            }
+
+            if (dumpState.isDumping(DumpState.DUMP_QUERIES)) {
+                mAppsFilter.dumpQueries(pw, packageName, dumpState, mUserManager.getUserIds());
             }
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
