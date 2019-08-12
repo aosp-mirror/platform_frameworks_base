@@ -18,13 +18,20 @@ package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.Settings;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -32,6 +39,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
@@ -55,6 +63,9 @@ public final class TimeController extends StateController {
     /** Delay alarm tag for logging purposes */
     private final String DELAY_TAG = "*job.delay*";
 
+    private final Handler mHandler;
+    private final TcConstants mTcConstants;
+
     private long mNextJobExpiredElapsedMillis;
     private long mNextDelayExpiredElapsedMillis;
 
@@ -70,6 +81,14 @@ public final class TimeController extends StateController {
         mNextJobExpiredElapsedMillis = Long.MAX_VALUE;
         mNextDelayExpiredElapsedMillis = Long.MAX_VALUE;
         mChainedAttributionEnabled = mService.isChainedAttributionEnabled();
+
+        mHandler = new Handler(mContext.getMainLooper());
+        mTcConstants = new TcConstants(mHandler);
+    }
+
+    @Override
+    public void onSystemServicesReady() {
+        mTcConstants.start(mContext.getContentResolver());
     }
 
     /**
@@ -294,8 +313,7 @@ public final class TimeController extends StateController {
                 } else {
                     if (!wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
                         if (DEBUG) {
-                            Slog.i(TAG,
-                                    "Skipping " + job + " because delay won't make it ready.");
+                            Slog.i(TAG, "Skipping " + job + " because delay won't make it ready.");
                         }
                         continue;
                     }
@@ -354,7 +372,8 @@ public final class TimeController extends StateController {
     /**
      * Set an alarm with the {@link android.app.AlarmManager} for the next time at which a job's
      * delay will expire.
-     * This alarm <b>will</b> wake up the phone.
+     * This alarm <b>will not</b> wake up the phone if
+     * {@link TcConstants#USE_NON_WAKEUP_ALARM_FOR_DELAY} is true.
      */
     private void setDelayExpiredAlarmLocked(long alarmTimeElapsedMillis, WorkSource ws) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
@@ -362,8 +381,11 @@ public final class TimeController extends StateController {
             return;
         }
         mNextDelayExpiredElapsedMillis = alarmTimeElapsedMillis;
-        updateAlarmWithListenerLocked(DELAY_TAG, mNextDelayExpiredListener,
-                mNextDelayExpiredElapsedMillis, ws);
+        final int alarmType =
+                mTcConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY
+                        ? AlarmManager.ELAPSED_REALTIME : AlarmManager.ELAPSED_REALTIME_WAKEUP;
+        updateAlarmWithListenerLocked(DELAY_TAG, alarmType,
+                mNextDelayExpiredListener, mNextDelayExpiredElapsedMillis, ws);
     }
 
     /**
@@ -377,16 +399,16 @@ public final class TimeController extends StateController {
             return;
         }
         mNextJobExpiredElapsedMillis = alarmTimeElapsedMillis;
-        updateAlarmWithListenerLocked(DEADLINE_TAG, mDeadlineExpiredListener,
-                mNextJobExpiredElapsedMillis, ws);
+        updateAlarmWithListenerLocked(DEADLINE_TAG, AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                mDeadlineExpiredListener, mNextJobExpiredElapsedMillis, ws);
     }
 
     private long maybeAdjustAlarmTime(long proposedAlarmTimeElapsedMillis) {
         return Math.max(proposedAlarmTimeElapsedMillis, sElapsedRealtimeClock.millis());
     }
 
-    private void updateAlarmWithListenerLocked(String tag, OnAlarmListener listener,
-            long alarmTimeElapsed, WorkSource ws) {
+    private void updateAlarmWithListenerLocked(String tag, @AlarmManager.AlarmType int alarmType,
+            OnAlarmListener listener, long alarmTimeElapsed, WorkSource ws) {
         ensureAlarmServiceLocked();
         if (alarmTimeElapsed == Long.MAX_VALUE) {
             mAlarmService.cancel(listener);
@@ -394,7 +416,7 @@ public final class TimeController extends StateController {
             if (DEBUG) {
                 Slog.d(TAG, "Setting " + tag + " for: " + alarmTimeElapsed);
             }
-            mAlarmService.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTimeElapsed,
+            mAlarmService.set(alarmType, alarmTimeElapsed,
                     AlarmManager.WINDOW_HEURISTIC, 0, tag, listener, null, ws);
         }
     }
@@ -422,9 +444,77 @@ public final class TimeController extends StateController {
     };
 
     @VisibleForTesting
-    void recheckAlarmsLocked() {
-        checkExpiredDeadlinesAndResetAlarm();
-        checkExpiredDelaysAndResetAlarm();
+    class TcConstants extends ContentObserver {
+        private ContentResolver mResolver;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        private static final String KEY_USE_NON_WAKEUP_ALARM_FOR_DELAY =
+                "use_non_wakeup_delay_alarm";
+
+        private static final boolean DEFAULT_USE_NON_WAKEUP_ALARM_FOR_DELAY = true;
+
+        /**
+         * Whether or not TimeController should skip setting wakeup alarms for jobs that aren't
+         * ready now.
+         */
+        public boolean USE_NON_WAKEUP_ALARM_FOR_DELAY = DEFAULT_USE_NON_WAKEUP_ALARM_FOR_DELAY;
+
+        /**
+         * Creates a content observer.
+         *
+         * @param handler The handler to run {@link #onChange} on, or null if none.
+         */
+        TcConstants(Handler handler) {
+            super(handler);
+        }
+
+        private void start(ContentResolver resolver) {
+            mResolver = resolver;
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS), false, this);
+            onChange(true, null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            final String constants = Settings.Global.getString(
+                    mResolver, Settings.Global.JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS);
+
+            try {
+                mParser.setString(constants);
+            } catch (Exception e) {
+                // Failed to parse the settings string, log this and move on with defaults.
+                Slog.e(TAG, "Bad jobscheduler time controller settings", e);
+            }
+
+            USE_NON_WAKEUP_ALARM_FOR_DELAY = mParser.getBoolean(
+                    KEY_USE_NON_WAKEUP_ALARM_FOR_DELAY, DEFAULT_USE_NON_WAKEUP_ALARM_FOR_DELAY);
+            // Intentionally not calling checkExpiredDelaysAndResetAlarm() here. There's no need to
+            // iterate through the entire list again for this constant change. The next delay alarm
+            // that is set will make use of the new constant value.
+        }
+
+        private void dump(IndentingPrintWriter pw) {
+            pw.println();
+            pw.println("TimeController:");
+            pw.increaseIndent();
+            pw.printPair(KEY_USE_NON_WAKEUP_ALARM_FOR_DELAY,
+                    USE_NON_WAKEUP_ALARM_FOR_DELAY).println();
+            pw.decreaseIndent();
+        }
+
+        private void dump(ProtoOutputStream proto) {
+            final long tcToken = proto.start(ConstantsProto.TIME_CONTROLLER);
+            proto.write(ConstantsProto.TimeController.USE_NON_WAKEUP_ALARM_FOR_DELAY,
+                    USE_NON_WAKEUP_ALARM_FOR_DELAY);
+            proto.end(tcToken);
+        }
+    }
+
+    @VisibleForTesting
+    @NonNull
+    TcConstants getTcConstants() {
+        return mTcConstants;
     }
 
     @Override
@@ -500,5 +590,15 @@ public final class TimeController extends StateController {
 
         proto.end(mToken);
         proto.end(token);
+    }
+
+    @Override
+    public void dumpConstants(IndentingPrintWriter pw) {
+        mTcConstants.dump(pw);
+    }
+
+    @Override
+    public void dumpConstants(ProtoOutputStream proto) {
+        mTcConstants.dump(proto);
     }
 }

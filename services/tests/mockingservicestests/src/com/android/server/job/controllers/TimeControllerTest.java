@@ -71,6 +71,7 @@ public class TimeControllerTest {
     private static final String SOURCE_PACKAGE = "com.android.frameworks.mockingservicestests";
     private static final int SOURCE_USER_ID = 0;
 
+    private TimeController.TcConstants mConstants;
     private TimeController mTimeController;
 
     private MockitoSession mMockingSession;
@@ -110,6 +111,7 @@ public class TimeControllerTest {
 
         // Initialize real objects.
         mTimeController = new TimeController(mJobSchedulerService);
+        mConstants = mTimeController.getTcConstants();
         spyOn(mTimeController);
     }
 
@@ -525,6 +527,46 @@ public class TimeControllerTest {
         assertTrue(jobLatest.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY));
         inOrder.verify(mAlarmManager, never())
                 .set(anyInt(), anyLong(), anyLong(), anyLong(), anyString(), any(), any(), any());
+    }
+
+    @Test
+    public void testJobDelayWakeupAlarmToggling() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+
+        JobStatus job = createJobStatus(
+                "testMaybeStartTrackingJobLocked_DeadlineReverseOrder",
+                createJob().setMinimumLatency(HOUR_IN_MILLIS));
+
+        doReturn(true).when(mTimeController)
+                .wouldBeReadyWithConstraintLocked(eq(job), anyInt());
+
+        // Starting off with using a wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(),
+                        eq(TAG_DELAY), any(), any(), any());
+
+        // Use a non wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = true;
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(), eq(TAG_DELAY),
+                        any(), any(), any());
+
+        // Back off, use a wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(),
+                        eq(TAG_DELAY), any(), any(), any());
     }
 
     @Test
