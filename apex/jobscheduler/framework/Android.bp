@@ -1,0 +1,29 @@
+filegroup {
+    name: "jobscheduler-framework-source",
+    srcs: [
+        "java/**/*.java",
+        "java/android/app/job/IJobCallback.aidl",
+        "java/android/app/job/IJobScheduler.aidl",
+        "java/android/app/job/IJobService.aidl",
+    ],
+    path: "java",
+}
+
+java_library {
+    name: "jobscheduler-framework",
+    installable: true,
+    sdk_version: "core_platform",
+
+    srcs: [
+        ":jobscheduler-framework-source",
+    ],
+
+    aidl: {
+        export_include_dirs: [
+            "java",
+        ],
+    },
+    libs: [
+        "framework-minus-apex",
+    ],
+}
