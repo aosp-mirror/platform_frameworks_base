@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -107,12 +108,10 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                 public void onOverviewShown(boolean fromHome) {
                     handleOverviewShown();
                 }
-
-                @Override
-                public void onSystemUiStateChanged(int sysuiStateFlags) {
-                    handleSystemUiStateChanged(sysuiStateFlags);
-                }
             };
+
+    private final SysUiState.SysUiStateCallback mSysUiStateCallback =
+            this::handleSystemUiStateChanged;
     private final BroadcastReceiver mDefaultHomeBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -127,6 +126,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private final StatusBarStateController mStatusBarStateController;
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final OverviewProxyService mOverviewProxyService;
+    private final SysUiState mSysUiFlagContainer;
 
     private boolean mOnLockscreen;
     private boolean mIsDozing;
@@ -154,6 +154,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mSysUiFlagContainer = Dependency.get(SysUiState.class);
         mDefaultHomeIntentFilter = new IntentFilter();
         for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
             mDefaultHomeIntentFilter.addAction(action);
@@ -174,6 +175,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mRunningTaskId = runningTaskInfo == null ? 0 : runningTaskInfo.taskId;
         mActivityManagerWrapper.registerTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.addCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.addCallback(mSysUiStateCallback);
 
         mLearningTimeElapsed = Settings.Secure.getLong(
                 context.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, /* default = */ 0);
@@ -199,6 +201,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mActivityManagerWrapper.unregisterTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.removeCallback(mSysUiStateCallback);
     }
 
     @Override

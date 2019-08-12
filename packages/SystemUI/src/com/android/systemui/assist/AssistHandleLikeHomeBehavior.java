@@ -22,8 +22,8 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
@@ -41,15 +41,11 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
                     handleDozingChanged(isDozing);
                 }
             };
-    private final OverviewProxyService.OverviewProxyListener mOverviewProxyListener =
-            new OverviewProxyService.OverviewProxyListener() {
-        @Override
-        public void onSystemUiStateChanged(int sysuiStateFlags) {
-            handleSystemUiStateChange(sysuiStateFlags);
-        }
-    };
+
+    private final SysUiState.SysUiStateCallback mSysUiStateCallback =
+            this::handleSystemUiStateChange;
     private final StatusBarStateController mStatusBarStateController;
-    private final OverviewProxyService mOverviewProxyService;
+    private final SysUiState mSysUiFlagContainer;
 
     private boolean mIsDozing;
     private boolean mIsHomeHandleHiding;
@@ -58,7 +54,7 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
 
     AssistHandleLikeHomeBehavior() {
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mSysUiFlagContainer = Dependency.get(SysUiState.class);
     }
 
     @Override
@@ -66,14 +62,14 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
         mAssistHandleCallbacks = callbacks;
         mIsDozing = mStatusBarStateController.isDozing();
         mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mOverviewProxyService.addCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.addCallback(mSysUiStateCallback);
         callbackForCurrentState();
     }
 
     @Override
     public void onModeDeactivated() {
         mAssistHandleCallbacks = null;
-        mOverviewProxyService.removeCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.removeCallback(mSysUiStateCallback);
     }
 
     private static boolean isHomeHandleHiding(int sysuiStateFlags) {

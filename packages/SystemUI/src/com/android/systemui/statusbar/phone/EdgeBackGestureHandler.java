@@ -55,6 +55,7 @@ import android.view.WindowManagerGlobal;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -166,8 +167,10 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private RegionSamplingHelper mRegionSamplingHelper;
     private int mLeftInset;
     private int mRightInset;
+    private int mSysUiFlags;
 
-    public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService) {
+    public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService,
+            SysUiState sysUiFlagContainer) {
         final Resources res = context.getResources();
         mContext = context;
         mDisplayId = context.getDisplayId();
@@ -186,6 +189,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
         mMinArrowPosition = res.getDimensionPixelSize(R.dimen.navigation_edge_arrow_min_y);
         mFingerOffset = res.getDimensionPixelSize(R.dimen.navigation_edge_finger_offset);
         updateCurrentUserResources(res);
+        sysUiFlagContainer.addCallback(sysUiFlags -> mSysUiFlags = sysUiFlags);
     }
 
     public void updateCurrentUserResources(Resources res) {
@@ -352,10 +356,9 @@ public class EdgeBackGestureHandler implements DisplayListener {
         if (action == MotionEvent.ACTION_DOWN) {
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
-            int stateFlags = mOverviewProxyService.getSystemUiStateFlags();
             mIsOnLeftEdge = ev.getX() <= mEdgeWidth + mLeftInset;
             mInRejectedExclusion = false;
-            mAllowGesture = !QuickStepContract.isBackGestureDisabled(stateFlags)
+            mAllowGesture = !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
                 mEdgePanelLp.gravity = mIsOnLeftEdge
