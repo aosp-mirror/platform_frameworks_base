@@ -130,9 +130,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SU
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_ASSIGN_LAYERS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
-import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
-import static com.android.server.wm.WindowManagerService.WINDOW_FREEZE_TIMEOUT_DURATION;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowState.EXCLUSION_LEFT;
@@ -148,6 +146,7 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -323,7 +322,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final DisplayPolicy mDisplayPolicy;
-    private DisplayRotation mDisplayRotation;
+    private final DisplayRotation mDisplayRotation;
     DisplayFrames mDisplayFrames;
 
     private final RemoteCallbackList<ISystemGestureExclusionListener>
@@ -350,22 +349,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** The desired scaling factor for compatible apps. */
     float mCompatibleScreenScale;
-
-    /**
-     * Current rotation of the display.
-     * Constants as per {@link android.view.Surface.Rotation}.
-     *
-     * @see #updateRotationUnchecked()
-     */
-    private int mRotation = 0;
-
-    /**
-     * Last applied orientation of the display.
-     * Constants as per {@link android.content.pm.ActivityInfo.ScreenOrientation}.
-     *
-     * @see #updateOrientationFromAppTokens()
-     */
-    private int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     /**
      * Orientation forced by some window. If there is no visible window that specifies orientation
@@ -407,7 +390,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Accessed directly by all users.
     private boolean mLayoutNeeded;
     int pendingLayoutChanges;
-    int mDeferredRotationPauseCount;
 
     /**
      * Used to gate application window layout until we have sent the complete configuration.
@@ -1138,73 +1120,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mInsetsStateController;
     }
 
-    @VisibleForTesting
-    void setDisplayRotation(DisplayRotation displayRotation) {
-        mDisplayRotation = displayRotation;
-    }
-
+    @Surface.Rotation
     int getRotation() {
-        return mRotation;
+        return mDisplayRotation.getRotation();
     }
 
-    @VisibleForTesting
-    void setRotation(int newRotation) {
-        mRotation = newRotation;
-        mDisplayRotation.setRotation(newRotation);
-    }
-
+    @ScreenOrientation
     int getLastOrientation() {
-        return mLastOrientation;
+        return mDisplayRotation.getLastOrientation();
     }
 
+    @ScreenOrientation
     int getLastWindowForcedOrientation() {
         return mLastWindowForcedOrientation;
     }
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         mAppTransitionController.registerRemoteAnimations(definition);
-    }
-
-    /**
-     * Temporarily pauses rotation changes until resumed.
-     *
-     * This can be used to prevent rotation changes from occurring while the user is
-     * performing certain operations, such as drag and drop.
-     *
-     * This call nests and must be matched by an equal number of calls to
-     * {@link #resumeRotationLocked}.
-     */
-    void pauseRotationLocked() {
-        mDeferredRotationPauseCount++;
-    }
-
-    /**
-     * Resumes normal rotation changes after being paused.
-     */
-    void resumeRotationLocked() {
-        if (mDeferredRotationPauseCount <= 0) {
-            return;
-        }
-
-        mDeferredRotationPauseCount--;
-        if (mDeferredRotationPauseCount == 0) {
-            updateRotationAndSendNewConfigIfNeeded();
-        }
-    }
-
-    /**
-     * If this is true we have updated our desired orientation, but not yet changed the real
-     * orientation our applied our screen rotation animation. For example, because a previous
-     * screen rotation was in progress.
-     *
-     * @return {@code true} if the there is an ongoing rotation change.
-     */
-    boolean rotationNeedsUpdate() {
-        final int lastOrientation = getLastOrientation();
-        final int oldRotation = getRotation();
-
-        final int rotation = mDisplayRotation.rotationForOrientation(lastOrientation, oldRotation);
-        return oldRotation != rotation;
     }
 
     /**
@@ -1225,7 +1157,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         configureDisplayPolicy();
         setLayoutNeeded();
 
-        boolean configChanged = updateOrientationFromAppTokens();
+        boolean configChanged = updateOrientation();
         final Configuration currentDisplayConfig = getConfiguration();
         mTmpConfiguration.setTo(currentDisplayConfig);
         computeScreenConfiguration(mTmpConfiguration);
@@ -1263,8 +1195,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
             ConfigurationContainer requestingContainer) {
-        final Configuration config = updateOrientationFromAppTokens(
-                getRequestedOverrideConfiguration(), freezeDisplayToken, false);
+        final Configuration config = updateOrientation(
+                getRequestedOverrideConfiguration(), freezeDisplayToken, false /* forceUpdate */);
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
@@ -1298,31 +1230,35 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * Determine the new desired orientation of this display.
      *
-     * The orientation is computed from non-application windows first. If none of the
-     * non-application windows specify orientation, the orientation is computed from application
-     * tokens.
-     *
-     * @return {@code true} if the orientation is changed.
+     * @see #getOrientation()
+     * @return {@code true} if the orientation is changed and the caller should call
+     *         {@link #sendNewConfiguration} if the method returns {@code true}.
      */
-    boolean updateOrientationFromAppTokens() {
-        return updateOrientationFromAppTokens(false /* forceUpdate */);
+    boolean updateOrientation() {
+        return mDisplayRotation.updateOrientation(getOrientation(), false /* forceUpdate */);
     }
 
     /**
-     * Update orientation of the target display, returning a non-null new Configuration if it has
+     * Update orientation of the display, returning a non-null new Configuration if it has
      * changed from the current orientation. If a non-null configuration is returned, someone must
      * call {@link WindowManagerService#setNewDisplayOverrideConfiguration(Configuration,
      * DisplayContent)} to tell the window manager it can unfreeze the screen. This will typically
-     * be done by calling {@link WindowManagerService#sendNewConfiguration(int)}.
+     * be done by calling {@link #sendNewConfiguration}.
+     *
+     * @param currentConfig The current requested override configuration (it is usually set from
+     *                      the last {@link #sendNewConfiguration}) of the display. It is used to
+     *                      check if the configuration container has the latest state.
+     * @param freezeDisplayToken Freeze the app window token if the orientation is changed.
+     * @param forceUpdate See {@link DisplayRotation#updateRotationUnchecked(boolean)}
      */
-    Configuration updateOrientationFromAppTokens(Configuration currentConfig,
-            IBinder freezeDisplayToken, boolean forceUpdate) {
+    Configuration updateOrientation(Configuration currentConfig, IBinder freezeDisplayToken,
+            boolean forceUpdate) {
         if (!mDisplayReady) {
             return null;
         }
 
         Configuration config = null;
-        if (updateOrientationFromAppTokens(forceUpdate)) {
+        if (mDisplayRotation.updateOrientation(getOrientation(), forceUpdate)) {
             // If we changed the orientation but mOrientationChangeComplete is already true,
             // we used seamless rotation, and we don't need to freeze the screen.
             if (freezeDisplayToken != null && !mWmService.mRoot.mOrientationChangeComplete) {
@@ -1345,10 +1281,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (currentConfig.diff(mTmpConfiguration) != 0) {
                 mWaitingForConfig = true;
                 setLayoutNeeded();
-                int[] anim = new int[2];
-                getDisplayPolicy().selectRotationAnimationLw(anim);
-
-                mWmService.startFreezingDisplayLocked(anim[0], anim[1], this);
+                mDisplayRotation.prepareNormalRotationAnimation();
                 config = new Configuration(mTmpConfiguration);
             }
         }
@@ -1356,163 +1289,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return config;
     }
 
-
-    private boolean updateOrientationFromAppTokens(boolean forceUpdate) {
-        final int req = getOrientation();
-        if (req != mLastOrientation || forceUpdate) {
-            mLastOrientation = req;
-            mDisplayRotation.setCurrentOrientation(req);
-            return updateRotationUnchecked(forceUpdate);
-        }
-        return false;
-    }
-
-    /**
-     * Update rotation of the display and send configuration if the rotation is changed.
-     *
-     * @return {@code true} if the rotation has been changed and the new config is sent.
-     */
-    boolean updateRotationAndSendNewConfigIfNeeded() {
-        final boolean changed = updateRotationUnchecked(false /* forceUpdate */);
-        if (changed) {
-            sendNewConfiguration();
-        }
-        return changed;
-    }
-
     /**
      * Update rotation of the display.
      *
      * @return {@code true} if the rotation has been changed.  In this case YOU MUST CALL
-     *         {@link WindowManagerService#sendNewConfiguration(int)} TO UNFREEZE THE SCREEN.
+     *         {@link #sendNewConfiguration} TO UNFREEZE THE SCREEN.
      */
     boolean updateRotationUnchecked() {
-        return updateRotationUnchecked(false /* forceUpdate */);
-    }
-
-    /**
-     * Update rotation of the DisplayContent with an option to force the update. This updates
-     * the container's perception of rotation and, depending on the top activities, will freeze
-     * the screen or start seamless rotation. The display itself gets rotated in
-     * {@link #applyRotationLocked} during {@link DisplayContent#sendNewConfiguration}.
-     *
-     * @param forceUpdate Force the rotation update. Sometimes in WM we might skip updating
-     *                    orientation because we're waiting for some rotation to finish or display
-     *                    to unfreeze, which results in configuration of the previously visible
-     *                    activity being applied to a newly visible one. Forcing the rotation
-     *                    update allows to workaround this issue.
-     * @return {@code true} if the rotation has been changed.  In this case YOU MUST CALL
-     *         {@link WindowManagerService#sendNewConfiguration(int)} TO COMPLETE THE ROTATION AND
-     *         UNFREEZE THE SCREEN.
-     */
-    boolean updateRotationUnchecked(boolean forceUpdate) {
-        ScreenRotationAnimation screenRotationAnimation;
-        if (!forceUpdate) {
-            if (mDeferredRotationPauseCount > 0) {
-                // Rotation updates have been paused temporarily.  Defer the update until
-                // updates have been resumed.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, rotation is paused.");
-                return false;
-            }
-
-            screenRotationAnimation =
-                    mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
-            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
-                // Rotation updates cannot be performed while the previous rotation change
-                // animation is still in progress.  Skip this update.  We will try updating
-                // again after the animation is finished and the display is unfrozen.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, animation in progress.");
-                return false;
-            }
-            if (mWmService.mDisplayFrozen) {
-                // Even if the screen rotation animation has finished (e.g. isAnimating
-                // returns false), there is still some time where we haven't yet unfrozen
-                // the display. We also need to abort rotation here.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                        "Deferring rotation, still finishing previous rotation");
-                return false;
-            }
-        }
-
-        if (!mWmService.mDisplayEnabled) {
-            // No point choosing a rotation if the display is not enabled.
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, display is not enabled.");
-            return false;
-        }
-
-        final int oldRotation = mRotation;
-        final int lastOrientation = mLastOrientation;
-        final int rotation = mDisplayRotation.rotationForOrientation(lastOrientation, oldRotation);
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Computed rotation=" + rotation + " for display id="
-                + mDisplayId + " based on lastOrientation=" + lastOrientation
-                + " and oldRotation=" + oldRotation);
-        boolean mayRotateSeamlessly = mDisplayPolicy.shouldRotateSeamlessly(mDisplayRotation,
-                oldRotation, rotation);
-
-        if (mayRotateSeamlessly) {
-            final WindowState seamlessRotated = getWindow((w) -> w.mSeamlesslyRotated);
-            if (seamlessRotated != null && !forceUpdate) {
-                // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
-                // to complete (that is, waiting for windows to redraw). It's tempting to check
-                // w.mSeamlessRotationCount but that could be incorrect in the case of
-                // window-removal.
-                return false;
-            }
-
-            // In the presence of the PINNED stack or System Alert
-            // windows we unfortunately can not seamlessly rotate.
-            if (hasPinnedStack()) {
-                mayRotateSeamlessly = false;
-            }
-            for (int i = 0; i < mWmService.mSessions.size(); i++) {
-                if (mWmService.mSessions.valueAt(i).hasAlertWindowSurfaces()) {
-                    mayRotateSeamlessly = false;
-                    break;
-                }
-            }
-        }
-        final boolean rotateSeamlessly = mayRotateSeamlessly;
-
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
-                + " selected orientation " + lastOrientation
-                + ", got rotation " + rotation);
-
-        if (oldRotation == rotation) {
-            // No change.
-            return false;
-        }
-
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
-                + " rotation changed to " + rotation
-                + " from " + oldRotation
-                + ", lastOrientation=" + lastOrientation);
-
-        if (DisplayContent.deltaRotation(rotation, oldRotation) != 2) {
-            mWaitingForConfig = true;
-        }
-
-        mRotation = rotation;
-
-        mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
-        mWmService.mH.sendNewMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
-                this, WINDOW_FREEZE_TIMEOUT_DURATION);
-
-        setLayoutNeeded();
-        final int[] anim = new int[2];
-        mDisplayPolicy.selectRotationAnimationLw(anim);
-
-        if (!rotateSeamlessly) {
-            mWmService.startFreezingDisplayLocked(anim[0], anim[1], this);
-            // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
-        } else {
-            // The screen rotation animation uses a screenshot to freeze the screen
-            // while windows resize underneath.
-            // When we are rotating seamlessly, we allow the elements to transition
-            // to their rotated state independently and without a freeze required.
-            mWmService.startSeamlessRotation();
-        }
-
-        return true;
+        return mDisplayRotation.updateRotationUnchecked(false /* forceUpdate */);
     }
 
     /**
@@ -1523,10 +1307,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param rotation the rotation to apply.
      */
     void applyRotationLocked(final int oldRotation, final int rotation) {
-        mDisplayRotation.setRotation(rotation);
-        final boolean rotateSeamlessly = mWmService.isRotatingSeamlessly();
-        ScreenRotationAnimation screenRotationAnimation = rotateSeamlessly
+        mDisplayRotation.applyCurrentRotation(rotation);
+        final boolean rotateSeamlessly = mDisplayRotation.isRotatingSeamlessly();
+        final ScreenRotationAnimation screenRotationAnimation = rotateSeamlessly
                 ? null : mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+        final Transaction transaction = getPendingTransaction();
         // We need to update our screen size information to match the new rotation. If the rotation
         // has actually changed then this method will return true and, according to the comment at
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
@@ -1537,15 +1322,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // NOTE: We disable the rotation in the emulator because
         //       it doesn't support hardware OpenGL emulation yet.
         if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
-            screenRotationAnimation.setRotation(getPendingTransaction(), rotation);
+            screenRotationAnimation.setRotation(transaction, rotation);
         }
 
         forAllWindows(w -> {
-            w.seamlesslyRotateIfAllowed(getPendingTransaction(), oldRotation, rotation,
-                    rotateSeamlessly);
+            w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
         }, true /* traverseTopToBottom */);
 
-        mWmService.mDisplayManagerInternal.performTraversal(getPendingTransaction());
+        mWmService.mDisplayManagerInternal.performTraversal(transaction);
         scheduleAnimation();
 
         forAllWindows(w -> {
@@ -1627,19 +1411,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private DisplayInfo updateDisplayAndOrientation(int uiMode, Configuration outConfig) {
         // Use the effective "visual" dimensions based on current rotation
-        final boolean rotated = (mRotation == ROTATION_90 || mRotation == ROTATION_270);
+        final int rotation = getRotation();
+        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final int dw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
         final int dh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
 
         // Update application display metrics.
-        final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(mRotation);
+        final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(rotation);
         final DisplayCutout displayCutout = wmDisplayCutout.getDisplayCutout();
 
-        final int appWidth = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode,
+        final int appWidth = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
                 displayCutout);
-        final int appHeight = mDisplayPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
+        final int appHeight = mDisplayPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode,
                 displayCutout);
-        mDisplayInfo.rotation = mRotation;
+        mDisplayInfo.rotation = rotation;
         mDisplayInfo.logicalWidth = dw;
         mDisplayInfo.logicalHeight = dh;
         mDisplayInfo.logicalDensityDpi = mBaseDisplayDensity;
@@ -2044,7 +1829,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTaskStackContainers.getPinnedStack();
     }
 
-    private boolean hasPinnedStack() {
+    boolean hasPinnedStack() {
         return mTaskStackContainers.getPinnedStack() != null;
     }
 
@@ -2198,6 +1983,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mImeWindowsContainers.forAllWindows(callback, traverseTopToBottom);
     }
 
+    /**
+     * In the general case, the orientation is computed from the above app windows first. If none of
+     * the above app windows specify orientation, the orientation is computed from the child window
+     * container, e.g. {@link AppWindowToken#getOrientation(int)}.
+     */
     @Override
     int getOrientation() {
         final WindowManagerPolicy policy = mWmService.mPolicy;
@@ -2222,8 +2012,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // things aren't stable while the display is frozen, for example the window could be
                 // momentarily unavailable due to activity relaunch.
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
-                        + " is frozen while keyguard locked, return " + mLastOrientation);
-                return mLastOrientation;
+                        + " is frozen while keyguard locked, return " + getLastOrientation());
+                return getLastOrientation();
             }
         } else {
             final int orientation = mAboveAppWindowsContainers.getOrientation();
@@ -2835,7 +2625,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.writeToProto(proto, DISPLAY_INFO);
-        proto.write(ROTATION, mRotation);
+        proto.write(ROTATION, getRotation());
         final ScreenRotationAnimation screenRotationAnimation =
                 mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
         if (screenRotationAnimation != null) {
@@ -2892,8 +2682,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         pw.println();
         pw.print(prefix); pw.print("mLayoutSeq="); pw.println(mLayoutSeq);
-        pw.print(prefix);
-        pw.print("mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
 
         pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
         if (mLastFocus != mCurrentFocus) {
@@ -3262,6 +3050,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }, false /* traverseTopToBottom */);
 
         return mTmpWindow != null;
+    }
+
+    boolean hasAlertWindowSurfaces() {
+        for (int i = mWmService.mSessions.size() - 1; i >= 0; --i) {
+            if (mWmService.mSessions.valueAt(i).hasAlertWindowSurfaces(this)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -3747,7 +3544,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
-                if (updateOrientationFromAppTokens()) {
+                if (updateOrientation()) {
                     setLayoutNeeded();
                     sendNewConfiguration();
                 }
@@ -3887,7 +3684,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
         // TODO: Not sure if we really need to set the rotation here since we are updating from
         // the display info above...
-        mDisplayFrames.mRotation = mRotation;
+        mDisplayFrames.mRotation = getRotation();
         mDisplayPolicy.beginLayoutLw(mDisplayFrames, getConfiguration().uiMode);
 
         int seq = mLayoutSeq + 1;
@@ -3999,25 +3796,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             crop.left = dh - crop.bottom;
             crop.bottom = crop.right;
             crop.right = dh - tmp;
-        }
-    }
-
-    void onSeamlessRotationTimeout() {
-        // Used to indicate the layout is needed.
-        mTmpWindow = null;
-
-        forAllWindows(w -> {
-            if (!w.mSeamlesslyRotated) {
-                return;
-            }
-            mTmpWindow = w;
-            w.setDisplayLayoutNeeded();
-            w.finishSeamlessRotation(true /* timeout */);
-            mWmService.markForSeamlessRotation(w, false);
-        }, true /* traverseTopToBottom */);
-
-        if (mTmpWindow != null) {
-            mWmService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
@@ -4502,11 +4280,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
 
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                    "No app is requesting an orientation, return " + mLastOrientation
+                    "No app is requesting an orientation, return " + getLastOrientation()
                             + " for display id=" + mDisplayId);
             // The next app has not been requested to be visible, so we keep the current orientation
             // to prevent freezing/unfreezing the display too early.
-            return mLastOrientation;
+            return getLastOrientation();
         }
 
         @Override

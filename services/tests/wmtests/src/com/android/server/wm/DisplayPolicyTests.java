@@ -28,16 +28,12 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 
@@ -52,7 +48,6 @@ import static org.mockito.Mockito.when;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
@@ -213,32 +208,15 @@ public class DisplayPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    public void testShouldRotateSeamlessly() {
-        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+    public void testComputeTopFullscreenOpaqueWindow() {
         final WindowManager.LayoutParams attrs = mAppWindow.mAttrs;
         attrs.x = attrs.y = 0;
         attrs.height = attrs.width = WindowManager.LayoutParams.MATCH_PARENT;
-        attrs.rotationAnimation = ROTATION_ANIMATION_SEAMLESS;
-        final DisplayRotation displayRotation = mock(DisplayRotation.class);
-        doReturn(Surface.ROTATION_180).when(displayRotation).getUpsideDownRotation();
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        policy.applyPostLayoutPolicyLw(
+                mAppWindow, attrs, null /* attached */, null /* imeTarget */);
 
-        synchronized (mWm.mGlobalLock) {
-            policy.focusChangedLw(null /* lastFocus */, mAppWindow);
-            policy.applyPostLayoutPolicyLw(
-                    mAppWindow, attrs, null /* attached */, null /* imeTarget */);
-            spyOn(policy);
-            doReturn(true).when(policy).navigationBarCanMove();
-            // The focused fullscreen opaque window without override bounds should be able to be
-            // rotated seamlessly.
-            assertTrue(policy.shouldRotateSeamlessly(
-                    displayRotation, Surface.ROTATION_0, Surface.ROTATION_90));
-
-            spyOn(mAppWindow.mAppToken);
-            doReturn(false).when(mAppWindow.mAppToken).matchParentBounds();
-            // No seamless rotation if the window may be positioned with offset after rotation.
-            assertFalse(policy.shouldRotateSeamlessly(
-                    displayRotation, Surface.ROTATION_0, Surface.ROTATION_90));
-        }
+        assertEquals(mAppWindow, policy.getTopFullscreenOpaqueWindow());
     }
 
     @Test

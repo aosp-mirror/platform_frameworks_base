@@ -36,7 +36,6 @@ import static android.view.WindowManager.TRANSIT_UNSET;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
@@ -160,7 +159,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // Set initial orientation and update.
         mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        mDisplayContent.updateOrientationFromAppTokens(
+        mDisplayContent.updateOrientation(
                 mDisplayContent.getRequestedOverrideConfiguration(),
                 null /* freezeThisOneIfNeeded */, false /* forceUpdate */);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mDisplayContent.getLastOrientation());
@@ -168,7 +167,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // Update the orientation to perform 180 degree rotation and check that resize was reported.
         mToken.setOrientation(SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-        mDisplayContent.updateOrientationFromAppTokens(
+        mDisplayContent.updateOrientation(
                 mDisplayContent.getRequestedOverrideConfiguration(),
                 null /* freezeThisOneIfNeeded */, false /* forceUpdate */);
         // In this test, DC will not get config update. Set the waiting flag to false.
@@ -181,8 +180,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testLandscapeSeascapeRotationByPolicy() {
+        // This instance has been spied in {@link TestActivityDisplay}.
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
-        spyOn(displayRotation);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);

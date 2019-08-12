@@ -69,20 +69,22 @@ class TestActivityDisplay extends ActivityDisplay {
         mSupervisor = supervisor;
         spyOn(this);
         spyOn(mDisplayContent);
+
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        spyOn(displayRotation);
         doAnswer(invocation -> {
             // Bypass all the rotation animation and display freezing stuff for testing and just
             // set the rotation we want for the display
-            final DisplayContent dc = mDisplayContent;
-            final int oldRotation = dc.getRotation();
-            final int rotation = dc.getDisplayRotation().rotationForOrientation(
-                    dc.getLastOrientation(), oldRotation);
+            final int oldRotation = displayRotation.getRotation();
+            final int rotation = displayRotation.rotationForOrientation(
+                    displayRotation.getLastOrientation(), oldRotation);
             if (oldRotation == rotation) {
                 return false;
             }
-            dc.setLayoutNeeded();
-            dc.setRotation(rotation);
+            mDisplayContent.setLayoutNeeded();
+            displayRotation.setRotation(rotation);
             return true;
-        }).when(mDisplayContent).updateRotationUnchecked(anyBoolean());
+        }).when(displayRotation).updateRotationUnchecked(anyBoolean());
     }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")

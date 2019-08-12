@@ -305,7 +305,7 @@ class DragState {
             if (DEBUG_ORIENTATION) {
                 Slog.d(TAG_WM, "Pausing rotation during drag");
             }
-            mDisplayContent.pauseRotationLocked();
+            mDisplayContent.getDisplayRotation().pause();
         }
 
         void tearDown() {
@@ -324,7 +324,7 @@ class DragState {
             if (DEBUG_ORIENTATION) {
                 Slog.d(TAG_WM, "Resuming rotation after drag");
             }
-            mDisplayContent.resumeRotationLocked();
+            mDisplayContent.getDisplayRotation().resume();
         }
     }
 

@@ -462,7 +462,7 @@ public class AppTransitionController {
             // new rotation animation after the old one finally finishes. It's better to defer the
             // app transition.
             if (screenRotationAnimation != null && screenRotationAnimation.isAnimating() &&
-                    mService.getDefaultDisplayContentLocked().rotationNeedsUpdate()) {
+                    mDisplayContent.getDisplayRotation().needsUpdate()) {
                 if (DEBUG_APP_TRANSITIONS) {
                     Slog.v(TAG, "Delaying app transition for screen rotation animation to finish");
                 }
