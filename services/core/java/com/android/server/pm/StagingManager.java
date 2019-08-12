@@ -160,25 +160,29 @@ public class StagingManager {
         final ApexInfoList apexInfoList = mApexManager.submitStagedSession(session.sessionId,
                 childSessionsIds.toArray());
         final List<PackageInfo> result = new ArrayList<>();
-        for (ApexInfo newPackage : apexInfoList.apexInfos) {
-            final PackageInfo pkg;
+        for (ApexInfo apexInfo : apexInfoList.apexInfos) {
+            final PackageInfo packageInfo;
+            int flags = PackageManager.GET_META_DATA;
+            PackageParser.Package pkg;
             try {
-                pkg = PackageParser.generatePackageInfoFromApex(newPackage,
-                        PackageManager.GET_META_DATA);
+                File apexFile = new File(apexInfo.modulePath);
+                PackageParser pp = new PackageParser();
+                pkg = pp.parsePackage(apexFile, flags, false);
             } catch (PackageParserException e) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "Failed to parse APEX package " + newPackage.modulePath, e);
+                        "Failed to parse APEX package " + apexInfo.modulePath, e);
             }
-            final PackageInfo activePackage = mApexManager.getPackageInfo(pkg.packageName,
+            packageInfo = PackageParser.generatePackageInfo(pkg, apexInfo, flags);
+            final PackageInfo activePackage = mApexManager.getPackageInfo(packageInfo.packageName,
                     ApexManager.MATCH_ACTIVE_PACKAGE);
             if (activePackage == null) {
-                Slog.w(TAG, "Attempting to install new APEX package " + pkg.packageName);
+                Slog.w(TAG, "Attempting to install new APEX package " + packageInfo.packageName);
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                         "It is forbidden to install new APEX packages.");
             }
             checkRequiredVersionCode(session, activePackage);
-            checkDowngrade(session, activePackage, pkg);
-            result.add(pkg);
+            checkDowngrade(session, activePackage, packageInfo);
+            result.add(packageInfo);
         }
         Slog.d(TAG, "Session " + session.sessionId + " has following APEX packages: ["
                 + result.stream().map(p -> p.packageName).collect(Collectors.joining(",")) + "]");
