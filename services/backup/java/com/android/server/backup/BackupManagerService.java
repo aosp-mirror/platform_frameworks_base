@@ -38,7 +38,6 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -50,7 +49,6 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Set;
 
 /**
  * Definition of the system service that performs backup/restore operations.
@@ -70,14 +68,17 @@ public class BackupManagerService {
 
     private final Context mContext;
     private final Trampoline mTrampoline;
-
-    // Keeps track of all unlocked users registered with this service. Indexed by user id.
-    private final SparseArray<UserBackupManagerService> mServiceUsers = new SparseArray<>();
+    private final SparseArray<UserBackupManagerService> mServiceUsers;
 
     /** Instantiate a new instance of {@link BackupManagerService}. */
-    public BackupManagerService(Context context, Trampoline trampoline) {
+    public BackupManagerService(
+            Context context,
+            Trampoline trampoline,
+            SparseArray<UserBackupManagerService> userServices) {
         mContext = checkNotNull(context);
         mTrampoline = checkNotNull(trampoline);
+        // TODO(b/135661048): Remove
+        mServiceUsers = userServices;
     }
 
     /**
@@ -97,48 +98,6 @@ public class BackupManagerService {
     // ---------------------------------------------
     // USER LIFECYCLE CALLBACKS
     // ---------------------------------------------
-
-    /**
-     * Starts the backup service for user {@code userId} by creating a new instance of {@link
-     * UserBackupManagerService} and registering it with this service.
-     */
-    @VisibleForTesting
-    protected void startServiceForUser(int userId, Set<ComponentName> transportWhitelist) {
-        if (mServiceUsers.get(userId) != null) {
-            Slog.i(TAG, "userId " + userId + " already started, so not starting again");
-            return;
-        }
-
-        UserBackupManagerService userBackupManagerService =
-                UserBackupManagerService.createAndInitializeService(
-                        userId, mContext, mTrampoline, transportWhitelist);
-        startServiceForUser(userId, userBackupManagerService);
-    }
-
-    /**
-     * Starts the backup service for user {@code userId} by registering its instance of {@link
-     * UserBackupManagerService} with this service and setting enabled state.
-     */
-    void startServiceForUser(int userId, UserBackupManagerService userBackupManagerService) {
-        mServiceUsers.put(userId, userBackupManagerService);
-
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
-        userBackupManagerService.initializeBackupEnableState();
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-    }
-
-    /** Stops the backup service for user {@code userId} when the user is stopped. */
-    @VisibleForTesting
-    protected void stopServiceForUser(int userId) {
-        UserBackupManagerService userBackupManagerService = mServiceUsers.removeReturnOld(userId);
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.tearDownService();
-
-            KeyValueBackupJob.cancel(userId, mContext);
-            FullBackupJob.cancel(userId, mContext);
-        }
-    }
 
     boolean isAbleToServeUser(int userId) {
         return getUserServices().get(UserHandle.USER_SYSTEM) != null
@@ -453,7 +412,7 @@ public class BackupManagerService {
         }
 
         for (int userId : userIds) {
-            UserBackupManagerService userBackupManagerService = getUserServices().get(userId);
+            UserBackupManagerService userBackupManagerService = mServiceUsers.get(userId);
             if (userBackupManagerService != null) {
                 if (userBackupManagerService.getAncestralSerialNumber() == ancestralSerialNumber) {
                     return UserHandle.of(userId);

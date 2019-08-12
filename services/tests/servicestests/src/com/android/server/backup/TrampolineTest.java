@@ -22,11 +22,11 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -39,6 +39,7 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.ISelectBackupTransportCallback;
+import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -71,7 +72,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -129,16 +129,17 @@ public class TrampolineTest {
     private TrampolineTestable mTrampoline;
     private File mTestDir;
     private File mSuppressFile;
+    private SparseArray<UserBackupManagerService> mUserServices;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mUserId = UserHandle.USER_SYSTEM;
 
-        SparseArray<UserBackupManagerService> serviceUsers = new SparseArray<>();
-        serviceUsers.append(UserHandle.USER_SYSTEM, mUserBackupManagerService);
-        serviceUsers.append(NON_USER_SYSTEM, mUserBackupManagerService);
-        when(mBackupManagerServiceMock.getUserServices()).thenReturn(serviceUsers);
+        mUserServices = new SparseArray<>();
+        mUserServices.append(UserHandle.USER_SYSTEM, mUserBackupManagerService);
+        mUserServices.append(NON_USER_SYSTEM, mUserBackupManagerService);
+        when(mBackupManagerServiceMock.getUserServices()).thenReturn(mUserServices);
 
         when(mUserManagerMock.getUserInfo(UserHandle.USER_SYSTEM)).thenReturn(mUserInfoMock);
         when(mUserManagerMock.getUserInfo(NON_USER_SYSTEM)).thenReturn(mUserInfoMock);
@@ -159,7 +160,9 @@ public class TrampolineTest {
         setUpStateFilesForNonSystemUser(NON_USER_SYSTEM);
         setUpStateFilesForNonSystemUser(UNSTARTED_NON_USER_SYSTEM);
 
-        mTrampoline = new TrampolineTestable(mContextMock);
+        when(mContextMock.getSystemService(Context.JOB_SCHEDULER_SERVICE))
+                .thenReturn(mock(JobScheduler.class));
+        mTrampoline = new TrampolineTestable(mContextMock, mUserServices);
     }
 
     private void setUpStateFilesForNonSystemUser(int userId) {
@@ -190,9 +193,8 @@ public class TrampolineTest {
 
     @Test
     public void testOnUnlockUser_forNonSystemUserWhenBackupsDisabled_doesNotStartUser() {
-        when(mBackupManagerServiceMock.getUserServices()).thenReturn(new SparseArray<>());
         TrampolineTestable.sBackupDisabled = true;
-        TrampolineTestable trampoline = new TrampolineTestable(mContextMock);
+        TrampolineTestable trampoline = new TrampolineTestable(mContextMock, new SparseArray<>());
         ConditionVariable unlocked = new ConditionVariable(false);
 
         trampoline.onUnlockUser(NON_USER_SYSTEM);
@@ -204,9 +206,8 @@ public class TrampolineTest {
 
     @Test
     public void testOnUnlockUser_forSystemUserWhenBackupsDisabled_doesNotStartUser() {
-        when(mBackupManagerServiceMock.getUserServices()).thenReturn(new SparseArray<>());
         TrampolineTestable.sBackupDisabled = true;
-        TrampolineTestable trampoline = new TrampolineTestable(mContextMock);
+        TrampolineTestable trampoline = new TrampolineTestable(mContextMock, new SparseArray<>());
         ConditionVariable unlocked = new ConditionVariable(false);
 
         trampoline.onUnlockUser(UserHandle.USER_SYSTEM);
@@ -218,9 +219,8 @@ public class TrampolineTest {
 
     @Test
     public void testOnUnlockUser_whenBackupNotActivated_doesNotStartUser() {
-        when(mBackupManagerServiceMock.getUserServices()).thenReturn(new SparseArray<>());
         TrampolineTestable.sBackupDisabled = false;
-        TrampolineTestable trampoline = new TrampolineTestable(mContextMock);
+        TrampolineTestable trampoline = new TrampolineTestable(mContextMock, new SparseArray<>());
         trampoline.setBackupServiceActive(NON_USER_SYSTEM, false);
         ConditionVariable unlocked = new ConditionVariable(false);
 
@@ -229,16 +229,13 @@ public class TrampolineTest {
         trampoline.getBackupHandler().post(unlocked::open);
         unlocked.block();
         assertNull(trampoline.getUserService(NON_USER_SYSTEM));
-        //noinspection unchecked
-        verify(mBackupManagerServiceMock, never()).startServiceForUser(
-                eq(NON_USER_SYSTEM), any(Set.class));
     }
 
     @Test
     public void testIsBackupServiceActive_forSystemUserWhenBackupDisabled_returnsTrue()
             throws Exception {
         TrampolineTestable.sBackupDisabled = true;
-        Trampoline trampoline = new TrampolineTestable(mContextMock);
+        Trampoline trampoline = new TrampolineTestable(mContextMock, mUserServices);
         trampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
 
         assertFalse(trampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
@@ -248,7 +245,7 @@ public class TrampolineTest {
     public void testIsBackupServiceActive_forNonSystemUserWhenBackupDisabled_returnsTrue()
             throws Exception {
         TrampolineTestable.sBackupDisabled = true;
-        Trampoline trampoline = new TrampolineTestable(mContextMock);
+        Trampoline trampoline = new TrampolineTestable(mContextMock, mUserServices);
         trampoline.setBackupServiceActive(NON_USER_SYSTEM, true);
 
         assertFalse(trampoline.isBackupServiceActive(NON_USER_SYSTEM));
@@ -396,7 +393,7 @@ public class TrampolineTest {
     @Test
     public void setBackupServiceActive_backupDisabled_ignored() {
         TrampolineTestable.sBackupDisabled = true;
-        TrampolineTestable trampoline = new TrampolineTestable(mContextMock);
+        TrampolineTestable trampoline = new TrampolineTestable(mContextMock, mUserServices);
 
         trampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
 
@@ -1045,7 +1042,7 @@ public class TrampolineTest {
 
     public void testGetUserForAncestralSerialNumber() {
         TrampolineTestable.sBackupDisabled = false;
-        Trampoline trampoline = new TrampolineTestable(mContextMock);
+        Trampoline trampoline = new TrampolineTestable(mContextMock, mUserServices);
 
         trampoline.getUserForAncestralSerialNumber(0L);
         verify(mBackupManagerServiceMock).getUserForAncestralSerialNumber(anyInt());
@@ -1053,7 +1050,7 @@ public class TrampolineTest {
 
     public void testGetUserForAncestralSerialNumber_whenDisabled() {
         TrampolineTestable.sBackupDisabled = true;
-        Trampoline trampoline = new TrampolineTestable(mContextMock);
+        Trampoline trampoline = new TrampolineTestable(mContextMock, mUserServices);
 
         trampoline.getUserForAncestralSerialNumber(0L);
         verify(mBackupManagerServiceMock, never()).getUserForAncestralSerialNumber(anyInt());
@@ -1069,8 +1066,8 @@ public class TrampolineTest {
         static SparseArray<File> sRememberActivatedFiles = new SparseArray<>();
         static UserManager sUserManagerMock = null;
 
-        TrampolineTestable(Context context) {
-            super(context);
+        TrampolineTestable(Context context, SparseArray<UserBackupManagerService> userServices) {
+            super(context, userServices);
             mService = sBackupManagerServiceMock;
         }
 
