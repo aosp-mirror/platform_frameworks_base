@@ -39,7 +39,7 @@ import android.os.Handler;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -71,7 +71,7 @@ public class BluetoothConstraintTest {
     private BluetoothManager mBluetoothManager;
 
     @Mock
-    private DeviceIdleController.LocalService mDeviceIdleService;
+    private DeviceIdleInternal mDeviceIdleService;
 
     private BluetoothConstraint mConstraint;
 

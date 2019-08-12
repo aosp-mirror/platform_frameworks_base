@@ -231,7 +231,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
@@ -4830,7 +4830,7 @@ public class NotificationManagerService extends SystemService {
                 final ActivityManagerInternal am = LocalServices
                         .getService(ActivityManagerInternal.class);
                 final long duration = LocalServices.getService(
-                        DeviceIdleController.LocalService.class).getNotificationWhitelistDuration();
+                        DeviceIdleInternal.class).getNotificationWhitelistDuration();
                 for (int i = 0; i < intentCount; i++) {
                     PendingIntent pendingIntent = notification.allPendingIntents.valueAt(i);
                     if (pendingIntent != null) {

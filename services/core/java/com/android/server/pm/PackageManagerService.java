@@ -290,7 +290,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.AttributeCache;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -816,7 +816,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<UserManagerService> mUserManagerProducer;
         private final Singleton<Settings> mSettingsProducer;
         private final Singleton<ActivityTaskManagerInternal> mActivityTaskManagerProducer;
-        private final Singleton<DeviceIdleController.LocalService> mLocalDeviceIdleController;
+        private final Singleton<DeviceIdleInternal> mLocalDeviceIdleController;
         private final Singleton<StorageManagerInternal> mStorageManagerInternalProducer;
         private final Singleton<NetworkPolicyManagerInternal> mNetworkPolicyManagerProducer;
         private final Singleton<PermissionPolicyInternal> mPermissionPolicyProducer;
@@ -832,7 +832,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Producer<UserManagerService> userManagerProducer,
                 Producer<Settings> settingsProducer,
                 Producer<ActivityTaskManagerInternal> activityTaskManagerProducer,
-                Producer<DeviceIdleController.LocalService> deviceIdleControllerProducer,
+                Producer<DeviceIdleInternal> deviceIdleControllerProducer,
                 Producer<StorageManagerInternal> storageManagerInternalProducer,
                 Producer<NetworkPolicyManagerInternal> networkPolicyManagerProducer,
                 Producer<PermissionPolicyInternal> permissionPolicyProvider,
@@ -912,7 +912,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mActivityTaskManagerProducer.get(this, mPackageManager);
         }
 
-        public DeviceIdleController.LocalService getLocalDeviceIdleController() {
+        public DeviceIdleInternal getLocalDeviceIdleController() {
             return mLocalDeviceIdleController.get(this, mPackageManager);
         }
 
@@ -1249,7 +1249,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setTemporaryAppWhitelistDuration(whitelistTimeout);
 
-            DeviceIdleController.LocalService idleController =
+            DeviceIdleInternal idleController =
                     mInjector.getLocalDeviceIdleController();
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
                     mIntentFilterVerifierComponent.getPackageName(), whitelistTimeout,
@@ -2425,7 +2425,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 i.getPermissionManagerServiceInternal().getPermissionSettings(),
                                 lock),
                 new Injector.LocalServicesProducer<>(ActivityTaskManagerInternal.class),
-                new Injector.LocalServicesProducer<>(DeviceIdleController.LocalService.class),
+                new Injector.LocalServicesProducer<>(DeviceIdleInternal.class),
                 new Injector.LocalServicesProducer<>(StorageManagerInternal.class),
                 new Injector.LocalServicesProducer<>(NetworkPolicyManagerInternal.class),
                 new Injector.LocalServicesProducer<>(PermissionPolicyInternal.class),
@@ -14511,7 +14511,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
                             receivers, verificationState);
 
-                    DeviceIdleController.LocalService idleController =
+                    DeviceIdleInternal idleController =
                             mInjector.getLocalDeviceIdleController();
                     final long idleDuration = getVerificationTimeout();
 

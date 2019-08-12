@@ -89,7 +89,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppStateTracker;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
@@ -207,7 +207,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     PackageManagerInternal mLocalPM;
     ActivityManagerInternal mActivityManagerInternal;
     IBatteryStats mBatteryStats;
-    DeviceIdleController.LocalService mLocalDeviceIdleController;
+    DeviceIdleInternal mLocalDeviceIdleController;
     AppStateTracker mAppStateTracker;
     final UsageStatsManagerInternal mUsageStats;
 
@@ -1399,8 +1399,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mReadyToRock = true;
                 mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                         BatteryStats.SERVICE_NAME));
-                mLocalDeviceIdleController
-                        = LocalServices.getService(DeviceIdleController.LocalService.class);
+                mLocalDeviceIdleController =
+                        LocalServices.getService(DeviceIdleInternal.class);
                 // Create the "runners".
                 for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
                     mActiveServices.add(
