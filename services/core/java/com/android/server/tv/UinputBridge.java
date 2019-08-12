@@ -16,12 +16,11 @@
 
 package com.android.server.tv;
 
-import android.os.Binder;
 import android.os.IBinder;
 
-import java.io.IOException;
-
 import dalvik.system.CloseGuard;
+
+import java.io.IOException;
 
 /**
  * Sends the input event to the linux driver.
@@ -35,7 +34,6 @@ public final class UinputBridge {
                                           int maxPointers);
     private static native void nativeClose(long ptr);
     private static native void nativeClear(long ptr);
-    private static native void nativeSendTimestamp(long ptr, long timestamp);
     private static native void nativeSendKey(long ptr, int keyCode, boolean down);
     private static native void nativeSendPointerDown(long ptr, int pointerId, int x, int y);
     private static native void nativeSendPointerUp(long ptr, int pointerId);
@@ -91,12 +89,6 @@ public final class UinputBridge {
 
     protected boolean isTokenValid(IBinder token) {
         return mToken.equals(token);
-    }
-
-    public void sendTimestamp(IBinder token, long timestamp) {
-        if (isTokenValid(token)) {
-            nativeSendTimestamp(mPtr, timestamp);
-        }
     }
 
     public void sendKeyDown(IBinder token, int keyCode) {

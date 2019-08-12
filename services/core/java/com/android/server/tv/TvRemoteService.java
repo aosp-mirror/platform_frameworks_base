@@ -147,13 +147,6 @@ public class TvRemoteService extends SystemService implements Watchdog.Monitor {
         }
     }
 
-    private void sendTimeStampInternalLocked(IBinder token, long timestamp) {
-        UinputBridge inputBridge = mBridgeMap.get(token);
-        if (inputBridge != null) {
-            inputBridge.sendTimestamp(token, timestamp);
-        }
-    }
-
     private void sendKeyDownInternalLocked(IBinder token, int keyCode) {
         if (DEBUG_KEYS) {
             Slog.d(TAG, "sendKeyDownInternalLocked(), token: " + token + ", keyCode: " + keyCode);
@@ -293,15 +286,6 @@ public class TvRemoteService extends SystemService implements Watchdog.Monitor {
             synchronized (mLock) {
                 if (mProviderList.contains(provider)) {
                     mService.clearInputBridgeInternalLocked(token);
-                }
-            }
-        }
-
-        @Override
-        public void sendTimeStamp(TvRemoteProviderProxy provider, IBinder token, long timestamp) {
-            synchronized (mLock) {
-                if (mProviderList.contains(provider)) {
-                    mService.sendTimeStampInternalLocked(token, timestamp);
                 }
             }
         }

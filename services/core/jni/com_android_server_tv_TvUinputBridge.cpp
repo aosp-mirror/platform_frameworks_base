@@ -43,10 +43,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-// Refer to EventHub.h
-#define MSC_ANDROID_TIME_SEC 0x6
-#define MSC_ANDROID_TIME_USEC 0x7
-
 #define SLOT_UNKNOWN -1
 
 namespace android {
@@ -153,11 +149,6 @@ NativeConnection* NativeConnection::open(const char* name, const char* uniqueId,
         ioctl(fd, UI_SET_KEYBIT, KEYS[i].linuxKeyCode);
     }
 
-    // set the misc events maps
-    ioctl(fd, UI_SET_EVBIT, EV_MSC);
-    ioctl(fd, UI_SET_MSCBIT, MSC_ANDROID_TIME_SEC);
-    ioctl(fd, UI_SET_MSCBIT, MSC_ANDROID_TIME_USEC);
-
     // register the input device
     if (write(fd, &uinp, sizeof(uinp)) != sizeof(uinp)) {
         ALOGE("Cannot write uinput_user_dev to fd %d: %s.", fd, strerror(errno));
@@ -198,13 +189,6 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz,
 static void nativeClose(JNIEnv* env, jclass clazz, jlong ptr) {
     NativeConnection* connection = reinterpret_cast<NativeConnection*>(ptr);
     delete connection;
-}
-
-static void nativeSendTimestamp(JNIEnv* env, jclass clazz, jlong ptr, jlong timestamp) {
-    NativeConnection* connection = reinterpret_cast<NativeConnection*>(ptr);
-
-    connection->sendEvent(EV_MSC, MSC_ANDROID_TIME_SEC, timestamp / 1000L);
-    connection->sendEvent(EV_MSC, MSC_ANDROID_TIME_USEC, (timestamp % 1000L) * 1000L);
 }
 
 static void nativeSendKey(JNIEnv* env, jclass clazz, jlong ptr, jint keyCode, jboolean down) {
@@ -281,8 +265,6 @@ static JNINativeMethod gUinputBridgeMethods[] = {
         (void*)nativeOpen },
     { "nativeClose", "(J)V",
         (void*)nativeClose },
-    { "nativeSendTimestamp", "(JJ)V",
-        (void*)nativeSendTimestamp },
     { "nativeSendKey", "(JIZ)V",
         (void*)nativeSendKey },
     { "nativeSendPointerDown", "(JIII)V",
