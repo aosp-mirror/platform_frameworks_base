@@ -367,10 +367,8 @@ message MemInfoDumpProto {
         optional int32 id = 3;
         optional bool is_proc = 4;
         optional bool has_activities = 5;
-        oneof ss_kb {
-            int64 pss_kb = 6;
-            int64 rss_kb = 9;
-        }
+        optional int64 pss_kb = 6;
+        optional int64 rss_kb = 9;
         optional int64 swap_pss_kb = 7;
         repeated MemItem sub_items = 8;
     }

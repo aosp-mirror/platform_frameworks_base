@@ -12204,11 +12204,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.write(MemInfoDumpProto.MemItem.IS_PROC, mi.isProc);
             proto.write(MemInfoDumpProto.MemItem.ID, mi.id);
             proto.write(MemInfoDumpProto.MemItem.HAS_ACTIVITIES, mi.hasActivities);
-            if (dumpPss) {
-                proto.write(MemInfoDumpProto.MemItem.PSS_KB, mi.pss);
-            } else {
-                proto.write(MemInfoDumpProto.MemItem.RSS_KB, mi.mRss);
-            }
+            proto.write(MemInfoDumpProto.MemItem.PSS_KB, mi.pss);
+            proto.write(MemInfoDumpProto.MemItem.RSS_KB, mi.mRss);
             if (dumpSwapPss) {
                 proto.write(MemInfoDumpProto.MemItem.SWAP_PSS_KB, mi.swapPss);
             }
