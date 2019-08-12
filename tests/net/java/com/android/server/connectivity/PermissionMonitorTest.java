@@ -265,6 +265,8 @@ public class PermissionMonitorTest {
         assertFalse(mPermissionMonitor.hasNetworkPermission(app));
         app = systemPackageInfoWithPermissions(CONNECTIVITY_USE_RESTRICTED_NETWORKS);
         assertFalse(mPermissionMonitor.hasNetworkPermission(app));
+        app = systemPackageInfoWithPermissions(CONNECTIVITY_INTERNAL);
+        assertFalse(mPermissionMonitor.hasNetworkPermission(app));
     }
 
     @Test
@@ -274,7 +276,7 @@ public class PermissionMonitorTest {
                 PARTITION_SYSTEM, VERSION_P, MOCK_UID1, CHANGE_NETWORK_STATE));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, MOCK_UID1, NETWORK_STACK));
-        assertTrue(hasRestrictedNetworkPermission(
+        assertFalse(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, MOCK_UID1, CONNECTIVITY_INTERNAL));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, MOCK_UID1, CONNECTIVITY_USE_RESTRICTED_NETWORKS));
@@ -283,7 +285,7 @@ public class PermissionMonitorTest {
 
         assertFalse(hasRestrictedNetworkPermission(PARTITION_SYSTEM, VERSION_Q, MOCK_UID1));
         assertFalse(hasRestrictedNetworkPermission(
-                PARTITION_SYSTEM, VERSION_Q, MOCK_UID1, CHANGE_WIFI_STATE));
+                PARTITION_SYSTEM, VERSION_Q, MOCK_UID1, CONNECTIVITY_INTERNAL));
     }
 
     @Test
@@ -291,14 +293,14 @@ public class PermissionMonitorTest {
         doReturn(VERSION_P).when(mPermissionMonitor).getDeviceFirstSdkInt();
         assertTrue(hasRestrictedNetworkPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID));
         assertTrue(hasRestrictedNetworkPermission(
-                PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CHANGE_WIFI_STATE));
+                PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CONNECTIVITY_INTERNAL));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CONNECTIVITY_USE_RESTRICTED_NETWORKS));
 
         doReturn(VERSION_Q).when(mPermissionMonitor).getDeviceFirstSdkInt();
         assertFalse(hasRestrictedNetworkPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID));
         assertFalse(hasRestrictedNetworkPermission(
-                PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID, CHANGE_WIFI_STATE));
+                PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID, CONNECTIVITY_INTERNAL));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID, CONNECTIVITY_USE_RESTRICTED_NETWORKS));
     }
@@ -319,7 +321,7 @@ public class PermissionMonitorTest {
 
         assertFalse(hasRestrictedNetworkPermission(PARTITION_VENDOR, VERSION_Q, MOCK_UID1));
         assertFalse(hasRestrictedNetworkPermission(
-                PARTITION_VENDOR, VERSION_Q, MOCK_UID1, CHANGE_WIFI_STATE));
+                PARTITION_VENDOR, VERSION_Q, MOCK_UID1, CONNECTIVITY_INTERNAL));
         assertFalse(hasRestrictedNetworkPermission(
                 PARTITION_VENDOR, VERSION_Q, MOCK_UID1, CHANGE_NETWORK_STATE));
     }
@@ -337,7 +339,7 @@ public class PermissionMonitorTest {
     public void testHasUseBackgroundNetworksPermission() throws Exception {
         assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(SYSTEM_UID));
         assertBackgroundPermission(false, SYSTEM_PACKAGE1, SYSTEM_UID);
-        assertBackgroundPermission(false, SYSTEM_PACKAGE1, SYSTEM_UID, CHANGE_WIFI_STATE);
+        assertBackgroundPermission(false, SYSTEM_PACKAGE1, SYSTEM_UID, CONNECTIVITY_INTERNAL);
         assertBackgroundPermission(true, SYSTEM_PACKAGE1, SYSTEM_UID, CHANGE_NETWORK_STATE);
         assertBackgroundPermission(true, SYSTEM_PACKAGE1, SYSTEM_UID, NETWORK_STACK);
 
@@ -348,8 +350,9 @@ public class PermissionMonitorTest {
 
         assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID2));
         assertBackgroundPermission(false, MOCK_PACKAGE2, MOCK_UID2);
-        assertBackgroundPermission(true, MOCK_PACKAGE2, MOCK_UID2,
+        assertBackgroundPermission(false, MOCK_PACKAGE2, MOCK_UID2,
                 CONNECTIVITY_INTERNAL);
+        assertBackgroundPermission(true, MOCK_PACKAGE2, MOCK_UID2, NETWORK_STACK);
     }
 
     private class NetdMonitor {

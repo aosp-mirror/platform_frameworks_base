@@ -1006,7 +1006,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     @Nullable
     public Network getActiveNetworkForUid(int uid) {
         return getActiveNetworkForUid(uid, false);
@@ -1135,7 +1135,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     @UnsupportedAppUsage
     public NetworkInfo getActiveNetworkInfoForUid(int uid) {
         return getActiveNetworkInfoForUid(uid, false);
@@ -1370,10 +1370,14 @@ public class ConnectivityManager {
      * The system network validation may be using different strategies to detect captive portals,
      * so this method does not necessarily return a URL used by the system. It only returns a URL
      * that may be relevant for other components trying to detect captive portals.
+     *
      * @hide
+     * @deprecated This API returns URL which is not guaranteed to be one of the URLs used by the
+     *             system.
      */
+    @Deprecated
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String getCaptivePortalServerUrl() {
         try {
             return mService.getCaptivePortalServerUrl();
@@ -2400,6 +2404,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more {@code String} of tethered dhcp ranges.
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String[] getTetheredDhcpRanges() {
         try {
             return mService.getTetheredDhcpRanges();
@@ -2979,7 +2984,7 @@ public class ConnectivityManager {
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void setGlobalProxy(ProxyInfo p) {
         try {
             mService.setGlobalProxy(p);
@@ -3124,6 +3129,7 @@ public class ConnectivityManager {
      * Get the mobile provisioning url.
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String getMobileProvisioningUrl() {
         try {
             return mService.getMobileProvisioningUrl();
@@ -3170,6 +3176,7 @@ public class ConnectivityManager {
 
     /** {@hide} - returns the factory serial number */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkFactory(Messenger messenger, String name) {
         try {
             return mService.registerNetworkFactory(messenger, name);
@@ -3180,6 +3187,7 @@ public class ConnectivityManager {
 
     /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public void unregisterNetworkFactory(Messenger messenger) {
         try {
             mService.unregisterNetworkFactory(messenger);
@@ -3197,6 +3205,7 @@ public class ConnectivityManager {
      * Register a NetworkAgent with ConnectivityService.
      * @return NetID corresponding to NetworkAgent.
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc) {
         return registerNetworkAgent(messenger, ni, lp, nc, score, misc,
@@ -3208,6 +3217,7 @@ public class ConnectivityManager {
      * Register a NetworkAgent with ConnectivityService.
      * @return NetID corresponding to NetworkAgent.
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc, int factorySerialNumber) {
         try {
@@ -4202,7 +4212,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void startCaptivePortalApp(Network network) {
         try {
             mService.startCaptivePortalApp(network);
@@ -4318,6 +4328,7 @@ public class ConnectivityManager {
      * Resets all connectivity manager settings back to factory defaults.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void factoryReset() {
         try {
             mService.factoryReset();
