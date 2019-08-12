@@ -21,10 +21,10 @@
 #include <inttypes.h>
 
 #include "android_os_Parcel.h"
-#include "GraphicBuffer.h"
-#include "GraphicsJNI.h"
+#include "android/graphics/GraphicsJNI.h"
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
 
 #include <binder/Parcel.h>
 
@@ -266,7 +266,7 @@ static jlong android_graphics_GraphicBuffer_read(JNIEnv* env, jobject clazz,
 // External helpers
 // ----------------------------------------------------------------------------
 
-sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
+sp<GraphicBuffer> android_graphics_GraphicBuffer_getNativeGraphicsBuffer(JNIEnv* env, jobject obj) {
     if (obj) {
         jlong nativeObject = env->GetLongField(obj, gGraphicBufferClassInfo.mNativeObject);
         GraphicBufferWrapper* wrapper = (GraphicBufferWrapper*) nativeObject;
@@ -278,7 +278,9 @@ sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
     return NULL;
 }
 
-jobject createJavaGraphicBuffer(JNIEnv* env, const sp<GraphicBuffer>& buffer) {
+jobject android_graphics_GraphicBuffer_createFromAHardwareBuffer(JNIEnv* env,
+                                                                 AHardwareBuffer* hardwareBuffer) {
+    GraphicBuffer* buffer = GraphicBuffer::fromAHardwareBuffer(hardwareBuffer);
     GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(buffer);
     jobject obj = env->NewObject(gGraphicBufferClassInfo.mClass,
             gGraphicBufferClassInfo.mConstructorMethodID, buffer->getWidth(), buffer->getHeight(),

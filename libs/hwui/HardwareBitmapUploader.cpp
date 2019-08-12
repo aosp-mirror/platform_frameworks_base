@@ -403,8 +403,9 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
     if (!sUploader->uploadHardwareBitmap(bitmap, format, buffer)) {
         return nullptr;
     }
-    return Bitmap::createFrom(buffer, bitmap.colorType(), bitmap.refColorSpace(),
-                              bitmap.alphaType(), Bitmap::computePalette(bitmap));
+    return Bitmap::createFrom(buffer->toAHardwareBuffer(), bitmap.colorType(),
+                              bitmap.refColorSpace(), bitmap.alphaType(),
+			      Bitmap::computePalette(bitmap));
 }
 
 void HardwareBitmapUploader::initialize() {
