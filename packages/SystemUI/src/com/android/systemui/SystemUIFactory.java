@@ -115,6 +115,10 @@ public class SystemUIFactory {
                 .dependencyProvider(new com.android.systemui.DependencyProvider())
                 .contextHolder(new ContextHolder(context))
                 .build();
+
+        // Every other part of our codebase currently relies on Dependency, so we
+        // really need to ensure the Dependency gets initialized early on.
+        Dependency.initDependencies(mRootComponent);
     }
 
     public SystemUIRootComponent getRootComponent() {
@@ -127,7 +131,7 @@ public class SystemUIFactory {
     }
 
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils,  ViewGroup container,
+            LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,

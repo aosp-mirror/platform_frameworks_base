@@ -25,10 +25,6 @@ public class TestableDependency extends Dependency {
     private final ArraySet<Object> mInstantiatedObjects = new ArraySet<>();
 
     public TestableDependency(Context context) {
-        if (context instanceof SysuiTestableContext) {
-            mComponents = ((SysuiTestableContext) context).getComponents();
-        }
-        mContext = context;
         SystemUIFactory.createFromConfig(context);
         SystemUIFactory.getInstance().getRootComponent()
                 .createDependency()
