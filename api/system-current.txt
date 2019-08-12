@@ -58,7 +58,7 @@ package android {
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final String CONFIGURE_WIFI_DISPLAY = "android.permission.CONFIGURE_WIFI_DISPLAY";
-    field public static final String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
+    field @Deprecated public static final String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
     field public static final String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
     field public static final String CONTROL_DISPLAY_COLOR_TRANSFORMS = "android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS";
     field public static final String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
@@ -126,6 +126,7 @@ package android {
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final String NETWORK_CARRIER_PROVISIONING = "android.permission.NETWORK_CARRIER_PROVISIONING";
+    field public static final String NETWORK_FACTORY = "android.permission.NETWORK_FACTORY";
     field public static final String NETWORK_MANAGED_PROVISIONING = "android.permission.NETWORK_MANAGED_PROVISIONING";
     field public static final String NETWORK_SCAN = "android.permission.NETWORK_SCAN";
     field public static final String NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
@@ -135,6 +136,7 @@ package android {
     field public static final String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
+    field public static final String OBSERVE_NETWORK_POLICY = "android.permission.OBSERVE_NETWORK_POLICY";
     field public static final String OBSERVE_ROLE_HOLDERS = "android.permission.OBSERVE_ROLE_HOLDERS";
     field public static final String OPEN_ACCESSIBILITY_DETAILS_SETTINGS = "android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
@@ -4340,7 +4342,7 @@ package android.net {
   public class ConnectivityManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull android.os.ParcelFileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull java.net.Socket, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
-    method @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS) public String getCaptivePortalServerUrl();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String getCaptivePortalServerUrl();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);

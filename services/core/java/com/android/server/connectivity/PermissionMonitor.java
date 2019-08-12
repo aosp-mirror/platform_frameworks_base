@@ -17,7 +17,6 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
-import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.NETWORK_STACK;
@@ -25,6 +24,7 @@ import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
@@ -259,7 +259,8 @@ public class PermissionMonitor {
                 return true;
             }
         }
-        return hasPermission(app, CONNECTIVITY_INTERNAL)
+
+        return hasPermission(app, PERMISSION_MAINLINE_NETWORK_STACK)
                 || hasPermission(app, NETWORK_STACK)
                 || hasPermission(app, CONNECTIVITY_USE_RESTRICTED_NETWORKS);
     }
