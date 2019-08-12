@@ -29,6 +29,8 @@ import android.view.ViewTreeObserver;
 
 import com.android.systemui.R;
 
+import java.io.PrintWriter;
+
 /**
  * A helper class to sample regions on the screen and inspect its luminosity.
  */
@@ -62,6 +64,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private final float mLuminanceThreshold;
     private final float mLuminanceChangeThreshold;
     private boolean mFirstSamplingAfterStart;
+    private boolean mWindowVisible;
     private SurfaceControl mRegisteredStopLayer = null;
     private ViewTreeObserver.OnDrawListener mUpdateOnDraw = new ViewTreeObserver.OnDrawListener() {
         @Override
@@ -148,7 +151,9 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     }
 
     private void updateSamplingListener() {
-        boolean isSamplingEnabled = mSamplingEnabled && !mSamplingRequestBounds.isEmpty()
+        boolean isSamplingEnabled = mSamplingEnabled
+                && !mSamplingRequestBounds.isEmpty()
+                && mWindowVisible
                 && (mSampledView.isAttachedToWindow() || mFirstSamplingAfterStart);
         if (isSamplingEnabled) {
             ViewRootImpl viewRootImpl = mSampledView.getViewRootImpl();
@@ -214,6 +219,24 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
             mSamplingRequestBounds.set(sampledRegion);
             updateSamplingListener();
         }
+    }
+
+    void setWindowVisible(boolean visible) {
+        mWindowVisible = visible;
+        updateSamplingListener();
+    }
+
+    void dump(PrintWriter pw) {
+        pw.println("RegionSamplingHelper:");
+        pw.println("  sampleView isAttached: " + mSampledView.isAttachedToWindow());
+        pw.println("  sampleView isScValid: " + (mSampledView.isAttachedToWindow()
+                ? mSampledView.getViewRootImpl().getSurfaceControl().isValid()
+                : "false"));
+        pw.println("  mSamplingListenerRegistered: " + mSamplingListenerRegistered);
+        pw.println("  mSamplingRequestBounds: " + mSamplingRequestBounds);
+        pw.println("  mLastMedianLuma: " + mLastMedianLuma);
+        pw.println("  mCurrentMedianLuma: " + mCurrentMedianLuma);
+        pw.println("  mWindowVisible: " + mWindowVisible);
     }
 
     public interface SamplingCallback {

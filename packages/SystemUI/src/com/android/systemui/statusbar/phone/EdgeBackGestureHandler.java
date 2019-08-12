@@ -297,6 +297,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
                             return mSamplingRect;
                         }
                     });
+            mRegionSamplingHelper.setWindowVisible(true);
         }
     }
 
