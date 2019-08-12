@@ -1880,15 +1880,14 @@
   <java-symbol type="anim" name="screen_rotate_180_enter" />
   <java-symbol type="anim" name="screen_rotate_180_exit" />
   <java-symbol type="anim" name="screen_rotate_180_frame" />
+  <java-symbol type="anim" name="screen_rotate_alpha"/>
   <java-symbol type="anim" name="screen_rotate_finish_enter" />
   <java-symbol type="anim" name="screen_rotate_finish_exit" />
   <java-symbol type="anim" name="screen_rotate_finish_frame" />
   <java-symbol type="anim" name="screen_rotate_minus_90_enter" />
   <java-symbol type="anim" name="screen_rotate_minus_90_exit" />
-  <java-symbol type="anim" name="screen_rotate_minus_90_frame" />
   <java-symbol type="anim" name="screen_rotate_plus_90_enter" />
   <java-symbol type="anim" name="screen_rotate_plus_90_exit" />
-  <java-symbol type="anim" name="screen_rotate_plus_90_frame" />
   <java-symbol type="anim" name="screen_rotate_start_enter" />
   <java-symbol type="anim" name="screen_rotate_start_exit" />
   <java-symbol type="anim" name="screen_rotate_start_frame" />

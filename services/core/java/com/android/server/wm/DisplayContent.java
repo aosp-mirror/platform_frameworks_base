@@ -521,9 +521,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private int mDeferUpdateImeTargetCount;
 
-    /** Temporary float array to retrieve 3x3 matrix values. */
-    private final float[] mTmpFloats = new float[9];
-
     private MagnificationSpec mMagnificationSpec;
 
     private InputMonitor mInputMonitor;
@@ -4659,20 +4656,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void prepareSurfaces() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "prepareSurfaces");
         try {
-            final ScreenRotationAnimation screenRotationAnimation =
-                    mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
             final Transaction transaction = getPendingTransaction();
-            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
-                screenRotationAnimation.getEnterTransformation().getMatrix().getValues(mTmpFloats);
-                transaction.setMatrix(mWindowingLayer,
-                        mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
-                        mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-                transaction.setPosition(mWindowingLayer,
-                        mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
-                transaction.setAlpha(mWindowingLayer,
-                        screenRotationAnimation.getEnterTransformation().getAlpha());
-            }
-
             super.prepareSurfaces();
 
             // TODO: Once we totally eliminate global transaction we will pass transaction in here
@@ -4900,6 +4884,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @VisibleForTesting
     SurfaceControl getWindowingLayer() {
         return mWindowingLayer;
+    }
+
+    SurfaceControl getOverlayLayer() {
+        return mOverlayLayer;
     }
 
     /**

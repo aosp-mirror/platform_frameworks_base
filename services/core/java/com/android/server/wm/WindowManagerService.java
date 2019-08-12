@@ -5458,7 +5458,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     getTransitionAnimationScaleLocked(), displayInfo.logicalWidth,
                         displayInfo.logicalHeight, mExitAnimId, mEnterAnimId)) {
                 mTransaction.apply();
-                scheduleAnimationLocked();
             } else {
                 screenRotationAnimation.kill();
                 mAnimator.setScreenRotationAnimationLocked(displayId, null);

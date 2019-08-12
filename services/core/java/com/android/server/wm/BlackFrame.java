@@ -40,7 +40,8 @@ public class BlackFrame {
         final SurfaceControl surface;
 
         BlackSurface(SurfaceControl.Transaction transaction, int layer,
-                int l, int t, int r, int b, DisplayContent dc) throws OutOfResourcesException {
+                int l, int t, int r, int b, DisplayContent dc,
+                SurfaceControl surfaceControl) throws OutOfResourcesException {
             left = l;
             top = t;
             this.layer = layer;
@@ -50,7 +51,7 @@ public class BlackFrame {
             surface = dc.makeOverlay()
                     .setName("BlackSurface")
                     .setColorLayer()
-                    .setParent(null) // TODO: Work-around for b/69259549
+                    .setParent(surfaceControl)
                     .build();
             transaction.setWindowCrop(surface, w, h);
             transaction.setLayerStack(surface, dc.getDisplayId());
@@ -114,7 +115,8 @@ public class BlackFrame {
     }
 
     public BlackFrame(Supplier<SurfaceControl.Transaction> factory, SurfaceControl.Transaction t,
-            Rect outer, Rect inner, int layer, DisplayContent dc, boolean forceDefaultOrientation)
+            Rect outer, Rect inner, int layer, DisplayContent dc, boolean forceDefaultOrientation,
+            SurfaceControl surfaceControl)
             throws OutOfResourcesException {
         boolean success = false;
 
@@ -128,19 +130,20 @@ public class BlackFrame {
         try {
             if (outer.top < inner.top) {
                 mBlackSurfaces[0] = new BlackSurface(t, layer,
-                        outer.left, outer.top, inner.right, inner.top, dc);
+                        outer.left, outer.top, inner.right, inner.top, dc, surfaceControl);
             }
             if (outer.left < inner.left) {
                 mBlackSurfaces[1] = new BlackSurface(t, layer,
-                        outer.left, inner.top, inner.left, outer.bottom, dc);
+                        outer.left, inner.top, inner.left, outer.bottom, dc, surfaceControl);
             }
             if (outer.bottom > inner.bottom) {
                 mBlackSurfaces[2] = new BlackSurface(t, layer,
-                        inner.left, inner.bottom, outer.right, outer.bottom, dc);
+                        inner.left, inner.bottom, outer.right, outer.bottom, dc,
+                        surfaceControl);
             }
             if (outer.right > inner.right) {
                 mBlackSurfaces[3] = new BlackSurface(t, layer,
-                        inner.right, outer.top, outer.right, inner.bottom, dc);
+                        inner.right, outer.top, outer.right, inner.bottom, dc, surfaceControl);
             }
             success = true;
         } finally {
