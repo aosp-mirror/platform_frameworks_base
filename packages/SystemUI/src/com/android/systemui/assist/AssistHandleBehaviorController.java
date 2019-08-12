@@ -177,6 +177,12 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mBehaviorMap.get(mCurrentBehavior).onAssistantGesturePerformed();
     }
 
+    void onAssistHandlesRequested() {
+        if (mInGesturalMode) {
+            mBehaviorMap.get(mCurrentBehavior).onAssistHandlesRequested();
+        }
+    }
+
     void setBehavior(AssistHandleBehavior behavior) {
         if (mCurrentBehavior == behavior) {
             return;
@@ -316,6 +322,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         void onModeActivated(Context context, AssistHandleCallbacks callbacks);
         default void onModeDeactivated() {}
         default void onAssistantGesturePerformed() {}
+        default void onAssistHandlesRequested() {}
         default void dump(PrintWriter pw, String prefix) {}
     }
 }

@@ -97,6 +97,8 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
     private static final String INVOCATION_PHONE_STATE_KEY = "invocation_phone_state";
     public static final String INVOCATION_TYPE_KEY = "invocation_type";
+    protected static final String ACTION_KEY = "action";
+    protected static final String SHOW_ASSIST_HANDLES_ACTION = "show_assist_handles";
 
     public static final int INVOCATION_TYPE_GESTURE = 1;
     public static final int INVOCATION_TYPE_ACTIVE_EDGE = 2;
@@ -204,6 +206,9 @@ public class AssistManager implements ConfigurationChangedReceiver {
                         if (VERBOSE) {
                             Log.v(TAG, "UI hints received");
                         }
+                        if (SHOW_ASSIST_HANDLES_ACTION.equals(hints.getString(ACTION_KEY))) {
+                            requestAssistHandles();
+                        }
                     }
                 });
     }
@@ -275,6 +280,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
      */
     public void onGestureCompletion(float velocity) {
         mUiController.onGestureCompletion(velocity);
+    }
+
+    protected void requestAssistHandles() {
+        mHandleController.onAssistHandlesRequested();
     }
 
     public void hideAssist() {
