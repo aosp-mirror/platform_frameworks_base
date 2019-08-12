@@ -403,6 +403,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     || checkUidChangedLocked(connection, callingUid, resolvedUserId)) {
                 return;
             }
+            ITvInputHardwareCallback callback = connection.getCallbackLocked();
+            if (callback != null) {
+                callback.asBinder().unlinkToDeath(connection, 0);
+            }
             connection.resetLocked(null, null, null, null, null);
         }
     }
