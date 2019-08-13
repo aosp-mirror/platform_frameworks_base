@@ -19,11 +19,49 @@
 #include <utils/Log.h>
 #include <ui/ColorSpace.h>
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
+#include <android/hardware_buffer.h>
+#endif
+
 #include <algorithm>
 #include <cmath>
 
 namespace android {
 namespace uirenderer {
+
+#ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
+SkImageInfo BufferDescriptionToImageInfo(const AHardwareBuffer_Desc& bufferDesc,
+                                         sk_sp<SkColorSpace> colorSpace) {
+    SkColorType colorType = kUnknown_SkColorType;
+    SkAlphaType alphaType = kOpaque_SkAlphaType;
+    switch (bufferDesc.format) {
+        case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
+            colorType = kN32_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
+        case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
+            colorType = kN32_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
+            break;
+        case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
+            colorType = kRGB_565_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
+            break;
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
+            colorType = kRGBA_1010102_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
+        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+            colorType = kRGBA_F16_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
+        default:
+            ALOGV("Unsupported format: %d, return unknown by default", bufferDesc.format);
+            break;
+    }
+    return SkImageInfo::Make(bufferDesc.width, bufferDesc.height, colorType, alphaType, colorSpace);
+}
+#endif
 
 android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType) {
     switch (colorType) {

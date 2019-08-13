@@ -57,6 +57,7 @@ import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/wifi/enums.proto";
 import "frameworks/base/core/proto/android/stats/textclassifier/textclassifier_enums.proto";
+import "frameworks/base/core/proto/android/stats/otaupdate/updateengine_enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -330,6 +331,8 @@ message Atom {
             222  [(log_from_module) = "textclassifier"];
         ExclusionRectStateChanged exclusion_rect_state_changed = 223;
         BackGesture back_gesture_reported_reported = 224;
+        UpdateEngineUpdateAttemptReported update_engine_update_attempt_reported = 225;
+        UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
     }
 
     // Pulled events will start at field 10000.
@@ -6968,4 +6971,71 @@ message LanguageDetectionEvent {
 
     // Position of this action.
     optional int32 action_index = 7;
+}
+
+/**
+ * Information about an OTA update attempt by update_engine.
+ * Logged from platform/system/update_engine/metrics_reporter_android.cc
+ */
+message UpdateEngineUpdateAttemptReported {
+    // The number of attempts for the update engine to apply a given payload.
+    optional int32 attempt_number = 1;
+
+    optional android.stats.otaupdate.PayloadType payload_type = 2;
+
+    // The total time in minutes for the update engine to apply a given payload.
+    // The time is calculated by calling clock_gettime() / CLOCK_BOOTTIME; and
+    // it's increased when the system is sleeping.
+    optional int32 duration_boottime_in_minutes = 3;
+
+    // The total time in minutes for the update engine to apply a given payload.
+    // The time is calculated by calling clock_gettime() / CLOCK_MONOTONIC_RAW;
+    // and it's not increased when the system is sleeping.
+    optional int32 duration_monotonic_in_minutes = 4;
+
+    // The size of the payload in MiBs.
+    optional int32 payload_size_mib = 5;
+
+    // The attempt result reported by the update engine for an OTA update.
+    optional android.stats.otaupdate.AttemptResult attempt_result = 6;
+
+    // The error code reported by the update engine after an OTA update attempt
+    // on A/B devices.
+    optional android.stats.otaupdate.ErrorCode error_code = 7;
+
+    // The build fingerprint of the source system. The value is read from a
+    // system property when the device takes the update. e.g.
+    // Android/aosp_sailfish/sailfish:10/QP1A.190425.004/5507117:userdebug/test-keys
+    optional string source_fingerprint = 8;
+}
+
+/**
+ * Information about all the attempts the device make before finishing the
+ * successful update.
+ * Logged from platform/system/update_engine/metrics_reporter_android.cc
+ */
+message UpdateEngineSuccessfulUpdateReported {
+    // The number of attempts for the update engine to apply the payload for a
+    // successful update.
+    optional int32 attempt_count = 1;
+
+    optional android.stats.otaupdate.PayloadType payload_type = 2;
+
+    optional int32 payload_size_mib = 3;
+
+    // The total number of bytes downloaded by update_engine since the last
+    // successful update.
+    optional int32 total_bytes_downloaded_mib = 4;
+
+    // The ratio in percentage of the over-downloaded bytes compared to the
+    // total bytes needed to successfully install the update. e.g. 200 if we
+    // download 200MiB in total for a 100MiB package.
+    optional int32 download_overhead_percentage = 5;
+
+    // The total time in minutes for the update engine to apply the payload for a
+    // successful update.
+    optional int32 total_duration_minutes = 6;
+
+    // The number of reboot of the device during a successful update.
+    optional int32 reboot_count = 7;
 }

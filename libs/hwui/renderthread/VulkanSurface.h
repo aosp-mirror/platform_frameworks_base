@@ -18,6 +18,7 @@
 #include <system/graphics.h>
 #include <system/window.h>
 #include <ui/BufferQueueDefs.h>
+#include <ui/PixelFormat.h>
 #include <vulkan/vulkan.h>
 
 #include <SkRefCnt.h>

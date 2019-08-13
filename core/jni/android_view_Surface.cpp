@@ -21,12 +21,12 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include "android_os_Parcel.h"
-#include "android/graphics/GraphicBuffer.h"
 #include "android/graphics/GraphicsJNI.h"
 
 #include "core_jni_helpers.h"
-#include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
+#include <android_runtime/android_view_Surface.h>
 #include <android_runtime/Log.h>
 
 #include <binder/Parcel.h>
@@ -35,6 +35,7 @@
 #include <gui/view/Surface.h>
 #include <gui/SurfaceControl.h>
 
+#include <ui/GraphicBuffer.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
 
@@ -432,8 +433,9 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
 static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv *env, jclass clazz, jlong nativeObject,
         jobject graphicBuffer, jint colorSpaceId) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    sp<GraphicBuffer> bp = graphicBufferForJavaObject(env, graphicBuffer);
-    int err = Surface::attachAndQueueBufferWithDataspace(surface, bp,
+    sp<GraphicBuffer> gb(android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env,
+                                                                                graphicBuffer));
+    int err = Surface::attachAndQueueBufferWithDataspace(surface, gb,
             fromNamedColorSpaceValueToDataspace(colorSpaceId));
     return err;
 }

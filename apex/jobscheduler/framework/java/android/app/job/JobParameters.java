@@ -52,6 +52,11 @@ public class JobParameters implements Parcelable {
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
+     *
+     * Note the order of these values will affect "dumpsys batterystats", and we do not want to
+     * change the order of existing fields, so adding new fields is okay but do not remove or
+     * change existing fields. When deprecating a field, just replace that with "-1" in this array.
+     *
      * @hide
      */
     public static final int[] JOB_STOP_REASON_CODES = {

@@ -56,11 +56,10 @@ public class MediaRouter2Manager {
     final String mPackageName;
 
     private Context mContext;
+    @GuardedBy("sLock")
     private Client mClient;
     private final IMediaRouterService mMediaRouterService;
     final Handler mHandler;
-
-    @GuardedBy("sLock")
     final List<CallbackRecord> mCallbacks = new CopyOnWriteArrayList<>();
 
     @SuppressWarnings("WeakerAccess") /* synthetic access */
@@ -73,6 +72,7 @@ public class MediaRouter2Manager {
 
     /**
      * Gets an instance of media router manager that controls media route of other applications.
+     *
      * @return The media router manager instance for the context.
      */
     public static MediaRouter2Manager getInstance(@NonNull Context context) {
@@ -96,28 +96,29 @@ public class MediaRouter2Manager {
     /**
      * Registers a callback to listen route info.
      *
-     * @param executor The executor that runs the callback.
-     * @param callback The callback to add.
+     * @param executor the executor that runs the callback
+     * @param callback the callback to add
      */
-    public void addCallback(@NonNull @CallbackExecutor Executor executor,
+    public void registerCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) {
-
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(callback, "callback must not be null");
 
-        synchronized (sLock) {
-            if (findCallbackRecordIndex(callback) >= 0) {
+        synchronized (mCallbacks) {
+            if (findCallbackRecordIndexLocked(callback) >= 0) {
                 Log.w(TAG, "Ignoring to add the same callback twice.");
                 return;
             }
-            if (mCallbacks.size() == 0) {
-                Client client = new Client();
-                try {
-                    mMediaRouterService.registerManagerAsUser(client, mPackageName,
-                            UserHandle.myUserId());
-                    mClient = client;
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to register media router manager.", ex);
+            synchronized (sLock) {
+                if (mCallbacks.size() == 0) {
+                    Client client = new Client();
+                    try {
+                        mMediaRouterService.registerManagerAsUser(client, mPackageName,
+                                UserHandle.myUserId());
+                        mClient = client;
+                    } catch (RemoteException ex) {
+                        Log.e(TAG, "Unable to register media router manager.", ex);
+                    }
                 }
             }
             CallbackRecord record = new CallbackRecord(executor, callback);
@@ -127,34 +128,35 @@ public class MediaRouter2Manager {
     }
 
     /**
-     * Removes the specified callback.
+     * Unregisters the specified callback.
      *
-     * @param callback The callback to remove.
+     * @param callback the callback to unregister
      */
-    public void removeCallback(@NonNull Callback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback must not be null");
-        }
+    public void unregisterCallback(@NonNull Callback callback) {
+        Objects.requireNonNull(callback, "callback must not be null");
 
-        synchronized (sLock) {
-            final int index = findCallbackRecordIndex(callback);
+        synchronized (mCallbacks) {
+            final int index = findCallbackRecordIndexLocked(callback);
             if (index < 0) {
                 Log.w(TAG, "Ignore removing unknown callback. " + callback);
                 return;
             }
             mCallbacks.remove(index);
-            if (mCallbacks.size() == 0 && mClient != null) {
-                try {
-                    mMediaRouterService.unregisterManager(mClient);
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to unregister media router manager", ex);
+            synchronized (sLock) {
+                if (mCallbacks.size() == 0 && mClient != null) {
+                    try {
+                        mMediaRouterService.unregisterManager(mClient);
+                    } catch (RemoteException ex) {
+                        Log.e(TAG, "Unable to unregister media router manager", ex);
+                    }
+                    mClient = null;
                 }
-                mClient = null;
             }
         }
     }
 
-    private int findCallbackRecordIndex(Callback callback) {
+    @GuardedBy("mCallbacks")
+    private int findCallbackRecordIndexLocked(Callback callback) {
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
             if (mCallbacks.get(i).mCallback == callback) {
@@ -173,6 +175,8 @@ public class MediaRouter2Manager {
      */
     @NonNull
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
+
         List<String> controlCategories = mControlCategoryMap.get(packageName);
         if (controlCategories == null) {
             return Collections.emptyList();
@@ -193,9 +197,16 @@ public class MediaRouter2Manager {
      * @param route the route to be selected
      */
     public void selectRoute(@NonNull String packageName, @NonNull MediaRoute2Info route) {
-        if (mClient != null) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
+        Objects.requireNonNull(route, "route must not be null");
+
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
             try {
-                mMediaRouterService.selectClientRoute2(mClient, packageName, route);
+                mMediaRouterService.selectClientRoute2(client, packageName, route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
@@ -208,9 +219,13 @@ public class MediaRouter2Manager {
      * @param packageName the package name of the application that should stop routing
      */
     public void unselectRoute(@NonNull String packageName) {
-        if (mClient != null) {
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
             try {
-                mMediaRouterService.selectClientRoute2(mClient, packageName, null);
+                mMediaRouterService.selectClientRoute2(client, packageName, null);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
@@ -227,10 +242,6 @@ public class MediaRouter2Manager {
         return -1;
     }
 
-    MediaRoute2ProviderInfo getProvider(int index) {
-        return mProviders.get(index);
-    }
-
     void updateProvider(@NonNull MediaRoute2ProviderInfo provider) {
         if (provider == null || !provider.isValid()) {
             Log.w(TAG, "Ignoring invalid provider : " + provider);
@@ -241,7 +252,7 @@ public class MediaRouter2Manager {
 
         final int index = findProviderIndex(provider);
         if (index >= 0) {
-            final MediaRoute2ProviderInfo prevProvider = getProvider(index);
+            final MediaRoute2ProviderInfo prevProvider = mProviders.get(index);
             final Set<String> updatedRouteIds = new HashSet<>();
             for (MediaRoute2Info routeInfo : routes) {
                 final MediaRoute2Info prevRoute = prevProvider.getRoute(routeInfo.getId());
@@ -374,11 +385,9 @@ public class MediaRouter2Manager {
         }
 
         void notifyRoutes() {
-            for (MediaRoute2ProviderInfo provider : mProviders) {
-                for (MediaRoute2Info routeInfo : provider.getRoutes()) {
-                    mExecutor.execute(
-                            () -> mCallback.onRouteAdded(routeInfo));
-                }
+            for (MediaRoute2Info routeInfo : mRoutes) {
+                mExecutor.execute(
+                        () -> mCallback.onRouteAdded(routeInfo));
             }
         }
     }

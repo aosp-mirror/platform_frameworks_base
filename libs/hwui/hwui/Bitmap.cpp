@@ -148,12 +148,26 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) 
 
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer, SkColorType colorType,
+sk_sp<Bitmap> Bitmap::createFrom(AHardwareBuffer* hardwareBuffer, sk_sp<SkColorSpace> colorSpace,
+                                 BitmapPalette palette) {
+    AHardwareBuffer_Desc bufferDesc;
+    AHardwareBuffer_describe(hardwareBuffer, &bufferDesc);
+    SkImageInfo info = uirenderer::BufferDescriptionToImageInfo(bufferDesc, colorSpace);
+
+    const size_t rowBytes = info.bytesPerPixel() * bufferDesc.stride;
+    return sk_sp<Bitmap>(new Bitmap(hardwareBuffer, info, rowBytes, palette));
+}
+
+sk_sp<Bitmap> Bitmap::createFrom(AHardwareBuffer* hardwareBuffer, SkColorType colorType,
                                  sk_sp<SkColorSpace> colorSpace, SkAlphaType alphaType,
                                  BitmapPalette palette) {
-    SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
+    AHardwareBuffer_Desc bufferDesc;
+    AHardwareBuffer_describe(hardwareBuffer, &bufferDesc);
+    SkImageInfo info = SkImageInfo::Make(bufferDesc.width, bufferDesc.height,
                                          colorType, alphaType, colorSpace);
-    return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info, palette));
+
+    const size_t rowBytes = info.bytesPerPixel() * bufferDesc.stride;
+    return sk_sp<Bitmap>(new Bitmap(hardwareBuffer, info, rowBytes, palette));
 }
 #endif
 
@@ -238,18 +252,17 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info
 }
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette)
-        : SkPixelRef(info.width(), info.height(), nullptr,
-                     bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride())
+Bitmap::Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes,
+               BitmapPalette palette)
+        : SkPixelRef(info.width(), info.height(), nullptr, rowBytes)
         , mInfo(validateAlpha(info))
         , mPixelStorageType(PixelStorageType::Hardware)
         , mPalette(palette)
         , mPaletteGenerationId(getGenerationID()) {
     mPixelStorage.hardware.buffer = buffer;
-    buffer->incStrong(buffer);
+    AHardwareBuffer_acquire(buffer);
     setImmutable();  // HW bitmaps are always immutable
-    mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
-                                              mInfo.alphaType(), mInfo.refColorSpace());
+    mImage = SkImage::MakeFromAHardwareBuffer(buffer, mInfo.alphaType(), mInfo.refColorSpace());
 }
 #endif
 
@@ -274,7 +287,7 @@ Bitmap::~Bitmap() {
         case PixelStorageType::Hardware:
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
             auto buffer = mPixelStorage.hardware.buffer;
-            buffer->decStrong(buffer);
+            AHardwareBuffer_release(buffer);
             mPixelStorage.hardware.buffer = nullptr;
 #endif
             break;
@@ -352,7 +365,7 @@ void Bitmap::getBounds(SkRect* bounds) const {
 }
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-GraphicBuffer* Bitmap::graphicBuffer() {
+AHardwareBuffer* Bitmap::hardwareBuffer() {
     if (isHardware()) {
         return mPixelStorage.hardware.buffer;
     }

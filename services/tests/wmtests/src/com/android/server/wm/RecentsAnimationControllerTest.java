@@ -44,6 +44,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.os.Binder;
 import android.os.IInterface;
 import android.platform.test.annotations.Presubmit;
@@ -73,6 +74,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Mock OnAnimationFinishedCallback mFinishedCallback;
     @Mock IRecentsAnimationRunner mMockRunner;
     @Mock RecentsAnimationController.RecentsAnimationCallbacks mAnimationCallbacks;
+    @Mock TaskSnapshot mMockTaskSnapshot;
     private RecentsAnimationController mController;
 
     @Before
@@ -104,7 +106,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Verify that the finish callback to reparent the leash is called
         verify(mFinishedCallback).onAnimationFinished(eq(adapter));
         // Verify the animation canceled callback to the app was made
-        verify(mMockRunner).onAnimationCanceled(false);
+        verify(mMockRunner).onAnimationCanceled(null /* taskSnapshot */);
         verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
     }
 
@@ -162,7 +164,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mController.setDeferredCancel(true /* deferred */, false /* screenshot */);
         mController.cancelAnimationWithScreenshot(false /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(false /* deferredWithScreenshot */);
+        verify(mMockRunner).onAnimationCanceled(null /* taskSnapshot */);
         assertNull(mController.mRecentScreenshotAnimator);
 
         // Simulate the app transition finishing
@@ -183,9 +185,14 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.addAnimation(appWindow.getTask(), false /* isRecentTaskInvisible */);
         assertTrue(mController.isAnimatingTask(appWindow.getTask()));
 
+        spyOn(mWm.mTaskSnapshotController);
+        doNothing().when(mWm.mTaskSnapshotController).notifyAppVisibilityChanged(any(),
+                anyBoolean());
+        doReturn(mMockTaskSnapshot).when(mWm.mTaskSnapshotController).getSnapshot(anyInt(),
+                anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* reducedResolution */);
         mController.setDeferredCancel(true /* deferred */, true /* screenshot */);
         mController.cancelAnimationWithScreenshot(true /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(true /* deferredWithScreenshot */);
+        verify(mMockRunner).onAnimationCanceled(mMockTaskSnapshot /* taskSnapshot */);
         assertNotNull(mController.mRecentScreenshotAnimator);
         assertTrue(mController.mRecentScreenshotAnimator.isAnimating());
 

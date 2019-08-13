@@ -23,8 +23,8 @@ import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
-
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
@@ -525,18 +525,23 @@ public class RecentsAnimationController implements DeathRecipient {
                 // Screen shot previous task when next task starts transition and notify the runner.
                 // We will actually finish the animation once the runner calls cleanUpScreenshot().
                 final Task task = mPendingAnimations.get(0).mTask;
-                screenshotRecentTask(task, reorderMode, runSynchronously);
+                final TaskSnapshot taskSnapshot = screenshotRecentTask(task, reorderMode,
+                        runSynchronously);
                 try {
-                    mRunner.onAnimationCanceled(true /* deferredWithScreenshot */);
+                    mRunner.onAnimationCanceled(taskSnapshot);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to cancel recents animation", e);
+                }
+                if (taskSnapshot == null) {
+                    mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
+                            false /* sendUserLeaveHint */);
                 }
             } else {
                 // Otherwise, notify the runner and clean up the animation immediately
                 // Note: In the fallback case, this can trigger multiple onAnimationCancel() calls
                 // to the runner if we this actually triggers cancel twice on the caller
                 try {
-                    mRunner.onAnimationCanceled(false /* deferredWithScreenshot */);
+                    mRunner.onAnimationCanceled(null /* taskSnapshot */);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to cancel recents animation", e);
                 }
@@ -587,20 +592,32 @@ public class RecentsAnimationController implements DeathRecipient {
         return mRequestDeferCancelUntilNextTransition && mCancelDeferredWithScreenshot;
     }
 
-    void screenshotRecentTask(Task task, @ReorderMode int reorderMode, boolean runSynchronously) {
-        final TaskScreenshotAnimatable animatable = TaskScreenshotAnimatable.create(task);
-        if (animatable != null) {
-            mRecentScreenshotAnimator = new SurfaceAnimator(
-                    animatable,
-                    () -> {
-                        if (DEBUG_RECENTS_ANIMATIONS) {
-                            Slog.d(TAG, "mRecentScreenshotAnimator finish");
-                        }
-                        mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
-                                false /* sendUserLeaveHint */);
-                    }, mService);
-            mRecentScreenshotAnimator.transferAnimation(task.mSurfaceAnimator);
+    TaskSnapshot screenshotRecentTask(Task task, @ReorderMode int reorderMode,
+            boolean runSynchronously) {
+        final TaskSnapshotController snapshotController = mService.mTaskSnapshotController;
+        final ArraySet<Task> tasks = Sets.newArraySet(task);
+        snapshotController.snapshotTasks(tasks);
+        snapshotController.addSkipClosingAppSnapshotTasks(tasks);
+        final TaskSnapshot taskSnapshot = snapshotController.getSnapshot(task.mTaskId,
+                task.mUserId, false /* restoreFromDisk */, false /* reducedResolution */);
+        if (taskSnapshot == null) {
+            return null;
         }
+
+        final TaskScreenshotAnimatable animatable = new TaskScreenshotAnimatable(task,
+                new SurfaceControl.ScreenshotGraphicBuffer(taskSnapshot.getSnapshot(),
+                        taskSnapshot.getColorSpace(), false /* containsSecureLayers */));
+        mRecentScreenshotAnimator = new SurfaceAnimator(
+                animatable,
+                () -> {
+                    if (DEBUG_RECENTS_ANIMATIONS) {
+                        Slog.d(TAG, "mRecentScreenshotAnimator finish");
+                    }
+                    mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
+                            false /* sendUserLeaveHint */);
+                }, mService);
+        mRecentScreenshotAnimator.transferAnimation(task.mSurfaceAnimator);
+        return taskSnapshot;
     }
 
     void cleanupAnimation(@ReorderMode int reorderMode) {

@@ -39,9 +39,13 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.BackupUtils;
 import android.util.Log;
+import android.util.Slog;
+import android.view.Display;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.display.DisplayDensityUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -52,11 +56,14 @@ import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.DateTimeException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.CRC32;
 
 /**
@@ -78,10 +85,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_SOFTAP_CONFIG = "softap_config";
     private static final String KEY_NETWORK_POLICIES = "network_policies";
     private static final String KEY_WIFI_NEW_CONFIG = "wifi_new_config";
+    private static final String KEY_DEVICE_SPECIFIC_CONFIG = "device_specific_config";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 7;
+    private static final int STATE_VERSION = 8;
 
     // Versioning of the Network Policies backup payload.
     private static final int NETWORK_POLICIES_BACKUP_VERSION = 1;
@@ -99,8 +107,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_SOFTAP_CONFIG    = 7;
     private static final int STATE_NETWORK_POLICIES = 8;
     private static final int STATE_WIFI_NEW_CONFIG  = 9;
+    private static final int STATE_DEVICE_CONFIG    = 10;
 
-    private static final int STATE_SIZE             = 10; // The current number of state items
+    private static final int STATE_SIZE             = 11; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
@@ -111,17 +120,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             7,              // version 4 added STATE_LOCK_SETTINGS
             8,              // version 5 added STATE_SOFTAP_CONFIG
             9,              // version 6 added STATE_NETWORK_POLICIES
-            STATE_SIZE      // version 7 added STATE_WIFI_NEW_CONFIG
+            10,             // version 7 added STATE_WIFI_NEW_CONFIG
+            STATE_SIZE      // version 8 added STATE_DEVICE_CONFIG
     };
 
-    // Versioning of the 'full backup' format
-    // Increment this version any time a new item is added
-    private static final int FULL_BACKUP_VERSION = 6;
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
     private static final int FULL_BACKUP_ADDED_LOCK_SETTINGS = 3; // added the "lock_settings" entry
     private static final int FULL_BACKUP_ADDED_SOFTAP_CONF = 4; //added the "softap_config" entry
     private static final int FULL_BACKUP_ADDED_NETWORK_POLICIES = 5; //added "network_policies"
     private static final int FULL_BACKUP_ADDED_WIFI_NEW = 6; // added "wifi_new_config" entry
+    private static final int FULL_BACKUP_ADDED_DEVICE_SPECIFIC = 7; // added "device specific" entry
+    // Versioning of the 'full backup' format
+    // Increment this version any time a new item is added
+    private static final int FULL_BACKUP_VERSION = FULL_BACKUP_ADDED_DEVICE_SPECIFIC;
 
     private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
 
@@ -129,10 +140,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private static final String TAG = "SettingsBackupAgent";
 
-    private static final String[] PROJECTION = {
+    @VisibleForTesting
+    static final String[] PROJECTION = {
             Settings.NameValueTable.NAME,
             Settings.NameValueTable.VALUE
     };
+
+    // Versioning of the 'device specific' section of a backup
+    // Increment this any time the format is changed or data added.
+    @VisibleForTesting
+    static final int DEVICE_SPECIFIC_VERSION = 1;
 
     // the key to store the WIFI data under, should be sorted as last, so restore happens last.
     // use very late unicode character to quasi-guarantee last sort position.
@@ -161,7 +178,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 KEY_GLOBAL,
             }));
 
-    private SettingsHelper mSettingsHelper;
+    @VisibleForTesting
+    SettingsHelper mSettingsHelper;
 
     private WifiManager mWifiManager;
 
@@ -190,6 +208,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] softApConfigData = getSoftAPConfiguration();
         byte[] netPoliciesData = getNetworkPolicies();
         byte[] wifiFullConfigData = getNewWifiConfigData();
+        byte[] deviceSpecificInformation = getDeviceSpecificConfiguration();
 
         long[] stateChecksums = readOldChecksums(oldState);
 
@@ -215,6 +234,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_WIFI_NEW_CONFIG] =
                 writeIfChanged(stateChecksums[STATE_WIFI_NEW_CONFIG], KEY_WIFI_NEW_CONFIG,
                         wifiFullConfigData, data);
+        stateChecksums[STATE_DEVICE_CONFIG] =
+                writeIfChanged(stateChecksums[STATE_DEVICE_CONFIG], KEY_DEVICE_SPECIFIC_CONFIG,
+                        deviceSpecificInformation, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -311,6 +333,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     byte[] restoredWifiNewConfigData = new byte[size];
                     data.readEntityData(restoredWifiNewConfigData, 0, size);
                     restoreNewWifiConfigData(restoredWifiNewConfigData);
+                    break;
+
+                case KEY_DEVICE_SPECIFIC_CONFIG:
+                    byte[] restoredDeviceSpecificConfig = new byte[size];
+                    data.readEntityData(restoredDeviceSpecificConfig, 0, size);
+                    restoreDeviceSpecificConfig(restoredDeviceSpecificConfig);
                     break;
 
                 default :
@@ -591,6 +619,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private void restoreSettings(byte[] settings, int bytes, Uri contentUri,
             HashSet<String> movedToGlobal, Set<String> movedToSecure) {
+        restoreSettings(settings, 0, bytes, contentUri, movedToGlobal, movedToSecure);
+    }
+
+    private void restoreSettings(byte[] settings, int pos, int bytes, Uri contentUri,
+                HashSet<String> movedToGlobal, Set<String> movedToSecure) {
         if (DEBUG) {
             Log.i(TAG, "restoreSettings: " + contentUri);
         }
@@ -601,7 +634,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
             whitelist = ArrayUtils.concatElements(String.class, Settings.Secure.SETTINGS_TO_BACKUP,
-                    Settings.Secure.LEGACY_RESTORE_SETTINGS);
+                    Settings.Secure.LEGACY_RESTORE_SETTINGS,
+                    Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
             validators = Settings.Secure.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
             whitelist = ArrayUtils.concatElements(String.class, Settings.System.SETTINGS_TO_BACKUP,
@@ -616,7 +650,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
 
         // Restore only the white list data.
-        int pos = 0;
         final ArrayMap<String, String> cachedEntries = new ArrayMap<>();
         ContentValues contentValues = new ContentValues(2);
         SettingsHelper settingsHelper = mSettingsHelper;
@@ -940,6 +973,150 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
     }
 
+    @VisibleForTesting
+    byte[] getDeviceSpecificConfiguration() throws IOException {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            writeHeader(os);
+            os.write(getDeviceSpecificSettings());
+            return os.toByteArray();
+        }
+    }
+
+    @VisibleForTesting
+    void writeHeader(OutputStream os) throws IOException {
+        os.write(toByteArray(DEVICE_SPECIFIC_VERSION));
+        os.write(toByteArray(Build.MANUFACTURER));
+        os.write(toByteArray(Build.PRODUCT));
+    }
+
+    private byte[] getDeviceSpecificSettings() {
+        try (Cursor cursor =
+                     getContentResolver()
+                             .query(Settings.Secure.CONTENT_URI, PROJECTION, null, null, null)) {
+            return extractRelevantValues(
+                    cursor, Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
+        }
+    }
+
+    /**
+     * Restore the device specific settings.
+     *
+     * @param data The byte array holding a backed up version of another devices settings.
+     * @return true if the restore succeeded, false if it was stopped.
+     */
+    @VisibleForTesting
+    boolean restoreDeviceSpecificConfig(byte[] data) {
+        // We're using an AtomicInteger to wrap the position int and allow called methods to
+        // modify it.
+        AtomicInteger pos = new AtomicInteger(0);
+        if (!isSourceAcceptable(data, pos)) {
+            return false;
+        }
+
+        Integer originalDensity = getPreviousDensity();
+
+        int dataStart = pos.get();
+        restoreSettings(
+                data, dataStart, data.length, Settings.Secure.CONTENT_URI, null, null);
+
+        updateWindowManagerIfNeeded(originalDensity);
+
+        return true;
+    }
+
+    private void updateWindowManagerIfNeeded(Integer previousDensity) {
+        int newDensity;
+        try {
+            newDensity = getForcedDensity();
+        } catch (Settings.SettingNotFoundException e) {
+            // If there's not density setting we can't perform a change.
+            return;
+        }
+
+        if (previousDensity == null || previousDensity != newDensity) {
+            // From nothing to something is a change.
+            DisplayDensityUtils.setForcedDisplayDensity(Display.DEFAULT_DISPLAY, newDensity);
+        }
+    }
+
+    private Integer getPreviousDensity() {
+        try {
+            return getForcedDensity();
+        } catch (Settings.SettingNotFoundException e) {
+            return null;
+        }
+    }
+
+    private int getForcedDensity() throws Settings.SettingNotFoundException {
+        return Settings.Secure.getInt(getContentResolver(), Settings.Secure.DISPLAY_DENSITY_FORCED);
+    }
+
+    @VisibleForTesting
+    boolean isSourceAcceptable(byte[] data, AtomicInteger pos) {
+        int version = readInt(data, pos);
+        if (version > DEVICE_SPECIFIC_VERSION) {
+            Slog.w(TAG, "Unable to restore device specific information; Backup is too new");
+            return false;
+        }
+
+        String sourceManufacturer = readString(data, pos);
+        if (!Objects.equals(Build.MANUFACTURER, sourceManufacturer)) {
+            Log.w(
+                    TAG,
+                    "Unable to restore device specific information; Manufacturer mismatch "
+                            + "(\'"
+                            + Build.MANUFACTURER
+                            + "\' and \'"
+                            + sourceManufacturer
+                            + "\')");
+            return false;
+        }
+
+        String sourceProduct = readString(data, pos);
+        if (!Objects.equals(Build.PRODUCT, sourceProduct)) {
+            Log.w(
+                    TAG,
+                    "Unable to restore device specific information; Product mismatch (\'"
+                            + Build.PRODUCT
+                            + "\' and \'"
+                            + sourceProduct
+                            + "\')");
+            return false;
+        }
+
+        return true;
+    }
+
+    @VisibleForTesting
+    static byte[] toByteArray(String value) {
+        if (value == null) {
+            return toByteArray(NULL_SIZE);
+        }
+
+        byte[] stringBytes = value.getBytes();
+        byte[] sizeAndString = new byte[stringBytes.length + INTEGER_BYTE_COUNT];
+        writeInt(sizeAndString, 0, stringBytes.length);
+        writeBytes(sizeAndString, INTEGER_BYTE_COUNT, stringBytes);
+        return sizeAndString;
+    }
+
+    @VisibleForTesting
+    static byte[] toByteArray(int value) {
+        byte[] result = new byte[INTEGER_BYTE_COUNT];
+        writeInt(result, 0, value);
+        return result;
+    }
+
+    private String readString(byte[] data, AtomicInteger pos) {
+        int byteCount = readInt(data, pos);
+        if (byteCount == NULL_SIZE) {
+            return null;
+        }
+
+        int stringStart = pos.getAndAdd(byteCount);
+        return new String(data, stringStart, byteCount);
+    }
+
     /**
      * Write an int in BigEndian into the byte array.
      * @param out byte array
@@ -947,7 +1124,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
      * @param value integer to write
      * @return the index after adding the size of an int (4) in bytes.
      */
-    private int writeInt(byte[] out, int pos, int value) {
+    private static int writeInt(byte[] out, int pos, int value) {
         out[pos + 0] = (byte) ((value >> 24) & 0xFF);
         out[pos + 1] = (byte) ((value >> 16) & 0xFF);
         out[pos + 2] = (byte) ((value >>  8) & 0xFF);
@@ -955,9 +1132,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         return pos + INTEGER_BYTE_COUNT;
     }
 
-    private int writeBytes(byte[] out, int pos, byte[] value) {
+    private static int writeBytes(byte[] out, int pos, byte[] value) {
         System.arraycopy(value, 0, out, pos, value.length);
         return pos + value.length;
+    }
+
+    private int readInt(byte[] in, AtomicInteger pos) {
+        return readInt(in, pos.getAndAdd(INTEGER_BYTE_COUNT));
     }
 
     private int readInt(byte[] in, int pos) {

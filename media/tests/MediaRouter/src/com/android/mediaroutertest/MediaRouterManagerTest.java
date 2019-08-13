@@ -44,8 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
@@ -92,9 +91,8 @@ public class MediaRouterManagerTest {
         mContext = InstrumentationRegistry.getTargetContext();
         mManager = MediaRouter2Manager.getInstance(mContext);
         mRouter = MediaRouter2.getInstance(mContext);
-        mExecutor = new ThreadPoolExecutor(
-            1, 20, 3, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>());
+        //TODO: If we need to support thread pool executors, change this to thread pool executor.
+        mExecutor = Executors.newSingleThreadExecutor();
         mPackageName = mContext.getPackageName();
     }
 
@@ -116,36 +114,34 @@ public class MediaRouterManagerTest {
     public void testRouteAdded() {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
 
-        mManager.addCallback(mExecutor, mockCallback);
+        mManager.registerCallback(mExecutor, mockCallback);
 
         verify(mockCallback, timeout(TIMEOUT_MS)).onRouteAdded(argThat(
                 (MediaRoute2Info info) ->
                         info.getId().equals(ROUTE_ID1) && info.getName().equals(ROUTE_NAME1)));
-        mManager.removeCallback(mockCallback);
+        mManager.unregisterCallback(mockCallback);
     }
 
     //TODO: Recover this test when media router 2 is finalized.
     public void testRouteRemoved() {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
-        mManager.addCallback(mExecutor, mockCallback);
+        mManager.registerCallback(mExecutor, mockCallback);
 
         MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
 
         //TODO: Figure out a more proper way to test.
         // (Control requests shouldn't be used in this way.)
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                (Runnable) () -> {
-                    mRouter.addCallback(CONTROL_CATEGORIES_ALL, mExecutor, mockRouterCallback);
-                    mRouter.sendControlRequest(
-                            new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2).build(),
-                            new Intent(ACTION_REMOVE_ROUTE));
-                    mRouter.removeCallback(mockRouterCallback);
-                }
-        );
+        mRouter.setControlCategories(CONTROL_CATEGORIES_ALL);
+        mRouter.registerCallback(mExecutor, mockRouterCallback);
+        mRouter.sendControlRequest(
+                new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2).build(),
+                new Intent(ACTION_REMOVE_ROUTE));
+        mRouter.unregisterCallback(mockRouterCallback);
+
         verify(mockCallback, timeout(TIMEOUT_MS)).onRouteRemoved(argThat(
                 (MediaRoute2Info info) ->
                         info.getId().equals(ROUTE_ID2) && info.getName().equals(ROUTE_NAME2)));
-        mManager.removeCallback(mockCallback);
+        mManager.unregisterCallback(mockCallback);
     }
 
     /**
@@ -154,17 +150,14 @@ public class MediaRouterManagerTest {
     @Test
     public void testControlCategory() throws Exception {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
-        mManager.addCallback(mExecutor, mockCallback);
+        mManager.registerCallback(mExecutor, mockCallback);
 
         MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
 
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> {
-                    mRouter.addCallback(CONTROL_CATEGORIES_SPECIAL,
-                            mExecutor, mockRouterCallback);
-                    mRouter.removeCallback(mockRouterCallback);
-                }
-        );
+        mRouter.setControlCategories(CONTROL_CATEGORIES_SPECIAL);
+        mRouter.registerCallback(mExecutor, mockRouterCallback);
+        mRouter.unregisterCallback(mockRouterCallback);
+
         verify(mockCallback, timeout(TIMEOUT_MS))
                 .onRouteListChanged(argThat(routes -> routes.size() > 0));
 
@@ -174,7 +167,7 @@ public class MediaRouterManagerTest {
         Assert.assertEquals(1, routes.size());
         Assert.assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
 
-        mManager.removeCallback(mockCallback);
+        mManager.unregisterCallback(mockCallback);
     }
 
     @Test
@@ -182,11 +175,7 @@ public class MediaRouterManagerTest {
         CountDownLatch latch = new CountDownLatch(1);
 
         MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> {
-                    mRouter.addCallback(CONTROL_CATEGORIES_ALL, mExecutor, mockRouterCallback);
-                }
-        );
+        mRouter.registerCallback(mExecutor, mockRouterCallback);
 
         MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
             MediaRoute2Info mSelectedRoute = null;
@@ -210,11 +199,11 @@ public class MediaRouterManagerTest {
             }
         };
 
-        mManager.addCallback(mExecutor, managerCallback);
+        mManager.registerCallback(mExecutor, managerCallback);
 
         Assert.assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
-        mManager.removeCallback(managerCallback);
+        mManager.unregisterCallback(managerCallback);
     }
 
     /**
@@ -225,12 +214,10 @@ public class MediaRouterManagerTest {
         MediaRouter2Manager.Callback managerCallback = mock(MediaRouter2Manager.Callback.class);
         MediaRouter2.Callback routerCallback = mock(MediaRouter2.Callback.class);
 
-        mManager.addCallback(mExecutor, managerCallback);
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> {
-                    mRouter.addCallback(CONTROL_CATEGORIES_ALL, mExecutor, routerCallback);
-                }
-        );
+        mManager.registerCallback(mExecutor, managerCallback);
+        mRouter.setControlCategories(CONTROL_CATEGORIES_ALL);
+        mRouter.registerCallback(mExecutor, routerCallback);
+
         verify(managerCallback, timeout(TIMEOUT_MS))
                 .onRouteListChanged(argThat(routes -> routes.size() > 0));
 
@@ -253,12 +240,8 @@ public class MediaRouterManagerTest {
                 .onRouteChanged(argThat(routeInfo -> TextUtils.equals(ROUTE_ID2, routeInfo.getId())
                         && TextUtils.equals(routeInfo.getClientPackageName(), null)));
 
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> {
-                    mRouter.removeCallback(routerCallback);
-                }
-        );
-        mManager.removeCallback(managerCallback);
+        mRouter.unregisterCallback(routerCallback);
+        mManager.unregisterCallback(managerCallback);
     }
 
     Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {

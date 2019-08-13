@@ -24,7 +24,7 @@
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-#include <ui/GraphicBuffer.h>
+#include <android/hardware_buffer.h>
 #endif
 
 namespace android {
@@ -74,11 +74,15 @@ public:
      * memory that is provided as an input param.
      */
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer,
+    static sk_sp<Bitmap> createFrom(AHardwareBuffer* hardwareBuffer,
+                                    sk_sp<SkColorSpace> colorSpace,
+                                    BitmapPalette palette = BitmapPalette::Unknown);
+
+    static sk_sp<Bitmap> createFrom(AHardwareBuffer* hardwareBuffer,
                                     SkColorType colorType,
                                     sk_sp<SkColorSpace> colorSpace,
-                                    SkAlphaType alphaType = kPremul_SkAlphaType,
-                                    BitmapPalette palette = BitmapPalette::Unknown);
+                                    SkAlphaType alphaType,
+                                    BitmapPalette palette);
 #endif
     static sk_sp<Bitmap> createFrom(const SkImageInfo& info, size_t rowBytes, int fd, void* addr,
                                     size_t size, bool readOnly);
@@ -110,7 +114,7 @@ public:
     PixelStorageType pixelStorageType() const { return mPixelStorageType; }
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    GraphicBuffer* graphicBuffer();
+     AHardwareBuffer* hardwareBuffer();
 #endif
 
     /**
@@ -143,7 +147,8 @@ private:
            size_t rowBytes);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette);
+    Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes,
+           BitmapPalette palette);
 #endif
 
     virtual ~Bitmap();
@@ -175,7 +180,7 @@ private:
         } heap;
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
         struct {
-            GraphicBuffer* buffer;
+            AHardwareBuffer* buffer;
         } hardware;
 #endif
     } mPixelStorage;

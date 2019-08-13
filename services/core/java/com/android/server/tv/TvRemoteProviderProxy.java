@@ -255,8 +255,6 @@ final class TvRemoteProviderProxy implements ServiceConnection {
 
         void clearInputBridge(TvRemoteProviderProxy provider, IBinder token);
 
-        void sendTimeStamp(TvRemoteProviderProxy provider, IBinder token, long timestamp);
-
         void sendKeyDown(TvRemoteProviderProxy provider, IBinder token, int keyCode);
 
         void sendKeyUp(TvRemoteProviderProxy provider, IBinder token, int keyCode);
@@ -400,24 +398,8 @@ final class TvRemoteProviderProxy implements ServiceConnection {
         }
 
         void sendTimestamp(final IBinder token, final long timestamp) {
-            synchronized (mLock) {
-                if (mActiveConnection == this && Binder.getCallingUid() == mUid) {
-                    final long idToken = Binder.clearCallingIdentity();
-                    try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.sendTimeStamp(TvRemoteProviderProxy.this, token,
-                                    timestamp);
-                        }
-                    } finally {
-                        Binder.restoreCallingIdentity(idToken);
-                    }
-                } else {
-                    if (DEBUG) {
-                        Slog.w(TAG,
-                                "sendTimeStamp, Invalid connection or incorrect uid: " + Binder
-                                        .getCallingUid());
-                    }
-                }
+            if (DEBUG) {
+                Slog.e(TAG, "sendTimestamp is deprecated, please remove all usages of this API.");
             }
         }
 

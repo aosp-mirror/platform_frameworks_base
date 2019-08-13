@@ -2675,6 +2675,22 @@ public class CarrierConfigManager {
             "5g_icon_configuration_string";
 
     /**
+     * Timeout in second for displaying 5G icon, default value is 0 which means the timer is
+     * disabled.
+     *
+     * System UI will show the 5G icon and start a timer with the timeout from this config when the
+     * device connects to a 5G cell. System UI stops displaying 5G icon when both the device
+     * disconnects from 5G cell and the timer is expired.
+     *
+     * If 5G is reacquired during this timer, the timer is canceled and restarted when 5G is next
+     * lost. Allows us to momentarily lose 5G without blinking the icon.
+     *
+     * @hide
+     */
+    public static final String KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT =
+            "5g_icon_display_grace_period_sec_int";
+
+    /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
      * this feature.
      * @hide
@@ -3486,6 +3502,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:None,connected:5G,not_restricted:None,restricted:None");
+        sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);

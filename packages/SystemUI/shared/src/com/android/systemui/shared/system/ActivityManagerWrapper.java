@@ -31,6 +31,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -235,9 +236,9 @@ public class ActivityManagerWrapper {
                     }
 
                     @Override
-                    public void onAnimationCanceled(boolean deferredWithScreenshot) {
+                    public void onAnimationCanceled(TaskSnapshot taskSnapshot) {
                         animationHandler.onAnimationCanceled(
-                                deferredWithScreenshot ? new ThumbnailData() : null);
+                                taskSnapshot != null ? new ThumbnailData(taskSnapshot) : null);
                     }
                 };
             }

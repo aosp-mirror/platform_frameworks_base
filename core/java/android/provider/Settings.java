@@ -7030,6 +7030,8 @@ public final class Settings {
          */
         public static final String DISPLAY_DENSITY_FORCED = "display_density_forced";
 
+        static final Validator DISPLAY_DENSITY_FORCED_VALIDATOR = NON_NEGATIVE_INTEGER_VALIDATOR;
+
         /**
          * Setting to always use the default text-to-speech settings regardless
          * of the application settings.
@@ -9083,8 +9085,22 @@ public final class Settings {
         };
 
         /**
-         * All settings in {@link SETTINGS_TO_BACKUP} array *must* have a non-null validator,
-         * otherwise they won't be restored.
+         * The settings values which should only be restored if the target device is the
+         * same as the source device
+         *
+         * NOTE: Settings are backed up and restored in the order they appear
+         *       in this array. If you have one setting depending on another,
+         *       make sure that they are ordered appropriately.
+         *
+         * @hide
+         */
+        public static final String[] DEVICE_SPECIFIC_SETTINGS_TO_BACKUP = {
+                DISPLAY_DENSITY_FORCED,
+        };
+
+        /**
+         * All settings in {@link SETTINGS_TO_BACKUP} and {@link DEVICE_SPECIFIC_SETTINGS_TO_BACKUP}
+         * array *must* have a non-null validator, otherwise they won't be restored.
          *
          * @hide
          */
@@ -9276,6 +9292,7 @@ public final class Settings {
             VALIDATORS.put(UI_NIGHT_MODE, UI_NIGHT_MODE_VALIDATOR);
             VALIDATORS.put(GLOBAL_ACTIONS_PANEL_ENABLED, GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR);
             VALIDATORS.put(AWARE_LOCK_ENABLED, AWARE_LOCK_ENABLED_VALIDATOR);
+            VALIDATORS.put(DISPLAY_DENSITY_FORCED, DISPLAY_DENSITY_FORCED_VALIDATOR);
         }
 
         /**
@@ -13819,6 +13836,9 @@ public final class Settings {
          *       in this array. If you have one setting depending on another,
          *       make sure that they are ordered appropriately.
          *
+         * NOTE: This table should only be used for settings which should be restored
+         *       between different types of devices {@see #DEVICE_SPECIFIC_SETTINGS_TO_BACKUP}
+         *
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -13863,6 +13883,7 @@ public final class Settings {
          * @hide
          */
         public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
+
         static {
             VALIDATORS.put(APPLY_RAMPING_RINGER, APPLY_RAMPING_RINGER_VALIDATOR);
             VALIDATORS.put(BUGREPORT_IN_POWER_MENU, BUGREPORT_IN_POWER_MENU_VALIDATOR);

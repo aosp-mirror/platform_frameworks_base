@@ -14,12 +14,16 @@
 
 package com.android.systemui.util;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.view.View;
 
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.List;
@@ -108,6 +112,16 @@ public class Utils {
         homeIntent.setPackage(packageName);
 
         return pm.queryIntentActivities(homeIntent, 0).isEmpty();
+    }
+
+    /**
+     * Returns {@code true} if the navMode is that of
+     * {@link android.view.WindowManagerPolicyConstants#NAV_BAR_MODE_GESTURAL} AND
+     * the context is that of the default display
+     */
+    public static boolean isGesturalModeOnDefaultDisplay(Context context, int navMode) {
+        return context.getDisplayId() == DEFAULT_DISPLAY
+                && QuickStepContract.isGesturalMode(navMode);
     }
 
 }

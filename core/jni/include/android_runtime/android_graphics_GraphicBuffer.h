@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-#include <ui/GraphicBuffer.h>
+#include <android/hardware_buffer.h>
 
 #include "jni.h"
 
 namespace android {
 
+class GraphicBuffer;
+
 // This function does not perform any type checking, the specified
 // object must be an instance of android.view.GraphicBuffer
-extern sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj);
+sp<GraphicBuffer> android_graphics_GraphicBuffer_getNativeGraphicsBuffer(JNIEnv* env, jobject obj);
 
-jobject createJavaGraphicBuffer(JNIEnv* env, const sp<GraphicBuffer>& buffer);
+extern jobject android_graphics_GraphicBuffer_createFromAHardwareBuffer(JNIEnv* env,
+                                                                        AHardwareBuffer* buffer);
 
 }

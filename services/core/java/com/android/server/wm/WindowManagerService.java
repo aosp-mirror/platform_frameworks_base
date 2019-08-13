@@ -336,11 +336,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
-    /**
-     * If true, the window manager will do its own custom freezing and general
-     * management of the screen during rotation.
-     */
-    static final boolean CUSTOM_SCREEN_ROTATION = true;
 
     // Maximum number of milliseconds to wait for input devices to be enumerated before
     // proceding with safe mode detection.
@@ -5395,25 +5390,23 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
-        if (CUSTOM_SCREEN_ROTATION) {
-            mExitAnimId = exitAnim;
-            mEnterAnimId = enterAnim;
-            ScreenRotationAnimation screenRotationAnimation =
-                    mAnimator.getScreenRotationAnimationLocked(mFrozenDisplayId);
-            if (screenRotationAnimation != null) {
-                screenRotationAnimation.kill();
-            }
-
-            // Check whether the current screen contains any secure content.
-            boolean isSecure = displayContent.hasSecureWindowOnScreen();
-
-            displayContent.updateDisplayInfo();
-            screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    displayContent.getDisplayRotation().isFixedToUserRotation(), isSecure,
-                    this);
-            mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
-                    screenRotationAnimation);
+        mExitAnimId = exitAnim;
+        mEnterAnimId = enterAnim;
+        ScreenRotationAnimation screenRotationAnimation =
+                mAnimator.getScreenRotationAnimationLocked(mFrozenDisplayId);
+        if (screenRotationAnimation != null) {
+            screenRotationAnimation.kill();
         }
+
+        // Check whether the current screen contains any secure content.
+        boolean isSecure = displayContent.hasSecureWindowOnScreen();
+
+        displayContent.updateDisplayInfo();
+        screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
+                displayContent.getDisplayRotation().isFixedToUserRotation(), isSecure,
+                this);
+        mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
+                screenRotationAnimation);
     }
 
     void stopFreezingDisplayLocked() {
@@ -5466,8 +5459,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(displayId);
-        if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
-                && screenRotationAnimation.hasScreenshot()) {
+        if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
             if (DEBUG_ORIENTATION) Slog.i(TAG_WM, "**** Dismissing screen rotation animation");
             DisplayInfo displayInfo = displayContent.getDisplayInfo();
             // Get rotation animation again, with new top window
@@ -5511,7 +5503,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mScreenFrozenLock.release();
 
-        if (updateRotation && displayContent != null && updateRotation) {
+        if (updateRotation && displayContent != null) {
             if (DEBUG_ORIENTATION) Slog.d(TAG_WM, "Performing post-rotate rotation");
             configChanged |= displayContent.updateRotationUnchecked();
         }

@@ -113,8 +113,9 @@ public abstract class AutofillFieldClassificationService extends Service {
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     /** @hide */
+    @SystemApi
+    @TestApi
     public AutofillFieldClassificationService() {
-
     }
 
     @Override

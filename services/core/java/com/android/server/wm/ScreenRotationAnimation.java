@@ -286,20 +286,11 @@ class ScreenRotationAnimation {
         setSnapshotTransform(t, mSnapshotInitialMatrix, 1.0f);
     }
 
-    public boolean setRotation(SurfaceControl.Transaction t, int rotation,
-            long maxAnimationDuration, float animationScale, int finalWidth, int finalHeight) {
-        setRotation(t, rotation);
-
-        // Don't start animation yet.
-        return false;
-    }
-
     /**
      * Returns true if animating.
      */
     private boolean startAnimation(SurfaceControl.Transaction t, long maxAnimationDuration,
-            float animationScale, int finalWidth, int finalHeight, boolean dismissing,
-            int exitAnim, int enterAnim) {
+            float animationScale, int finalWidth, int finalHeight, int exitAnim, int enterAnim) {
         if (mSurfaceControl == null) {
             // Can't do animation.
             return false;
@@ -420,7 +411,7 @@ class ScreenRotationAnimation {
         }
         if (!mStarted) {
             startAnimation(t, maxAnimationDuration, animationScale, finalWidth, finalHeight,
-                    true, exitAnim, enterAnim);
+                    exitAnim, enterAnim);
         }
         if (!mStarted) {
             return false;

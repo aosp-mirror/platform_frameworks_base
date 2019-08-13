@@ -26,6 +26,7 @@ import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 
 import android.app.Activity;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
@@ -216,7 +217,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
             }
 
             @Override
-            public void onAnimationCanceled(boolean deferredWithScreenshot) throws RemoteException {
+            public void onAnimationCanceled(TaskSnapshot taskSnapshot) throws RemoteException {
                 Assume.assumeNoException(
                         new AssertionError("onAnimationCanceled should not be called"));
             }

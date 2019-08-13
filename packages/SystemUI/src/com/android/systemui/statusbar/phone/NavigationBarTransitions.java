@@ -18,8 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
-import static com.android.systemui.statusbar.phone.NavBarTintController.DEFAULT_COLOR_ADAPT_TRANSITION_TIME;
-import static com.android.systemui.statusbar.phone.NavBarTintController.MIN_COLOR_ADAPT_TRANSITION_TIME;
+import static com.android.systemui.util.Utils.isGesturalModeOnDefaultDisplay;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -41,6 +40,9 @@ import java.util.List;
 
 public final class NavigationBarTransitions extends BarTransitions implements
         LightBarTransitionsController.DarkIntensityApplier {
+
+    public static final int MIN_COLOR_ADAPT_TRANSITION_TIME = 400;
+    public static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
     /**
      * Notified when the color of nav bar elements changes.
@@ -124,7 +126,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
     @Override
     public void setAutoDim(boolean autoDim) {
         // Ensure we aren't in gestural nav if we are triggering auto dim
-        if (autoDim && NavBarTintController.isEnabled(mView.getContext(), mNavBarMode)) return;
+        if (autoDim && isGesturalModeOnDefaultDisplay(mView.getContext(), mNavBarMode)) return;
         if (mAutoDim == autoDim) return;
         mAutoDim = autoDim;
         applyLightsOut(true, false);
@@ -201,7 +203,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     @Override
     public int getTintAnimationDuration() {
-        if (NavBarTintController.isEnabled(mView.getContext(), mNavBarMode)) {
+        if (isGesturalModeOnDefaultDisplay(mView.getContext(), mNavBarMode)) {
             return Math.max(DEFAULT_COLOR_ADAPT_TRANSITION_TIME, MIN_COLOR_ADAPT_TRANSITION_TIME);
         }
         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;

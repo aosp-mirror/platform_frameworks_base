@@ -460,7 +460,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      */
     static void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
         try {
-            recentsAnimationRunner.onAnimationCanceled(false /* deferredWithScreenshot */);
+            recentsAnimationRunner.onAnimationCanceled(null /* taskSnapshot */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to cancel recents animation before start", e);
         }

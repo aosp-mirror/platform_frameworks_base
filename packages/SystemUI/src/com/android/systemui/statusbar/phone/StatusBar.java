@@ -948,7 +948,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStatusBarWindow.onScrimVisibilityChanged(scrimsVisible);
                     }
                 }, DozeParameters.getInstance(mContext),
-                mContext.getSystemService(AlarmManager.class));
+                mContext.getSystemService(AlarmManager.class),
+                mKeyguardMonitor);
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
         mDozeScrimController = new DozeScrimController(DozeParameters.getInstance(context));
@@ -3874,7 +3875,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void notifyBiometricAuthModeChanged() {
         updateDozing();
-        mScrimController.setUnlockIsFading(mBiometricUnlockController.isUnlockFading());
         updateScrimController();
         mStatusBarWindow.onBiometricAuthModeChanged(mBiometricUnlockController.isWakeAndUnlock(),
                 mBiometricUnlockController.isBiometricUnlock());

@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.server.FgThread;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The entity responsible for filtering visibility between apps based on declarations in their
@@ -50,6 +52,10 @@ import java.util.Set;
 class AppsFilter {
 
     private static final String TAG = PackageManagerService.TAG;
+
+    // Forces filtering logic to run for debug purposes.
+    // STOPSHIP (b/136675067): should be false after development is complete
+    private static final boolean DEBUG_FILTERING = true;
     /**
      * This contains a list of packages that are implicitly queryable because another app explicitly
      * interacted with it. For example, if application A starts a service in application B,
@@ -104,12 +110,11 @@ class AppsFilter {
     }
 
     public static AppsFilter create(Context context) {
+        // tracks whether the feature is enabled where -1 is unknown, 0 is false and 1 is true;
+        final AtomicInteger featureEnabled = new AtomicInteger(-1);
+
         final boolean forceSystemAppsQueryable =
                 context.getResources().getBoolean(R.bool.config_forceSystemPackagesQueryable);
-        final ConfigProvider configProvider = () -> DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                "package_query_filtering_enabled",
-                false);
         final String[] forcedQueryablePackageNames;
         if (forceSystemAppsQueryable) {
             // all system apps already queryable, no need to read and parse individual exceptions
@@ -123,7 +128,19 @@ class AppsFilter {
         }
         IPermissionManager permissionmgr =
                 (IPermissionManager) ServiceManager.getService("permissionmgr");
-        return new AppsFilter(configProvider, permissionmgr,
+        return new AppsFilter(() -> {
+            if (featureEnabled.get() < 0) {
+                featureEnabled.set(DeviceConfig.getBoolean(
+                        DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                        "package_query_filtering_enabled", false) ? 1 : 0);
+                DeviceConfig.addOnPropertiesChangedListener(
+                        DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                        FgThread.getExecutor(),
+                        pr -> featureEnabled.set(
+                                pr.getBoolean("package_query_filtering_enabled", false) ? 1 : 0));
+            }
+            return featureEnabled.get() == 1;
+        }, permissionmgr,
                 context.getSystemService(AppOpsManager.class), forcedQueryablePackageNames,
                 forceSystemAppsQueryable);
     }
@@ -260,6 +277,10 @@ class AppsFilter {
         if (callingUid < Process.FIRST_APPLICATION_UID) {
             return false;
         }
+        final boolean featureEnabled = mConfigProvider.isEnabled();
+        if (!featureEnabled && !DEBUG_FILTERING) {
+            return false;
+        }
         if (callingSetting == null) {
             Slog.wtf(TAG, "No setting found for non system uid " + callingUid);
             return true;
@@ -277,7 +298,8 @@ class AppsFilter {
             final ArraySet<PackageSetting> packageSettings =
                     ((SharedUserSetting) callingSetting).packages;
             if (packageSettings != null && packageSettings.size() > 0) {
-                for (PackageSetting packageSetting : packageSettings) {
+                for (int i = 0, max = packageSettings.size(); i < max; i++) {
+                    final PackageSetting packageSetting = packageSettings.valueAt(i);
                     if (!shouldFilterApplicationInternal(packageSetting, targetPkgSetting,
                             userId)) {
                         // TODO: actually base this on a start / launch (not just a query)
@@ -288,13 +310,18 @@ class AppsFilter {
                         callingPkgSetting = packageSetting;
                     }
                 }
+                if (callingPkgSetting == null) {
+                    Slog.wtf(TAG, callingSetting + " does not have any non-null packages!");
+                    return true;
+                }
             } else {
+                Slog.wtf(TAG, callingSetting + " has no packages!");
                 return true;
             }
         }
-        if (callingPkgSetting == null) {
-            Slog.wtf(TAG, "What... " + callingSetting);
-            return true;
+
+        if (!featureEnabled) {
+            return false;
         }
         final int mode = mAppOpsManager
                 .checkOpNoThrow(AppOpsManager.OP_QUERY_ALL_PACKAGES, callingUid,
@@ -303,7 +330,7 @@ class AppsFilter {
             case AppOpsManager.MODE_DEFAULT:
                 // if default, let's rely on remote feature toggle to determine whether to
                 // actually filter
-                return mConfigProvider.isEnabled();
+                return true;
             case AppOpsManager.MODE_ALLOWED:
                 // explicitly allowed to see all packages, don't filter
                 return false;
