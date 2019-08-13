@@ -32,9 +32,11 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneNumberUtils;
-import android.text.TextUtils;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
+import android.text.TextUtils;
+
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +82,10 @@ public class CallerInfoAsyncQuery {
      * classes.
      */
     private static final class CookieWrapper {
+        @UnsupportedAppUsage
+        private CookieWrapper() {
+        }
+
         public OnQueryCompleteListener listener;
         public Object cookie;
         public int event;
@@ -527,6 +533,7 @@ public class CallerInfoAsyncQuery {
     /**
      * Releases the relevant data.
      */
+    @UnsupportedAppUsage
     private void release() {
         mHandler.mContext = null;
         mHandler.mQueryUri = null;

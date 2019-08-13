@@ -21,6 +21,8 @@ import android.util.SparseIntArray;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.util.HexDump;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 public class UserData {
 
     /**
@@ -92,6 +94,7 @@ public class UserData {
     public static final int PRINTABLE_ASCII_MIN_INDEX = 0x20;
     public static final int ASCII_NL_INDEX = 0x0A;
     public static final int ASCII_CR_INDEX = 0x0D;
+    @UnsupportedAppUsage
     public static final SparseIntArray charToAscii = new SparseIntArray();
     static {
         for (int i = 0; i < ASCII_MAP.length; i++) {
@@ -99,6 +102,10 @@ public class UserData {
         }
         charToAscii.put('\n', ASCII_NL_INDEX);
         charToAscii.put('\r', ASCII_CR_INDEX);
+    }
+
+    @UnsupportedAppUsage
+    public UserData() {
     }
 
     /*
@@ -131,12 +138,15 @@ public class UserData {
     /**
      * Contains the data header of the user data
      */
+    @UnsupportedAppUsage
     public SmsHeader userDataHeader;
 
     /**
      * Contains the data encoding type for the SMS message
      */
+    @UnsupportedAppUsage
     public int msgEncoding;
+    @UnsupportedAppUsage
     public boolean msgEncodingSet = false;
 
     public int msgType;
@@ -146,13 +156,16 @@ public class UserData {
      */
     public int paddingBits;
 
+    @UnsupportedAppUsage
     public int numFields;
 
     /**
      * Contains the user data of a SMS message
      * (See 3GPP2 C.S0015-B, v2, 4.5.2)
      */
+    @UnsupportedAppUsage
     public byte[] payload;
+    @UnsupportedAppUsage
     public String payloadStr;
 
     @Override
