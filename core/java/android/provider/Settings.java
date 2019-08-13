@@ -7112,24 +7112,8 @@ public final class Settings {
          */
         public static final String TTS_DEFAULT_LOCALE = "tts_default_locale";
 
-        private static final Validator TTS_DEFAULT_LOCALE_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                if (value == null || value.length() == 0) {
-                    return false;
-                }
-                String[] ttsLocales = value.split(",");
-                boolean valid = true;
-                for (String ttsLocale : ttsLocales) {
-                    String[] parts = ttsLocale.split(":");
-                    valid |= ((parts.length == 2)
-                            && (parts[0].length() > 0)
-                            && ANY_STRING_VALIDATOR.validate(parts[0])
-                            && LOCALE_VALIDATOR.validate(parts[1]));
-                }
-                return valid;
-            }
-        };
+        private static final Validator TTS_DEFAULT_LOCALE_VALIDATOR =
+                new SettingsValidators.TTSListValidator();
 
         /**
          * Space delimited list of plugin packages that are enabled.
@@ -8649,25 +8633,13 @@ public final class Settings {
 
         /**
          * Holds comma separated list of ordering of QS tiles.
+         *
          * @hide
          */
         public static final String QS_TILES = "sysui_qs_tiles";
 
-        private static final Validator QS_TILES_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                if (value == null) {
-                    return false;
-                }
-                String[] tiles = value.split(",");
-                boolean valid = true;
-                for (String tile : tiles) {
-                    // tile can be any non-empty string as specified by OEM
-                    valid |= ((tile.length() > 0) && ANY_STRING_VALIDATOR.validate(tile));
-                }
-                return valid;
-            }
-        };
+        private static final Validator QS_TILES_VALIDATOR =
+                new SettingsValidators.TileListValidator();
 
         /**
          * Specifies whether the web action API is enabled.
@@ -8733,21 +8705,8 @@ public final class Settings {
          */
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
 
-        private static final Validator QS_AUTO_ADDED_TILES_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                if (value == null) {
-                    return false;
-                }
-                String[] tiles = value.split(",");
-                boolean valid = true;
-                for (String tile : tiles) {
-                    // tile can be any non-empty string as specified by OEM
-                    valid |= ((tile.length() > 0) && ANY_STRING_VALIDATOR.validate(tile));
-                }
-                return valid;
-            }
-        };
+        private static final Validator QS_AUTO_ADDED_TILES_VALIDATOR =
+                new SettingsValidators.TileListValidator();
 
         /**
          * Whether the Lockdown button should be shown in the power menu.
