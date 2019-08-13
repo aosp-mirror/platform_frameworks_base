@@ -412,7 +412,8 @@ public class TransactionParcelTests {
                 IUiAutomationConnection iUiAutomationConnection, int i, boolean b, boolean b1,
                 boolean b2, boolean b3, Configuration configuration,
                 CompatibilityInfo compatibilityInfo, Map map, Bundle bundle1, String s1,
-                boolean autofillCompatEnabled) throws RemoteException {
+                boolean autofillCompatEnabled, long[] disableCompatChanges)
+                throws RemoteException {
         }
 
         @Override

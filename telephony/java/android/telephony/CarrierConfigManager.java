@@ -852,6 +852,19 @@ public class CarrierConfigManager {
             "carrier_metered_roaming_apn_types_strings";
 
     /**
+     * APN types that are not allowed on cellular
+     * @hide
+     */
+    public static final String KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
+            "carrier_wwan_disallowed_apn_types_string_array";
+
+    /**
+     * APN types that are not allowed on IWLAN
+     * @hide
+     */
+    public static final String KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
+            "carrier_wlan_disallowed_apn_types_string_array";
+    /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
      */
@@ -2377,6 +2390,14 @@ public class CarrierConfigManager {
     public static final String KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL =
             "check_pricing_with_carrier_data_roaming_bool";
 
+     /**
+      * Determines whether we should show a notification when the phone established a data
+      * connection in roaming network, to warn users about possible roaming charges.
+      * @hide
+      */
+    public static final String KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL =
+            "show_data_connected_roaming_notification";
+
     /**
      * A list of 4 LTE RSRP thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
@@ -2804,6 +2825,23 @@ public class CarrierConfigManager {
             "is_opportunistic_subscription_bool";
 
     /**
+     * Configs used by the IMS stack.
+     */
+    public static final class Ims {
+        /** Prefix of all Ims.KEY_* constants. */
+        public static final String KEY_PREFIX = "ims.";
+
+        //TODO: Add configs related to IMS.
+
+        private Ims() {}
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            return defaults;
+        }
+    }
+
+    /**
      * A list of 4 GSM RSSI thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
      *
@@ -2816,6 +2854,15 @@ public class CarrierConfigManager {
      */
     public static final String KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY =
             "gsm_rssi_thresholds_int_array";
+
+    /**
+     * Determines whether Wireless Priority Service call is supported over IMS.
+     *
+     * See Wireless Priority Service from https://www.fcc.gov/general/wireless-priority-service-wps
+     * @hide
+     */
+    public static final String KEY_SUPPORT_WPS_OVER_IMS_BOOL =
+            "support_wps_over_ims_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -2951,6 +2998,10 @@ public class CarrierConfigManager {
                 new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
+        sDefaults.putStringArray(KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
+                new String[]{""});
+        sDefaults.putStringArray(KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
+                new String[]{""});
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[]{
                     4, /* IS95A */
@@ -3157,6 +3208,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING, "");
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
                 new int[] {
                         -128, /* SIGNAL_STRENGTH_POOR */
@@ -3217,6 +3269,8 @@ public class CarrierConfigManager {
                         -97, /* SIGNAL_STRENGTH_GOOD */
                         -89,  /* SIGNAL_STRENGTH_GREAT */
                 });
+        sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
+        sDefaults.putAll(Ims.getDefaults());
     }
 
     /**
@@ -3412,5 +3466,76 @@ public class CarrierConfigManager {
     private ICarrierConfigLoader getICarrierConfigLoader() {
         return ICarrierConfigLoader.Stub
                 .asInterface(ServiceManager.getService(Context.CARRIER_CONFIG_SERVICE));
+    }
+
+    /**
+     * Gets the configuration values for a component using its prefix.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param prefix prefix of the component.
+     * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
+     *
+     * @see #getConfigForSubId
+     */
+    @Nullable
+    public PersistableBundle getConfigByComponentForSubId(String prefix, int subId) {
+        PersistableBundle configs = getConfigForSubId(subId);
+
+        if (configs == null) {
+            return null;
+        }
+
+        PersistableBundle ret = new PersistableBundle();
+        for (String configKey : configs.keySet()) {
+            if (configKey.startsWith(prefix)) {
+                addConfig(configKey, configs.get(configKey), ret);
+            }
+        }
+
+        return ret;
+    }
+
+    private void addConfig(String key, Object value, PersistableBundle configs) {
+        if (value instanceof String) {
+            configs.putString(key, (String) value);
+        }
+
+        if (value instanceof String[]) {
+            configs.putStringArray(key, (String[]) value);
+        }
+
+        if (value instanceof Integer) {
+            configs.putInt(key, (Integer) value);
+        }
+
+        if (value instanceof Long) {
+            configs.putLong(key, (Long) value);
+        }
+
+        if (value instanceof Double) {
+            configs.putDouble(key, (Double) value);
+        }
+
+        if (value instanceof Boolean) {
+            configs.putBoolean(key, (Boolean) value);
+        }
+
+        if (value instanceof int[]) {
+            configs.putIntArray(key, (int[]) value);
+        }
+
+        if (value instanceof double[]) {
+            configs.putDoubleArray(key, (double[]) value);
+        }
+
+        if (value instanceof boolean[]) {
+            configs.putBooleanArray(key, (boolean[]) value);
+        }
+
+        if (value instanceof long[]) {
+            configs.putLongArray(key, (long[]) value);
+        }
     }
 }

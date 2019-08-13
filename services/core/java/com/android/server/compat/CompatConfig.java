@@ -17,13 +17,27 @@
 package com.android.server.compat;
 
 import android.content.pm.ApplicationInfo;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.LongSparseArray;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.compat.config.Change;
+import com.android.server.compat.config.XmlParser;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+
+import javax.xml.datatype.DatatypeConfigurationException;
 /**
  * This class maintains state relating to platform compatibility changes.
  *
@@ -32,7 +46,12 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 public final class CompatConfig {
 
-    private static final CompatConfig sInstance = new CompatConfig();
+    private static final String TAG = "CompatConfig";
+    private static final String CONFIG_FILE_SUFFIX = "platform_compat_config.xml";
+
+    private static final CompatConfig sInstance = new CompatConfig().initConfigFromLib(
+            Environment.buildPath(
+                    Environment.getRootDirectory(), "etc", "sysconfig"));
 
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
@@ -128,20 +147,24 @@ public final class CompatConfig {
      * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
      *
      * @param changeId The ID of the change to be overridden. Note, this call will succeed even if
-     *                 this change is not known; it will only have any affect if any code in the
+     *                 this change is not known; it will only have any effect if any code in the
      *                 platform is gated on the ID given.
      * @param packageName The app package name to override the change for.
      * @param enabled If the change should be enabled or disabled.
+     * @return {@code true} if the change existed before adding the override.
      */
-    public void addOverride(long changeId, String packageName, boolean enabled) {
+    public boolean addOverride(long changeId, String packageName, boolean enabled) {
+        boolean alreadyKnown = true;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
+                alreadyKnown = false;
                 c = new CompatChange(changeId);
                 addChange(c);
             }
             c.addPackageOverride(packageName, enabled);
         }
+        return alreadyKnown;
     }
 
     /**
@@ -151,13 +174,60 @@ public final class CompatConfig {
      *
      * @param changeId The ID of the change that was overridden.
      * @param packageName The app package name that was overridden.
+     * @return {@code true} if an override existed;
      */
-    public void removeOverride(long changeId, String packageName) {
+    public boolean removeOverride(long changeId, String packageName) {
+        boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c != null) {
+                overrideExists = true;
                 c.removePackageOverride(packageName);
             }
+        }
+        return overrideExists;
+    }
+
+    /**
+    * Dumps the current list of compatibility config information.
+    *
+    * @param pw The {@link PrintWriter} instance to which the information will be dumped.
+    */
+    public void dumpConfig(PrintWriter pw) {
+        synchronized (mChanges) {
+            if (mChanges.size() == 0) {
+                pw.println("No compat overrides.");
+                return;
+            }
+            for (int i = 0; i < mChanges.size(); ++i) {
+                CompatChange c = mChanges.valueAt(i);
+                pw.println(c.toString());
+            }
+        }
+    }
+
+    CompatConfig initConfigFromLib(File libraryDir) {
+        if (!libraryDir.exists() || !libraryDir.isDirectory()) {
+            Slog.e(TAG, "No directory " + libraryDir + ", skipping");
+            return this;
+        }
+        for (File f : libraryDir.listFiles()) {
+            //TODO(b/138222363): Handle duplicate ids across config files.
+            if (f.getPath().endsWith(CONFIG_FILE_SUFFIX)) {
+                readConfig(f);
+            }
+        }
+        return this;
+    }
+
+    private void readConfig(File configFile) {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
+            for (Change change : XmlParser.read(in).getCompatChange()) {
+                Slog.w(TAG, "Adding: " + change.toString());
+                addChange(new CompatChange(change));
+            }
+        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
+            Slog.e(TAG, "Encountered an error while reading/parsing compat config file", e);
         }
     }
 

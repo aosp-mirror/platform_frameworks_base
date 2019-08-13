@@ -35,8 +35,14 @@ void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 StatsPuller::StatsPuller(const int tagId)
     : mTagId(tagId) {
-    mCoolDownNs = StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.coolDownNs;
-    VLOG("Puller for tag %d created. Cooldown set to %lld", mTagId, (long long)mCoolDownNs);
+    auto pullAtomInfo = StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId);
+    if (pullAtomInfo != StatsPullerManagerImpl::kAllPullAtomInfo.end()) {
+        mCoolDownNs = pullAtomInfo->second.coolDownNs;
+        VLOG("Puller for tag %d created. Cooldown set to %lld", mTagId, (long long)mCoolDownNs);
+    } else {
+        mCoolDownNs = 0;
+        VLOG("Creating puller for a non-recognised tag %d.", mTagId);
+    }
 }
 
 bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<LogEvent>>* data) {

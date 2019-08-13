@@ -95,7 +95,6 @@ public class AudioPortConfig {
 
     /**
      * The gain configuration if this port supports gain control, null otherwise
-     * @see AudioGainConfig.
      */
     public AudioGainConfig gain() {
         return mGain;

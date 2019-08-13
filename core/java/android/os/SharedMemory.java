@@ -25,6 +25,8 @@ import android.system.OsConstants;
 
 import dalvik.system.VMRuntime;
 
+import libcore.io.IoUtils;
+
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
@@ -62,7 +64,7 @@ public final class SharedMemory implements Parcelable, Closeable {
 
         mMemoryRegistration = new MemoryRegistration(mSize);
         mCleaner = Cleaner.create(mFileDescriptor,
-                new Closer(mFileDescriptor, mMemoryRegistration));
+                new Closer(mFileDescriptor.getInt$(), mMemoryRegistration));
     }
 
     /**
@@ -259,6 +261,9 @@ public final class SharedMemory implements Parcelable, Closeable {
             mCleaner.clean();
             mCleaner = null;
         }
+
+        // Cleaner.clean doesn't clear the value of the file descriptor.
+        mFileDescriptor.setInt$(-1);
     }
 
     @Override
@@ -290,19 +295,24 @@ public final class SharedMemory implements Parcelable, Closeable {
      * Cleaner that closes the FD
      */
     private static final class Closer implements Runnable {
+        // This is a copy of the FileDescriptor we're attached to, in order to avoid a reference
+        // cycle.
         private FileDescriptor mFd;
         private MemoryRegistration mMemoryReference;
 
-        private Closer(FileDescriptor fd, MemoryRegistration memoryReference) {
-            mFd = fd;
+        private Closer(int fd, MemoryRegistration memoryReference) {
+            mFd = new FileDescriptor();
+            mFd.setInt$(fd);
+            IoUtils.setFdOwner(mFd, this);
+
             mMemoryReference = memoryReference;
         }
 
         @Override
         public void run() {
-            try {
-                Os.close(mFd);
-            } catch (ErrnoException e) { /* swallow error */ }
+            IoUtils.closeQuietly(mFd);
+            mFd = null;
+
             mMemoryReference.release();
             mMemoryReference = null;
         }

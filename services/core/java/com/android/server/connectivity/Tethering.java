@@ -772,7 +772,6 @@ public class Tethering extends BaseNetworkObserver {
                     case WifiManager.WIFI_AP_STATE_FAILED:
                     default:
                         disableWifiIpServingLocked(ifname, curState);
-                        mEntitlementMgr.stopProvisioningIfNeeded(TETHERING_WIFI);
                         break;
                 }
             }
