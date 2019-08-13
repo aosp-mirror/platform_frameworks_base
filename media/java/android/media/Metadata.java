@@ -272,6 +272,15 @@ import java.util.TimeZone;
     @UnsupportedAppUsage
     public Metadata() { }
 
+    // Have to declare protected for finalize() since it is protected
+    // in the base class Object.
+    @Override
+    protected void finalize() throws Throwable {
+        if (mParcel != null) {
+            mParcel.recycle();
+        }
+    }
+
     /**
      * Go over all the records, collecting metadata keys and records'
      * type field offset in the Parcel. These are stored in
@@ -417,6 +426,10 @@ import java.util.TimeZone;
         if (!scanAllRecords(parcel, size - kMetaHeaderSize)) {
             parcel.setDataPosition(pin);
             return false;
+        }
+
+        if (mParcel != null) {
+            mParcel.recycle();
         }
         mParcel = parcel;
         return true;
