@@ -46,9 +46,11 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -127,6 +129,9 @@ public class Trampoline extends IBackupManager.Stub {
     private final Handler mHandler;
     private final Set<ComponentName> mTransportWhitelist;
 
+    /** Keeps track of all unlocked users registered with this service. Indexed by user id. */
+    private final SparseArray<UserBackupManagerService> mUserServices;
+
     private final BroadcastReceiver mUserRemovedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -140,6 +145,11 @@ public class Trampoline extends IBackupManager.Stub {
     };
 
     public Trampoline(Context context) {
+        this(context, new SparseArray<>());
+    }
+
+    @VisibleForTesting
+    Trampoline(Context context, SparseArray<UserBackupManagerService> userServices) {
         mContext = context;
         mGlobalDisable = isBackupDisabled();
         HandlerThread handlerThread =
@@ -147,7 +157,8 @@ public class Trampoline extends IBackupManager.Stub {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
         mUserManager = UserManager.get(context);
-        mService = new BackupManagerService(mContext, this);
+        mUserServices = userServices;
+        mService = new BackupManagerService(mContext, this, mUserServices);
         Set<ComponentName> transportWhitelist =
                 SystemConfig.getInstance().getBackupTransportWhitelist();
         mTransportWhitelist = (transportWhitelist == null) ? emptySet() : transportWhitelist;
@@ -297,7 +308,12 @@ public class Trampoline extends IBackupManager.Stub {
         postToHandler(() -> startServiceForUser(userId));
     }
 
-    private void startServiceForUser(int userId) {
+    /**
+     * Starts the backup service for user {@code userId} by creating a new instance of {@link
+     * UserBackupManagerService} and registering it with this service.
+     */
+    @VisibleForTesting
+    void startServiceForUser(int userId) {
         // We know that the user is unlocked here because it is called from setBackupServiceActive
         // and unlockUser which have these guarantees. So we can check if the file exists.
         if (mGlobalDisable) {
@@ -308,8 +324,53 @@ public class Trampoline extends IBackupManager.Stub {
             Slog.i(TAG, "Backup not activated for user " + userId);
             return;
         }
+        if (mUserServices.get(userId) != null) {
+            Slog.i(TAG, "userId " + userId + " already started, so not starting again");
+            return;
+        }
         Slog.i(TAG, "Starting service for user: " + userId);
-        mService.startServiceForUser(userId, mTransportWhitelist);
+        UserBackupManagerService userBackupManagerService =
+                UserBackupManagerService.createAndInitializeService(
+                        userId, mContext, this, mTransportWhitelist);
+        startServiceForUser(userId, userBackupManagerService);
+    }
+
+    /**
+     * Starts the backup service for user {@code userId} by registering its instance of {@link
+     * UserBackupManagerService} with this service and setting enabled state.
+     */
+    void startServiceForUser(int userId, UserBackupManagerService userBackupManagerService) {
+        mUserServices.put(userId, userBackupManagerService);
+
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
+        userBackupManagerService.initializeBackupEnableState();
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /** Stops the backup service for user {@code userId} when the user is stopped. */
+    @VisibleForTesting
+    protected void stopServiceForUser(int userId) {
+        UserBackupManagerService userBackupManagerService = mUserServices.removeReturnOld(userId);
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.tearDownService();
+
+            KeyValueBackupJob.cancel(userId, mContext);
+            FullBackupJob.cancel(userId, mContext);
+        }
+    }
+
+    /**
+     *  Returns a list of users currently unlocked that have a {@link UserBackupManagerService}
+     *  registered.
+     *
+     *  Warning: Do NOT modify returned object as it's used inside.
+     *
+     *  TODO: Return a copy or only expose read-only information through other means.
+     */
+    @VisibleForTesting
+    SparseArray<UserBackupManagerService> getUserServices() {
+        return mUserServices;
     }
 
     /**
@@ -321,7 +382,7 @@ public class Trampoline extends IBackupManager.Stub {
                 () -> {
                     if (!mGlobalDisable) {
                         Slog.i(TAG, "Stopping service for user: " + userId);
-                        mService.stopServiceForUser(userId);
+                        stopServiceForUser(userId);
                     }
                 });
     }
@@ -329,7 +390,7 @@ public class Trampoline extends IBackupManager.Stub {
     /** Returns {@link UserBackupManagerService} for user {@code userId}. */
     @Nullable
     public UserBackupManagerService getUserService(int userId) {
-        return mService.getUserServices().get(userId);
+        return mUserServices.get(userId);
     }
 
     /**
