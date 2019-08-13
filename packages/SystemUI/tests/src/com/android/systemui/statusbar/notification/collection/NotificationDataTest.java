@@ -653,6 +653,7 @@ public class NotificationDataTest extends SysuiTestCase {
         public static final String OVERRIDE_SMART_ACTIONS = "sa";
         public static final String OVERRIDE_SMART_REPLIES = "sr";
         public static final String OVERRIDE_BUBBLE = "cb";
+        public static final String OVERRIDE_VISUALLY_INTERRUPTIVE = "vi";
 
         public Map<String, Bundle> rankingOverrides = new HashMap<>();
 
@@ -713,7 +714,9 @@ public class NotificationDataTest extends SysuiTestCase {
                         overrides.containsKey(OVERRIDE_SMART_REPLIES)
                                 ? overrides.getCharSequenceArrayList(OVERRIDE_SMART_REPLIES)
                                 : currentReplies,
-                        overrides.getBoolean(OVERRIDE_BUBBLE, outRanking.canBubble()));
+                        overrides.getBoolean(OVERRIDE_BUBBLE, outRanking.canBubble()),
+                        overrides.getBoolean(OVERRIDE_VISUALLY_INTERRUPTIVE,
+                                outRanking.visuallyInterruptive()));
             } else {
                 outRanking.populate(
                         new RankingBuilder()
