@@ -25,6 +25,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_TAG;
 
 import android.annotation.NonNull;
+import android.annotation.StringRes;
 import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -1265,14 +1266,22 @@ public final class SystemServer {
             startSystemCaptionsManagerService(context, t);
 
             // App prediction manager service
-            t.traceBegin("StartAppPredictionService");
-            mSystemServiceManager.startService(APP_PREDICTION_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
+            if (deviceHasConfigString(context, R.string.config_defaultAppPredictionService)) {
+                t.traceBegin("StartAppPredictionService");
+                mSystemServiceManager.startService(APP_PREDICTION_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "AppPredictionService not defined by OEM");
+            }
 
             // Content suggestions manager service
-            t.traceBegin("StartContentSuggestionsService");
-            mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
-            t.traceEnd();
+            if (deviceHasConfigString(context, R.string.config_defaultContentSuggestionsService)) {
+                t.traceBegin("StartContentSuggestionsService");
+                mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "ContentSuggestionsService not defined by OEM");
+            }
 
             t.traceBegin("InitNetworkStackClient");
             try {
@@ -2257,11 +2266,14 @@ public final class SystemServer {
         t.traceEnd(); // startOtherServices
     }
 
+    private boolean deviceHasConfigString(@NonNull Context context, @StringRes int resId) {
+        String serviceName = context.getString(resId);
+        return !TextUtils.isEmpty(serviceName);
+    }
+
     private void startSystemCaptionsManagerService(@NonNull Context context,
             @NonNull TimingsTraceAndSlog t) {
-        String serviceName = context.getString(
-                com.android.internal.R.string.config_defaultSystemCaptionsManagerService);
-        if (TextUtils.isEmpty(serviceName)) {
+        if (!deviceHasConfigString(context, R.string.config_defaultSystemCaptionsManagerService)) {
             Slog.d(TAG, "SystemCaptionsManagerService disabled because resource is not overlaid");
             return;
         }
@@ -2289,9 +2301,7 @@ public final class SystemServer {
 
         // Then check if OEM overlaid the resource that defines the service.
         if (!explicitlyEnabled) {
-            final String serviceName = context
-                    .getString(com.android.internal.R.string.config_defaultContentCaptureService);
-            if (TextUtils.isEmpty(serviceName)) {
+            if (!deviceHasConfigString(context, R.string.config_defaultContentCaptureService)) {
                 Slog.d(TAG, "ContentCaptureService disabled because resource is not overlaid");
                 return;
             }
