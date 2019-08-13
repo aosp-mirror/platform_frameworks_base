@@ -23,4 +23,5 @@ android_app {
         "src/FrameLayoutInflationActivity.java",
         "src/TextViewInflationActivity.java",
     ],
+    platform_apis: true,
 }

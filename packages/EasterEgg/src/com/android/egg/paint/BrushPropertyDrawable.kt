@@ -63,7 +63,7 @@ class BrushPropertyDrawable : Drawable {
     }
 
     override fun draw(c: Canvas) {
-        c?.let {
+        c.let {
             val w = bounds.width().toFloat()
             val h = bounds.height().toFloat()
             val inset = _size / 12 // 2dp in a 24x24 icon

@@ -12,12 +12,14 @@ java_library_static {
     },
     srcs: [
         "java/**/*.java",
+        ":platformcompat_aidl",
         ":dumpstate_aidl",
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
         ":gsiservice_aidl",
         ":mediaupdateservice_aidl",
+        ":platform-compat-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
@@ -77,4 +79,12 @@ java_library {
 prebuilt_etc {
     name: "gps_debug.conf",
     src: "java/com/android/server/location/gps_debug.conf",
+}
+
+filegroup {
+    name: "platformcompat_aidl",
+    srcs: [
+        "java/com/android/server/compat/IPlatformCompat.aidl",
+    ],
+    path: "java",
 }

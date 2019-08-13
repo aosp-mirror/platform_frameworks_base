@@ -7424,6 +7424,7 @@ package android.telephony.ims.feature {
   public abstract class ImsFeature {
     ctor public ImsFeature();
     method public abstract void changeEnabledCapabilities(android.telephony.ims.feature.CapabilityChangeRequest, android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
+    method public final int getSlotIndex();
     method public abstract void onFeatureReady();
     method public abstract void onFeatureRemoved();
     method public final void setFeatureState(int);
@@ -7437,7 +7438,7 @@ package android.telephony.ims.feature {
     field public static final int STATE_UNAVAILABLE = 0; // 0x0
   }
 
-  @Deprecated public static class ImsFeature.Capabilities {
+  public static class ImsFeature.Capabilities {
     field @Deprecated protected int mCapabilities;
   }
 

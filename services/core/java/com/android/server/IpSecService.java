@@ -750,10 +750,10 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    // These values have been reserved in ConnectivityService
+    // These values have been reserved in NetIdManager
     @VisibleForTesting static final int TUN_INTF_NETID_START = 0xFC00;
 
-    @VisibleForTesting static final int TUN_INTF_NETID_RANGE = 0x0400;
+    public static final int TUN_INTF_NETID_RANGE = 0x0400;
 
     private final SparseBooleanArray mTunnelNetIds = new SparseBooleanArray();
     private int mNextTunnelNetIdIndex = 0;

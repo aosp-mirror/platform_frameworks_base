@@ -21,7 +21,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.feature.ImsFeature;
 import android.util.ArraySet;
-import android.util.Pair;
 
 import java.util.Set;
 
@@ -80,7 +79,7 @@ public final class ImsFeatureConfiguration implements Parcelable {
 
         @Override
         public String toString() {
-            return "{s=" + slotId + ", f=" + featureType + "}";
+            return "{s=" + slotId + ", f=" + ImsFeature.FEATURE_LOG_MAP.get(featureType) + "}";
         }
     }
 

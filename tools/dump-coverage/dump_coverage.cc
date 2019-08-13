@@ -18,20 +18,10 @@
 #include <jvmti.h>
 #include <string.h>
 
-#include <atomic>
-#include <ctime>
 #include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <istream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
 
 using std::get;
 using std::tuple;
-using std::chrono::system_clock;
 
 namespace dump_coverage {
 
@@ -87,35 +77,11 @@ static jbyteArray GetExecutionData(JNIEnv* env) {
   return java_result_array;
 }
 
-// Gets the filename to write execution data to
-//  dirname: the directory in which to place the file
-//  outputs <dirname>/YYYY-MM-DD-HH-MM-SS.SSS.exec
-static std::string GetFilename(const std::string& dirname) {
-  system_clock::time_point time_point = system_clock::now();
-  auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(time_point);
-  auto fractional_time = time_point - seconds;
-  auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(fractional_time);
-
-  std::time_t time = system_clock::to_time_t(time_point);
-  auto tm = *std::gmtime(&time);
-
-  std::ostringstream oss;
-  oss
-    << dirname
-    << "/"
-    << std::put_time(&tm, "%Y-%m-%d-%H-%M-%S.")
-    << std::setfill('0') << std::setw(3) << millis.count()
-    << ".ec";
-  return oss.str();
-}
-
-// Writes the execution data to a file
-//  data, length: represent the data, as a sequence of bytes
-//  dirname: directory name to contain the file
+// Writes the execution data to a file.
+//  data, length: represent the data, as a sequence of bytes.
+//  filename: file to write coverage data to.
 //  returns JNI_ERR if there is an error in writing the file, otherwise JNI_OK.
-static jint WriteFile(const char* data, int length, const std::string& dirname) {
-  auto filename = GetFilename(dirname);
-
+static jint WriteFile(const char* data, int length, const std::string& filename) {
   LOG(INFO) << "Writing file of length " << length << " to '" << filename
             << "'";
   std::ofstream file(filename, std::ios::binary);
@@ -136,11 +102,11 @@ static jint WriteFile(const char* data, int length, const std::string& dirname) 
   return JNI_OK;
 }
 
-// Grabs execution data and writes it to a file
-//  dirname: directory name to contain the file
+// Grabs execution data and writes it to a file.
+//  filename: file to write coverage data to.
 //  returns JNI_ERR if there is an error writing the file.
 // Will crash if the Agent isn't found or if any Java Exception occurs.
-static jint Dump(const std::string& dirname) {
+static jint Dump(const std::string& filename) {
   LOG(INFO) << "Dumping file";
 
   JNIEnv* env = GetJNIEnv();
@@ -152,12 +118,12 @@ static jint Dump(const std::string& dirname) {
 
   int result_len = env->GetArrayLength(java_result_array);
 
-  return WriteFile((const char*) result_ptr, result_len, dirname);
+  return WriteFile((const char*) result_ptr, result_len, filename);
 }
 
 // Resets execution data, performing the equivalent of
 //  Agent.getInstance().reset();
-//  args: should be empty
+//  args: should be empty.
 //  returns JNI_ERR if the arguments are invalid.
 // Will crash if the Agent isn't found or if any Java Exception occurs.
 static jint Reset(const std::string& args) {
