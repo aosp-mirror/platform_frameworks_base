@@ -77,6 +77,8 @@ public class AccessibilityWindowManagerTest {
     private static final boolean FORCE_SEND = true;
     private static final boolean SEND_ON_WINDOW_CHANGES = false;
     private static final int USER_SYSTEM_ID = UserHandle.USER_SYSTEM;
+    private static final int USER_PROFILE = 11;
+    private static final int USER_PROFILE_PARENT = 1;
     // TO-DO [Multi-Display] : change the display count to 2
     private static final int DISPLAY_COUNT = 1;
     private static final int NUM_GLOBAL_WINDOWS = 4;
@@ -109,6 +111,8 @@ public class AccessibilityWindowManagerTest {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         when(mMockA11yUserManager.getCurrentUserIdLocked()).thenReturn(USER_SYSTEM_ID);
+        when(mMockA11ySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(
+                USER_PROFILE)).thenReturn(USER_PROFILE_PARENT);
         when(mMockA11ySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(
                 USER_SYSTEM_ID)).thenReturn(USER_SYSTEM_ID);
         when(mMockA11ySecurityPolicy.resolveValidReportedPackageLocked(
@@ -247,8 +251,8 @@ public class AccessibilityWindowManagerTest {
             throws RemoteException {
         final AccessibilityWindowInfo oldWindow =
                 mA11yWindowManager.getWindowListLocked().get(0);
-        final IWindow token =
-                addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY, true);
+        final IWindow token = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                true, USER_SYSTEM_ID);
         final WindowInfo windowInfo = WindowInfo.obtain();
         windowInfo.type = AccessibilityWindowInfo.TYPE_APPLICATION;
         windowInfo.token = token.asBinder();
@@ -605,6 +609,16 @@ public class AccessibilityWindowManagerTest {
         verify(mockRemoteConnection).notifyOutsideTouch();
     }
 
+    @Test
+    public void addAccessibilityInteractionConnection_profileUser_findInParentUser()
+            throws RemoteException {
+        final IWindow token = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                false, USER_PROFILE);
+        final int windowId = mA11yWindowManager.findWindowIdLocked(
+                USER_PROFILE_PARENT, token.asBinder());
+        assertTrue(windowId >= 0);
+    }
+
     private void startTrackingPerDisplay(int displayId) throws RemoteException {
         ArrayList<WindowInfo> windowInfosForDisplay = new ArrayList<>();
         // Adds RemoteAccessibilityConnection into AccessibilityWindowManager, and copy
@@ -612,12 +626,14 @@ public class AccessibilityWindowManagerTest {
         // for the test.
         int layer = 0;
         for (int i = 0; i < NUM_GLOBAL_WINDOWS; i++) {
-            final IWindow token = addAccessibilityInteractionConnection(displayId, true);
+            final IWindow token = addAccessibilityInteractionConnection(displayId,
+                    true, USER_SYSTEM_ID);
             addWindowInfo(windowInfosForDisplay, token, layer++);
 
         }
         for (int i = 0; i < NUM_APP_WINDOWS; i++) {
-            final IWindow token = addAccessibilityInteractionConnection(displayId, false);
+            final IWindow token = addAccessibilityInteractionConnection(displayId,
+                    false, USER_SYSTEM_ID);
             addWindowInfo(windowInfosForDisplay, token, layer++);
         }
         // Setups default focus.
@@ -647,8 +663,8 @@ public class AccessibilityWindowManagerTest {
         return windowsForAccessibilityCallbacksCaptor.getValue();
     }
 
-    private IWindow addAccessibilityInteractionConnection(int displayId, boolean bGlobal)
-            throws RemoteException {
+    private IWindow addAccessibilityInteractionConnection(int displayId, boolean bGlobal,
+            int userId) throws RemoteException {
         final IWindow mockWindowToken = Mockito.mock(IWindow.class);
         final IAccessibilityInteractionConnection mockA11yConnection = Mockito.mock(
                 IAccessibilityInteractionConnection.class);
@@ -656,13 +672,13 @@ public class AccessibilityWindowManagerTest {
         final IBinder mockWindowBinder = Mockito.mock(IBinder.class);
         when(mockA11yConnection.asBinder()).thenReturn(mockConnectionBinder);
         when(mockWindowToken.asBinder()).thenReturn(mockWindowBinder);
-        when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(USER_SYSTEM_ID))
+        when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(userId))
                 .thenReturn(bGlobal);
         when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowToken.asBinder()))
                 .thenReturn(displayId);
 
         int windowId = mA11yWindowManager.addAccessibilityInteractionConnection(
-                mockWindowToken, mockA11yConnection, PACKAGE_NAME, USER_SYSTEM_ID);
+                mockWindowToken, mockA11yConnection, PACKAGE_NAME, userId);
         mA11yWindowTokens.put(windowId, mockWindowToken);
         return mockWindowToken;
     }
