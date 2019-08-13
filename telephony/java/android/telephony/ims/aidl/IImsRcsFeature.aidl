@@ -16,10 +16,38 @@
 
 package android.telephony.ims.aidl;
 
+import android.net.Uri;
+import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.aidl.IImsCapabilityCallback;
+import android.telephony.ims.aidl.IRcsFeatureListener;
+import android.telephony.ims.feature.CapabilityChangeRequest;
+
+import java.util.List;
+
 /**
  * See RcsFeature for more information.
  * {@hide}
  */
 interface IImsRcsFeature {
-    //Empty Default Implementation
+    // Not oneway because we need to verify this completes before doing anything else.
+    void setListener(IRcsFeatureListener listener);
+    int queryCapabilityStatus();
+    // Inherited from ImsFeature
+    int getFeatureState();
+    oneway void addCapabilityCallback(IImsCapabilityCallback c);
+    oneway void removeCapabilityCallback(IImsCapabilityCallback c);
+    oneway void changeCapabilitiesConfiguration(in CapabilityChangeRequest r,
+            IImsCapabilityCallback c);
+    oneway void queryCapabilityConfiguration(int capability, int radioTech,
+            IImsCapabilityCallback c);
+    // RcsPresenceExchangeImplBase specific api
+    oneway void requestCapabilities(in List<Uri> uris, int operationToken);
+    oneway void updateCapabilities(in RcsContactUceCapability capabilities, int operationToken);
+    // RcsSipOptionsImplBase specific api
+    oneway void sendCapabilityRequest(in Uri contactUri,
+            in RcsContactUceCapability capabilities, int operationToken);
+    oneway void respondToCapabilityRequest(in String contactUri,
+            in RcsContactUceCapability ownCapabilities, int operationToken);
+    oneway void respondToCapabilityRequestWithError(in Uri contactUri, int code, in String reason,
+            int operationToken);
 }
