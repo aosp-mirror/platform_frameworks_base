@@ -22,7 +22,7 @@
     <string name="session" msgid="6470628549473641030">"सत्र:"</string>
     <string name="duration" msgid="3584782459928719435">"अवधि:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"भेजे गए:"</string>
-    <string name="data_received" msgid="4062776929376067820">"प्राप्त:"</string>
+    <string name="data_received" msgid="4062776929376067820">"पाया:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> बाइट / <xliff:g id="NUMBER_1">%2$s</xliff:g> पैकेट"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"हमेशा चालू रहने वाले VPN से नहीं जुड़ पा रहा है"</string>
     <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> को हर समय जुड़े रहने के लिए सेट अप किया गया है, लेकिन वह इस समय नहीं जुड़ पा रहा है. जब तक आपका फ़ोन <xliff:g id="VPN_APP_1">%1$s</xliff:g> से नहीं जुड़ जाता, तब तक वह सार्वजनिक नेटवर्क का इस्तेमाल करेगा."</string>

@@ -26,6 +26,7 @@ import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.classifier.brightline.FalsingDataProvider;
@@ -102,7 +103,8 @@ public class FalsingManagerProxy implements FalsingManager {
         } else {
             mInternalFalsingManager = new BrightLineFalsingManager(
                     new FalsingDataProvider(context.getResources().getDisplayMetrics()),
-                    Dependency.get(AsyncSensorManager.class)
+                    Dependency.get(AsyncSensorManager.class),
+                    KeyguardUpdateMonitor.getInstance(context)
             );
         }
 
