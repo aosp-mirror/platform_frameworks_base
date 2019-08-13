@@ -4177,6 +4177,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
+    @TestApi
     public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
 
     /**

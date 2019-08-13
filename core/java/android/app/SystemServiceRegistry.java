@@ -128,12 +128,10 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BugreportManager;
 import android.os.Build;
-import android.os.DeviceIdleManager;
 import android.os.DropBoxManager;
 import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
-import android.os.IDeviceIdleController;
 import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
@@ -196,6 +194,7 @@ import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -1221,17 +1220,6 @@ public final class SystemServiceRegistry {
                     }
             });
 
-        registerService(Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
-                new CachedServiceFetcher<DeviceIdleManager>() {
-                    @Override
-                    public DeviceIdleManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        IDeviceIdleController service = IDeviceIdleController.Stub.asInterface(
-                                ServiceManager.getServiceOrThrow(
-                                        Context.DEVICE_IDLE_CONTROLLER));
-                        return new DeviceIdleManager(ctx.getOuterContext(), service);
-                    }});
-
         registerService(Context.TIME_DETECTOR_SERVICE, TimeDetector.class,
                 new CachedServiceFetcher<TimeDetector>() {
                     @Override
@@ -1332,14 +1320,30 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    public static <T> void registerStaticService(String serviceName, Class<T> serviceClass,
+    public static <T> void registerStaticService(String serviceName, Class<T> serviceWrapperClass,
             Function<IBinder, T> serviceFetcher) {
-        registerService(serviceName, serviceClass,
+        registerService(serviceName, serviceWrapperClass,
                 new StaticServiceFetcher<T>() {
                     @Override
                     public T createService() throws ServiceNotFoundException {
                         IBinder b = ServiceManager.getServiceOrThrow(serviceName);
                         return serviceFetcher.apply(b);
+                    }});
+    }
+
+    /**
+     * APEX modules will use it to register their service wrapper.
+     *
+     * @hide
+     */
+    public static <T> void registerCachedService(String serviceName, Class<T> serviceWrapperClass,
+            BiFunction<ContextImpl, IBinder, T> serviceFetcher) {
+        registerService(serviceName, serviceWrapperClass,
+                new CachedServiceFetcher<T>() {
+                    @Override
+                    public T createService(ContextImpl ctx) throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(serviceName);
+                        return serviceFetcher.apply(ctx, b);
                     }});
     }
 
