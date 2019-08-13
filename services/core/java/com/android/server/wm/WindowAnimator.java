@@ -107,14 +107,6 @@ public class WindowAnimator {
     }
 
     void removeDisplayLocked(final int displayId) {
-        final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
-        if (displayAnimator != null) {
-            if (displayAnimator.mScreenRotationAnimation != null) {
-                displayAnimator.mScreenRotationAnimation.kill();
-                displayAnimator.mScreenRotationAnimation = null;
-            }
-        }
-
         mDisplayContentsAnimators.delete(displayId);
     }
 
@@ -245,22 +237,14 @@ public class WindowAnimator {
 
     public void dumpLocked(PrintWriter pw, String prefix, boolean dumpAll) {
         final String subPrefix = "  " + prefix;
-        final String subSubPrefix = "  " + subPrefix;
 
         for (int i = 0; i < mDisplayContentsAnimators.size(); i++) {
             pw.print(prefix); pw.print("DisplayContentsAnimator #");
                     pw.print(mDisplayContentsAnimators.keyAt(i));
                     pw.println(":");
-            final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
             final DisplayContent dc =
                     mService.mRoot.getDisplayContent(mDisplayContentsAnimators.keyAt(i));
             dc.dumpWindowAnimators(pw, subPrefix);
-            if (displayAnimator.mScreenRotationAnimation != null) {
-                pw.print(subPrefix); pw.println("mScreenRotationAnimation:");
-                displayAnimator.mScreenRotationAnimation.printTo(subSubPrefix, pw);
-            } else if (dumpAll) {
-                pw.print(subPrefix); pw.println("no ScreenRotationAnimation ");
-            }
             pw.println();
         }
 
@@ -294,23 +278,6 @@ public class WindowAnimator {
         return displayAnimator;
     }
 
-    void setScreenRotationAnimationLocked(int displayId, ScreenRotationAnimation animation) {
-        final DisplayContentsAnimator animator = getDisplayContentsAnimatorLocked(displayId);
-
-        if (animator != null) {
-            animator.mScreenRotationAnimation = animation;
-        }
-    }
-
-    ScreenRotationAnimation getScreenRotationAnimationLocked(int displayId) {
-        if (displayId < 0) {
-            return null;
-        }
-
-        DisplayContentsAnimator animator = getDisplayContentsAnimatorLocked(displayId);
-        return animator != null? animator.mScreenRotationAnimation : null;
-    }
-
     void requestRemovalOfReplacedWindows(WindowState win) {
         mRemoveReplacedWindows = true;
     }
@@ -330,7 +297,6 @@ public class WindowAnimator {
     }
 
     private class DisplayContentsAnimator {
-        ScreenRotationAnimation mScreenRotationAnimation = null;
     }
 
     boolean isAnimating() {

@@ -497,6 +497,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** Windows removed since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
     final ArrayList<WindowState> mWinRemovedSinceNullFocus = new ArrayList<>();
 
+    private ScreenRotationAnimation mScreenRotationAnimation;
+
     /**
      * We organize all top-level Surfaces in to the following layers.
      * mOverlayLayer contains a few Surfaces which are always on top of others
@@ -1302,9 +1304,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void applyRotationLocked(final int oldRotation, final int rotation) {
         mDisplayRotation.applyCurrentRotation(rotation);
         final boolean rotateSeamlessly = mDisplayRotation.isRotatingSeamlessly();
-        final ScreenRotationAnimation screenRotationAnimation = rotateSeamlessly
-                ? null : mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
         final Transaction transaction = getPendingTransaction();
+        ScreenRotationAnimation screenRotationAnimation = rotateSeamlessly
+                ? null : getRotationAnimation();
         // We need to update our screen size information to match the new rotation. If the rotation
         // has actually changed then this method will return true and, according to the comment at
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
@@ -2386,6 +2388,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mPointerEventDispatcher.dispose();
+            setRotationAnimation(null);
             mWmService.mAnimator.removeDisplayLocked(mDisplayId);
             mWindowingLayer.release();
             mOverlayLayer.release();
@@ -2550,6 +2553,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return delta;
     }
 
+    public void setRotationAnimation(ScreenRotationAnimation screenRotationAnimation) {
+        if (mScreenRotationAnimation != null) {
+            mScreenRotationAnimation.kill();
+        }
+        mScreenRotationAnimation = screenRotationAnimation;
+    }
+
+    public ScreenRotationAnimation getRotationAnimation() {
+        return mScreenRotationAnimation;
+    }
+
     private static void createRotationMatrix(int rotation, float displayWidth, float displayHeight,
             Matrix outMatrix) {
         // For rotations without Z-ordering we don't need the target rectangle's position.
@@ -2612,8 +2626,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.writeToProto(proto, DISPLAY_INFO);
         proto.write(ROTATION, getRotation());
-        final ScreenRotationAnimation screenRotationAnimation =
-                mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+        final ScreenRotationAnimation screenRotationAnimation = getRotationAnimation();
         if (screenRotationAnimation != null) {
             screenRotationAnimation.writeToProto(proto, SCREEN_ROTATION_ANIMATION);
         }
@@ -2723,6 +2736,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 pw.println(':');
                 token.dump(pw, "    ", dumpAll);
             }
+        }
+
+        final ScreenRotationAnimation rotationAnimation = getRotationAnimation();
+        if (rotationAnimation != null) {
+            pw.print(subPrefix);
+            pw.println("  mScreenRotationAnimation:");
+            rotationAnimation.printTo("  ", pw);
+        } else if (dumpAll) {
+            pw.print(subPrefix);
+            pw.println("  no ScreenRotationAnimation ");
         }
 
         pw.println();
@@ -3734,7 +3757,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         convertCropForSurfaceFlinger(frame, rot, dw, dh);
 
         final ScreenRotationAnimation screenRotationAnimation =
-                mWmService.mAnimator.getScreenRotationAnimationLocked(DEFAULT_DISPLAY);
+                mWmService.mRoot.getDisplayContent(DEFAULT_DISPLAY).getRotationAnimation();
         final boolean inRotation = screenRotationAnimation != null &&
                 screenRotationAnimation.isAnimating();
         if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM, "Taking screenshot while rotating");

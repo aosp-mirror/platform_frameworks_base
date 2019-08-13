@@ -673,9 +673,8 @@ class WindowStateAnimator {
     }
 
     void computeShownFrameLocked() {
-        final int displayId = mWin.getDisplayId();
         final ScreenRotationAnimation screenRotationAnimation =
-                mAnimator.getScreenRotationAnimationLocked(displayId);
+                mWin.getDisplayContent().getRotationAnimation();
         final boolean windowParticipatesInScreenRotationAnimation =
                 !mWin.mForceSeamlesslyRotate;
         final boolean screenAnimation = screenRotationAnimation != null
