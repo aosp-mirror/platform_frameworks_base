@@ -291,7 +291,7 @@ final class HistoricalRegistry {
                 makeRelativeToEpochStart(currentOps, nowMillis);
                 currentOps.accept(visitor);
 
-                if(isPersistenceInitializedMLocked()) {
+                if (!isPersistenceInitializedMLocked()) {
                     Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
@@ -457,7 +457,7 @@ final class HistoricalRegistry {
                 // it is a part of the persistence initialization process.
                 boolean resampleHistory = false;
                 Slog.i(LOG_TAG, "New history parameters: mode:"
-                        + AppOpsManager.historicalModeToString(mMode) + " baseSnapshotInterval:"
+                        + AppOpsManager.historicalModeToString(mode) + " baseSnapshotInterval:"
                         + baseSnapshotInterval + " intervalCompressionMultiplier:"
                         + intervalCompressionMultiplier);
                 if (mMode != mode) {
@@ -1066,7 +1066,7 @@ final class HistoricalRegistry {
                 normalizeSnapshotForSlotDuration(persistedOps, slotDurationMillis);
                 writeHistoricalOpsDLocked(persistedOps, intervalOverflowMillis, newFile);
                 if (DEBUG) {
-                    Slog.i(LOG_TAG, "Persisted at depth: " + depth
+                    Slog.i(LOG_TAG, "Persisted at depth: " + depth + " file: " + newFile
                             + " ops:\n" + opsToDebugString(persistedOps));
                     enforceOpsWellFormed(persistedOps);
                 }
@@ -1160,7 +1160,7 @@ final class HistoricalRegistry {
             }
             if (DEBUG) {
                 if (allOps != null) {
-                    Slog.i(LOG_TAG, "Read from file: " + file + "ops:\n"
+                    Slog.i(LOG_TAG, "Read from file: " + file + " ops:\n"
                             + opsToDebugString(allOps));
                     enforceOpsWellFormed(allOps);
                 }
