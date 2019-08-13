@@ -17,6 +17,11 @@
 package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
+import android.os.RemoteException;
+import android.telephony.ims.ImsException;
+import android.telephony.ims.aidl.IRcsFeatureListener;
+import android.telephony.ims.feature.ImsFeature;
+import android.telephony.ims.feature.RcsFeature;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -72,6 +77,24 @@ public class RcsCapabilityExchange {
     })
     public @interface CommandCode {}
 
+
+    private RcsFeature mFeature;
+
+    /** @hide */
+    public final void initialize(RcsFeature feature) {
+        mFeature = feature;
+    }
+
+    /** @hide */
+    protected final IRcsFeatureListener getListener() throws ImsException {
+        IRcsFeatureListener listener = mFeature.getListener();
+        if (listener == null) {
+            throw new ImsException("Connection to Framework has not been established, wait for "
+                    + "onFeatureReady().", ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+        return mFeature.getListener();
+    }
+
     /**
      * Provides the framework with an update as to whether or not a command completed successfully
      * locally. This includes capabilities requests and updates from the network. If it does not
@@ -82,8 +105,18 @@ public class RcsCapabilityExchange {
      * @param code The result of the pending command. If {@link #COMMAND_CODE_SUCCESS}, further
      *             updates will be sent for this command using the associated operationToken.
      * @param operationToken the token associated with the pending command.
+     * @throws ImsException If this {@link RcsCapabilityExchange} instance is not currently
+     * connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received the
+     * {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases when the
+     * Telephony stack has crashed.
      */
-    public final void onCommandUpdate(@CommandCode int code, int operationToken) {
-        throw new UnsupportedOperationException();
+    public final void onCommandUpdate(@CommandCode int code, int operationToken)
+            throws ImsException {
+        try {
+            getListener().onCommandUpdate(code, operationToken);
+        } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 }
