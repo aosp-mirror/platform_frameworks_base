@@ -1738,7 +1738,8 @@ public class NotificationPanelView extends PanelView implements
     private void setQsExpansion(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
         mQsFullyExpanded = height == mQsMaxExpansionHeight && mQsMaxExpansionHeight != 0;
-        if (height > mQsMinExpansionHeight && !mQsExpanded && !mStackScrollerOverscrolling) {
+        if (height > mQsMinExpansionHeight && !mQsExpanded && !mStackScrollerOverscrolling
+                && !mDozing) {
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
             setQsExpanded(false);
