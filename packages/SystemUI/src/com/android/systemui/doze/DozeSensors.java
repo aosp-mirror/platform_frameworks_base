@@ -292,6 +292,7 @@ public class DozeSensors {
         final AlarmTimeout mCooldownTimer;
         final AlwaysOnDisplayPolicy mPolicy;
         final Sensor mSensor;
+        final boolean mUsingBrightnessSensor;
 
         public ProxSensor(AlwaysOnDisplayPolicy policy) {
             mPolicy = policy;
@@ -302,6 +303,7 @@ public class DozeSensors {
             // if available.
             Sensor sensor = DozeSensors.findSensorWithType(mSensorManager,
                     mContext.getString(R.string.doze_brightness_sensor_type));
+            mUsingBrightnessSensor = sensor != null;
             if (sensor == null) {
                 sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
             }
@@ -331,8 +333,7 @@ public class DozeSensors {
                 return;
             }
             if (register) {
-                mRegistered = mSensorManager.registerListener(this,
-                        mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
+                mRegistered = mSensorManager.registerListener(this, mSensor,
                         SensorManager.SENSOR_DELAY_NORMAL, mHandler);
             } else {
                 mSensorManager.unregisterListener(this);
@@ -345,7 +346,13 @@ public class DozeSensors {
         public void onSensorChanged(android.hardware.SensorEvent event) {
             if (DEBUG) Log.d(TAG, "onSensorChanged " + event);
 
-            mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
+            if (mUsingBrightnessSensor) {
+                // The custom brightness sensor is gated by the proximity sensor and will return 0
+                // whenever prox is covered.
+                mCurrentlyFar = event.values[0] > 0;
+            } else {
+                mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
+            }
             mProxCallback.accept(mCurrentlyFar);
 
             long now = SystemClock.elapsedRealtime();
