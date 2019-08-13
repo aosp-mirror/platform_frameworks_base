@@ -47,6 +47,7 @@ import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.utils.os.FakeHandler;
 
@@ -99,7 +100,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                     mScrimBehindAlpha = scrimBehindAlpha;
                     mScrimInFrontColor = scrimInFrontColor;
                 },
-                visible -> mScrimVisibility = visible, mDozeParamenters, mAlarmManager);
+                visible -> mScrimVisibility = visible, mDozeParamenters, mAlarmManager,
+                mock(KeyguardMonitor.class));
         mScrimController.setHasBackdrop(false);
         mScrimController.setWallpaperSupportsAmbientMode(false);
         mScrimController.transitionTo(ScrimState.KEYGUARD);
@@ -786,9 +788,9 @@ public class ScrimControllerTest extends SysuiTestCase {
                 ScrimView scrimForBubble,
                 TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
                 Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-                AlarmManager alarmManager) {
+                AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
             super(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
-                    scrimVisibleListener, dozeParameters, alarmManager);
+                    scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
         }
 
         @Override
