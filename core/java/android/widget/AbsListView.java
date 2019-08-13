@@ -2550,12 +2550,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return;
         }
 
-        final boolean isItemEnabled;
+        boolean isItemEnabled = view.isEnabled() && isEnabled();
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
         if (lp instanceof AbsListView.LayoutParams) {
-            isItemEnabled = ((AbsListView.LayoutParams) lp).isEnabled && isEnabled();
-        } else {
-            isItemEnabled = false;
+            isItemEnabled &= ((AbsListView.LayoutParams) lp).isEnabled;
         }
 
         info.setEnabled(isItemEnabled);
