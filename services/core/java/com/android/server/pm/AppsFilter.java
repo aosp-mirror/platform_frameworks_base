@@ -36,12 +36,12 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.server.FgThread;
 
-import java.util.ArrayList;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -69,20 +69,20 @@ class AppsFilter {
      * application B is implicitly allowed to query for application A; regardless of any manifest
      * entries.
      */
-    private final SparseArray<HashMap<String, ArrayList<String>>> mImplicitlyQueryable =
+    private final SparseArray<HashMap<String, Set<String>>> mImplicitlyQueryable =
             new SparseArray<>();
 
     /**
      * A mapping from the set of packages that query other packages via package name to the
      * list of packages that they can see.
      */
-    private final HashMap<String, List<String>> mQueriesViaPackage = new HashMap<>();
+    private final HashMap<String, Set<String>> mQueriesViaPackage = new HashMap<>();
 
     /**
      * A mapping from the set of packages that query others via intent to the list
      * of packages that the intents resolve to.
      */
-    private final HashMap<String, List<String>> mQueriesViaIntent = new HashMap<>();
+    private final HashMap<String, Set<String>> mQueriesViaIntent = new HashMap<>();
 
     /**
      * A set of packages that are always queryable by any package, regardless of their manifest
@@ -189,13 +189,13 @@ class AppsFilter {
      */
     private void markAppInteraction(
             PackageSetting initiatingPackage, PackageSetting targetPackage, int userId) {
-        HashMap<String, ArrayList<String>> currentUser = mImplicitlyQueryable.get(userId);
+        HashMap<String, Set<String>> currentUser = mImplicitlyQueryable.get(userId);
         if (currentUser == null) {
             currentUser = new HashMap<>();
             mImplicitlyQueryable.put(userId, currentUser);
         }
         if (!currentUser.containsKey(targetPackage.pkg.packageName)) {
-            currentUser.put(targetPackage.pkg.packageName, new ArrayList<>());
+            currentUser.put(targetPackage.pkg.packageName, new HashSet<>());
         }
         currentUser.get(targetPackage.pkg.packageName).add(initiatingPackage.pkg.packageName);
     }
@@ -224,7 +224,7 @@ class AppsFilter {
             }
         }
         // if the new package declares them, let's evaluate its ability to see existing packages
-        mQueriesViaIntent.put(newPkg.packageName, new ArrayList<>());
+        mQueriesViaIntent.put(newPkg.packageName, new HashSet<>());
         for (PackageParser.Package existingPackage : existing.values()) {
             if (existingPackage.packageName == newPkg.packageName) {
                 continue;
@@ -238,7 +238,7 @@ class AppsFilter {
                 mQueriesViaIntent.get(newPkg.packageName).add(existingPackage.packageName);
             }
         }
-        final ArrayList<String> queriesPackages = new ArrayList<>(
+        final HashSet<String> queriesPackages = new HashSet<>(
                 newPkg.mQueriesPackages == null ? 0 : newPkg.mQueriesPackages.size());
         if (newPkg.mQueriesPackages != null) {
             queriesPackages.addAll(newPkg.mQueriesPackages);
@@ -256,13 +256,13 @@ class AppsFilter {
 
         for (int i = 0; i < mImplicitlyQueryable.size(); i++) {
             mImplicitlyQueryable.valueAt(i).remove(packageName);
-            for (ArrayList<String> initiators : mImplicitlyQueryable.valueAt(i).values()) {
+            for (Set<String> initiators : mImplicitlyQueryable.valueAt(i).values()) {
                 initiators.remove(packageName);
             }
         }
 
         mQueriesViaIntent.remove(packageName);
-        for (List<String> declarators : mQueriesViaIntent.values()) {
+        for (Set<String> declarators : mQueriesViaIntent.values()) {
             declarators.remove(packageName);
         }
 
@@ -406,6 +406,55 @@ class AppsFilter {
     private boolean isImplicitlyQueryableSystemApp(PackageSetting targetPkgSetting) {
         return targetPkgSetting.isSystem() && (mSystemAppsQueryable
                 || mForceQueryableByDevice.contains(targetPkgSetting.pkg.packageName));
+    }
+
+    public void dumpQueries(
+            PrintWriter pw, @Nullable String filteringPackageName, DumpState dumpState,
+            int[] users) {
+        pw.println();
+        pw.println("Queries:");
+        dumpState.onTitlePrinted();
+        pw.println("  enabled: " + mConfigProvider.isEnabled());
+        pw.println("  system apps queryable: " + mSystemAppsQueryable);
+        dumpPackageSet(pw, filteringPackageName, mForceQueryableByDevice, "System whitelist", "  ");
+        dumpPackageSet(pw, filteringPackageName, mForceQueryable, "forceQueryable", "  ");
+        pw.println("  queries via package name:");
+        dumpQueriesMap(pw, filteringPackageName, mQueriesViaPackage, "    ");
+        pw.println("  queries via intent:");
+        dumpQueriesMap(pw, filteringPackageName, mQueriesViaIntent, "    ");
+        pw.println("  queryable via interaction:");
+        for (int user : users) {
+            pw.append("    User ").append(Integer.toString(user)).println(":");
+            final HashMap<String, Set<String>> queryMapForUser = mImplicitlyQueryable.get(user);
+            dumpQueriesMap(pw, filteringPackageName, queryMapForUser, "      ");
+        }
+    }
+
+    private static void dumpQueriesMap(PrintWriter pw, @Nullable String filteringPackageName,
+            HashMap<String, Set<String>> queriesMap, String spacing) {
+        for (String callingPkg : queriesMap.keySet()) {
+            if (Objects.equals(callingPkg, filteringPackageName)) {
+                // don't filter target package names if the calling is filteringPackageName
+                dumpPackageSet(pw, null /*filteringPackageName*/, queriesMap.get(callingPkg),
+                        callingPkg, spacing);
+            } else {
+                dumpPackageSet(pw, filteringPackageName, queriesMap.get(callingPkg), callingPkg,
+                        spacing);
+            }
+        }
+    }
+
+    private static void dumpPackageSet(PrintWriter pw, @Nullable String filteringPackageName,
+            Set<String> targetPkgSet, String subTitle, String spacing) {
+        if (targetPkgSet != null && targetPkgSet.size() > 0
+                && (filteringPackageName == null || targetPkgSet.contains(filteringPackageName))) {
+            pw.append(spacing).append(subTitle).println(":");
+            for (String pkgName : targetPkgSet) {
+                if (filteringPackageName == null || Objects.equals(filteringPackageName, pkgName)) {
+                    pw.append(spacing).append("  ").println(pkgName);
+                }
+            }
+        }
     }
 
     public interface ConfigProvider {

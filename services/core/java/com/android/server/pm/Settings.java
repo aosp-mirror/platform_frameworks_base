@@ -4570,6 +4570,13 @@ public final class Settings {
                 pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
                         ps.pkg.applicationInfo.privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
             }
+            pw.print(prefix); pw.print("  forceQueryable="); pw.println(ps.pkg.mForceQueryable);
+            if (ps.pkg.mQueriesPackages != null) {
+                pw.append(prefix).append("  queriesPackages=").println(ps.pkg.mQueriesPackages);
+            }
+            if (ps.pkg.mQueriesIntents != null) {
+                pw.append(prefix).append("  queriesIntents=").println(ps.pkg.mQueriesIntents);
+            }
             pw.print(prefix); pw.print("  dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;
