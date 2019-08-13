@@ -18,11 +18,16 @@ package com.android.server;
 
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT;
 
+import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.UserManager;
+
+import com.android.server.pm.UserManagerService;
 
 /**
  * The base class for services running in the system process. Override and implement
@@ -145,11 +150,29 @@ public abstract class SystemService {
     public void onBootPhase(int phase) {}
 
     /**
+     * @deprecated subclasses should extend {@link #onStartUser(int, int)} instead (which by default
+     * calls this method).
+     */
+    @Deprecated
+    public void onStartUser(@UserIdInt int userHandle) {}
+
+    /**
      * Called when a new user is starting, for system services to initialize any per-user
      * state they maintain for running users.
-     * @param userHandle The identifier of the user.
+     *
+     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
+     * referenced by {@link UserManagerService} and hence should not be modified.
      */
-    public void onStartUser(int userHandle) {}
+    public void onStartUser(@NonNull UserInfo userInfo) {
+        onStartUser(userInfo.id);
+    }
+
+    /**
+     * @deprecated subclasses should extend {@link #onUnlockUser(int, int)} instead (which by
+     * default calls this method).
+     */
+    @Deprecated
+    public void onUnlockUser(@UserIdInt int userHandle) {}
 
     /**
      * Called when an existing user is in the process of being unlocked. This
@@ -163,17 +186,38 @@ public abstract class SystemService {
      * {@link UserManager#isUserUnlockingOrUnlocked(int)} to handle both of
      * these states.
      *
-     * @param userHandle The identifier of the user.
+     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
+     * referenced by {@link UserManagerService} and hence should not be modified.
      */
-    public void onUnlockUser(int userHandle) {}
+    public void onUnlockUser(@NonNull UserInfo userInfo) {
+        onUnlockUser(userInfo.id);
+    }
+
+    /**
+     * @deprecated subclasses should extend {@link #onSwitchUser(int, int)} instead (which by
+     * default calls this method).
+     */
+    @Deprecated
+    public void onSwitchUser(@UserIdInt int userHandle) {}
 
     /**
      * Called when switching to a different foreground user, for system services that have
      * special behavior for whichever user is currently in the foreground.  This is called
      * before any application processes are aware of the new user.
-     * @param userHandle The identifier of the user.
+     *
+     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
+     * referenced by {@link UserManagerService} and hence should not be modified.
      */
-    public void onSwitchUser(int userHandle) {}
+    public void onSwitchUser(@NonNull UserInfo userInfo) {
+        onSwitchUser(userInfo.id);
+    }
+
+    /**
+     * @deprecated subclasses should extend {@link #onStopUser(int, int)} instead (which by default
+     * calls this method).
+     */
+    @Deprecated
+    public void onStopUser(@UserIdInt int userHandle) {}
 
     /**
      * Called when an existing user is stopping, for system services to finalize any per-user
@@ -183,9 +227,19 @@ public abstract class SystemService {
      *
      * <p>NOTE: This is the last callback where the callee may access the target user's CE storage.
      *
-     * @param userHandle The identifier of the user.
+     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
+     * referenced by {@link UserManagerService} and hence should not be modified.
      */
-    public void onStopUser(int userHandle) {}
+    public void onStopUser(@NonNull UserInfo userInfo) {
+        onStopUser(userInfo.id);
+    }
+
+    /**
+     * @deprecated subclasses should extend {@link #onCleanupUser(int, int)} instead (which by
+     * default calls this method).
+     */
+    @Deprecated
+    public void onCleanupUser(@UserIdInt int userHandle) {}
 
     /**
      * Called when an existing user is stopping, for system services to finalize any per-user
@@ -193,11 +247,14 @@ public abstract class SystemService {
      * teardown of the user is complete.
      *
      * <p>NOTE: When this callback is called, the CE storage for the target user may not be
-     * accessible already.  Use {@link #onStopUser} instead if you need to access the CE storage.
+     * accessible already.  Use {@link #onCleanupUser} instead if you need to access the CE storage.
      *
-     * @param userHandle The identifier of the user.
+     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
+     * referenced by {@link UserManagerService} and hence should not be modified.
      */
-    public void onCleanupUser(int userHandle) {}
+    public void onCleanupUser(@NonNull UserInfo userInfo) {
+        onCleanupUser(userInfo.id);
+    }
 
     /**
      * Publish the service so it is accessible to other services and apps.

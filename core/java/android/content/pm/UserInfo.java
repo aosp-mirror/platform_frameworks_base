@@ -16,11 +16,17 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
+import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.DebugUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Per-user information.
@@ -119,10 +125,31 @@ public class UserInfo implements Parcelable {
      */
     public static final int FLAG_SYSTEM = 0x00000800;
 
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, prefix = "FLAG_", value = {
+            FLAG_PRIMARY,
+            FLAG_ADMIN,
+            FLAG_GUEST,
+            FLAG_RESTRICTED,
+            FLAG_INITIALIZED,
+            FLAG_MANAGED_PROFILE,
+            FLAG_DISABLED,
+            FLAG_QUIET_MODE,
+            FLAG_EPHEMERAL,
+            FLAG_DEMO,
+            FLAG_FULL,
+            FLAG_SYSTEM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserInfoFlag {
+    }
+
     public static final int NO_PROFILE_GROUP_ID = UserHandle.USER_NULL;
 
     @UnsupportedAppUsage
-    public int id;
+    public @UserIdInt int id;
     @UnsupportedAppUsage
     public int serialNumber;
     @UnsupportedAppUsage
@@ -130,7 +157,7 @@ public class UserInfo implements Parcelable {
     @UnsupportedAppUsage
     public String iconPath;
     @UnsupportedAppUsage
-    public int flags;
+    public @UserInfoFlag int flags;
     @UnsupportedAppUsage
     public long creationTime;
     @UnsupportedAppUsage
@@ -214,6 +241,10 @@ public class UserInfo implements Parcelable {
         return (flags & FLAG_DEMO) == FLAG_DEMO;
     }
 
+    public boolean isFull() {
+        return (flags & FLAG_FULL) == FLAG_FULL;
+    }
+
     /**
      * Returns true if the user is a split system user.
      * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,
@@ -290,13 +321,23 @@ public class UserInfo implements Parcelable {
 
     @Override
     public String toString() {
+        // NOTE:  do not change this string, it's used by 'pm list users', which in turn is
+        // used and parsed by TestDevice. In other words, if you change it, you'd have to change
+        // TestDevice, TestDeviceTest, and possibly others....
         return "UserInfo{" + id + ":" + name + ":" + Integer.toHexString(flags) + "}";
     }
 
+    /** @hide */
+    public static String flagsToString(int flags) {
+        return DebugUtils.flagsToString(UserInfo.class, "FLAG_", flags);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(id);
         dest.writeString(name);

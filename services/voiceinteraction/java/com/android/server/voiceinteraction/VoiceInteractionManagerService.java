@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -36,6 +37,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ShortcutServiceInternal;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -80,6 +82,7 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.soundtrigger.SoundTriggerInternal;
+import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
@@ -92,7 +95,7 @@ import java.util.concurrent.Executor;
  */
 public class VoiceInteractionManagerService extends SystemService {
     static final String TAG = "VoiceInteractionManagerService";
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true; // TODO(b/133242016) STOPSHIP: change to false before R ships
 
     final Context mContext;
     final ContentResolver mResolver;
@@ -154,19 +157,37 @@ public class VoiceInteractionManagerService extends SystemService {
     }
 
     @Override
-    public void onStartUser(int userHandle) {
-        mServiceStub.initForUser(userHandle);
+    public void onStartUser(@NonNull UserInfo userInfo) {
+        if (DEBUG) Slog.d(TAG, "onStartUser(" + userInfo + ")");
+
+        if (!userInfo.isFull()) {
+            if (DEBUG) Slog.d(TAG,  "***** skipping on non-full user " + userInfo);
+            return;
+        }
+        mServiceStub.initForUser(userInfo.id);
     }
 
     @Override
-    public void onUnlockUser(int userHandle) {
-        mServiceStub.initForUser(userHandle);
+    public void onUnlockUser(@NonNull UserInfo userInfo) {
+        if (DEBUG) Slog.d(TAG, "onUnlockUser(" + userInfo + ")");
+
+        if (!userInfo.isFull()) {
+            if (DEBUG) Slog.d(TAG,  "***** skipping on non-full user " + userInfo);
+            return;
+        }
+        mServiceStub.initForUser(userInfo.id);
         mServiceStub.switchImplementationIfNeeded(false);
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
-        mServiceStub.switchUser(userHandle);
+    public void onSwitchUser(@NonNull UserInfo userInfo) {
+        if (DEBUG) Slog.d(TAG, "onSwitchUser(" + userInfo + ")");
+
+        if (!userInfo.isFull()) {
+            if (DEBUG) Slog.d(TAG,  "***** skipping on non-full user " + userInfo);
+            return;
+        }
+        mServiceStub.switchUser(userInfo.id);
     }
 
     class LocalService extends VoiceInteractionManagerInternal {
@@ -270,6 +291,20 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         public void initForUser(int userHandle) {
+            final TimingsTraceAndSlog t;
+            if (DEBUG) {
+                t = TimingsTraceAndSlog.newAsyncLog();
+                t.traceBegin("VoiceInteractionSvc.initForUser(" + userHandle + ")");
+            } else {
+                t = null;
+            }
+            initForUserNoTracing(userHandle);
+            if (t != null) {
+                t.traceEnd();
+            }
+        }
+
+        private void initForUserNoTracing(@UserIdInt int userHandle) {
             if (DEBUG) Slog.d(TAG, "**************** initForUser user=" + userHandle);
             String curInteractorStr = Settings.Secure.getStringForUser(
                     mContext.getContentResolver(),
@@ -426,6 +461,20 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         void switchImplementationIfNeededLocked(boolean force) {
+            final TimingsTraceAndSlog t;
+            if (DEBUG) {
+                t = TimingsTraceAndSlog.newAsyncLog();
+                t.traceBegin("VoiceInteractionSvc.switchImplementation(" + mCurUser + ")");
+            } else {
+                t = null;
+            }
+            switchImplementationIfNeededNoTracingLocked(force);
+            if (t != null) {
+                t.traceEnd();
+            }
+        }
+
+        void switchImplementationIfNeededNoTracingLocked(boolean force) {
             if (!mSafeMode) {
                 String curService = Settings.Secure.getStringForUser(
                         mResolver, Settings.Secure.VOICE_INTERACTION_SERVICE, mCurUser);

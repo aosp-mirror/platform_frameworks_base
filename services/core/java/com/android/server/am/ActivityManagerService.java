@@ -8990,6 +8990,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     public void systemReady(final Runnable goingCallback, @NonNull TimingsTraceAndSlog t) {
         t.traceBegin("PhaseActivityManagerReady");
+        mSystemServiceManager.preSystemReady();
         synchronized(this) {
             if (mSystemReady) {
                 // If we're done calling all the receivers, run the next "boot phase" passed in
