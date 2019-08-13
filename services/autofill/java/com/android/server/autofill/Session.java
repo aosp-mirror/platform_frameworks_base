@@ -301,6 +301,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
                 return;
             }
+            if (mCurrentViewId == null) {
+                Slog.w(TAG, "No current view id - session might have finished");
+                return;
+            }
+
             final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE);
             if (structure == null) {
                 Slog.e(TAG, "No assist structure - app might have crashed providing it");
