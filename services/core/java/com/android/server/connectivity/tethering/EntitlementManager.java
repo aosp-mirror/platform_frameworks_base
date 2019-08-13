@@ -161,6 +161,12 @@ public class EntitlementManager {
      * Check if cellular upstream is permitted.
      */
     public boolean isCellularUpstreamPermitted() {
+        // If provisioning is required and EntitlementManager don't know any downstream,
+        // cellular upstream should not be allowed.
+        final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+        if (mCurrentTethers.size() == 0 && isTetherProvisioningRequired(config)) {
+            return false;
+        }
         return mCellularUpstreamPermitted;
     }
 
