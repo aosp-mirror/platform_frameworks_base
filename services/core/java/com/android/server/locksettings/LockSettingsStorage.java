@@ -35,6 +35,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.CredentialType;
@@ -674,6 +675,26 @@ class LockSettingsStorage {
 
     public interface Callback {
         void initialize(SQLiteDatabase db);
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        final UserManager um = UserManager.get(mContext);
+        for (UserInfo user : um.getUsers(false)) {
+            File userPath = getSyntheticPasswordDirectoryForUser(user.id);
+            pw.println(String.format("User %d [%s]:", user.id, userPath.getAbsolutePath()));
+            pw.increaseIndent();
+            File[] files = userPath.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    pw.println(String.format("%4d %s %s", file.length(),
+                            LockSettingsService.timestampToString(file.lastModified()),
+                            file.getName()));
+                }
+            } else {
+                pw.println("[Not found]");
+            }
+            pw.decreaseIndent();
+        }
     }
 
     static class DatabaseHelper extends SQLiteOpenHelper {
