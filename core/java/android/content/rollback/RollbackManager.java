@@ -74,7 +74,10 @@ public final class RollbackManager {
     }
 
     /**
-     * Returns a list of all currently available rollbacks.
+     * Returns a list of all currently available rollbacks. This includes ones for very recently
+     * installed packages (even if onFinished has not yet been called). As a result, packages that
+     * very recently failed to install may also be included, but those rollbacks will fail with
+     * 'rollback not available'.
      *
      * @throws SecurityException if the caller does not have appropriate permissions.
      */
