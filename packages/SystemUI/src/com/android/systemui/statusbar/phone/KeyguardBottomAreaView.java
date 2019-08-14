@@ -278,7 +278,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         getContext().registerReceiverAsUser(mDevicePolicyReceiver,
                 UserHandle.ALL, filter, null, null);
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateMonitorCallback);
         mUnlockMethodCache.addListener(this);
     }
 
@@ -290,7 +290,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightExtension.destroy();
         mLeftExtension.destroy();
         getContext().unregisterReceiver(mDevicePolicyReceiver);
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mUpdateMonitorCallback);
     }
 
     private void initAccessibility() {
@@ -817,7 +817,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public Intent getIntent() {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
             boolean canSkipBouncer = updateMonitor.getUserCanSkipBouncer(
                     KeyguardUpdateMonitor.getCurrentUser());
             boolean secure = mUnlockMethodCache.isMethodSecure();

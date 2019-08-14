@@ -193,7 +193,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
-        KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController.addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
         mGesturalNav = QuickStepContract.isGesturalMode(
@@ -395,7 +395,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing);
             }
-            KeyguardUpdateMonitor.getInstance(mContext).sendKeyguardReset();
+            Dependency.get(KeyguardUpdateMonitor.class).sendKeyguardReset();
             updateStates();
         }
     }
@@ -533,7 +533,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 mShowing, mKeyguardMonitor.isSecure(), mKeyguardMonitor.isOccluded());
         launchPendingWakeupAction();
 
-        if (KeyguardUpdateMonitor.getInstance(mContext).needsSlowUnlockTransition()) {
+        if (Dependency.get(KeyguardUpdateMonitor.class).needsSlowUnlockTransition()) {
             fadeoutDuration = KEYGUARD_DISMISS_DURATION_LOCKED;
         }
         long uptimeMillis = SystemClock.uptimeMillis();
@@ -785,7 +785,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             updateLockIcon();
         }
 
-        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
             updateMonitor.onKeyguardVisibilityChanged(showing && !occluded);
         }

@@ -142,7 +142,7 @@ public class KeyguardIndicationController implements StateListener,
                 Dependency.get(AccessibilityController.class),
                 UnlockMethodCache.getInstance(context),
                 Dependency.get(StatusBarStateController.class),
-                KeyguardUpdateMonitor.getInstance(context));
+                Dependency.get(KeyguardUpdateMonitor.class));
     }
 
     /**
@@ -649,7 +649,7 @@ public class KeyguardIndicationController implements StateListener,
         @Override
         public void onBiometricHelp(int msgId, String helpString,
                 BiometricSourceType biometricSourceType) {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
             if (!updateMonitor.isUnlockingWithBiometricAllowed()) {
                 return;
             }
@@ -674,7 +674,7 @@ public class KeyguardIndicationController implements StateListener,
         @Override
         public void onBiometricError(int msgId, String errString,
                 BiometricSourceType biometricSourceType) {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
             if (shouldSuppressBiometricError(msgId, biometricSourceType, updateMonitor)) {
                 return;
             }

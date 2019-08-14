@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,21 +86,26 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Mock
     private SettableWakeLock mMediaWakeLock;
     @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
     private DozeParameters mDozeParameters;
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mKeyguardUpdateMonitor = mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
         mProvider.initDependencies(mNotificationMediaManager, mStatusBarStateController,
                 mKeyguardBypassController, mDozeParameters);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
+    }
+
+    @After
+    public void tearDown() {
+        mProvider.onDestroy();
     }
 
     @Test
@@ -266,11 +272,6 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         void cleanDateFormatLocked() {
             super.cleanDateFormatLocked();
             mCleanDateFormatInvokations++;
-        }
-
-        @Override
-        public KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
-            return mKeyguardUpdateMonitor;
         }
 
         @Override

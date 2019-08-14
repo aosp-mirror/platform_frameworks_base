@@ -136,7 +136,7 @@ public class SystemUIFactory {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
                 dismissCallbackRegistry, falsingManager,
                 expansionCallback, UnlockMethodCache.getInstance(context),
-                KeyguardUpdateMonitor.getInstance(context), bypassController,
+                Dependency.get(KeyguardUpdateMonitor.class), bypassController,
                 new Handler(Looper.getMainLooper()));
     }
 

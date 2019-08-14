@@ -46,7 +46,7 @@ public abstract class SystemUIModule {
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
             return null;
         }
-        return new KeyguardLiftController(context, statusBarStateController, asyncSensorManager);
+        return new KeyguardLiftController(statusBarStateController, asyncSensorManager);
     }
 
 

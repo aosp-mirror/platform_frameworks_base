@@ -23,6 +23,7 @@ import android.util.TimeUtils;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -112,7 +113,7 @@ public class DozeLog {
                 }
                 log("init");
                 if (sRegisterKeyguardCallback) {
-                    KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
+                    Dependency.get(KeyguardUpdateMonitor.class).registerCallback(sKeyguardCallback);
                 }
             }
         }

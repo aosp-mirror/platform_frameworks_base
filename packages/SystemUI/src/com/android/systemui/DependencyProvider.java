@@ -19,6 +19,7 @@ package com.android.systemui;
 import static com.android.systemui.Dependency.BG_HANDLER_NAME;
 import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+import static com.android.systemui.Dependency.MAIN_LOOPER_NAME;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.annotation.Nullable;
@@ -87,6 +88,14 @@ public class DependencyProvider {
         return thread.getLooper();
     }
 
+    /** Main Looper */
+    @Singleton
+    @Provides
+    @Named(MAIN_LOOPER_NAME)
+    public Looper provideMainLooper() {
+        return Looper.getMainLooper();
+    }
+
     @Singleton
     @Provides
     @Named(BG_HANDLER_NAME)
@@ -97,8 +106,8 @@ public class DependencyProvider {
     @Singleton
     @Provides
     @Named(MAIN_HANDLER_NAME)
-    public Handler provideMainHandler() {
-        return new Handler(Looper.getMainLooper());
+    public Handler provideMainHandler(@Named(MAIN_LOOPER_NAME) Looper mainLooper) {
+        return new Handler(mainLooper);
     }
 
     @Singleton

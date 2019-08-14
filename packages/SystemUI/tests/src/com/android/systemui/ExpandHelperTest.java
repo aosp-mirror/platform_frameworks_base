@@ -29,6 +29,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Assert;
@@ -48,6 +49,7 @@ public class ExpandHelperTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
         Context context = getContext();
         mRow = new NotificationTestHelper(context).createRow();

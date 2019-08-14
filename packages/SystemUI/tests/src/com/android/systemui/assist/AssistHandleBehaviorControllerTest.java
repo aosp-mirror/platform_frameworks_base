@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.systemui.DumpController;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -70,6 +71,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
+        mDependency.injectMockDependency(DumpController.class);
         doAnswer(answerVoid(Runnable::run)).when(mMockHandler).post(any(Runnable.class));
         doAnswer(answerVoid(Runnable::run)).when(mMockHandler)
                 .postDelayed(any(Runnable.class), anyLong());

@@ -37,6 +37,7 @@ import android.view.ViewPropertyAnimator;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -87,6 +88,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(StatusBarWindowController.class);
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         when(mLockIconContainer.getParent()).thenReturn(mock(ViewGroup.class));
         when(mLockIconContainer.animate()).thenReturn(mock(ViewPropertyAnimator.class,

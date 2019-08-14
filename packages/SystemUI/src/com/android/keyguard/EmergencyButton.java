@@ -40,6 +40,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.util.EmergencyDialerConstants;
 
 /**
@@ -104,13 +105,13 @@ public class EmergencyButton extends Button {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mInfoCallback);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mInfoCallback);
     }
 
     @Override
@@ -186,7 +187,7 @@ public class EmergencyButton extends Button {
                 mEmergencyButtonCallback.onEmergencyButtonClickedWhenInCall();
             }
         } else {
-            KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(
+            Dependency.get(KeyguardUpdateMonitor.class).reportEmergencyCallAction(
                     true /* bypassHandler */);
             getContext().startActivityAsUser(INTENT_EMERGENCY_DIAL,
                     ActivityOptions.makeCustomAnimation(getContext(), 0, 0).toBundle(),
@@ -201,7 +202,7 @@ public class EmergencyButton extends Button {
             if (isInCall()) {
                 visible = true; // always show "return to call" if phone is off-hook
             } else {
-                final boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext)
+                final boolean simLocked = Dependency.get(KeyguardUpdateMonitor.class)
                         .isSimPinVoiceSecure();
                 if (simLocked) {
                     // Some countries can't handle emergency calls while SIM is locked.

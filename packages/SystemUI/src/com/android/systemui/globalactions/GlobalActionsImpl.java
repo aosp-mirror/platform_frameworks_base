@@ -82,7 +82,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mGlobalActions.showDialog(mKeyguardMonitor.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mPanelExtension.get());
-        KeyguardUpdateMonitor.getInstance(mContext).requestFaceAuth();
+        Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();
     }
 
     @Override

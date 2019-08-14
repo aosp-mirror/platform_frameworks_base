@@ -281,7 +281,7 @@ public class NotificationLockscreenUserManagerImpl implements
         if (userId == UserHandle.USER_ALL) {
             userId = mCurrentUserId;
         }
-        return KeyguardUpdateMonitor.getInstance(mContext).isUserInLockdown(userId);
+        return Dependency.get(KeyguardUpdateMonitor.class).isUserInLockdown(userId);
     }
 
     /**

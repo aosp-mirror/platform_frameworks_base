@@ -710,7 +710,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
-        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
 
         mLockPatternUtils = new LockPatternUtils(mContext);
         KeyguardUpdateMonitor.setCurrentUser(ActivityManager.getCurrentUser());
@@ -846,7 +846,7 @@ public class KeyguardViewMediator extends SystemUI {
                 playSounds(true);
             }
         }
-        KeyguardUpdateMonitor.getInstance(mContext).dispatchStartedGoingToSleep(why);
+        mUpdateMonitor.dispatchStartedGoingToSleep(why);
         notifyStartedGoingToSleep();
     }
 
@@ -891,7 +891,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
         }
-        KeyguardUpdateMonitor.getInstance(mContext).dispatchFinishedGoingToSleep(why);
+        mUpdateMonitor.dispatchFinishedGoingToSleep(why);
     }
 
     private long getLockTimeout(int userId) {
@@ -1004,7 +1004,7 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence);
             notifyStartedWakingUp();
         }
-        KeyguardUpdateMonitor.getInstance(mContext).dispatchStartedWakingUp();
+        mUpdateMonitor.dispatchStartedWakingUp();
         maybeSendUserPresentBroadcast();
         Trace.endSection();
     }
@@ -1047,7 +1047,7 @@ public class KeyguardViewMediator extends SystemUI {
      * if there is a secure lock pattern.
      */
     public void onDreamingStarted() {
-        KeyguardUpdateMonitor.getInstance(mContext).dispatchDreamingStarted();
+        mUpdateMonitor.dispatchDreamingStarted();
         synchronized (this) {
             if (mDeviceInteractive
                     && mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
@@ -1060,7 +1060,7 @@ public class KeyguardViewMediator extends SystemUI {
      * A dream stopped.
      */
     public void onDreamingStopped() {
-        KeyguardUpdateMonitor.getInstance(mContext).dispatchDreamingStopped();
+        mUpdateMonitor.dispatchDreamingStopped();
         synchronized (this) {
             if (mDeviceInteractive) {
                 cancelDoKeyguardLaterLocked();
@@ -1456,11 +1456,11 @@ public class KeyguardViewMediator extends SystemUI {
 
     public boolean isSecure(int userId) {
         return mLockPatternUtils.isSecure(userId)
-                || KeyguardUpdateMonitor.getInstance(mContext).isSimPinSecure();
+                || mUpdateMonitor.isSimPinSecure();
     }
 
     public void setSwitchingUser(boolean switching) {
-        KeyguardUpdateMonitor.getInstance(mContext).setSwitchingUser(switching);
+        mUpdateMonitor.setSwitchingUser(switching);
     }
 
     /**

@@ -40,6 +40,7 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.systemui.Dependency;
 
 
 /**
@@ -171,8 +172,8 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         if (count < 2) {
             msg = rez.getString(R.string.kg_puk_enter_puk_hint);
         } else {
-            SubscriptionInfo info = KeyguardUpdateMonitor.getInstance(mContext).
-                    getSubscriptionInfoForSubId(mSubId);
+            SubscriptionInfo info = Dependency.get(KeyguardUpdateMonitor.class)
+                    .getSubscriptionInfoForSubId(mSubId);
             CharSequence displayName = info != null ? info.getDisplayName() : "";
             msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
             if (info != null) {
@@ -202,7 +203,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     }
 
     private void handleSubInfoChangeIfNeeded() {
-        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
         int subId = monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED);
         if (subId != mSubId && SubscriptionManager.isValidSubscriptionId(subId)) {
             mSubId = subId;
@@ -271,14 +272,14 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateMonitorCallback);
         resetState();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mUpdateMonitorCallback);
     }
 
     @Override
@@ -408,7 +409,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                             resetPasswordText(true /* animate */,
                                     result != PhoneConstants.PIN_RESULT_SUCCESS /* announce */);
                             if (result == PhoneConstants.PIN_RESULT_SUCCESS) {
-                                KeyguardUpdateMonitor.getInstance(getContext())
+                                Dependency.get(KeyguardUpdateMonitor.class)
                                         .reportSimUnlocked(mSubId);
                                 mRemainingAttempts = -1;
                                 mShowDefaultMessage = true;

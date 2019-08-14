@@ -28,6 +28,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -57,8 +58,8 @@ public class UnlockMethodCache {
 
     private UnlockMethodCache(Context ctx) {
         mLockPatternUtils = new LockPatternUtils(ctx);
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(ctx);
-        KeyguardUpdateMonitor.getInstance(ctx).registerCallback(mCallback);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mCallback);
         update(true /* updateAlways */);
         if (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB) {
             // Watch for interesting updates

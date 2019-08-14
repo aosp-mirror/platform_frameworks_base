@@ -114,7 +114,7 @@ public class FalsingManagerProxy implements FalsingManager {
             mInternalFalsingManager = new BrightLineFalsingManager(
                     new FalsingDataProvider(context.getResources().getDisplayMetrics()),
                     Dependency.get(AsyncSensorManager.class),
-                    KeyguardUpdateMonitor.getInstance(context),
+                    Dependency.get(KeyguardUpdateMonitor.class),
                     mDeviceConfig
             );
         }

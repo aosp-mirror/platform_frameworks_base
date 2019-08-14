@@ -701,7 +701,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));

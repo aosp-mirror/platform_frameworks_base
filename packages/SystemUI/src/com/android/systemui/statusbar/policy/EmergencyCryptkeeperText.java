@@ -32,6 +32,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class EmergencyCryptkeeperText extends TextView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardUpdateMonitor.registerCallback(mCallback);
         getContext().registerReceiver(mReceiver,
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));

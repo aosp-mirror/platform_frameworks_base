@@ -16,23 +16,22 @@
 
 package com.android.systemui.statusbar.phone
 
-import android.content.Context
 import android.hardware.Sensor
 import android.hardware.TriggerEvent
 import android.hardware.TriggerEventListener
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Dependency
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.AsyncSensorManager
 
 class KeyguardLiftController constructor(
-    context: Context,
     private val statusBarStateController: StatusBarStateController,
     private val asyncSensorManager: AsyncSensorManager
 ) : StatusBarStateController.StateListener, KeyguardUpdateMonitorCallback() {
 
-    private val keyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(context)
+    private val keyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor::class.java)
     private val pickupSensor = asyncSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE)
     private var isListening = false
     private var bouncerVisible = false

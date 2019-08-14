@@ -154,7 +154,7 @@ public class FalsingManagerImpl implements FalsingManager {
 
         updateConfiguration();
         Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
-        KeyguardUpdateMonitor.getInstance(context).registerCallback(mKeyguardUpdateCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mKeyguardUpdateCallback);
     }
 
     private void updateConfiguration() {
@@ -556,7 +556,7 @@ public class FalsingManagerImpl implements FalsingManager {
         mSensorManager.unregisterListener(mSensorEventListener);
         mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
         Dependency.get(StatusBarStateController.class).removeCallback(mStatusBarStateListener);
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mKeyguardUpdateCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mKeyguardUpdateCallback);
     }
 
     public Uri reportRejectedTouch() {

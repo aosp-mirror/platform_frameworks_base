@@ -51,8 +51,8 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
             @NonNull ClassLoader cl, @NonNull String className)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         Application app = super.instantiateApplicationCompat(cl, className);
-        if (app instanceof ContextProvider) {
-            ((ContextProvider) app).setContextAvailableCallback(
+        if (app instanceof ContextInitializer) {
+            ((ContextInitializer) app).setContextAvailableCallback(
                     context -> {
                         SystemUIFactory.createFromConfig(context);
                         SystemUIFactory.getInstance().getRootComponent().inject(
@@ -71,8 +71,8 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
         ContentProvider contentProvider = super.instantiateProviderCompat(cl, className);
-        if (contentProvider instanceof ContextProvider) {
-            ((ContextProvider) contentProvider).setContextAvailableCallback(
+        if (contentProvider instanceof ContextInitializer) {
+            ((ContextInitializer) contentProvider).setContextAvailableCallback(
                     context -> {
                         SystemUIFactory.createFromConfig(context);
                         SystemUIFactory.getInstance().getRootComponent().inject(
@@ -96,11 +96,17 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
         return super.instantiateServiceCompat(cl, className, intent);
     }
 
-    interface ContextAvailableCallback {
+    /**
+     * A callback that receives a Context when one is ready.
+     */
+    public interface ContextAvailableCallback {
         void onContextAvailable(Context context);
     }
 
-    interface ContextProvider {
+    /**
+     * Implemented in classes that get started by the system before a context is available.
+     */
+    public interface ContextInitializer {
         void setContextAvailableCallback(ContextAvailableCallback callback);
     }
 }

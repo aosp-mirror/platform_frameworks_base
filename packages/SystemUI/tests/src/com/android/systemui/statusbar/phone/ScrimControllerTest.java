@@ -45,6 +45,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -91,6 +92,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mAlwaysOnEnabled = true;
         mDozeParamenters = mock(DozeParameters.class);
         mLooper = TestableLooper.get(this);
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
         when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
         mScrimController = new SynchronousScrimController(mScrimBehind, mScrimInFront,

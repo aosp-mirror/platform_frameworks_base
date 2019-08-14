@@ -948,8 +948,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         pw.print("  mNavigationBarView=");
         pw.println(mNavigationBarView);
 
-        if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
-            KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
+        if (Dependency.get(KeyguardUpdateMonitor.class) != null) {
+            Dependency.get(KeyguardUpdateMonitor.class).dump(fd, pw, args);
         }
 
         Dependency.get(FalsingManager.class).dump(pw);

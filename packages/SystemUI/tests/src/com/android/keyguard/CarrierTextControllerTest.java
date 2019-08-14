@@ -111,6 +111,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         mDependency.injectMockDependency(WakefulnessLifecycle.class);
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 new Handler(mTestableLooper.getLooper()));
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
 
         mCarrierTextCallbackInfo = new CarrierTextController.CarrierTextCallbackInfo("",
                 new CharSequence[]{}, false, new int[]{});

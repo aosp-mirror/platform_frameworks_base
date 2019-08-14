@@ -198,7 +198,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mContext = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         mScrimBehindAlphaResValue = mContext.getResources().getFloat(R.dimen.scrim_behind_alpha);

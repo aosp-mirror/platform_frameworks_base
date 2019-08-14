@@ -42,6 +42,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
@@ -182,7 +183,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         super(context, attrs);
         mContext = context;
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mAccessibilityController = accessibilityController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
@@ -509,7 +510,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     }
 
     private int getState() {
-        KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         if ((mUnlockMethodCache.canSkipBouncer() || !mKeyguardShowing
                 || mKeyguardMonitor.isKeyguardGoingAway()) && !mSimLocked) {
             return STATE_LOCK_OPEN;

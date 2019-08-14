@@ -28,6 +28,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -55,6 +56,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mTestableLooper = TestableLooper.get(this);
         mHandler = new Handler(mTestableLooper.getLooper());
         mDeviceConfig = new DeviceConfigProxyFake();

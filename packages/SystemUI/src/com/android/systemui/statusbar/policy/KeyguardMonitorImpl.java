@@ -23,6 +23,7 @@ import android.content.Context;
 import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     @Inject
     public KeyguardMonitorImpl(Context context) {
         mContext = context;
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
             public void onUserSwitched(int newUserId) {
