@@ -29,6 +29,7 @@ package android {
     field public static final String BIND_CONTENT_SUGGESTIONS_SERVICE = "android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE";
     field public static final String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
+    field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
     field public static final String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
@@ -6763,6 +6764,20 @@ package android.service.sms {
     method public android.os.IBinder onBind(android.content.Intent);
     method @Nullable public abstract android.database.CursorWindow onGetSmsMessages(@NonNull android.os.Bundle);
     field public static final String ACTION_FINANCIAL_SERVICE_INTENT = "android.service.sms.action.FINANCIAL_SERVICE_INTENT";
+  }
+
+}
+
+package android.service.storage {
+
+  public abstract class ExternalStorageService extends android.app.Service {
+    ctor public ExternalStorageService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onEndSession(@NonNull String) throws java.io.IOException;
+    method public abstract void onStartSession(@NonNull String, int, @NonNull android.os.ParcelFileDescriptor, @NonNull String, @NonNull String) throws java.io.IOException;
+    field public static final int FLAG_SESSION_ATTRIBUTE_INDEXABLE = 2; // 0x2
+    field public static final int FLAG_SESSION_TYPE_FUSE = 1; // 0x1
+    field public static final String SERVICE_INTERFACE = "android.service.storage.ExternalStorageService";
   }
 
 }
