@@ -34,6 +34,7 @@ import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
@@ -200,6 +201,7 @@ public class Dependency extends SystemUI {
 
     @Inject Lazy<ActivityStarter> mActivityStarter;
     @Inject Lazy<ActivityStarterDelegate> mActivityStarterDelegate;
+    @Inject Lazy<BroadcastDispatcher> mBroadcastDispatcher;
     @Inject Lazy<AsyncSensorManager> mAsyncSensorManager;
     @Inject Lazy<BluetoothController> mBluetoothController;
     @Inject Lazy<LocationController> mLocationController;
@@ -317,6 +319,7 @@ public class Dependency extends SystemUI {
         mProviders.put(MAIN_HANDLER, mMainHandler::get);
         mProviders.put(ActivityStarter.class, mActivityStarter::get);
         mProviders.put(ActivityStarterDelegate.class, mActivityStarterDelegate::get);
+        mProviders.put(BroadcastDispatcher.class, mBroadcastDispatcher::get);
 
         mProviders.put(AsyncSensorManager.class, mAsyncSensorManager::get);
 
@@ -496,6 +499,7 @@ public class Dependency extends SystemUI {
         // Make sure that the DumpController gets added to mDependencies, as they are only added
         // with Dependency#get.
         getDependency(DumpController.class);
+        getDependency(BroadcastDispatcher.class);
 
         // If an arg is specified, try to dump the dependency
         String controller = args != null && args.length > 1
