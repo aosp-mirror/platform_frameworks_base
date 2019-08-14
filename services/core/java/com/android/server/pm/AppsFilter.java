@@ -28,13 +28,11 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.permission.IPermissionManager;
-import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
-import com.android.server.FgThread;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -135,19 +133,7 @@ class AppsFilter {
         }
         IPermissionManager permissionmgr =
                 (IPermissionManager) ServiceManager.getService("permissionmgr");
-        return new AppsFilter(() -> {
-            if (featureEnabled.get() < 0) {
-                featureEnabled.set(DeviceConfig.getBoolean(
-                        DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                        "package_query_filtering_enabled", false) ? 1 : 0);
-                DeviceConfig.addOnPropertiesChangedListener(
-                        DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                        FgThread.getExecutor(),
-                        pr -> featureEnabled.set(
-                                pr.getBoolean("package_query_filtering_enabled", false) ? 1 : 0));
-            }
-            return featureEnabled.get() == 1;
-        }, permissionmgr,
+        return new AppsFilter(() -> false, permissionmgr,
                 context.getSystemService(AppOpsManager.class), forcedQueryablePackageNames,
                 forceSystemAppsQueryable);
     }
