@@ -18,6 +18,7 @@ package com.android.server.accessibility;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
@@ -27,6 +28,7 @@ import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -211,19 +213,31 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     @Override
-    protected boolean isCalledForCurrentUserLocked() {
+    protected boolean hasRightsToCurrentUserLocked() {
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
-        final int resolvedUserId = mSecurityPolicy
-                .resolveCallingUserIdEnforcingPermissionsLocked(UserHandle.USER_CURRENT);
-        return resolvedUserId == mSystemSupport.getCurrentUserIdLocked();
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.ROOT_UID
+                || callingUid == Process.SYSTEM_UID
+                || callingUid == Process.SHELL_UID) {
+            return true;
+        }
+        if (mSecurityPolicy.resolveProfileParentLocked(UserHandle.getUserId(callingUid))
+                == mSystemSupport.getCurrentUserIdLocked()) {
+            return true;
+        }
+        if (mSecurityPolicy.hasPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+                || mSecurityPolicy.hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean setSoftKeyboardShowMode(int showMode) {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
             final UserState userState = mUserStateWeakReference.get();
@@ -241,7 +255,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     @Override
     public boolean isAccessibilityButtonAvailable() {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
             UserState userState = mUserStateWeakReference.get();

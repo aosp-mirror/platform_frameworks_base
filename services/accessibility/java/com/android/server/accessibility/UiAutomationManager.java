@@ -263,7 +263,7 @@ class UiAutomationManager {
         }
 
         @Override
-        protected boolean isCalledForCurrentUserLocked() {
+        protected boolean hasRightsToCurrentUserLocked() {
             // Allow UiAutomation to work for any user
             return true;
         }

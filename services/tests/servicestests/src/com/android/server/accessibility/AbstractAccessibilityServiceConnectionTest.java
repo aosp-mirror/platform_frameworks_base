@@ -752,7 +752,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         }
 
         @Override
-        protected boolean isCalledForCurrentUserLocked() {
+        protected boolean hasRightsToCurrentUserLocked() {
             return mResolvedUserId == mSystemSupport.getCurrentUserIdLocked();
         }
 

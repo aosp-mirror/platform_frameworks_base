@@ -468,7 +468,7 @@ public class AccessibilitySecurityPolicy {
         }
     }
 
-    private boolean hasPermission(String permission) {
+    boolean hasPermission(String permission) {
         return mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED;
     }
 
