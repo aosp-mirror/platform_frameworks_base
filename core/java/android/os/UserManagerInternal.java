@@ -16,6 +16,7 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
@@ -224,4 +225,10 @@ public abstract class UserManagerInternal {
 
     /** @return a specific user restriction that's in effect currently. */
     public abstract boolean hasUserRestriction(String restriction, int userId);
+
+    /**
+     * Gets an {@link UserInfo} for the given {@code userId}, or {@code null} if not
+     * found.
+     */
+    public abstract @Nullable UserInfo getUserInfo(@UserIdInt int userId);
 }

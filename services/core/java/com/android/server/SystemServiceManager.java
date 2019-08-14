@@ -19,9 +19,11 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserManagerInternal;
 import android.util.Slog;
 
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -52,6 +54,8 @@ public class SystemServiceManager {
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
 
     private int mCurrentPhase = -1;
+
+    private UserManagerInternal mUserManagerInternal;
 
     SystemServiceManager(Context context) {
         mContext = context;
@@ -187,11 +191,30 @@ public class SystemServiceManager {
     }
 
     /**
+     * Called at the beginning of {@code ActivityManagerService.systemReady()}.
+     */
+    public void preSystemReady() {
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+    }
+
+    private @NonNull UserInfo getUserInfo(@UserIdInt int userHandle) {
+        if (mUserManagerInternal == null) {
+            throw new IllegalStateException("mUserManagerInternal not set yet");
+        }
+        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userHandle);
+        if (userInfo == null) {
+            throw new IllegalStateException("No UserInfo for " + userHandle);
+        }
+        return userInfo;
+    }
+
+    /**
      * Starts the given user.
      */
-    public void startUser(@NonNull TimingsTraceAndSlog t, final @UserIdInt int userHandle) {
+    public void startUser(final @NonNull TimingsTraceAndSlog t, final @UserIdInt int userHandle) {
         t.traceBegin("ssm.startUser-" + userHandle);
         Slog.i(TAG, "Calling onStartUser u" + userHandle);
+        final UserInfo userInfo = getUserInfo(userHandle);
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
@@ -199,7 +222,7 @@ public class SystemServiceManager {
             t.traceBegin("onStartUser-" + userHandle + " " + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
-                service.onStartUser(userHandle);
+                service.onStartUser(userInfo);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting start of user " + userHandle
                         + " to service " + service.getClass().getName(), ex);
@@ -217,6 +240,7 @@ public class SystemServiceManager {
         final TimingsTraceAndSlog t = TimingsTraceAndSlog.newAsyncLog();
         t.traceBegin("ssm.unlockUser-" + userHandle);
         Slog.i(TAG, "Calling onUnlockUser u" + userHandle);
+        final UserInfo userInfo = getUserInfo(userHandle);
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
@@ -224,7 +248,7 @@ public class SystemServiceManager {
             t.traceBegin("onUnlockUser-" + userHandle + " " + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
-                service.onUnlockUser(userHandle);
+                service.onUnlockUser(userInfo);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting unlock of user " + userHandle
                         + " to service " + serviceName, ex);
@@ -242,6 +266,7 @@ public class SystemServiceManager {
         final TimingsTraceAndSlog t = TimingsTraceAndSlog.newAsyncLog();
         t.traceBegin("ssm.switchUser-" + userHandle);
         Slog.i(TAG, "Calling switchUser u" + userHandle);
+        final UserInfo userInfo = getUserInfo(userHandle);
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
@@ -249,7 +274,7 @@ public class SystemServiceManager {
             t.traceBegin("onSwitchUser-" + userHandle + " " + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
-                service.onSwitchUser(userHandle);
+                service.onSwitchUser(userInfo);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting switch of user " + userHandle
                         + " to service " + serviceName, ex);
@@ -267,6 +292,7 @@ public class SystemServiceManager {
         final TimingsTraceAndSlog t = TimingsTraceAndSlog.newAsyncLog();
         t.traceBegin("ssm.stopUser-" + userHandle);
         Slog.i(TAG, "Calling onStopUser u" + userHandle);
+        final UserInfo userInfo = getUserInfo(userHandle);
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
@@ -274,7 +300,7 @@ public class SystemServiceManager {
             t.traceBegin("onStopUser-" + userHandle + " " + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
-                service.onStopUser(userHandle);
+                service.onStopUser(userInfo);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting stop of user " + userHandle
                         + " to service " + serviceName, ex);
@@ -292,6 +318,7 @@ public class SystemServiceManager {
         final TimingsTraceAndSlog t = TimingsTraceAndSlog.newAsyncLog();
         t.traceBegin("ssm.cleanupUser-" + userHandle);
         Slog.i(TAG, "Calling onCleanupUser u" + userHandle);
+        final UserInfo userInfo = getUserInfo(userHandle);
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
@@ -299,7 +326,7 @@ public class SystemServiceManager {
             t.traceBegin("onCleanupUser-" + userHandle + " " + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
-                service.onCleanupUser(userHandle);
+                service.onCleanupUser(userInfo);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting cleanup of user " + userHandle
                         + " to service " + serviceName, ex);

@@ -3762,6 +3762,8 @@ public class UserManagerService extends IUserManager.Stub {
                         pw.print(" <partial>");
                     }
                     pw.println();
+                    pw.print("    Flags: "); pw.print(userInfo.flags); pw.print(" (");
+                    pw.print(UserInfo.flagsToString(userInfo.flags)); pw.println(")");
                     pw.print("    State: ");
                     final int state;
                     synchronized (mUserStates) {
@@ -3846,6 +3848,8 @@ public class UserManagerService extends IUserManager.Stub {
         pw.println("  All guests ephemeral: " + Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_guestUserEphemeral));
         pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
+        pw.println("  Is headless-system mode: " + UserManager.isHeadlessSystemUserMode());
+        pw.println("  User version: " + mUserVersion);
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
@@ -4171,6 +4175,14 @@ public class UserManagerService extends IUserManager.Stub {
             }
             Bundle restrictions = getEffectiveUserRestrictions(userId);
             return restrictions != null && restrictions.getBoolean(restrictionKey);
+        }
+
+        public @Nullable UserInfo getUserInfo(@UserIdInt int userId) {
+            UserData userData;
+            synchronized (mUsersLock) {
+                userData = mUsers.get(userId);
+            }
+            return userData == null ? null : userData.info;
         }
     }
 
