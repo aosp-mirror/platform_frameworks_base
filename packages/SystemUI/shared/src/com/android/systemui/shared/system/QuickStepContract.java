@@ -188,9 +188,8 @@ public class QuickStepContract {
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0) {
             return false;
         }
-        // Disable when in screen pinning, immersive, or the notifications are interactive
-        int disableFlags = SYSUI_STATE_SCREEN_PINNING
-                | SYSUI_STATE_NAV_BAR_HIDDEN
+        // Disable when in immersive, or the notifications are interactive
+        int disableFlags = SYSUI_STATE_NAV_BAR_HIDDEN
                 | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
                 | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
         return (sysuiStateFlags & disableFlags) != 0;
