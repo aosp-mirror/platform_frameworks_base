@@ -526,11 +526,26 @@ public class Trampoline extends IBackupManager.Stub {
         }
     }
 
+    // ---------------------------------------------
+    // TRANSPORT OPERATIONS
+    // ---------------------------------------------
+
     @Override
     public void initializeTransportsForUser(
             int userId, String[] transportNames, IBackupObserver observer) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.initializeTransports(userId, transportNames, observer);
+            initializeTransports(userId, transportNames, observer);
+        }
+    }
+
+    /** Run an initialize operation for the given transports {@code transportNames}. */
+    public void initializeTransports(
+            @UserIdInt int userId, String[] transportNames, IBackupObserver observer) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "initializeTransports()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.initializeTransports(transportNames, observer);
         }
     }
 
@@ -538,7 +553,20 @@ public class Trampoline extends IBackupManager.Stub {
     public void clearBackupDataForUser(int userId, String transportName, String packageName)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.clearBackupData(userId, transportName, packageName);
+            clearBackupData(userId, transportName, packageName);
+        }
+    }
+
+    /**
+     * Clear the given package {@code packageName}'s backup data from the transport {@code
+     * transportName}.
+     */
+    public void clearBackupData(@UserIdInt int userId, String transportName, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "clearBackupData()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.clearBackupData(transportName, packageName);
         }
     }
 
@@ -722,12 +750,23 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public String getCurrentTransportForUser(int userId) throws RemoteException {
-        return (isUserReadyForBackup(userId)) ? mService.getCurrentTransport(userId) : null;
+        return (isUserReadyForBackup(userId)) ? getCurrentTransport(userId) : null;
     }
 
     @Override
     public String getCurrentTransport() throws RemoteException {
         return getCurrentTransportForUser(binderGetCallingUserId());
+    }
+
+    /** Return the name of the currently active transport. */
+    @Nullable
+    public String getCurrentTransport(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransport()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getCurrentTransport();
     }
 
     /**
@@ -737,13 +776,37 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     @Nullable
     public ComponentName getCurrentTransportComponentForUser(int userId) {
-        return (isUserReadyForBackup(userId))
-                ? mService.getCurrentTransportComponent(userId) : null;
+        return (isUserReadyForBackup(userId)) ? getCurrentTransportComponent(userId) : null;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or {@code
+     * null} if no transport selected or if the transport selected is not registered.
+     */
+    @Nullable
+    public ComponentName getCurrentTransportComponent(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransportComponent()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getCurrentTransportComponent();
     }
 
     @Override
     public String[] listAllTransportsForUser(int userId) throws RemoteException {
-        return (isUserReadyForBackup(userId)) ? mService.listAllTransports(userId) : null;
+        return (isUserReadyForBackup(userId)) ? listAllTransports(userId) : null;
+    }
+
+    /** Report all known, available backup transports by name. */
+    @Nullable
+    public String[] listAllTransports(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "listAllTransports()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.listAllTransports();
     }
 
     @Override
@@ -754,7 +817,18 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public ComponentName[] listAllTransportComponentsForUser(int userId) throws RemoteException {
         return (isUserReadyForBackup(userId))
-                ? mService.listAllTransportComponents(userId) : null;
+                ? listAllTransportComponents(userId) : null;
+    }
+
+    /** Report all known, available backup transports by {@link ComponentName}. */
+    @Nullable
+    public ComponentName[] listAllTransportComponents(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "listAllTransportComponents()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.listAllTransportComponents();
     }
 
     @Override
