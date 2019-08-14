@@ -640,28 +640,6 @@ public class TrampolineTest {
     }
 
     @Test
-    public void updateTransportAttributesForUser_forwarded() {
-        mTrampoline.updateTransportAttributesForUser(
-                mUserId,
-                TRANSPORT_COMPONENT_NAME,
-                TRANSPORT_NAME,
-                null,
-                "Transport Destination",
-                null,
-                "Data Management");
-
-        verify(mBackupManagerServiceMock)
-                .updateTransportAttributes(
-                        mUserId,
-                        TRANSPORT_COMPONENT_NAME,
-                        TRANSPORT_NAME,
-                        null,
-                        "Transport Destination",
-                        null,
-                        "Data Management");
-    }
-
-    @Test
     public void selectBackupTransportAsyncForUser_beforeUserUnlocked_notifiesBackupNotAllowed()
             throws Exception {
         mUserServices.clear();

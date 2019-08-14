@@ -21,8 +21,6 @@ import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
-import static com.android.server.backup.testing.TransportData.backupTransport;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -42,7 +40,6 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.UserHandle;
@@ -50,7 +47,6 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
-import com.android.server.backup.testing.TransportData;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowEnvironment;
@@ -217,70 +213,6 @@ public class BackupManagerServiceTest {
         assertEquals(
                 mUserOneService,
                 backupManagerService.getServiceForUserIfCallerHasPermission(mUserOneId, "test"));
-    }
-
-    // ---------------------------------------------
-    // Transport tests
-    // ---------------------------------------------
-
-    /** Test that the backup service routes methods correctly to the user that requests it. */
-    @Test
-    public void testUpdateTransportAttributes_onRegisteredUser_callsMethodForUser()
-            throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
-        TransportData transport = backupTransport();
-        Intent configurationIntent = new Intent();
-        Intent dataManagementIntent = new Intent();
-
-        backupManagerService.updateTransportAttributes(
-                mUserOneId,
-                transport.getTransportComponent(),
-                transport.transportName,
-                configurationIntent,
-                "currentDestinationString",
-                dataManagementIntent,
-                "dataManagementLabel");
-
-        verify(mUserOneService)
-                .updateTransportAttributes(
-                        transport.getTransportComponent(),
-                        transport.transportName,
-                        configurationIntent,
-                        "currentDestinationString",
-                        dataManagementIntent,
-                        "dataManagementLabel");
-    }
-
-    /** Test that the backup service does not route methods for non-registered users. */
-    @Test
-    public void testUpdateTransportAttributes_onUnknownUser_doesNotPropagateCall()
-            throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
-        TransportData transport = backupTransport();
-        Intent configurationIntent = new Intent();
-        Intent dataManagementIntent = new Intent();
-
-        backupManagerService.updateTransportAttributes(
-                mUserTwoId,
-                transport.getTransportComponent(),
-                transport.transportName,
-                configurationIntent,
-                "currentDestinationString",
-                dataManagementIntent,
-                "dataManagementLabel");
-
-        verify(mUserOneService, never())
-                .updateTransportAttributes(
-                        transport.getTransportComponent(),
-                        transport.transportName,
-                        configurationIntent,
-                        "currentDestinationString",
-                        dataManagementIntent,
-                        "dataManagementLabel");
     }
 
     // ---------------------------------------------

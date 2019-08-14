@@ -32,6 +32,7 @@ import android.annotation.UserIdInt;
 import android.app.Application;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.content.Context;
+import android.content.Intent;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
@@ -553,6 +554,66 @@ public class TrampolineRoboTest {
         backupManagerService.getDataManagementLabel(mUserTwoId, TEST_TRANSPORT);
 
         verify(mUserOneService, never()).getDataManagementLabel(TEST_TRANSPORT);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testUpdateTransportAttributes_onRegisteredUser_callsMethodForUser()
+            throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+        TransportData transport = backupTransport();
+        Intent configurationIntent = new Intent();
+        Intent dataManagementIntent = new Intent();
+
+        backupManagerService.updateTransportAttributes(
+                mUserOneId,
+                transport.getTransportComponent(),
+                transport.transportName,
+                configurationIntent,
+                "currentDestinationString",
+                dataManagementIntent,
+                "dataManagementLabel");
+
+        verify(mUserOneService)
+                .updateTransportAttributes(
+                        transport.getTransportComponent(),
+                        transport.transportName,
+                        configurationIntent,
+                        "currentDestinationString",
+                        dataManagementIntent,
+                        "dataManagementLabel");
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testUpdateTransportAttributes_onUnknownUser_doesNotPropagateCall()
+            throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+        TransportData transport = backupTransport();
+        Intent configurationIntent = new Intent();
+        Intent dataManagementIntent = new Intent();
+
+        backupManagerService.updateTransportAttributes(
+                mUserTwoId,
+                transport.getTransportComponent(),
+                transport.transportName,
+                configurationIntent,
+                "currentDestinationString",
+                dataManagementIntent,
+                "dataManagementLabel");
+
+        verify(mUserOneService, never())
+                .updateTransportAttributes(
+                        transport.getTransportComponent(),
+                        transport.transportName,
+                        configurationIntent,
+                        "currentDestinationString",
+                        dataManagementIntent,
+                        "dataManagementLabel");
     }
 
     private Trampoline createService() {

@@ -28,9 +28,7 @@ import android.app.backup.IRestoreSession;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -101,55 +99,6 @@ public class BackupManagerService {
      * action on the passed in user. Currently this is a straight redirection (see TODO).
      */
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    // ---------------------------------------------
-    // TRANSPORT OPERATIONS
-    // ---------------------------------------------
-
-    /**
-     * Update the attributes of the transport identified by {@code transportComponent}. If the
-     * specified transport has not been bound at least once (for registration), this call will be
-     * ignored. Only the host process of the transport can change its description, otherwise a
-     * {@link SecurityException} will be thrown.
-     *
-     * @param transportComponent The identity of the transport being described.
-     * @param name A {@link String} with the new name for the transport. This is NOT for
-     *     identification. MUST NOT be {@code null}.
-     * @param configurationIntent An {@link Intent} that can be passed to {@link
-     *     Context#startActivity} in order to launch the transport's configuration UI. It may be
-     *     {@code null} if the transport does not offer any user-facing configuration UI.
-     * @param currentDestinationString A {@link String} describing the destination to which the
-     *     transport is currently sending data. MUST NOT be {@code null}.
-     * @param dataManagementIntent An {@link Intent} that can be passed to {@link
-     *     Context#startActivity} in order to launch the transport's data-management UI. It may be
-     *     {@code null} if the transport does not offer any user-facing data management UI.
-     * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
-     *     data management affordance. This MUST be {@code null} when dataManagementIntent is {@code
-     *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
-     * @throws SecurityException If the UID of the calling process differs from the package UID of
-     *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
-     */
-    public void updateTransportAttributes(
-            @UserIdInt int userId,
-            ComponentName transportComponent,
-            String name,
-            @Nullable Intent configurationIntent,
-            String currentDestinationString,
-            @Nullable Intent dataManagementIntent,
-            CharSequence dataManagementLabel) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "updateTransportAttributes()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.updateTransportAttributes(
-                    transportComponent,
-                    name,
-                    configurationIntent,
-                    currentDestinationString,
-                    dataManagementIntent,
-                    dataManagementLabel);
-        }
-    }
 
     /**
      * Sets the ancestral work profile for the calling user.
