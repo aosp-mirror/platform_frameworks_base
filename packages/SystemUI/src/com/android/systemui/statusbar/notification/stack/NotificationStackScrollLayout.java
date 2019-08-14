@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.ANCHOR_SCROLLING;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
@@ -112,6 +113,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -172,7 +174,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * Sentinel value for no current active pointer. Used by {@link #mActivePointerId}.
      */
     private static final int INVALID_POINTER = -1;
-    static final int NUM_SECTIONS = 2;
     /**
      * The distance in pixels between sections when the sections are directly adjacent (no visible
      * gap is drawn between them). In this case we don't want to round their corners.
@@ -351,7 +352,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return true;
         }
     };
-    private NotificationSection[] mSections = new NotificationSection[NUM_SECTIONS];
+    private NotificationSection[] mSections;
     private boolean mAnimateNextBackgroundTop;
     private boolean mAnimateNextBackgroundBottom;
     private boolean mAnimateNextSectionBoundsChange;
@@ -522,9 +523,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         mAllowLongPress = allowLongPress;
 
-        for (int i = 0; i < NUM_SECTIONS; i++) {
-            mSections[i] = new NotificationSection(this);
-        }
         mRoundnessManager = notificationRoundnessManager;
 
         mHeadsUpManager = headsUpManager;
@@ -533,19 +531,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mKeyguardBypassController = keyguardBypassController;
         mFalsingManager = falsingManager;
 
+        int[] buckets = NotificationData.getNotificationBuckets(context);
         mSectionsManager =
                 new NotificationSectionsManager(
                         this,
                         activityStarter,
                         statusBarStateController,
                         configurationController,
-                        NotificationUtils.useNewInterruptionModel(context));
+                        buckets.length);
         mSectionsManager.initialize(LayoutInflater.from(context));
         mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
             // Leave the shade open if there will be other notifs left over to clear
             final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
             clearNotifications(ROWS_GENTLE, closeShade);
         });
+        mSections = mSectionsManager.createSectionsForBuckets(buckets);
 
         mAmbientState = new AmbientState(context, mSectionsManager, mHeadsUpManager);
         mBgColor = context.getColor(R.color.notification_shade_background_color);
@@ -773,7 +773,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     protected void onDraw(Canvas canvas) {
         if (mShouldDrawNotificationBackground
                 && (mSections[0].getCurrentBounds().top
-                < mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom
+                < mSections[mSections.length - 1].getCurrentBounds().bottom
                 || mAmbientState.isDozing())) {
             drawBackground(canvas);
         } else if (mInHeadsUpPinnedMode || mHeadsUpAnimatingAway) {
@@ -819,7 +819,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int lockScreenLeft = mSidePaddings;
         int lockScreenRight = getWidth() - mSidePaddings;
         int lockScreenTop = mSections[0].getCurrentBounds().top;
-        int lockScreenBottom = mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom;
+        int lockScreenBottom = mSections[mSections.length - 1].getCurrentBounds().bottom;
         int hiddenLeft = getWidth() / 2;
         int hiddenTop = mTopPadding;
 
@@ -2636,6 +2636,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return null;
     }
 
+    //TODO: We shouldn't have to generate this list every time
+    private List<ActivatableNotificationView> getChildrenWithBackground() {
+        ArrayList<ActivatableNotificationView> children = new ArrayList<>();
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE && child instanceof ActivatableNotificationView
+                    && child != mShelf) {
+                children.add((ActivatableNotificationView) child);
+            }
+        }
+
+        return children;
+    }
+
     /**
      * Fling the scroll view
      *
@@ -3198,8 +3213,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         ActivatableNotificationView lastChild = getLastChildWithBackground();
-        boolean sectionViewsChanged = mSectionsManager.updateFirstAndLastViewsInSections(
-                mSections[0], mSections[1], firstChild, lastChild);
+        boolean sectionViewsChanged = mSectionsManager.updateFirstAndLastViewsForAllSections(
+                mSections, getChildrenWithBackground());
 
         if (mAnimationsEnabled && mIsExpanded) {
             mAnimateNextBackgroundTop = firstChild != previousFirstChild;
@@ -5780,7 +5795,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             currentIndex++;
             boolean beforeSpeedBump;
             if (mHighPriorityBeforeSpeedBump) {
-                beforeSpeedBump = row.getEntry().isTopBucket();
+                beforeSpeedBump = row.getEntry().getBucket() < BUCKET_SILENT;
             } else {
                 beforeSpeedBump = !row.getEntry().isAmbient();
             }
@@ -5838,9 +5853,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             case ROWS_ALL:
                 return true;
             case ROWS_HIGH_PRIORITY:
-                return row.getEntry().isTopBucket();
+                return row.getEntry().getBucket() < BUCKET_SILENT;
             case ROWS_GENTLE:
-                return !row.getEntry().isTopBucket();
+                return row.getEntry().getBucket() == BUCKET_SILENT;
             default:
                 throw new IllegalArgumentException("Unknown selection: " + selection);
         }

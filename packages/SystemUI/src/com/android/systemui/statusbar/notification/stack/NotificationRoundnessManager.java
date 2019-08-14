@@ -16,11 +16,10 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.NUM_SECTIONS;
-
-
+import android.content.Context;
 import android.util.MathUtils;
 
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -51,11 +50,14 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     private float mAppearFraction;
 
     @Inject
-    NotificationRoundnessManager(KeyguardBypassController keyguardBypassController) {
-        mFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
-        mLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
-        mTmpFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
-        mTmpLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
+    NotificationRoundnessManager(
+            KeyguardBypassController keyguardBypassController,
+            Context context) {
+        int numberOfSections = NotificationData.getNotificationBuckets(context).length;
+        mFirstInSectionViews = new ActivatableNotificationView[numberOfSections];
+        mLastInSectionViews = new ActivatableNotificationView[numberOfSections];
+        mTmpFirstInSectionViews = new ActivatableNotificationView[numberOfSections];
+        mTmpLastInSectionViews = new ActivatableNotificationView[numberOfSections];
         mBypassController = keyguardBypassController;
     }
 
@@ -157,7 +159,7 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     public void updateRoundedChildren(NotificationSection[] sections) {
         boolean anyChanged = false;
-        for (int i = 0; i < NUM_SECTIONS; i++) {
+        for (int i = 0; i < sections.length; i++) {
             mTmpFirstInSectionViews[i] = mFirstInSectionViews[i];
             mTmpLastInSectionViews[i] = mLastInSectionViews[i];
             mFirstInSectionViews[i] = sections[i].getFirstVisibleChild();
