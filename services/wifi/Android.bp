@@ -1,0 +1,11 @@
+// Interfaces between the core system and the wifi mainline module.
+java_library_static {
+    name: "services.wifi",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
+    ],
+    libs: [
+        "services.net",
+    ],
+}

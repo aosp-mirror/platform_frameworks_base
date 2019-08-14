@@ -112,7 +112,6 @@ import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
-import android.net.wifi.IWifiManager;
 import android.net.wifi.IWifiScanner;
 import android.net.wifi.RttManager;
 import android.net.wifi.WifiManager;
@@ -730,10 +729,8 @@ public final class SystemServiceRegistry {
         registerService(Context.WIFI_SERVICE, WifiManager.class,
                 new CachedServiceFetcher<WifiManager>() {
             @Override
-            public WifiManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_SERVICE);
-                IWifiManager service = IWifiManager.Stub.asInterface(b);
-                return new WifiManager(ctx.getOuterContext(), service,
+            public WifiManager createService(ContextImpl ctx) {
+                return new WifiManager(ctx.getOuterContext(),
                         ConnectivityThread.getInstanceLooper());
             }});
 

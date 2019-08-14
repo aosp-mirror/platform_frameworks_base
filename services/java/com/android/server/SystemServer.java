@@ -39,7 +39,9 @@ import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
+import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
+import android.net.wifi.WifiStackClient;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -1274,6 +1276,14 @@ public final class SystemServer {
             mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
             t.traceEnd();
 
+            t.traceBegin("InitConnectivityModuleConnector");
+            try {
+                ConnectivityModuleConnector.getInstance().init(context);
+            } catch (Throwable e) {
+                reportWtf("initializing ConnectivityModuleConnector", e);
+            }
+            t.traceEnd();
+
             t.traceBegin("InitNetworkStackClient");
             try {
                 NetworkStackClient.getInstance().init();
@@ -1334,40 +1344,6 @@ public final class SystemServer {
                 reportWtf("starting NetworkPolicy Service", e);
             }
             t.traceEnd();
-
-            if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI)) {
-                // Wifi Service must be started first for wifi-related services.
-                t.traceBegin("StartWifi");
-                mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
-                t.traceEnd();
-                t.traceBegin("StartWifiScanning");
-                mSystemServiceManager.startService(
-                        "com.android.server.wifi.scanner.WifiScanningService");
-                t.traceEnd();
-            }
-
-            if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI_RTT)) {
-                t.traceBegin("StartRttService");
-                mSystemServiceManager.startService(
-                        "com.android.server.wifi.rtt.RttService");
-                t.traceEnd();
-            }
-
-            if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI_AWARE)) {
-                t.traceBegin("StartWifiAware");
-                mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
-                t.traceEnd();
-            }
-
-            if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI_DIRECT)) {
-                t.traceBegin("StartWifiP2P");
-                mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
-                t.traceEnd();
-            }
 
             if (context.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_LOWPAN)) {
@@ -2168,11 +2144,20 @@ public final class SystemServer {
                 // ActivityManagerService.mSystemReady and ActivityManagerService.mProcessesReady
                 // are set to true. Be careful if moving this to a different place in the
                 // startup sequence.
-                NetworkStackClient.getInstance().start(context);
+                NetworkStackClient.getInstance().start();
             } catch (Throwable e) {
                 reportWtf("starting Network Stack", e);
             }
             t.traceEnd();
+
+            t.traceBegin("StartWifiStack");
+            try {
+                WifiStackClient.getInstance().start();
+            } catch (Throwable e) {
+                reportWtf("starting Wifi Stack", e);
+            }
+            t.traceEnd();
+
 
             t.traceBegin("MakeLocationServiceReady");
             try {
