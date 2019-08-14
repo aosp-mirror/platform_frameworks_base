@@ -342,6 +342,7 @@ java_defaults {
         "core/java/android/companion/ICompanionDeviceDiscoveryService.aidl",
         "core/java/android/companion/ICompanionDeviceDiscoveryServiceCallback.aidl",
         "core/java/android/companion/IFindDeviceCallback.aidl",
+        "core/java/android/compat/IPlatformCompat.aidl",
         "core/java/android/service/dreams/IDreamManager.aidl",
         "core/java/android/service/dreams/IDreamService.aidl",
         "core/java/android/service/oemlock/IOemLockService.aidl",
