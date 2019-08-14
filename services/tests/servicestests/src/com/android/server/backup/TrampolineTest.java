@@ -483,22 +483,6 @@ public class TrampolineTest {
     }
 
     @Test
-    public void dataChangedForUser_forwarded() throws Exception {
-        mTrampoline.dataChangedForUser(mUserId, PACKAGE_NAME);
-
-        verify(mBackupManagerServiceMock).dataChanged(mUserId, PACKAGE_NAME);
-    }
-
-    @Test
-    public void dataChanged_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.dataChanged(PACKAGE_NAME);
-
-        verify(mBackupManagerServiceMock).dataChanged(mUserId, PACKAGE_NAME);
-    }
-
-    @Test
     public void clearBackupDataForUser_forwarded() throws Exception {
 
         mTrampoline.clearBackupDataForUser(mUserId, TRANSPORT_NAME, PACKAGE_NAME);
@@ -513,40 +497,6 @@ public class TrampolineTest {
         mTrampoline.clearBackupData(TRANSPORT_NAME, PACKAGE_NAME);
 
         verify(mBackupManagerServiceMock).clearBackupData(mUserId, TRANSPORT_NAME, PACKAGE_NAME);
-    }
-
-    @Test
-    public void agentConnectedForUser_forwarded() throws Exception {
-
-        mTrampoline.agentConnectedForUser(mUserId, PACKAGE_NAME, mAgentMock);
-
-        verify(mBackupManagerServiceMock).agentConnected(mUserId, PACKAGE_NAME, mAgentMock);
-    }
-
-    @Test
-    public void agentConnected_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.agentConnected(PACKAGE_NAME, mAgentMock);
-
-        verify(mBackupManagerServiceMock).agentConnected(mUserId, PACKAGE_NAME, mAgentMock);
-    }
-
-    @Test
-    public void agentDisconnectedForUser_forwarded() throws Exception {
-
-        mTrampoline.agentDisconnectedForUser(mUserId, PACKAGE_NAME);
-
-        verify(mBackupManagerServiceMock).agentDisconnected(mUserId, PACKAGE_NAME);
-    }
-
-    @Test
-    public void agentDisconnected_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.agentDisconnected(PACKAGE_NAME);
-
-        verify(mBackupManagerServiceMock).agentDisconnected(mUserId, PACKAGE_NAME);
     }
 
     @Test
@@ -933,15 +883,6 @@ public class TrampolineTest {
 
         verify(mBackupManagerServiceMock)
                 .beginRestoreSession(mUserId, PACKAGE_NAME, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void opComplete_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.opComplete(1, 2);
-
-        verify(mBackupManagerServiceMock).opComplete(mUserId, 1, 2);
     }
 
     @Test

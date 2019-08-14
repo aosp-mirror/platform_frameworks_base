@@ -24,6 +24,7 @@ import static java.util.Collections.emptySet;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
@@ -502,13 +503,27 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public void dataChangedForUser(int userId, String packageName) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.dataChanged(userId, packageName);
+            dataChanged(userId, packageName);
         }
     }
 
     @Override
     public void dataChanged(String packageName) throws RemoteException {
         dataChangedForUser(binderGetCallingUserId(), packageName);
+    }
+
+    /**
+     * An app's backup agent calls this method to let the service know that there's new data to
+     * backup for their app {@code packageName}. Only used for apps participating in key-value
+     * backup.
+     */
+    public void dataChanged(@UserIdInt int userId, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "dataChanged()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.dataChanged(packageName);
+        }
     }
 
     @Override
@@ -537,7 +552,7 @@ public class Trampoline extends IBackupManager.Stub {
     public void agentConnectedForUser(int userId, String packageName, IBinder agent)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.agentConnected(userId, packageName, agent);
+            agentConnected(userId, packageName, agent);
         }
     }
 
@@ -546,16 +561,42 @@ public class Trampoline extends IBackupManager.Stub {
         agentConnectedForUser(binderGetCallingUserId(), packageName, agent);
     }
 
+    /**
+     * Callback: a requested backup agent has been instantiated. This should only be called from the
+     * {@link ActivityManager}.
+     */
+    public void agentConnected(@UserIdInt int userId, String packageName, IBinder agentBinder) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "agentConnected()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.agentConnected(packageName, agentBinder);
+        }
+    }
+
     @Override
     public void agentDisconnectedForUser(int userId, String packageName) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.agentDisconnected(userId, packageName);
+            agentDisconnected(userId, packageName);
         }
     }
 
     @Override
     public void agentDisconnected(String packageName) throws RemoteException {
         agentDisconnectedForUser(binderGetCallingUserId(), packageName);
+    }
+
+    /**
+     * Callback: a backup agent has failed to come up, or has unexpectedly quit. This should only be
+     * called from the {@link ActivityManager}.
+     */
+    public void agentDisconnected(@UserIdInt int userId, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "agentDisconnected()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.agentDisconnected(packageName);
+        }
     }
 
     @Override
@@ -835,13 +876,26 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public void opCompleteForUser(int userId, int token, long result) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.opComplete(userId, token, result);
+            opComplete(userId, token, result);
         }
     }
 
     @Override
     public void opComplete(int token, long result) throws RemoteException {
         opCompleteForUser(binderGetCallingUserId(), token, result);
+    }
+
+    /**
+     * Used by a currently-active backup agent to notify the service that it has completed its given
+     * outstanding asynchronous backup/restore operation.
+     */
+    public void opComplete(@UserIdInt int userId, int token, long result) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "opComplete()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.opComplete(token, result);
+        }
     }
 
     @Override
@@ -925,6 +979,43 @@ public class Trampoline extends IBackupManager.Stub {
     /* package */ void endFullBackup(@UserIdInt int userId) {
         if (isUserReadyForBackup(userId)) {
             mService.endFullBackup(userId);
+        }
+    }
+
+    /**
+     * Returns the {@link UserBackupManagerService} instance for the specified user {@code userId}.
+     * If the user is not registered with the service (either the user is locked or not eligible for
+     * the backup service) then return {@code null}.
+     *
+     * @param userId The id of the user to retrieve its instance of {@link
+     *     UserBackupManagerService}.
+     * @param caller A {@link String} identifying the caller for logging purposes.
+     * @throws SecurityException if {@code userId} is different from the calling user id and the
+     *     caller does NOT have the android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Nullable
+    @VisibleForTesting
+    UserBackupManagerService getServiceForUserIfCallerHasPermission(
+            @UserIdInt int userId, String caller) {
+        enforceCallingPermissionOnUserId(userId, caller);
+        UserBackupManagerService userBackupManagerService = mUserServices.get(userId);
+        if (userBackupManagerService == null) {
+            Slog.w(TAG, "Called " + caller + " for unknown user: " + userId);
+        }
+        return userBackupManagerService;
+    }
+
+    /**
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id on which the backup operation is being requested.
+     * @param message A message to include in the exception if it is thrown.
+     */
+    void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
+        if (Binder.getCallingUserHandle().getIdentifier() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
         }
     }
 }

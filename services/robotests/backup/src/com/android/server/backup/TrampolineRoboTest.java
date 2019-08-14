@@ -21,6 +21,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
@@ -28,6 +29,7 @@ import static org.robolectric.Shadows.shadowOf;
 import android.annotation.UserIdInt;
 import android.app.Application;
 import android.content.Context;
+import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -63,6 +65,8 @@ import org.robolectric.shadows.ShadowContextWrapper;
         })
 @Presubmit
 public class TrampolineRoboTest {
+    private static final String TEST_PACKAGE = "package";
+
     private Context mContext;
     private ShadowContextWrapper mShadowContext;
     private ShadowUserManager mShadowUserManager;
@@ -161,8 +165,92 @@ public class TrampolineRoboTest {
         assertThat(serviceUsers.size()).isEqualTo(0);
     }
 
+    // ---------------------------------------------
+    // Backup agent tests
+    // ---------------------------------------------
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testDataChanged_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.dataChanged(mUserOneId, TEST_PACKAGE);
+
+        verify(mUserOneService).dataChanged(TEST_PACKAGE);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testDataChanged_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.dataChanged(mUserTwoId, TEST_PACKAGE);
+
+        verify(mUserOneService, never()).dataChanged(TEST_PACKAGE);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testAgentConnected_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+        IBinder agentBinder = mock(IBinder.class);
+
+        backupManagerService.agentConnected(mUserOneId, TEST_PACKAGE, agentBinder);
+
+        verify(mUserOneService).agentConnected(TEST_PACKAGE, agentBinder);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testAgentConnected_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+        IBinder agentBinder = mock(IBinder.class);
+
+        backupManagerService.agentConnected(mUserTwoId, TEST_PACKAGE, agentBinder);
+
+        verify(mUserOneService, never()).agentConnected(TEST_PACKAGE, agentBinder);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testOpComplete_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.opComplete(mUserOneId, /* token */ 0, /* result */ 0L);
+
+        verify(mUserOneService).opComplete(/* token */ 0, /* result */ 0L);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testOpComplete_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.opComplete(mUserTwoId, /* token */ 0, /* result */ 0L);
+
+        verify(mUserOneService, never()).opComplete(/* token */ 0, /* result */ 0L);
+    }
+
     private Trampoline createService() {
         return new Trampoline(mContext);
+    }
+
+    private void registerUser(
+            Trampoline trampoline, int userId, UserBackupManagerService userBackupManagerService) {
+        trampoline.setBackupServiceActive(userId, true);
+        trampoline.startServiceForUser(userId, userBackupManagerService);
     }
 
     private Trampoline createServiceAndRegisterUser(
@@ -171,5 +259,20 @@ public class TrampolineRoboTest {
         backupManagerService.setBackupServiceActive(userBackupManagerService.getUserId(), true);
         backupManagerService.startServiceForUser(userId, userBackupManagerService);
         return backupManagerService;
+    }
+
+    /**
+     * Sets the calling user to {@code userId} and grants the permission INTERACT_ACROSS_USERS_FULL
+     * to the caller if {@code shouldGrantPermission} is {@code true}, else it denies the
+     * permission.
+     */
+    private void setCallerAndGrantInteractUserPermission(
+            @UserIdInt int userId, boolean shouldGrantPermission) {
+        ShadowBinder.setCallingUserHandle(UserHandle.of(userId));
+        if (shouldGrantPermission) {
+            mShadowContext.grantPermissions(INTERACT_ACROSS_USERS_FULL);
+        } else {
+            mShadowContext.denyPermissions(INTERACT_ACROSS_USERS_FULL);
+        }
     }
 }

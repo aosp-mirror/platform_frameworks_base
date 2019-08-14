@@ -44,7 +44,6 @@ import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.content.Context;
 import android.content.Intent;
-import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.UserHandle;
@@ -219,108 +218,6 @@ public class BackupManagerServiceTest {
         assertEquals(
                 mUserOneService,
                 backupManagerService.getServiceForUserIfCallerHasPermission(mUserOneId, "test"));
-    }
-
-    // ---------------------------------------------
-    // Backup agent tests
-    // ---------------------------------------------
-
-    /** Test that the backup service routes methods correctly to the user that requests it. */
-    @Test
-    public void testDataChanged_onRegisteredUser_callsMethodForUser() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
-
-        backupManagerService.dataChanged(mUserOneId, TEST_PACKAGE);
-
-        verify(mUserOneService).dataChanged(TEST_PACKAGE);
-    }
-
-    /** Test that the backup service does not route methods for non-registered users. */
-    @Test
-    public void testDataChanged_onUnknownUser_doesNotPropagateCall() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
-
-        backupManagerService.dataChanged(mUserTwoId, TEST_PACKAGE);
-
-        verify(mUserOneService, never()).dataChanged(TEST_PACKAGE);
-    }
-
-    /** Test that the backup service routes methods correctly to the user that requests it. */
-    @Test
-    public void testAgentConnected_onRegisteredUser_callsMethodForUser() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
-        IBinder agentBinder = mock(IBinder.class);
-
-        backupManagerService.agentConnected(mUserOneId, TEST_PACKAGE, agentBinder);
-
-        verify(mUserOneService).agentConnected(TEST_PACKAGE, agentBinder);
-    }
-
-    /** Test that the backup service does not route methods for non-registered users. */
-    @Test
-    public void testAgentConnected_onUnknownUser_doesNotPropagateCall() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
-        IBinder agentBinder = mock(IBinder.class);
-
-        backupManagerService.agentConnected(mUserTwoId, TEST_PACKAGE, agentBinder);
-
-        verify(mUserOneService, never()).agentConnected(TEST_PACKAGE, agentBinder);
-    }
-
-    /** Test that the backup service routes methods correctly to the user that requests it. */
-    @Test
-    public void testAgentDisconnected_onRegisteredUser_callsMethodForUser() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
-
-        backupManagerService.agentDisconnected(mUserOneId, TEST_PACKAGE);
-
-        verify(mUserOneService).agentDisconnected(TEST_PACKAGE);
-    }
-
-    /** Test that the backup service does not route methods for non-registered users. */
-    @Test
-    public void testAgentDisconnected_onUnknownUser_doesNotPropagateCall() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
-
-        backupManagerService.agentDisconnected(mUserTwoId, TEST_PACKAGE);
-
-        verify(mUserOneService, never()).agentDisconnected(TEST_PACKAGE);
-    }
-
-    /** Test that the backup service routes methods correctly to the user that requests it. */
-    @Test
-    public void testOpComplete_onRegisteredUser_callsMethodForUser() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
-
-        backupManagerService.opComplete(mUserOneId, /* token */ 0, /* result */ 0L);
-
-        verify(mUserOneService).opComplete(/* token */ 0, /* result */ 0L);
-    }
-
-    /** Test that the backup service does not route methods for non-registered users. */
-    @Test
-    public void testOpComplete_onUnknownUser_doesNotPropagateCall() throws Exception {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
-
-        backupManagerService.opComplete(mUserTwoId, /* token */ 0, /* result */ 0L);
-
-        verify(mUserOneService, never()).opComplete(/* token */ 0, /* result */ 0L);
     }
 
     // ---------------------------------------------

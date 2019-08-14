@@ -18,10 +18,8 @@ package com.android.server.backup;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -40,7 +38,6 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -82,20 +79,6 @@ public class BackupManagerService {
     }
 
     /**
-     * If {@code userId} is different from the calling user id, then the caller must hold the
-     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
-     *
-     * @param userId User id on which the backup operation is being requested.
-     * @param message A message to include in the exception if it is thrown.
-     */
-    private void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
-        if (Binder.getCallingUserHandle().getIdentifier() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
-        }
-    }
-
-    /**
      * Returns the {@link UserBackupManagerService} instance for the specified user {@code userId}.
      * If the user is not registered with the service (either the user is locked or not eligible for
      * the backup service) then return {@code null}.
@@ -110,12 +93,7 @@ public class BackupManagerService {
     @VisibleForTesting
     UserBackupManagerService getServiceForUserIfCallerHasPermission(
             @UserIdInt int userId, String caller) {
-        enforceCallingPermissionOnUserId(userId, caller);
-        UserBackupManagerService userBackupManagerService = mServiceUsers.get(userId);
-        if (userBackupManagerService == null) {
-            Slog.w(TAG, "Called " + caller + " for unknown user: " + userId);
-        }
-        return userBackupManagerService;
+        return mTrampoline.getServiceForUserIfCallerHasPermission(userId, caller);
     }
 
     /*
@@ -124,63 +102,6 @@ public class BackupManagerService {
      * action on the passed in user. Currently this is a straight redirection (see TODO).
      */
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    // ---------------------------------------------
-    // BACKUP AGENT OPERATIONS
-    // ---------------------------------------------
-
-    /**
-     * An app's backup agent calls this method to let the service know that there's new data to
-     * backup for their app {@code packageName}. Only used for apps participating in key-value
-     * backup.
-     */
-    public void dataChanged(@UserIdInt int userId, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "dataChanged()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.dataChanged(packageName);
-        }
-    }
-
-    /**
-     * Callback: a requested backup agent has been instantiated. This should only be called from the
-     * {@link ActivityManager}.
-     */
-    public void agentConnected(@UserIdInt int userId, String packageName, IBinder agentBinder) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "agentConnected()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.agentConnected(packageName, agentBinder);
-        }
-    }
-
-    /**
-     * Callback: a backup agent has failed to come up, or has unexpectedly quit. This should only be
-     * called from the {@link ActivityManager}.
-     */
-    public void agentDisconnected(@UserIdInt int userId, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "agentDisconnected()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.agentDisconnected(packageName);
-        }
-    }
-
-    /**
-     * Used by a currently-active backup agent to notify the service that it has completed its given
-     * outstanding asynchronous backup/restore operation.
-     */
-    public void opComplete(@UserIdInt int userId, int token, long result) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "opComplete()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.opComplete(token, result);
-        }
-    }
 
     // ---------------------------------------------
     // TRANSPORT OPERATIONS
