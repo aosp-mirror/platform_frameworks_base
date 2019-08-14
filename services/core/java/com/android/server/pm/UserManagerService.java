@@ -2252,14 +2252,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy({"mPackagesLock", "mRestrictionsLock"})
     private void fallbackToSingleUserLP() {
-        int flags = UserInfo.FLAG_SYSTEM | UserInfo.FLAG_INITIALIZED;
-        // In split system user mode, the admin and primary flags are assigned to the first human
-        // user.
-        if (!UserManager.isSplitSystemUser()) {
-            flags |= UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY;
-        }
+        int flags = UserInfo.FLAG_SYSTEM | UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN;
+        // In headless system user mode, the primary flag is assigned to the first human user.
         if (!UserManager.isHeadlessSystemUserMode()) {
-            flags |= UserInfo.FLAG_FULL;
+            flags |= UserInfo.FLAG_PRIMARY | UserInfo.FLAG_FULL;
         }
         // Create the system user
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags);
@@ -2773,9 +2769,9 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
-                // In split system user mode, we assign the first human user the primary flag.
+                // In headless system user mode, we assign the first human user the primary flag.
                 // And if there is no device owner, we also assign the admin flag to primary user.
-                if (UserManager.isSplitSystemUser()
+                if (UserManager.isHeadlessSystemUserMode()
                         && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
                     flags |= UserInfo.FLAG_PRIMARY;
                     synchronized (mUsersLock) {
