@@ -644,7 +644,7 @@ public class Trampoline extends IBackupManager.Stub {
     public void setBackupEnabledForUser(@UserIdInt int userId, boolean isEnabled)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.setBackupEnabled(userId, isEnabled);
+            setBackupEnabled(userId, isEnabled);
         }
     }
 
@@ -653,10 +653,20 @@ public class Trampoline extends IBackupManager.Stub {
         setBackupEnabledForUser(binderGetCallingUserId(), isEnabled);
     }
 
+    /** Enable/disable the backup service. This is user-configurable via backup settings. */
+    public void setBackupEnabled(@UserIdInt int userId, boolean enable) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "setBackupEnabled()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.setBackupEnabled(enable);
+        }
+    }
+
     @Override
     public void setAutoRestoreForUser(int userId, boolean doAutoRestore) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.setAutoRestore(userId, doAutoRestore);
+            setAutoRestore(userId, doAutoRestore);
         }
     }
 
@@ -665,14 +675,34 @@ public class Trampoline extends IBackupManager.Stub {
         setAutoRestoreForUser(binderGetCallingUserId(), doAutoRestore);
     }
 
+    /** Enable/disable automatic restore of app data at install time. */
+    public void setAutoRestore(@UserIdInt int userId, boolean autoRestore) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "setAutoRestore()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.setAutoRestore(autoRestore);
+        }
+    }
+
     @Override
     public boolean isBackupEnabledForUser(@UserIdInt int userId) throws RemoteException {
-        return isUserReadyForBackup(userId) && mService.isBackupEnabled(userId);
+        return isUserReadyForBackup(userId) && isBackupEnabled(userId);
     }
 
     @Override
     public boolean isBackupEnabled() throws RemoteException {
         return isBackupEnabledForUser(binderGetCallingUserId());
+    }
+
+    /**
+     * Return {@code true} if the backup mechanism is currently enabled, else returns {@code false}.
+     */
+    public boolean isBackupEnabled(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "isBackupEnabled()");
+
+        return userBackupManagerService != null && userBackupManagerService.isBackupEnabled();
     }
 
     @Override

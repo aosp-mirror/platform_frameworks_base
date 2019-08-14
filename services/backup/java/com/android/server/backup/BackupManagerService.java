@@ -99,40 +99,6 @@ public class BackupManagerService {
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
 
     // ---------------------------------------------
-    // SETTINGS OPERATIONS
-    // ---------------------------------------------
-
-    /** Enable/disable the backup service. This is user-configurable via backup settings. */
-    public void setBackupEnabled(@UserIdInt int userId, boolean enable) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "setBackupEnabled()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.setBackupEnabled(enable);
-        }
-    }
-
-    /** Enable/disable automatic restore of app data at install time. */
-    public void setAutoRestore(@UserIdInt int userId, boolean autoRestore) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "setAutoRestore()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.setAutoRestore(autoRestore);
-        }
-    }
-
-    /**
-     * Return {@code true} if the backup mechanism is currently enabled, else returns {@code false}.
-     */
-    public boolean isBackupEnabled(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "isBackupEnabled()");
-
-        return userBackupManagerService != null && userBackupManagerService.isBackupEnabled();
-    }
-
-    // ---------------------------------------------
     // BACKUP OPERATIONS
     // ---------------------------------------------
 

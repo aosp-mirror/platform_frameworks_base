@@ -499,57 +499,6 @@ public class TrampolineTest {
     }
 
     @Test
-    public void setBackupEnabledForUser_forwarded() throws Exception {
-
-        mTrampoline.setBackupEnabledForUser(mUserId, true);
-
-        verify(mBackupManagerServiceMock).setBackupEnabled(mUserId, true);
-    }
-
-    @Test
-    public void setBackupEnabled_forwardedToCallingUserId() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.setBackupEnabled(true);
-
-        verify(mBackupManagerServiceMock).setBackupEnabled(mUserId, true);
-    }
-
-    @Test
-    public void setAutoRestoreForUser_forwarded() throws Exception {
-
-        mTrampoline.setAutoRestoreForUser(mUserId, true);
-
-        verify(mBackupManagerServiceMock).setAutoRestore(mUserId, true);
-    }
-
-    @Test
-    public void setAutoRestore_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.setAutoRestore(true);
-
-        verify(mBackupManagerServiceMock).setAutoRestore(mUserId, true);
-    }
-
-    @Test
-    public void isBackupEnabledForUser_forwarded() throws Exception {
-
-        mTrampoline.isBackupEnabledForUser(mUserId);
-
-        verify(mBackupManagerServiceMock).isBackupEnabled(mUserId);
-    }
-
-    @Test
-    public void isBackupEnabled_forwardedToCallingUserId() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.isBackupEnabled();
-
-        verify(mBackupManagerServiceMock).isBackupEnabled(mUserId);
-    }
-
-    @Test
     public void setBackupPassword_forwarded() throws Exception {
         mTrampoline.setBackupPassword(CURRENT_PASSWORD, NEW_PASSWORD);
         verify(mBackupManagerServiceMock).setBackupPassword(CURRENT_PASSWORD, NEW_PASSWORD);
