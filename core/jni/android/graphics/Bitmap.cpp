@@ -237,10 +237,6 @@ Bitmap& toBitmap(jlong bitmapHandle) {
 }
 
 void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info) {
-    SkASSERT(info);
-    SkASSERT(env);
-    SkASSERT(bitmap);
-    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
     jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
     LocalScopedBitmap localBitmap(bitmapHandle);
 
@@ -261,6 +257,9 @@ void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info) {
             break;
         case kAlpha_8_SkColorType:
             info->format = ANDROID_BITMAP_FORMAT_A_8;
+            break;
+        case kRGBA_F16_SkColorType:
+            info->format = ANDROID_BITMAP_FORMAT_RGBA_F16;
             break;
         default:
             info->format = ANDROID_BITMAP_FORMAT_NONE;
