@@ -16,7 +16,6 @@
 
 package com.android.server.job;
 
-import android.app.IActivityManager;
 import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.content.ContentProvider;
@@ -40,7 +39,7 @@ public final class GrantedUriPermissions {
     private final IBinder mPermissionOwner;
     private final ArrayList<Uri> mUris = new ArrayList<>();
 
-    private GrantedUriPermissions(IActivityManager am, int grantFlags, int uid, String tag)
+    private GrantedUriPermissions(int grantFlags, int uid, String tag)
             throws RemoteException {
         mGrantFlags = grantFlags;
         mSourceUserId = UserHandle.getUserId(uid);
@@ -49,7 +48,7 @@ public final class GrantedUriPermissions {
                 .getService(UriGrantsManagerInternal.class).newUriPermissionOwner("job: " + tag);
     }
 
-    public void revoke(IActivityManager am) {
+    public void revoke() {
         for (int i = mUris.size()-1; i >= 0; i--) {
             LocalServices.getService(UriGrantsManagerInternal.class).revokeUriPermissionFromOwner(
                     mPermissionOwner, mUris.get(i), mGrantFlags, mSourceUserId);
@@ -62,7 +61,7 @@ public final class GrantedUriPermissions {
                 |Intent.FLAG_GRANT_READ_URI_PERMISSION)) != 0;
     }
 
-    public static GrantedUriPermissions createFromIntent(IActivityManager am, Intent intent,
+    public static GrantedUriPermissions createFromIntent(Intent intent,
             int sourceUid, String targetPackage, int targetUserId, String tag) {
         int grantFlags = intent.getFlags();
         if (!checkGrantFlags(grantFlags)) {
@@ -73,44 +72,44 @@ public final class GrantedUriPermissions {
 
         Uri data = intent.getData();
         if (data != null) {
-            perms = grantUri(am, data, sourceUid, targetPackage, targetUserId, grantFlags, tag,
+            perms = grantUri(data, sourceUid, targetPackage, targetUserId, grantFlags, tag,
                     perms);
         }
 
         ClipData clip = intent.getClipData();
         if (clip != null) {
-            perms = grantClip(am, clip, sourceUid, targetPackage, targetUserId, grantFlags, tag,
+            perms = grantClip(clip, sourceUid, targetPackage, targetUserId, grantFlags, tag,
                     perms);
         }
 
         return perms;
     }
 
-    public static GrantedUriPermissions createFromClip(IActivityManager am, ClipData clip,
+    public static GrantedUriPermissions createFromClip(ClipData clip,
             int sourceUid, String targetPackage, int targetUserId, int grantFlags, String tag) {
         if (!checkGrantFlags(grantFlags)) {
             return null;
         }
         GrantedUriPermissions perms = null;
         if (clip != null) {
-            perms = grantClip(am, clip, sourceUid, targetPackage, targetUserId, grantFlags,
+            perms = grantClip(clip, sourceUid, targetPackage, targetUserId, grantFlags,
                     tag, perms);
         }
         return perms;
     }
 
-    private static GrantedUriPermissions grantClip(IActivityManager am, ClipData clip,
+    private static GrantedUriPermissions grantClip(ClipData clip,
             int sourceUid, String targetPackage, int targetUserId, int grantFlags, String tag,
             GrantedUriPermissions curPerms) {
         final int N = clip.getItemCount();
         for (int i = 0; i < N; i++) {
-            curPerms = grantItem(am, clip.getItemAt(i), sourceUid, targetPackage, targetUserId,
+            curPerms = grantItem(clip.getItemAt(i), sourceUid, targetPackage, targetUserId,
                     grantFlags, tag, curPerms);
         }
         return curPerms;
     }
 
-    private static GrantedUriPermissions grantUri(IActivityManager am, Uri uri,
+    private static GrantedUriPermissions grantUri(Uri uri,
             int sourceUid, String targetPackage, int targetUserId, int grantFlags, String tag,
             GrantedUriPermissions curPerms) {
         try {
@@ -118,7 +117,7 @@ public final class GrantedUriPermissions {
                     UserHandle.getUserId(sourceUid));
             uri = ContentProvider.getUriWithoutUserId(uri);
             if (curPerms == null) {
-                curPerms = new GrantedUriPermissions(am, grantFlags, sourceUid, tag);
+                curPerms = new GrantedUriPermissions(grantFlags, sourceUid, tag);
             }
             UriGrantsManager.getService().grantUriPermissionFromOwner(curPerms.mPermissionOwner,
                     sourceUid, targetPackage, uri, grantFlags, sourceUserId, targetUserId);
@@ -129,16 +128,16 @@ public final class GrantedUriPermissions {
         return curPerms;
     }
 
-    private static GrantedUriPermissions grantItem(IActivityManager am, ClipData.Item item,
+    private static GrantedUriPermissions grantItem(ClipData.Item item,
             int sourceUid, String targetPackage, int targetUserId, int grantFlags, String tag,
             GrantedUriPermissions curPerms) {
         if (item.getUri() != null) {
-            curPerms = grantUri(am, item.getUri(), sourceUid, targetPackage, targetUserId,
+            curPerms = grantUri(item.getUri(), sourceUid, targetPackage, targetUserId,
                     grantFlags, tag, curPerms);
         }
         Intent intent = item.getIntent();
         if (intent != null && intent.getData() != null) {
-            curPerms = grantUri(am, intent.getData(), sourceUid, targetPackage, targetUserId,
+            curPerms = grantUri(intent.getData(), sourceUid, targetPackage, targetUserId,
                     grantFlags, tag, curPerms);
         }
         return curPerms;

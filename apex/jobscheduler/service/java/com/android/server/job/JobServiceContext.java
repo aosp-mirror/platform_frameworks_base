@@ -18,7 +18,6 @@ package com.android.server.job;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
-import android.app.ActivityManager;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
 import android.app.job.JobInfo;
@@ -389,7 +388,7 @@ public final class JobServiceContext implements ServiceConnection {
         try {
             synchronized (mLock) {
                 assertCallerLocked(cb);
-                return mRunningJob.completeWorkLocked(ActivityManager.getService(), workId);
+                return mRunningJob.completeWorkLocked(workId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
