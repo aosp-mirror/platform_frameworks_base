@@ -649,7 +649,8 @@ public class UserBackupManagerService {
     }
 
     /** Cleans up state when the user of this service is stopped. */
-    void tearDownService() {
+    @VisibleForTesting
+    protected void tearDownService() {
         mAgentTimeoutParameters.stop();
         mConstants.stop();
         mContext.getContentResolver().unregisterContentObserver(mSetupObserver);

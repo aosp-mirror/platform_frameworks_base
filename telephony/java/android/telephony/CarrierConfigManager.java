@@ -1421,6 +1421,13 @@ public class CarrierConfigManager {
             "show_4g_for_lte_data_icon_bool";
 
     /**
+     * Boolean indicating if default data account should show 4G icon when in 3G.
+     * @hide
+     */
+    public static final String KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL =
+            "show_4g_for_3g_data_icon_bool";
+
+    /**
      * Boolean indicating if lte+ icon should be shown if available
      * @hide
      */
@@ -3463,6 +3470,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL, false);
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);

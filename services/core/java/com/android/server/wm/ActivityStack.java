@@ -5370,13 +5370,20 @@ class ActivityStack extends ConfigurationContainer {
     void animateResizePinnedStack(Rect sourceHintBounds, Rect toBounds, int animationDuration,
             boolean fromFullscreen) {
         if (!inPinnedWindowingMode()) return;
-        if (skipResizeAnimation(toBounds == null /* toFullscreen */)) {
-            mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
-        } else {
-            if (getTaskStack() == null) return;
-            getTaskStack().animateResizePinnedStack(toBounds, sourceHintBounds,
-                    animationDuration, fromFullscreen);
+        if (toBounds == null /* toFullscreen */) {
+            final Configuration parentConfig = getParent().getConfiguration();
+            final ActivityRecord top = topRunningNonOverlayTaskActivity();
+            if (top != null && !top.isConfigurationCompatible(parentConfig)) {
+                // The final orientation of this activity will change after moving to full screen.
+                // Start freezing screen here to prevent showing a temporary full screen window.
+                top.startFreezingScreenLocked(top.app, CONFIG_SCREEN_LAYOUT);
+                mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
+                return;
+            }
         }
+        if (getTaskStack() == null) return;
+        getTaskStack().animateResizePinnedStack(toBounds, sourceHintBounds,
+                animationDuration, fromFullscreen);
     }
 
     /**
@@ -5390,15 +5397,6 @@ class ActivityStack extends ConfigurationContainer {
             return;
         }
         stack.getAnimationOrCurrentBounds(outBounds);
-    }
-
-    private boolean skipResizeAnimation(boolean toFullscreen) {
-        if (!toFullscreen) {
-            return false;
-        }
-        final Configuration parentConfig = getParent().getConfiguration();
-        final ActivityRecord top = topRunningNonOverlayTaskActivity();
-        return top != null && !top.isConfigurationCompatible(parentConfig);
     }
 
     void setPictureInPictureAspectRatio(float aspectRatio) {

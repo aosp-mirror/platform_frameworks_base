@@ -591,6 +591,7 @@ java_defaults {
         "telephony/java/android/telephony/ims/aidl/IImsServiceControllerListener.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
         "telephony/java/android/telephony/ims/aidl/IRcsMessage.aidl",
+        "telephony/java/android/telephony/ims/aidl/IRcsFeatureListener.aidl",
         "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsGroupCallSessionCallback.aidl",
@@ -720,9 +721,6 @@ java_defaults {
         "core/java/com/android/server/DropboxLogTags.logtags",
         "core/java/org/chromium/arc/EventLogTags.logtags",
 
-        ":apex-properties",
-        ":platform-properties",
-
         ":framework-statslog-gen",
     ],
 
@@ -790,6 +788,9 @@ java_defaults {
         "android.hardware.vibrator-V1.3-java",
         "android.hardware.wifi-V1.0-java-constants",
         "devicepolicyprotosnano",
+
+        "com.android.sysprop.apex",
+        "PlatformProperties",
     ],
 
     required: [

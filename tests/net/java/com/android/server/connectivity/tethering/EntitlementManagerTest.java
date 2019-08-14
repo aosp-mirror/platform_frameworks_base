@@ -406,6 +406,13 @@ public final class EntitlementManagerTest {
     }
 
     @Test
+    public void verifyPermissionWhenProvisioningNotStarted() {
+        assertTrue(mEnMgr.isCellularUpstreamPermitted());
+        setupForRequiredProvisioning();
+        assertFalse(mEnMgr.isCellularUpstreamPermitted());
+    }
+
+    @Test
     public void testRunTetherProvisioning() {
         setupForRequiredProvisioning();
         // 1. start ui provisioning, upstream is mobile

@@ -283,4 +283,50 @@ public class SettingsValidators {
             return true;
         }
     }
+
+    private abstract static class ListValidator implements Validator {
+        public boolean validate(@Nullable String value) {
+            if (!isEntryValid(value)) {
+                return false;
+            }
+            String[] items = value.split(",");
+            for (String item : items) {
+                if (!isItemValid(item)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        protected abstract boolean isEntryValid(String entry);
+
+        protected abstract boolean isItemValid(String item);
+    }
+
+    /** Ensure a restored value is a string in the format the text-to-speech system handles */
+    public static final class TTSListValidator extends ListValidator {
+        protected boolean isEntryValid(String entry) {
+            return entry != null && entry.length() > 0;
+        }
+
+        protected boolean isItemValid(String item) {
+            String[] parts = item.split(":");
+            // Replaces any old language separator (-) with the new one (_)
+            return ((parts.length == 2)
+                    && (parts[0].length() > 0)
+                    && ANY_STRING_VALIDATOR.validate(parts[0])
+                    && LOCALE_VALIDATOR.validate(parts[1].replace('-', '_')));
+        }
+    }
+
+    /** Ensure a restored value is suitable to be used as a tile name */
+    public static final class TileListValidator extends ListValidator {
+        protected boolean isEntryValid(String entry) {
+            return entry != null;
+        }
+
+        protected boolean isItemValid(String item) {
+            return item.length() > 0 && ANY_STRING_VALIDATOR.validate(item);
+        }
+    }
 }

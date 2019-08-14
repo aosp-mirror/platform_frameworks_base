@@ -10846,6 +10846,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void setGlobalSetting(ComponentName who, String setting, String value) {
         Preconditions.checkNotNull(who, "ComponentName is null");
 
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_GLOBAL_SETTING)
+                .setAdmin(who)
+                .setStrings(setting, value)
+                .write();
+
         synchronized (getLockObject()) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 

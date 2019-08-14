@@ -86,6 +86,7 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.mtp">
+        <permission name="android.permission.ACCESS_MTP"/>
         <permission name="android.permission.MANAGE_USB"/>
     </privapp-permissions>
 
@@ -192,7 +193,6 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.media">
-        <permission name="android.permission.ACCESS_MTP"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>

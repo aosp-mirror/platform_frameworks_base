@@ -1186,8 +1186,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mInvocationHandler.notifySoftKeyboardShowModeChangedLocked(showState);
     }
 
-    public void notifyAccessibilityButtonClickedLocked() {
-        mInvocationHandler.notifyAccessibilityButtonClickedLocked();
+    public void notifyAccessibilityButtonClickedLocked(int displayId) {
+        mInvocationHandler.notifyAccessibilityButtonClickedLocked(displayId);
     }
 
     public void notifyAccessibilityButtonAvailabilityChangedLocked(boolean available) {
@@ -1226,11 +1226,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private void notifyAccessibilityButtonClickedInternal() {
+    private void notifyAccessibilityButtonClickedInternal(int displayId) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                listener.onAccessibilityButtonClicked();
+                listener.onAccessibilityButtonClicked(displayId);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error sending accessibility button click to " + mService, re);
             }
@@ -1484,7 +1484,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 } break;
 
                 case MSG_ON_ACCESSIBILITY_BUTTON_CLICKED: {
-                    notifyAccessibilityButtonClickedInternal();
+                    final int displayId = (int) message.arg1;
+                    notifyAccessibilityButtonClickedInternal(displayId);
                 } break;
 
                 case MSG_ON_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED: {
@@ -1546,8 +1547,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             mIsSoftKeyboardCallbackEnabled = enabled;
         }
 
-        public void notifyAccessibilityButtonClickedLocked() {
-            final Message msg = obtainMessage(MSG_ON_ACCESSIBILITY_BUTTON_CLICKED);
+        public void notifyAccessibilityButtonClickedLocked(int displayId) {
+            final Message msg = obtainMessage(MSG_ON_ACCESSIBILITY_BUTTON_CLICKED, displayId, 0);
             msg.sendToTarget();
         }
 
