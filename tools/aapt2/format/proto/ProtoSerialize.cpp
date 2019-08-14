@@ -290,8 +290,10 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
     pb::Overlayable* pb_overlayable = pb_table->add_overlayable();
     pb_overlayable->set_name(overlayable_item.overlayable->name);
     pb_overlayable->set_actor(overlayable_item.overlayable->actor);
-    SerializeSourceToPb(overlayable_item.overlayable->source, source_pool,
-                        pb_overlayable->mutable_source());
+    if (source_pool != nullptr) {
+      SerializeSourceToPb(overlayable_item.overlayable->source, source_pool,
+                          pb_overlayable->mutable_source());
+    }
   }
 
   pb::OverlayableItem* pb_overlayable_item = pb_entry->mutable_overlayable_item();
@@ -319,14 +321,17 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
     pb_overlayable_item->add_policy(pb::OverlayableItem::OEM);
   }
 
-  SerializeSourceToPb(overlayable_item.source, source_pool,
-                      pb_overlayable_item->mutable_source());
+  if (source_pool != nullptr) {
+    SerializeSourceToPb(overlayable_item.source, source_pool,
+                        pb_overlayable_item->mutable_source());
+  }
   pb_overlayable_item->set_comment(overlayable_item.comment);
 }
 
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
-                        IDiagnostics* diag) {
-  StringPool source_pool;
+                        IDiagnostics* diag, SerializeTableOptions options) {
+  auto source_pool = (options.exclude_sources) ? nullptr : util::make_unique<StringPool>();
+
   pb::ToolFingerprint* pb_fingerprint = out_table->add_tool_fingerprint();
   pb_fingerprint->set_tool(util::GetToolName());
   pb_fingerprint->set_version(util::GetToolFingerprint());
@@ -356,32 +361,40 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
         // Write the Visibility struct.
         pb::Visibility* pb_visibility = pb_entry->mutable_visibility();
         pb_visibility->set_level(SerializeVisibilityToPb(entry->visibility.level));
-        SerializeSourceToPb(entry->visibility.source, &source_pool,
-                            pb_visibility->mutable_source());
+        if (source_pool != nullptr) {
+          SerializeSourceToPb(entry->visibility.source, source_pool.get(),
+                              pb_visibility->mutable_source());
+        }
         pb_visibility->set_comment(entry->visibility.comment);
 
         if (entry->allow_new) {
           pb::AllowNew* pb_allow_new = pb_entry->mutable_allow_new();
-          SerializeSourceToPb(entry->allow_new.value().source, &source_pool,
-                              pb_allow_new->mutable_source());
+          if (source_pool != nullptr) {
+            SerializeSourceToPb(entry->allow_new.value().source, source_pool.get(),
+                                pb_allow_new->mutable_source());
+          }
           pb_allow_new->set_comment(entry->allow_new.value().comment);
         }
 
         if (entry->overlayable_item) {
-          SerializeOverlayableItemToPb(entry->overlayable_item.value(), overlayables, &source_pool,
-                                       pb_entry, out_table);
+          SerializeOverlayableItemToPb(entry->overlayable_item.value(), overlayables,
+                                       source_pool.get(), pb_entry, out_table);
         }
 
         for (const std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
           pb::ConfigValue* pb_config_value = pb_entry->add_config_value();
           SerializeConfig(config_value->config, pb_config_value->mutable_config());
           pb_config_value->mutable_config()->set_product(config_value->product);
-          SerializeValueToPb(*config_value->value, pb_config_value->mutable_value(), &source_pool);
+          SerializeValueToPb(*config_value->value, pb_config_value->mutable_value(),
+                             source_pool.get());
         }
       }
     }
   }
-  SerializeStringPoolToPb(source_pool, out_table->mutable_source_pool(), diag);
+
+  if (source_pool != nullptr) {
+    SerializeStringPoolToPb(*source_pool, out_table->mutable_source_pool(), diag);
+  }
 }
 
 static pb::Reference_Type SerializeReferenceTypeToPb(Reference::Type type) {
