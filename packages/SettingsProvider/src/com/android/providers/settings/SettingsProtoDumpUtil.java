@@ -18,7 +18,9 @@ package com.android.providers.settings;
 
 import android.annotation.NonNull;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.providers.settings.ConfigSettingsProto;
 import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SecureSettingsProto;
 import android.providers.settings.SettingProto;
@@ -28,9 +30,62 @@ import android.providers.settings.UserSettingsProto;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /** @hide */
 class SettingsProtoDumpUtil {
+    private static final Map<String, Long> NAMESPACE_TO_FIELD_MAP = createNamespaceMap();
+
     private SettingsProtoDumpUtil() {}
+
+    private static Map<String, Long> createNamespaceMap() {
+        Map<String, Long> namespaceToFieldMap = new HashMap<>();
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ConfigSettingsProto.ACTIVITY_MANAGER_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                ConfigSettingsProto.ACTIVITY_MANAGER_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_APP_COMPAT,
+                ConfigSettingsProto.APP_COMPAT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_AUTOFILL,
+                ConfigSettingsProto.AUTOFILL_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_CONNECTIVITY,
+                ConfigSettingsProto.CONNECTIVITY_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                ConfigSettingsProto.CONTENT_CAPTURE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_DEX_BOOT,
+                ConfigSettingsProto.DEX_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_GAME_DRIVER,
+                ConfigSettingsProto.GAME_DRIVER_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
+                ConfigSettingsProto.INPUT_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_NETD_NATIVE,
+                ConfigSettingsProto.NETD_NATIVE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_PRIVACY,
+                ConfigSettingsProto.PRIVACY_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ROLLBACK,
+                ConfigSettingsProto.ROLLBACK_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                ConfigSettingsProto.ROLLBACK_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_RUNTIME,
+                ConfigSettingsProto.RUNTIME_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
+                ConfigSettingsProto.RUNTIME_NATIVE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                ConfigSettingsProto.RUNTIME_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_STORAGE,
+                ConfigSettingsProto.STORAGE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_SYSTEMUI,
+                ConfigSettingsProto.SYSTEMUI_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_TELEPHONY,
+                ConfigSettingsProto.TELEPHONY_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                ConfigSettingsProto.TEXTCLASSIFIER_SETTINGS);
+        return Collections.unmodifiableMap(namespaceToFieldMap);
+    }
 
     static void dumpProtoLocked(SettingsProvider.SettingsRegistry settingsRegistry,
             ProtoOutputStream proto) {
@@ -38,14 +93,16 @@ class SettingsProtoDumpUtil {
         SettingsState configSettings = settingsRegistry.getSettingsLocked(
                 SettingsProvider.SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
         if (configSettings != null) {
-            // TODO(b/113100523): dump configuration settings after they are added
+            dumpProtoConfigSettingsLocked(
+                    proto, SettingsServiceDumpProto.CONFIG_SETTINGS, configSettings);
         }
 
         // Global settings
         SettingsState globalSettings = settingsRegistry.getSettingsLocked(
                 SettingsProvider.SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
         if (globalSettings != null) {
-            dumpProtoGlobalSettingsLocked(proto, SettingsServiceDumpProto.GLOBAL_SETTINGS, globalSettings);
+            dumpProtoGlobalSettingsLocked(
+                    proto, SettingsServiceDumpProto.GLOBAL_SETTINGS, globalSettings);
         }
 
         // Per-user settings
@@ -1597,6 +1654,33 @@ class SettingsProtoDumpUtil {
         // Please insert new settings using the same order as in GlobalSettingsProto.
 
         // Settings.Global.INSTALL_NON_MARKET_APPS intentionally excluded since it's deprecated.
+    }
+
+    private static void dumpProtoConfigSettingsLocked(
+            @NonNull ProtoOutputStream p, long fieldId, @NonNull SettingsState s) {
+        Map<String, List<String>> namespaceMap = new HashMap<>();
+        final long token = p.start(fieldId);
+        s.dumpHistoricalOperations(p, ConfigSettingsProto.HISTORICAL_OPERATIONS);
+        for (String name : s.getSettingNamesLocked()) {
+            String namespace = name.substring(0, name.indexOf('/'));
+            if (NAMESPACE_TO_FIELD_MAP.containsKey(namespace)) {
+                dumpSetting(s, p, name, NAMESPACE_TO_FIELD_MAP.get(namespace));
+            } else {
+                if (!namespaceMap.containsKey(namespace)) {
+                    namespaceMap.put(namespace, new ArrayList<>());
+                }
+                namespaceMap.get(namespace).add(name);
+            }
+        }
+        for (String namespace : namespaceMap.keySet()) {
+            final long namespacesToken = p.start(ConfigSettingsProto.EXTRA_NAMESPACES);
+            p.write(ConfigSettingsProto.NamespaceProto.NAMESPACE, namespace);
+            for (String name : namespaceMap.get(namespace)) {
+                dumpSetting(s, p, name, ConfigSettingsProto.NamespaceProto.SETTINGS);
+            }
+            p.end(namespacesToken);
+        }
+        p.end(token);
     }
 
     /** Dumps settings that use a common prefix into a repeated field. */
