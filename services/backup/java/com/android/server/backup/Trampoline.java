@@ -1155,18 +1155,62 @@ public class Trampoline extends IBackupManager.Stub {
         cancelBackupsForUser(binderGetCallingUserId());
     }
 
+    /**
+     * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the
+     * serial number of the its ancestral work profile or null if there is no {@link
+     * UserBackupManagerService} associated with that user.
+     *
+     * <p> The ancestral work profile is set by {@link #setAncestralSerialNumber(long)}
+     * and it corresponds to the profile that was used to restore to the callers profile.
+     */
     @Override
-    @Nullable public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
+    @Nullable
+    public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
         if (mGlobalDisable) {
             return null;
         }
-        return mService.getUserForAncestralSerialNumber(ancestralSerialNumber);
+        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
+        long oldId = Binder.clearCallingIdentity();
+        final int[] userIds;
+        try {
+            userIds =
+                    mContext
+                            .getSystemService(UserManager.class)
+                            .getProfileIds(callingUserId, false);
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+
+        for (int userId : userIds) {
+            UserBackupManagerService userBackupManagerService = mUserServices.get(userId);
+            if (userBackupManagerService != null) {
+                if (userBackupManagerService.getAncestralSerialNumber() == ancestralSerialNumber) {
+                    return UserHandle.of(userId);
+                }
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * Sets the ancestral work profile for the calling user.
+     *
+     * <p> The ancestral work profile corresponds to the profile that was used to restore to the
+     * callers profile.
+     */
     @Override
     public void setAncestralSerialNumber(long ancestralSerialNumber) {
-        if (!mGlobalDisable) {
-            mService.setAncestralSerialNumber(ancestralSerialNumber);
+        if (mGlobalDisable) {
+            return;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(
+                        Binder.getCallingUserHandle().getIdentifier(),
+                        "setAncestralSerialNumber()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.setAncestralSerialNumber(ancestralSerialNumber);
         }
     }
 

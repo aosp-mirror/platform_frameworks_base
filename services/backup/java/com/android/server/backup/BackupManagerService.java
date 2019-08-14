@@ -30,11 +30,9 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -99,57 +97,6 @@ public class BackupManagerService {
      * action on the passed in user. Currently this is a straight redirection (see TODO).
      */
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    /**
-     * Sets the ancestral work profile for the calling user.
-     *
-     * <p> The ancestral work profile corresponds to the profile that was used to restore to the
-     * callers profile.
-     */
-    public void setAncestralSerialNumber(long ancestralSerialNumber) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(
-                        Binder.getCallingUserHandle().getIdentifier(),
-                        "setAncestralSerialNumber()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.setAncestralSerialNumber(ancestralSerialNumber);
-        }
-    }
-
-    /**
-     * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the
-     * serial number of the its ancestral work profile or null if there is no {@link
-     * UserBackupManagerService} associated with that user.
-     *
-     * <p> The ancestral work profile is set by {@link #setAncestralSerialNumber(long)}
-     * and it corresponds to the profile that was used to restore to the callers profile.
-     */
-    @Nullable
-    public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
-        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
-        long oldId = Binder.clearCallingIdentity();
-        final int[] userIds;
-        try {
-            userIds =
-                    mContext
-                            .getSystemService(UserManager.class)
-                            .getProfileIds(callingUserId, false);
-        } finally {
-            Binder.restoreCallingIdentity(oldId);
-        }
-
-        for (int userId : userIds) {
-            UserBackupManagerService userBackupManagerService = mServiceUsers.get(userId);
-            if (userBackupManagerService != null) {
-                if (userBackupManagerService.getAncestralSerialNumber() == ancestralSerialNumber) {
-                    return UserHandle.of(userId);
-                }
-            }
-        }
-
-        return null;
-    }
 
     // ---------------------------------------------
     // SETTINGS OPERATIONS

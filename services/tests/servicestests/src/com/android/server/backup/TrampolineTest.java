@@ -16,18 +16,18 @@
 
 package com.android.server.backup;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -786,17 +786,21 @@ public class TrampolineTest {
     public void testGetUserForAncestralSerialNumber() {
         TrampolineTestable.sBackupDisabled = false;
         Trampoline trampoline = new TrampolineTestable(mContextMock, mUserServices);
+        when(mUserBackupManagerService.getAncestralSerialNumber()).thenReturn(11L);
 
-        trampoline.getUserForAncestralSerialNumber(0L);
-        verify(mBackupManagerServiceMock).getUserForAncestralSerialNumber(anyInt());
+        UserHandle user = trampoline.getUserForAncestralSerialNumber(11L);
+
+        assertThat(user).isEqualTo(UserHandle.of(1));
     }
 
     public void testGetUserForAncestralSerialNumber_whenDisabled() {
         TrampolineTestable.sBackupDisabled = true;
         Trampoline trampoline = new TrampolineTestable(mContextMock, mUserServices);
+        when(mUserBackupManagerService.getAncestralSerialNumber()).thenReturn(11L);
 
-        trampoline.getUserForAncestralSerialNumber(0L);
-        verify(mBackupManagerServiceMock, never()).getUserForAncestralSerialNumber(anyInt());
+        UserHandle user = trampoline.getUserForAncestralSerialNumber(11L);
+
+        assertThat(user).isNull();
     }
 
     private static class TrampolineTestable extends Trampoline {
