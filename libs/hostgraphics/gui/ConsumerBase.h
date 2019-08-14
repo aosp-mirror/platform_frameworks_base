@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
-#define ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
+#ifndef ANDROID_GUI_CONSUMERBASE_H
+#define ANDROID_GUI_CONSUMERBASE_H
+
+#include <gui/BufferItem.h>
 
 #include <utils/RefBase.h>
 
-#include <ui/GraphicBuffer.h>
-
 namespace android {
 
-class IGraphicBufferProducer : virtual public RefBase {
+class ConsumerBase : public virtual RefBase {
 public:
-    enum class DisconnectMode {
-        // Disconnect only the specified API.
-        Api,
-        // Disconnect any API originally connected from the process calling disconnect.
-        AllLocal
+    struct FrameAvailableListener : public virtual RefBase {
+        // See IConsumerListener::onFrame{Available,Replaced}
+        virtual void onFrameAvailable(const BufferItem& item) = 0;
+        virtual void onFrameReplaced(const BufferItem& /* item */) {}
     };
 };
 
 } // namespace android
 
-#endif // ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
+#endif // ANDROID_GUI_CONSUMERBASE_H

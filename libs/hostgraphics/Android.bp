@@ -1,8 +1,15 @@
 cc_library_host_static {
     name: "libhostgraphics",
 
+    cflags: [
+        "-Wno-unused-parameter",
+    ],
+
     srcs: [
         ":libui_host_common",
+        "Fence.cpp",
+        "HostBufferQueue.cpp",
+        "PublicFormat.cpp",
     ],
 
     include_dirs: [

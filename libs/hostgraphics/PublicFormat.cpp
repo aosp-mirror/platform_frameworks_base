@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
-#define ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
-
-#include <utils/RefBase.h>
-
-#include <ui/GraphicBuffer.h>
+#include <ui/PublicFormat.h>
 
 namespace android {
 
-class IGraphicBufferProducer : virtual public RefBase {
-public:
-    enum class DisconnectMode {
-        // Disconnect only the specified API.
-        Api,
-        // Disconnect any API originally connected from the process calling disconnect.
-        AllLocal
-    };
-};
+android_dataspace mapPublicFormatToHalDataspace(PublicFormat f) {
+    return static_cast<android_dataspace>(0);
+}
+
+int mapPublicFormatToHalFormat(PublicFormat f) {
+    return static_cast<int>(f);
+}
+
+PublicFormat mapHalFormatDataspaceToPublicFormat(int format, android_dataspace dataSpace) {
+    return static_cast<PublicFormat>(format);
+}
 
 } // namespace android
-
-#endif // ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
