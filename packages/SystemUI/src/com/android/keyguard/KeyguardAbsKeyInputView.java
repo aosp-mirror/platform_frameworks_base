@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.R;
 
 import java.util.Arrays;
 

@@ -21,6 +21,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.google.common.truth.Truth.assertThat
