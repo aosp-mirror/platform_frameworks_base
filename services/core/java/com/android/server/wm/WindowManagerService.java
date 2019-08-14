@@ -32,6 +32,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE;
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -844,6 +845,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mWindowsChanged = false;
 
     int mSystemGestureExclusionLimitDp;
+    boolean mSystemGestureExcludedByPreQStickyImmersive;
 
     public interface WindowChangeListener {
         public void windowsChanged();
@@ -1142,13 +1144,21 @@ public class WindowManagerService extends IWindowManager.Stub
         mSystemGestureExclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
                 DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                         KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
+        mSystemGestureExcludedByPreQStickyImmersive =
+                DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 new HandlerExecutor(mH), properties -> {
                     synchronized (mGlobalLock) {
                         final int exclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
                                 properties.getInt(KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
-                        if (mSystemGestureExclusionLimitDp != exclusionLimitDp) {
+                        final boolean excludedByPreQSticky = DeviceConfig.getBoolean(
+                                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                                KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
+                        if (mSystemGestureExcludedByPreQStickyImmersive != excludedByPreQSticky
+                                || mSystemGestureExclusionLimitDp != exclusionLimitDp) {
                             mSystemGestureExclusionLimitDp = exclusionLimitDp;
+                            mSystemGestureExcludedByPreQStickyImmersive = excludedByPreQSticky;
                             mRoot.forAllDisplays(DisplayContent::updateSystemGestureExclusionLimit);
                         }
                     }
