@@ -139,7 +139,6 @@ public class TrampolineTest {
         mUserServices = new SparseArray<>();
         mUserServices.append(UserHandle.USER_SYSTEM, mUserBackupManagerService);
         mUserServices.append(NON_USER_SYSTEM, mUserBackupManagerService);
-        when(mBackupManagerServiceMock.getUserServices()).thenReturn(mUserServices);
 
         when(mUserManagerMock.getUserInfo(UserHandle.USER_SYSTEM)).thenReturn(mUserInfoMock);
         when(mUserManagerMock.getUserInfo(NON_USER_SYSTEM)).thenReturn(mUserInfoMock);
@@ -794,7 +793,7 @@ public class TrampolineTest {
     @Test
     public void selectBackupTransportAsyncForUser_beforeUserUnlocked_notifiesBackupNotAllowed()
             throws Exception {
-        when(mBackupManagerServiceMock.getUserServices()).thenReturn(new SparseArray<>());
+        mUserServices.clear();
         CompletableFuture<Integer> future = new CompletableFuture<>();
         ISelectBackupTransportCallback listener =
                 new ISelectBackupTransportCallback.Stub() {

@@ -269,7 +269,8 @@ public class Trampoline extends IBackupManager.Stub {
     // This method should not perform any I/O (e.g. do not call isBackupActivatedForUser),
     // it's used in multiple places where I/O waits would cause system lock-ups.
     private boolean isUserReadyForBackup(int userId) {
-        return mService.isAbleToServeUser(userId);
+        return mUserServices.get(UserHandle.USER_SYSTEM) != null
+                && mUserServices.get(userId) != null;
     }
 
     /**

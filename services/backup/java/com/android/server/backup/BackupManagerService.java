@@ -95,28 +95,6 @@ public class BackupManagerService {
         }
     }
 
-    // ---------------------------------------------
-    // USER LIFECYCLE CALLBACKS
-    // ---------------------------------------------
-
-    boolean isAbleToServeUser(int userId) {
-        return getUserServices().get(UserHandle.USER_SYSTEM) != null
-                && getUserServices().get(userId) != null;
-    }
-
-    /**
-     *  Returns a list of users currently unlocked that have a {@link UserBackupManagerService}
-     *  registered.
-     *
-     *  Warning: Do NOT modify returned object as it's used inside.
-     *
-     *  TODO: Return a copy or only expose read-only information through other means.
-     */
-    @VisibleForTesting
-    public SparseArray<UserBackupManagerService> getUserServices() {
-        return mServiceUsers;
-    }
-
     /**
      * Returns the {@link UserBackupManagerService} instance for the specified user {@code userId}.
      * If the user is not registered with the service (either the user is locked or not eligible for
