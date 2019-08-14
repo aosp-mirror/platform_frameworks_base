@@ -216,10 +216,14 @@ public class MobileSignalController extends SignalController<
 
         MobileIconGroup hGroup = TelephonyIcons.THREE_G;
         MobileIconGroup hPlusGroup = TelephonyIcons.THREE_G;
-        if (mConfig.hspaDataDistinguishable) {
+        if (mConfig.show4gFor3g) {
+            hGroup = TelephonyIcons.FOUR_G;
+            hPlusGroup = TelephonyIcons.FOUR_G;
+        } else if (mConfig.hspaDataDistinguishable) {
             hGroup = TelephonyIcons.H;
             hPlusGroup = TelephonyIcons.H_PLUS;
         }
+
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSDPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSUPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSPA, hGroup);
