@@ -58,6 +58,8 @@ cc_library_shared {
 
     whole_static_libs: ["libandroid_graphics"],
 
+    export_static_lib_headers: ["libandroid_graphics"],
+
     shared_libs: [
         "libbase",
         "libcutils",
@@ -340,7 +342,9 @@ cc_library_static {
     cppflags: ["-Wno-conversion-null"],
 
     srcs: [
+        "android/graphics/apex/android_bitmap.cpp",
         "android/graphics/apex/android_region.cpp",
+        "android/graphics/apex/android_paint.cpp",
 
         "android_graphics_Canvas.cpp",
         "android_graphics_ColorSpace.cpp",
@@ -393,7 +397,6 @@ cc_library_static {
     ],
 
     export_include_dirs: [
-        ".",
         "android/graphics/apex/include",
     ],
 

@@ -124,9 +124,9 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
     int32_t status = native_window_lock(window.get(), &outBuffer, &rect);
     if (status) return JNI_FALSE;
 
-    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
-    ACanvas_setBuffer(canvas, &outBuffer, ANativeWindow_getBuffersDataSpace(window.get()));
-    ACanvas_clipRect(canvas, {rect.left, rect.top, rect.right, rect.bottom});
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(&outBuffer, ANativeWindow_getBuffersDataSpace(window.get()));
+    canvas.clipRect({rect.left, rect.top, rect.right, rect.bottom});
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,
@@ -140,8 +140,8 @@ static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
         jlong nativeWindow, jobject canvasObj) {
 
     // release the buffer from the canvas
-    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
-    ACanvas_setBuffer(canvas, nullptr, ADATASPACE_UNKNOWN);
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(nullptr, ADATASPACE_UNKNOWN);
 
     if (nativeWindow) {
         sp<ANativeWindow> window((ANativeWindow*) nativeWindow);

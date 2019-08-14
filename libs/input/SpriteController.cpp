@@ -23,11 +23,9 @@
 #include <utils/String8.h>
 #include <gui/Surface.h>
 
-#include <SkBitmap.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
-
+#include <android/graphics/bitmap.h>
+#include <android/graphics/canvas.h>
+#include <android/graphics/paint.h>
 #include <android/native_window.h>
 
 namespace android {
@@ -132,8 +130,8 @@ void SpriteController::doUpdateSprites() {
         SpriteUpdate& update = updates.editItemAt(i);
 
         if (update.state.surfaceControl == NULL && update.state.wantSurfaceVisible()) {
-            update.state.surfaceWidth = update.state.icon.bitmap.width();
-            update.state.surfaceHeight = update.state.icon.bitmap.height();
+            update.state.surfaceWidth = update.state.icon.bitmap.getInfo().width;
+            update.state.surfaceHeight = update.state.icon.bitmap.getInfo().height;
             update.state.surfaceDrawn = false;
             update.state.surfaceVisible = false;
             update.state.surfaceControl = obtainSurface(
@@ -154,8 +152,8 @@ void SpriteController::doUpdateSprites() {
         }
 
         if (update.state.wantSurfaceVisible()) {
-            int32_t desiredWidth = update.state.icon.bitmap.width();
-            int32_t desiredHeight = update.state.icon.bitmap.height();
+            int32_t desiredWidth = update.state.icon.bitmap.getInfo().width;
+            int32_t desiredHeight = update.state.icon.bitmap.getInfo().height;
             if (update.state.surfaceWidth < desiredWidth
                     || update.state.surfaceHeight < desiredHeight) {
                 needApplyTransaction = true;
@@ -201,26 +199,22 @@ void SpriteController::doUpdateSprites() {
             if (status) {
                 ALOGE("Error %d locking sprite surface before drawing.", status);
             } else {
-                SkBitmap surfaceBitmap;
-                ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-                surfaceBitmap.installPixels(SkImageInfo::MakeN32Premul(outBuffer.width, outBuffer.height),
-                                            outBuffer.bits, bpr);
+                graphics::Paint paint;
+                paint.setBlendMode(ABLEND_MODE_SRC);
 
-                SkCanvas surfaceCanvas(surfaceBitmap);
+                graphics::Canvas canvas(outBuffer, (int32_t) surface->getBuffersDataSpace());
+                canvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
 
-                SkPaint paint;
-                paint.setBlendMode(SkBlendMode::kSrc);
-                surfaceCanvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
+                const int iconWidth = update.state.icon.bitmap.getInfo().width;
+                const int iconHeight = update.state.icon.bitmap.getInfo().height;
 
-                if (outBuffer.width > update.state.icon.bitmap.width()) {
-                    paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRect(SkRect::MakeLTRB(update.state.icon.bitmap.width(), 0,
-                            outBuffer.width, update.state.icon.bitmap.height()), paint);
+                if (outBuffer.width > iconWidth) {
+                    paint.setBlendMode(ABLEND_MODE_CLEAR); // clear to transparent
+                    canvas.drawRect({iconWidth, 0, outBuffer.width, iconHeight}, paint);
                 }
-                if (outBuffer.height > update.state.icon.bitmap.height()) {
-                    paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRect(SkRect::MakeLTRB(0, update.state.icon.bitmap.height(),
-                            outBuffer.width, outBuffer.height), paint);
+                if (outBuffer.height > iconHeight) {
+                    paint.setBlendMode(ABLEND_MODE_CLEAR); // clear to transparent
+                    canvas.drawRect({0, iconHeight, outBuffer.width, outBuffer.height}, paint);
                 }
 
                 status = surface->unlockAndPost();
@@ -398,12 +392,7 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
 
     uint32_t dirty;
     if (icon.isValid()) {
-        SkBitmap* bitmapCopy = &mLocked.state.icon.bitmap;
-        if (bitmapCopy->tryAllocPixels(icon.bitmap.info().makeColorType(kN32_SkColorType))) {
-            icon.bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
-                    bitmapCopy->rowBytes(), 0, 0);
-        }
-
+        mLocked.state.icon.bitmap = icon.bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888);
         if (!mLocked.state.icon.isValid()
                 || mLocked.state.icon.hotSpotX != icon.hotSpotX
                 || mLocked.state.icon.hotSpotY != icon.hotSpotY) {

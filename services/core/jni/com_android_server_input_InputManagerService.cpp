@@ -159,12 +159,7 @@ static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextOb
     status_t status = android_view_PointerIcon_loadSystemIcon(env,
             contextObj, style, outPointerIcon);
     if (!status) {
-        SkBitmap* bitmapCopy = &outSpriteIcon->bitmap;
-        SkImageInfo bitmapCopyInfo = outPointerIcon->bitmap.info().makeColorType(kN32_SkColorType);
-        if (bitmapCopy->tryAllocPixels(bitmapCopyInfo)) {
-            outPointerIcon->bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
-                    bitmapCopy->rowBytes(), 0, 0);
-        }
+        outSpriteIcon->bitmap = outPointerIcon->bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888);
         outSpriteIcon->style = outPointerIcon->style;
         outSpriteIcon->hotSpotX = outPointerIcon->hotSpotX;
         outSpriteIcon->hotSpotY = outPointerIcon->hotSpotY;
@@ -1709,15 +1704,8 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
         return;
     }
 
-    SpriteIcon spriteIcon;
-    SkImageInfo spriteInfo = pointerIcon.bitmap.info().makeColorType(kN32_SkColorType);
-    if (spriteIcon.bitmap.tryAllocPixels(spriteInfo)) {
-        pointerIcon.bitmap.readPixels(spriteInfo, spriteIcon.bitmap.getPixels(),
-                spriteIcon.bitmap.rowBytes(), 0, 0);
-    }
-    spriteIcon.style = pointerIcon.style;
-    spriteIcon.hotSpotX = pointerIcon.hotSpotX;
-    spriteIcon.hotSpotY = pointerIcon.hotSpotY;
+    SpriteIcon spriteIcon(pointerIcon.bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888),
+                          pointerIcon.style, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
     im->setCustomPointerIcon(spriteIcon);
 }
 

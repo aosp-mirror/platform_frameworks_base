@@ -24,15 +24,13 @@
 #include <assert.h>
 #include <dlfcn.h>
 
+#include <android/graphics/bitmap.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
 #include <ETC1/etc1.h>
 
-#include <SkBitmap.h>
-
 #include "core_jni_helpers.h"
-#include "android/graphics/Bitmap.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OpenGLUtil"
@@ -628,31 +626,27 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // The internal format is no longer the same as pixel format, per Table 2 in
 // https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
-static int checkInternalFormat(SkColorType colorType, int internalformat,
-    int type)
+static bool checkInternalFormat(int32_t bitmapFormat, int internalformat, int type)
 {
-    switch(colorType) {
-        case kN32_SkColorType:
-            return (type == GL_UNSIGNED_BYTE &&
-                    internalformat == GL_RGBA) ||
-                (type == GL_UNSIGNED_BYTE &&
-                 internalformat == GL_SRGB8_ALPHA8) ? 0 : -1;
-        case kAlpha_8_SkColorType:
-            return (type == GL_UNSIGNED_BYTE &&
-                internalformat == GL_ALPHA) ? 0 : -1;
-        case kARGB_4444_SkColorType:
-            return (type == GL_UNSIGNED_SHORT_4_4_4_4 &&
-                internalformat == GL_RGBA) ? 0 : -1;
-        case kRGB_565_SkColorType:
-            return (type == GL_UNSIGNED_SHORT_5_6_5 &&
-                internalformat == GL_RGB) ? 0 : -1;
-        case kRGBA_F16_SkColorType:
-            return (type == GL_HALF_FLOAT &&
-                internalformat == GL_RGBA16F) ? 0 : -1;
+    if (internalformat == GL_PALETTE8_RGBA8_OES) {
+        return false;
+    }
+    switch(bitmapFormat) {
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
+            return (type == GL_UNSIGNED_BYTE && internalformat == GL_RGBA) ||
+                   (type == GL_UNSIGNED_BYTE && internalformat == GL_SRGB8_ALPHA8);
+        case ANDROID_BITMAP_FORMAT_A_8:
+            return (type == GL_UNSIGNED_BYTE && internalformat == GL_ALPHA);
+        case ANDROID_BITMAP_FORMAT_RGBA_4444:
+            return (type == GL_UNSIGNED_SHORT_4_4_4_4 && internalformat == GL_RGBA);
+        case ANDROID_BITMAP_FORMAT_RGB_565:
+            return (type == GL_UNSIGNED_SHORT_5_6_5 && internalformat == GL_RGB);
+        case ANDROID_BITMAP_FORMAT_RGBA_F16:
+            return (type == GL_HALF_FLOAT && internalformat == GL_RGBA16F);
         default:
             break;
     }
-    return -1;
+    return false;
 }
 
 // The internal format is no longer the same as pixel format, per Table 2 in
@@ -670,107 +664,92 @@ static int getPixelFormatFromInternalFormat(uint32_t internalFormat) {
     }
 }
 
-static int getInternalFormat(SkColorType colorType)
-{
-    switch(colorType) {
-        case kAlpha_8_SkColorType:
+static int getInternalFormat(int32_t bitmapFormat) {
+    switch(bitmapFormat) {
+        case ANDROID_BITMAP_FORMAT_A_8:
             return GL_ALPHA;
-        case kARGB_4444_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_4444:
             return GL_RGBA;
-        case kN32_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
             return GL_RGBA;
-        case kRGB_565_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGB_565:
             return GL_RGB;
-        case kRGBA_F16_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_F16:
             return GL_RGBA16F;
         default:
             return -1;
     }
 }
 
-static int getType(SkColorType colorType)
-{
-    switch(colorType) {
-        case kAlpha_8_SkColorType:
+static int getType(int32_t bitmapFormat) {
+    switch(bitmapFormat) {
+        case ANDROID_BITMAP_FORMAT_A_8:
             return GL_UNSIGNED_BYTE;
-        case kARGB_4444_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_4444:
             return GL_UNSIGNED_SHORT_4_4_4_4;
-        case kN32_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
             return GL_UNSIGNED_BYTE;
-        case kRGB_565_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGB_565:
             return GL_UNSIGNED_SHORT_5_6_5;
-        case kRGBA_F16_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_F16:
             return GL_HALF_FLOAT;
         default:
             return -1;
     }
 }
 
-static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
-        jlong bitmapPtr)
+static jint util_getInternalFormat(JNIEnv *env, jclass clazz, jobject bitmapObj)
 {
-    SkBitmap nativeBitmap;
-    bitmap::toSkBitmap(bitmapPtr, &nativeBitmap);
-    return getInternalFormat(nativeBitmap.colorType());
+    graphics::Bitmap bitmap(env, bitmapObj);
+    return getInternalFormat(bitmap.getInfo().format);
 }
 
-static jint util_getType(JNIEnv *env, jclass clazz,
-        jlong bitmapPtr)
+static jint util_getType(JNIEnv *env, jclass clazz, jobject bitmapObj)
 {
-    SkBitmap nativeBitmap;
-    bitmap::toSkBitmap(bitmapPtr, &nativeBitmap);
-    return getType(nativeBitmap.colorType());
+    graphics::Bitmap bitmap(env, bitmapObj);
+    return getType(bitmap.getInfo().format);
 }
 
-static jint util_texImage2D(JNIEnv *env, jclass clazz,
-        jint target, jint level, jint internalformat,
-        jlong bitmapPtr, jint type, jint border)
+static jint util_texImage2D(JNIEnv *env, jclass clazz, jint target, jint level,
+        jint internalformat, jobject bitmapObj, jint type, jint border)
 {
-    SkBitmap bitmap;
-    bitmap::toSkBitmap(bitmapPtr, &bitmap);
-    SkColorType colorType = bitmap.colorType();
+    graphics::Bitmap bitmap(env, bitmapObj);
+    AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
+
     if (internalformat < 0) {
-        internalformat = getInternalFormat(colorType);
+        internalformat = getInternalFormat(bitmapInfo.format);
     }
     if (type < 0) {
-        type = getType(colorType);
+        type = getType(bitmapInfo.format);
     }
-    int err = checkInternalFormat(colorType, internalformat, type);
-    if (err)
-        return err;
-    const int w = bitmap.width();
-    const int h = bitmap.height();
-    const void* p = bitmap.getPixels();
-    if (internalformat == GL_PALETTE8_RGBA8_OES) {
-        err = -1;
-    } else {
-        glTexImage2D(target, level, internalformat, w, h, border,
-                     getPixelFormatFromInternalFormat(internalformat), type, p);
+
+    if (checkInternalFormat(bitmapInfo.format, internalformat, type)) {
+        glTexImage2D(target, level, internalformat, bitmapInfo.width, bitmapInfo.height, border,
+                     getPixelFormatFromInternalFormat(internalformat), type, bitmap.getPixels());
+        return 0;
     }
-    return err;
+    return -1;
 }
 
-static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
-        jint target, jint level, jint xoffset, jint yoffset,
-        jlong bitmapPtr, jint format, jint type)
+static jint util_texSubImage2D(JNIEnv *env, jclass clazz, jint target, jint level,
+        jint xoffset, jint yoffset, jobject bitmapObj, jint format, jint type)
 {
-    SkBitmap bitmap;
-    bitmap::toSkBitmap(bitmapPtr, &bitmap);
-    SkColorType colorType = bitmap.colorType();
-    int internalFormat = getInternalFormat(colorType);
+    graphics::Bitmap bitmap(env, bitmapObj);
+    AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
+
+    int internalFormat = getInternalFormat(bitmapInfo.format);
     if (format < 0) {
         format = getPixelFormatFromInternalFormat(internalFormat);
         if (format == GL_PALETTE8_RGBA8_OES)
             return -1; // glCompressedTexSubImage2D() not supported
     }
-    int err = checkInternalFormat(colorType, internalFormat, type);
-    if (err)
-        return err;
-    const int w = bitmap.width();
-    const int h = bitmap.height();
-    const void* p = bitmap.getPixels();
-    glTexSubImage2D(target, level, xoffset, yoffset, w, h, format, type, p);
-    return 0;
+
+    if (checkInternalFormat(bitmapInfo.format, internalFormat, type)) {
+        glTexSubImage2D(target, level, xoffset, yoffset, bitmapInfo.width, bitmapInfo.height,
+                        format, type, bitmap.getPixels());
+        return 0;
+    }
+    return -1;
 }
 
 /*
@@ -1036,10 +1015,10 @@ static const JNINativeMethod gVisibilityMethods[] = {
 };
 
 static const JNINativeMethod gUtilsMethods[] = {
-    { "native_getInternalFormat", "(J)I", (void*) util_getInternalFormat },
-    { "native_getType", "(J)I", (void*) util_getType },
-    { "native_texImage2D", "(IIIJII)I", (void*)util_texImage2D },
-    { "native_texSubImage2D", "(IIIIJII)I", (void*)util_texSubImage2D },
+    { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat },
+    { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
+    { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },
+    { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D },
 };
 
 static const JNINativeMethod gEtc1Methods[] = {

@@ -178,9 +178,9 @@ static jboolean android_graphics_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     nativeBuffer.format = AHardwareBuffer_convertFromPixelFormat(buffer->getPixelFormat());
     nativeBuffer.bits = bits;
 
-    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
-    ACanvas_setBuffer(canvas, &nativeBuffer, ADATASPACE_UNKNOWN);
-    ACanvas_clipRect(canvas, {rect.left, rect.top, rect.right, rect.bottom});
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(&nativeBuffer, ADATASPACE_UNKNOWN);
+    canvas.clipRect({rect.left, rect.top, rect.right, rect.bottom});
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,
@@ -193,8 +193,8 @@ static jboolean android_graphics_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
 static jboolean android_graphics_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobject,
         jlong wrapperHandle, jobject canvasObj) {
     // release the buffer from the canvas
-    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
-    ACanvas_setBuffer(canvas, nullptr, ADATASPACE_UNKNOWN);
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(nullptr, ADATASPACE_UNKNOWN);
 
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
