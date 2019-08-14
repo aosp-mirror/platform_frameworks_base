@@ -42,7 +42,6 @@ import android.app.backup.ISelectBackupTransportCallback;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.ConditionVariable;
@@ -663,23 +662,6 @@ public class TrampolineTest {
     }
 
     @Test
-    public void selectBackupTransportForUser_forwarded() throws Exception {
-
-        mTrampoline.selectBackupTransportForUser(mUserId, TRANSPORT_NAME);
-
-        verify(mBackupManagerServiceMock).selectBackupTransport(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void selectBackupTransport_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.selectBackupTransport(TRANSPORT_NAME);
-
-        verify(mBackupManagerServiceMock).selectBackupTransport(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
     public void selectBackupTransportAsyncForUser_beforeUserUnlocked_notifiesBackupNotAllowed()
             throws Exception {
         mUserServices.clear();
@@ -726,102 +708,6 @@ public class TrampolineTest {
         mTrampoline.selectBackupTransportAsyncForUser(mUserId, TRANSPORT_COMPONENT_NAME, listener);
 
         // No crash.
-    }
-
-    @Test
-    public void selectBackupTransportAsyncForUser_forwarded() throws Exception {
-
-        mTrampoline.selectBackupTransportAsyncForUser(mUserId, TRANSPORT_COMPONENT_NAME, null);
-
-        verify(mBackupManagerServiceMock)
-                .selectBackupTransportAsync(mUserId, TRANSPORT_COMPONENT_NAME, null);
-    }
-
-    @Test
-    public void getConfigurationIntentForUser_forwarded() throws Exception {
-        Intent configurationIntentStub = new Intent();
-        when(mBackupManagerServiceMock.getConfigurationIntent(mUserId, TRANSPORT_NAME)).thenReturn(
-                configurationIntentStub);
-
-        assertEquals(
-                configurationIntentStub,
-                mTrampoline.getConfigurationIntentForUser(mUserId, TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getConfigurationIntent(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void getConfigurationIntent_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-        Intent configurationIntentStub = new Intent();
-        when(mBackupManagerServiceMock.getConfigurationIntent(mUserId, TRANSPORT_NAME)).thenReturn(
-                configurationIntentStub);
-
-        assertEquals(configurationIntentStub, mTrampoline.getConfigurationIntent(TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getConfigurationIntent(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void getDestinationStringForUser_forwarded() throws Exception {
-        when(mBackupManagerServiceMock.getDestinationString(mUserId, TRANSPORT_NAME)).thenReturn(
-                DESTINATION_STRING);
-
-        assertEquals(
-                DESTINATION_STRING,
-                mTrampoline.getDestinationStringForUser(mUserId, TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getDestinationString(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void getDestinationString_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-        when(mBackupManagerServiceMock.getDestinationString(mUserId, TRANSPORT_NAME)).thenReturn(
-                DESTINATION_STRING);
-
-        assertEquals(DESTINATION_STRING, mTrampoline.getDestinationString(TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getDestinationString(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void getDataManagementIntentForUser_forwarded() throws Exception {
-        Intent dataManagementIntent = new Intent();
-        when(mBackupManagerServiceMock.getDataManagementIntent(mUserId, TRANSPORT_NAME)).thenReturn(
-                dataManagementIntent);
-
-        assertEquals(
-                dataManagementIntent,
-                mTrampoline.getDataManagementIntentForUser(mUserId, TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getDataManagementIntent(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void getDataManagementIntent_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-        Intent dataManagementIntent = new Intent();
-        when(mBackupManagerServiceMock.getDataManagementIntent(mUserId, TRANSPORT_NAME)).thenReturn(
-                dataManagementIntent);
-
-        assertEquals(dataManagementIntent, mTrampoline.getDataManagementIntent(TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getDataManagementIntent(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void getDataManagementLabelForUser_forwarded() throws Exception {
-        when(mBackupManagerServiceMock.getDataManagementLabel(mUserId, TRANSPORT_NAME)).thenReturn(
-                DATA_MANAGEMENT_LABEL);
-
-        assertEquals(
-                DATA_MANAGEMENT_LABEL,
-                mTrampoline.getDataManagementLabelForUser(mUserId, TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getDataManagementLabel(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void beginRestoreSessionForUser_forwarded() throws Exception {
-
-        mTrampoline.beginRestoreSessionForUser(mUserId, PACKAGE_NAME, TRANSPORT_NAME);
-
-        verify(mBackupManagerServiceMock)
-                .beginRestoreSession(mUserId, PACKAGE_NAME, TRANSPORT_NAME);
     }
 
     @Test

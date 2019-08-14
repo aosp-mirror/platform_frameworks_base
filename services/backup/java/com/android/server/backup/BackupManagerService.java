@@ -25,7 +25,6 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
-import android.app.backup.ISelectBackupTransportCallback;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
@@ -153,54 +152,6 @@ public class BackupManagerService {
     }
 
     /**
-     * Selects transport {@code transportName} and returns the previously selected transport.
-     *
-     * @deprecated Use {@link #selectBackupTransportAsync(ComponentName,
-     *     ISelectBackupTransportCallback)} instead.
-     */
-    @Deprecated
-    @Nullable
-    public String selectBackupTransport(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransport()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.selectBackupTransport(transportName);
-    }
-
-    /**
-     * Selects transport {@code transportComponent} asynchronously and notifies {@code listener}
-     * with the result upon completion.
-     */
-    public void selectBackupTransportAsync(
-            @UserIdInt int userId,
-            ComponentName transportComponent,
-            ISelectBackupTransportCallback listener) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransportAsync()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.selectBackupTransportAsync(transportComponent, listener);
-        }
-    }
-
-    /**
-     * Supply the configuration intent for the given transport. If the name is not one of the
-     * available transports, or if the transport does not supply any configuration UI, the method
-     * returns {@code null}.
-     */
-    @Nullable
-    public Intent getConfigurationIntent(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getConfigurationIntent()");
-
-        return userBackupManagerService == null
-            ? null
-            : userBackupManagerService.getConfigurationIntent(transportName);
-    }
-
-    /**
      * Sets the ancestral work profile for the calling user.
      *
      * <p> The ancestral work profile corresponds to the profile that was used to restore to the
@@ -249,50 +200,6 @@ public class BackupManagerService {
         }
 
         return null;
-    }
-
-    /**
-     * Supply the current destination string for the given transport. If the name is not one of the
-     * registered transports the method will return null.
-     *
-     * <p>This string is used VERBATIM as the summary text of the relevant Settings item.
-     *
-     * @param transportName The name of the registered transport.
-     * @return The current destination string or null if the transport is not registered.
-     */
-    @Nullable
-    public String getDestinationString(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getDestinationString()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getDestinationString(transportName);
-    }
-
-    /** Supply the manage-data intent for the given transport. */
-    @Nullable
-    public Intent getDataManagementIntent(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getDataManagementIntent()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getDataManagementIntent(transportName);
-    }
-
-    /**
-     * Supply the menu label for affordances that fire the manage-data intent for the given
-     * transport.
-     */
-    @Nullable
-    public CharSequence getDataManagementLabel(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getDataManagementLabel()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getDataManagementLabel(transportName);
     }
 
     // ---------------------------------------------
