@@ -140,7 +140,7 @@ class LockSettingsStorage {
                 dos.close();
                 return os.toByteArray();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Fail to serialze credential hash", e);
             }
         }
 
@@ -157,7 +157,7 @@ class LockSettingsStorage {
                 }
                 return new CredentialHash(hash, type);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Fail to deserialze credential hash", e);
             }
         }
     }
@@ -666,7 +666,7 @@ class LockSettingsStorage {
                 dos.writeInt(qualityForUi);
                 dos.write(payload);
             } catch (IOException e) {
-                throw new RuntimeException("ByteArrayOutputStream cannot throw IOException");
+                throw new IllegalStateException("ByteArrayOutputStream cannot throw IOException");
             }
             return os.toByteArray();
         }

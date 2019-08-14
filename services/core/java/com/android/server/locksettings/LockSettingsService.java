@@ -1614,17 +1614,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (CertificateException | UnrecoverableKeyException
                 | IOException | BadPaddingException | IllegalBlockSizeException | KeyStoreException
                 | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("Failed to encrypt key", e);
+            throw new IllegalStateException("Failed to encrypt key", e);
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             if (iv.length != PROFILE_KEY_IV_SIZE) {
-                throw new RuntimeException("Invalid iv length: " + iv.length);
+                throw new IllegalArgumentException("Invalid iv length: " + iv.length);
             }
             outputStream.write(iv);
             outputStream.write(encryptionResult);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to concatenate byte arrays", e);
+            throw new IllegalStateException("Failed to concatenate byte arrays", e);
         }
         mStorage.writeChildProfileLock(userId, outputStream.toByteArray());
     }
@@ -1692,7 +1692,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             digest.update(credential);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("NoSuchAlgorithmException for SHA-512");
+            throw new IllegalStateException("NoSuchAlgorithmException for SHA-512");
         }
     }
 
