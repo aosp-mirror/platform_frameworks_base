@@ -1108,8 +1108,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     static class Config {
         static final int NR_CONNECTED_MMWAVE = 1;
         static final int NR_CONNECTED = 2;
-        static final int NR_NOT_RESTRICTED = 3;
-        static final int NR_RESTRICTED = 4;
+        static final int NR_NOT_RESTRICTED_RRC_IDLE = 3;
+        static final int NR_NOT_RESTRICTED_RRC_CON = 4;
+        static final int NR_RESTRICTED = 5;
 
         Map<Integer, MobileIconGroup> nr5GIconMap = new HashMap<>();
 
@@ -1129,10 +1130,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
          */
         private static final Map<String, Integer> NR_STATUS_STRING_TO_INDEX;
         static {
-            NR_STATUS_STRING_TO_INDEX = new HashMap<>(4);
+            NR_STATUS_STRING_TO_INDEX = new HashMap<>(5);
             NR_STATUS_STRING_TO_INDEX.put("connected_mmwave", NR_CONNECTED_MMWAVE);
             NR_STATUS_STRING_TO_INDEX.put("connected", NR_CONNECTED);
-            NR_STATUS_STRING_TO_INDEX.put("not_restricted", NR_NOT_RESTRICTED);
+            NR_STATUS_STRING_TO_INDEX.put("not_restricted_rrc_idle", NR_NOT_RESTRICTED_RRC_IDLE);
+            NR_STATUS_STRING_TO_INDEX.put("not_restricted_rrc_con", NR_NOT_RESTRICTED_RRC_CON);
             NR_STATUS_STRING_TO_INDEX.put("restricted", NR_RESTRICTED);
         }
 

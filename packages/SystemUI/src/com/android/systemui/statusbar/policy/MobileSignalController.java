@@ -537,8 +537,14 @@ public class MobileSignalController extends SignalController<
                 return mConfig.nr5GIconMap.get(Config.NR_CONNECTED);
             }
         } else if (nrState == NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED) {
-            if (mConfig.nr5GIconMap.containsKey(Config.NR_NOT_RESTRICTED)) {
-                return mConfig.nr5GIconMap.get(Config.NR_NOT_RESTRICTED);
+            if (mCurrentState.activityDormant) {
+                if (mConfig.nr5GIconMap.containsKey(Config.NR_NOT_RESTRICTED_RRC_IDLE)) {
+                    return mConfig.nr5GIconMap.get(Config.NR_NOT_RESTRICTED_RRC_IDLE);
+                }
+            } else {
+                if (mConfig.nr5GIconMap.containsKey(Config.NR_NOT_RESTRICTED_RRC_CON)) {
+                    return mConfig.nr5GIconMap.get(Config.NR_NOT_RESTRICTED_RRC_CON);
+                }
             }
         } else if (nrState == NetworkRegistrationInfo.NR_STATE_RESTRICTED) {
             if (mConfig.nr5GIconMap.containsKey(Config.NR_RESTRICTED)) {
@@ -559,6 +565,8 @@ public class MobileSignalController extends SignalController<
                 || activity == TelephonyManager.DATA_ACTIVITY_IN;
         mCurrentState.activityOut = activity == TelephonyManager.DATA_ACTIVITY_INOUT
                 || activity == TelephonyManager.DATA_ACTIVITY_OUT;
+        mCurrentState.activityDormant = activity == TelephonyManager.DATA_ACTIVITY_DORMANT;
+
         notifyListenersIfNecessary();
     }
 
