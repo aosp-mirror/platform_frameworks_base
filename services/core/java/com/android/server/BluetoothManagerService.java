@@ -1142,7 +1142,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (isBluetoothDisallowed) {
             return;
         }
-        if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
+        final boolean isSafeMode = mContext.getPackageManager().isSafeMode();
+        if (mEnableExternal && isBluetoothPersistedStateOnBluetooth() && !isSafeMode) {
             if (DBG) {
                 Slog.d(TAG, "Auto-enabling Bluetooth.");
             }

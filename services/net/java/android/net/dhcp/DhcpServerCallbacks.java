@@ -21,13 +21,11 @@ package android.net.dhcp;
  * @hide
  */
 public abstract class DhcpServerCallbacks extends IDhcpServerCallbacks.Stub {
-    // TODO: add @Override here once the API is versioned
-
     /**
      * Get the version of the aidl interface implemented by the callbacks.
      */
+    @Override
     public int getInterfaceVersion() {
-        // TODO: return IDhcpServerCallbacks.VERSION;
-        return 0;
+        return IDhcpServerCallbacks.VERSION;
     }
 }

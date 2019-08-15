@@ -19,6 +19,8 @@
 #include <memory>
 #include <sstream>
 
+#include <unistd.h>
+
 #include <jni.h>
 
 #include <jvmti.h>
@@ -26,10 +28,14 @@
 #include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/macros.h>
+#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+
+#include <nativehelper/scoped_utf_chars.h>
 
 // We need dladdr.
 #if !defined(__APPLE__) && !defined(_WIN32)
@@ -61,6 +67,8 @@
 namespace {
 
 JavaVM* gJavaVM = nullptr;
+bool gForkCrash = false;
+bool gJavaCrash = false;
 
 // Converts a class name to a type descriptor
 // (ex. "java.lang.String" to "Ljava/lang/String;")
@@ -77,118 +85,143 @@ std::string classNameToDescriptor(const char* className) {
 using namespace dex;
 using namespace lir;
 
-bool transform(std::shared_ptr<ir::DexFile> dexIr) {
-    bool modified = false;
+class Transformer {
+public:
+    explicit Transformer(std::shared_ptr<ir::DexFile> dexIr) : dexIr_(dexIr) {}
 
-    std::unique_ptr<ir::Builder> builder;
+    bool transform() {
+        bool classModified = false;
 
-    for (auto& method : dexIr->encoded_methods) {
-        // Do not look into abstract/bridge/native/synthetic methods.
-        if ((method->access_flags & (kAccAbstract | kAccBridge | kAccNative | kAccSynthetic))
-                != 0) {
-            continue;
+        std::unique_ptr<ir::Builder> builder;
+
+        for (auto& method : dexIr_->encoded_methods) {
+            // Do not look into abstract/bridge/native/synthetic methods.
+            if ((method->access_flags & (kAccAbstract | kAccBridge | kAccNative | kAccSynthetic))
+                    != 0) {
+                continue;
+            }
+
+            struct HookVisitor: public Visitor {
+                HookVisitor(Transformer* transformer, CodeIr* c_ir)
+                        : transformer(transformer), cIr(c_ir) {
+                }
+
+                bool Visit(Bytecode* bytecode) override {
+                    if (bytecode->opcode == OP_MONITOR_ENTER) {
+                        insertHook(bytecode, true,
+                                reinterpret_cast<VReg*>(bytecode->operands[0])->reg);
+                        return true;
+                    }
+                    if (bytecode->opcode == OP_MONITOR_EXIT) {
+                        insertHook(bytecode, false,
+                                reinterpret_cast<VReg*>(bytecode->operands[0])->reg);
+                        return true;
+                    }
+                    return false;
+                }
+
+                void insertHook(lir::Instruction* before, bool pre, u4 reg) {
+                    transformer->preparePrePost();
+                    transformer->addCall(cIr, before, OP_INVOKE_STATIC_RANGE,
+                            transformer->hookType_, pre ? "preLock" : "postLock",
+                            transformer->voidType_, transformer->objectType_, reg);
+                    myModified = true;
+                }
+
+                Transformer* transformer;
+                CodeIr* cIr;
+                bool myModified = false;
+            };
+
+            CodeIr c(method.get(), dexIr_);
+            bool methodModified = false;
+
+            HookVisitor visitor(this, &c);
+            for (auto it = c.instructions.begin(); it != c.instructions.end(); ++it) {
+                lir::Instruction* fi = *it;
+                fi->Accept(&visitor);
+            }
+            methodModified |= visitor.myModified;
+
+            if (methodModified) {
+                classModified = true;
+                c.Assemble();
+            }
         }
 
-        struct HookVisitor: public Visitor {
-            HookVisitor(std::unique_ptr<ir::Builder>* b, std::shared_ptr<ir::DexFile> d_ir,
-                    CodeIr* c_ir) :
-                    b(b), dIr(d_ir), cIr(c_ir) {
-            }
+        return classModified;
+    }
 
-            bool Visit(Bytecode* bytecode) override {
-                if (bytecode->opcode == OP_MONITOR_ENTER) {
-                    prepare();
-                    addCall(bytecode, OP_INVOKE_STATIC_RANGE, hookType, "preLock", voidType,
-                            objectType, reinterpret_cast<VReg*>(bytecode->operands[0])->reg);
-                    myModified = true;
-                    return true;
-                }
-                if (bytecode->opcode == OP_MONITOR_EXIT) {
-                    prepare();
-                    addCall(bytecode, OP_INVOKE_STATIC_RANGE, hookType, "postLock", voidType,
-                            objectType, reinterpret_cast<VReg*>(bytecode->operands[0])->reg);
-                    myModified = true;
-                    return true;
-                }
-                return false;
-            }
+private:
+    void preparePrePost() {
+        // Insert "void LockHook.(pre|post)(Object o)."
 
-            void prepare() {
-                if (*b == nullptr) {
-                    *b = std::unique_ptr<ir::Builder>(new ir::Builder(dIr));
-                }
-                if (voidType == nullptr) {
-                    voidType = (*b)->GetType("V");
-                    hookType = (*b)->GetType("Lcom/android/lock_checker/LockHook;");
-                    objectType = (*b)->GetType("Ljava/lang/Object;");
-                }
-            }
+        prepareBuilder();
 
-            void addInst(lir::Instruction* instructionAfter, Opcode opcode,
-                    const std::list<Operand*>& operands) {
-                auto instruction = cIr->Alloc<Bytecode>();
-
-                instruction->opcode = opcode;
-
-                for (auto it = operands.begin(); it != operands.end(); it++) {
-                    instruction->operands.push_back(*it);
-                }
-
-                cIr->instructions.InsertBefore(instructionAfter, instruction);
-            }
-
-            void addCall(lir::Instruction* instructionAfter, Opcode opcode, ir::Type* type,
-                    const char* methodName, ir::Type* returnType,
-                    const std::vector<ir::Type*>& types, const std::list<int>& regs) {
-                auto proto = (*b)->GetProto(returnType, (*b)->GetTypeList(types));
-                auto method = (*b)->GetMethodDecl((*b)->GetAsciiString(methodName), proto, type);
-
-                VRegList* paramRegs = cIr->Alloc<VRegList>();
-                for (auto it = regs.begin(); it != regs.end(); it++) {
-                    paramRegs->registers.push_back(*it);
-                }
-
-                addInst(instructionAfter, opcode,
-                        { paramRegs, cIr->Alloc<Method>(method, method->orig_index) });
-            }
-
-            void addCall(lir::Instruction* instructionAfter, Opcode opcode, ir::Type* type,
-                    const char* methodName, ir::Type* returnType, ir::Type* paramType,
-                    u4 paramVReg) {
-                auto proto = (*b)->GetProto(returnType, (*b)->GetTypeList( { paramType }));
-                auto method = (*b)->GetMethodDecl((*b)->GetAsciiString(methodName), proto, type);
-
-                VRegRange* args = cIr->Alloc<VRegRange>(paramVReg, 1);
-
-                addInst(instructionAfter, opcode,
-                        { args, cIr->Alloc<Method>(method, method->orig_index) });
-            }
-
-            std::unique_ptr<ir::Builder>* b;
-            std::shared_ptr<ir::DexFile> dIr;
-            CodeIr* cIr;
-            ir::Type* voidType = nullptr;
-            ir::Type* hookType = nullptr;
-            ir::Type* objectType = nullptr;
-            bool myModified = false;
-        };
-
-        CodeIr c(method.get(), dexIr);
-        HookVisitor visitor(&builder, dexIr, &c);
-
-        for (auto it = c.instructions.begin(); it != c.instructions.end(); ++it) {
-            lir::Instruction* fi = *it;
-            fi->Accept(&visitor);
+        if (voidType_ == nullptr) {
+            voidType_ = builder_->GetType("V");
         }
-
-        if (visitor.myModified) {
-            modified = true;
-            c.Assemble();
+        if (hookType_ == nullptr) {
+            hookType_ = builder_->GetType("Lcom/android/lock_checker/LockHook;");
+        }
+        if (objectType_ == nullptr) {
+            objectType_ = builder_->GetType("Ljava/lang/Object;");
         }
     }
 
-    return modified;
-}
+    void prepareBuilder() {
+        if (builder_ == nullptr) {
+            builder_ = std::unique_ptr<ir::Builder>(new ir::Builder(dexIr_));
+        }
+    }
+
+    static void addInst(CodeIr* cIr, lir::Instruction* instructionAfter, Opcode opcode,
+            const std::list<Operand*>& operands) {
+        auto instruction = cIr->Alloc<Bytecode>();
+
+        instruction->opcode = opcode;
+
+        for (auto it = operands.begin(); it != operands.end(); it++) {
+            instruction->operands.push_back(*it);
+        }
+
+        cIr->instructions.InsertBefore(instructionAfter, instruction);
+    }
+
+    void addCall(CodeIr* cIr, lir::Instruction* instructionAfter, Opcode opcode, ir::Type* type,
+            const char* methodName, ir::Type* returnType,
+            const std::vector<ir::Type*>& types, const std::list<int>& regs) {
+        auto proto = builder_->GetProto(returnType, builder_->GetTypeList(types));
+        auto method = builder_->GetMethodDecl(builder_->GetAsciiString(methodName), proto, type);
+
+        VRegList* paramRegs = cIr->Alloc<VRegList>();
+        for (auto it = regs.begin(); it != regs.end(); it++) {
+            paramRegs->registers.push_back(*it);
+        }
+
+        addInst(cIr, instructionAfter, opcode,
+                { paramRegs, cIr->Alloc<Method>(method, method->orig_index) });
+    }
+
+    void addCall(CodeIr* cIr, lir::Instruction* instructionAfter, Opcode opcode, ir::Type* type,
+            const char* methodName, ir::Type* returnType, ir::Type* paramType,
+            u4 paramVReg) {
+        auto proto = builder_->GetProto(returnType, builder_->GetTypeList( { paramType }));
+        auto method = builder_->GetMethodDecl(builder_->GetAsciiString(methodName), proto, type);
+
+        VRegRange* args = cIr->Alloc<VRegRange>(paramVReg, 1);
+
+        addInst(cIr, instructionAfter, opcode,
+                { args, cIr->Alloc<Method>(method, method->orig_index) });
+    }
+
+    std::shared_ptr<ir::DexFile> dexIr_;
+    std::unique_ptr<ir::Builder> builder_;
+
+    ir::Type* voidType_ = nullptr;
+    ir::Type* hookType_ = nullptr;
+    ir::Type* objectType_ = nullptr;
+};
 
 std::pair<dex::u1*, size_t> maybeTransform(const char* name, size_t classDataLen,
         const unsigned char* classData, dex::Writer::Allocator* allocator) {
@@ -201,8 +234,11 @@ std::pair<dex::u1*, size_t> maybeTransform(const char* name, size_t classDataLen
     reader.CreateClassIr(index);
     std::shared_ptr<ir::DexFile> ir = reader.GetIr();
 
-    if (!transform(ir)) {
-        return std::make_pair(nullptr, 0);
+    {
+        Transformer transformer(ir);
+        if (!transformer.transform()) {
+            return std::make_pair(nullptr, 0);
+        }
     }
 
     size_t new_size;
@@ -372,7 +408,7 @@ void prepareHook(jvmtiEnv* env) {
     }
 }
 
-jint attach(JavaVM* vm, char* options ATTRIBUTE_UNUSED, void* reserved ATTRIBUTE_UNUSED) {
+jint attach(JavaVM* vm, char* options, void* reserved ATTRIBUTE_UNUSED) {
     gJavaVM = vm;
 
     jvmtiEnv* env;
@@ -383,7 +419,64 @@ jint attach(JavaVM* vm, char* options ATTRIBUTE_UNUSED, void* reserved ATTRIBUTE
 
     prepareHook(env);
 
+    std::vector<std::string> config = android::base::Split(options, ",");
+    for (const std::string& c : config) {
+        if (c == "native_crash") {
+            gForkCrash = true;
+        } else if (c == "java_crash") {
+            gJavaCrash = true;
+        }
+    }
+
     return JVMTI_ERROR_NONE;
+}
+
+extern "C" JNIEXPORT
+jboolean JNICALL Java_com_android_lock_1checker_LockHook_getNativeHandlingConfig(JNIEnv*, jclass) {
+    return gForkCrash ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_android_lock_1checker_LockHook_getSimulateCrashConfig(JNIEnv*, jclass) {
+    return gJavaCrash ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_android_lock_1checker_LockHook_nWtf(JNIEnv* env, jclass,
+        jstring msg) {
+    if (!gForkCrash || msg == nullptr) {
+        return;
+    }
+
+    // Create a native crash with the given message. Decouple from the current crash to create a
+    // tombstone but continue on.
+    //
+    // TODO: Once there are not so many reports, consider making this fatal for the calling process.
+    ScopedUtfChars utf(env, msg);
+    if (utf.c_str() == nullptr) {
+        return;
+    }
+    const char* args[] = {
+        "/system/bin/lockagent_crasher",
+        utf.c_str(),
+        nullptr
+    };
+    pid_t pid = fork();
+    if (pid < 0) {
+        return;
+    }
+    if (pid == 0) {
+        // Double fork so we return quickly. Leave init to deal with the zombie.
+        pid_t pid2 = fork();
+        if (pid2 == 0) {
+            execv(args[0], const_cast<char* const*>(args));
+            _exit(1);
+            __builtin_unreachable();
+        }
+        _exit(0);
+        __builtin_unreachable();
+    }
+    int status;
+    waitpid(pid, &status, 0);  // Ignore any results.
 }
 
 extern "C" JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM* vm, char* options, void* reserved) {

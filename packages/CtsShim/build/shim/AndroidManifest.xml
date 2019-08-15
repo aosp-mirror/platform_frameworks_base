@@ -20,7 +20,7 @@
     package="com.android.cts.ctsshim" >
 
     <uses-sdk android:minSdkVersion="24"
-        android:targetSdkVersion="24" />
+        android:targetSdkVersion="28" />
 
     <restrict-update
         android:hash="__CAN_NOT_BE_UPDATED__" />

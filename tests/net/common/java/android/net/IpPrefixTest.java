@@ -16,15 +16,17 @@
 
 package android.net;
 
+import static com.android.testutils.MiscAssertsKt.assertEqualBothWays;
+import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
+import static com.android.testutils.MiscAssertsKt.assertNotEqualEitherWay;
+import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -171,56 +173,46 @@ public class IpPrefixTest {
 
     }
 
-    private void assertAreEqual(Object o1, Object o2) {
-        assertTrue(o1.equals(o2));
-        assertTrue(o2.equals(o1));
-    }
-
-    private void assertAreNotEqual(Object o1, Object o2) {
-        assertFalse(o1.equals(o2));
-        assertFalse(o2.equals(o1));
-    }
-
     @Test
     public void testEquals() {
         IpPrefix p1, p2;
 
         p1 = new IpPrefix("192.0.2.251/23");
         p2 = new IpPrefix(new byte[]{(byte) 192, (byte) 0, (byte) 2, (byte) 251}, 23);
-        assertAreEqual(p1, p2);
+        assertEqualBothWays(p1, p2);
 
         p1 = new IpPrefix("192.0.2.5/23");
-        assertAreEqual(p1, p2);
+        assertEqualBothWays(p1, p2);
 
         p1 = new IpPrefix("192.0.2.5/24");
-        assertAreNotEqual(p1, p2);
+        assertNotEqualEitherWay(p1, p2);
 
         p1 = new IpPrefix("192.0.4.5/23");
-        assertAreNotEqual(p1, p2);
+        assertNotEqualEitherWay(p1, p2);
 
 
         p1 = new IpPrefix("2001:db8:dead:beef:f00::80/122");
         p2 = new IpPrefix(IPV6_BYTES, 122);
         assertEquals("2001:db8:dead:beef:f00::80/122", p2.toString());
-        assertAreEqual(p1, p2);
+        assertEqualBothWays(p1, p2);
 
         p1 = new IpPrefix("2001:db8:dead:beef:f00::bf/122");
-        assertAreEqual(p1, p2);
+        assertEqualBothWays(p1, p2);
 
         p1 = new IpPrefix("2001:db8:dead:beef:f00::8:0/123");
-        assertAreNotEqual(p1, p2);
+        assertNotEqualEitherWay(p1, p2);
 
         p1 = new IpPrefix("2001:db8:dead:beef::/122");
-        assertAreNotEqual(p1, p2);
+        assertNotEqualEitherWay(p1, p2);
 
         // 192.0.2.4/32 != c000:0204::/32.
         byte[] ipv6bytes = new byte[16];
         System.arraycopy(IPV4_BYTES, 0, ipv6bytes, 0, IPV4_BYTES.length);
         p1 = new IpPrefix(ipv6bytes, 32);
-        assertAreEqual(p1, new IpPrefix("c000:0204::/32"));
+        assertEqualBothWays(p1, new IpPrefix("c000:0204::/32"));
 
         p2 = new IpPrefix(IPV4_BYTES, 32);
-        assertAreNotEqual(p1, p2);
+        assertNotEqualEitherWay(p1, p2);
     }
 
     @Test
@@ -356,25 +348,6 @@ public class IpPrefixTest {
         assertEquals(InetAddress.parseNumericAddress("192.0.2.0"), p.getAddress());
     }
 
-    public IpPrefix passThroughParcel(IpPrefix p) {
-        Parcel parcel = Parcel.obtain();
-        IpPrefix p2 = null;
-        try {
-            p.writeToParcel(parcel, 0);
-            parcel.setDataPosition(0);
-            p2 = IpPrefix.CREATOR.createFromParcel(parcel);
-        } finally {
-            parcel.recycle();
-        }
-        assertNotNull(p2);
-        return p2;
-    }
-
-    public void assertParcelingIsLossless(IpPrefix p) {
-        IpPrefix p2 = passThroughParcel(p);
-        assertEquals(p, p2);
-    }
-
     @Test
     public void testParceling() {
         IpPrefix p;
@@ -386,5 +359,7 @@ public class IpPrefixTest {
         p = new IpPrefix("192.0.2.0/25");
         assertParcelingIsLossless(p);
         assertTrue(p.isIPv4());
+
+        assertFieldCountEquals(2, IpPrefix.class);
     }
 }

@@ -77,7 +77,6 @@ cc_test_host {
     name: "view-compiler-tests",
     defaults: ["viewcompiler_defaults"],
     srcs: [
-        "dex_builder_test.cc",
         "layout_validation_test.cc",
         "util_test.cc",
     ],

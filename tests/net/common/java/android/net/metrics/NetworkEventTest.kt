@@ -16,11 +16,9 @@
 
 package android.net.metrics
 
-import android.os.Parcelable
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.internal.util.ParcelableTestUtil
-import com.android.internal.util.TestUtils
+import com.android.testutils.assertParcelSane
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,11 +26,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class NetworkEventTest {
-    private fun <T: Parcelable> testParcel(obj: T, fieldCount: Int) {
-        ParcelableTestUtil.assertFieldCountEquals(fieldCount, obj::class.java)
-        TestUtils.assertParcelingIsLossless(obj)
-    }
-
     @Test
     fun testConstructorAndParcel() {
         (NetworkEvent.NETWORK_CONNECTED..NetworkEvent.NETWORK_PARTIAL_CONNECTIVITY).forEach {
@@ -44,7 +37,7 @@ class NetworkEventTest {
             assertEquals(it, networkEvent.eventType)
             assertEquals(Long.MAX_VALUE, networkEvent.durationMs)
 
-            testParcel(networkEvent, 2)
+            assertParcelSane(networkEvent, 2)
         }
     }
 }

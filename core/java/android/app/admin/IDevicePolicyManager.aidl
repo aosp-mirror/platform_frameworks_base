@@ -146,12 +146,15 @@ interface IDevicePolicyManager {
     int getDeviceOwnerUserId();
 
     boolean setProfileOwner(in ComponentName who, String ownerName, int userHandle);
+    ComponentName getProfileOwnerAsUser(int userHandle);
     ComponentName getProfileOwner(int userHandle);
     String getProfileOwnerName(int userHandle);
     void setProfileEnabled(in ComponentName who);
     void setProfileName(in ComponentName who, String profileName);
     void clearProfileOwner(in ComponentName who);
     boolean hasUserSetupCompleted();
+
+    boolean checkDeviceIdentifierAccess(in String packageName, int pid, int uid);
 
     void setDeviceOwnerLockScreenInfo(in ComponentName who, CharSequence deviceOwnerInfo);
     CharSequence getDeviceOwnerLockScreenInfo();

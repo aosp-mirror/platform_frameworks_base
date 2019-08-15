@@ -19,13 +19,14 @@ package com.android.server.pm;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
+import androidx.test.InstrumentationRegistry;
+
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -34,6 +35,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -141,27 +143,19 @@ public final class BackgroundDexOptServiceIntegrationTests {
     // Run the command and return the stdout.
     private static String runShellCommand(String cmd) throws IOException {
         Log.i(TAG, String.format("running command: '%s'", cmd));
-        long startTime = System.nanoTime();
-        Process p = Runtime.getRuntime().exec(cmd);
-        int res;
-        try {
-            res = p.waitFor();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                .executeShellCommand(cmd);
+        byte[] buf = new byte[512];
+        int bytesRead;
+        FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        StringBuilder stdout = new StringBuilder();
+        while ((bytesRead = fis.read(buf)) != -1) {
+            stdout.append(new String(buf, 0, bytesRead));
         }
-        String stdout = inputStreamToString(p.getInputStream());
-        String stderr = inputStreamToString(p.getErrorStream());
-        long elapsedTime = System.nanoTime() - startTime;
-        Log.i(TAG, String.format("ran command: '%s' in %d ms with return code %d", cmd,
-                TimeUnit.NANOSECONDS.toMillis(elapsedTime), res));
+        fis.close();
         Log.i(TAG, "stdout");
-        Log.i(TAG, stdout);
-        Log.i(TAG, "stderr");
-        Log.i(TAG, stderr);
-        if (res != 0) {
-            throw new RuntimeException(String.format("failed command: '%s'", cmd));
-        }
-        return stdout;
+        Log.i(TAG, stdout.toString());
+        return stdout.toString();
     }
 
     // Run the command and return the stdout split by lines.
@@ -209,7 +203,10 @@ public final class BackgroundDexOptServiceIntegrationTests {
 
     // TODO(aeubanks): figure out how to get scheduled bg-dexopt to run
     private static void runBackgroundDexOpt() throws IOException {
-        runShellCommand("cmd package bg-dexopt-job " + PACKAGE_NAME);
+        String result = runShellCommand("cmd package bg-dexopt-job " + PACKAGE_NAME);
+        if (!result.trim().equals("Success")) {
+            throw new IllegalStateException("Expected command success, received >" + result + "<");
+        }
     }
 
     // Set the time ahead of the last use time of the test app in days.

@@ -28,6 +28,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -108,6 +109,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
+    @Ignore  // Should invoke shell command via UiAutomation: b/137574238
     public void testDexLoggerReconcileGeneratesEvents() throws Exception {
         int[] tagList = new int[] { SNET_TAG };
         List<EventLog.Event> events = new ArrayList<>();

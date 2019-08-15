@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.ExifInterface;
 import android.media.MediaScanner;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -47,6 +48,7 @@ import dalvik.system.CloseGuard;
 import com.google.android.collect.Sets;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -841,6 +843,52 @@ public class MtpDatabase implements AutoCloseable {
             return -1;
         }
         return obj.getFormat();
+    }
+
+    private boolean getThumbnailInfo(int handle, long[] outLongs) {
+        MtpStorageManager.MtpObject obj = mManager.getObject(handle);
+        if (obj == null) {
+            return false;
+        }
+
+        String path = obj.getPath().toString();
+        switch (obj.getFormat()) {
+            case MtpConstants.FORMAT_HEIF:
+            case MtpConstants.FORMAT_EXIF_JPEG:
+            case MtpConstants.FORMAT_JFIF:
+                try {
+                    ExifInterface exif = new ExifInterface(path);
+                    long[] thumbOffsetAndSize = exif.getThumbnailRange();
+                    outLongs[0] = thumbOffsetAndSize != null ? thumbOffsetAndSize[1] : 0;
+                    outLongs[1] = exif.getAttributeInt(ExifInterface.TAG_PIXEL_X_DIMENSION, 0);
+                    outLongs[2] = exif.getAttributeInt(ExifInterface.TAG_PIXEL_Y_DIMENSION, 0);
+                    return true;
+                } catch (IOException e) {
+                    // ignore and fall through
+                }
+        }
+        return false;
+    }
+
+    private byte[] getThumbnailData(int handle) {
+        MtpStorageManager.MtpObject obj = mManager.getObject(handle);
+        if (obj == null) {
+            return null;
+        }
+
+        String path = obj.getPath().toString();
+        switch (obj.getFormat()) {
+            case MtpConstants.FORMAT_HEIF:
+            case MtpConstants.FORMAT_EXIF_JPEG:
+            case MtpConstants.FORMAT_JFIF:
+                try {
+                    ExifInterface exif = new ExifInterface(path);
+                    return exif.getThumbnail();
+                } catch (IOException e) {
+                    // ignore and fall through
+                }
+        }
+        return null;
     }
 
     private int beginDeleteObject(int handle) {

@@ -294,4 +294,23 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      */
     public void onAppCallbackDied(int uid, int subscriptionId) {
     }
+
+
+    // Following two methods exist to workaround b/124210145
+    /** @hide */
+    @SystemApi
+    @TestApi
+    @Override
+    public android.os.IBinder asBinder() {
+        return super.asBinder();
+    }
+
+    /** @hide */
+    @SystemApi
+    @TestApi
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply,
+            int flags) throws RemoteException {
+        return super.onTransact(code, data, reply, flags);
+    }
 }

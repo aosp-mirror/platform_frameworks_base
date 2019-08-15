@@ -1949,6 +1949,30 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports Open Mobile API capable UICC-based secure
+     * elements.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SE_OMAPI_UICC = "android.hardware.se.omapi.uicc";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports Open Mobile API capable eSE-based secure
+     * elements.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SE_OMAPI_ESE = "android.hardware.se.omapi.ese";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports Open Mobile API capable SD-based secure
+     * elements.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SE_OMAPI_SD = "android.hardware.se.omapi.sd";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports the OpenGL ES
      * <a href="http://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
      * Android Extension Pack</a>.

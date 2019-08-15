@@ -232,14 +232,25 @@ public class NetworkNotificationManager {
             title = r.getString(R.string.network_switch_metered, toTransport);
             details = r.getString(R.string.network_switch_metered_detail, toTransport,
                     fromTransport);
+        } else if (notifyType == NotificationType.NO_INTERNET
+                    || notifyType == NotificationType.PARTIAL_CONNECTIVITY) {
+            // NO_INTERNET and PARTIAL_CONNECTIVITY notification for non-WiFi networks
+            // are sent, but they are not implemented yet.
+            return;
         } else {
             Slog.wtf(TAG, "Unknown notification type " + notifyType + " on network transport "
                     + getTransportName(transportType));
             return;
         }
-
-        final String channelId = highPriority ? SystemNotificationChannels.NETWORK_ALERTS :
-                SystemNotificationChannels.NETWORK_STATUS;
+        // When replacing an existing notification for a given network, don't alert, just silently
+        // update the existing notification. Note that setOnlyAlertOnce() will only work for the
+        // same id, and the id used here is the NotificationType which is different in every type of
+        // notification. This is required because the notification metrics only track the ID but not
+        // the tag.
+        final boolean hasPreviousNotification = previousNotifyType != null;
+        final String channelId = (highPriority && !hasPreviousNotification)
+                ? SystemNotificationChannels.NETWORK_ALERTS
+                : SystemNotificationChannels.NETWORK_STATUS;
         Notification.Builder builder = new Notification.Builder(mContext, channelId)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(notifyType == NotificationType.NETWORK_SWITCH)

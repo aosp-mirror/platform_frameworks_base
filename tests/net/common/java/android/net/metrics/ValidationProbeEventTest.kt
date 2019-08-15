@@ -16,11 +16,9 @@
 
 package android.net.metrics
 
-import android.os.Parcelable
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.internal.util.ParcelableTestUtil
-import com.android.internal.util.TestUtils
+import com.android.testutils.assertParcelSane
 import java.lang.reflect.Modifier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -33,11 +31,6 @@ private const val REVALIDATION: Int = 2 shl 8
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class ValidationProbeEventTest {
-    private fun <T: Parcelable> testParcel(obj: T, fieldCount: Int) {
-        ParcelableTestUtil.assertFieldCountEquals(fieldCount, obj::class.java)
-        TestUtils.assertParcelingIsLossless(obj)
-    }
-
     private infix fun Int.hasType(type: Int) = (type and this) == type
 
     @Test
@@ -58,7 +51,7 @@ class ValidationProbeEventTest {
         assertTrue(validationProbeEvent.probeType hasType FIRST_VALIDATION)
         assertEquals(ValidationProbeEvent.DNS_SUCCESS, validationProbeEvent.returnCode)
 
-        testParcel(validationProbeEvent, 3)
+        assertParcelSane(validationProbeEvent, 3)
     }
 
     @Test

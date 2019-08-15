@@ -452,20 +452,10 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
-import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
-import com.android.server.am.ActivityManagerServiceDumpBroadcastsProto;
-import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
-import com.android.server.am.ActivityManagerServiceDumpServicesProto;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.am.GrantUriProto;
-import com.android.server.am.ImportanceTokenProto;
-import com.android.server.am.MemInfoDumpProto;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
-import com.android.server.am.NeededUriGrantsProto;
-import com.android.server.am.ProcessOomProto;
-import com.android.server.am.ProcessToGcProto;
-import com.android.server.am.StickyBroadcastProto;
+import com.android.server.compat.CompatConfig;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -478,11 +468,11 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
-
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
+
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -4212,6 +4202,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             checkTime(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
+            app.startSeq = 0;
         }
 
         if (DEBUG_PROCESSES && mProcessesOnHold.contains(app)) Slog.v(TAG_PROCESSES,
@@ -4309,6 +4300,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if ("1".equals(SystemProperties.get("debug.assert"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
+            if ("1".equals(SystemProperties.get("debug.ignoreappsignalhandler"))) {
+                runtimeFlags |= Zygote.DEBUG_IGNORE_APP_SIGNAL_HANDLER;
+            }
             if (mNativeDebuggingApp != null && mNativeDebuggingApp.equals(app.processName)) {
                 // Enable all debug flags required by the native debugger.
                 runtimeFlags |= Zygote.DEBUG_ALWAYS_JIT;          // Don't interpret anything
@@ -4400,6 +4394,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.killedByAm = false;
         app.removed = false;
         app.killed = false;
+        if (app.startSeq != 0) {
+            Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
+                    + " with non-zero startSeq:" + app.startSeq);
+        }
+        if (app.pid != 0) {
+            Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
+                    + " with non-zero pid:" + app.pid);
+        }
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
         app.setStartParams(uid, hostingType, hostingNameStr, seInfo, startTime);
         if (mConstants.FLAG_PROCESS_START_ASYNC) {
@@ -4585,8 +4587,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If there is already an app occupying that pid that hasn't been cleaned up
         if (oldApp != null && !app.isolated) {
             // Clean up anything relating to this pid first
-            Slog.w(TAG, "Reusing pid " + pid
-                    + " while app is still mapped to it");
+          Slog.wtf(TAG, "handleProcessStartedLocked process:" + app.processName
+                  + " startSeq:" + app.startSeq
+                  + " pid:" + pid
+                  + " belongs to another existing app:" + oldApp.processName
+                  + " startSeq:" + oldApp.startSeq);
             cleanUpApplicationRecordLocked(oldApp, false, false, -1,
                     true /*replacingPid*/);
         }
@@ -7442,6 +7447,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
             }
+            if (app != null && (app.startUid != callingUid || app.startSeq != startSeq)) {
+                String processName = null;
+                final ProcessRecord pending = mPendingStarts.get(startSeq);
+                if (pending != null) {
+                    processName = pending.processName;
+                }
+                final String msg = "attachApplicationLocked process:" + processName
+                      + " startSeq:" + startSeq
+                      + " pid:" + pid
+                      + " belongs to another existing app:" + app.processName
+                      + " startSeq:" + app.startSeq;
+                Slog.wtf(TAG, msg);
+                // SafetyNet logging for b/131105245.
+                EventLog.writeEvent(0x534e4554, "131105245", app.startUid, msg);
+                // If there is already an app occupying that pid that hasn't been cleaned up
+                cleanUpApplicationRecordLocked(app, false, false, -1,
+                    true /*replacingPid*/);
+                mPidsSelfLocked.remove(pid);
+                app = null;
+            }
         } else {
             app = null;
         }
@@ -7450,7 +7475,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // update the internal state.
         if (app == null && startSeq > 0) {
             final ProcessRecord pending = mPendingStarts.get(startSeq);
-            if (pending != null && pending.startUid == callingUid
+            if (pending != null && pending.startUid == callingUid && pending.startSeq == startSeq
                     && handleProcessStartedLocked(pending, pid, pending.usingWrapper,
                             startSeq, true)) {
                 app = pending;
@@ -7670,6 +7695,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
+            long[] disabledCompatChanges = CompatConfig.get().getDisabledChanges(app.info);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
                 // being bound to an application.
@@ -7685,7 +7711,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled);
+                        buildSerial, isAutofillCompatEnabled, disabledCompatChanges);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -7694,7 +7720,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled);
+                        buildSerial, isAutofillCompatEnabled, disabledCompatChanges);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();
@@ -7903,6 +7929,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 completedIsas.add(instructionSet);
             }
         }
+
+        // Let the ART runtime in zygote and system_server know that the boot completed.
+        ZYGOTE_PROCESS.bootCompleted();
+        VMRuntime.bootCompleted();
 
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);

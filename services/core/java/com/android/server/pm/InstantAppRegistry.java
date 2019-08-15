@@ -38,7 +38,6 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.ByteStringUtils;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -52,6 +51,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
+import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -66,7 +66,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -232,7 +231,7 @@ class InstantAppRegistry {
                                                 @UserIdInt int userId) {
         byte[] randomBytes = new byte[8];
         new SecureRandom().nextBytes(randomBytes);
-        String id = ByteStringUtils.toHexString(randomBytes).toLowerCase(Locale.US);
+        String id = HexEncoding.encodeToString(randomBytes, false /* upperCase */);
         File appDir = getInstantApplicationDir(packageName, userId);
         if (!appDir.exists() && !appDir.mkdirs()) {
             Slog.e(LOG_TAG, "Cannot create instant app cookie directory");

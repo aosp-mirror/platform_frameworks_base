@@ -18,13 +18,10 @@ package android.net;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.net.LocalServerSocket;
-import android.net.LocalSocket;
-import android.net.LocalSocketAddress;
-import android.net.Network;
 import android.platform.test.annotations.AppModeFull;
 
 import androidx.test.filters.SmallTest;
@@ -40,7 +37,6 @@ import java.net.DatagramSocket;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.Objects;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -123,29 +119,29 @@ public class NetworkTest {
         Network three = new Network(3);
 
         // None of the hashcodes are zero.
-        assertNotEqual(0, one.hashCode());
-        assertNotEqual(0, two.hashCode());
-        assertNotEqual(0, three.hashCode());
+        assertNotEquals(0, one.hashCode());
+        assertNotEquals(0, two.hashCode());
+        assertNotEquals(0, three.hashCode());
 
         // All the hashcodes are distinct.
-        assertNotEqual(one.hashCode(), two.hashCode());
-        assertNotEqual(one.hashCode(), three.hashCode());
-        assertNotEqual(two.hashCode(), three.hashCode());
+        assertNotEquals(one.hashCode(), two.hashCode());
+        assertNotEquals(one.hashCode(), three.hashCode());
+        assertNotEquals(two.hashCode(), three.hashCode());
 
         // None of the handles are zero.
-        assertNotEqual(0, one.getNetworkHandle());
-        assertNotEqual(0, two.getNetworkHandle());
-        assertNotEqual(0, three.getNetworkHandle());
+        assertNotEquals(0, one.getNetworkHandle());
+        assertNotEquals(0, two.getNetworkHandle());
+        assertNotEquals(0, three.getNetworkHandle());
 
         // All the handles are distinct.
-        assertNotEqual(one.getNetworkHandle(), two.getNetworkHandle());
-        assertNotEqual(one.getNetworkHandle(), three.getNetworkHandle());
-        assertNotEqual(two.getNetworkHandle(), three.getNetworkHandle());
+        assertNotEquals(one.getNetworkHandle(), two.getNetworkHandle());
+        assertNotEquals(one.getNetworkHandle(), three.getNetworkHandle());
+        assertNotEquals(two.getNetworkHandle(), three.getNetworkHandle());
 
         // The handles are not equal to the hashcodes.
-        assertNotEqual(one.hashCode(), one.getNetworkHandle());
-        assertNotEqual(two.hashCode(), two.getNetworkHandle());
-        assertNotEqual(three.hashCode(), three.getNetworkHandle());
+        assertNotEquals(one.hashCode(), one.getNetworkHandle());
+        assertNotEquals(two.hashCode(), two.getNetworkHandle());
+        assertNotEquals(three.hashCode(), three.getNetworkHandle());
 
         // Adjust as necessary to test an implementation's specific constants.
         // When running with runtest, "adb logcat -s TestRunner" can be useful.
@@ -154,15 +150,11 @@ public class NetworkTest {
         assertEquals(16290598925L, three.getNetworkHandle());
     }
 
-    private static <T> void assertNotEqual(T t1, T t2) {
-        assertFalse(Objects.equals(t1, t2));
-    }
-
     @Test
     public void testGetPrivateDnsBypassingCopy() {
         final Network copy = mNetwork.getPrivateDnsBypassingCopy();
         assertEquals(mNetwork.netId, copy.netId);
-        assertNotEqual(copy.netId, copy.getNetIdForResolv());
-        assertNotEqual(mNetwork.getNetIdForResolv(), copy.getNetIdForResolv());
+        assertNotEquals(copy.netId, copy.getNetIdForResolv());
+        assertNotEquals(mNetwork.getNetIdForResolv(), copy.getNetIdForResolv());
     }
 }

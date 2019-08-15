@@ -18,10 +18,11 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.format.Time;
 
 import com.android.internal.telephony.uicc.IccUtils;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 
 /**
@@ -165,19 +166,21 @@ public class SmsCbEtwsInfo implements Parcelable {
         int timezoneOffset = IccUtils.gsmBcdByteToInt((byte) (tzByte & (~0x08)));
 
         timezoneOffset = ((tzByte & 0x08) == 0) ? timezoneOffset : -timezoneOffset;
+        // timezoneOffset is in quarter hours.
+        int timeZoneOffsetSeconds = timezoneOffset * 15 * 60;
 
-        Time time = new Time(Time.TIMEZONE_UTC);
+        LocalDateTime localDateTime = LocalDateTime.of(
+                // We only need to support years above 2000.
+                year + 2000,
+                month /* 1-12 */,
+                day,
+                hour,
+                minute,
+                second);
 
-        // We only need to support years above 2000.
-        time.year = year + 2000;
-        time.month = month - 1;
-        time.monthDay = day;
-        time.hour = hour;
-        time.minute = minute;
-        time.second = second;
-
-        // Timezone offset is in quarter hours.
-        return time.toMillis(true) - timezoneOffset * 15 * 60 * 1000;
+        long epochSeconds = localDateTime.toEpochSecond(ZoneOffset.UTC) - timeZoneOffsetSeconds;
+        // Convert to milliseconds, ignore overflow.
+        return epochSeconds * 1000;
     }
 
     /**

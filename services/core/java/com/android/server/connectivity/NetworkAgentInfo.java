@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.net.IDnsResolver;
 import android.net.INetd;
@@ -25,12 +26,12 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
+import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -116,7 +117,7 @@ import java.util.TreeSet;
 // not, ConnectivityService disconnects the NetworkAgent's AsyncChannel.
 public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
-    public NetworkInfo networkInfo;
+    @NonNull public NetworkInfo networkInfo;
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
     // This Network object is always valid.
@@ -155,9 +156,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Whether a captive portal was found during the last network validation attempt.
     public boolean lastCaptivePortalDetected;
 
-    // Indicates the user was notified of a successful captive portal login since a portal was
-    // last detected.
-    public boolean captivePortalLoginNotified;
+    // Indicates the captive portal app was opened to show a login UI to the user, but the network
+    // has not validated yet.
+    public volatile boolean captivePortalValidationPending;
 
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
@@ -247,7 +248,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public final Nat464Xlat clatd;
 
     // Set after asynchronous creation of the NetworkMonitor.
-    private volatile INetworkMonitor mNetworkMonitor;
+    private volatile NetworkMonitorManager mNetworkMonitor;
 
     private static final String TAG = ConnectivityService.class.getSimpleName();
     private static final boolean VDBG = false;
@@ -278,7 +279,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * Inform NetworkAgentInfo that a new NetworkMonitor was created.
      */
     public void onNetworkMonitorCreated(INetworkMonitor networkMonitor) {
-        mNetworkMonitor = networkMonitor;
+        mNetworkMonitor = new NetworkMonitorManager(networkMonitor);
     }
 
     /**
@@ -290,13 +291,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      */
     public void setNetworkCapabilities(NetworkCapabilities nc) {
         networkCapabilities = nc;
-        final INetworkMonitor nm = mNetworkMonitor;
+        final NetworkMonitorManager nm = mNetworkMonitor;
         if (nm != null) {
-            try {
-                nm.notifyNetworkCapabilitiesChanged(nc);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error notifying NetworkMonitor of updated NetworkCapabilities", e);
-            }
+            nm.notifyNetworkCapabilitiesChanged(nc);
         }
     }
 
@@ -317,11 +314,11 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     /**
-     * Get the INetworkMonitor in this NetworkAgentInfo.
+     * Get the NetworkMonitorManager in this NetworkAgentInfo.
      *
      * <p>This will be null before {@link #onNetworkMonitorCreated(INetworkMonitor)} is called.
      */
-    public INetworkMonitor networkMonitor() {
+    public NetworkMonitorManager networkMonitor() {
         return mNetworkMonitor;
     }
 
@@ -583,10 +580,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         if (newExpiry > 0) {
-            mLingerMessage = mConnService.makeWakeupMessage(
+            mLingerMessage = new WakeupMessage(
                     mContext, mHandler,
-                    "NETWORK_LINGER_COMPLETE." + network.netId,
-                    EVENT_NETWORK_LINGER_COMPLETE, this);
+                    "NETWORK_LINGER_COMPLETE." + network.netId /* cmdName */,
+                    EVENT_NETWORK_LINGER_COMPLETE /* cmd */,
+                    0 /* arg1 (unused) */, 0 /* arg2 (unused) */,
+                    this /* obj (NetworkAgentInfo) */);
             mLingerMessage.schedule(newExpiry);
         }
 
@@ -633,7 +632,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} "
                 + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
                 + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
-                + "captivePortalLoginNotified{" + captivePortalLoginNotified + "} "
+                + "captivePortalValidationPending{" + captivePortalValidationPending + "} "
                 + "partialConnectivity{" + partialConnectivity + "} "
                 + "acceptPartialConnectivity{" + networkMisc.acceptPartialConnectivity + "} "
                 + "clat{" + clatd + "} "

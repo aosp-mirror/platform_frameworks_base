@@ -195,7 +195,7 @@ public class AssistUtils {
         return applicationInfo.isSystemApp() || applicationInfo.isUpdatedSystemApp();
     }
 
-    private static boolean isDisclosureEnabled(Context context) {
+    public static boolean isDisclosureEnabled(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.ASSIST_DISCLOSURE_ENABLED, 0) != 0;
     }

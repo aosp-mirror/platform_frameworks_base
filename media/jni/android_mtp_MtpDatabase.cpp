@@ -30,13 +30,6 @@
 #include "src/piex_types.h"
 #include "src/piex.h"
 
-extern "C" {
-#include "libexif/exif-content.h"
-#include "libexif/exif-data.h"
-#include "libexif/exif-tag.h"
-#include "libexif/exif-utils.h"
-}
-
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <jni.h>
@@ -70,6 +63,8 @@ static jmethodID method_setDeviceProperty;
 static jmethodID method_getObjectPropertyList;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
+static jmethodID method_getThumbnailInfo;
+static jmethodID method_getThumbnailData;
 static jmethodID method_beginDeleteObject;
 static jmethodID method_endDeleteObject;
 static jmethodID method_beginMoveObject;
@@ -219,7 +214,7 @@ MtpDatabase::MtpDatabase(JNIEnv *env, jobject client)
         return; // Already threw.
     }
     mIntBuffer = (jintArray)env->NewGlobalRef(intArray);
-    jlongArray longArray = env->NewLongArray(2);
+    jlongArray longArray = env->NewLongArray(3);
     if (!longArray) {
         return; // Already threw.
     }
@@ -780,57 +775,6 @@ MtpResponseCode MtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
     return result;
 }
 
-static void foreachentry(ExifEntry *entry, void* /* user */) {
-    char buf[1024];
-    ALOGI("entry %x, format %d, size %d: %s",
-            entry->tag, entry->format, entry->size, exif_entry_get_value(entry, buf, sizeof(buf)));
-}
-
-static void foreachcontent(ExifContent *content, void *user) {
-    ALOGI("content %d", exif_content_get_ifd(content));
-    exif_content_foreach_entry(content, foreachentry, user);
-}
-
-static long getLongFromExifEntry(ExifEntry *e) {
-    ExifByteOrder o = exif_data_get_byte_order(e->parent->parent);
-    return exif_get_long(e->data, o);
-}
-
-static ExifData *getExifFromExtractor(const char *path) {
-    std::unique_ptr<uint8_t[]> exifBuf;
-    ExifData *exifdata = NULL;
-
-    FILE *fp = fopen (path, "rb");
-    if (!fp) {
-        ALOGE("failed to open file");
-        return NULL;
-    }
-
-    sp<NuMediaExtractor> extractor = new NuMediaExtractor();
-    fseek(fp, 0L, SEEK_END);
-    if (extractor->setDataSource(fileno(fp), 0, ftell(fp)) != OK) {
-        ALOGE("failed to setDataSource");
-        fclose(fp);
-        return NULL;
-    }
-
-    off64_t offset;
-    size_t size;
-    if (extractor->getExifOffsetSize(&offset, &size) != OK) {
-        fclose(fp);
-        return NULL;
-    }
-
-    exifBuf.reset(new uint8_t[size]);
-    fseek(fp, offset, SEEK_SET);
-    if (fread(exifBuf.get(), 1, size, fp) == size) {
-        exifdata = exif_data_new_from_data(exifBuf.get(), size);
-    }
-
-    fclose(fp);
-    return exifdata;
-}
-
 MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
                                              MtpObjectInfo& info) {
     MtpStringBuffer path;
@@ -877,26 +821,23 @@ MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
         case MTP_FORMAT_EXIF_JPEG:
         case MTP_FORMAT_HEIF:
         case MTP_FORMAT_JFIF: {
-            ExifData *exifdata;
-            if (info.mFormat == MTP_FORMAT_HEIF) {
-                exifdata = getExifFromExtractor(path);
-            } else {
-                exifdata = exif_data_new_from_file(path);
-            }
-            if (exifdata) {
-                if ((false)) {
-                    exif_data_foreach_content(exifdata, foreachcontent, NULL);
-                }
+            env = AndroidRuntime::getJNIEnv();
+            if (env->CallBooleanMethod(
+                    mDatabase, method_getThumbnailInfo, (jint)handle, mLongBuffer)) {
 
-                ExifEntry *w = exif_content_get_entry(
-                        exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_X_DIMENSION);
-                ExifEntry *h = exif_content_get_entry(
-                        exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_Y_DIMENSION);
-                info.mThumbCompressedSize = exifdata->data ? exifdata->size : 0;
-                info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
-                info.mImagePixWidth = w ? getLongFromExifEntry(w) : 0;
-                info.mImagePixHeight = h ? getLongFromExifEntry(h) : 0;
-                exif_data_unref(exifdata);
+                jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
+                jlong size = longValues[0];
+                jlong w = longValues[1];
+                jlong h = longValues[2];
+                if (size > 0 && size <= UINT32_MAX &&
+                        w > 0 && w <= UINT32_MAX &&
+                        h > 0 && h <= UINT32_MAX) {
+                    info.mThumbCompressedSize = size;
+                    info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
+                    info.mImagePixWidth = w;
+                    info.mImagePixHeight = h;
+                }
+                env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
             }
             break;
         }
@@ -941,22 +882,19 @@ void* MtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
             case MTP_FORMAT_EXIF_JPEG:
             case MTP_FORMAT_HEIF:
             case MTP_FORMAT_JFIF: {
-                ExifData *exifdata;
-                if (format == MTP_FORMAT_HEIF) {
-                    exifdata = getExifFromExtractor(path);
-                } else {
-                    exifdata = exif_data_new_from_file(path);
+                JNIEnv* env = AndroidRuntime::getJNIEnv();
+                jbyteArray thumbData = (jbyteArray) env->CallObjectMethod(
+                        mDatabase, method_getThumbnailData, (jint)handle);
+                if (thumbData == NULL) {
+                    return nullptr;
                 }
-                if (exifdata) {
-                    if (exifdata->data) {
-                        result = malloc(exifdata->size);
-                        if (result) {
-                            memcpy(result, exifdata->data, exifdata->size);
-                            outThumbSize = exifdata->size;
-                        }
-                    }
-                    exif_data_unref(exifdata);
+                jsize thumbSize = env->GetArrayLength(thumbData);
+                result = malloc(thumbSize);
+                if (result) {
+                    env->GetByteArrayRegion(thumbData, 0, thumbSize, (jbyte*)result);
+                    outThumbSize = thumbSize;
                 }
+                env->DeleteLocalRef(thumbData);
                 break;
             }
 
@@ -1388,6 +1326,8 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
     GET_METHOD_ID(getObjectPropertyList, clazz, "(IIIII)Landroid/mtp/MtpPropertyList;");
     GET_METHOD_ID(getObjectInfo, clazz, "(I[I[C[J)Z");
     GET_METHOD_ID(getObjectFilePath, clazz, "(I[C[J)I");
+    GET_METHOD_ID(getThumbnailInfo, clazz, "(I[J)Z");
+    GET_METHOD_ID(getThumbnailData, clazz, "(I)[B");
     GET_METHOD_ID(beginDeleteObject, clazz, "(I)I");
     GET_METHOD_ID(endDeleteObject, clazz, "(IZ)V");
     GET_METHOD_ID(beginMoveObject, clazz, "(III)I");

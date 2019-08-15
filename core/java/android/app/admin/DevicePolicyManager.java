@@ -5654,6 +5654,31 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the specified package can read the device identifiers.
+     *
+     * @param packageName The package name of the app to check for device identifier access.
+     * @param pid The process id of the package to be checked.
+     * @param uid The uid of the package to be checked.
+     * @return whether the package can read the device identifiers.
+     *
+     * @hide
+     */
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
+        throwIfParentInstance("checkDeviceIdentifierAccess");
+        if (packageName == null) {
+            return false;
+        }
+        if (mService != null) {
+            try {
+                return mService.checkDeviceIdentifierAccess(packageName, pid, uid);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * @hide
      * @return the human readable name of the organisation associated with this DPM or {@code null}
      *         if one is not set.

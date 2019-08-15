@@ -433,6 +433,14 @@ public abstract class CameraDevice implements AutoCloseable {
      * target combinations with sizes outside of these guarantees, but this can only be tested for
      * by attempting to create a session with such targets.</p>
      *
+     * <p>Exception on 176x144 (QCIF) resolution:
+     * Camera devices usually have a fixed capability for downscaling from larger resolution to
+     * smaller, and the QCIF resolution sometimes is not fully supported due to this
+     * limitation on devices with high-resolution image sensors. Therefore, trying to configure a
+     * QCIF resolution stream together with any other stream larger than 1920x1080 resolution
+     * (either width or height) might not be supported, and capture session creation will fail if it
+     * is not.</p>
+     *
      * @param outputs The new set of Surfaces that should be made available as
      *                targets for captured image data.
      * @param callback The callback to notify about the status of the new capture session.

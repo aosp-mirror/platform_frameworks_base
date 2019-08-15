@@ -19,7 +19,6 @@ package com.android.server.backup;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThreadAndGetLooper;
-
 import static com.android.server.backup.testing.TransportData.backupTransport;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -80,7 +79,6 @@ import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -106,7 +104,7 @@ import java.util.stream.Stream;
     sdk = 26,
     shadows = {ShadowBackupDataInput.class, ShadowBackupDataOutput.class, ShadowQueuedWork.class}
 )
-@SystemLoaderPackages({"com.android.server.backup", "android.app.backup"})
+@SystemLoaderPackages({"com.android.server.backup", "android.app.backup", "android.apex"})
 @SystemLoaderClasses({IBackupTransport.class, IBackupAgent.class, PackageInfo.class})
 @Presubmit
 public class PerformBackupTaskTest {

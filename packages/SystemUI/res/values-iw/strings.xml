@@ -405,6 +405,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"שקט\nמוחלט"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"הודעות בעדיפות\nבלבד"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"התראות\nבלבד"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה אלחוטית (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד לסיום)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה מהירה (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד לסיום)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה איטית (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד לסיום)"</string>
@@ -800,8 +801,8 @@
     <string name="pip_notification_message" msgid="5619512781514343311">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולכבות את התכונה."</string>
     <string name="pip_play" msgid="1417176722760265888">"הפעל"</string>
     <string name="pip_pause" msgid="8881063404466476571">"השהה"</string>
-    <string name="pip_skip_to_next" msgid="1948440006726306284">"ברצוני לדלג אל הבא"</string>
-    <string name="pip_skip_to_prev" msgid="1955311326688637914">"ברצוני לדלג אל הקודם"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"אפשר לדלג אל הבא"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"אפשר לדלג אל הקודם"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"הטלפון כבה עקב התחממות"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"הטלפון פועל כרגיל עכשיו"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"הטלפון שלך התחמם יותר מדי וכבה כדי להתקרר. הטלפון פועל כרגיל עכשיו.\n\nייתכן שהטלפון יתחמם יותר מדי אם:\n	• תשתמש באפליקציות עתירות משאבים (כגון משחקים, אפליקציות וידאו או אפליקציות ניווט)\n	• תוריד או תעלה קבצים גדולים\n	• תשתמש בטלפון בטמפרטורות גבוהות"</string>
