@@ -38,6 +38,8 @@ import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -3368,6 +3370,17 @@ public abstract class PackageManager {
      * Constant for specifying the highest installed package version code.
      */
     public static final int VERSION_CODE_HIGHEST = -1;
+
+    /**
+     * Apps targeting Android R and above will need to declare the packages and intents they intend
+     * to use to get details about other apps on a device. Such declarations must be made via the
+     * {@code <queries>} tag in the manifest.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    public static final long FILTER_APPLICATION_QUERY = 135549675L;
 
     /** {@hide} */
     public int getUserId() {
