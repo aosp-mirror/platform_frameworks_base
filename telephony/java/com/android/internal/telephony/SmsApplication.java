@@ -425,9 +425,6 @@ public final class SmsApplication {
             final SmsApplicationData smsApplicationData = receivers.get(packageName);
             if (smsApplicationData != null) {
                 if (!smsApplicationData.isComplete()) {
-                    Log.w(LOG_TAG, "Package " + packageName
-                            + " lacks required manifest declarations to be a default sms app: "
-                            + smsApplicationData);
                     receivers.remove(packageName);
                 }
             }
