@@ -52,8 +52,9 @@ import android.os.Parcel;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -95,14 +96,14 @@ import java.util.concurrent.Executor;
  */
 public class VoiceInteractionManagerService extends SystemService {
     static final String TAG = "VoiceInteractionManagerService";
-    static final boolean DEBUG = true; // TODO(b/133242016) STOPSHIP: change to false before R ships
+    static final boolean DEBUG = false;
 
     final Context mContext;
     final ContentResolver mResolver;
     final DatabaseHelper mDbHelper;
     final ActivityManagerInternal mAmInternal;
     final ActivityTaskManagerInternal mAtmInternal;
-    final UserManager mUserManager;
+    final UserManagerInternal mUserManagerInternal;
     final ArraySet<Integer> mLoadedKeyphraseIds = new ArraySet<>();
     ShortcutServiceInternal mShortcutServiceInternal;
     SoundTriggerInternal mSoundTriggerInternal;
@@ -120,8 +121,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Preconditions.checkNotNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mUserManager = Preconditions.checkNotNull(
-                context.getSystemService(UserManager.class));
+        mUserManagerInternal = Preconditions.checkNotNull(
+                LocalServices.getService(UserManagerInternal.class));
 
         PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
                 PermissionManagerServiceInternal.class);
@@ -157,37 +158,30 @@ public class VoiceInteractionManagerService extends SystemService {
     }
 
     @Override
-    public void onStartUser(@NonNull UserInfo userInfo) {
-        if (DEBUG) Slog.d(TAG, "onStartUser(" + userInfo + ")");
+    public boolean isSupported(UserInfo userInfo) {
+        return userInfo.isFull();
+    }
 
-        if (!userInfo.isFull()) {
-            if (DEBUG) Slog.d(TAG,  "***** skipping on non-full user " + userInfo);
-            return;
-        }
+    @Override
+    public void onStartUser(@NonNull UserInfo userInfo) {
+        if (DEBUG_USER) Slog.d(TAG, "onStartUser(" + userInfo + ")");
+
         mServiceStub.initForUser(userInfo.id);
     }
 
     @Override
     public void onUnlockUser(@NonNull UserInfo userInfo) {
-        if (DEBUG) Slog.d(TAG, "onUnlockUser(" + userInfo + ")");
+        if (DEBUG_USER) Slog.d(TAG, "onUnlockUser(" + userInfo + ")");
 
-        if (!userInfo.isFull()) {
-            if (DEBUG) Slog.d(TAG,  "***** skipping on non-full user " + userInfo);
-            return;
-        }
         mServiceStub.initForUser(userInfo.id);
         mServiceStub.switchImplementationIfNeeded(false);
     }
 
     @Override
-    public void onSwitchUser(@NonNull UserInfo userInfo) {
-        if (DEBUG) Slog.d(TAG, "onSwitchUser(" + userInfo + ")");
+    public void onSwitchUser(@NonNull UserInfo from, @NonNull UserInfo to) {
+        if (DEBUG_USER) Slog.d(TAG, "onSwitchUser(" + from + " > " + to + ")");
 
-        if (!userInfo.isFull()) {
-            if (DEBUG) Slog.d(TAG,  "***** skipping on non-full user " + userInfo);
-            return;
-        }
-        mServiceStub.switchUser(userInfo.id);
+        mServiceStub.switchUser(to.id);
     }
 
     class LocalService extends VoiceInteractionManagerInternal {
@@ -225,6 +219,7 @@ public class VoiceInteractionManagerService extends SystemService {
         private boolean mSafeMode;
         private int mCurUser;
         private boolean mCurUserUnlocked;
+        private boolean mCurUserSupported;
         private final boolean mEnableService;
 
         VoiceInteractionManagerServiceStub() {
@@ -292,9 +287,9 @@ public class VoiceInteractionManagerService extends SystemService {
 
         public void initForUser(int userHandle) {
             final TimingsTraceAndSlog t;
-            if (DEBUG) {
-                t = TimingsTraceAndSlog.newAsyncLog();
-                t.traceBegin("VoiceInteractionSvc.initForUser(" + userHandle + ")");
+            if (DEBUG_USER) {
+                t = new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                t.traceBegin("initForUser(" + userHandle + ")");
             } else {
                 t = null;
             }
@@ -439,15 +434,21 @@ public class VoiceInteractionManagerService extends SystemService {
             new SettingsObserver(UiThread.getHandler());
 
             synchronized (this) {
-                mCurUser = ActivityManager.getCurrentUser();
+                setCurrentUserLocked(ActivityManager.getCurrentUser());
                 switchImplementationIfNeededLocked(false);
             }
         }
 
-        public void switchUser(int userHandle) {
+        private void setCurrentUserLocked(@UserIdInt int userHandle) {
+            mCurUser = userHandle;
+            final UserInfo userInfo = mUserManagerInternal.getUserInfo(mCurUser);
+            mCurUserSupported = isSupported(userInfo);
+        }
+
+        public void switchUser(@UserIdInt int userHandle) {
             FgThread.getHandler().post(() -> {
                 synchronized (this) {
-                    mCurUser = userHandle;
+                    setCurrentUserLocked(userHandle);
                     mCurUserUnlocked = false;
                     switchImplementationIfNeededLocked(false);
                 }
@@ -461,10 +462,22 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         void switchImplementationIfNeededLocked(boolean force) {
+            if (!mCurUserSupported) {
+                if (DEBUG_USER) {
+                    Slog.d(TAG, "switchImplementationIfNeeded(): skipping on unsuported user "
+                            + mCurUser);
+                }
+                if (mImpl != null) {
+                    mImpl.shutdownLocked();
+                    setImplLocked(null);
+                }
+                return;
+            }
+
             final TimingsTraceAndSlog t;
-            if (DEBUG) {
-                t = TimingsTraceAndSlog.newAsyncLog();
-                t.traceBegin("VoiceInteractionSvc.switchImplementation(" + mCurUser + ")");
+            if (DEBUG_USER) {
+                t = new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                t.traceBegin("switchImplementation(" + mCurUser + ")");
             } else {
                 t = null;
             }
@@ -494,7 +507,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 final boolean hasComponent = serviceComponent != null && serviceInfo != null;
 
-                if (mUserManager.isUserUnlockingOrUnlocked(mCurUser)) {
+                if (mUserManagerInternal.isUserUnlockingOrUnlocked(mCurUser)) {
                     if (hasComponent) {
                         mShortcutServiceInternal.setShortcutHostPackage(TAG,
                                 serviceComponent.getPackageName(), mCurUser);
@@ -1275,6 +1288,9 @@ public class VoiceInteractionManagerService extends SystemService {
             synchronized (this) {
                 pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)");
                 pw.println("  mEnableService: " + mEnableService);
+                pw.println("  mCurUser: " + mCurUser);
+                pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
+                pw.println("  mCurUserSupported: " + mCurUserSupported);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
                     return;

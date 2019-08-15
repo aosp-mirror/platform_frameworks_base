@@ -54,6 +54,10 @@ import com.android.server.pm.UserManagerService;
  * {@hide}
  */
 public abstract class SystemService {
+
+    // TODO(b/133242016) STOPSHIP: change to false before R ships
+    protected static final boolean DEBUG_USER = true;
+
     /*
      * Boot Phases
      */
@@ -150,7 +154,17 @@ public abstract class SystemService {
     public void onBootPhase(int phase) {}
 
     /**
-     * @deprecated subclasses should extend {@link #onStartUser(int, int)} instead (which by default
+     * Checks if the service should be available for the given user.
+     *
+     * <p>By default returns {@code true}, but subclasses should extend for optimization, if they
+     * don't support some types (like headless system user).
+     */
+    public boolean isSupported(@NonNull UserInfo userInfo) {
+        return true;
+    }
+
+    /**
+     * @deprecated subclasses should extend {@link #onStartUser(UserInfo)} instead (which by default
      * calls this method).
      */
     @Deprecated
@@ -160,6 +174,9 @@ public abstract class SystemService {
      * Called when a new user is starting, for system services to initialize any per-user
      * state they maintain for running users.
      *
+     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} this
+     * user.
+     *
      * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
      * referenced by {@link UserManagerService} and hence should not be modified.
      */
@@ -168,7 +185,7 @@ public abstract class SystemService {
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onUnlockUser(int, int)} instead (which by
+     * @deprecated subclasses should extend {@link #onUnlockUser(UserInfo)} instead (which by
      * default calls this method).
      */
     @Deprecated
@@ -185,6 +202,9 @@ public abstract class SystemService {
      * Code written inside system services should use
      * {@link UserManager#isUserUnlockingOrUnlocked(int)} to handle both of
      * these states.
+     * <p>
+     * This method is only called when the service {@link #isSupported(UserInfo) supports} this
+     * user.
      *
      * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
      * referenced by {@link UserManagerService} and hence should not be modified.
@@ -194,8 +214,8 @@ public abstract class SystemService {
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onSwitchUser(int, int)} instead (which by
-     * default calls this method).
+     * @deprecated subclasses should extend {@link #onSwitchUser(UserInfo, UserInfo)} instead
+     * (which by default calls this method).
      */
     @Deprecated
     public void onSwitchUser(@UserIdInt int userHandle) {}
@@ -205,15 +225,21 @@ public abstract class SystemService {
      * special behavior for whichever user is currently in the foreground.  This is called
      * before any application processes are aware of the new user.
      *
-     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
+     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} either
+     * of the users ({@code from} or {@code to}).
+     *
+     * <b>NOTE: </b> both {@code from} and {@code to} are "live" objects
      * referenced by {@link UserManagerService} and hence should not be modified.
+     *
+     * @param from The information about the user being switched from.
+     * @param to The information about the user being switched from to.
      */
-    public void onSwitchUser(@NonNull UserInfo userInfo) {
-        onSwitchUser(userInfo.id);
+    public void onSwitchUser(@NonNull UserInfo from, @NonNull UserInfo to) {
+        onSwitchUser(to.id);
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onStopUser(int, int)} instead (which by default
+     * @deprecated subclasses should extend {@link #onStopUser(UserInfo)} instead (which by default
      * calls this method).
      */
     @Deprecated
@@ -225,6 +251,9 @@ public abstract class SystemService {
      * broadcast to the user; it is a good place to stop making use of any resources of that
      * user (such as binding to a service running in the user).
      *
+     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} this
+     * user.
+     *
      * <p>NOTE: This is the last callback where the callee may access the target user's CE storage.
      *
      * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
@@ -235,7 +264,7 @@ public abstract class SystemService {
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onCleanupUser(int, int)} instead (which by
+     * @deprecated subclasses should extend {@link #onCleanupUser(UserInfo)} instead (which by
      * default calls this method).
      */
     @Deprecated
@@ -246,8 +275,12 @@ public abstract class SystemService {
      * state they maintain for running users.  This is called after all application process
      * teardown of the user is complete.
      *
+     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} this
+     * user.
+     *
      * <p>NOTE: When this callback is called, the CE storage for the target user may not be
-     * accessible already.  Use {@link #onCleanupUser} instead if you need to access the CE storage.
+     * accessible already.  Use {@link #onStopUser(UserInfo)} instead if you need to access the CE
+     * storage.
      *
      * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
      * referenced by {@link UserManagerService} and hence should not be modified.
