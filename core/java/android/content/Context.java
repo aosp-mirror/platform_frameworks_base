@@ -4109,6 +4109,9 @@ public abstract class Context {
     /**
      * Official published name of the app prediction service.
      *
+     * <p><b>NOTE: </b> this service is optional; callers of
+     * {@code Context.getSystemServiceName(APP_PREDICTION_SERVICE)} should check for {@code null}.
+     *
      * @hide
      * @see #getSystemService(String)
      */
