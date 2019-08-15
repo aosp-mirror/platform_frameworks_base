@@ -482,23 +482,6 @@ public class TrampolineTest {
     }
 
     @Test
-    public void restoreAtInstallForUser_forwarded() throws Exception {
-
-        mTrampoline.restoreAtInstallForUser(mUserId, PACKAGE_NAME, 123);
-
-        verify(mBackupManagerServiceMock).restoreAtInstall(mUserId, PACKAGE_NAME, 123);
-    }
-
-    @Test
-    public void restoreAtInstall_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.restoreAtInstall(PACKAGE_NAME, 123);
-
-        verify(mBackupManagerServiceMock).restoreAtInstall(mUserId, PACKAGE_NAME, 123);
-    }
-
-    @Test
     public void setBackupPassword_forwarded() throws Exception {
         mTrampoline.setBackupPassword(CURRENT_PASSWORD, NEW_PASSWORD);
         verify(mBackupManagerServiceMock).setBackupPassword(CURRENT_PASSWORD, NEW_PASSWORD);
@@ -610,15 +593,6 @@ public class TrampolineTest {
         mTrampoline.selectBackupTransportAsyncForUser(mUserId, TRANSPORT_COMPONENT_NAME, listener);
 
         // No crash.
-    }
-
-    @Test
-    public void getAvailableRestoreTokenForUser_forwarded() {
-        when(mBackupManagerServiceMock.getAvailableRestoreToken(mUserId, PACKAGE_NAME))
-                .thenReturn(123L);
-
-        assertEquals(123, mTrampoline.getAvailableRestoreTokenForUser(mUserId, PACKAGE_NAME));
-        verify(mBackupManagerServiceMock).getAvailableRestoreToken(mUserId, PACKAGE_NAME);
     }
 
     @Test

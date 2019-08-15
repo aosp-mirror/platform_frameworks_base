@@ -41,6 +41,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -634,13 +635,26 @@ public class Trampoline extends IBackupManager.Stub {
     public void restoreAtInstallForUser(int userId, String packageName, int token)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.restoreAtInstall(userId, packageName, token);
+            restoreAtInstall(userId, packageName, token);
         }
     }
 
     @Override
     public void restoreAtInstall(String packageName, int token) throws RemoteException {
         restoreAtInstallForUser(binderGetCallingUserId(), packageName, token);
+    }
+
+    /**
+     * Used to run a restore pass for an application that is being installed. This should only be
+     * called from the {@link PackageManager}.
+     */
+    public void restoreAtInstall(@UserIdInt int userId, String packageName, int token) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "restoreAtInstall()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.restoreAtInstall(packageName, token);
+        }
     }
 
     @Override
@@ -1138,8 +1152,23 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public IRestoreSession beginRestoreSessionForUser(
             int userId, String packageName, String transportID) throws RemoteException {
-        return isUserReadyForBackup(userId) ? mService.beginRestoreSession(userId, packageName,
-                transportID) : null;
+        return isUserReadyForBackup(userId)
+                ? beginRestoreSession(userId, packageName, transportID) : null;
+    }
+
+    /**
+     * Begin a restore for the specified package {@code packageName} using the specified transport
+     * {@code transportName}.
+     */
+    @Nullable
+    public IRestoreSession beginRestoreSession(
+            @UserIdInt int userId, String packageName, String transportName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "beginRestoreSession()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.beginRestoreSession(packageName, transportName);
     }
 
     @Override
@@ -1169,8 +1198,20 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public long getAvailableRestoreTokenForUser(int userId, String packageName) {
-        return isUserReadyForBackup(userId) ? mService.getAvailableRestoreToken(userId,
-                packageName) : 0;
+        return isUserReadyForBackup(userId) ? getAvailableRestoreToken(userId, packageName) : 0;
+    }
+
+    /**
+     * Get the restore-set token for the best-available restore set for this {@code packageName}:
+     * the active set if possible, else the ancestral one. Returns zero if none available.
+     */
+    public long getAvailableRestoreToken(@UserIdInt int userId, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getAvailableRestoreToken()");
+
+        return userBackupManagerService == null
+                ? 0
+                : userBackupManagerService.getAvailableRestoreToken(packageName);
     }
 
     @Override

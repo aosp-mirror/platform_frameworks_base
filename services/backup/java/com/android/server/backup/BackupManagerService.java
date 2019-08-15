@@ -21,9 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.backup.IFullBackupRestoreObserver;
-import android.app.backup.IRestoreSession;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
@@ -91,51 +89,6 @@ public class BackupManagerService {
      * action on the passed in user. Currently this is a straight redirection (see TODO).
      */
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    // ---------------------------------------------
-    // RESTORE OPERATIONS
-    // ---------------------------------------------
-
-    /**
-     * Used to run a restore pass for an application that is being installed. This should only be
-     * called from the {@link PackageManager}.
-     */
-    public void restoreAtInstall(@UserIdInt int userId, String packageName, int token) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "restoreAtInstall()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.restoreAtInstall(packageName, token);
-        }
-    }
-
-    /**
-     * Begin a restore for the specified package {@code packageName} using the specified transport
-     * {@code transportName}.
-     */
-    @Nullable
-    public IRestoreSession beginRestoreSession(
-            @UserIdInt int userId, String packageName, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "beginRestoreSession()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.beginRestoreSession(packageName, transportName);
-    }
-
-    /**
-     * Get the restore-set token for the best-available restore set for this {@code packageName}:
-     * the active set if possible, else the ancestral one. Returns zero if none available.
-     */
-    public long getAvailableRestoreToken(@UserIdInt int userId, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getAvailableRestoreToken()");
-
-        return userBackupManagerService == null
-                ? 0
-                : userBackupManagerService.getAvailableRestoreToken(packageName);
-    }
 
     // ---------------------------------------------
     // ADB BACKUP/RESTORE OPERATIONS
