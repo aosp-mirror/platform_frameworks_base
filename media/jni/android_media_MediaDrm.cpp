@@ -27,14 +27,13 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
-#include <binder/IServiceManager.h>
 #include <binder/Parcel.h>
 #include <binder/PersistableBundle.h>
 #include <cutils/properties.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaErrors.h>
+#include <mediadrm/DrmUtils.h>
 #include <mediadrm/IDrm.h>
-#include <mediadrm/IMediaDrmService.h>
 
 using ::android::os::PersistableBundle;
 
@@ -486,20 +485,7 @@ JDrm::~JDrm() {
 
 // static
 sp<IDrm> JDrm::MakeDrm() {
-    sp<IServiceManager> sm = defaultServiceManager();
-
-    sp<IBinder> binder = sm->getService(String16("media.drm"));
-    sp<IMediaDrmService> service = interface_cast<IMediaDrmService>(binder);
-    if (service == NULL) {
-        return NULL;
-    }
-
-    sp<IDrm> drm = service->makeDrm();
-    if (drm == NULL || (drm->initCheck() != OK && drm->initCheck() != NO_INIT)) {
-        return NULL;
-    }
-
-    return drm;
+    return DrmUtils::MakeDrm();
 }
 
 // static
