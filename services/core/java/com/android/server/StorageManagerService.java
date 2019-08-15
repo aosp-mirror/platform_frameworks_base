@@ -140,6 +140,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.storage.AppFuseBridge;
+import com.android.server.storage.StorageSessionController;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ScreenObserver;
 
@@ -498,6 +499,9 @@ class StorageManagerService extends IStorageManager.Stub
     private final StorageManagerInternalImpl mStorageManagerInternal
             = new StorageManagerInternalImpl();
 
+    // Not guarded by a lock.
+    private final StorageSessionController mStorageSessionController;
+
     class ObbState implements IBinder.DeathRecipient {
         public ObbState(String rawPath, String canonicalPath, int callingUid,
                 IObbActionListener token, int nonce, String volId) {
@@ -647,12 +651,20 @@ class StorageManagerService extends IStorageManager.Stub
                         Slog.i(TAG, "Ignoring mount " + vol.getId() + " due to policy");
                         break;
                     }
-                    mount(vol);
+
+                    // TODO(b/135341433): Remove paranoid logging when FUSE is stable
+                    Slog.i(TAG, "Mounting volume " + vol);
+                    // TODO(b/135341433): Update to use new vold API that gets or mounts fuse fd
+                    // Ensure that we can pass user of a volume to the new API
+                    mStorageSessionController.onVolumeMounted(mCurrentUserId, mount(vol), vol);
+                    Slog.i(TAG, "Mounted volume " + vol);
+
                     break;
                 }
                 case H_VOLUME_UNMOUNT: {
                     final VolumeInfo vol = (VolumeInfo) msg.obj;
                     unmount(vol);
+                    mStorageSessionController.onVolumeUnmounted(mCurrentUserId, vol);
                     break;
                 }
                 case H_VOLUME_BROADCAST: {
@@ -733,6 +745,7 @@ class StorageManagerService extends IStorageManager.Stub
                         }
                     }
                     mVold.onUserRemoved(userId);
+                    mStorageSessionController.onUserRemoved(userId);
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
@@ -951,7 +964,10 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
+                // TODO(b/135341433): Remove paranoid logging when FUSE is stable
+                Slog.i(TAG, "Resetting vold");
                 mVold.reset();
+                Slog.i(TAG, "Reset vold");
 
                 // Tell vold about all existing and started users
                 for (UserInfo user : users) {
@@ -976,6 +992,7 @@ class StorageManagerService extends IStorageManager.Stub
         // staging area is ready so it's ready for zygote-forked apps to
         // bind mount against.
         try {
+            mStorageSessionController.onUserStarted(userId);
             mVold.onUserStarted(userId);
             mStoraged.onUserStarted(userId);
         } catch (Exception e) {
@@ -1516,6 +1533,12 @@ class StorageManagerService extends IStorageManager.Stub
         // Add OBB Action Handler to StorageManagerService thread.
         mObbActionHandler = new ObbActionHandler(IoThread.get().getLooper());
 
+        mStorageSessionController = new StorageSessionController(mContext,
+                userId -> {
+                    Slog.i(TAG, "Storage session ended for user: " + userId + ". Resetting...");
+                    mHandler.obtainMessage(H_RESET).sendToTarget();
+                });
+
         // Initialize the last-fstrim tracking if necessary
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
@@ -1814,11 +1837,18 @@ class StorageManagerService extends IStorageManager.Stub
         mount(vol);
     }
 
-    private void mount(VolumeInfo vol) {
+    private FileDescriptor mount(VolumeInfo vol) {
         try {
-            mVold.mount(vol.id, vol.mountFlags, vol.mountUserId);
+            // TODO(b/135341433): Now, emulated (and private?) volumes are shared across users
+            // This means the mountUserId on such volumes is USER_NULL. This breaks fuse which
+            // requires a valid user to mount a volume. Create individual volumes per user in vold
+            // and remove this property check
+            int userId = SystemProperties.getBoolean("persist.sys.fuse", false)
+                    ? mCurrentUserId : vol.mountUserId;
+            return mVold.mount(vol.id, vol.mountFlags, userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
+            return null;
         }
     }
 
