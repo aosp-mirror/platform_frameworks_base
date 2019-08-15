@@ -249,6 +249,20 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testInheritsFreeformModeFromSourceOnFullscreenDisplay() {
+        final TestActivityDisplay fullscreenDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FULLSCREEN);
+        final ActivityRecord source = createSourceActivity(fullscreenDisplay);
+        source.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, source, /* options */ null, mCurrent, mResult));
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+                WINDOWING_MODE_FULLSCREEN);
+    }
+
+    @Test
     public void testKeepsPictureInPictureLaunchModeInOptions() {
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);
@@ -566,6 +580,23 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                 mActivity, /* source */ null, options, mCurrent, mResult));
+
+        assertEquals(expected, mResult.mBounds);
+    }
+
+    @Test
+    public void testRespectsLaunchBoundsWithFreeformSourceOnFullscreenDisplay() {
+        final TestActivityDisplay fullscreenDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FULLSCREEN);
+        final ActivityRecord source = createSourceActivity(fullscreenDisplay);
+        source.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        final Rect expected = new Rect(0, 0, 150, 150);
+        options.setLaunchBounds(expected);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, source, options, mCurrent, mResult));
 
         assertEquals(expected, mResult.mBounds);
     }
