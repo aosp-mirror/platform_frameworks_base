@@ -13,6 +13,8 @@ java_plugin {
     static_libs: [
         "codegen-version-info",
     ],
+    // The --add-modules/exports flags below don't work for kotlinc yet, so pin this module to Java language level 8 (see b/139342589):
+    java_version: "1.8",
     openjdk9: {
         javacflags: [
             "--add-modules=jdk.compiler",
