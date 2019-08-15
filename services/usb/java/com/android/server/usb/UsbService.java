@@ -740,6 +740,8 @@ public class UsbService extends IUsbManager.Stub {
 
                 mSettingsManager.dump(dump, "settings_manager",
                         UsbServiceDumpProto.SETTINGS_MANAGER);
+                mPermissionManager.dump(dump, "permissions_manager",
+                        UsbServiceDumpProto.PERMISSIONS_MANAGER);
                 dump.flush();
             } else if ("set-port-roles".equals(args[0]) && args.length == 4) {
                 final String portId = args[1];

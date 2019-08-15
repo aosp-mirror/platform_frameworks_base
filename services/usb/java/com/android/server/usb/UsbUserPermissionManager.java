@@ -36,9 +36,12 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Process;
 import android.os.UserHandle;
-import android.service.usb.UsbSettingsAccessoryPermissionProto;
-import android.service.usb.UsbSettingsDevicePermissionProto;
-import android.service.usb.UsbUserSettingsManagerProto;
+import android.service.usb.UsbAccessoryPermissionProto;
+import android.service.usb.UsbAccessoryPersistentPermissionProto;
+import android.service.usb.UsbDevicePermissionProto;
+import android.service.usb.UsbDevicePersistentPermissionProto;
+import android.service.usb.UsbUidPermissionProto;
+import android.service.usb.UsbUserPermissionsManagerProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -261,7 +264,7 @@ class UsbUserPermissionManager {
             }
 
             if (isChanged) {
-                scheduleWritePermissionLocked();
+                scheduleWritePermissionsLocked();
             }
         }
     }
@@ -288,7 +291,7 @@ class UsbUserPermissionManager {
             }
 
             if (isChanged) {
-                scheduleWritePermissionLocked();
+                scheduleWritePermissionsLocked();
             }
         }
     }
@@ -370,7 +373,7 @@ class UsbUserPermissionManager {
     }
 
     @GuardedBy("mLock")
-    private void scheduleWritePermissionLocked() {
+    private void scheduleWritePermissionsLocked() {
         if (mIsCopyPermissionsScheduled) {
             return;
         }
@@ -393,15 +396,18 @@ class UsbUserPermissionManager {
                 devices = new DeviceFilter[numDevices];
                 uidsForDevices = new int[numDevices][];
                 grantedValuesForDevices = new boolean[numDevices][];
-                for (int i = 0; i < numDevices; i++) {
-                    devices[i] = new DeviceFilter(mDevicePersistentPermissionMap.keyAt(i));
-                    SparseBooleanArray permissions = mDevicePersistentPermissionMap.valueAt(i);
+                for (int deviceIdx = 0; deviceIdx < numDevices; deviceIdx++) {
+                    devices[deviceIdx] =
+                            new DeviceFilter(mDevicePersistentPermissionMap.keyAt(deviceIdx));
+                    SparseBooleanArray permissions =
+                            mDevicePersistentPermissionMap.valueAt(deviceIdx);
                     int numPermissions = permissions.size();
-                    uidsForDevices[i] = new int[numPermissions];
-                    grantedValuesForDevices[i] = new boolean[numPermissions];
-                    for (int j = 0; j < numPermissions; j++) {
-                        uidsForDevices[i][j] = permissions.keyAt(j);
-                        grantedValuesForDevices[i][j] = permissions.valueAt(j);
+                    uidsForDevices[deviceIdx] = new int[numPermissions];
+                    grantedValuesForDevices[deviceIdx] = new boolean[numPermissions];
+                    for (int permissionIdx = 0; permissionIdx < numPermissions; permissionIdx++) {
+                        uidsForDevices[deviceIdx][permissionIdx] = permissions.keyAt(permissionIdx);
+                        grantedValuesForDevices[deviceIdx][permissionIdx] =
+                                permissions.valueAt(permissionIdx);
                     }
                 }
 
@@ -409,16 +415,19 @@ class UsbUserPermissionManager {
                 accessories = new AccessoryFilter[numAccessories];
                 uidsForAccessories = new int[numAccessories][];
                 grantedValuesForAccessories = new boolean[numAccessories][];
-                for (int i = 0; i < numAccessories; i++) {
-                    accessories[i] =
-                            new AccessoryFilter(mAccessoryPersistentPermissionMap.keyAt(i));
-                    SparseBooleanArray permissions = mAccessoryPersistentPermissionMap.valueAt(i);
+                for (int accessoryIdx = 0; accessoryIdx < numAccessories; accessoryIdx++) {
+                    accessories[accessoryIdx] = new AccessoryFilter(
+                                    mAccessoryPersistentPermissionMap.keyAt(accessoryIdx));
+                    SparseBooleanArray permissions =
+                            mAccessoryPersistentPermissionMap.valueAt(accessoryIdx);
                     int numPermissions = permissions.size();
-                    uidsForAccessories[i] = new int[numPermissions];
-                    grantedValuesForAccessories[i] = new boolean[numPermissions];
-                    for (int j = 0; j < numPermissions; j++) {
-                        uidsForAccessories[i][j] = permissions.keyAt(j);
-                        grantedValuesForAccessories[i][j] = permissions.valueAt(j);
+                    uidsForAccessories[accessoryIdx] = new int[numPermissions];
+                    grantedValuesForAccessories[accessoryIdx] = new boolean[numPermissions];
+                    for (int permissionIdx = 0; permissionIdx < numPermissions; permissionIdx++) {
+                        uidsForAccessories[accessoryIdx][permissionIdx] =
+                                permissions.keyAt(permissionIdx);
+                        grantedValuesForAccessories[accessoryIdx][permissionIdx] =
+                                permissions.valueAt(permissionIdx);
                     }
                 }
                 mIsCopyPermissionsScheduled = false;
@@ -477,22 +486,22 @@ class UsbUserPermissionManager {
      * Creates UI dialog to request permission for the given package to access the device
      * or accessory.
      *
-     * @param device The USB device attached
-     * @param accessory The USB accessory attached
+     * @param device       The USB device attached
+     * @param accessory    The USB accessory attached
      * @param canBeDefault Whether the calling pacakge can set as default handler
-     * of the USB device or accessory
-     * @param packageName The package name of the calling package
-     * @param uid The uid of the calling package
-     * @param userContext The context to start the UI dialog
-     * @param pi PendingIntent for returning result
+     *                     of the USB device or accessory
+     * @param packageName  The package name of the calling package
+     * @param uid          The uid of the calling package
+     * @param userContext  The context to start the UI dialog
+     * @param pi           PendingIntent for returning result
      */
     void requestPermissionDialog(@Nullable UsbDevice device,
-                                 @Nullable UsbAccessory accessory,
-                                 boolean canBeDefault,
-                                 @NonNull String packageName,
-                                 int uid,
-                                 @NonNull Context userContext,
-                                 @NonNull PendingIntent pi) {
+            @Nullable UsbAccessory accessory,
+            boolean canBeDefault,
+            @NonNull String packageName,
+            int uid,
+            @NonNull Context userContext,
+            @NonNull PendingIntent pi) {
         long identity = Binder.clearCallingIdentity();
         Intent intent = new Intent();
         if (device != null) {
@@ -517,48 +526,96 @@ class UsbUserPermissionManager {
         }
     }
 
-    void dump(@NonNull DualDumpOutputStream dump) {
+    void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
         synchronized (mLock) {
-            for (String deviceName : mDevicePermissionMap.keySet()) {
+            dump.write("user_id", UsbUserPermissionsManagerProto.USER_ID, mUser.getIdentifier());
+            int numMappings = mDevicePermissionMap.size();
+            for (int mappingsIdx = 0; mappingsIdx < numMappings; mappingsIdx++) {
+                String deviceName = mDevicePermissionMap.keyAt(mappingsIdx);
                 long devicePermissionToken = dump.start("device_permissions",
-                        UsbUserSettingsManagerProto.DEVICE_PERMISSIONS);
+                        UsbUserPermissionsManagerProto.DEVICE_PERMISSIONS);
 
-                dump.write("device_name", UsbSettingsDevicePermissionProto.DEVICE_NAME, deviceName);
+                dump.write("device_name", UsbDevicePermissionProto.DEVICE_NAME, deviceName);
 
-                SparseBooleanArray uidList = mDevicePermissionMap.get(deviceName);
-                int count = uidList.size();
-                for (int i = 0; i < count; i++) {
-                    dump.write("uids", UsbSettingsDevicePermissionProto.UIDS, uidList.keyAt(i));
+                SparseBooleanArray uidList = mDevicePermissionMap.valueAt(mappingsIdx);
+                int numUids = uidList.size();
+                for (int uidsIdx = 0; uidsIdx < numUids; uidsIdx++) {
+                    dump.write("uids", UsbDevicePermissionProto.UIDS, uidList.keyAt(uidsIdx));
                 }
 
                 dump.end(devicePermissionToken);
             }
 
-            for (UsbAccessory accessory : mAccessoryPermissionMap.keySet()) {
+            numMappings = mAccessoryPermissionMap.size();
+            for (int mappingsIdx = 0; mappingsIdx < numMappings; ++mappingsIdx) {
+                UsbAccessory accessory = mAccessoryPermissionMap.keyAt(mappingsIdx);
                 long accessoryPermissionToken = dump.start("accessory_permissions",
-                        UsbUserSettingsManagerProto.ACCESSORY_PERMISSIONS);
+                        UsbUserPermissionsManagerProto.ACCESSORY_PERMISSIONS);
 
                 dump.write("accessory_description",
-                        UsbSettingsAccessoryPermissionProto.ACCESSORY_DESCRIPTION,
+                        UsbAccessoryPermissionProto.ACCESSORY_DESCRIPTION,
                         accessory.getDescription());
 
-                SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
-                int count = uidList.size();
-                for (int i = 0; i < count; i++) {
-                    dump.write("uids", UsbSettingsAccessoryPermissionProto.UIDS, uidList.keyAt(i));
+                SparseBooleanArray uidList = mAccessoryPermissionMap.valueAt(mappingsIdx);
+                int numUids = uidList.size();
+                for (int uidsIdx = 0; uidsIdx < numUids; uidsIdx++) {
+                    dump.write("uids", UsbAccessoryPermissionProto.UIDS, uidList.keyAt(uidsIdx));
                 }
 
                 dump.end(accessoryPermissionToken);
             }
+
+            numMappings = mDevicePersistentPermissionMap.size();
+            for (int mappingsIdx = 0; mappingsIdx < numMappings; mappingsIdx++) {
+                DeviceFilter filter = mDevicePersistentPermissionMap.keyAt(mappingsIdx);
+                long devicePermissionToken = dump.start("device_persistent_permissions",
+                        UsbUserPermissionsManagerProto.DEVICE_PERSISTENT_PERMISSIONS);
+                filter.dump(dump, "device",
+                        UsbDevicePersistentPermissionProto.DEVICE_FILTER);
+                SparseBooleanArray permissions =
+                        mDevicePersistentPermissionMap.valueAt(mappingsIdx);
+                int numPermissions = permissions.size();
+                for (int permissionsIdx = 0; permissionsIdx < numPermissions; permissionsIdx++) {
+                    long uidPermissionToken = dump.start("uid_permission",
+                            UsbDevicePersistentPermissionProto.PERMISSION_VALUES);
+                    dump.write("uid", UsbUidPermissionProto.UID, permissions.keyAt(permissionsIdx));
+                    dump.write("is_granted",
+                            UsbUidPermissionProto.IS_GRANTED, permissions.valueAt(permissionsIdx));
+                    dump.end(uidPermissionToken);
+                }
+                dump.end(devicePermissionToken);
+            }
+
+            numMappings = mAccessoryPersistentPermissionMap.size();
+            for (int mappingsIdx = 0; mappingsIdx < numMappings; mappingsIdx++) {
+                AccessoryFilter filter = mAccessoryPersistentPermissionMap.keyAt(mappingsIdx);
+                long accessoryPermissionToken = dump.start("accessory_persistent_permissions",
+                        UsbUserPermissionsManagerProto.ACCESSORY_PERSISTENT_PERMISSIONS);
+                filter.dump(dump, "accessory",
+                        UsbAccessoryPersistentPermissionProto.ACCESSORY_FILTER);
+                SparseBooleanArray permissions =
+                        mAccessoryPersistentPermissionMap.valueAt(mappingsIdx);
+                int numPermissions = permissions.size();
+                for (int permissionsIdx = 0; permissionsIdx < numPermissions; permissionsIdx++) {
+                    long uidPermissionToken = dump.start("uid_permission",
+                            UsbAccessoryPersistentPermissionProto.PERMISSION_VALUES);
+                    dump.write("uid", UsbUidPermissionProto.UID, permissions.keyAt(permissionsIdx));
+                    dump.write("is_granted",
+                            UsbUidPermissionProto.IS_GRANTED, permissions.valueAt(permissionsIdx));
+                    dump.end(uidPermissionToken);
+                }
+                dump.end(accessoryPermissionToken);
+            }
         }
+        dump.end(token);
     }
 
     /**
      * Check for camera permission of the calling process.
      *
      * @param packageName Package name of the caller.
-     * @param uid Linux uid of the calling process.
-     *
+     * @param uid         Linux uid of the calling process.
      * @return True in case camera permission is available, False otherwise.
      */
     private boolean isCameraPermissionGranted(String packageName, int uid) {
@@ -677,7 +734,7 @@ class UsbUserPermissionManager {
      *
      * @param device The device that needs to get scanned
      * @return True in case a VIDEO device or interface is present,
-     *         False otherwise.
+     * False otherwise.
      */
     private boolean isCameraDevicePresent(UsbDevice device) {
         if (device.getDeviceClass() == UsbConstants.USB_CLASS_VIDEO) {
