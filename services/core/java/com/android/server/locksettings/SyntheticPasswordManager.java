@@ -353,12 +353,12 @@ public class SyntheticPasswordManager {
      */
     private byte[] weaverEnroll(int slot, byte[] key, @Nullable byte[] value) {
         if (slot == INVALID_WEAVER_SLOT || slot >= mWeaverConfig.slots) {
-            throw new RuntimeException("Invalid slot for weaver");
+            throw new IllegalArgumentException("Invalid slot for weaver");
         }
         if (key == null) {
             key = new byte[mWeaverConfig.keySize];
         } else if (key.length != mWeaverConfig.keySize) {
-            throw new RuntimeException("Invalid key size for weaver");
+            throw new IllegalArgumentException("Invalid key size for weaver");
         }
         if (value == null) {
             value = secureRandom(mWeaverConfig.valueSize);
@@ -383,12 +383,12 @@ public class SyntheticPasswordManager {
      */
     private VerifyCredentialResponse weaverVerify(int slot, byte[] key) {
         if (slot == INVALID_WEAVER_SLOT || slot >= mWeaverConfig.slots) {
-            throw new RuntimeException("Invalid slot for weaver");
+            throw new IllegalArgumentException("Invalid slot for weaver");
         }
         if (key == null) {
             key = new byte[mWeaverConfig.keySize];
         } else if (key.length != mWeaverConfig.keySize) {
-            throw new RuntimeException("Invalid key size for weaver");
+            throw new IllegalArgumentException("Invalid key size for weaver");
         }
         final VerifyCredentialResponse[] response = new VerifyCredentialResponse[1];
         try {
@@ -620,7 +620,7 @@ public class SyntheticPasswordManager {
                 return i;
             }
         }
-        throw new RuntimeException("Run out of weaver slots.");
+        throw new IllegalStateException("Run out of weaver slots.");
     }
 
     /**
@@ -1029,10 +1029,10 @@ public class SyntheticPasswordManager {
         if (version != SYNTHETIC_PASSWORD_VERSION_V3
                 && version != SYNTHETIC_PASSWORD_VERSION_V2
                 && version != SYNTHETIC_PASSWORD_VERSION_V1) {
-            throw new RuntimeException("Unknown blob version");
+            throw new IllegalArgumentException("Unknown blob version");
         }
         if (blob[1] != type) {
-            throw new RuntimeException("Invalid blob type");
+            throw new IllegalArgumentException("Invalid blob type");
         }
         final byte[] secret;
         if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
@@ -1237,7 +1237,7 @@ public class SyntheticPasswordManager {
     private byte[] passwordTokenToWeaverKey(byte[] token) {
         byte[] key = SyntheticPasswordCrypto.personalisedHash(PERSONALISATION_WEAVER_KEY, token);
         if (key.length < mWeaverConfig.keySize) {
-            throw new RuntimeException("weaver key length too small");
+            throw new IllegalArgumentException("weaver key length too small");
         }
         return Arrays.copyOf(key, mWeaverConfig.keySize);
     }

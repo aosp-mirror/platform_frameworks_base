@@ -106,6 +106,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
@@ -137,8 +138,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -169,6 +172,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
     private static final int SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT = 1;
+    private static final String PREV_SYNTHETIC_PASSWORD_HANDLE_KEY = "prev-sp-handle";
+    private static final String SYNTHETIC_PASSWORD_UPDATE_TIME_KEY = "sp-handle-ts";
 
     // No challenge provided
     private static final int CHALLENGE_NONE = 0;
@@ -1614,17 +1619,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (CertificateException | UnrecoverableKeyException
                 | IOException | BadPaddingException | IllegalBlockSizeException | KeyStoreException
                 | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("Failed to encrypt key", e);
+            throw new IllegalStateException("Failed to encrypt key", e);
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             if (iv.length != PROFILE_KEY_IV_SIZE) {
-                throw new RuntimeException("Invalid iv length: " + iv.length);
+                throw new IllegalArgumentException("Invalid iv length: " + iv.length);
             }
             outputStream.write(iv);
             outputStream.write(encryptionResult);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to concatenate byte arrays", e);
+            throw new IllegalStateException("Failed to concatenate byte arrays", e);
         }
         mStorage.writeChildProfileLock(userId, outputStream.toByteArray());
     }
@@ -1692,7 +1697,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             digest.update(credential);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("NoSuchAlgorithmException for SHA-512");
+            throw new IllegalStateException("NoSuchAlgorithmException for SHA-512");
         }
     }
 
@@ -2474,13 +2479,21 @@ public class LockSettingsService extends ILockSettings.Stub {
             gateKeeperClearSecureUserId(userId);
         }
         fixateNewestUserKeyAuth(userId);
-        setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, handle, userId);
+        setSyntheticPasswordHandleLocked(handle, userId);
         return auth;
     }
 
     private long getSyntheticPasswordHandleLocked(int userId) {
         return getLong(SYNTHETIC_PASSWORD_HANDLE_KEY,
                 SyntheticPasswordManager.DEFAULT_HANDLE, userId);
+    }
+
+    private void setSyntheticPasswordHandleLocked(long handle, int userId) {
+        final long oldHandle = getSyntheticPasswordHandleLocked(userId);
+        setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, handle, userId);
+        setLong(PREV_SYNTHETIC_PASSWORD_HANDLE_KEY, oldHandle, userId);
+        setLong(SYNTHETIC_PASSWORD_UPDATE_TIME_KEY, System.currentTimeMillis(), userId);
+
     }
 
     private boolean isSyntheticPasswordBasedCredentialLocked(int userId) {
@@ -2660,7 +2673,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             unlockKeystore(auth.deriveKeyStorePassword(), userId);
             setKeystorePassword(null, userId);
         }
-        setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, newHandle, userId);
+        setSyntheticPasswordHandleLocked(newHandle, userId);
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
 
         notifyActivePasswordMetricsAvailable(credentialType, credential, userId);
@@ -2928,29 +2941,57 @@ public class LockSettingsService extends ILockSettings.Stub {
         return true;
     }
 
+    static String timestampToString(long timestamp) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(timestamp));
+    }
+
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args){
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+    protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, printWriter)) return;
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
 
         pw.println("Current lock settings service state:");
+
         pw.println(String.format("SP Enabled = %b",
                 mLockPatternUtils.isSyntheticPasswordEnabled()));
+        pw.println();
 
+        pw.println("User State:");
+        pw.increaseIndent();
         List<UserInfo> users = mUserManager.getUsers();
         for (int user = 0; user < users.size(); user++) {
             final int userId = users.get(user).id;
-            pw.println("    User " + userId);
+            pw.println("User " + userId);
+            pw.increaseIndent();
             synchronized (mSpManager) {
-                pw.println(String.format("        SP Handle = %x",
+                pw.println(String.format("SP Handle: %x",
                         getSyntheticPasswordHandleLocked(userId)));
+                pw.println(String.format("Last changed: %s (%x)",
+                        timestampToString(getLong(SYNTHETIC_PASSWORD_UPDATE_TIME_KEY, 0, userId)),
+                        getLong(PREV_SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId)));
             }
             try {
-                pw.println(String.format("        SID = %x",
+                pw.println(String.format("SID: %x",
                         getGateKeeperService().getSecureUserId(userId)));
             } catch (RemoteException e) {
                 // ignore.
             }
+            // It's OK to dump the password type since anyone with physical access can just
+            // observe it from the keyguard directly.
+            pw.println("PasswordType: " + getLong(LockPatternUtils.PASSWORD_TYPE_KEY, 0, userId));
+            pw.println("hasPassword: " + havePassword(userId));
+            pw.println("hasPattern: " + havePattern(userId)); // print raw credential type instead?
+            pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabled(userId));
+            pw.decreaseIndent();
         }
+        pw.println();
+        pw.decreaseIndent();
+
+        pw.println("Storage:");
+        pw.increaseIndent();
+        mStorage.dump(pw);
+        pw.println();
+        pw.decreaseIndent();
     }
 
     private void disableEscrowTokenOnNonManagedDevicesIfNeeded(int userId) {
