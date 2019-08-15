@@ -301,8 +301,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करा"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमची शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कॅमेरा"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्रे घेण्याची आणि व्हिडिओ रेकॉर्ड"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो घेऊ आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्रे काढण्याची आणि व्हिडिओ रेकॉर्ड करण्याची"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो काढू आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"कॉल लॉग"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"फोन कॉल लॉग वाचा आणि लिहा"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे फोन कॉल लॉग अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>

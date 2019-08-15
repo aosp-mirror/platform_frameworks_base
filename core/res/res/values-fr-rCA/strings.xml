@@ -1585,7 +1585,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Lancer le navigateur?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prendre l\'appel?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Toujours"</string>
-    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Régler pour toujours ouvrir"</string>
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Définir cette activité comme toujours ouverte"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Une seule fois"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Paramètres"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ne prend pas en charge le profil professionnel"</string>

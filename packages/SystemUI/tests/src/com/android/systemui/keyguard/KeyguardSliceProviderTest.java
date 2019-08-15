@@ -48,6 +48,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 
@@ -177,6 +178,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void onMetadataChanged_updatesSlice() {
+        mProvider.onStateChanged(StatusBarState.KEYGUARD);
         mProvider.onDozingChanged(true);
         reset(mContentResolver);
         mProvider.onMetadataOrStateChanged(mock(MediaMetadata.class), PlaybackState.STATE_PLAYING);
@@ -190,6 +192,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void onDozingChanged_updatesSliceIfMedia() {
+        mProvider.onStateChanged(StatusBarState.KEYGUARD);
         mProvider.onMetadataOrStateChanged(mock(MediaMetadata.class), PlaybackState.STATE_PLAYING);
         reset(mContentResolver);
         // Show media when dozing

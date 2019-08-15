@@ -572,9 +572,9 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Torna a registrar la teva cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ja no es reconeix la teva cara. Torna-ho a provar."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"És massa semblant; canvia de postura."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Inclina el cap una mica menys."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Inclina el cap una mica menys."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"No inclinis tant el cap."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"No giris tant el cap."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"No inclinis tant el cap."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"No giris tant el cap."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Suprimeix qualsevol cosa que amagui la teva cara."</string>
     <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Neteja el sensor de l\'extrem superior."</string>
   <string-array name="face_acquired_vendor">
@@ -594,7 +594,7 @@
   </string-array>
     <string name="face_icon_content_description" msgid="4024817159806482191">"Icona facial"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Persones estigui sincronitzada amb un compte."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Contactes estigui sincronitzada amb un compte."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar o desactivar la sincronització"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet que una aplicació modifiqui la configuració de sincronització d\'un compte. Per exemple, aquesta acció es pot fer servir per activar la sincronització de l\'aplicació Persones amb un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"llegir les estadístiques de sincronització"</string>
@@ -1482,7 +1482,7 @@
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Omet"</string>
-    <string name="no_matches" msgid="8129421908915840737">"Cap coincidència"</string>
+    <string name="no_matches" msgid="8129421908915840737">"No s\'ha trobat cap coincidència"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Troba-ho a la pàgina"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>

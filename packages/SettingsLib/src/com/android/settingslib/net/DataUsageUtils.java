@@ -18,14 +18,10 @@ package com.android.settingslib.net;
 
 import android.content.Context;
 import android.net.NetworkTemplate;
-import android.os.ParcelUuid;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Utils class for data usage
@@ -38,7 +34,7 @@ public class DataUsageUtils {
      */
     public static NetworkTemplate getMobileTemplate(Context context, int subId) {
         final TelephonyManager telephonyManager = context.getSystemService(
-                TelephonyManager.class);
+                TelephonyManager.class).createForSubscriptionId(subId);
         final SubscriptionManager subscriptionManager = context.getSystemService(
                 SubscriptionManager.class);
         final SubscriptionInfo info = subscriptionManager.getActiveSubscriptionInfo(subId);
@@ -49,23 +45,8 @@ public class DataUsageUtils {
             Log.i(TAG, "Subscription is not active: " + subId);
             return mobileAll;
         }
-        final ParcelUuid groupUuid = info.getGroupUuid();
-        if (groupUuid == null) {
-            Log.i(TAG, "Subscription doesn't have valid group uuid: " + subId);
-            return mobileAll;
-        }
 
-        // Otherwise merge other subscriberId to create new NetworkTemplate
-        final List<SubscriptionInfo> groupInfos = subscriptionManager.getSubscriptionsInGroup(
-                groupUuid);
-        final List<String> mergedSubscriberIds = new ArrayList<>();
-        for (SubscriptionInfo subInfo : groupInfos) {
-            final String subscriberId = telephonyManager.getSubscriberId(
-                    subInfo.getSubscriptionId());
-            if (subscriberId != null) {
-                mergedSubscriberIds.add(subscriberId);
-            }
-        }
-        return NetworkTemplate.normalize(mobileAll, mergedSubscriberIds.toArray(new String[0]));
+        // Use old API to build networkTemplate
+        return NetworkTemplate.normalize(mobileAll, telephonyManager.getMergedSubscriberIds());
     }
 }

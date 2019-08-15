@@ -297,7 +297,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"運動データ"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活動"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"運動データにアクセス"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
@@ -817,7 +817,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"もう一度お試しください"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"もう一度お試しください"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"すべての機能とデータを利用するにはロック解除"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"フェイスアンロックの最大試行回数を超えました"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"顔認証の最大試行回数を超えました"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"タブレット内にSIMカードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"テレビにSIMカードが挿入されていません。"</string>
@@ -887,7 +887,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"ロック解除エリアを拡大します。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"スライドロックを解除します。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"パターンロックを解除します。"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"フェイスアンロックを行います。"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"顔認証を行います。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PINロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM PIN のロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM PUK のロックを解除します。"</string>

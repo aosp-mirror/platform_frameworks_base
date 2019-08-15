@@ -1658,7 +1658,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ଆପଣଙ୍କ ଅନଲକ୍‍ ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଏକ ଇମେଲ୍‍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ନିଜ ଫୋନ୍‌କୁ ଅନଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ବାହାର କରନ୍ତୁ"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିସ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"ସର୍ଟକଟ୍‌ ଅନ୍‌ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍‍ ବଟନ୍‍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ ଆରମ୍ଭ ହେବ।\n\n ସମ୍ପ୍ରତି ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ୍ୟ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ସେଟିଙ୍ଗ ଓ ଆକ୍ସେସବିଲିଟିରେ ଆପଣ ବୈଶିଷ୍ଟ୍ୟ ବଦଳାଇ ପାରିବେ।"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"ଶର୍ଟକଟ୍‍ ବନ୍ଦ କରନ୍ତୁ"</string>

@@ -43,6 +43,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.systemui.R;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AlarmTimeout;
@@ -255,12 +256,21 @@ public class DozeSensors {
         long mLastNear;
         final AlarmTimeout mCooldownTimer;
         final AlwaysOnDisplayPolicy mPolicy;
-
+        final Sensor mSensor;
 
         public ProxSensor(AlwaysOnDisplayPolicy policy) {
             mPolicy = policy;
             mCooldownTimer = new AlarmTimeout(mAlarmManager, this::updateRegistered,
                     "prox_cooldown", mHandler);
+
+            // The default prox sensor can be noisy, so let's use a prox gated brightness sensor
+            // if available.
+            Sensor sensor = DozeSensors.findSensorWithType(mSensorManager,
+                    mContext.getString(R.string.doze_brightness_sensor_type));
+            if (sensor == null) {
+                sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            }
+            mSensor = sensor;
         }
 
         void setRequested(boolean requested) {
@@ -324,8 +334,9 @@ public class DozeSensors {
 
         @Override
         public String toString() {
-            return String.format("{registered=%s, requested=%s, coolingDown=%s, currentlyFar=%s}",
-                    mRegistered, mRequested, mCooldownTimer.isScheduled(), mCurrentlyFar);
+            return String.format("{registered=%s, requested=%s, coolingDown=%s, currentlyFar=%s,"
+                    + " sensor=%s}", mRegistered, mRequested, mCooldownTimer.isScheduled(),
+                    mCurrentlyFar, mSensor);
         }
     }
 

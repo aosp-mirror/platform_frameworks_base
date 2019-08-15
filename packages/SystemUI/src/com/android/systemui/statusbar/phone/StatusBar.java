@@ -482,9 +482,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             WallpaperInfo info = wallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
             final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
+            final boolean imageWallpaperInAmbient =
+                    !DozeParameters.getInstance(mContext).getDisplayNeedsBlanking();
             // If WallpaperInfo is null, it must be ImageWallpaper.
             final boolean supportsAmbientMode = deviceSupportsAodWallpaper
-                    && (info == null || info.supportsAmbientMode());
+                    && ((info == null && imageWallpaperInAmbient)
+                        || (info != null && info.supportsAmbientMode()));
 
             mStatusBarWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
@@ -1213,6 +1216,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDozeScrimController, keyguardViewMediator,
                 mScrimController, this, UnlockMethodCache.getInstance(mContext),
                 new Handler(), mKeyguardUpdateMonitor, Dependency.get(TunerService.class));
+        putComponent(BiometricUnlockController.class, mBiometricUnlockController);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
                 mStatusBarWindow.findViewById(R.id.lock_icon_container));

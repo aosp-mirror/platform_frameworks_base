@@ -24,6 +24,7 @@ import static android.opengl.GLES20.glViewport;
 
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
@@ -70,7 +71,14 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         DisplayInfo displayInfo = new DisplayInfo();
         WindowManager wm = context.getSystemService(WindowManager.class);
         wm.getDefaultDisplay().getDisplayInfo(displayInfo);
-        mScissor = new Rect(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+
+        // We only do transition in portrait currently, b/137962047.
+        int orientation = context.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mScissor = new Rect(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        } else {
+            mScissor = new Rect(0, 0, displayInfo.logicalHeight, displayInfo.logicalWidth);
+        }
 
         mProxy = proxy;
         mProgram = new ImageGLProgram(context);
@@ -179,20 +187,24 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     }
 
     @Override
-    public void onRevealStart() {
-        mScissorMode = true;
-        // Use current display area of texture.
-        mWallpaper.adjustTextureCoordinates(mSurfaceSize, mScissor, mXOffset, mYOffset);
+    public void onRevealStart(boolean animate) {
+        if (animate) {
+            mScissorMode = true;
+            // Use current display area of texture.
+            mWallpaper.adjustTextureCoordinates(mSurfaceSize, mScissor, mXOffset, mYOffset);
+        }
         mProxy.preRender();
     }
 
     @Override
     public void onRevealEnd() {
-        mScissorMode = false;
-        // reset texture coordinates to use full texture.
-        mWallpaper.adjustTextureCoordinates(null, null, 0, 0);
-        // We need draw full texture back before finishing render.
-        mProxy.requestRender();
+        if (mScissorMode) {
+            mScissorMode = false;
+            // reset texture coordinates to use full texture.
+            mWallpaper.adjustTextureCoordinates(null, null, 0, 0);
+            // We need draw full texture back before finishing render.
+            mProxy.requestRender();
+        }
         mProxy.postRender();
     }
 

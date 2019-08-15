@@ -15,4 +15,4 @@
     limitations under the License.
 -->
 <color xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="#C5E1A5" />
+    android:color="@color/q_clue_text" />

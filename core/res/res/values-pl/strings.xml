@@ -1711,7 +1711,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Gdy skrót jest włączony, jednoczesne naciśnięcie przez trzy sekundy obu klawiszy sterowania głośnością uruchomi funkcję ułatwień dostępu.\n\nBieżąca funkcja ułatwień dostępu:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nFunkcję możesz zmienić, wybierając Ustawienia &gt; Ułatwienia dostępu."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Wyłącz skrót"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Użyj skrótu"</string>
-    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Inwersja kolorów"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Odwrócenie kolorów"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Korekcja kolorów"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Skrót ułatwień dostępu wyłączył usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Skrót ułatwień dostępu wyłączył usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>

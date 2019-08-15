@@ -296,22 +296,12 @@ final class OverlayManagerServiceImpl {
      */
     private void updateAndRefreshOverlaysForTarget(@NonNull final String targetPackageName,
             final int userId, final int flags) {
-        final List<OverlayInfo> ois = new ArrayList<>();
+        final List<OverlayInfo> targetOverlays = mSettings.getOverlaysForTarget(targetPackageName,
+                userId);
 
-        // Framework overlays added first because order matters when resolving a resource
-        if (!"android".equals(targetPackageName)) {
-            ois.addAll(mSettings.getOverlaysForTarget("android", userId));
-        }
-
-        // Then add the targeted, non-framework overlays which have higher priority
-        ois.addAll(mSettings.getOverlaysForTarget(targetPackageName, userId));
-
-        final List<String> enabledBaseCodePaths = new ArrayList<>(ois.size());
-
+        // Update the state for any overlay that targets this package.
         boolean modified = false;
-        final int n = ois.size();
-        for (int i = 0; i < n; i++) {
-            final OverlayInfo oi = ois.get(i);
+        for (final OverlayInfo oi : targetOverlays) {
             final PackageInfo overlayPackage = mPackageManager.getPackageInfo(oi.packageName,
                     userId);
             if (overlayPackage == null) {
@@ -324,25 +314,39 @@ final class OverlayManagerServiceImpl {
                     Slog.e(TAG, "failed to update settings", e);
                     modified |= mSettings.remove(oi.packageName, userId);
                 }
-
-                if (oi.isEnabled() && overlayPackage.applicationInfo != null) {
-                    enabledBaseCodePaths.add(overlayPackage.applicationInfo.getBaseCodePath());
-                }
             }
         }
 
         if (!modified) {
+            // Update the overlay paths of the target within package manager if necessary.
+            final List<String> enabledOverlayPaths = new ArrayList<>(targetOverlays.size());
+
+            // Framework overlays are first in the overlay paths of a package within PackageManager.
+            for (final OverlayInfo oi : mSettings.getOverlaysForTarget("android", userId)) {
+                if (oi.isEnabled()) {
+                    enabledOverlayPaths.add(oi.baseCodePath);
+                }
+            }
+
+            for (final OverlayInfo oi : targetOverlays) {
+                if (oi.isEnabled()) {
+                    enabledOverlayPaths.add(oi.baseCodePath);
+                }
+            }
+
+            // TODO(): Use getEnabledOverlayPaths(userId, targetPackageName) instead of
+            // resourceDirs if in the future resourceDirs contains APKs other than overlays
             PackageInfo packageInfo = mPackageManager.getPackageInfo(targetPackageName, userId);
             ApplicationInfo appInfo = packageInfo == null ? null : packageInfo.applicationInfo;
             String[] resourceDirs = appInfo == null ? null : appInfo.resourceDirs;
 
             // If the lists aren't the same length, the enabled overlays have changed
-            if (ArrayUtils.size(resourceDirs) != enabledBaseCodePaths.size()) {
+            if (ArrayUtils.size(resourceDirs) != enabledOverlayPaths.size()) {
                 modified = true;
             } else if (resourceDirs != null) {
                 // If any element isn't equal, an overlay or the order of overlays has changed
                 for (int index = 0; index < resourceDirs.length; index++) {
-                    if (!resourceDirs[index].equals(enabledBaseCodePaths.get(index))) {
+                    if (!resourceDirs[index].equals(enabledOverlayPaths.get(index))) {
                         modified = true;
                         break;
                     }

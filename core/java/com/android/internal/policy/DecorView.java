@@ -983,13 +983,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     @Override
     public void setBackgroundDrawable(Drawable background) {
-
         // TODO: This should route through setWindowBackground, but late in the release to make this
         // change.
         if (mOriginalBackgroundDrawable != background) {
             mOriginalBackgroundDrawable = background;
             updateBackgroundDrawable();
-            drawableChanged();
+            if (!View.sBrokenWindowBackground) {
+                drawableChanged();
+            }
         }
     }
 

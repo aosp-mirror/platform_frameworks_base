@@ -25,7 +25,6 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
@@ -108,10 +107,19 @@ public class NotificationData {
             boolean bSystemMax = bImportance >= NotificationManager.IMPORTANCE_HIGH
                     && isSystemNotification(nb);
 
-            boolean isHeadsUp = a.getRow().isHeadsUp();
-            if (isHeadsUp != b.getRow().isHeadsUp()) {
-                return isHeadsUp ? -1 : 1;
-            } else if (isHeadsUp) {
+
+            boolean aHeadsUp = a.getRow().isHeadsUp();
+            boolean bHeadsUp = b.getRow().isHeadsUp();
+
+            // HACK: This should really go elsewhere, but it's currently not straightforward to
+            // extract the comparison code and we're guaranteed to touch every element, so this is
+            // the best place to set the buckets for the moment.
+            a.setIsTopBucket(aHeadsUp || aMedia || aSystemMax || a.isHighPriority());
+            b.setIsTopBucket(bHeadsUp || bMedia || bSystemMax || b.isHighPriority());
+
+            if (aHeadsUp != bHeadsUp) {
+                return aHeadsUp ? -1 : 1;
+            } else if (aHeadsUp) {
                 // Provide consistent ranking with headsUpManager
                 return mHeadsUpManager.compare(a, b);
             } else if (a.getRow().showingAmbientPulsing() != b.getRow().showingAmbientPulsing()) {
@@ -414,7 +422,14 @@ public class NotificationData {
             }
         }
 
-        Collections.sort(mSortedAndFiltered, mRankingComparator);
+        if (mSortedAndFiltered.size() == 1) {
+            // HACK: We need the comparator to run on all children in order to set the
+            // isHighPriority field. If there is only one child, then the comparison won't be run,
+            // so we have to trigger it manually. Get rid of this code as soon as possible.
+            mRankingComparator.compare(mSortedAndFiltered.get(0), mSortedAndFiltered.get(0));
+        } else {
+            Collections.sort(mSortedAndFiltered, mRankingComparator);
+        }
     }
 
     public void dump(PrintWriter pw, String indent) {

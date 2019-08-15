@@ -127,7 +127,7 @@
     <item msgid="3910386316304772394">"Da biste pozivali i slali poruke koristeći WiFi mrežu, prvo zatražite od operatera da postavi tu uslugu. Zatim ponovo uključite pozivanje putem WiFi-ja u Postavkama. (Kôd greške: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7372514042696663278">"Došlo je do problema prilikom registracije pozivanja putem WiFi mreže kod vašeg operatera: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="7372514042696663278">"Došlo je do problema prilikom registracije pozivanja putem WiFi mreže kod vašeg mobilnog operatera: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
@@ -801,7 +801,7 @@
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Nije pronađena aplikacija za pregled ovog kontakta."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Unesite PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Unesite PUK i novi PIN"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kôd"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Novi PIN"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Dodirnite za unos lozinke"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Unesite lozinku za otključavanje tipkovnice"</string>
@@ -893,7 +893,7 @@
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Otključavanje licem."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Otključavanje pinom."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Otključavanje Pin-om za Sim."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Otključavanje Puk-om za Sim."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Otključavanje SIM-a PUK-om"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Otključavanje lozinkom."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Uzorak oblasti."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Oblast za pomjeranje klizača."</string>
@@ -1150,10 +1150,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Otvori koristeći"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otvori koristeći %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Otvori"</string>
-    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"Otvaranje linkova hosta <xliff:g id="HOST">%1$s</xliff:g> pomoću"</string>
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"Otvaranje <xliff:g id="HOST">%1$s</xliff:g> linkova pomoću"</string>
     <string name="whichOpenLinksWith" msgid="6392123355599572804">"Otvaranje linkova pomoću"</string>
     <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Otvaranje linkova pomoću aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"Otvaranje linkova hosta <xliff:g id="HOST">%1$s</xliff:g> pomoću aplikacije <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"Otvaranje <xliff:g id="HOST">%1$s</xliff:g> linkova pomoću aplikacije <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Dozvoli pristup"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Uredi koristeći"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Uredi koristeći %1$s"</string>
@@ -1542,7 +1542,7 @@
     <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Povećaj sate"</string>
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Smanji sate"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Postavi za poslijepodne (PM)"</string>
-    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Postavi za prijepodne (AM)"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Postavi za prijepodne"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Povećaj mjesece"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Smanji mjesece"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Povećaj dane"</string>
