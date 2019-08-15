@@ -722,16 +722,33 @@ public class Trampoline extends IBackupManager.Stub {
         return userBackupManagerService != null && userBackupManagerService.isBackupEnabled();
     }
 
+    /** Sets the backup password used when running adb backup. */
     @Override
-    public boolean setBackupPassword(String currentPw, String newPw) throws RemoteException {
+    public boolean setBackupPassword(String currentPassword, String newPassword) {
         int userId = binderGetCallingUserId();
-        return (isUserReadyForBackup(userId)) && mService.setBackupPassword(currentPw, newPw);
+        if (!isUserReadyForBackup(userId)) {
+            return false;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(
+                        UserHandle.USER_SYSTEM, "setBackupPassword()");
+
+        return userBackupManagerService != null
+                && userBackupManagerService.setBackupPassword(currentPassword, newPassword);
     }
 
+    /** Returns {@code true} if adb backup was run with a password, else returns {@code false}. */
     @Override
     public boolean hasBackupPassword() throws RemoteException {
         int userId = binderGetCallingUserId();
-        return (isUserReadyForBackup(userId)) && mService.hasBackupPassword();
+        if (!isUserReadyForBackup(userId)) {
+            return false;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(
+                        UserHandle.USER_SYSTEM, "hasBackupPassword()");
+
+        return userBackupManagerService != null && userBackupManagerService.hasBackupPassword();
     }
 
     @Override
@@ -759,13 +776,43 @@ public class Trampoline extends IBackupManager.Stub {
         }
     }
 
-    public void adbBackup(@UserIdInt int userId, ParcelFileDescriptor fd,
-            boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
-            boolean allApps, boolean allIncludesSystem, boolean doCompress, boolean doKeyValue,
-            String[] packageNames) throws RemoteException {
-        if (isUserReadyForBackup(userId)) {
-            mService.adbBackup(userId, fd, includeApks, includeObbs, includeShared, doWidgets,
-                    allApps, allIncludesSystem, doCompress, doKeyValue, packageNames);
+    /**
+     * Used by 'adb backup' to run a backup pass for packages {@code packageNames} supplied via the
+     * command line, writing the resulting data stream to the supplied {@code fd}. This method is
+     * synchronous and does not return to the caller until the backup has been completed. It
+     * requires on-screen confirmation by the user.
+     */
+    @Override
+    public void adbBackup(
+            @UserIdInt int userId,
+            ParcelFileDescriptor fd,
+            boolean includeApks,
+            boolean includeObbs,
+            boolean includeShared,
+            boolean doWidgets,
+            boolean doAllApps,
+            boolean includeSystem,
+            boolean doCompress,
+            boolean doKeyValue,
+            String[] packageNames) {
+        if (!isUserReadyForBackup(userId)) {
+            return;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "adbBackup()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.adbBackup(
+                    fd,
+                    includeApks,
+                    includeObbs,
+                    includeShared,
+                    doWidgets,
+                    doAllApps,
+                    includeSystem,
+                    doCompress,
+                    doKeyValue,
+                    packageNames);
         }
     }
 
@@ -789,10 +836,21 @@ public class Trampoline extends IBackupManager.Stub {
         }
     }
 
+    /**
+     * Used by 'adb restore' to run a restore pass reading from the supplied {@code fd}. This method
+     * is synchronous and does not return to the caller until the restore has been completed. It
+     * requires on-screen confirmation by the user.
+     */
     @Override
-    public void adbRestore(@UserIdInt int userId, ParcelFileDescriptor fd) throws RemoteException {
-        if (isUserReadyForBackup(userId)) {
-            mService.adbRestore(userId, fd);
+    public void adbRestore(@UserIdInt int userId, ParcelFileDescriptor fd) {
+        if (!isUserReadyForBackup(userId)) {
+            return;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "adbRestore()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.adbRestore(fd);
         }
     }
 
@@ -806,8 +864,28 @@ public class Trampoline extends IBackupManager.Stub {
             IFullBackupRestoreObserver observer)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.acknowledgeAdbBackupOrRestore(userId, token, allow,
+            acknowledgeAdbBackupOrRestore(userId, token, allow,
                     curPassword, encryptionPassword, observer);
+        }
+    }
+
+    /**
+     * Confirm that the previously requested adb backup/restore operation can proceed. This is used
+     * to require a user-facing disclosure about the operation.
+     */
+    public void acknowledgeAdbBackupOrRestore(
+            @UserIdInt int userId,
+            int token,
+            boolean allow,
+            String currentPassword,
+            String encryptionPassword,
+            IFullBackupRestoreObserver observer) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "acknowledgeAdbBackupOrRestore()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.acknowledgeAdbBackupOrRestore(
+                    token, allow, currentPassword, encryptionPassword, observer);
         }
     }
 

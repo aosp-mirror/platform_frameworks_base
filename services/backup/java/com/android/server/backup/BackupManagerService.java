@@ -20,10 +20,8 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.backup.IFullBackupRestoreObserver;
 import android.content.Context;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.util.SparseArray;
 
@@ -89,99 +87,6 @@ public class BackupManagerService {
      * action on the passed in user. Currently this is a straight redirection (see TODO).
      */
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    // ---------------------------------------------
-    // ADB BACKUP/RESTORE OPERATIONS
-    // ---------------------------------------------
-
-    /** Sets the backup password used when running adb backup. */
-    public boolean setBackupPassword(String currentPassword, String newPassword) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(
-                        UserHandle.USER_SYSTEM, "setBackupPassword()");
-
-        return userBackupManagerService != null
-                && userBackupManagerService.setBackupPassword(currentPassword, newPassword);
-    }
-
-    /** Returns {@code true} if adb backup was run with a password, else returns {@code false}. */
-    public boolean hasBackupPassword() {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(
-                        UserHandle.USER_SYSTEM, "hasBackupPassword()");
-
-        return userBackupManagerService != null && userBackupManagerService.hasBackupPassword();
-    }
-
-    /**
-     * Used by 'adb backup' to run a backup pass for packages {@code packageNames} supplied via the
-     * command line, writing the resulting data stream to the supplied {@code fd}. This method is
-     * synchronous and does not return to the caller until the backup has been completed. It
-     * requires on-screen confirmation by the user.
-     */
-    public void adbBackup(
-            @UserIdInt int userId,
-            ParcelFileDescriptor fd,
-            boolean includeApks,
-            boolean includeObbs,
-            boolean includeShared,
-            boolean doWidgets,
-            boolean doAllApps,
-            boolean includeSystem,
-            boolean doCompress,
-            boolean doKeyValue,
-            String[] packageNames) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "adbBackup()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.adbBackup(
-                    fd,
-                    includeApks,
-                    includeObbs,
-                    includeShared,
-                    doWidgets,
-                    doAllApps,
-                    includeSystem,
-                    doCompress,
-                    doKeyValue,
-                    packageNames);
-        }
-    }
-
-    /**
-     * Used by 'adb restore' to run a restore pass reading from the supplied {@code fd}. This method
-     * is synchronous and does not return to the caller until the restore has been completed. It
-     * requires on-screen confirmation by the user.
-     */
-    public void adbRestore(@UserIdInt int userId, ParcelFileDescriptor fd) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "adbRestore()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.adbRestore(fd);
-        }
-    }
-
-    /**
-     * Confirm that the previously requested adb backup/restore operation can proceed. This is used
-     * to require a user-facing disclosure about the operation.
-     */
-    public void acknowledgeAdbBackupOrRestore(
-            @UserIdInt int userId,
-            int token,
-            boolean allow,
-            String currentPassword,
-            String encryptionPassword,
-            IFullBackupRestoreObserver observer) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "acknowledgeAdbBackupOrRestore()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.acknowledgeAdbBackupOrRestore(
-                    token, allow, currentPassword, encryptionPassword, observer);
-        }
-    }
 
     // ---------------------------------------------
     //  SERVICE OPERATIONS
