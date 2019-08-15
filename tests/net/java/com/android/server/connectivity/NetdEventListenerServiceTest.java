@@ -19,8 +19,9 @@ package com.android.server.connectivity;
 import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
 import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
 
+import static com.android.testutils.MiscAssertsKt.assertStringContains;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -111,15 +112,15 @@ public class NetdEventListenerServiceTest {
         String[] events2 = remove(listNetdEvent(), baseline);
         int expectedLength2 = uids.length + 1; // +1 for the WakeupStats line
         assertEquals(expectedLength2, events2.length);
-        assertContains(events2[0], "WakeupStats");
-        assertContains(events2[0], "wlan0");
-        assertContains(events2[0], "0x800");
-        assertContains(events2[0], "0x86dd");
+        assertStringContains(events2[0], "WakeupStats");
+        assertStringContains(events2[0], "wlan0");
+        assertStringContains(events2[0], "0x800");
+        assertStringContains(events2[0], "0x86dd");
         for (int i = 0; i < uids.length; i++) {
             String got = events2[i+1];
-            assertContains(got, "WakeupEvent");
-            assertContains(got, "wlan0");
-            assertContains(got, "uid: " + uids[i]);
+            assertStringContains(got, "WakeupEvent");
+            assertStringContains(got, "wlan0");
+            assertStringContains(got, "uid: " + uids[i]);
         }
 
         int uid = 20000;
@@ -131,13 +132,13 @@ public class NetdEventListenerServiceTest {
         String[] events3 = remove(listNetdEvent(), baseline);
         int expectedLength3 = BUFFER_LENGTH + 1; // +1 for the WakeupStats line
         assertEquals(expectedLength3, events3.length);
-        assertContains(events2[0], "WakeupStats");
-        assertContains(events2[0], "wlan0");
+        assertStringContains(events2[0], "WakeupStats");
+        assertStringContains(events2[0], "wlan0");
         for (int i = 1; i < expectedLength3; i++) {
             String got = events3[i];
-            assertContains(got, "WakeupEvent");
-            assertContains(got, "wlan0");
-            assertContains(got, "uid: " + uid);
+            assertStringContains(got, "WakeupEvent");
+            assertStringContains(got, "wlan0");
+            assertStringContains(got, "uid: " + uid);
         }
 
         uid = 45678;
@@ -145,9 +146,9 @@ public class NetdEventListenerServiceTest {
 
         String[] events4 = remove(listNetdEvent(), baseline);
         String lastEvent = events4[events4.length - 1];
-        assertContains(lastEvent, "WakeupEvent");
-        assertContains(lastEvent, "wlan0");
-        assertContains(lastEvent, "uid: " + uid);
+        assertStringContains(lastEvent, "WakeupEvent");
+        assertStringContains(lastEvent, "wlan0");
+        assertStringContains(lastEvent, "uid: " + uid);
     }
 
     @Test
@@ -527,10 +528,6 @@ public class NetdEventListenerServiceTest {
         PrintWriter writer = new PrintWriter(buffer);
         mService.list(writer);
         return buffer.toString().split("\\n");
-    }
-
-    static void assertContains(String got, String want) {
-        assertTrue(got + " did not contain \"" + want + "\"", got.contains(want));
     }
 
     static <T> T[] remove(T[] array, T[] filtered) {

@@ -38,6 +38,9 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
 
+import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
+import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,7 +48,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
@@ -267,9 +269,9 @@ public class NetworkCapabilitiesTest {
             .setUids(uids)
             .addCapability(NET_CAPABILITY_EIMS)
             .addCapability(NET_CAPABILITY_NOT_METERED);
-        assertEqualsThroughMarshalling(netCap);
+        assertParcelingIsLossless(netCap);
         netCap.setSSID(TEST_SSID);
-        assertEqualsThroughMarshalling(netCap);
+        assertParcelSane(netCap, 11);
     }
 
     @Test
@@ -540,18 +542,6 @@ public class NetworkCapabilitiesTest {
         NetworkCapabilities nc3 = new NetworkCapabilities();
         nc3.setTransportInfo(nc1.getTransportInfo());
         nc1.combineCapabilities(nc3);
-    }
-
-    private void assertEqualsThroughMarshalling(NetworkCapabilities netCap) {
-        Parcel p = Parcel.obtain();
-        netCap.writeToParcel(p, /* flags */ 0);
-        p.setDataPosition(0);
-        byte[] marshalledData = p.marshall();
-
-        p = Parcel.obtain();
-        p.unmarshall(marshalledData, 0, marshalledData.length);
-        p.setDataPosition(0);
-        assertEquals(NetworkCapabilities.CREATOR.createFromParcel(p), netCap);
     }
 
     @Test

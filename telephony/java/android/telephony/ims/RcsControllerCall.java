@@ -19,10 +19,11 @@ package android.telephony.ims;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telephony.ims.aidl.IRcs;
+import android.telephony.ims.aidl.IRcsMessage;
 
 /**
- * A wrapper class around RPC calls that {@link RcsMessageStore} APIs to minimize boilerplate code.
+ * A wrapper class around RPC calls that {@link RcsMessageManager} APIs to minimize boilerplate
+ * code.
  *
  * @hide - not meant for public use
  */
@@ -34,13 +35,14 @@ class RcsControllerCall {
     }
 
     <R> R call(RcsServiceCall<R> serviceCall) throws RcsMessageStoreException {
-        IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_RCS_SERVICE));
-        if (iRcs == null) {
+        IRcsMessage iRcsMessage = IRcsMessage.Stub.asInterface(ServiceManager.getService(
+                Context.TELEPHONY_RCS_MESSAGE_SERVICE));
+        if (iRcsMessage == null) {
             throw new RcsMessageStoreException("Could not connect to RCS storage service");
         }
 
         try {
-            return serviceCall.methodOnIRcs(iRcs, mContext.getOpPackageName());
+            return serviceCall.methodOnIRcs(iRcsMessage, mContext.getOpPackageName());
         } catch (RemoteException exception) {
             throw new RcsMessageStoreException(exception.getMessage());
         }
@@ -48,17 +50,17 @@ class RcsControllerCall {
 
     void callWithNoReturn(RcsServiceCallWithNoReturn serviceCall)
             throws RcsMessageStoreException {
-        call((iRcs, callingPackage) -> {
-            serviceCall.methodOnIRcs(iRcs, callingPackage);
+        call((iRcsMessage, callingPackage) -> {
+            serviceCall.methodOnIRcs(iRcsMessage, callingPackage);
             return null;
         });
     }
 
     interface RcsServiceCall<R> {
-        R methodOnIRcs(IRcs iRcs, String callingPackage) throws RemoteException;
+        R methodOnIRcs(IRcsMessage iRcs, String callingPackage) throws RemoteException;
     }
 
     interface RcsServiceCallWithNoReturn {
-        void methodOnIRcs(IRcs iRcs, String callingPackage) throws RemoteException;
+        void methodOnIRcs(IRcsMessage iRcs, String callingPackage) throws RemoteException;
     }
 }

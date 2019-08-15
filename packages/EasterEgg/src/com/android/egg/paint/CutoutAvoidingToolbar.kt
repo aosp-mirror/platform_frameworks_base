@@ -26,15 +26,16 @@ class CutoutAvoidingToolbar : LinearLayout {
     private var _insets: WindowInsets? = null
 
     constructor(context: Context) : super(context) {
-        init(null, 0)
     }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init(attrs, 0)
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
-        init(attrs, defStyle)
+    constructor(
+        context: Context,
+        attrs: AttributeSet,
+        defStyle: Int
+    ) : super(context, attrs, defStyle) {
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -81,8 +82,4 @@ class CutoutAvoidingToolbar : LinearLayout {
             requestLayout()
         }
     }
-
-    private fun init(attrs: AttributeSet?, defStyle: Int) {
-    }
-
 }

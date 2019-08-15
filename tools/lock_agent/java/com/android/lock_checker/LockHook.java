@@ -16,6 +16,7 @@
 
 package com.android.lock_checker;
 
+import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -24,6 +25,7 @@ import android.os.Process;
 import android.util.Log;
 import android.util.LogWriter;
 
+import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.StatLogger;
 
@@ -66,10 +68,14 @@ public class LockHook {
 
     static final StatLogger sStats = new StatLogger(new String[] { "on-thread", });
 
-    private static final ConcurrentLinkedQueue<Object> sViolations = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<Violation> sViolations =
+            new ConcurrentLinkedQueue<>();
     private static final int MAX_VIOLATIONS = 50;
 
     private static final LockChecker[] sCheckers;
+
+    private static boolean sNativeHandling = false;
+    private static boolean sSimulateCrash = false;
 
     static {
         sHandlerThread = new HandlerThread("LockHook:wtf", Process.THREAD_PRIORITY_BACKGROUND);
@@ -77,7 +83,13 @@ public class LockHook {
         sHandler = new WtfHandler(sHandlerThread.getLooper());
 
         sCheckers = new LockChecker[] { new OnThreadLockChecker() };
+
+        sNativeHandling = getNativeHandlingConfig();
+        sSimulateCrash = getSimulateCrashConfig();
     }
+
+    private static native boolean getNativeHandlingConfig();
+    private static native boolean getSimulateCrashConfig();
 
     static <T> boolean shouldDumpStacktrace(StacktraceHasher hasher, Map<String, T> dumpedSet,
             T val, AnnotatedStackTraceElement[] st, int from, int to) {
@@ -101,8 +113,8 @@ public class LockHook {
         }
     }
 
-    static void wtf(String message) {
-        sHandler.wtf(message);
+    static void wtf(Violation v) {
+        sHandler.wtf(v);
     }
 
     static void doCheckOnThisThread(boolean check) {
@@ -151,10 +163,10 @@ public class LockHook {
             super(looper);
         }
 
-        public void wtf(String msg) {
+        public void wtf(Violation v) {
             sDoCheck.set(false);
             SomeArgs args = SomeArgs.obtain();
-            args.arg1 = msg;
+            args.arg1 = v;
             obtainMessage(MSG_WTF, args).sendToTarget();
             sDoCheck.set(true);
         }
@@ -164,12 +176,28 @@ public class LockHook {
             switch (msg.what) {
                 case MSG_WTF:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    Log.wtf(TAG, (String) args.arg1);
+                    handleViolation((Violation) args.arg1);
                     args.recycle();
                     break;
             }
         }
     }
+
+    private static void handleViolation(Violation v) {
+        String msg = v.toString();
+        Log.wtf(TAG, msg);
+        if (sNativeHandling) {
+            nWtf(msg);  // Also send to native.
+        }
+        if (sSimulateCrash) {
+            RuntimeInit.logUncaught("LockAgent",
+                    ActivityThread.isSystem() ? "system_server"
+                            : ActivityThread.currentProcessName(),
+                    Process.myPid(), v.getException());
+        }
+    }
+
+    private static native void nWtf(String msg);
 
     /**
      * Generates a hash for a given stacktrace of a {@link Throwable}.
@@ -224,8 +252,10 @@ public class LockHook {
         }
     }
 
-    static void addViolation(Object o) {
-        sViolations.offer(o);
+    static void addViolation(Violation v) {
+        wtf(v);
+
+        sViolations.offer(v);
         while (sViolations.size() > MAX_VIOLATIONS) {
             sViolations.poll();
         }
@@ -286,5 +316,9 @@ public class LockHook {
         String getCheckerName();
 
         void dump(PrintWriter pw);
+    }
+
+    interface Violation {
+        Throwable getException();
     }
 }

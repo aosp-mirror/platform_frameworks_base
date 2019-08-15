@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -52,6 +53,7 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
 
@@ -306,18 +308,46 @@ interface ITelephony {
      */
     List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);
 
-     @UnsupportedAppUsage
-     int getCallState();
+    @UnsupportedAppUsage
+    int getCallState();
 
     /**
      * Returns the call state for a slot.
      */
-     int getCallStateForSlot(int slotIndex);
+    int getCallStateForSlot(int slotIndex);
 
-     @UnsupportedAppUsage
-     int getDataActivity();
-     @UnsupportedAppUsage
-     int getDataState();
+    /**
+     * Replaced by getDataActivityForSubId.
+     */
+    int getDataActivity();
+
+    /**
+     * Returns a constant indicating the type of activity on a data connection
+     * (cellular).
+     *
+     * @see #DATA_ACTIVITY_NONE
+     * @see #DATA_ACTIVITY_IN
+     * @see #DATA_ACTIVITY_OUT
+     * @see #DATA_ACTIVITY_INOUT
+     * @see #DATA_ACTIVITY_DORMANT
+     */
+    int getDataActivityForSubId(int subId);
+
+    /**
+     * Replaced by getDataStateForSubId.
+     */
+    int getDataState();
+
+    /**
+     * Returns a constant indicating the current data connection state
+     * (cellular).
+     *
+     * @see #DATA_DISCONNECTED
+     * @see #DATA_CONNECTING
+     * @see #DATA_CONNECTED
+     * @see #DATA_SUSPENDED
+     */
+    int getDataStateForSubId(int subId);
 
     /**
      * Returns the current active phone type as integer.
@@ -1612,7 +1642,7 @@ interface ITelephony {
      * <p>
      * See {@link UiccCardInfo} for more details on the kind of information available.
      *
-     * @param callingPackage package making the call, used to evaluate carrier privileges 
+     * @param callingPackage package making the call, used to evaluate carrier privileges
      * @return a list of UiccCardInfo objects, representing information on the currently inserted
      * UICCs and eUICCs. Each UiccCardInfo in the list will have private information filtered out if
      * the caller does not have adequate permissions for that card.
@@ -1973,4 +2003,31 @@ interface ITelephony {
     boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
 
     boolean isApnMetered(int apnType, int subId);
+
+    /**
+     * Enqueue a pending sms Consumer, which will answer with the user specified selection for an
+     * outgoing SmsManager operation.
+     */
+    oneway void enqueueSmsPickResult(String callingPackage, IIntegerConsumer subIdResult);
+
+    /**
+     * Returns the MMS user agent.
+     */
+    String getMmsUserAgent(int subId);
+
+    /**
+     * Returns the MMS user agent profile URL.
+     */
+    String getMmsUAProfUrl(int subId);
+
+    /**
+     * Set allowing mobile data during voice call.
+     */
+    boolean setDataAllowedDuringVoiceCall(int subId, boolean allow);
+
+    /**
+     * Check whether data is allowed during voice call. Note this is for dual sim device that
+     * data might be disabled on non-default data subscription but explicitly turned on by settings.
+     */
+    boolean isDataAllowedInVoiceCall(int subId);
 }

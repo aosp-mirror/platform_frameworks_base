@@ -250,6 +250,8 @@ public final class ImsSsInfo implements Parcelable {
         out.writeInt(mStatus);
         out.writeString(mIcbNum);
         out.writeInt(mProvisionStatus);
+        out.writeInt(mClirInterrogationStatus);
+        out.writeInt(mClirOutgoingState);
     }
 
     @Override
@@ -273,6 +275,8 @@ public final class ImsSsInfo implements Parcelable {
         mStatus = in.readInt();
         mIcbNum = in.readString();
         mProvisionStatus = in.readInt();
+        mClirInterrogationStatus = in.readInt();
+        mClirOutgoingState = in.readInt();
     }
 
     public static final Creator<ImsSsInfo> CREATOR =

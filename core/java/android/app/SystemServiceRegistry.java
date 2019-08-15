@@ -149,7 +149,8 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
-import android.telephony.ims.RcsManager;
+import android.telephony.ims.RcsMessageManager;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -171,7 +172,7 @@ import com.android.internal.net.INetworkWatchlistManager;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Manages all of the system services that can be returned by {@link Context#getSystemService}.
@@ -182,10 +183,10 @@ final class SystemServiceRegistry {
 
     // Service registry information.
     // This information is never changed once static initialization has completed.
-    private static final HashMap<Class<?>, String> SYSTEM_SERVICE_NAMES =
-            new HashMap<Class<?>, String>();
-    private static final HashMap<String, ServiceFetcher<?>> SYSTEM_SERVICE_FETCHERS =
-            new HashMap<String, ServiceFetcher<?>>();
+    private static final Map<Class<?>, String> SYSTEM_SERVICE_NAMES =
+            new ArrayMap<Class<?>, String>();
+    private static final Map<String, ServiceFetcher<?>> SYSTEM_SERVICE_FETCHERS =
+            new ArrayMap<String, ServiceFetcher<?>>();
     private static int sServiceCacheSize;
 
     // Not instantiable.
@@ -551,11 +552,11 @@ final class SystemServiceRegistry {
                 return new SubscriptionManager(ctx.getOuterContext());
             }});
 
-        registerService(Context.TELEPHONY_RCS_SERVICE, RcsManager.class,
-                new CachedServiceFetcher<RcsManager>() {
+        registerService(Context.TELEPHONY_RCS_MESSAGE_SERVICE, RcsMessageManager.class,
+                new CachedServiceFetcher<RcsMessageManager>() {
                     @Override
-                    public RcsManager createService(ContextImpl ctx) {
-                        return new RcsManager(ctx.getOuterContext());
+                    public RcsMessageManager createService(ContextImpl ctx) {
+                        return new RcsMessageManager(ctx.getOuterContext());
                     }
                 });
 

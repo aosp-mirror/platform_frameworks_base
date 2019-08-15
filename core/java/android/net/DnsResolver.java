@@ -16,7 +16,7 @@
 
 package android.net;
 
-import static android.net.NetworkUtils.getDnsNetId;
+import static android.net.NetworkUtils.getDnsNetwork;
 import static android.net.NetworkUtils.resNetworkCancel;
 import static android.net.NetworkUtils.resNetworkQuery;
 import static android.net.NetworkUtils.resNetworkResult;
@@ -34,6 +34,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.CancellationSignal;
 import android.os.Looper;
+import android.os.MessageQueue;
 import android.system.ErrnoException;
 import android.util.Log;
 
@@ -333,7 +334,7 @@ public final class DnsResolver {
         final Object lock = new Object();
         final Network queryNetwork;
         try {
-            queryNetwork = (network != null) ? network : new Network(getDnsNetId());
+            queryNetwork = (network != null) ? network : getDnsNetwork();
         } catch (ErrnoException e) {
             executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
             return;
@@ -433,7 +434,7 @@ public final class DnsResolver {
         final FileDescriptor queryfd;
         final Network queryNetwork;
         try {
-            queryNetwork = (network != null) ? network : new Network(getDnsNetId());
+            queryNetwork = (network != null) ? network : getDnsNetwork();
             queryfd = resNetworkQuery(queryNetwork.getNetIdForResolv(), domain, CLASS_IN, nsType,
                     flags);
         } catch (ErrnoException e) {
@@ -466,10 +467,20 @@ public final class DnsResolver {
     private void registerFDListener(@NonNull Executor executor,
             @NonNull FileDescriptor queryfd, @NonNull Callback<? super byte[]> answerCallback,
             @Nullable CancellationSignal cancellationSignal, @NonNull Object lock) {
-        Looper.getMainLooper().getQueue().addOnFileDescriptorEventListener(
+        final MessageQueue mainThreadMessageQueue = Looper.getMainLooper().getQueue();
+        mainThreadMessageQueue.addOnFileDescriptorEventListener(
                 queryfd,
                 FD_EVENTS,
                 (fd, events) -> {
+                    // b/134310704
+                    // Unregister fd event listener before resNetworkResult is called to prevent
+                    // race condition caused by fd reused.
+                    // For example when querying v4 and v6, it's possible that the first query ends
+                    // and the fd is closed before the second request starts, which might return
+                    // the same fd for the second request. By that time, the looper must have
+                    // unregistered the fd, otherwise another event listener can't be registered.
+                    mainThreadMessageQueue.removeOnFileDescriptorEventListener(fd);
+
                     executor.execute(() -> {
                         DnsResponse resp = null;
                         ErrnoException exception = null;
@@ -490,7 +501,11 @@ public final class DnsResolver {
                         }
                         answerCallback.onAnswer(resp.answerbuf, resp.rcode);
                     });
-                    // Unregister this fd listener
+
+                    // The file descriptor has already been unregistered, so it does not really
+                    // matter what is returned here. In spirit 0 (meaning "unregister this FD")
+                    // is still the closest to what the looper needs to do. When returning 0,
+                    // Looper knows to ignore the fd if it has already been unregistered.
                     return 0;
                 });
     }

@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -30,8 +32,6 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.android.internal.util.TestUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -942,13 +942,13 @@ public class LinkPropertiesTest {
 
         source.setNat64Prefix(new IpPrefix("2001:db8:1:2:64:64::/96"));
 
-        TestUtils.assertParcelingIsLossless(source);
+        assertParcelingIsLossless(source);
     }
 
     @Test
     public void testParcelUninitialized() throws Exception {
         LinkProperties empty = new LinkProperties();
-        TestUtils.assertParcelingIsLossless(empty);
+        assertParcelingIsLossless(empty);
     }
 
     @Test

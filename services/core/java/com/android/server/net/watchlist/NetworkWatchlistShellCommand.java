@@ -17,8 +17,6 @@
 package com.android.server.net.watchlist;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.NetworkWatchlistManager;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -26,7 +24,6 @@ import android.os.ShellCommand;
 import android.provider.Settings;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
@@ -74,10 +71,12 @@ class NetworkWatchlistShellCommand extends ShellCommand {
         try {
             final String configXmlPath = getNextArgRequired();
             final ParcelFileDescriptor pfd = openFileForSystem(configXmlPath, "r");
-            if (pfd != null) {
-                final InputStream fileStream = new FileInputStream(pfd.getFileDescriptor());
-                WatchlistConfig.getInstance().setTestMode(fileStream);
+            if (pfd == null) {
+                pw.println("Error: can't open input file " + configXmlPath);
+                return -1;
             }
+            final InputStream fileStream = new FileInputStream(pfd.getFileDescriptor());
+            WatchlistConfig.getInstance().setTestMode(fileStream);
             pw.println("Success!");
         } catch (Exception ex) {
             pw.println("Error: " + ex.toString());

@@ -306,6 +306,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                 whichHeap = HEAP_NATIVE;
             } else if (strncmp(name, "[stack", 6) == 0) {
                 whichHeap = HEAP_STACK;
+            } else if (strncmp(name, "[anon:stack_and_tls:", 20) == 0) {
+                whichHeap = HEAP_STACK;
             } else if (nameLen > 3 && strcmp(name+nameLen-3, ".so") == 0) {
                 whichHeap = HEAP_SO;
                 is_swappable = true;

@@ -39,6 +39,7 @@ android_test {
     srcs: [
         "src/android/startop/test/DexBuilderTest.java",
         "src/android/startop/test/LayoutCompilerTest.java",
+        "src/android/startop/test/TestClass.java",
     ],
     sdk_version: "current",
     data: [":generate_dex_testcases", ":generate_compiled_layout1", ":generate_compiled_layout2"],

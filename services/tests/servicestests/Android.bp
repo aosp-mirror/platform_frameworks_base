@@ -38,6 +38,7 @@ android_test {
         "ub-uiautomator",
         "platformprotosnano",
         "servicestests-utils",
+        "xml-writer-device-lib",
     ],
 
     aidl: {
@@ -78,6 +79,8 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    data: [":JobTestApp"],
 }
 
 java_library {

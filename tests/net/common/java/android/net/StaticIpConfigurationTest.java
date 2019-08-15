@@ -18,6 +18,7 @@ package android.net;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -34,7 +35,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -59,10 +59,6 @@ public class StaticIpConfigurationTest {
         assertNull(s.gateway);
         assertNull(s.domains);
         assertEquals(0, s.dnsServers.size());
-    }
-
-    private static <T> void assertNotEquals(T t1, T t2) {
-        assertFalse(Objects.equals(t1, t2));
     }
 
     private StaticIpConfiguration makeTestObject() {

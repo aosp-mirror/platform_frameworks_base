@@ -149,6 +149,11 @@ class ZygoteConnection {
 
         parsedArgs = new ZygoteArguments(args);
 
+        if (parsedArgs.mBootCompleted) {
+            handleBootCompleted();
+            return null;
+        }
+
         if (parsedArgs.mAbiListQuery) {
             handleAbiListQuery();
             return null;
@@ -289,6 +294,10 @@ class ZygoteConnection {
         } catch (IOException ioe) {
             throw new IllegalStateException("Error writing to command socket", ioe);
         }
+    }
+
+    private void handleBootCompleted() {
+        VMRuntime.bootCompleted();
     }
 
     /**

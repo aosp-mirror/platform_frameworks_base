@@ -302,9 +302,25 @@ public class SubscriptionManager {
      * subscription.
      *
      * Default value is 0.
+     *
+     * @deprecated Replaced by {@link #DATA_ENABLED_OVERRIDE_RULES}
+     * @hide
      */
-    /** @hide */
+    @Deprecated
     public static final String WHITE_LISTED_APN_DATA = "white_listed_apn_data";
+
+    /**
+     * TelephonyProvider column name data_enabled_override_rules.
+     * It's a list of rules for overriding data enabled settings. The syntax is
+     * For example, "mms=nonDefault" indicates enabling data for mms in non-default subscription.
+     * "default=nonDefault&inVoiceCall" indicates enabling data for internet in non-default
+     * subscription and while is in voice call.
+     *
+     * Default value is empty string.
+     *
+     * @hide
+     */
+    public static final String DATA_ENABLED_OVERRIDE_RULES = "data_enabled_override_rules";
 
     /**
      * This constant is to designate a subscription as a Local-SIM Subscription.
@@ -773,6 +789,14 @@ public class SubscriptionManager {
      */
     @SystemApi
     public static final int PROFILE_CLASS_DEFAULT = PROFILE_CLASS_UNSET;
+
+    /**
+     * IMSI (International Mobile Subscriber Identity).
+     * <P>Type: TEXT </P>
+     * @hide
+     */
+    //TODO: add @SystemApi
+    public static final String IMSI = "imsi";
 
     /**
      * Broadcast Action: The user has changed one of the default subs related to
@@ -3054,18 +3078,10 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns whether the subscription is enabled or not. This is different from activated
-     * or deactivated for two aspects. 1) For when user disables a physical subscription, we
-     * actually disable the modem because we can't switch off the subscription. 2) For eSIM,
-     * user may enable one subscription but the system may activate another temporarily. In this
-     * case, user enabled one is different from current active one.
-
-     * @param subscriptionId The subscription it asks about.
-     * @return whether it's enabled or not. {@code true} if user set this subscription enabled
-     * earlier, or user never set subscription enable / disable on this slot explicitly, and
-     * this subscription is currently active. Otherwise, it returns {@code false}.
-     *
+     * DO NOT USE.
+     * This API is designed for features that are not finished at this point. Do not call this API.
      * @hide
+     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3083,14 +3099,10 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get which subscription is enabled on this slot. See {@link #isSubscriptionEnabled(int)}
-     * for more details.
-     *
-     * @param slotIndex which slot it asks about.
-     * @return which subscription is enabled on this slot. If there's no enabled subscription
-     *         in this slot, it will return {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
-     *
+     * DO NOT USE.
+     * This API is designed for features that are not finished at this point. Do not call this API.
      * @hide
+     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3158,5 +3170,25 @@ public class SubscriptionManager {
         }
 
         return result;
+    }
+
+    /**
+     * Get active data subscription id.
+     * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
+     *
+     * @return Active data subscription id
+     *
+     * //TODO: Refactor this API in b/134702460
+     * @hide
+     */
+    public static int getActiveDataSubscriptionId() {
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.getActiveDataSubscriptionId();
+            }
+        } catch (RemoteException ex) {
+        }
+        return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 }

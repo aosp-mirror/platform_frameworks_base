@@ -363,7 +363,7 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.STREAM_MUSIC,       // STREAM_MUSIC
         AudioSystem.STREAM_MUSIC,       // STREAM_ALARM
         AudioSystem.STREAM_MUSIC,       // STREAM_NOTIFICATION
-        AudioSystem.STREAM_MUSIC,       // STREAM_BLUETOOTH_SCO
+        AudioSystem.STREAM_BLUETOOTH_SCO,       // STREAM_BLUETOOTH_SCO
         AudioSystem.STREAM_MUSIC,       // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_MUSIC,       // STREAM_DTMF
         AudioSystem.STREAM_MUSIC,       // STREAM_TTS
@@ -2520,8 +2520,9 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.muteMicrophone(on);
             Binder.restoreCallingIdentity(identity);
             if (on != currentMute) {
-                mContext.sendBroadcast(new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
-                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+                mContext.sendBroadcastAsUser(
+                        new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
+                                .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL);
             }
         }
     }

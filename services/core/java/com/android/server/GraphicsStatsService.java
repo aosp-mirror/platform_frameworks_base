@@ -191,7 +191,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             if (!file.getFileDescriptor().valid()) {
                 throw new IllegalStateException("Invalid file descriptor");
             }
-            return new ParcelFileDescriptor(file.getFileDescriptor());
+            return ParcelFileDescriptor.dup(file.getFileDescriptor());
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to get PFD from memory file", ex);
         }

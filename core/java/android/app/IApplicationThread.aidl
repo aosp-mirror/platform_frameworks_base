@@ -67,7 +67,8 @@ oneway interface IApplicationThread {
             int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
-            in Bundle coreSettings, in String buildSerial, boolean isAutofillCompatEnabled);
+            in Bundle coreSettings, in String buildSerial, boolean isAutofillCompatEnabled,
+            in long[] disabledCompatChanges);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);

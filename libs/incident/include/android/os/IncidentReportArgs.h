@@ -36,6 +36,12 @@ const uint8_t DEST_LOCAL = 0;
 const uint8_t DEST_EXPLICIT = 100;
 const uint8_t DEST_AUTOMATIC = 200;
 
+// Aliases for the above.
+const uint8_t PRIVACY_POLICY_LOCAL = 0;
+const uint8_t PRIVACY_POLICY_EXPLICIT = 100;
+const uint8_t PRIVACY_POLICY_AUTOMATIC = 200;
+const uint8_t PRIVACY_POLICY_UNSET = 255;
+
 
 class IncidentReportArgs : public Parcelable {
 public:
@@ -48,7 +54,10 @@ public:
 
     void setAll(bool all);
     void setDest(int dest);
+    void setPrivacyPolicy(int);
     void addSection(int section);
+    void setReceiverPkg(const string&);
+    void setReceiverCls(const string&);
     void addHeader(const IncidentHeaderProto& headerProto);
 
     inline bool all() const { return mAll; }

@@ -16,6 +16,28 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DISABLED;
+
+import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
+import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
+import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
+import static com.android.server.pm.Installer.DEXOPT_FORCE;
+import static com.android.server.pm.Installer.DEXOPT_GENERATE_APP_IMAGE;
+import static com.android.server.pm.Installer.DEXOPT_GENERATE_COMPACT_DEX;
+import static com.android.server.pm.Installer.DEXOPT_IDLE_BACKGROUND_JOB;
+import static com.android.server.pm.Installer.DEXOPT_PROFILE_GUIDED;
+import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
+import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
+import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
+import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
+import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
+import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
+import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getReasonName;
+
+import static dalvik.system.DexFile.getSafeModeCompilerFilter;
+import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -25,12 +47,10 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.os.FileUtils;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
 
@@ -43,38 +63,14 @@ import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
 
+import dalvik.system.DexFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import dalvik.system.DexFile;
-
-import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DISABLED;
-
-import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
-import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
-import static com.android.server.pm.Installer.DEXOPT_PROFILE_GUIDED;
-import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
-import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
-import static com.android.server.pm.Installer.DEXOPT_FORCE;
-import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
-import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
-import static com.android.server.pm.Installer.DEXOPT_IDLE_BACKGROUND_JOB;
-import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
-import static com.android.server.pm.Installer.DEXOPT_GENERATE_COMPACT_DEX;
-import static com.android.server.pm.Installer.DEXOPT_GENERATE_APP_IMAGE;
-import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
-import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
-
-import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
-
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getReasonName;
-
-import static dalvik.system.DexFile.getSafeModeCompilerFilter;
-import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
 /**
  * Helper class for running dexopt command on packages.
@@ -271,10 +267,7 @@ public class PackageDexOptimizer {
             return DEX_OPT_SKIPPED;
         }
 
-        // TODO(calin): there's no need to try to create the oat dir over and over again,
-        //              especially since it involve an extra installd call. We should create
-        //              if (if supported) on the fly during the dexopt call.
-        String oatDir = createOatDirIfSupported(pkg, isa);
+        String oatDir = getPackageOatDirIfSupported(pkg);
 
         Log.i(TAG, "Running dexopt (dexoptNeeded=" + dexoptNeeded + ") on: " + path
                 + " pkg=" + pkg.applicationInfo.packageName + " isa=" + isa
@@ -508,13 +501,25 @@ public class PackageDexOptimizer {
      */
     private String getRealCompilerFilter(ApplicationInfo info, String targetCompilerFilter,
             boolean isUsedByOtherApps) {
-        int flags = info.flags;
-        boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         // When a priv app is configured to run out of box, only verify it.
         if (info.isPrivilegedApp() && DexManager.isPackageSelectedToRunOob(info.packageName)) {
             return "verify";
         }
-        if (vmSafeMode) {
+
+        // We force vmSafeMode on debuggable apps as well:
+        //  - the runtime ignores their compiled code
+        //  - they generally have lots of methods that could make the compiler used run
+        //    out of memory (b/130828957)
+        // Note that forcing the compiler filter here applies to all compilations (even if they
+        // are done via adb shell commands). That's ok because right now the runtime will ignore
+        // the compiled code anyway. The alternative would have been to update either
+        // PackageDexOptimizer#canOptimizePackage or PackageManagerService#getOptimizablePackages
+        // but that would have the downside of possibly producing a big odex files which would
+        // be ignored anyway.
+        boolean vmSafeModeOrDebuggable = ((info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0)
+                || ((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+
+        if (vmSafeModeOrDebuggable) {
             return getSafeModeCompilerFilter(targetCompilerFilter);
         }
 
@@ -627,7 +632,7 @@ public class PackageDexOptimizer {
     }
 
     /**
-     * Creates oat dir for the specified package if needed and supported.
+     * Gets oat dir for the specified package if needed and supported.
      * In certain cases oat directory
      * <strong>cannot</strong> be created:
      * <ul>
@@ -635,29 +640,19 @@ public class PackageDexOptimizer {
      *      <li>Package location is not a directory, i.e. monolithic install.</li>
      * </ul>
      *
-     * @return Absolute path to the oat directory or null, if oat directory
-     * cannot be created.
+     * @return Absolute path to the oat directory or null, if oat directories
+     * not needed or unsupported for the package.
      */
     @Nullable
-    private String createOatDirIfSupported(PackageParser.Package pkg, String dexInstructionSet) {
+    private String getPackageOatDirIfSupported(PackageParser.Package pkg) {
         if (!pkg.canHaveOatDir()) {
             return null;
         }
         File codePath = new File(pkg.codePath);
-        if (codePath.isDirectory()) {
-            // TODO(calin): why do we create this only if the codePath is a directory? (i.e for
-            //              cluster packages). It seems that the logic for the folder creation is
-            //              split between installd and here.
-            File oatDir = getOatDir(codePath);
-            try {
-                mInstaller.createOatDir(oatDir.getAbsolutePath(), dexInstructionSet);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to create oat dir", e);
-                return null;
-            }
-            return oatDir.getAbsolutePath();
+        if (!codePath.isDirectory()) {
+            return null;
         }
-        return null;
+        return getOatDir(codePath).getAbsolutePath();
     }
 
     static File getOatDir(File codePath) {

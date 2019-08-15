@@ -21,6 +21,8 @@ import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
 import android.os.RemoteException;
 
+import java.io.FileDescriptor;
+
 /**
  * UpdateEngine handles calls to the update engine which takes care of A/B OTA
  * updates. It wraps up the update engine Binder APIs and exposes them as
@@ -181,6 +183,22 @@ public class UpdateEngine {
     public void applyPayload(String url, long offset, long size, String[] headerKeyValuePairs) {
         try {
             mUpdateEngine.applyPayload(url, offset, size, headerKeyValuePairs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Applies the payload passed as file descriptor {@code fd} instead of
+     * using the {@code file://} scheme.
+     *
+     * <p>See {@link #applyPayload(String)} for {@code offset}, {@code size} and
+     * {@code headerKeyValuePairs} parameters.
+     */
+    public void applyPayload(FileDescriptor fd, long offset, long size,
+            String[] headerKeyValuePairs) {
+        try {
+            mUpdateEngine.applyPayloadFd(fd, offset, size, headerKeyValuePairs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

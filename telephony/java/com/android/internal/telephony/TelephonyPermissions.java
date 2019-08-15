@@ -19,17 +19,28 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /** Utility class for Telephony permission enforcement. */
@@ -40,6 +51,20 @@ public final class TelephonyPermissions {
 
     private static final Supplier<ITelephony> TELEPHONY_SUPPLIER = () ->
             ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
+
+    /**
+     * Whether to disable the new device identifier access restrictions.
+     */
+    private static final String PROPERTY_DEVICE_IDENTIFIER_ACCESS_RESTRICTIONS_DISABLED =
+            "device_identifier_access_restrictions_disabled";
+
+    // Contains a mapping of packages that did not meet the new requirements to access device
+    // identifiers and the methods they were attempting to invoke; used to prevent duplicate
+    // reporting of packages / methods.
+    private static final Map<String, Set<String>> sReportedDeviceIDPackages;
+    static {
+        sReportedDeviceIDPackages = new HashMap<>();
+    }
 
     private TelephonyPermissions() {}
 
@@ -112,6 +137,19 @@ public final class TelephonyPermissions {
                 context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage, message);
     }
 
+    /**
+     * Check whether the calling packages has carrier privileges for the passing subscription.
+     * @return {@code true} if the caller has carrier privileges, {@false} otherwise.
+     */
+    public static boolean checkCarrierPrivilegeForSubId(int subId) {
+        if (SubscriptionManager.isValidSubscriptionId(subId)
+                && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, Binder.getCallingUid())
+                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+            return true;
+        }
+        return false;
+    }
+
     @VisibleForTesting
     public static boolean checkReadPhoneState(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
@@ -179,18 +217,9 @@ public final class TelephonyPermissions {
                 context.enforcePermission(
                         android.Manifest.permission.READ_PHONE_STATE, pid, uid, message);
             } catch (SecurityException phoneStateException) {
-                SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
-                        Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-                int[] activeSubIds = sm.getActiveSubscriptionIdList();
-                for (int activeSubId : activeSubIds) {
-                    // If we don't have the runtime permission, but do have carrier privileges, that
-                    // suffices for reading phone state.
-                    if (getCarrierPrivilegeStatus(telephonySupplier, activeSubId, uid)
-                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                        return true;
-                    }
-                }
-                return false;
+                // If we don't have the runtime permission, but do have carrier privileges, that
+                // suffices for reading phone state.
+                return checkCarrierPrivilegeForAnySubId(context, telephonySupplier, uid);
             }
         }
 
@@ -199,6 +228,182 @@ public final class TelephonyPermissions {
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         return appOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, uid, callingPackage) ==
                 AppOpsManager.MODE_ALLOWED;
+    }
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) can read device identifiers.
+     *
+     * <p>This method behaves in one of the following ways:
+     * <ul>
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the calling
+     *       package passes a DevicePolicyManager Device Owner / Profile Owner device identifier
+     *       access check, or the calling package has carrier privileges.
+     *   <li>throw SecurityException: if the caller does not meet any of the requirements and is
+     *       targeting Q or is targeting pre-Q and does not have the READ_PHONE_STATE permission.
+     *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     *       permission. In this case the caller would expect to have access to the device
+     *       identifiers so false is returned instead of throwing a SecurityException to indicate
+     *       the calling function should return dummy data.
+     * </ul>
+     */
+    public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context,
+            String callingPackage, String message) {
+        return checkCallingOrSelfReadDeviceIdentifiers(context,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, message);
+    }
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) can read device identifiers.
+     *
+     * <p>This method behaves in one of the following ways:
+     * <ul>
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the calling
+     *       package passes a DevicePolicyManager Device Owner / Profile Owner device identifier
+     *       access check, or the calling package has carrier privileges.
+     *   <li>throw SecurityException: if the caller does not meet any of the requirements and is
+     *       targeting Q or is targeting pre-Q and does not have the READ_PHONE_STATE permission
+     *       or carrier privileges.
+     *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     *       permission or carrier privileges. In this case the caller would expect to have access
+     *       to the device identifiers so false is returned instead of throwing a SecurityException
+     *       to indicate the calling function should return dummy data.
+     * </ul>
+     */
+    public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context, int subId,
+            String callingPackage, String message) {
+        return checkReadDeviceIdentifiers(context, TELEPHONY_SUPPLIER, subId,
+                Binder.getCallingPid(), Binder.getCallingUid(), callingPackage, message);
+    }
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) can read subscriber identifiers.
+     *
+     * <p>This method behaves in one of the following ways:
+     * <ul>
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the calling
+     *       package passes a DevicePolicyManager Device Owner / Profile Owner device identifier
+     *       access check, or the calling package has carrier privileges.
+     *   <li>throw SecurityException: if the caller does not meet any of the requirements and is
+     *       targeting Q or is targeting pre-Q and does not have the READ_PHONE_STATE permission.
+     *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     *       permission. In this case the caller would expect to have access to the device
+     *       identifiers so false is returned instead of throwing a SecurityException to indicate
+     *       the calling function should return dummy data.
+     * </ul>
+     */
+    public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
+            String callingPackage, String message) {
+        return checkReadDeviceIdentifiers(context, TELEPHONY_SUPPLIER, subId,
+                Binder.getCallingPid(), Binder.getCallingUid(), callingPackage, message);
+    }
+
+    /**
+     * Checks whether the app with the given pid/uid can read device identifiers.
+     *
+     * @returns true if the caller has the READ_PRIVILEGED_PHONE_STATE permission or the calling
+     * package passes a DevicePolicyManager Device Owner / Profile Owner device identifier access
+     * check.
+     */
+    @VisibleForTesting
+    public static boolean checkReadDeviceIdentifiers(Context context,
+            Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
+            String callingPackage, String message) {
+        // Allow system and root access to the device identifiers.
+        final int appId = UserHandle.getAppId(uid);
+        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
+            return true;
+        }
+        // Allow access to packages that have the READ_PRIVILEGED_PHONE_STATE permission.
+        if (context.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid,
+                uid) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        // If the calling package has carrier privileges for any subscription then allow access.
+        if (checkCarrierPrivilegeForAnySubId(context, telephonySupplier, uid)) {
+            return true;
+        }
+        // if the calling package is not null then perform the DevicePolicyManager device /
+        // profile owner and Appop checks.
+        if (callingPackage != null) {
+            // Allow access to a device / profile owner app.
+            DevicePolicyManager devicePolicyManager =
+                    (DevicePolicyManager) context.getSystemService(
+                            Context.DEVICE_POLICY_SERVICE);
+            if (devicePolicyManager != null && devicePolicyManager.checkDeviceIdentifierAccess(
+                    callingPackage, pid, uid)) {
+                return true;
+            }
+        }
+        return reportAccessDeniedToReadIdentifiers(context, subId, pid, uid, callingPackage,
+            message);
+    }
+
+    /**
+     * Reports a failure when the app with the given pid/uid cannot access the requested identifier.
+     *
+     * @returns false if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     * permission or carrier privileges.
+     * @throws SecurityException if the caller does not meet any of the requirements for the
+     *                           requested identifier and is targeting Q or is targeting pre-Q
+     *                           and does not have the READ_PHONE_STATE permission or carrier
+     *                           privileges.
+     */
+    private static boolean reportAccessDeniedToReadIdentifiers(Context context, int subId, int pid,
+            int uid, String callingPackage, String message) {
+        boolean isPreinstalled = false;
+        boolean isPrivApp = false;
+        ApplicationInfo callingPackageInfo = null;
+        try {
+            callingPackageInfo = context.getPackageManager().getApplicationInfoAsUser(
+                    callingPackage, 0, UserHandle.getUserId(uid));
+            if (callingPackageInfo != null) {
+                if (callingPackageInfo.isSystemApp()) {
+                    isPreinstalled = true;
+                    if (callingPackageInfo.isPrivilegedApp()) {
+                        isPrivApp = true;
+                    }
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // If the application info for the calling package could not be found then assume the
+            // calling app is a non-preinstalled app to detect any issues with the check
+            Log.e(LOG_TAG, "Exception caught obtaining package info for package " + callingPackage,
+                    e);
+        }
+        // The current package should only be reported in StatsLog if it has not previously been
+        // reported for the currently invoked device identifier method.
+        boolean packageReported = sReportedDeviceIDPackages.containsKey(callingPackage);
+        if (!packageReported || !sReportedDeviceIDPackages.get(callingPackage).contains(
+                message)) {
+            Set invokedMethods;
+            if (!packageReported) {
+                invokedMethods = new HashSet<String>();
+                sReportedDeviceIDPackages.put(callingPackage, invokedMethods);
+            } else {
+                invokedMethods = sReportedDeviceIDPackages.get(callingPackage);
+            }
+            invokedMethods.add(message);
+            StatsLog.write(StatsLog.DEVICE_IDENTIFIER_ACCESS_DENIED, callingPackage, message,
+                    isPreinstalled, isPrivApp);
+        }
+        Log.w(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message
+                + ":isPreinstalled=" + isPreinstalled + ":isPrivApp=" + isPrivApp);
+        // if the target SDK is pre-Q then check if the calling package would have previously
+        // had access to device identifiers.
+        if (callingPackageInfo != null && (
+                callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q)) {
+            if (context.checkPermission(
+                    android.Manifest.permission.READ_PHONE_STATE,
+                    pid,
+                    uid) == PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+            if (checkCarrierPrivilegeForSubId(subId)) {
+                return false;
+            }
+        }
+        throw new SecurityException(message + ": The user " + uid
+                + " does not meet the requirements to access device identifiers.");
     }
 
     /**
@@ -382,6 +587,26 @@ public final class TelephonyPermissions {
             throw new SecurityException(message);
         }
     }
+
+    /**
+     * Returns whether the provided uid has carrier privileges for any active subscription ID.
+     */
+    private static boolean checkCarrierPrivilegeForAnySubId(Context context,
+            Supplier<ITelephony> telephonySupplier, int uid) {
+        SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
+                Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        int[] activeSubIds = sm.getActiveSubscriptionIdList();
+        if (activeSubIds != null) {
+            for (int activeSubId : activeSubIds) {
+                if (getCarrierPrivilegeStatus(telephonySupplier, activeSubId, uid)
+                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     private static int getCarrierPrivilegeStatus(
             Supplier<ITelephony> telephonySupplier, int subId, int uid) {

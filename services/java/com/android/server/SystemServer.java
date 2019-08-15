@@ -79,6 +79,7 @@ import com.android.server.audio.AudioService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -975,6 +976,11 @@ public final class SystemServer {
             traceBeginAndSlog("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
             traceEnd();
+
+            traceBeginAndSlog("PlatformCompat");
+            ServiceManager.addService("platform_compat", new PlatformCompat(context));
+            traceEnd();
+
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
@@ -1303,16 +1309,13 @@ public final class SystemServer {
             }
             traceEnd();
 
-            final boolean useNewTimeServices = true;
-            if (useNewTimeServices) {
-                traceBeginAndSlog("StartTimeDetectorService");
-                try {
-                    mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting StartTimeDetectorService service", e);
-                }
-                traceEnd();
+            traceBeginAndSlog("StartTimeDetectorService");
+            try {
+                mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting StartTimeDetectorService service", e);
             }
+            traceEnd();
 
             if (!isWatch) {
                 traceBeginAndSlog("StartSearchManagerService");
@@ -1487,12 +1490,7 @@ public final class SystemServer {
             if (!isWatch) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
                 try {
-                    if (useNewTimeServices) {
-                        networkTimeUpdater = new NewNetworkTimeUpdateService(context);
-                    } else {
-                        networkTimeUpdater = new OldNetworkTimeUpdateService(context);
-                    }
-                    Slog.d(TAG, "Using networkTimeUpdater class=" + networkTimeUpdater.getClass());
+                    networkTimeUpdater = new NetworkTimeUpdateServiceImpl(context);
                     ServiceManager.addService("network_time_update_service", networkTimeUpdater);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkTimeUpdate service", e);
@@ -1678,6 +1676,10 @@ public final class SystemServer {
         traceBeginAndSlog("StartStatsCompanionService");
         mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
         traceEnd();
+
+        if (safeMode) {
+            mActivityManagerService.enterSafeMode();
+        }
 
         // MMS service broker
         traceBeginAndSlog("StartMmsService");
