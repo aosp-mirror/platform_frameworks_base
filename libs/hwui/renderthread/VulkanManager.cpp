@@ -138,14 +138,14 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     err = mCreateInstance(&instance_create, nullptr, &mInstance);
     LOG_ALWAYS_FATAL_IF(err < 0);
 
+    GET_INST_PROC(CreateDevice);
     GET_INST_PROC(DestroyInstance);
+    GET_INST_PROC(EnumerateDeviceExtensionProperties);
     GET_INST_PROC(EnumeratePhysicalDevices);
-    GET_INST_PROC(GetPhysicalDeviceProperties);
-    GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties);
     GET_INST_PROC(GetPhysicalDeviceFeatures2);
     GET_INST_PROC(GetPhysicalDeviceImageFormatProperties2);
-    GET_INST_PROC(CreateDevice);
-    GET_INST_PROC(EnumerateDeviceExtensionProperties);
+    GET_INST_PROC(GetPhysicalDeviceProperties);
+    GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties);
 
     uint32_t gpuCount;
     LOG_ALWAYS_FATAL_IF(mEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr));
@@ -312,29 +312,27 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 
     LOG_ALWAYS_FATAL_IF(mCreateDevice(mPhysicalDevice, &deviceInfo, nullptr, &mDevice));
 
-    GET_DEV_PROC(GetDeviceQueue);
-    GET_DEV_PROC(DeviceWaitIdle);
-    GET_DEV_PROC(DestroyDevice);
-    GET_DEV_PROC(CreateCommandPool);
-    GET_DEV_PROC(DestroyCommandPool);
     GET_DEV_PROC(AllocateCommandBuffers);
-    GET_DEV_PROC(FreeCommandBuffers);
-    GET_DEV_PROC(ResetCommandBuffer);
     GET_DEV_PROC(BeginCommandBuffer);
-    GET_DEV_PROC(EndCommandBuffer);
     GET_DEV_PROC(CmdPipelineBarrier);
+    GET_DEV_PROC(CreateCommandPool);
+    GET_DEV_PROC(CreateFence);
+    GET_DEV_PROC(CreateSemaphore);
+    GET_DEV_PROC(DestroyCommandPool);
+    GET_DEV_PROC(DestroyDevice);
+    GET_DEV_PROC(DestroyFence);
+    GET_DEV_PROC(DestroySemaphore);
+    GET_DEV_PROC(DeviceWaitIdle);
+    GET_DEV_PROC(EndCommandBuffer);
+    GET_DEV_PROC(FreeCommandBuffers);
     GET_DEV_PROC(GetDeviceQueue);
+    GET_DEV_PROC(GetSemaphoreFdKHR);
+    GET_DEV_PROC(ImportSemaphoreFdKHR);
     GET_DEV_PROC(QueueSubmit);
     GET_DEV_PROC(QueueWaitIdle);
-    GET_DEV_PROC(DeviceWaitIdle);
-    GET_DEV_PROC(CreateSemaphore);
-    GET_DEV_PROC(DestroySemaphore);
-    GET_DEV_PROC(ImportSemaphoreFdKHR);
-    GET_DEV_PROC(GetSemaphoreFdKHR);
-    GET_DEV_PROC(CreateFence);
-    GET_DEV_PROC(DestroyFence);
-    GET_DEV_PROC(WaitForFences);
+    GET_DEV_PROC(ResetCommandBuffer);
     GET_DEV_PROC(ResetFences);
+    GET_DEV_PROC(WaitForFences);
 }
 
 void VulkanManager::initialize() {
