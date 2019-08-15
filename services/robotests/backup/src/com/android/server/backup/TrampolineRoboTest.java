@@ -27,13 +27,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
+import static org.testng.Assert.expectThrows;
 
 import android.annotation.UserIdInt;
 import android.app.Application;
+import android.app.backup.IBackupManagerMonitor;
+import android.app.backup.IBackupObserver;
+import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -58,6 +63,8 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowContextWrapper;
 
+import java.io.File;
+
 /** Tests for {@link com.android.server.backup.Trampoline}. */
 @RunWith(RobolectricTestRunner.class)
 @Config(
@@ -72,6 +79,7 @@ import org.robolectric.shadows.ShadowContextWrapper;
 public class TrampolineRoboTest {
     private static final String TEST_PACKAGE = "package";
     private static final String TEST_TRANSPORT = "transport";
+    private static final String[] ADB_TEST_PACKAGES = {TEST_PACKAGE};
 
     private Context mContext;
     private ShadowContextWrapper mShadowContext;
@@ -616,8 +624,804 @@ public class TrampolineRoboTest {
                         "dataManagementLabel");
     }
 
+    // ---------------------------------------------
+    // Settings tests
+    // ---------------------------------------------
+
+    /**
+     * Test that the backup services throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testSetBackupEnabled_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        expectThrows(
+                SecurityException.class,
+                () -> backupManagerService.setBackupEnabled(mUserTwoId, true));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testSetBackupEnabled_withPermission_propagatesForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
+
+        backupManagerService.setBackupEnabled(mUserTwoId, true);
+
+        verify(mUserTwoService).setBackupEnabled(true);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testSetBackupEnabled_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.setBackupEnabled(mUserOneId, true);
+
+        verify(mUserOneService).setBackupEnabled(true);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testSetBackupEnabled_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.setBackupEnabled(mUserTwoId, true);
+
+        verify(mUserOneService, never()).setBackupEnabled(true);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testSetAutoRestore_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.setAutoRestore(mUserOneId, true);
+
+        verify(mUserOneService).setAutoRestore(true);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testSetAutoRestore_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.setAutoRestore(mUserTwoId, true);
+
+        verify(mUserOneService, never()).setAutoRestore(true);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testIsBackupEnabled_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.isBackupEnabled(mUserOneId);
+
+        verify(mUserOneService).isBackupEnabled();
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testIsBackupEnabled_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.isBackupEnabled(mUserTwoId);
+
+        verify(mUserOneService, never()).isBackupEnabled();
+    }
+
+    // ---------------------------------------------
+    // Backup tests
+    // ---------------------------------------------
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testIsAppEligibleForBackup_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.isAppEligibleForBackup(mUserOneId, TEST_PACKAGE);
+
+        verify(mUserOneService).isAppEligibleForBackup(TEST_PACKAGE);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testIsAppEligibleForBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.isAppEligibleForBackup(mUserTwoId, TEST_PACKAGE);
+
+        verify(mUserOneService, never()).isAppEligibleForBackup(TEST_PACKAGE);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testFilterAppsEligibleForBackup_onRegisteredUser_callsMethodForUser()
+            throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+        String[] packages = {TEST_PACKAGE};
+
+        backupManagerService.filterAppsEligibleForBackup(mUserOneId, packages);
+
+        verify(mUserOneService).filterAppsEligibleForBackup(packages);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testFilterAppsEligibleForBackup_onUnknownUser_doesNotPropagateCall()
+            throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+        String[] packages = {TEST_PACKAGE};
+
+        backupManagerService.filterAppsEligibleForBackup(mUserTwoId, packages);
+
+        verify(mUserOneService, never()).filterAppsEligibleForBackup(packages);
+    }
+
+    /**
+     * Test verifying that {@link BackupManagerService#backupNow(int)} throws a {@link
+     * SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Test
+    public void testBackupNow_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        expectThrows(SecurityException.class, () -> backupManagerService.backupNow(mUserTwoId));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testBackupNow_withPermission_propagatesForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
+
+        backupManagerService.backupNow(mUserTwoId);
+
+        verify(mUserTwoService).backupNow();
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testBackupNow_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.backupNow(mUserOneId);
+
+        verify(mUserOneService).backupNow();
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testBackupNow_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.backupNow(mUserTwoId);
+
+        verify(mUserOneService, never()).backupNow();
+    }
+
+    /**
+     * Test that the backup services throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testRequestBackup_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+        String[] packages = {TEST_PACKAGE};
+        IBackupObserver observer = mock(IBackupObserver.class);
+        IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
+
+        expectThrows(
+                SecurityException.class,
+                () ->
+                        backupManagerService.requestBackup(
+                                mUserTwoId, packages, observer, monitor, 0));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testRequestBackup_withPermission_propagatesForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+
+        String[] packages = {TEST_PACKAGE};
+        IBackupObserver observer = mock(IBackupObserver.class);
+        IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
+
+        backupManagerService.requestBackup(mUserTwoId, packages, observer, monitor, /* flags */ 0);
+
+        verify(mUserTwoService).requestBackup(packages, observer, monitor, /* flags */ 0);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testRequestBackup_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        String[] packages = {TEST_PACKAGE};
+        IBackupObserver observer = mock(IBackupObserver.class);
+        IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.requestBackup(mUserOneId, packages, observer, monitor, /* flags */ 0);
+
+        verify(mUserOneService).requestBackup(packages, observer, monitor, /* flags */ 0);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testRequestBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        String[] packages = {TEST_PACKAGE};
+        IBackupObserver observer = mock(IBackupObserver.class);
+        IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.requestBackup(mUserTwoId, packages, observer, monitor, /* flags */ 0);
+
+        verify(mUserOneService, never()).requestBackup(packages, observer, monitor, /* flags */ 0);
+    }
+
+    /**
+     * Test verifying that {@link BackupManagerService#cancelBackups(int)} throws a {@link
+     * SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Test
+    public void testCancelBackups_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        expectThrows(SecurityException.class, () -> backupManagerService.cancelBackups(mUserTwoId));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testCancelBackups_withPermission_propagatesForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
+
+        backupManagerService.cancelBackups(mUserTwoId);
+
+        verify(mUserTwoService).cancelBackups();
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testCancelBackups_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.cancelBackups(mUserOneId);
+
+        verify(mUserOneService).cancelBackups();
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testCancelBackups_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.cancelBackups(mUserTwoId);
+
+        verify(mUserOneService, never()).cancelBackups();
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testBeginFullBackup_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
+        FullBackupJob job = new FullBackupJob();
+
+        backupManagerService.beginFullBackup(UserHandle.USER_SYSTEM, job);
+
+        verify(mUserOneService).beginFullBackup(job);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testBeginFullBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        FullBackupJob job = new FullBackupJob();
+
+        backupManagerService.beginFullBackup(UserHandle.USER_SYSTEM, job);
+
+        verify(mUserOneService, never()).beginFullBackup(job);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testEndFullBackup_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
+
+        backupManagerService.endFullBackup(UserHandle.USER_SYSTEM);
+
+        verify(mUserOneService).endFullBackup();
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testEndFullBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+
+        backupManagerService.endFullBackup(UserHandle.USER_SYSTEM);
+
+        verify(mUserOneService, never()).endFullBackup();
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testFullTransportBackup_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+        String[] packages = {TEST_PACKAGE};
+
+        backupManagerService.fullTransportBackup(mUserOneId, packages);
+
+        verify(mUserOneService).fullTransportBackup(packages);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testFullTransportBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+        String[] packages = {TEST_PACKAGE};
+
+        backupManagerService.fullTransportBackup(mUserTwoId, packages);
+
+        verify(mUserOneService, never()).fullTransportBackup(packages);
+    }
+
+    // ---------------------------------------------
+    // Restore tests
+    // ---------------------------------------------
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testRestoreAtInstall_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.restoreAtInstall(mUserOneId, TEST_PACKAGE, /* token */ 0);
+
+        verify(mUserOneService).restoreAtInstall(TEST_PACKAGE, /* token */ 0);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testRestoreAtInstall_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.restoreAtInstall(mUserTwoId, TEST_PACKAGE, /* token */ 0);
+
+        verify(mUserOneService, never()).restoreAtInstall(TEST_PACKAGE, /* token */ 0);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testBeginRestoreSession_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.beginRestoreSession(mUserOneId, TEST_PACKAGE, TEST_TRANSPORT);
+
+        verify(mUserOneService).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testBeginRestoreSession_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.beginRestoreSession(mUserTwoId, TEST_PACKAGE, TEST_TRANSPORT);
+
+        verify(mUserOneService, never()).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testGetAvailableRestoreToken_onRegisteredUser_callsMethodForUser()
+            throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.getAvailableRestoreToken(mUserOneId, TEST_PACKAGE);
+
+        verify(mUserOneService).getAvailableRestoreToken(TEST_PACKAGE);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testGetAvailableRestoreToken_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.getAvailableRestoreToken(mUserTwoId, TEST_PACKAGE);
+
+        verify(mUserOneService, never()).getAvailableRestoreToken(TEST_PACKAGE);
+    }
+
+    // ---------------------------------------------
+    // Adb backup/restore tests
+    // ---------------------------------------------
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testSetBackupPassword_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
+        ShadowBinder.setCallingUserHandle(UserHandle.of(UserHandle.USER_SYSTEM));
+
+        backupManagerService.setBackupPassword("currentPassword", "newPassword");
+
+        verify(mUserOneService).setBackupPassword("currentPassword", "newPassword");
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testSetBackupPassword_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+
+        backupManagerService.setBackupPassword("currentPassword", "newPassword");
+
+        verify(mUserOneService, never()).setBackupPassword("currentPassword", "newPassword");
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testHasBackupPassword_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
+        ShadowBinder.setCallingUserHandle(UserHandle.of(UserHandle.USER_SYSTEM));
+
+        backupManagerService.hasBackupPassword();
+
+        verify(mUserOneService).hasBackupPassword();
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testHasBackupPassword_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createService();
+
+        backupManagerService.hasBackupPassword();
+
+        verify(mUserOneService, never()).hasBackupPassword();
+    }
+
+    /**
+     * Test that the backup services throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testAdbBackup_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        expectThrows(
+                SecurityException.class,
+                () ->
+                        backupManagerService.adbBackup(
+                                mUserTwoId,
+                                /* parcelFileDescriptor*/ null,
+                                /* includeApks */ true,
+                                /* includeObbs */ true,
+                                /* includeShared */ true,
+                                /* doWidgets */ true,
+                                /* doAllApps */ true,
+                                /* includeSystem */ true,
+                                /* doCompress */ true,
+                                /* doKeyValue */ true,
+                                null));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testAdbBackup_withPermission_propagatesForNonCallingUser() throws Exception {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
+
+        backupManagerService.adbBackup(
+                mUserTwoId,
+                parcelFileDescriptor,
+                /* includeApks */ true,
+                /* includeObbs */ true,
+                /* includeShared */ true,
+                /* doWidgets */ true,
+                /* doAllApps */ true,
+                /* includeSystem */ true,
+                /* doCompress */ true,
+                /* doKeyValue */ true,
+                ADB_TEST_PACKAGES);
+
+        verify(mUserTwoService)
+                .adbBackup(
+                        parcelFileDescriptor,
+                        /* includeApks */ true,
+                        /* includeObbs */ true,
+                        /* includeShared */ true,
+                        /* doWidgets */ true,
+                        /* doAllApps */ true,
+                        /* includeSystem */ true,
+                        /* doCompress */ true,
+                        /* doKeyValue */ true,
+                        ADB_TEST_PACKAGES);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testAdbBackup_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.adbBackup(
+                mUserOneId,
+                parcelFileDescriptor,
+                /* includeApks */ true,
+                /* includeObbs */ true,
+                /* includeShared */ true,
+                /* doWidgets */ true,
+                /* doAllApps */ true,
+                /* includeSystem */ true,
+                /* doCompress */ true,
+                /* doKeyValue */ true,
+                ADB_TEST_PACKAGES);
+
+        verify(mUserOneService)
+                .adbBackup(
+                        parcelFileDescriptor,
+                        /* includeApks */ true,
+                        /* includeObbs */ true,
+                        /* includeShared */ true,
+                        /* doWidgets */ true,
+                        /* doAllApps */ true,
+                        /* includeSystem */ true,
+                        /* doCompress */ true,
+                        /* doKeyValue */ true,
+                        ADB_TEST_PACKAGES);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testAdbBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.adbBackup(
+                mUserTwoId,
+                parcelFileDescriptor,
+                /* includeApks */ true,
+                /* includeObbs */ true,
+                /* includeShared */ true,
+                /* doWidgets */ true,
+                /* doAllApps */ true,
+                /* includeSystem */ true,
+                /* doCompress */ true,
+                /* doKeyValue */ true,
+                ADB_TEST_PACKAGES);
+
+        verify(mUserOneService, never())
+                .adbBackup(
+                        parcelFileDescriptor,
+                        /* includeApks */ true,
+                        /* includeObbs */ true,
+                        /* includeShared */ true,
+                        /* doWidgets */ true,
+                        /* doAllApps */ true,
+                        /* includeSystem */ true,
+                        /* doCompress */ true,
+                        /* doKeyValue */ true,
+                        ADB_TEST_PACKAGES);
+    }
+
+    /**
+     * Test that the backup services throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testAdbRestore_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        expectThrows(
+                SecurityException.class, () -> backupManagerService.adbRestore(mUserTwoId, null));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testAdbRestore_withPermission_propagatesForNonCallingUser() throws Exception {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        registerUser(backupManagerService, mUserTwoId, mUserTwoService);
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
+
+        backupManagerService.adbRestore(mUserTwoId, parcelFileDescriptor);
+
+        verify(mUserTwoService).adbRestore(parcelFileDescriptor);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testAdbRestore_onRegisteredUser_callsMethodForUser() throws Exception {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        backupManagerService.adbRestore(mUserOneId, parcelFileDescriptor);
+
+        verify(mUserOneService).adbRestore(parcelFileDescriptor);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testAdbRestore_onUnknownUser_doesNotPropagateCall() throws Exception {
+        Trampoline backupManagerService = createSystemRegisteredService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        backupManagerService.adbRestore(mUserTwoId, parcelFileDescriptor);
+
+        verify(mUserOneService, never()).adbRestore(parcelFileDescriptor);
+    }
+
+    private ParcelFileDescriptor getFileDescriptorForAdbTest() throws Exception {
+        File testFile = new File(mContext.getFilesDir(), "test");
+        testFile.createNewFile();
+        return ParcelFileDescriptor.open(testFile, ParcelFileDescriptor.MODE_READ_WRITE);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testAcknowledgeAdbBackupOrRestore_onRegisteredUser_callsMethodForUser()
+            throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+        IFullBackupRestoreObserver observer = mock(IFullBackupRestoreObserver.class);
+
+        backupManagerService.acknowledgeAdbBackupOrRestore(
+                mUserOneId,
+                /* token */ 0,
+                /* allow */ true,
+                "currentPassword",
+                "encryptionPassword",
+                observer);
+
+        verify(mUserOneService)
+                .acknowledgeAdbBackupOrRestore(
+                        /* token */ 0,
+                        /* allow */ true,
+                        "currentPassword",
+                        "encryptionPassword",
+                        observer);
+    }
+
+    /** Test that the backup service does not route methods for non-registered users. */
+    @Test
+    public void testAcknowledgeAdbBackupOrRestore_onUnknownUser_doesNotPropagateCall()
+            throws Exception {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+        IFullBackupRestoreObserver observer = mock(IFullBackupRestoreObserver.class);
+
+        backupManagerService.acknowledgeAdbBackupOrRestore(
+                mUserTwoId,
+                /* token */ 0,
+                /* allow */ true,
+                "currentPassword",
+                "encryptionPassword",
+                observer);
+
+        verify(mUserOneService, never())
+                .acknowledgeAdbBackupOrRestore(
+                        /* token */ 0,
+                        /* allow */ true,
+                        "currentPassword",
+                        "encryptionPassword",
+                        observer);
+    }
+
     private Trampoline createService() {
         return new Trampoline(mContext);
+    }
+
+    private Trampoline createSystemRegisteredService() {
+        Trampoline trampoline = createService();
+        registerUser(trampoline, UserHandle.USER_SYSTEM, mock(UserBackupManagerService.class));
+        return trampoline;
     }
 
     private void registerUser(
