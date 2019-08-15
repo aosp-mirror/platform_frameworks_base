@@ -35,6 +35,8 @@ import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.broadcastradio.V2_0.VendorKeyValue;
 import android.hardware.radio.RadioManager;
 import android.os.DeadObjectException;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.MutableInt;
 import android.util.Slog;
@@ -45,6 +47,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,6 +59,7 @@ class RadioModule {
     @NonNull public final RadioManager.ModuleProperties mProperties;
 
     private final Object mLock = new Object();
+    @NonNull private final Handler mHandler;
 
     @GuardedBy("mLock")
     private ITunerSession mHalTunerSession;
@@ -77,22 +81,24 @@ class RadioModule {
     private final ITunerCallback mHalTunerCallback = new ITunerCallback.Stub() {
         @Override
         public void onTuneFailed(int result, ProgramSelector programSelector) {
-            fanoutAidlCallback(cb -> cb.onTuneFailed(result, Convert.programSelectorFromHal(
-                    programSelector)));
+            lockAndFireLater(() -> {
+                android.hardware.radio.ProgramSelector csel =
+                        Convert.programSelectorFromHal(programSelector);
+                fanoutAidlCallbackLocked(cb -> cb.onTuneFailed(result, csel));
+            });
         }
 
         @Override
         public void onCurrentProgramInfoChanged(ProgramInfo halProgramInfo) {
-            RadioManager.ProgramInfo programInfo = Convert.programInfoFromHal(halProgramInfo);
-            synchronized (mLock) {
-                mCurrentProgramInfo = programInfo;
-                fanoutAidlCallbackLocked(cb -> cb.onCurrentProgramInfoChanged(programInfo));
-            }
+            lockAndFireLater(() -> {
+                mCurrentProgramInfo = Convert.programInfoFromHal(halProgramInfo);
+                fanoutAidlCallbackLocked(cb -> cb.onCurrentProgramInfoChanged(mCurrentProgramInfo));
+            });
         }
 
         @Override
         public void onProgramListUpdated(ProgramListChunk programListChunk) {
-            synchronized (mLock) {
+            lockAndFireLater(() -> {
                 android.hardware.radio.ProgramList.Chunk chunk =
                         Convert.programListChunkFromHal(programListChunk);
                 mProgramInfoCache.filterAndApplyChunk(chunk);
@@ -100,20 +106,23 @@ class RadioModule {
                 for (TunerSession tunerSession : mAidlTunerSessions) {
                     tunerSession.onMergedProgramListUpdateFromHal(chunk);
                 }
-            }
+            });
         }
 
         @Override
         public void onAntennaStateChange(boolean connected) {
-            synchronized (mLock) {
+            lockAndFireLater(() -> {
                 mAntennaConnected = connected;
                 fanoutAidlCallbackLocked(cb -> cb.onAntennaState(connected));
-            }
+            });
         }
 
         @Override
         public void onParametersUpdated(ArrayList<VendorKeyValue> parameters) {
-            fanoutAidlCallback(cb -> cb.onParametersUpdated(Convert.vendorInfoFromHal(parameters)));
+            lockAndFireLater(() -> {
+                Map<String, String> cparam = Convert.vendorInfoFromHal(parameters);
+                fanoutAidlCallbackLocked(cb -> cb.onParametersUpdated(cparam));
+            });
         }
     };
 
@@ -126,6 +135,7 @@ class RadioModule {
             @NonNull RadioManager.ModuleProperties properties) {
         mProperties = Objects.requireNonNull(properties);
         mService = Objects.requireNonNull(service);
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     public static @Nullable RadioModule tryLoadingModule(int idx, @NonNull String fqName) {
@@ -310,15 +320,22 @@ class RadioModule {
         }
     }
 
+    // add to mHandler queue, but ensure the runnable holds mLock when it gets executed
+    private void lockAndFireLater(Runnable r) {
+        mHandler.post(() -> {
+            synchronized (mLock) {
+                r.run();
+            }
+        });
+    }
+
     interface AidlCallbackRunnable {
         void run(android.hardware.radio.ITunerCallback callback) throws RemoteException;
     }
 
     // Invokes runnable with each TunerSession currently open.
     void fanoutAidlCallback(AidlCallbackRunnable runnable) {
-        synchronized (mLock) {
-            fanoutAidlCallbackLocked(runnable);
-        }
+        lockAndFireLater(() -> fanoutAidlCallbackLocked(runnable));
     }
 
     private void fanoutAidlCallbackLocked(AidlCallbackRunnable runnable) {
