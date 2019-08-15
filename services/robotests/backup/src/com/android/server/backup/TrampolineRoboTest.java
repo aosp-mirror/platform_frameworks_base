@@ -1487,6 +1487,53 @@ public class TrampolineRoboTest {
         mShadowContext.grantPermissions(PACKAGE_USAGE_STATS);
     }
 
+    /**
+     * Test that the backup services throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testGetServiceForUser_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        expectThrows(
+                SecurityException.class,
+                () ->
+                        backupManagerService.getServiceForUserIfCallerHasPermission(
+                                mUserOneId, "test"));
+    }
+
+    /**
+     * Test that the backup services does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testGetServiceForUserIfCallerHasPermission_withPermission_worksForNonCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ true);
+
+        assertEquals(
+                mUserOneService,
+                backupManagerService.getServiceForUserIfCallerHasPermission(mUserOneId, "test"));
+    }
+
+    /**
+     * Test that the backup services does not throw a {@link SecurityException} if the caller does
+     * not have INTERACT_ACROSS_USERS_FULL permission and passes in the calling user id.
+     */
+    @Test
+    public void testGetServiceForUserIfCallerHasPermission_withoutPermission_worksForCallingUser() {
+        Trampoline backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
+
+        assertEquals(
+                mUserOneService,
+                backupManagerService.getServiceForUserIfCallerHasPermission(mUserOneId, "test"));
+    }
+
     private Trampoline createService() {
         return new Trampoline(mContext);
     }

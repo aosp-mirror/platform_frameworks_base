@@ -21,7 +21,6 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -156,53 +155,6 @@ public class BackupManagerServiceTest {
                 () ->
                         new BackupManagerService(
                                 mContext, /* trampoline */ null, new SparseArray<>()));
-    }
-
-    /**
-     * Test that the backup services throws a {@link SecurityException} if the caller does not have
-     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
-     */
-    @Test
-    public void testGetServiceForUser_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
-
-        expectThrows(
-                SecurityException.class,
-                () ->
-                        backupManagerService.getServiceForUserIfCallerHasPermission(
-                                mUserOneId, "test"));
-    }
-
-    /**
-     * Test that the backup services does not throw a {@link SecurityException} if the caller has
-     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
-     */
-    @Test
-    public void testGetServiceForUserIfCallerHasPermission_withPermission_worksForNonCallingUser() {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ true);
-
-        assertEquals(
-                mUserOneService,
-                backupManagerService.getServiceForUserIfCallerHasPermission(mUserOneId, "test"));
-    }
-
-    /**
-     * Test that the backup services does not throw a {@link SecurityException} if the caller does
-     * not have INTERACT_ACROSS_USERS_FULL permission and passes in the calling user id.
-     */
-    @Test
-    public void testGetServiceForUserIfCallerHasPermission_withoutPermission_worksForCallingUser() {
-        registerUser(mUserOneId, mUserOneService);
-        BackupManagerService backupManagerService = createService();
-        setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
-
-        assertEquals(
-                mUserOneService,
-                backupManagerService.getServiceForUserIfCallerHasPermission(mUserOneId, "test"));
     }
 
     // ---------------------------------------------

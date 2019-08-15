@@ -18,8 +18,6 @@ package com.android.server.backup;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.IBinder;
 import android.util.SparseArray;
@@ -53,24 +51,6 @@ public class BackupManagerService {
         mTrampoline = checkNotNull(trampoline);
         // TODO(b/135661048): Remove
         mServiceUsers = userServices;
-    }
-
-    /**
-     * Returns the {@link UserBackupManagerService} instance for the specified user {@code userId}.
-     * If the user is not registered with the service (either the user is locked or not eligible for
-     * the backup service) then return {@code null}.
-     *
-     * @param userId The id of the user to retrieve its instance of {@link
-     *     UserBackupManagerService}.
-     * @param caller A {@link String} identifying the caller for logging purposes.
-     * @throws SecurityException if {@code userId} is different from the calling user id and the
-     *     caller does NOT have the android.permission.INTERACT_ACROSS_USERS_FULL permission.
-     */
-    @Nullable
-    @VisibleForTesting
-    UserBackupManagerService getServiceForUserIfCallerHasPermission(
-            @UserIdInt int userId, String caller) {
-        return mTrampoline.getServiceForUserIfCallerHasPermission(userId, caller);
     }
 
     /** Implementation to receive lifecycle event callbacks for system services. */
