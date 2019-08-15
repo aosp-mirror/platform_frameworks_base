@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.server.compat;
+package android.compat;
 
 import android.content.pm.ApplicationInfo;
 
 /**
- * System private API for talking with the PlatformCompat service.
+ * Platform private API for talking with the PlatformCompat service.
+ *
+ * <p> Should be used for gating and logging from non-app processes.
+ * For app processes please use android.compat.Compatibility API.
+ *
  * {@hide}
  */
 interface IPlatformCompat
