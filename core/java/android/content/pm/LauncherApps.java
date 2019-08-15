@@ -507,18 +507,6 @@ public class LauncherApps {
      * {@link Intent#CATEGORY_LAUNCHER}, for a specified user. Result may include
      * synthesized activities like app details Activity injected by system.
      *
-     * <p>As of <a href="/reference/android/os/Build.VERSION_CODES.html#Q">Android Q</a>, the
-     * launchable activities for a given app are included in the returned list unless the app
-     * satisfies at least one of the following conditions:</p>
-     * <ul>
-     * <li>The app is a system app.</li>
-     * <li>The app doesn't declare any <a href="/guide/topics/permissions/overview">permissions</a>.
-     * </li>
-     * <li>The <code>&lt;application&gt;</code> tag in the app's manifest file doesn't contain any
-     * child elements that represent
-     * <a href="/guide/components/fundamentals#DeclaringComponents">app components</a>.</li>
-     * </ul>
-     *
      * @param packageName The specific package to query. If null, it checks all installed packages
      *            in the profile.
      * @param user The UserHandle of the profile.
