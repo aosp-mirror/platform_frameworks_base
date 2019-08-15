@@ -77,6 +77,7 @@ public class KeyguardBouncer {
                 }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
+    private final KeyguardBypassController mKeyguardBypassController;
     protected KeyguardHostView mKeyguardView;
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardView != null) {
@@ -97,7 +98,8 @@ public class KeyguardBouncer {
             LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
             BouncerExpansionCallback expansionCallback, UnlockMethodCache unlockMethodCache,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, Handler handler) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            KeyguardBypassController keyguardBypassController, Handler handler) {
         mContext = context;
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -109,6 +111,7 @@ public class KeyguardBouncer {
         mHandler = handler;
         mUnlockMethodCache = unlockMethodCache;
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
+        mKeyguardBypassController = keyguardBypassController;
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -171,7 +174,8 @@ public class KeyguardBouncer {
         // Split up the work over multiple frames.
         DejankUtils.removeCallbacks(mResetRunnable);
         if (mUnlockMethodCache.isFaceAuthEnabled() && !needsFullscreenBouncer()
-                && !mKeyguardUpdateMonitor.userNeedsStrongAuth()) {
+                && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
+                && !mKeyguardBypassController.getBypassEnabled()) {
             mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
         } else {
             DejankUtils.postAfterTraversal(mShowRunnable);
