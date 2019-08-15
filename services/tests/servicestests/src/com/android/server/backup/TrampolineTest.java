@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -539,17 +538,6 @@ public class TrampolineTest {
         mTrampoline.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
 
         verifyNoMoreInteractions(mBackupManagerServiceMock);
-    }
-
-    @Test
-    public void dump_callerHasPermission_forwarded() {
-        when(mContextMock.checkCallingOrSelfPermission(
-                android.Manifest.permission.DUMP)).thenReturn(
-                PackageManager.PERMISSION_GRANTED);
-
-        mTrampoline.dump(mFileDescriptorStub, mPrintWriterMock, null);
-
-        verify(mBackupManagerServiceMock).dump(mFileDescriptorStub, mPrintWriterMock, null);
     }
 
     public void testGetUserForAncestralSerialNumber() {

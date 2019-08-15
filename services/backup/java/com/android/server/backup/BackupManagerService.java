@@ -22,15 +22,10 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.IBinder;
-import android.os.UserHandle;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 /**
  * Definition of the system service that performs backup/restore operations.
@@ -44,9 +39,6 @@ public class BackupManagerService {
     public static final boolean DEBUG = true;
     public static final boolean MORE_DEBUG = false;
     public static final boolean DEBUG_SCHEDULING = true;
-
-    @VisibleForTesting
-    static final String DUMP_RUNNING_USERS_MESSAGE = "Backup Manager is running for users:";
 
     private final Context mContext;
     private final Trampoline mTrampoline;
@@ -79,44 +71,6 @@ public class BackupManagerService {
     UserBackupManagerService getServiceForUserIfCallerHasPermission(
             @UserIdInt int userId, String caller) {
         return mTrampoline.getServiceForUserIfCallerHasPermission(userId, caller);
-    }
-
-    /*
-     * The following methods are implementations of IBackupManager methods called from Trampoline.
-     * They delegate to the appropriate per-user instance of UserBackupManagerService to perform the
-     * action on the passed in user. Currently this is a straight redirection (see TODO).
-     */
-    // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    // ---------------------------------------------
-    //  SERVICE OPERATIONS
-    // ---------------------------------------------
-
-    /** Prints service state for 'dumpsys backup'. */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) {
-            return;
-        }
-
-        if (args != null) {
-            for (String arg : args) {
-                if ("users".equals(arg.toLowerCase())) {
-                    pw.print(DUMP_RUNNING_USERS_MESSAGE);
-                    for (int i = 0; i < mServiceUsers.size(); i++) {
-                        pw.print(" " + mServiceUsers.keyAt(i));
-                    }
-                    pw.println();
-                    return;
-                }
-            }
-        }
-
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(UserHandle.USER_SYSTEM, "dump()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.dump(fd, pw, args);
-        }
     }
 
     /** Implementation to receive lifecycle event callbacks for system services. */
