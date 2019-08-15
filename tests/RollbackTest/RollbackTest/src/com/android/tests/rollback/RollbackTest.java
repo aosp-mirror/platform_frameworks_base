@@ -929,7 +929,6 @@ public class RollbackTest {
      */
     @Test
     public void testBadUpdateRollback() throws Exception {
-        BroadcastReceiver crashCountReceiver = null;
         Context context = InstrumentationRegistry.getContext();
         try {
             InstallUtils.adoptShellPermissionIdentity(
@@ -937,7 +936,7 @@ public class RollbackTest {
                     Manifest.permission.DELETE_PACKAGES,
                     Manifest.permission.MANAGE_ROLLBACKS,
                     Manifest.permission.TEST_MANAGE_ROLLBACKS,
-                    Manifest.permission.KILL_BACKGROUND_PROCESSES,
+                    Manifest.permission.FORCE_STOP_PACKAGES,
                     Manifest.permission.RESTART_PACKAGES);
             RollbackManager rm = RollbackUtils.getRollbackManager();
 
@@ -967,7 +966,7 @@ public class RollbackTest {
             RollbackBroadcastReceiver rollbackReceiver = new RollbackBroadcastReceiver();
 
             // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
-            crashCountReceiver = RollbackUtils.sendCrashBroadcast(context, TestApp.A, 5);
+            RollbackUtils.sendCrashBroadcast(TestApp.A, 5);
 
             // Verify we received a broadcast for the rollback.
             rollbackReceiver.take();
@@ -981,9 +980,6 @@ public class RollbackTest {
             assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(2);
         } finally {
             InstallUtils.dropShellPermissionIdentity();
-            if (crashCountReceiver != null) {
-                context.unregisterReceiver(crashCountReceiver);
-            }
         }
     }
 
