@@ -31,6 +31,8 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.util.DeviceConfigProxyFake;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +62,8 @@ public class ProximityClassifierTest extends ClassifierTest {
         MockitoAnnotations.initMocks(this);
         when(mDataProvider.getInteractionType()).thenReturn(GENERIC);
         when(mDistanceClassifier.isLongSwipe()).thenReturn(false);
-        mClassifier = new ProximityClassifier(mDistanceClassifier, mDataProvider);
+        mClassifier = new ProximityClassifier(
+                mDistanceClassifier, mDataProvider, new DeviceConfigProxyFake());
     }
 
     @After

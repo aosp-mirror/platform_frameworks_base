@@ -27,6 +27,8 @@ import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import com.android.systemui.util.DeviceConfigProxy;
+
 import java.util.List;
 
 /**
@@ -50,35 +52,35 @@ class DistanceClassifier extends FalsingClassifier {
     private boolean mDistanceDirty;
     private DistanceVectors mCachedDistance;
 
-    DistanceClassifier(FalsingDataProvider dataProvider) {
+    DistanceClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 
-        mVelocityToDistanceMultiplier = DeviceConfig.getFloat(
+        mVelocityToDistanceMultiplier = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_VELOCITY_TO_DISTANCE,
                 VELOCITY_TO_DISTANCE);
 
-        float horizontalFlingThresholdIn = DeviceConfig.getFloat(
+        float horizontalFlingThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_FLING_THRESHOLD_IN,
                 HORIZONTAL_FLING_THRESHOLD_DISTANCE_IN);
 
-        float verticalFlingThresholdIn = DeviceConfig.getFloat(
+        float verticalFlingThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_VERTICAL_FLING_THRESHOLD_IN,
                 VERTICAL_FLING_THRESHOLD_DISTANCE_IN);
 
-        float horizontalSwipeThresholdIn = DeviceConfig.getFloat(
+        float horizontalSwipeThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_SWIPE_THRESHOLD_IN,
                 HORIZONTAL_SWIPE_THRESHOLD_DISTANCE_IN);
 
-        float verticalSwipeThresholdIn = DeviceConfig.getFloat(
+        float verticalSwipeThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_VERTICAL_SWIPE_THRESHOLD_IN,
                 VERTICAL_SWIPE_THRESHOLD_DISTANCE_IN);
 
-        float screenFractionMaxDistance = DeviceConfig.getFloat(
+        float screenFractionMaxDistance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_SCREEN_FRACTION_MAX_DISTANCE,
                 SCREEN_FRACTION_MAX_DISTANCE);

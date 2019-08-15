@@ -28,6 +28,8 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.util.DeviceConfigProxyFake;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +60,7 @@ public class DiagonalClassifierTest extends ClassifierTest {
     public void setup() {
         super.setup();
         MockitoAnnotations.initMocks(this);
-        mClassifier = new DiagonalClassifier(mDataProvider);
+        mClassifier = new DiagonalClassifier(mDataProvider, new DeviceConfigProxyFake());
     }
 
     @After
