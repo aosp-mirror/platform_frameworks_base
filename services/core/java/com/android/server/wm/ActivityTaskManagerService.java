@@ -82,6 +82,8 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PRE
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -3237,11 +3239,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                ActivityRecord r = ActivityRecord.isInStackLocked(token);
-                if (r == null) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null || !r.isDestroyable()) {
                     return false;
                 }
-                return r.safelyDestroy("app-req");
+                r.destroyImmediately(true /* removeFromApp */, "app-req");
+                return r.isState(DESTROYING, DESTROYED);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
