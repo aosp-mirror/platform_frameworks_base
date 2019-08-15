@@ -127,7 +127,17 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                             Log.d(TAG, "onActivityViewReady: calling startActivity, "
                                     + "bubble=" + getBubbleKey());
                         }
-                        mActivityView.startActivity(mBubbleIntent, options);
+                        try {
+                            mActivityView.startActivity(mBubbleIntent, options);
+                        } catch (RuntimeException e) {
+                            // If there's a runtime exception here then there's something
+                            // wrong with the intent, we can't really recover / try to populate
+                            // the bubble again so we'll just remove it.
+                            Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
+                                    + ", " + e.getMessage() + "; removing bubble");
+                            mBubbleController.removeBubble(mBubble.getKey(),
+                                    BubbleController.DISMISS_INVALID_INTENT);
+                        }
                     });
                     mActivityViewStatus = ActivityViewStatus.ACTIVITY_STARTED;
             }
