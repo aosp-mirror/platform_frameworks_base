@@ -18,29 +18,21 @@ package com.android.server.backup;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
-import android.app.backup.ISelectBackupTransportCallback;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
-import android.os.UserManager;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -82,42 +74,6 @@ public class BackupManagerService {
     }
 
     /**
-     * If {@code userId} is different from the calling user id, then the caller must hold the
-     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
-     *
-     * @param userId User id on which the backup operation is being requested.
-     * @param message A message to include in the exception if it is thrown.
-     */
-    private void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
-        if (Binder.getCallingUserHandle().getIdentifier() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
-        }
-    }
-
-    // ---------------------------------------------
-    // USER LIFECYCLE CALLBACKS
-    // ---------------------------------------------
-
-    boolean isAbleToServeUser(int userId) {
-        return getUserServices().get(UserHandle.USER_SYSTEM) != null
-                && getUserServices().get(userId) != null;
-    }
-
-    /**
-     *  Returns a list of users currently unlocked that have a {@link UserBackupManagerService}
-     *  registered.
-     *
-     *  Warning: Do NOT modify returned object as it's used inside.
-     *
-     *  TODO: Return a copy or only expose read-only information through other means.
-     */
-    @VisibleForTesting
-    public SparseArray<UserBackupManagerService> getUserServices() {
-        return mServiceUsers;
-    }
-
-    /**
      * Returns the {@link UserBackupManagerService} instance for the specified user {@code userId}.
      * If the user is not registered with the service (either the user is locked or not eligible for
      * the backup service) then return {@code null}.
@@ -132,12 +88,7 @@ public class BackupManagerService {
     @VisibleForTesting
     UserBackupManagerService getServiceForUserIfCallerHasPermission(
             @UserIdInt int userId, String caller) {
-        enforceCallingPermissionOnUserId(userId, caller);
-        UserBackupManagerService userBackupManagerService = mServiceUsers.get(userId);
-        if (userBackupManagerService == null) {
-            Slog.w(TAG, "Called " + caller + " for unknown user: " + userId);
-        }
-        return userBackupManagerService;
+        return mTrampoline.getServiceForUserIfCallerHasPermission(userId, caller);
     }
 
     /*
@@ -146,326 +97,6 @@ public class BackupManagerService {
      * action on the passed in user. Currently this is a straight redirection (see TODO).
      */
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    // ---------------------------------------------
-    // BACKUP AGENT OPERATIONS
-    // ---------------------------------------------
-
-    /**
-     * An app's backup agent calls this method to let the service know that there's new data to
-     * backup for their app {@code packageName}. Only used for apps participating in key-value
-     * backup.
-     */
-    public void dataChanged(@UserIdInt int userId, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "dataChanged()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.dataChanged(packageName);
-        }
-    }
-
-    /**
-     * Callback: a requested backup agent has been instantiated. This should only be called from the
-     * {@link ActivityManager}.
-     */
-    public void agentConnected(@UserIdInt int userId, String packageName, IBinder agentBinder) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "agentConnected()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.agentConnected(packageName, agentBinder);
-        }
-    }
-
-    /**
-     * Callback: a backup agent has failed to come up, or has unexpectedly quit. This should only be
-     * called from the {@link ActivityManager}.
-     */
-    public void agentDisconnected(@UserIdInt int userId, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "agentDisconnected()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.agentDisconnected(packageName);
-        }
-    }
-
-    /**
-     * Used by a currently-active backup agent to notify the service that it has completed its given
-     * outstanding asynchronous backup/restore operation.
-     */
-    public void opComplete(@UserIdInt int userId, int token, long result) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "opComplete()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.opComplete(token, result);
-        }
-    }
-
-    // ---------------------------------------------
-    // TRANSPORT OPERATIONS
-    // ---------------------------------------------
-
-    /** Run an initialize operation for the given transports {@code transportNames}. */
-    public void initializeTransports(
-            @UserIdInt int userId, String[] transportNames, IBackupObserver observer) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "initializeTransports()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.initializeTransports(transportNames, observer);
-        }
-    }
-
-    /**
-     * Clear the given package {@code packageName}'s backup data from the transport {@code
-     * transportName}.
-     */
-    public void clearBackupData(@UserIdInt int userId, String transportName, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "clearBackupData()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.clearBackupData(transportName, packageName);
-        }
-    }
-
-    /** Return the name of the currently active transport. */
-    @Nullable
-    public String getCurrentTransport(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransport()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getCurrentTransport();
-    }
-
-    /**
-     * Returns the {@link ComponentName} of the host service of the selected transport or {@code
-     * null} if no transport selected or if the transport selected is not registered.
-     */
-    @Nullable
-    public ComponentName getCurrentTransportComponent(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransportComponent()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getCurrentTransportComponent();
-    }
-
-    /** Report all known, available backup transports by name. */
-    @Nullable
-    public String[] listAllTransports(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "listAllTransports()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.listAllTransports();
-    }
-
-    /** Report all known, available backup transports by {@link ComponentName}. */
-    @Nullable
-    public ComponentName[] listAllTransportComponents(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "listAllTransportComponents()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.listAllTransportComponents();
-    }
-
-    /**
-     * Update the attributes of the transport identified by {@code transportComponent}. If the
-     * specified transport has not been bound at least once (for registration), this call will be
-     * ignored. Only the host process of the transport can change its description, otherwise a
-     * {@link SecurityException} will be thrown.
-     *
-     * @param transportComponent The identity of the transport being described.
-     * @param name A {@link String} with the new name for the transport. This is NOT for
-     *     identification. MUST NOT be {@code null}.
-     * @param configurationIntent An {@link Intent} that can be passed to {@link
-     *     Context#startActivity} in order to launch the transport's configuration UI. It may be
-     *     {@code null} if the transport does not offer any user-facing configuration UI.
-     * @param currentDestinationString A {@link String} describing the destination to which the
-     *     transport is currently sending data. MUST NOT be {@code null}.
-     * @param dataManagementIntent An {@link Intent} that can be passed to {@link
-     *     Context#startActivity} in order to launch the transport's data-management UI. It may be
-     *     {@code null} if the transport does not offer any user-facing data management UI.
-     * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
-     *     data management affordance. This MUST be {@code null} when dataManagementIntent is {@code
-     *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
-     * @throws SecurityException If the UID of the calling process differs from the package UID of
-     *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
-     */
-    public void updateTransportAttributes(
-            @UserIdInt int userId,
-            ComponentName transportComponent,
-            String name,
-            @Nullable Intent configurationIntent,
-            String currentDestinationString,
-            @Nullable Intent dataManagementIntent,
-            CharSequence dataManagementLabel) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "updateTransportAttributes()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.updateTransportAttributes(
-                    transportComponent,
-                    name,
-                    configurationIntent,
-                    currentDestinationString,
-                    dataManagementIntent,
-                    dataManagementLabel);
-        }
-    }
-
-    /**
-     * Selects transport {@code transportName} and returns the previously selected transport.
-     *
-     * @deprecated Use {@link #selectBackupTransportAsync(ComponentName,
-     *     ISelectBackupTransportCallback)} instead.
-     */
-    @Deprecated
-    @Nullable
-    public String selectBackupTransport(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransport()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.selectBackupTransport(transportName);
-    }
-
-    /**
-     * Selects transport {@code transportComponent} asynchronously and notifies {@code listener}
-     * with the result upon completion.
-     */
-    public void selectBackupTransportAsync(
-            @UserIdInt int userId,
-            ComponentName transportComponent,
-            ISelectBackupTransportCallback listener) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransportAsync()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.selectBackupTransportAsync(transportComponent, listener);
-        }
-    }
-
-    /**
-     * Supply the configuration intent for the given transport. If the name is not one of the
-     * available transports, or if the transport does not supply any configuration UI, the method
-     * returns {@code null}.
-     */
-    @Nullable
-    public Intent getConfigurationIntent(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getConfigurationIntent()");
-
-        return userBackupManagerService == null
-            ? null
-            : userBackupManagerService.getConfigurationIntent(transportName);
-    }
-
-    /**
-     * Sets the ancestral work profile for the calling user.
-     *
-     * <p> The ancestral work profile corresponds to the profile that was used to restore to the
-     * callers profile.
-     */
-    public void setAncestralSerialNumber(long ancestralSerialNumber) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(
-                        Binder.getCallingUserHandle().getIdentifier(),
-                        "setAncestralSerialNumber()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.setAncestralSerialNumber(ancestralSerialNumber);
-        }
-    }
-
-    /**
-     * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the
-     * serial number of the its ancestral work profile or null if there is no {@link
-     * UserBackupManagerService} associated with that user.
-     *
-     * <p> The ancestral work profile is set by {@link #setAncestralSerialNumber(long)}
-     * and it corresponds to the profile that was used to restore to the callers profile.
-     */
-    @Nullable
-    public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
-        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
-        long oldId = Binder.clearCallingIdentity();
-        final int[] userIds;
-        try {
-            userIds =
-                    mContext
-                            .getSystemService(UserManager.class)
-                            .getProfileIds(callingUserId, false);
-        } finally {
-            Binder.restoreCallingIdentity(oldId);
-        }
-
-        for (int userId : userIds) {
-            UserBackupManagerService userBackupManagerService = mServiceUsers.get(userId);
-            if (userBackupManagerService != null) {
-                if (userBackupManagerService.getAncestralSerialNumber() == ancestralSerialNumber) {
-                    return UserHandle.of(userId);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Supply the current destination string for the given transport. If the name is not one of the
-     * registered transports the method will return null.
-     *
-     * <p>This string is used VERBATIM as the summary text of the relevant Settings item.
-     *
-     * @param transportName The name of the registered transport.
-     * @return The current destination string or null if the transport is not registered.
-     */
-    @Nullable
-    public String getDestinationString(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getDestinationString()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getDestinationString(transportName);
-    }
-
-    /** Supply the manage-data intent for the given transport. */
-    @Nullable
-    public Intent getDataManagementIntent(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getDataManagementIntent()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getDataManagementIntent(transportName);
-    }
-
-    /**
-     * Supply the menu label for affordances that fire the manage-data intent for the given
-     * transport.
-     */
-    @Nullable
-    public CharSequence getDataManagementLabel(@UserIdInt int userId, String transportName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "getDataManagementLabel()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.getDataManagementLabel(transportName);
-    }
 
     // ---------------------------------------------
     // SETTINGS OPERATIONS

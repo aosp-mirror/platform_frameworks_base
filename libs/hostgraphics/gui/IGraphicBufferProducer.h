@@ -19,6 +19,8 @@
 
 #include <utils/RefBase.h>
 
+#include <ui/GraphicBuffer.h>
+
 namespace android {
 
 class IGraphicBufferProducer : virtual public RefBase {

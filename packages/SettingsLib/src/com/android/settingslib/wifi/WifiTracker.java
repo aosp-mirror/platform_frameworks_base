@@ -224,7 +224,9 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging developer option has been turned on or off
-        sVerboseLogging = mWifiManager != null && (mWifiManager.getVerboseLoggingLevel() > 0);
+        sVerboseLogging = Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED, 0) > 0;
 
         mFilter = filter;
 

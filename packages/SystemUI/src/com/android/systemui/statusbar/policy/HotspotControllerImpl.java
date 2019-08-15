@@ -51,6 +51,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private int mHotspotState;
     private int mNumConnectedDevices;
     private boolean mWaitingForTerminalState;
+    private boolean mListening;
 
     /**
      */
@@ -105,14 +106,18 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             if (DEBUG) Log.d(TAG, "addCallback " + callback);
             mCallbacks.add(callback);
             if (mWifiManager != null) {
-                if (mCallbacks.size() == 1) {
-                    mWifiManager.registerSoftApCallback(this, mMainHandler);
-                } else {
-                    // mWifiManager#registerSoftApCallback triggers a call to onNumClientsChanged
-                    // on the Main Handler. In order to always update the callback on added, we
-                    // make this call when adding callbacks after the first.
-                    mMainHandler.post(() ->
-                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
+                if (mListening) {
+                    if (mCallbacks.size() == 1) {
+                        mWifiManager.registerSoftApCallback(this, mMainHandler);
+                    } else {
+                        // mWifiManager#registerSoftApCallback triggers a call to
+                        // onNumClientsChanged on the Main Handler. In order to always update the
+                        // callback on added, we make this call when adding callbacks after the
+                        // first.
+                        mMainHandler.post(() ->
+                                callback.onHotspotChanged(isHotspotEnabled(),
+                                        mNumConnectedDevices));
+                    }
                 }
             }
         }
@@ -124,9 +129,20 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         synchronized (mCallbacks) {
             mCallbacks.remove(callback);
-            if (mCallbacks.isEmpty() && mWifiManager != null) {
+            if (mCallbacks.isEmpty() && mWifiManager != null && mListening) {
                 mWifiManager.unregisterSoftApCallback(this);
             }
+        }
+    }
+
+    @Override
+    public void handleSetListening(boolean listening) {
+        // Wait for the first |handleSetListening(true))| to register softap callbacks (for lazy
+        // registration of the softap callbacks).
+        if (mListening || !listening) return;
+        mListening = true;
+        if (mCallbacks.size() >= 1) {
+            mWifiManager.registerSoftApCallback(this, mMainHandler);
         }
     }
 

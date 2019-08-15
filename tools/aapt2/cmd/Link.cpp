@@ -1084,7 +1084,8 @@ class Linker {
 
       case OutputFormat::kProto: {
         pb::ResourceTable pb_table;
-        SerializeTableToPb(*table, &pb_table, context_->GetDiagnostics());
+        SerializeTableToPb(*table, &pb_table, context_->GetDiagnostics(),
+                           options_.proto_table_flattener_options);
         return io::CopyProtoToArchive(context_, &pb_table, kProtoResourceTablePath,
                                       ArchiveEntry::kCompress, writer);
       } break;

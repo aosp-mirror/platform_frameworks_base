@@ -24,6 +24,7 @@ import static java.util.Collections.emptySet;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
@@ -269,7 +270,8 @@ public class Trampoline extends IBackupManager.Stub {
     // This method should not perform any I/O (e.g. do not call isBackupActivatedForUser),
     // it's used in multiple places where I/O waits would cause system lock-ups.
     private boolean isUserReadyForBackup(int userId) {
-        return mService.isAbleToServeUser(userId);
+        return mUserServices.get(UserHandle.USER_SYSTEM) != null
+                && mUserServices.get(userId) != null;
     }
 
     /**
@@ -501,7 +503,7 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public void dataChangedForUser(int userId, String packageName) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.dataChanged(userId, packageName);
+            dataChanged(userId, packageName);
         }
     }
 
@@ -510,11 +512,40 @@ public class Trampoline extends IBackupManager.Stub {
         dataChangedForUser(binderGetCallingUserId(), packageName);
     }
 
+    /**
+     * An app's backup agent calls this method to let the service know that there's new data to
+     * backup for their app {@code packageName}. Only used for apps participating in key-value
+     * backup.
+     */
+    public void dataChanged(@UserIdInt int userId, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "dataChanged()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.dataChanged(packageName);
+        }
+    }
+
+    // ---------------------------------------------
+    // TRANSPORT OPERATIONS
+    // ---------------------------------------------
+
     @Override
     public void initializeTransportsForUser(
             int userId, String[] transportNames, IBackupObserver observer) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.initializeTransports(userId, transportNames, observer);
+            initializeTransports(userId, transportNames, observer);
+        }
+    }
+
+    /** Run an initialize operation for the given transports {@code transportNames}. */
+    public void initializeTransports(
+            @UserIdInt int userId, String[] transportNames, IBackupObserver observer) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "initializeTransports()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.initializeTransports(transportNames, observer);
         }
     }
 
@@ -522,7 +553,20 @@ public class Trampoline extends IBackupManager.Stub {
     public void clearBackupDataForUser(int userId, String transportName, String packageName)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.clearBackupData(userId, transportName, packageName);
+            clearBackupData(userId, transportName, packageName);
+        }
+    }
+
+    /**
+     * Clear the given package {@code packageName}'s backup data from the transport {@code
+     * transportName}.
+     */
+    public void clearBackupData(@UserIdInt int userId, String transportName, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "clearBackupData()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.clearBackupData(transportName, packageName);
         }
     }
 
@@ -536,7 +580,7 @@ public class Trampoline extends IBackupManager.Stub {
     public void agentConnectedForUser(int userId, String packageName, IBinder agent)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.agentConnected(userId, packageName, agent);
+            agentConnected(userId, packageName, agent);
         }
     }
 
@@ -545,16 +589,42 @@ public class Trampoline extends IBackupManager.Stub {
         agentConnectedForUser(binderGetCallingUserId(), packageName, agent);
     }
 
+    /**
+     * Callback: a requested backup agent has been instantiated. This should only be called from the
+     * {@link ActivityManager}.
+     */
+    public void agentConnected(@UserIdInt int userId, String packageName, IBinder agentBinder) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "agentConnected()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.agentConnected(packageName, agentBinder);
+        }
+    }
+
     @Override
     public void agentDisconnectedForUser(int userId, String packageName) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.agentDisconnected(userId, packageName);
+            agentDisconnected(userId, packageName);
         }
     }
 
     @Override
     public void agentDisconnected(String packageName) throws RemoteException {
         agentDisconnectedForUser(binderGetCallingUserId(), packageName);
+    }
+
+    /**
+     * Callback: a backup agent has failed to come up, or has unexpectedly quit. This should only be
+     * called from the {@link ActivityManager}.
+     */
+    public void agentDisconnected(@UserIdInt int userId, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "agentDisconnected()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.agentDisconnected(packageName);
+        }
     }
 
     @Override
@@ -680,12 +750,23 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public String getCurrentTransportForUser(int userId) throws RemoteException {
-        return (isUserReadyForBackup(userId)) ? mService.getCurrentTransport(userId) : null;
+        return (isUserReadyForBackup(userId)) ? getCurrentTransport(userId) : null;
     }
 
     @Override
     public String getCurrentTransport() throws RemoteException {
         return getCurrentTransportForUser(binderGetCallingUserId());
+    }
+
+    /** Return the name of the currently active transport. */
+    @Nullable
+    public String getCurrentTransport(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransport()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getCurrentTransport();
     }
 
     /**
@@ -695,13 +776,37 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     @Nullable
     public ComponentName getCurrentTransportComponentForUser(int userId) {
-        return (isUserReadyForBackup(userId))
-                ? mService.getCurrentTransportComponent(userId) : null;
+        return (isUserReadyForBackup(userId)) ? getCurrentTransportComponent(userId) : null;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or {@code
+     * null} if no transport selected or if the transport selected is not registered.
+     */
+    @Nullable
+    public ComponentName getCurrentTransportComponent(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getCurrentTransportComponent()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getCurrentTransportComponent();
     }
 
     @Override
     public String[] listAllTransportsForUser(int userId) throws RemoteException {
-        return (isUserReadyForBackup(userId)) ? mService.listAllTransports(userId) : null;
+        return (isUserReadyForBackup(userId)) ? listAllTransports(userId) : null;
+    }
+
+    /** Report all known, available backup transports by name. */
+    @Nullable
+    public String[] listAllTransports(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "listAllTransports()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.listAllTransports();
     }
 
     @Override
@@ -712,7 +817,18 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public ComponentName[] listAllTransportComponentsForUser(int userId) throws RemoteException {
         return (isUserReadyForBackup(userId))
-                ? mService.listAllTransportComponents(userId) : null;
+                ? listAllTransportComponents(userId) : null;
+    }
+
+    /** Report all known, available backup transports by {@link ComponentName}. */
+    @Nullable
+    public ComponentName[] listAllTransportComponents(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "listAllTransportComponents()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.listAllTransportComponents();
     }
 
     @Override
@@ -741,8 +857,53 @@ public class Trampoline extends IBackupManager.Stub {
             @Nullable Intent dataManagementIntent,
             CharSequence dataManagementLabel) {
         if (isUserReadyForBackup(userId)) {
-            mService.updateTransportAttributes(
+            updateTransportAttributes(
                     userId,
+                    transportComponent,
+                    name,
+                    configurationIntent,
+                    currentDestinationString,
+                    dataManagementIntent,
+                    dataManagementLabel);
+        }
+    }
+
+    /**
+     * Update the attributes of the transport identified by {@code transportComponent}. If the
+     * specified transport has not been bound at least once (for registration), this call will be
+     * ignored. Only the host process of the transport can change its description, otherwise a
+     * {@link SecurityException} will be thrown.
+     *
+     * @param transportComponent The identity of the transport being described.
+     * @param name A {@link String} with the new name for the transport. This is NOT for
+     *     identification. MUST NOT be {@code null}.
+     * @param configurationIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's configuration UI. It may be
+     *     {@code null} if the transport does not offer any user-facing configuration UI.
+     * @param currentDestinationString A {@link String} describing the destination to which the
+     *     transport is currently sending data. MUST NOT be {@code null}.
+     * @param dataManagementIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's data-management UI. It may be
+     *     {@code null} if the transport does not offer any user-facing data management UI.
+     * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
+     *     data management affordance. This MUST be {@code null} when dataManagementIntent is {@code
+     *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     * @throws SecurityException If the UID of the calling process differs from the package UID of
+     *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
+     */
+    public void updateTransportAttributes(
+            @UserIdInt int userId,
+            ComponentName transportComponent,
+            String name,
+            @Nullable Intent configurationIntent,
+            String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            CharSequence dataManagementLabel) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "updateTransportAttributes()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.updateTransportAttributes(
                     transportComponent,
                     name,
                     configurationIntent,
@@ -756,7 +917,7 @@ public class Trampoline extends IBackupManager.Stub {
     public String selectBackupTransportForUser(int userId, String transport)
             throws RemoteException {
         return (isUserReadyForBackup(userId))
-                ? mService.selectBackupTransport(userId, transport) : null;
+                ? selectBackupTransport(userId, transport) : null;
     }
 
     @Override
@@ -764,11 +925,28 @@ public class Trampoline extends IBackupManager.Stub {
         return selectBackupTransportForUser(binderGetCallingUserId(), transport);
     }
 
+    /**
+     * Selects transport {@code transportName} and returns the previously selected transport.
+     *
+     * @deprecated Use {@link #selectBackupTransportAsync(ComponentName,
+     *     ISelectBackupTransportCallback)} instead.
+     */
+    @Deprecated
+    @Nullable
+    public String selectBackupTransport(@UserIdInt int userId, String transportName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransport()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.selectBackupTransport(transportName);
+    }
+
     @Override
     public void selectBackupTransportAsyncForUser(int userId, ComponentName transport,
             ISelectBackupTransportCallback listener) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.selectBackupTransportAsync(userId, transport, listener);
+            selectBackupTransportAsync(userId, transport, listener);
         } else {
             if (listener != null) {
                 try {
@@ -780,10 +958,26 @@ public class Trampoline extends IBackupManager.Stub {
         }
     }
 
+    /**
+     * Selects transport {@code transportComponent} asynchronously and notifies {@code listener}
+     * with the result upon completion.
+     */
+    public void selectBackupTransportAsync(
+            @UserIdInt int userId,
+            ComponentName transportComponent,
+            ISelectBackupTransportCallback listener) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "selectBackupTransportAsync()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.selectBackupTransportAsync(transportComponent, listener);
+        }
+    }
+
     @Override
     public Intent getConfigurationIntentForUser(int userId, String transport)
             throws RemoteException {
-        return isUserReadyForBackup(userId) ? mService.getConfigurationIntent(userId, transport)
+        return isUserReadyForBackup(userId) ? getConfigurationIntent(userId, transport)
                 : null;
     }
 
@@ -793,9 +987,24 @@ public class Trampoline extends IBackupManager.Stub {
         return getConfigurationIntentForUser(binderGetCallingUserId(), transport);
     }
 
+    /**
+     * Supply the configuration intent for the given transport. If the name is not one of the
+     * available transports, or if the transport does not supply any configuration UI, the method
+     * returns {@code null}.
+     */
+    @Nullable
+    public Intent getConfigurationIntent(@UserIdInt int userId, String transportName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getConfigurationIntent()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getConfigurationIntent(transportName);
+    }
+
     @Override
     public String getDestinationStringForUser(int userId, String transport) throws RemoteException {
-        return isUserReadyForBackup(userId) ? mService.getDestinationString(userId, transport)
+        return isUserReadyForBackup(userId) ? getDestinationString(userId, transport)
                 : null;
     }
 
@@ -804,11 +1013,30 @@ public class Trampoline extends IBackupManager.Stub {
         return getDestinationStringForUser(binderGetCallingUserId(), transport);
     }
 
+    /**
+     * Supply the current destination string for the given transport. If the name is not one of the
+     * registered transports the method will return null.
+     *
+     * <p>This string is used VERBATIM as the summary text of the relevant Settings item.
+     *
+     * @param transportName The name of the registered transport.
+     * @return The current destination string or null if the transport is not registered.
+     */
+    @Nullable
+    public String getDestinationString(@UserIdInt int userId, String transportName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getDestinationString()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getDestinationString(transportName);
+    }
+
     @Override
     public Intent getDataManagementIntentForUser(int userId, String transport)
             throws RemoteException {
         return isUserReadyForBackup(userId)
-                ? mService.getDataManagementIntent(userId, transport) : null;
+                ? getDataManagementIntent(userId, transport) : null;
     }
 
     @Override
@@ -817,11 +1045,36 @@ public class Trampoline extends IBackupManager.Stub {
         return getDataManagementIntentForUser(binderGetCallingUserId(), transport);
     }
 
+    /** Supply the manage-data intent for the given transport. */
+    @Nullable
+    public Intent getDataManagementIntent(@UserIdInt int userId, String transportName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getDataManagementIntent()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getDataManagementIntent(transportName);
+    }
+
     @Override
     public CharSequence getDataManagementLabelForUser(int userId, String transport)
             throws RemoteException {
-        return isUserReadyForBackup(userId) ? mService.getDataManagementLabel(userId, transport)
+        return isUserReadyForBackup(userId) ? getDataManagementLabel(userId, transport)
                 : null;
+    }
+
+    /**
+     * Supply the menu label for affordances that fire the manage-data intent for the given
+     * transport.
+     */
+    @Nullable
+    public CharSequence getDataManagementLabel(@UserIdInt int userId, String transportName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "getDataManagementLabel()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.getDataManagementLabel(transportName);
     }
 
     @Override
@@ -834,13 +1087,26 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public void opCompleteForUser(int userId, int token, long result) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.opComplete(userId, token, result);
+            opComplete(userId, token, result);
         }
     }
 
     @Override
     public void opComplete(int token, long result) throws RemoteException {
         opCompleteForUser(binderGetCallingUserId(), token, result);
+    }
+
+    /**
+     * Used by a currently-active backup agent to notify the service that it has completed its given
+     * outstanding asynchronous backup/restore operation.
+     */
+    public void opComplete(@UserIdInt int userId, int token, long result) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "opComplete()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.opComplete(token, result);
+        }
     }
 
     @Override
@@ -889,18 +1155,62 @@ public class Trampoline extends IBackupManager.Stub {
         cancelBackupsForUser(binderGetCallingUserId());
     }
 
+    /**
+     * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the
+     * serial number of the its ancestral work profile or null if there is no {@link
+     * UserBackupManagerService} associated with that user.
+     *
+     * <p> The ancestral work profile is set by {@link #setAncestralSerialNumber(long)}
+     * and it corresponds to the profile that was used to restore to the callers profile.
+     */
     @Override
-    @Nullable public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
+    @Nullable
+    public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
         if (mGlobalDisable) {
             return null;
         }
-        return mService.getUserForAncestralSerialNumber(ancestralSerialNumber);
+        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
+        long oldId = Binder.clearCallingIdentity();
+        final int[] userIds;
+        try {
+            userIds =
+                    mContext
+                            .getSystemService(UserManager.class)
+                            .getProfileIds(callingUserId, false);
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+
+        for (int userId : userIds) {
+            UserBackupManagerService userBackupManagerService = mUserServices.get(userId);
+            if (userBackupManagerService != null) {
+                if (userBackupManagerService.getAncestralSerialNumber() == ancestralSerialNumber) {
+                    return UserHandle.of(userId);
+                }
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * Sets the ancestral work profile for the calling user.
+     *
+     * <p> The ancestral work profile corresponds to the profile that was used to restore to the
+     * callers profile.
+     */
     @Override
     public void setAncestralSerialNumber(long ancestralSerialNumber) {
-        if (!mGlobalDisable) {
-            mService.setAncestralSerialNumber(ancestralSerialNumber);
+        if (mGlobalDisable) {
+            return;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(
+                        Binder.getCallingUserHandle().getIdentifier(),
+                        "setAncestralSerialNumber()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.setAncestralSerialNumber(ancestralSerialNumber);
         }
     }
 
@@ -924,6 +1234,43 @@ public class Trampoline extends IBackupManager.Stub {
     /* package */ void endFullBackup(@UserIdInt int userId) {
         if (isUserReadyForBackup(userId)) {
             mService.endFullBackup(userId);
+        }
+    }
+
+    /**
+     * Returns the {@link UserBackupManagerService} instance for the specified user {@code userId}.
+     * If the user is not registered with the service (either the user is locked or not eligible for
+     * the backup service) then return {@code null}.
+     *
+     * @param userId The id of the user to retrieve its instance of {@link
+     *     UserBackupManagerService}.
+     * @param caller A {@link String} identifying the caller for logging purposes.
+     * @throws SecurityException if {@code userId} is different from the calling user id and the
+     *     caller does NOT have the android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Nullable
+    @VisibleForTesting
+    UserBackupManagerService getServiceForUserIfCallerHasPermission(
+            @UserIdInt int userId, String caller) {
+        enforceCallingPermissionOnUserId(userId, caller);
+        UserBackupManagerService userBackupManagerService = mUserServices.get(userId);
+        if (userBackupManagerService == null) {
+            Slog.w(TAG, "Called " + caller + " for unknown user: " + userId);
+        }
+        return userBackupManagerService;
+    }
+
+    /**
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id on which the backup operation is being requested.
+     * @param message A message to include in the exception if it is thrown.
+     */
+    void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
+        if (Binder.getCallingUserHandle().getIdentifier() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
         }
     }
 }

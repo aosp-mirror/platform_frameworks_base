@@ -775,17 +775,54 @@ public class ResolverDrawerLayout extends ViewGroup {
         return false;
     }
 
+    private boolean performAccessibilityActionCommon(int action) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case AccessibilityNodeInfo.ACTION_EXPAND:
+            case R.id.accessibilityActionScrollDown:
+                if (mCollapseOffset != 0) {
+                    smoothScrollTo(0, 0);
+                    return true;
+                }
+                break;
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case R.id.accessibilityActionScrollUp:
+                if (mCollapseOffset < mCollapsibleHeight) {
+                    smoothScrollTo(mCollapsibleHeight, 0);
+                    return true;
+                } else if ((mCollapseOffset < mCollapsibleHeight + mUncollapsibleHeight)
+                        && isDismissable()) {
+                    smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, 0);
+                    mDismissOnScrollerFinished = true;
+                    return true;
+                }
+                break;
+            case AccessibilityNodeInfo.ACTION_COLLAPSE:
+                if (mCollapseOffset < mCollapsibleHeight) {
+                    smoothScrollTo(mCollapsibleHeight, 0);
+                    return true;
+                }
+                break;
+            case AccessibilityNodeInfo.ACTION_DISMISS:
+                if ((mCollapseOffset < mCollapsibleHeight + mUncollapsibleHeight)
+                        && isDismissable()) {
+                    smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, 0);
+                    mDismissOnScrollerFinished = true;
+                    return true;
+                }
+                break;
+        }
+
+        return false;
+    }
+
     @Override
     public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle args) {
         if (super.onNestedPrePerformAccessibilityAction(target, action, args)) {
             return true;
         }
 
-        if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD && mCollapseOffset != 0) {
-            smoothScrollTo(0, 0);
-            return true;
-        }
-        return false;
+        return performAccessibilityActionCommon(action);
     }
 
     @Override
@@ -802,8 +839,22 @@ public class ResolverDrawerLayout extends ViewGroup {
 
         if (isEnabled()) {
             if (mCollapseOffset != 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityAction.ACTION_EXPAND);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_DOWN);
                 info.setScrollable(true);
+            }
+            if ((mCollapseOffset < mCollapsibleHeight + mUncollapsibleHeight)
+                    && ((mCollapseOffset < mCollapsibleHeight) || isDismissable())) {
+                info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_UP);
+                info.setScrollable(true);
+            }
+            if (mCollapseOffset < mCollapsibleHeight) {
+                info.addAction(AccessibilityAction.ACTION_COLLAPSE);
+            }
+            if (mCollapseOffset < mCollapsibleHeight + mUncollapsibleHeight && isDismissable()) {
+                info.addAction(AccessibilityAction.ACTION_DISMISS);
             }
         }
 
@@ -823,12 +874,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             return true;
         }
 
-        if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD && mCollapseOffset != 0) {
-            smoothScrollTo(0, 0);
-            return true;
-        }
-
-        return false;
+        return performAccessibilityActionCommon(action);
     }
 
     @Override
