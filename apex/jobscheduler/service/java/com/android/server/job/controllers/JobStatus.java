@@ -20,7 +20,6 @@ import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AppGlobals;
-import android.app.IActivityManager;
 import android.app.job.JobInfo;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
@@ -528,7 +527,7 @@ public final class JobStatus {
                 /*innerFlags=*/ 0);
     }
 
-    public void enqueueWorkLocked(IActivityManager am, JobWorkItem work) {
+    public void enqueueWorkLocked(JobWorkItem work) {
         if (pendingWork == null) {
             pendingWork = new ArrayList<>();
         }
@@ -536,7 +535,7 @@ public final class JobStatus {
         nextPendingWorkId++;
         if (work.getIntent() != null
                 && GrantedUriPermissions.checkGrantFlags(work.getIntent().getFlags())) {
-            work.setGrants(GrantedUriPermissions.createFromIntent(am, work.getIntent(), sourceUid,
+            work.setGrants(GrantedUriPermissions.createFromIntent(work.getIntent(), sourceUid,
                     sourcePackageName, sourceUserId, toShortString()));
         }
         pendingWork.add(work);
@@ -567,20 +566,20 @@ public final class JobStatus {
         return executingWork != null && executingWork.size() > 0;
     }
 
-    private static void ungrantWorkItem(IActivityManager am, JobWorkItem work) {
+    private static void ungrantWorkItem(JobWorkItem work) {
         if (work.getGrants() != null) {
-            ((GrantedUriPermissions)work.getGrants()).revoke(am);
+            ((GrantedUriPermissions)work.getGrants()).revoke();
         }
     }
 
-    public boolean completeWorkLocked(IActivityManager am, int workId) {
+    public boolean completeWorkLocked(int workId) {
         if (executingWork != null) {
             final int N = executingWork.size();
             for (int i = 0; i < N; i++) {
                 JobWorkItem work = executingWork.get(i);
                 if (work.getWorkId() == workId) {
                     executingWork.remove(i);
-                    ungrantWorkItem(am, work);
+                    ungrantWorkItem(work);
                     return true;
                 }
             }
@@ -588,16 +587,16 @@ public final class JobStatus {
         return false;
     }
 
-    private static void ungrantWorkList(IActivityManager am, ArrayList<JobWorkItem> list) {
+    private static void ungrantWorkList(ArrayList<JobWorkItem> list) {
         if (list != null) {
             final int N = list.size();
             for (int i = 0; i < N; i++) {
-                ungrantWorkItem(am, list.get(i));
+                ungrantWorkItem(list.get(i));
             }
         }
     }
 
-    public void stopTrackingJobLocked(IActivityManager am, JobStatus incomingJob) {
+    public void stopTrackingJobLocked(JobStatus incomingJob) {
         if (incomingJob != null) {
             // We are replacing with a new job -- transfer the work!  We do any executing
             // work first, since that was originally at the front of the pending work.
@@ -615,15 +614,15 @@ public final class JobStatus {
             incomingJob.updateEstimatedNetworkBytesLocked();
         } else {
             // We are completely stopping the job...  need to clean up work.
-            ungrantWorkList(am, pendingWork);
+            ungrantWorkList(pendingWork);
             pendingWork = null;
-            ungrantWorkList(am, executingWork);
+            ungrantWorkList(executingWork);
             executingWork = null;
         }
         updateEstimatedNetworkBytesLocked();
     }
 
-    public void prepareLocked(IActivityManager am) {
+    public void prepareLocked() {
         if (prepared) {
             Slog.wtf(TAG, "Already prepared: " + this);
             return;
@@ -634,12 +633,12 @@ public final class JobStatus {
         }
         final ClipData clip = job.getClipData();
         if (clip != null) {
-            uriPerms = GrantedUriPermissions.createFromClip(am, clip, sourceUid, sourcePackageName,
+            uriPerms = GrantedUriPermissions.createFromClip(clip, sourceUid, sourcePackageName,
                     sourceUserId, job.getClipGrantFlags(), toShortString());
         }
     }
 
-    public void unprepareLocked(IActivityManager am) {
+    public void unprepareLocked() {
         if (!prepared) {
             Slog.wtf(TAG, "Hasn't been prepared: " + this);
             if (DEBUG_PREPARE && unpreparedPoint != null) {
@@ -652,7 +651,7 @@ public final class JobStatus {
             unpreparedPoint = new Throwable().fillInStackTrace();
         }
         if (uriPerms != null) {
-            uriPerms.revoke(am);
+            uriPerms.revoke();
             uriPerms = null;
         }
     }

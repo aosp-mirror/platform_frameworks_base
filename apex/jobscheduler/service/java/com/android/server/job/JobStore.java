@@ -20,8 +20,6 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -180,7 +178,6 @@ public final class JobStore {
     public void getRtcCorrectedJobsLocked(final ArrayList<JobStatus> toAdd,
             final ArrayList<JobStatus> toRemove) {
         final long elapsedNow = sElapsedRealtimeClock.millis();
-        final IActivityManager am = ActivityManager.getService();
 
         // Find the jobs that need to be fixed up, collecting them for post-iteration
         // replacement with their new versions
@@ -192,7 +189,7 @@ public final class JobStore {
                 JobStatus newJob = new JobStatus(job,
                         elapsedRuntimes.first, elapsedRuntimes.second,
                         0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
-                newJob.prepareLocked(am);
+                newJob.prepareLocked();
                 toAdd.add(newJob);
                 toRemove.add(job);
             }
@@ -667,10 +664,9 @@ public final class JobStore {
                     jobs = readJobMapImpl(fis, rtcGood);
                     if (jobs != null) {
                         long now = sElapsedRealtimeClock.millis();
-                        IActivityManager am = ActivityManager.getService();
                         for (int i=0; i<jobs.size(); i++) {
                             JobStatus js = jobs.get(i);
-                            js.prepareLocked(am);
+                            js.prepareLocked();
                             js.enqueueTime = now;
                             this.jobSet.add(js);
 

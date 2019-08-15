@@ -963,7 +963,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // changing.  We can just directly enqueue this work in to the job.
                 if (toCancel.getJob().equals(job)) {
 
-                    toCancel.enqueueWorkLocked(ActivityManager.getService(), work);
+                    toCancel.enqueueWorkLocked(work);
 
                     // If any of work item is enqueued when the source is in the foreground,
                     // exempt the entire job.
@@ -992,11 +992,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             // This may throw a SecurityException.
-            jobStatus.prepareLocked(ActivityManager.getService());
+            jobStatus.prepareLocked();
 
             if (work != null) {
                 // If work has been supplied, enqueue it into the new job.
-                jobStatus.enqueueWorkLocked(ActivityManager.getService(), work);
+                jobStatus.enqueueWorkLocked(work);
             }
 
             if (toCancel != null) {
@@ -1144,7 +1144,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob, String reason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
-        cancelled.unprepareLocked(ActivityManager.getService());
+        cancelled.unprepareLocked();
         stopTrackingJobLocked(cancelled, incomingJob, true /* writeBack */);
         // Remove from pending queue.
         if (mPendingJobs.remove(cancelled)) {
@@ -1449,7 +1449,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private boolean stopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean removeFromPersisted) {
         // Deal with any remaining work items in the old job.
-        jobStatus.stopTrackingJobLocked(ActivityManager.getService(), incomingJob);
+        jobStatus.stopTrackingJobLocked(incomingJob);
 
         // Remove from store as well as controllers.
         final boolean removed = mJobs.remove(jobStatus, removeFromPersisted);
@@ -1705,7 +1705,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         if (rescheduledJob != null) {
             try {
-                rescheduledJob.prepareLocked(ActivityManager.getService());
+                rescheduledJob.prepareLocked();
             } catch (SecurityException e) {
                 Slog.w(TAG, "Unable to regrant job permissions for " + rescheduledJob);
             }
@@ -1713,13 +1713,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         } else if (jobStatus.getJob().isPeriodic()) {
             JobStatus rescheduledPeriodic = getRescheduleJobForPeriodic(jobStatus);
             try {
-                rescheduledPeriodic.prepareLocked(ActivityManager.getService());
+                rescheduledPeriodic.prepareLocked();
             } catch (SecurityException e) {
                 Slog.w(TAG, "Unable to regrant job permissions for " + rescheduledPeriodic);
             }
             startTrackingJobLocked(rescheduledPeriodic, jobStatus);
         }
-        jobStatus.unprepareLocked(ActivityManager.getService());
+        jobStatus.unprepareLocked();
         reportActiveLocked();
         mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
     }
