@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * Information about a rollback available for a set of atomically installed
  * packages.
  */
-class RollbackData {
+class Rollback {
     @IntDef(flag = true, prefix = { "ROLLBACK_STATE_" }, value = {
             ROLLBACK_STATE_ENABLING,
             ROLLBACK_STATE_AVAILABLE,
@@ -102,13 +102,13 @@ class RollbackData {
     public boolean restoreUserDataInProgress = false;
 
     /**
-     * Constructs a new, empty RollbackData instance.
+     * Constructs a new, empty Rollback instance.
      *
      * @param rollbackId the id of the rollback.
      * @param backupDir the directory where the rollback data is stored.
      * @param stagedSessionId the session id if this is a staged rollback, -1 otherwise.
      */
-    RollbackData(int rollbackId, File backupDir, int stagedSessionId) {
+    Rollback(int rollbackId, File backupDir, int stagedSessionId) {
         this.info = new RollbackInfo(rollbackId,
                 /* packages */ new ArrayList<>(),
                 /* isStaged */ stagedSessionId != -1,
@@ -121,9 +121,9 @@ class RollbackData {
     }
 
     /**
-     * Constructs a RollbackData instance with full rollback data information.
+     * Constructs a pre-populated Rollback instance.
      */
-    RollbackData(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
+    Rollback(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
             @RollbackState int state, int apkSessionId, boolean restoreUserDataInProgress) {
         this.info = info;
         this.backupDir = backupDir;
@@ -143,9 +143,9 @@ class RollbackData {
 
     static String rollbackStateToString(@RollbackState int state) {
         switch (state) {
-            case RollbackData.ROLLBACK_STATE_ENABLING: return "enabling";
-            case RollbackData.ROLLBACK_STATE_AVAILABLE: return "available";
-            case RollbackData.ROLLBACK_STATE_COMMITTED: return "committed";
+            case Rollback.ROLLBACK_STATE_ENABLING: return "enabling";
+            case Rollback.ROLLBACK_STATE_AVAILABLE: return "available";
+            case Rollback.ROLLBACK_STATE_COMMITTED: return "committed";
         }
         throw new AssertionError("Invalid rollback state: " + state);
     }
@@ -153,9 +153,9 @@ class RollbackData {
     static @RollbackState int rollbackStateFromString(String state)
             throws ParseException {
         switch (state) {
-            case "enabling": return RollbackData.ROLLBACK_STATE_ENABLING;
-            case "available": return RollbackData.ROLLBACK_STATE_AVAILABLE;
-            case "committed": return RollbackData.ROLLBACK_STATE_COMMITTED;
+            case "enabling": return Rollback.ROLLBACK_STATE_ENABLING;
+            case "available": return Rollback.ROLLBACK_STATE_AVAILABLE;
+            case "committed": return Rollback.ROLLBACK_STATE_COMMITTED;
         }
         throw new ParseException("Invalid rollback state: " + state, 0);
     }

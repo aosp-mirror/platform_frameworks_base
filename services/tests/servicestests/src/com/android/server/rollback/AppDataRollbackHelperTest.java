@@ -235,22 +235,22 @@ public class AppDataRollbackHelperTest {
         wasRecentlyRestored.getPendingRestores().add(
                 new RestoreInfo(73 /* userId */, 239 /* appId*/, "seInfo"));
 
-        RollbackData dataWithPendingBackup = new RollbackData(101, new File("/does/not/exist"), -1);
+        Rollback dataWithPendingBackup = new Rollback(101, new File("/does/not/exist"), -1);
         dataWithPendingBackup.info.getPackages().add(pendingBackup);
 
-        RollbackData dataWithRecentRestore = new RollbackData(17239, new File("/does/not/exist"),
+        Rollback dataWithRecentRestore = new Rollback(17239, new File("/does/not/exist"),
                 -1);
         dataWithRecentRestore.info.getPackages().add(wasRecentlyRestored);
 
-        RollbackData dataForDifferentUser = new RollbackData(17239, new File("/does/not/exist"),
+        Rollback dataForDifferentUser = new Rollback(17239, new File("/does/not/exist"),
                 -1);
         dataForDifferentUser.info.getPackages().add(ignoredInfo);
 
-        RollbackData dataForRestore = new RollbackData(17239, new File("/does/not/exist"), -1);
+        Rollback dataForRestore = new Rollback(17239, new File("/does/not/exist"), -1);
         dataForRestore.info.getPackages().add(pendingRestore);
         dataForRestore.info.getPackages().add(wasRecentlyRestored);
 
-        Set<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
+        Set<Rollback> changed = helper.commitPendingBackupAndRestoreForUser(37,
                 Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser,
                     dataForRestore));
         InOrder inOrder = Mockito.inOrder(installer);
@@ -265,7 +265,7 @@ public class AppDataRollbackHelperTest {
         assertEquals(-1, pendingBackup.getPendingBackups().indexOf(37));
         assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
 
-        // Check that changed returns correct RollbackData.
+        // Check that changed returns correct Rollback.
         assertEquals(3, changed.size());
         assertTrue(changed.contains(dataWithPendingBackup));
         assertTrue(changed.contains(dataWithRecentRestore));
