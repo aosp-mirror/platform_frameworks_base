@@ -635,6 +635,13 @@ public final class SystemServer {
         SystemServerInitThreadPool.get().submit(SystemConfig::getInstance, TAG_SYSTEM_CONFIG);
         t.traceEnd();
 
+        // Platform compat service is used by ActivityManagerService, PackageManagerService, and
+        // possibly others in the future. b/135010838.
+        t.traceBegin("PlatformCompat");
+        ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE,
+                new PlatformCompat(mSystemContext));
+        t.traceEnd();
+
         // Wait for installd to finish starting up so that it has a chance to
         // create critical directories such as /data/user with the appropriate
         // permissions.  We need this to complete before we initialize other services.
@@ -1100,10 +1107,6 @@ public final class SystemServer {
 
             t.traceBegin("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
-            t.traceEnd();
-
-            t.traceBegin("PlatformCompat");
-            ServiceManager.addService("platform_compat", new PlatformCompat(context));
             t.traceEnd();
 
         } catch (RuntimeException e) {
