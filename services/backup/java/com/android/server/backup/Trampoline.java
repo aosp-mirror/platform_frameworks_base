@@ -33,6 +33,9 @@ import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
+import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
+import android.app.job.JobService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -720,13 +723,26 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public void backupNowForUser(@UserIdInt int userId) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.backupNow(userId);
+            backupNow(userId);
         }
     }
 
     @Override
     public void backupNow() throws RemoteException {
         backupNowForUser(binderGetCallingUserId());
+    }
+
+    /**
+     * Run a backup pass immediately for any key-value backup applications that have declared that
+     * they have pending updates.
+     */
+    public void backupNow(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "backupNow()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.backupNow();
+        }
     }
 
     public void adbBackup(@UserIdInt int userId, ParcelFileDescriptor fd,
@@ -743,7 +759,19 @@ public class Trampoline extends IBackupManager.Stub {
     public void fullTransportBackupForUser(int userId, String[] packageNames)
             throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.fullTransportBackup(userId, packageNames);
+            fullTransportBackup(userId, packageNames);
+        }
+    }
+
+    /**
+     * Run a full backup pass for the given packages {@code packageNames}. Used by 'adb shell bmgr'.
+     */
+    public void fullTransportBackup(@UserIdInt int userId, String[] packageNames) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "fullTransportBackup()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.fullTransportBackup(packageNames);
         }
     }
 
@@ -1147,14 +1175,35 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public boolean isAppEligibleForBackupForUser(int userId, String packageName) {
-        return isUserReadyForBackup(userId) && mService.isAppEligibleForBackup(userId,
+        return isUserReadyForBackup(userId) && isAppEligibleForBackup(userId,
                 packageName);
+    }
+
+    /** Checks if the given package {@code packageName} is eligible for backup. */
+    public boolean isAppEligibleForBackup(@UserIdInt int userId, String packageName) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "isAppEligibleForBackup()");
+
+        return userBackupManagerService != null
+                && userBackupManagerService.isAppEligibleForBackup(packageName);
     }
 
     @Override
     public String[] filterAppsEligibleForBackupForUser(int userId, String[] packages) {
-        return isUserReadyForBackup(userId) ? mService.filterAppsEligibleForBackup(userId,
-                packages) : null;
+        return isUserReadyForBackup(userId) ? filterAppsEligibleForBackup(userId, packages) : null;
+    }
+
+    /**
+     * Returns from the inputted packages {@code packages}, the ones that are eligible for backup.
+     */
+    @Nullable
+    public String[] filterAppsEligibleForBackup(@UserIdInt int userId, String[] packages) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "filterAppsEligibleForBackup()");
+
+        return userBackupManagerService == null
+                ? null
+                : userBackupManagerService.filterAppsEligibleForBackup(packages);
     }
 
     @Override
@@ -1163,7 +1212,7 @@ public class Trampoline extends IBackupManager.Stub {
         if (!isUserReadyForBackup(userId)) {
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
-        return mService.requestBackup(userId, packages, observer, monitor, flags);
+        return requestBackup(userId, packages, observer, monitor, flags);
     }
 
     @Override
@@ -1173,10 +1222,28 @@ public class Trampoline extends IBackupManager.Stub {
                 observer, monitor, flags);
     }
 
+    /**
+     * Requests a backup for the inputted {@code packages} with a specified callback {@link
+     * IBackupManagerMonitor} for receiving events during the operation.
+     */
+    public int requestBackup(
+            @UserIdInt int userId,
+            String[] packages,
+            IBackupObserver observer,
+            IBackupManagerMonitor monitor,
+            int flags) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "requestBackup()");
+
+        return userBackupManagerService == null
+                ? BackupManager.ERROR_BACKUP_NOT_ALLOWED
+                : userBackupManagerService.requestBackup(packages, observer, monitor, flags);
+    }
+
     @Override
     public void cancelBackupsForUser(@UserIdInt int userId) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.cancelBackups(userId);
+            cancelBackups(userId);
         }
     }
 
@@ -1185,9 +1252,19 @@ public class Trampoline extends IBackupManager.Stub {
         cancelBackupsForUser(binderGetCallingUserId());
     }
 
+    /** Cancel all running backup operations. */
+    public void cancelBackups(@UserIdInt int userId) {
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "cancelBackups()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.cancelBackups();
+        }
+    }
+
     /**
      * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the
-     * serial number of the its ancestral work profile or null if there is no {@link
+     * serial number of its ancestral work profile or null if there is no {@link
      * UserBackupManagerService} associated with that user.
      *
      * <p> The ancestral work profile is set by {@link #setAncestralSerialNumber(long)}
@@ -1255,15 +1332,38 @@ public class Trampoline extends IBackupManager.Stub {
         }
     }
 
-    // Full backup/restore entry points - non-Binder; called directly
-    // by the full-backup scheduled job
-    /* package */ boolean beginFullBackup(@UserIdInt int userId, FullBackupJob scheduledJob) {
-        return (isUserReadyForBackup(userId)) && mService.beginFullBackup(userId, scheduledJob);
+    /**
+     * Used by the {@link JobScheduler} to run a full backup when conditions are right. The model we
+     * use is to perform one app backup per scheduled job execution, and to reschedule the job with
+     * zero latency as long as conditions remain right and we still have work to do.
+     *
+     * @return Whether ongoing work will continue. The return value here will be passed along as the
+     *     return value to the callback {@link JobService#onStartJob(JobParameters)}.
+     */
+    public boolean beginFullBackup(@UserIdInt int userId, FullBackupJob scheduledJob) {
+        if (!isUserReadyForBackup(userId)) {
+            return false;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "beginFullBackup()");
+
+        return userBackupManagerService != null
+                && userBackupManagerService.beginFullBackup(scheduledJob);
     }
 
-    /* package */ void endFullBackup(@UserIdInt int userId) {
-        if (isUserReadyForBackup(userId)) {
-            mService.endFullBackup(userId);
+    /**
+     * Used by the {@link JobScheduler} to end the current full backup task when conditions are no
+     * longer met for running the full backup job.
+     */
+    public void endFullBackup(@UserIdInt int userId) {
+        if (!isUserReadyForBackup(userId)) {
+            return;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId, "endFullBackup()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.endFullBackup();
         }
     }
 

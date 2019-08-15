@@ -511,37 +511,12 @@ public class TrampolineTest {
     }
 
     @Test
-    public void backupNowForUser_forwarded() throws Exception {
-
-        mTrampoline.backupNowForUser(mUserId);
-
-        verify(mBackupManagerServiceMock).backupNow(mUserId);
-    }
-
-    @Test
-    public void backupNow_forwardedToCallingUserId() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.backupNow();
-
-        verify(mBackupManagerServiceMock).backupNow(mUserId);
-    }
-
-    @Test
     public void adbBackup_forwarded() throws Exception {
         mTrampoline.adbBackup(mUserId, mParcelFileDescriptorMock, true, true,
                 true, true, true, true, true, true,
                 PACKAGE_NAMES);
         verify(mBackupManagerServiceMock).adbBackup(mUserId, mParcelFileDescriptorMock, true,
                 true, true, true, true, true, true, true, PACKAGE_NAMES);
-    }
-
-    @Test
-    public void fullTransportBackupForUser_forwarded() throws Exception {
-
-        mTrampoline.fullTransportBackupForUser(mUserId, PACKAGE_NAMES);
-
-        verify(mBackupManagerServiceMock).fullTransportBackup(mUserId, PACKAGE_NAMES);
     }
 
     @Test
@@ -644,70 +619,6 @@ public class TrampolineTest {
 
         assertEquals(123, mTrampoline.getAvailableRestoreTokenForUser(mUserId, PACKAGE_NAME));
         verify(mBackupManagerServiceMock).getAvailableRestoreToken(mUserId, PACKAGE_NAME);
-    }
-
-    @Test
-    public void isAppEligibleForBackupForUser_forwarded() {
-        when(mBackupManagerServiceMock.isAppEligibleForBackup(mUserId, PACKAGE_NAME))
-                .thenReturn(true);
-
-        assertTrue(mTrampoline.isAppEligibleForBackupForUser(mUserId, PACKAGE_NAME));
-        verify(mBackupManagerServiceMock).isAppEligibleForBackup(mUserId, PACKAGE_NAME);
-    }
-
-    @Test
-    public void requestBackupForUser_forwarded() throws Exception {
-        when(mBackupManagerServiceMock.requestBackup(mUserId, PACKAGE_NAMES,
-                mBackupObserverMock, mBackupManagerMonitorMock, 123)).thenReturn(456);
-
-        assertEquals(456, mTrampoline.requestBackupForUser(mUserId, PACKAGE_NAMES,
-                mBackupObserverMock, mBackupManagerMonitorMock, 123));
-        verify(mBackupManagerServiceMock).requestBackup(mUserId, PACKAGE_NAMES,
-                mBackupObserverMock, mBackupManagerMonitorMock, 123);
-    }
-
-    @Test
-    public void requestBackup_forwardedToCallingUserId() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-        when(mBackupManagerServiceMock.requestBackup(mUserId, PACKAGE_NAMES,
-                mBackupObserverMock, mBackupManagerMonitorMock, 123)).thenReturn(456);
-
-        assertEquals(456, mTrampoline.requestBackup(PACKAGE_NAMES,
-                mBackupObserverMock, mBackupManagerMonitorMock, 123));
-        verify(mBackupManagerServiceMock).requestBackup(mUserId, PACKAGE_NAMES,
-                mBackupObserverMock, mBackupManagerMonitorMock, 123);
-    }
-
-    @Test
-    public void cancelBackupsForUser_forwarded() throws Exception {
-
-        mTrampoline.cancelBackupsForUser(mUserId);
-
-        verify(mBackupManagerServiceMock).cancelBackups(mUserId);
-    }
-
-    @Test
-    public void cancelBackups_forwardedToCallingUserId() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-
-        mTrampoline.cancelBackups();
-
-        verify(mBackupManagerServiceMock).cancelBackups(mUserId);
-    }
-
-    @Test
-    public void beginFullBackup_forwarded() throws Exception {
-        FullBackupJob fullBackupJob = new FullBackupJob();
-        when(mBackupManagerServiceMock.beginFullBackup(mUserId, fullBackupJob)).thenReturn(true);
-
-        assertTrue(mTrampoline.beginFullBackup(mUserId, fullBackupJob));
-        verify(mBackupManagerServiceMock).beginFullBackup(mUserId, fullBackupJob);
-    }
-
-    @Test
-    public void endFullBackup_forwarded() {
-        mTrampoline.endFullBackup(mUserId);
-        verify(mBackupManagerServiceMock).endFullBackup(mUserId);
     }
 
     @Test

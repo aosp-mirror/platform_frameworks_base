@@ -20,14 +20,8 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.backup.BackupManager;
-import android.app.backup.IBackupManagerMonitor;
-import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
-import android.app.job.JobParameters;
-import android.app.job.JobScheduler;
-import android.app.job.JobService;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
@@ -97,114 +91,6 @@ public class BackupManagerService {
      * action on the passed in user. Currently this is a straight redirection (see TODO).
      */
     // TODO (b/118520567): Stop hardcoding system user when we pass in user id as a parameter
-
-    // ---------------------------------------------
-    // BACKUP OPERATIONS
-    // ---------------------------------------------
-
-    /** Checks if the given package {@code packageName} is eligible for backup. */
-    public boolean isAppEligibleForBackup(@UserIdInt int userId, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "isAppEligibleForBackup()");
-
-        return userBackupManagerService != null
-                && userBackupManagerService.isAppEligibleForBackup(packageName);
-    }
-
-    /**
-     * Returns from the inputted packages {@code packages}, the ones that are eligible for backup.
-     */
-    @Nullable
-    public String[] filterAppsEligibleForBackup(@UserIdInt int userId, String[] packages) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "filterAppsEligibleForBackup()");
-
-        return userBackupManagerService == null
-                ? null
-                : userBackupManagerService.filterAppsEligibleForBackup(packages);
-    }
-
-    /**
-     * Run a backup pass immediately for any key-value backup applications that have declared that
-     * they have pending updates.
-     */
-    public void backupNow(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "backupNow()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.backupNow();
-        }
-    }
-
-    /**
-     * Requests a backup for the inputted {@code packages} with a specified callback {@link
-     * IBackupManagerMonitor} for receiving events during the operation.
-     */
-    public int requestBackup(
-            @UserIdInt int userId,
-            String[] packages,
-            IBackupObserver observer,
-            IBackupManagerMonitor monitor,
-            int flags) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "requestBackup()");
-
-        return userBackupManagerService == null
-                ? BackupManager.ERROR_BACKUP_NOT_ALLOWED
-                : userBackupManagerService.requestBackup(packages, observer, monitor, flags);
-    }
-
-    /** Cancel all running backup operations. */
-    public void cancelBackups(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "cancelBackups()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.cancelBackups();
-        }
-    }
-
-    /**
-     * Used by the {@link JobScheduler} to run a full backup when conditions are right. The model we
-     * use is to perform one app backup per scheduled job execution, and to reschedule the job with
-     * zero latency as long as conditions remain right and we still have work to do.
-     *
-     * @return Whether ongoing work will continue. The return value here will be passed along as the
-     *     return value to the callback {@link JobService#onStartJob(JobParameters)}.
-     */
-    public boolean beginFullBackup(@UserIdInt int userId, FullBackupJob scheduledJob) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "beginFullBackup()");
-
-        return userBackupManagerService != null
-                && userBackupManagerService.beginFullBackup(scheduledJob);
-    }
-
-    /**
-     * Used by the {@link JobScheduler} to end the current full backup task when conditions are no
-     * longer met for running the full backup job.
-     */
-    public void endFullBackup(@UserIdInt int userId) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "endFullBackup()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.endFullBackup();
-        }
-    }
-
-    /**
-     * Run a full backup pass for the given packages {@code packageNames}. Used by 'adb shell bmgr'.
-     */
-    public void fullTransportBackup(@UserIdInt int userId, String[] packageNames) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "fullTransportBackup()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.fullTransportBackup(packageNames);
-        }
-    }
 
     // ---------------------------------------------
     // RESTORE OPERATIONS
