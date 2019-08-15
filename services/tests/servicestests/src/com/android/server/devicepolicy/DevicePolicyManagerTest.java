@@ -40,6 +40,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -764,7 +765,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     /**
-     * Test for: @{link DevicePolicyManager#setActivePasswordState}
+     * Test for: @{link DevicePolicyManager#reportPasswordChanged}
      *
      * Validates that when the password for a user changes, the notification broadcast intent
      * {@link DeviceAdminReceiver#ACTION_PASSWORD_CHANGED} is sent to managed profile owners, in
@@ -806,7 +807,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     /**
-     * Test for: @{link DevicePolicyManager#setActivePasswordState}
+     * Test for: @{link DevicePolicyManager#reportPasswordChanged}
      *
      * Validates that when the password for a managed profile changes, the notification broadcast
      * intent {@link DeviceAdminReceiver#ACTION_PASSWORD_CHANGED} is only sent to the profile, not
@@ -4258,6 +4259,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         mContext.packageName = admin1.getPackageName();
         setupDeviceOwner();
+        final int userHandle = UserHandle.getUserId(mContext.binder.callingUid);
+        // When there is no lockscreen, user password metrics is always empty.
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(userHandle))
+                .thenReturn(new PasswordMetrics());
 
         // If no password requirements are set, isActivePasswordSufficient should succeed.
         assertTrue(dpm.isActivePasswordSufficient());
@@ -4266,14 +4271,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
 
         reset(mContext.spiedContext);
-        final int userHandle = UserHandle.getUserId(mContext.binder.callingUid);
-        PasswordMetrics passwordMetricsNoSymbols = new PasswordMetrics(
-                DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 9,
-                8, 2,
-                6, 1,
-                0, 1);
         // This should be ignored, as there is no lock screen.
-        dpm.setActivePasswordState(passwordMetricsNoSymbols, userHandle);
         dpm.reportPasswordChanged(userHandle);
 
         // No broadcast should be sent.
@@ -4290,19 +4288,24 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int userHandle = UserHandle.getUserId(mContext.binder.callingUid);
         final long ident = mContext.binder.clearCallingIdentity();
 
-        dpm.setActivePasswordState(passwordMetrics, userHandle);
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(userHandle))
+                .thenReturn(passwordMetrics);
         dpm.reportPasswordChanged(userHandle);
 
         // Drain ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED broadcasts as part of
         // reportPasswordChanged()
-        // This broadcast should be sent 4 times:
+        // This broadcast should be sent 2-4 times:
         // * Twice from calls to DevicePolicyManagerService.updatePasswordExpirationsLocked,
         //   once for each affected user, in DevicePolicyManagerService.reportPasswordChanged.
-        // * Twice from calls to DevicePolicyManagerService.saveSettingsLocked
+        // * Optionally, at most twice from calls to DevicePolicyManagerService.saveSettingsLocked
         //   in DevicePolicyManagerService.reportPasswordChanged, once with the userId
         //   the password change is relevant to and another with the credential owner of said
-        //   userId.
-        verify(mContext.spiedContext, times(4)).sendBroadcastAsUser(
+        //   userId, if the password checkpoint value changes.
+        verify(mContext.spiedContext, atMost(4)).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+                MockUtils.checkUserHandle(userHandle));
+        verify(mContext.spiedContext, atLeast(2)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
                 MockUtils.checkUserHandle(userHandle));
@@ -5224,9 +5227,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
         when(getServices().userManager.getCredentialOwnerProfile(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(DpmMockContext.CALLER_USER_HANDLE);
-        dpms.mUserPasswordMetrics.put(
-                DpmMockContext.CALLER_USER_HANDLE,
-                PasswordMetrics.computeForPassword("asdf".getBytes()));
+        when(getServices().lockSettingsInternal
+                .getUserPasswordMetrics(DpmMockContext.CALLER_USER_HANDLE))
+                .thenReturn(PasswordMetrics.computeForPassword("asdf".getBytes()));
 
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM, dpm.getPasswordComplexity());
     }
@@ -5241,12 +5244,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.getCredentialOwnerProfile(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(parentUser.id);
 
-        dpms.mUserPasswordMetrics.put(
-                DpmMockContext.CALLER_USER_HANDLE,
-                PasswordMetrics.computeForPassword("asdf".getBytes()));
-        dpms.mUserPasswordMetrics.put(
-                parentUser.id,
-                PasswordMetrics.computeForPassword("parentUser".getBytes()));
+        when(getServices().lockSettingsInternal
+                .getUserPasswordMetrics(DpmMockContext.CALLER_USER_HANDLE))
+                .thenReturn(PasswordMetrics.computeForPassword("asdf".getBytes()));
+        when(getServices().lockSettingsInternal
+                .getUserPasswordMetrics(parentUser.id))
+                .thenReturn(PasswordMetrics.computeForPassword("parentUser".getBytes()));
 
         assertEquals(PASSWORD_COMPLEXITY_HIGH, dpm.getPasswordComplexity());
     }

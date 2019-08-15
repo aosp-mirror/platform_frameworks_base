@@ -217,6 +217,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
 
     private boolean mFirstCallToVold;
+    // Current password metric for all users on the device. Updated when user unlocks
+    // the device or changes password. Removed when user is stopped.
+    @GuardedBy("this")
+    final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
+
     protected IGateKeeperService mGateKeeperService;
     protected IAuthSecret mAuthSecretService;
 
@@ -424,6 +429,13 @@ public class LockSettingsService extends ILockSettings.Stub {
             return (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         }
 
+        /**
+         * Return the {@link DevicePolicyManager} object.
+         *
+         * Since LockSettingsService is considered a lower-level component than DevicePolicyManager,
+         * do NOT hold any lock in this class while calling into DevicePolicyManager to prevent
+         * the risk of deadlock.
+         */
         public DevicePolicyManager getDevicePolicyManager() {
             return (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         }
@@ -593,6 +605,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         // the device.
         int strongAuthRequired = LockPatternUtils.StrongAuthTracker.getDefaultFlags(mContext);
         requireStrongAuth(strongAuthRequired, userId);
+        synchronized (this) {
+            mUserPasswordMetrics.remove(userId);
+        }
     }
 
     public void onStartUser(final int userId) {
@@ -1501,7 +1516,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setKeystorePassword(null, userId);
             fixateNewestUserKeyAuth(userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
-            notifyActivePasswordMetricsAvailable(CREDENTIAL_TYPE_NONE, null, userId);
+            setUserPasswordMetrics(CREDENTIAL_TYPE_NONE, null, userId);
             sendCredentialsOnChangeIfRequired(
                     credentialType, credential, userId, isLockTiedToParent);
             return;
@@ -1946,7 +1961,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     Log.w(TAG, "progressCallback throws exception", e);
                 }
             }
-            notifyActivePasswordMetricsAvailable(storedHash.type, credential, userId);
+            setUserPasswordMetrics(storedHash.type, credential, userId);
             unlockKeystore(credential, userId);
 
             Slog.i(TAG, "Unlocking user " + userId + " with token length "
@@ -1988,32 +2003,40 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * Call this method to notify DPMS regarding the latest password metric. This should be called
-     * when the user is authenticating or when a new password is being set.
+     * Keep track of the given user's latest password metric. This should be called
+     * when the user is authenticating or when a new password is being set. In comparison,
+     * {@link #notifyPasswordChanged} only needs to be called when the user changes the password.
      */
-    private void notifyActivePasswordMetricsAvailable(
-            @CredentialType int credentialType, byte[] password, @UserIdInt int userId) {
-        final PasswordMetrics metrics =
-                PasswordMetrics.computeForCredential(credentialType, password);
+    private void setUserPasswordMetrics(@CredentialType int credentialType, byte[] password,
+            @UserIdInt int userHandle) {
+        synchronized (this) {
+            mUserPasswordMetrics.put(userHandle,
+                    PasswordMetrics.computeForCredential(credentialType, password));
+        }
+    }
 
-        // Asynchronous to avoid dead lock
-        mHandler.post(() -> {
-            final DevicePolicyManager dpm = (DevicePolicyManager)
-                    mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            dpm.setActivePasswordState(metrics, userId);
-        });
+    @VisibleForTesting
+    PasswordMetrics getUserPasswordMetrics(int userHandle) {
+        if (!isUserSecure(userHandle)) {
+            // for users without password, mUserPasswordMetrics might not be initialized
+            // since the user never unlock the device manually. In this case, always
+            // return a default metrics object. This is to distinguish this case from
+            // the case where during boot user password is unknown yet (returning null here)
+            return new PasswordMetrics();
+        }
+        synchronized (this) {
+            return mUserPasswordMetrics.get(userHandle);
+        }
     }
 
     /**
-     * Call after {@link #notifyActivePasswordMetricsAvailable} so metrics are updated before
+     * Call after {@link #setUserPasswordMetrics} so metrics are updated before
      * reporting the password changed.
      */
     private void notifyPasswordChanged(@UserIdInt int userId) {
         // Same handler as notifyActivePasswordMetricsAvailable to ensure correct ordering
         mHandler.post(() -> {
-            DevicePolicyManager dpm = (DevicePolicyManager)
-                    mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            dpm.reportPasswordChanged(userId);
+            mInjector.getDevicePolicyManager().reportPasswordChanged(userId);
             LocalServices.getService(WindowManagerInternal.class).reportPasswordChanged(userId);
         });
     }
@@ -2582,7 +2605,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-            notifyActivePasswordMetricsAvailable(credentialType, userCredential, userId);
+            setUserPasswordMetrics(credentialType, userCredential, userId);
             unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
 
             // Do resetLockout / revokeChallenge when all profiles are unlocked
@@ -2676,7 +2699,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         setSyntheticPasswordHandleLocked(newHandle, userId);
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
 
-        notifyActivePasswordMetricsAvailable(credentialType, credential, userId);
+        setUserPasswordMetrics(credentialType, credential, userId);
 
         if (profilePasswords != null) {
             for (Map.Entry<Integer, byte[]> entry : profilePasswords.entrySet()) {
@@ -2982,6 +3005,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             pw.println("hasPassword: " + havePassword(userId));
             pw.println("hasPattern: " + havePattern(userId)); // print raw credential type instead?
             pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabled(userId));
+            pw.println(String.format("metrics: %s",
+                    getUserPasswordMetrics(userId) != null ? "known" : "unknown"));
             pw.decreaseIndent();
         }
         pw.println();
@@ -3158,5 +3183,23 @@ public class LockSettingsService extends ILockSettings.Stub {
         public boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId) {
             return LockSettingsService.this.unlockUserWithToken(tokenHandle, token, userId);
         }
+
+        @Override
+        public PasswordMetrics getUserPasswordMetrics(int userHandle) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                if (isManagedProfileWithUnifiedLock(userHandle)) {
+                    // A managed profile with unified challenge is supposed to be protected by the
+                    // parent lockscreen, so asking for its password metrics is not really useful,
+                    // as this method would just return the metrics of the random profile password
+                    Slog.w(TAG, "Querying password metrics for unified challenge profile: "
+                            + userHandle);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return LockSettingsService.this.getUserPasswordMetrics(userHandle);
+        }
+
     }
 }
