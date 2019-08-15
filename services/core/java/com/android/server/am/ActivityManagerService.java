@@ -330,7 +330,7 @@ import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AttributeCache;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
@@ -1135,7 +1135,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Access to DeviceIdleController service.
      */
-    DeviceIdleController.LocalService mLocalDeviceIdleController;
+    DeviceIdleInternal mLocalDeviceIdleController;
 
     /**
      * Power-save whitelisted app-ids (not including except-idle-whitelisted ones).
@@ -9003,8 +9003,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             t.traceBegin("controllersReady");
-            mLocalDeviceIdleController
-                    = LocalServices.getService(DeviceIdleController.LocalService.class);
+            mLocalDeviceIdleController =
+                    LocalServices.getService(DeviceIdleInternal.class);
             mActivityTaskManager.onSystemReady();
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();

@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 
 /**
@@ -33,7 +33,7 @@ import com.android.server.LocalServices;
 public class TvConstraintController implements ConstraintController {
     private final Context mContext;
     private final Handler mHandler;
-    private final DeviceIdleController.LocalService mDeviceIdleService;
+    private final DeviceIdleInternal mDeviceIdleService;
 
     @Nullable
     private final BluetoothConstraint mBluetoothConstraint;
@@ -41,7 +41,7 @@ public class TvConstraintController implements ConstraintController {
     public TvConstraintController(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;
-        mDeviceIdleService = LocalServices.getService(DeviceIdleController.LocalService.class);
+        mDeviceIdleService = LocalServices.getService(DeviceIdleInternal.class);
 
         final PackageManager pm = context.getPackageManager();
         mBluetoothConstraint = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
