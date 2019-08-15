@@ -19,6 +19,7 @@ import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -54,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileStateListener {
-    private static final int MIN_NUM_TILES = 6;
     private static final long DRAG_LENGTH = 100;
     private static final float DRAG_SCALE = 1.2f;
     public static final long MOVE_DURATION = 150;
@@ -79,6 +79,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final ItemTouchHelper mItemTouchHelper;
     private final ItemDecoration mDecoration;
     private final AccessibilityManager mAccessibilityManager;
+    private final int mMinNumTiles;
     private int mEditIndex;
     private int mTileDividerIndex;
     private boolean mNeedsFocus;
@@ -97,6 +98,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         mDecoration = new TileItemDecoration(context);
+        mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
     }
 
     public void setHost(QSTileHost host) {
@@ -247,15 +249,17 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             return;
         }
         if (holder.getItemViewType() == TYPE_EDIT) {
-            final int titleResId;
+            final String titleText;
+            Resources res = mContext.getResources();
             if (mCurrentDrag == null) {
-                titleResId = R.string.drag_to_add_tiles;
+                titleText = res.getString(R.string.drag_to_add_tiles);
             } else if (!canRemoveTiles() && mCurrentDrag.getAdapterPosition() < mEditIndex) {
-                titleResId = R.string.drag_to_remove_disabled;
+                titleText = res.getString(R.string.drag_to_remove_disabled, mMinNumTiles);
             } else {
-                titleResId = R.string.drag_to_remove_tiles;
+                titleText = res.getString(R.string.drag_to_remove_tiles);
             }
-            ((TextView) holder.itemView.findViewById(android.R.id.title)).setText(titleResId);
+
+            ((TextView) holder.itemView.findViewById(android.R.id.title)).setText(titleText);
             return;
         }
         if (holder.getItemViewType() == TYPE_ACCESSIBLE_DROP) {
@@ -337,7 +341,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     private boolean canRemoveTiles() {
-        return mCurrentSpecs.size() > MIN_NUM_TILES;
+        return mCurrentSpecs.size() > mMinNumTiles;
     }
 
     private void selectPosition(int position, View v) {

@@ -415,7 +415,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         void sendErrorResult(String message) {
             try {
-                if (callerApp.hasThread()) {
+                if (callerApp != null && callerApp.hasThread()) {
                     callerApp.getThread().scheduleCrash(message);
                 }
             } catch (RemoteException e) {

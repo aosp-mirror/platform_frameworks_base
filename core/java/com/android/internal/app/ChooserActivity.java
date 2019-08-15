@@ -1534,7 +1534,11 @@ public class ChooserActivity extends ResolverActivity {
                 if (driList.get(i).getResolvedComponentName().equals(
                             resultList.get(j).getTargetComponent())) {
                     ShortcutManager.ShareShortcutInfo shareShortcutInfo = resultList.get(j);
-                    ChooserTarget chooserTarget = convertToChooserTarget(shareShortcutInfo);
+                    // Incoming results are ordered but without a score. Create a score
+                    // based on the index in order to be sorted appropriately when joined
+                    // with legacy direct share api results.
+                    float score = Math.max(1.0f - (0.05f * j), 0.0f);
+                    ChooserTarget chooserTarget = convertToChooserTarget(shareShortcutInfo, score);
                     chooserTargets.add(chooserTarget);
                     if (mDirectShareAppTargetCache != null && appTargets != null) {
                         mDirectShareAppTargetCache.put(chooserTarget, appTargets.get(j));
@@ -1580,7 +1584,8 @@ public class ChooserActivity extends ResolverActivity {
         return false;
     }
 
-    private ChooserTarget convertToChooserTarget(ShortcutManager.ShareShortcutInfo shareShortcut) {
+    private ChooserTarget convertToChooserTarget(ShortcutManager.ShareShortcutInfo shareShortcut,
+                                                 float score) {
         ShortcutInfo shortcutInfo = shareShortcut.getShortcutInfo();
         Bundle extras = new Bundle();
         extras.putString(Intent.EXTRA_SHORTCUT_ID, shortcutInfo.getId());
@@ -1591,7 +1596,7 @@ public class ChooserActivity extends ResolverActivity {
                 null,
                 // The ranking score for this target (0.0-1.0); the system will omit items with low
                 // scores when there are too many Direct Share items.
-                1.0f,
+                score,
                 // The name of the component to be launched if this target is chosen.
                 shareShortcut.getTargetComponent().clone(),
                 // The extra values here will be merged into the Intent when this target is chosen.

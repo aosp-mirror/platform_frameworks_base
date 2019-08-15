@@ -19,6 +19,8 @@ package android.app.activity;
 import static android.content.Intent.ACTION_EDIT;
 import static android.content.Intent.ACTION_VIEW;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -31,6 +33,7 @@ import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.content.Intent;
@@ -45,9 +48,13 @@ import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.content.ReferrerIntent;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -307,6 +314,24 @@ public class ActivityThreadTest {
         assertEquals(400, activity.mConfig.smallestScreenWidthDp);
     }
 
+    @Test
+    public void testResumeAfterNewIntent() {
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+        final ArrayList<ReferrerIntent> rIntents = new ArrayList<>();
+        rIntents.add(new ReferrerIntent(new Intent(), "android.app.activity"));
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            activityThread.executeTransaction(newNewIntentTransaction(activity, rIntents, false));
+        });
+        assertThat(activity.isResumed()).isFalse();
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            activityThread.executeTransaction(newNewIntentTransaction(activity, rIntents, true));
+        });
+        assertThat(activity.isResumed()).isTrue();
+    }
+
     /**
      * Calls {@link ActivityThread#handleActivityConfigurationChanged(IBinder, Configuration, int)}
      * to try to push activity configuration to the activity for the given sequence number.
@@ -379,6 +404,16 @@ public class ActivityThreadTest {
     private static ClientTransaction newActivityConfigTransaction(Activity activity,
             Configuration config) {
         final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(config);
+
+        final ClientTransaction transaction = newTransaction(activity);
+        transaction.addCallback(item);
+
+        return transaction;
+    }
+
+    private static ClientTransaction newNewIntentTransaction(Activity activity,
+            List<ReferrerIntent> intents, boolean resume) {
+        final NewIntentItem item = NewIntentItem.obtain(intents, resume);
 
         final ClientTransaction transaction = newTransaction(activity);
         transaction.addCallback(item);

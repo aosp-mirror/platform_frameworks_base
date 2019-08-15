@@ -325,6 +325,17 @@ public final class DeviceConfig {
          */
         @TestApi
         String KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP = "system_gesture_exclusion_limit_dp";
+
+        /**
+         * Key for controlling whether system gestures are implicitly excluded by windows requesting
+         * sticky immersive mode from apps that are targeting an SDK prior to Q.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
+         * @hide
+         */
+        @TestApi
+        String KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE =
+                "system_gestures_excluded_by_pre_q_sticky_immersive";
     }
 
     private static final Object sLock = new Object();

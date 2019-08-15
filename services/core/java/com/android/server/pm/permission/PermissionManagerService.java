@@ -2269,6 +2269,11 @@ public class PermissionManagerService {
             return;
         }
 
+        // Permission is already revoked, no need to do anything.
+        if (!permissionsState.hasRuntimePermission(permName, userId)) {
+            return;
+        }
+
         if (permissionsState.revokeRuntimePermission(bp, userId) ==
                 PERMISSION_OPERATION_FAILURE) {
             return;

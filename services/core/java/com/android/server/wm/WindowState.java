@@ -24,6 +24,8 @@ import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.Transaction;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -155,6 +157,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -655,6 +658,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mExclusionRects.clear();
         mExclusionRects.addAll(exclusionRects);
         return true;
+    }
+
+    boolean isImplicitlyExcludingAllSystemGestures() {
+        final int immersiveStickyFlags =
+                SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        final boolean immersiveSticky =
+                (mSystemUiVisibility & immersiveStickyFlags) == immersiveStickyFlags;
+        return immersiveSticky && mWmService.mSystemGestureExcludedByPreQStickyImmersive
+                && mAppToken != null && mAppToken.mTargetSdk < Build.VERSION_CODES.Q;
     }
 
     interface PowerManagerWrapper {
@@ -2997,6 +3009,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         cropRegionToStackBoundsIfNeeded(outRegion);
         subtractTouchExcludeRegionIfNeeded(outRegion);
+    }
+
+    /**
+     * Get the effective touchable region in global coordinates.
+     *
+     * In contrast to {@link #getTouchableRegion}, this takes into account
+     * {@link WindowManager.LayoutParams#FLAG_NOT_TOUCH_MODAL touch modality.}
+     */
+    void getEffectiveTouchableRegion(Region outRegion) {
+        final boolean modal = (mAttrs.flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+        final DisplayContent dc = getDisplayContent();
+
+        if (modal && dc != null) {
+            outRegion.set(dc.getBounds());
+            cropRegionToStackBoundsIfNeeded(outRegion);
+            subtractTouchExcludeRegionIfNeeded(outRegion);
+        } else {
+            getTouchableRegion(outRegion);
+        }
     }
 
     private void setTouchableRegionCropIfNeeded(InputWindowHandle handle) {
