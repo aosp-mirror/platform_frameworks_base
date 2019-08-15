@@ -181,12 +181,6 @@ import java.util.function.Consumer;
 @RunWithLooper
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
-    private static final String CLEAR_DEVICE_CONFIG_KEY_CMD =
-            "device_config delete " + DeviceConfig.NAMESPACE_SYSTEMUI + " "
-                    + SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE;
-    private static final String SET_DEFAULT_ASSISTANT_DEVICE_CONFIG_CMD =
-            "device_config put " + DeviceConfig.NAMESPACE_SYSTEMUI + " "
-                    + SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE;
 
     private final int mUid = Binder.getCallingUid();
     private TestableNotificationManagerService mService;
@@ -4037,6 +4031,41 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // no delegate
 
         assertEquals(expectedUid, mService.resolveNotificationUid("android", "target", 0, 0));
+    }
+
+    @Test
+    public void testPostFromAndroidForNonExistentPackage() throws Exception {
+        final String notReal = "NOT REAL";
+        when(mPackageManagerClient.getPackageUidAsUser(anyString(), anyInt())).thenThrow(
+                PackageManager.NameNotFoundException.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.uid = -1;
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt())).thenReturn(ai);
+
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        try {
+            mInternalService.enqueueNotification(notReal, "android", 0, 0, "tag",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+            fail("can't post notifications for nonexistent packages, even if you exist");
+        } catch (SecurityException e) {
+            // yay
+        }
+    }
+
+    @Test
+    public void testCancelFromAndroidForNonExistentPackage() throws Exception {
+        final String notReal = "NOT REAL";
+        when(mPackageManagerClient.getPackageUidAsUser(eq(notReal), anyInt())).thenThrow(
+                PackageManager.NameNotFoundException.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.uid = -1;
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt())).thenReturn(ai);
+
+        // unlike the post case, ignore instead of throwing
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+
+        mInternalService.cancelNotification(notReal, "android", 0, 0, "tag",
+                sbn.getId(), sbn.getUserId());
     }
 
     @Test
