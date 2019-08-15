@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ShadeController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -52,11 +51,13 @@ import kotlin.math.max
  */
 @Singleton
 class PulseExpansionHandler @Inject
-constructor(context: Context,
-            private val wakeUpCoordinator: NotificationWakeUpCoordinator,
-            private val bypassController: KeyguardBypassController,
-            private val headsUpManager: HeadsUpManagerPhone,
-            private val roundnessManager: NotificationRoundnessManager) : Gefingerpoken {
+constructor(
+    context: Context,
+    private val wakeUpCoordinator: NotificationWakeUpCoordinator,
+    private val bypassController: KeyguardBypassController,
+    private val headsUpManager: HeadsUpManagerPhone,
+    private val roundnessManager: NotificationRoundnessManager
+) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
@@ -124,8 +125,8 @@ constructor(context: Context,
     }
 
     private fun maybeStartExpansion(event: MotionEvent): Boolean {
-        if (!wakeUpCoordinator.canShowPulsingHuns || qsExpanded
-                || bouncerShowing) {
+        if (!wakeUpCoordinator.canShowPulsingHuns || qsExpanded ||
+                bouncerShowing) {
             return false
         }
         if (velocityTracker == null) {
@@ -160,18 +161,18 @@ constructor(context: Context,
             }
 
             MotionEvent.ACTION_UP -> {
-                recycleVelocityTracker();
+                recycleVelocityTracker()
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                recycleVelocityTracker();
+                recycleVelocityTracker()
             }
         }
         return false
     }
 
     private fun recycleVelocityTracker() {
-        velocityTracker?.recycle();
+        velocityTracker?.recycle()
         velocityTracker = null
     }
 
@@ -216,7 +217,7 @@ constructor(context: Context,
                     "com.android.systemui:PULSEDRAG")
         }
         shadeController.goToLockedShade(mStartingChild)
-        leavingLockscreen = true;
+        leavingLockscreen = true
         isExpanding = false
         if (mStartingChild is ExpandableNotificationRow) {
             val row = mStartingChild as ExpandableNotificationRow?
@@ -227,7 +228,7 @@ constructor(context: Context,
     private fun updateExpansionHeight(height: Float) {
         var expansionHeight = max(height, 0.0f)
         if (!mReachedWakeUpHeight && height > mWakeUpHeight) {
-            mReachedWakeUpHeight = true;
+            mReachedWakeUpHeight = true
         }
         if (mStartingChild != null) {
             val child = mStartingChild!!
@@ -317,9 +318,11 @@ constructor(context: Context,
         } else null
     }
 
-    fun setUp(stackScroller: NotificationStackScrollLayout,
-              expansionCallback: ExpansionCallback,
-              shadeController: ShadeController) {
+    fun setUp(
+        stackScroller: NotificationStackScrollLayout,
+        expansionCallback: ExpansionCallback,
+        shadeController: ShadeController
+    ) {
         this.expansionCallback = expansionCallback
         this.shadeController = shadeController
         this.stackScroller = stackScroller
