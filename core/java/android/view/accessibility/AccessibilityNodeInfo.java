@@ -4745,8 +4745,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Obtains a pooled instance.
          *
-         * @param rowCount The number of rows.
-         * @param columnCount The number of columns.
+         * @param rowCount The number of rows, or -1 if count is unknown.
+         * @param columnCount The number of columns, or -1 if count is unknown.
          * @param hierarchical Whether the collection is hierarchical.
          */
         public static CollectionInfo obtain(int rowCount, int columnCount,
@@ -4800,7 +4800,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Gets the number of rows.
          *
-         * @return The row count.
+         * @return The row count, or -1 if count is unknown.
          */
         public int getRowCount() {
             return mRowCount;
@@ -4809,7 +4809,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Gets the number of columns.
          *
-         * @return The column count.
+         * @return The column count, or -1 if count is unknown.
          */
         public int getColumnCount() {
             return mColumnCount;
