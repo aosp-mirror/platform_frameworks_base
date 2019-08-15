@@ -15,6 +15,7 @@
  */
 
 #include <dirent.h>
+#include <fcntl.h>
 
 #include <set>
 #include <string>
@@ -69,7 +70,7 @@ TEST(FileUtilsTests, FindFilesFindApkFilesRecursive) {
 
 TEST(FileUtilsTests, ReadFile) {
   int pipefd[2];
-  ASSERT_EQ(pipe(pipefd), 0);
+  ASSERT_EQ(pipe2(pipefd, O_CLOEXEC), 0);
 
   ASSERT_EQ(write(pipefd[1], "foobar", 6), 6);
   close(pipefd[1]);
