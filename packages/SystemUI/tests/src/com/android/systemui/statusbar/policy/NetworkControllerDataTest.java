@@ -1,5 +1,7 @@
 package com.android.systemui.statusbar.policy;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -241,6 +243,186 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         doReturn(NetworkRegistrationInfo.NR_STATE_RESTRICTED).when(ss).getNrState();
         mPhoneStateListener.onServiceStateChanged(mServiceState);
 
+        verifyDataIndicators(TelephonyIcons.ICON_LTE);
+    }
+
+    @Test
+    public void testNr5GIcon_displayGracePeriodTime_enabled() {
+        setupDefaultNr5GIconConfiguration();
+        setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds();
+        setupDefaultSignal();
+        mNetworkController.handleConfigurationChanged();
+        mPhoneStateListener.onServiceStateChanged(mServiceState);
+
+        ServiceState ss = Mockito.mock(ServiceState.class);
+        // While nrIconDisplayGracePeriodMs > 0 & is Nr5G, mIsShowingIconGracefully should be true
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        mPhoneStateListener.onServiceStateChanged(ss);
+
+        assertTrue(mConfig.nrIconDisplayGracePeriodMs > 0);
+        assertTrue(mMobileSignalController.mIsShowingIconGracefully);
+    }
+
+    @Test
+    public void testNr5GIcon_displayGracePeriodTime_disabled() {
+        setupDefaultNr5GIconConfiguration();
+        setupDefaultNr5GIconDisplayGracePeriodTime_disabled();
+        setupDefaultSignal();
+
+        assertTrue(mConfig.nrIconDisplayGracePeriodMs == 0);
+
+        // While nrIconDisplayGracePeriodMs <= 0, mIsShowingIconGracefully should be false
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(mServiceState).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(mServiceState).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        assertFalse(mMobileSignalController.mIsShowingIconGracefully);
+    }
+
+    @Test
+    public void testNr5GIcon_enableDisplayGracePeriodTime_showIconGracefully() {
+        setupDefaultNr5GIconConfiguration();
+        setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds();
+        setupDefaultSignal();
+        mNetworkController.handleConfigurationChanged();
+        mPhoneStateListener.onServiceStateChanged(mServiceState);
+
+        ServiceState ss = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        mPhoneStateListener.onServiceStateChanged(ss);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+
+        // Enabled timer Nr5G switch to None Nr5G, showing 5G icon gracefully
+        ServiceState ssLte = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(ssLte).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(ssLte).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        mPhoneStateListener.onServiceStateChanged(ssLte);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+    }
+
+    @Test
+    public void testNr5GIcon_disableDisplayGracePeriodTime_showLatestIconImmediately() {
+        setupDefaultNr5GIconConfiguration();
+        setupDefaultNr5GIconDisplayGracePeriodTime_disabled();
+        setupDefaultSignal();
+        mNetworkController.handleConfigurationChanged();
+
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(mServiceState).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(mServiceState).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+
+        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(mServiceState).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(mServiceState).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verifyDataIndicators(TelephonyIcons.ICON_LTE);
+    }
+
+    @Test
+    public void testNr5GIcon_resetDisplayGracePeriodTime_whenDataDisconnected() {
+        setupDefaultNr5GIconConfiguration();
+        setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds();
+        setupDefaultSignal();
+        mNetworkController.handleConfigurationChanged();
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(mServiceState).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(mServiceState).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+
+        // Disabled timer, when out of service, reset timer to display latest state
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(mServiceState).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(mServiceState).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_DISCONNECTED,
+                TelephonyManager.NETWORK_TYPE_UMTS);
+
+        verifyDataIndicators(0);
+    }
+
+    @Test
+    public void testNr5GIcon_enableDisplayGracePeriodTime_show5G_switching_5GPlus() {
+        setupDefaultNr5GIconConfiguration();
+        setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds();
+        setupDefaultSignal();
+        mNetworkController.handleConfigurationChanged();
+        mPhoneStateListener.onServiceStateChanged(mServiceState);
+
+        ServiceState ss5G = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss5G).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss5G).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        mPhoneStateListener.onServiceStateChanged(ss5G);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+
+        // When timeout enabled, 5G/5G+ switching should be updated immediately
+        ServiceState ss5GPlus = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss5GPlus).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_MMWAVE).when(ss5GPlus).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        mPhoneStateListener.onServiceStateChanged(ss5GPlus);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G_PLUS);
+    }
+
+    @Test
+    public void testNr5GIcon_carrierDisabledDisplayGracePeriodTime_shouldUpdateIconImmediately() {
+        setupDefaultNr5GIconConfiguration();
+        setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds();
+        setupDefaultSignal();
+        mNetworkController.handleConfigurationChanged();
+        mPhoneStateListener.onServiceStateChanged(mServiceState);
+
+        ServiceState ss5G = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss5G).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss5G).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        mPhoneStateListener.onServiceStateChanged(ss5G);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+
+        // State from NR_5G to NONE NR_5G with timeout, should show previous 5G icon
+        ServiceState ssLte = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(ssLte).getNrState();
+        doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(ssLte).getNrFrequencyRange();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        mPhoneStateListener.onServiceStateChanged(ssLte);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+
+        // Update nrIconDisplayGracePeriodMs to 0
+        setupDefaultNr5GIconDisplayGracePeriodTime_disabled();
+        mNetworkController.handleConfigurationChanged();
+
+        // State from NR_5G to NONE NR_STATE_RESTRICTED, showing corresponding icon
+        doReturn(NetworkRegistrationInfo.NR_STATE_RESTRICTED).when(mServiceState).getNrState();
+        doReturn(TelephonyManager.NETWORK_TYPE_LTE).when(mServiceState).getDataNetworkType();
+        mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        assertTrue(mConfig.nrIconDisplayGracePeriodMs == 0);
         verifyDataIndicators(TelephonyIcons.ICON_LTE);
     }
 
