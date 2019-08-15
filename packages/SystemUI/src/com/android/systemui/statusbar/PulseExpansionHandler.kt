@@ -27,11 +27,11 @@ import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
+import com.android.systemui.Dependency
 
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
-import com.android.systemui.classifier.FalsingManagerFactory
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -116,7 +116,7 @@ constructor(
         mMinDragDistance = context.resources.getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance)
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
-        mFalsingManager = FalsingManagerFactory.getInstance(context)
+        mFalsingManager = Dependency.get(FalsingManager::class.java)
         mPowerManager = context.getSystemService(PowerManager::class.java)
     }
 
