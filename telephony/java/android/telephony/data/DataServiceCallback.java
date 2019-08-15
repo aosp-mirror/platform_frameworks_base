@@ -42,6 +42,8 @@ public class DataServiceCallback {
 
     private static final String TAG = DataServiceCallback.class.getSimpleName();
 
+    private static final boolean DBG = true;
+
     /**
      * Result of data requests
      * @hide
@@ -81,6 +83,7 @@ public class DataServiceCallback {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
+                if (DBG) Rlog.d(TAG, "onSetupDataCallComplete");
                 callback.onSetupDataCallComplete(result, response);
             } catch (RemoteException e) {
                 Rlog.e(TAG, "Failed to onSetupDataCallComplete on the remote");
@@ -98,6 +101,7 @@ public class DataServiceCallback {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
+                if (DBG) Rlog.d(TAG, "onDeactivateDataCallComplete");
                 callback.onDeactivateDataCallComplete(result);
             } catch (RemoteException e) {
                 Rlog.e(TAG, "Failed to onDeactivateDataCallComplete on the remote");
@@ -169,6 +173,7 @@ public class DataServiceCallback {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
+                if (DBG) Rlog.d(TAG, "onDataCallListChanged");
                 callback.onDataCallListChanged(dataCallList);
             } catch (RemoteException e) {
                 Rlog.e(TAG, "Failed to onDataCallListChanged on the remote");
