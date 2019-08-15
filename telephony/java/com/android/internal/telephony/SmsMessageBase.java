@@ -16,17 +16,16 @@
 
 package com.android.internal.telephony;
 
-import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
-import com.android.internal.telephony.SmsConstants;
-import com.android.internal.telephony.SmsHeader;
-import java.text.BreakIterator;
-import java.util.Arrays;
-
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.text.Emoji;
+
+import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
+
+import java.text.BreakIterator;
+import java.util.Arrays;
 
 /**
  * Base class declaring the specific methods and members for SmsMessage.
@@ -101,6 +100,10 @@ public abstract class SmsMessageBase {
     /** TP-Message-Reference - Message Reference of sent message. @hide */
     @UnsupportedAppUsage
     public int mMessageRef;
+
+    @UnsupportedAppUsage
+    public SmsMessageBase() {
+    }
 
     // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
     public static abstract class SubmitPduBase  {

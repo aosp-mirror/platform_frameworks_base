@@ -48,6 +48,8 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +93,7 @@ public final class SmsApplication {
         /**
          * Name of this SMS app for display.
          */
+        @UnsupportedAppUsage
         private String mApplicationName;
 
         /**
@@ -224,6 +227,7 @@ public final class SmsApplication {
      * Implement ACTION_SENDTO intent.
      * Support smsto Uri scheme.
      */
+    @UnsupportedAppUsage
     public static Collection<SmsApplicationData> getApplicationCollection(Context context) {
         return getApplicationCollectionAsUser(context, getIncomingUserId(context));
     }
@@ -576,6 +580,7 @@ public final class SmsApplication {
      * Sets the specified package as the default SMS/MMS application. The caller of this method
      * needs to have permission to set AppOps and write to secure settings.
      */
+    @UnsupportedAppUsage
     public static void setDefaultApplication(String packageName, Context context) {
         setDefaultApplicationAsUser(packageName, context, getIncomingUserId(context));
     }
@@ -823,6 +828,7 @@ public final class SmsApplication {
         sSmsPackageMonitor.register(context, context.getMainLooper(), UserHandle.ALL, false);
     }
 
+    @UnsupportedAppUsage
     private static void configurePreferredActivity(PackageManager packageManager,
             ComponentName componentName, int userId) {
         // Add the four activity preferences we want to direct to this app.
@@ -865,6 +871,7 @@ public final class SmsApplication {
      * Returns SmsApplicationData for this package if this package is capable of being set as the
      * default SMS application.
      */
+    @UnsupportedAppUsage
     public static SmsApplicationData getSmsApplicationData(String packageName, Context context) {
         Collection<SmsApplicationData> applications = getApplicationCollection(context);
         return getApplicationForPackage(applications, packageName);
@@ -876,6 +883,7 @@ public final class SmsApplication {
      * @param updateIfNeeded update the default app if there is no valid default app configured.
      * @return component name of the app and class to deliver SMS messages to
      */
+    @UnsupportedAppUsage
     public static ComponentName getDefaultSmsApplication(Context context, boolean updateIfNeeded) {
         return getDefaultSmsApplicationAsUser(context, updateIfNeeded, getIncomingUserId(context));
     }
@@ -910,6 +918,7 @@ public final class SmsApplication {
      * @param updateIfNeeded update the default app if there is no valid default app configured.
      * @return component name of the app and class to deliver MMS messages to
      */
+    @UnsupportedAppUsage
     public static ComponentName getDefaultMmsApplication(Context context, boolean updateIfNeeded) {
         int userId = getIncomingUserId(context);
         final long token = Binder.clearCallingIdentity();
@@ -933,6 +942,7 @@ public final class SmsApplication {
      * @param updateIfNeeded update the default app if there is no valid default app configured.
      * @return component name of the app and class to direct Respond Via Message intent to
      */
+    @UnsupportedAppUsage
     public static ComponentName getDefaultRespondViaMessageApplication(Context context,
             boolean updateIfNeeded) {
         int userId = getIncomingUserId(context);
@@ -1033,6 +1043,7 @@ public final class SmsApplication {
      * <p>
      * Caller must pass in the correct user context if calling from a singleton service.
      */
+    @UnsupportedAppUsage
     public static boolean shouldWriteMessageForPackage(String packageName, Context context) {
         if (SmsManager.getDefault().getAutoPersisting()) {
             return true;
@@ -1047,6 +1058,7 @@ public final class SmsApplication {
      * @param packageName the name of the package to be checked
      * @return true if the package is default sms app or bluetooth
      */
+    @UnsupportedAppUsage
     public static boolean isDefaultSmsApplication(Context context, String packageName) {
         if (packageName == null) {
             return false;

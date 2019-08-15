@@ -15,6 +15,8 @@
  */
 package com.android.internal.telephony;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 /**
  * @hide
  */
@@ -31,8 +33,12 @@ public class PhoneConstants {
      * ringing or waiting.</li>
      * </ul>
      */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/PhoneConstants$State;")
     public enum State {
-        IDLE, RINGING, OFFHOOK;
+        @UnsupportedAppUsage IDLE,
+        @UnsupportedAppUsage RINGING,
+        @UnsupportedAppUsage OFFHOOK;
     };
 
     /**
@@ -46,8 +52,13 @@ public class PhoneConstants {
       *                 in 2G network</li>
       * </ul>
       */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/PhoneConstants$DataState;")
     public enum DataState {
-        CONNECTED, CONNECTING, DISCONNECTED, SUSPENDED;
+        @UnsupportedAppUsage CONNECTED,
+        @UnsupportedAppUsage CONNECTING,
+        @UnsupportedAppUsage DISCONNECTED,
+        @UnsupportedAppUsage SUSPENDED;
     };
 
     public static final String STATE_KEY = "state";
@@ -69,9 +80,13 @@ public class PhoneConstants {
     public static final int LTE_ON_CDMA_TRUE = RILConstants.LTE_ON_CDMA_TRUE;
 
     // Number presentation type for caller id display (From internal/Connection.java)
+    @UnsupportedAppUsage
     public static final int PRESENTATION_ALLOWED = 1;    // normal
+    @UnsupportedAppUsage
     public static final int PRESENTATION_RESTRICTED = 2; // block by user
+    @UnsupportedAppUsage
     public static final int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
+    @UnsupportedAppUsage
     public static final int PRESENTATION_PAYPHONE = 4;   // show pay phone info
 
     // Sim activation type

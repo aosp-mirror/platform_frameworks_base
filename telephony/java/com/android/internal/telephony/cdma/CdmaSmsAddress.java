@@ -16,11 +16,11 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.SmsAddress;
-import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.util.HexDump;
 
 public class CdmaSmsAddress extends SmsAddress {
@@ -33,6 +33,7 @@ public class CdmaSmsAddress extends SmsAddress {
     static public final int DIGIT_MODE_4BIT_DTMF              = 0x00;
     static public final int DIGIT_MODE_8BIT_CHAR              = 0x01;
 
+    @UnsupportedAppUsage
     public int digitMode;
 
     /**
@@ -43,6 +44,7 @@ public class CdmaSmsAddress extends SmsAddress {
     static public final int NUMBER_MODE_NOT_DATA_NETWORK      = 0x00;
     static public final int NUMBER_MODE_DATA_NETWORK          = 0x01;
 
+    @UnsupportedAppUsage
     public int numberMode;
 
     /**
@@ -70,6 +72,7 @@ public class CdmaSmsAddress extends SmsAddress {
      * This field shall be set to the number of address digits
      * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
      */
+    @UnsupportedAppUsage
     public int numberOfDigits;
 
     /**
@@ -83,6 +86,7 @@ public class CdmaSmsAddress extends SmsAddress {
     //static protected final int NUMBERING_PLAN_TELEX             = 0x4;
     //static protected final int NUMBERING_PLAN_PRIVATE           = 0x9;
 
+    @UnsupportedAppUsage
     public int numberPlan;
 
     /**
@@ -91,6 +95,7 @@ public class CdmaSmsAddress extends SmsAddress {
      * respectively.
      */
 
+    @UnsupportedAppUsage
     public CdmaSmsAddress(){
     }
 
@@ -194,6 +199,7 @@ public class CdmaSmsAddress extends SmsAddress {
      * common punctuation.  For alpha addresses, the string is cleaned
      * up by removing whitespace.
      */
+    @UnsupportedAppUsage
     public static CdmaSmsAddress parse(String address) {
         CdmaSmsAddress addr = new CdmaSmsAddress();
         addr.address = address;

@@ -16,34 +16,35 @@
 
 package com.android.internal.telephony.gsm;
 
+import static com.android.internal.telephony.SmsConstants.ENCODING_16BIT;
+import static com.android.internal.telephony.SmsConstants.ENCODING_7BIT;
+import static com.android.internal.telephony.SmsConstants.ENCODING_8BIT;
+import static com.android.internal.telephony.SmsConstants.ENCODING_KSC5601;
+import static com.android.internal.telephony.SmsConstants.ENCODING_UNKNOWN;
+import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_BYTES;
+import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_SEPTETS;
+import static com.android.internal.telephony.SmsConstants.MessageClass;
+
+import android.content.res.Resources;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.Rlog;
-import android.content.res.Resources;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
-import com.android.internal.telephony.uicc.IccUtils;
+import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
-import com.android.internal.telephony.Sms7BitEncodingTranslator;
+import com.android.internal.telephony.uicc.IccUtils;
+
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
-import static com.android.internal.telephony.SmsConstants.MessageClass;
-import static com.android.internal.telephony.SmsConstants.ENCODING_UNKNOWN;
-import static com.android.internal.telephony.SmsConstants.ENCODING_7BIT;
-import static com.android.internal.telephony.SmsConstants.ENCODING_8BIT;
-import static com.android.internal.telephony.SmsConstants.ENCODING_16BIT;
-import static com.android.internal.telephony.SmsConstants.ENCODING_KSC5601;
-import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_SEPTETS;
-import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_BYTES;
-import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_BYTES_WITH_HEADER;
 
 /**
  * A Short Message Service message.
@@ -100,11 +101,18 @@ public class SmsMessage extends SmsMessageBase {
     private static final int INVALID_VALIDITY_PERIOD = -1;
 
     public static class SubmitPdu extends SubmitPduBase {
+        @UnsupportedAppUsage
+        public SubmitPdu() {}
+    }
+
+    @UnsupportedAppUsage
+    public SmsMessage() {
     }
 
     /**
      * Create an SmsMessage from a raw PDU.
      */
+    @UnsupportedAppUsage
     public static SmsMessage createFromPdu(byte[] pdu) {
         try {
             SmsMessage msg = new SmsMessage();
@@ -169,6 +177,7 @@ public class SmsMessage extends SmsMessageBase {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static SmsMessage createFromEfRecord(int index, byte[] data) {
         try {
             SmsMessage msg = new SmsMessage();
@@ -259,6 +268,7 @@ public class SmsMessage extends SmsMessageBase {
      *         Returns null on encode error.
      * @hide
      */
+    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header) {
@@ -281,6 +291,7 @@ public class SmsMessage extends SmsMessageBase {
      *         Returns null on encode error.
      * @hide
      */
+    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header, int encoding,
@@ -304,6 +315,7 @@ public class SmsMessage extends SmsMessageBase {
      *         Returns null on encode error.
      * @hide
      */
+    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header, int encoding,
@@ -444,6 +456,7 @@ public class SmsMessage extends SmsMessageBase {
      * @throws UnsupportedEncodingException
      * @throws EncodeException if String is too large to encode
      */
+    @UnsupportedAppUsage
     private static byte[] encodeUCS2(String message, byte[] header)
             throws UnsupportedEncodingException, EncodeException {
         byte[] userData, textPart;
@@ -478,6 +491,7 @@ public class SmsMessage extends SmsMessageBase {
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
      */
+    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested) {
@@ -496,6 +510,7 @@ public class SmsMessage extends SmsMessageBase {
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
      */
+    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, int validityPeriod) {
@@ -576,6 +591,7 @@ public class SmsMessage extends SmsMessageBase {
      * @param ret <code>SubmitPdu</code> containing the encoded SC
      *        address, if applicable, and the encoded message. Returns null on encode error.
      */
+    @UnsupportedAppUsage
     private static ByteArrayOutputStream getSubmitPduHead(
             String scAddress, String destinationAddress, byte mtiByte,
             boolean statusReportRequested, SubmitPdu ret) {
@@ -622,12 +638,16 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     private static class PduParser {
+        @UnsupportedAppUsage
         byte mPdu[];
+        @UnsupportedAppUsage
         int mCur;
         SmsHeader mUserDataHeader;
         byte[] mUserData;
+        @UnsupportedAppUsage
         int mUserDataSeptetPadding;
 
+        @UnsupportedAppUsage
         PduParser(byte[] pdu) {
             mPdu = pdu;
             mCur = 0;
@@ -667,6 +687,7 @@ public class SmsMessage extends SmsMessageBase {
         /**
          * returns non-sign-extended byte value
          */
+        @UnsupportedAppUsage
         int getByte() {
             return mPdu[mCur++] & 0xff;
         }
@@ -808,6 +829,7 @@ public class SmsMessage extends SmsMessageBase {
          *
          * @return the user data payload, not including the headers
          */
+        @UnsupportedAppUsage
         byte[] getUserData() {
             return mUserData;
         }
@@ -864,6 +886,7 @@ public class SmsMessage extends SmsMessageBase {
          * @param byteCount the number of bytes in the user data payload
          * @return a String with the decoded characters
          */
+        @UnsupportedAppUsage
         String getUserDataUCS2(int byteCount) {
             String ret;
 
@@ -912,6 +935,7 @@ public class SmsMessage extends SmsMessageBase {
      * @param use7bitOnly ignore (but still count) illegal characters if true
      * @return TextEncodingDetails
      */
+    @UnsupportedAppUsage
     public static TextEncodingDetails calculateLength(CharSequence msgBody,
             boolean use7bitOnly) {
         CharSequence newMsgBody = null;
@@ -959,6 +983,7 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     @Override
     public boolean isMWIClearMessage() {
         if (mIsMwi && !mMwiSense) {
@@ -970,6 +995,7 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     @Override
     public boolean isMWISetMessage() {
         if (mIsMwi && mMwiSense) {
@@ -981,6 +1007,7 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     @Override
     public boolean isMwiDontStore() {
         if (mIsMwi && mMwiDontStore) {
@@ -1000,12 +1027,14 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     @Override
     public int getStatus() {
         return mStatus;
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     @Override
     public boolean isStatusReportMessage() {
         return mIsStatusReportMessage;
