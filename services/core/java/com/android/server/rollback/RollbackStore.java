@@ -319,13 +319,14 @@ class RollbackStore {
 
         IntArray pendingBackups = info.getPendingBackups();
         List<RestoreInfo> pendingRestores = info.getPendingRestores();
-        IntArray installedUsers = info.getInstalledUsers();
+        IntArray snapshottedUsers = info.getSnapshottedUsers();
         json.put("pendingBackups", convertToJsonArray(pendingBackups));
         json.put("pendingRestores", convertToJsonArray(pendingRestores));
 
         json.put("isApex", info.isApex());
 
-        json.put("installedUsers", convertToJsonArray(installedUsers));
+        // Field is named 'installedUsers' for legacy reasons.
+        json.put("installedUsers", convertToJsonArray(snapshottedUsers));
         json.put("ceSnapshotInodes", ceSnapshotInodesToJson(info.getCeSnapshotInodes()));
 
         return json;
@@ -345,12 +346,13 @@ class RollbackStore {
 
         final boolean isApex = json.getBoolean("isApex");
 
-        final IntArray installedUsers = convertToIntArray(json.getJSONArray("installedUsers"));
+        // Field is named 'installedUsers' for legacy reasons.
+        final IntArray snapshottedUsers = convertToIntArray(json.getJSONArray("installedUsers"));
         final SparseLongArray ceSnapshotInodes = ceSnapshotInodesFromJson(
                 json.getJSONArray("ceSnapshotInodes"));
 
         return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
-                pendingBackups, pendingRestores, isApex, installedUsers, ceSnapshotInodes);
+                pendingBackups, pendingRestores, isApex, snapshottedUsers, ceSnapshotInodes);
     }
 
     private static JSONArray versionedPackagesToJson(List<VersionedPackage> packages)

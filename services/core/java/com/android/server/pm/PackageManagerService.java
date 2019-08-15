@@ -14580,17 +14580,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
                     mPendingEnableRollback.append(enableRollbackToken, this);
 
-                    final int[] installedUsers;
-                    synchronized (mLock) {
-                        PackageSetting ps = mSettings.getPackageLPr(pkgLite.packageName);
-                        if (ps != null) {
-                            installedUsers = ps.queryInstalledUsers(mUserManager.getUserIds(),
-                                    true);
-                        } else {
-                            installedUsers = new int[0];
-                        }
-                    }
-
                     Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
@@ -14598,9 +14587,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
                             installFlags);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS,
-                            installedUsers);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
                             getRollbackUser().getIdentifier());
