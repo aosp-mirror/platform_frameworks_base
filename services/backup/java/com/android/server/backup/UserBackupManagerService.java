@@ -421,13 +421,13 @@ public class UserBackupManagerService {
      * Creates an instance of {@link UserBackupManagerService} and initializes state for it. This
      * includes setting up the directories where we keep our bookkeeping and transport management.
      *
-     * @see #createAndInitializeService(int, Context, Trampoline, HandlerThread, File, File,
-     *     TransportManager)
+     * @see #createAndInitializeService(int, Context, BackupManagerService, HandlerThread, File,
+     * File, TransportManager)
      */
     static UserBackupManagerService createAndInitializeService(
             @UserIdInt int userId,
             Context context,
-            Trampoline trampoline,
+            BackupManagerService backupManagerService,
             Set<ComponentName> transportWhitelist) {
         String currentTransport =
                 Settings.Secure.getStringForUser(
@@ -455,7 +455,7 @@ public class UserBackupManagerService {
         return createAndInitializeService(
                 userId,
                 context,
-                trampoline,
+                backupManagerService,
                 userBackupThread,
                 baseStateDir,
                 dataDir,
@@ -467,7 +467,7 @@ public class UserBackupManagerService {
      *
      * @param userId The user which this service is for.
      * @param context The system server context.
-     * @param trampoline A reference to the proxy to {@link BackupManagerService}.
+     * @param backupManagerService A reference to the proxy to {@link BackupManagerService}.
      * @param userBackupThread The thread running backup/restore operations for the user.
      * @param baseStateDir The directory we store the user's persistent bookkeeping data.
      * @param dataDir The directory we store the user's temporary staging data.
@@ -478,7 +478,7 @@ public class UserBackupManagerService {
     public static UserBackupManagerService createAndInitializeService(
             @UserIdInt int userId,
             Context context,
-            Trampoline trampoline,
+            BackupManagerService backupManagerService,
             HandlerThread userBackupThread,
             File baseStateDir,
             File dataDir,
@@ -486,7 +486,7 @@ public class UserBackupManagerService {
         return new UserBackupManagerService(
                 userId,
                 context,
-                trampoline,
+                backupManagerService,
                 userBackupThread,
                 baseStateDir,
                 dataDir,
@@ -509,7 +509,7 @@ public class UserBackupManagerService {
     private UserBackupManagerService(
             @UserIdInt int userId,
             Context context,
-            Trampoline parent,
+            BackupManagerService parent,
             HandlerThread userBackupThread,
             File baseStateDir,
             File dataDir,
@@ -525,8 +525,8 @@ public class UserBackupManagerService {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
 
-        checkNotNull(parent, "trampoline cannot be null");
-        mBackupManagerBinder = Trampoline.asInterface(parent.asBinder());
+        checkNotNull(parent, "parent cannot be null");
+        mBackupManagerBinder = BackupManagerService.asInterface(parent.asBinder());
 
         mAgentTimeoutParameters = new
                 BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());

@@ -26,8 +26,12 @@ import static com.android.server.backup.testing.TransportData.backupTransport;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
@@ -72,7 +76,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-/** Tests for {@link com.android.server.backup.Trampoline}. */
+/** Tests for {@link BackupManagerService}. */
 @RunWith(RobolectricTestRunner.class)
 @Config(
         shadows = {
@@ -83,7 +87,7 @@ import java.io.StringWriter;
                 ShadowSystemServiceRegistry.class
         })
 @Presubmit
-public class TrampolineRoboTest {
+public class BackupManagerServiceRoboTest {
     private static final String TEST_PACKAGE = "package";
     private static final String TEST_TRANSPORT = "transport";
     private static final String[] ADB_TEST_PACKAGES = {TEST_PACKAGE};
@@ -121,7 +125,7 @@ public class TrampolineRoboTest {
     /** Test that the service registers users. */
     @Test
     public void testStartServiceForUser_registersUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         backupManagerService.setBackupServiceActive(mUserOneId, true);
 
         backupManagerService.startServiceForUser(mUserOneId);
@@ -134,7 +138,7 @@ public class TrampolineRoboTest {
     /** Test that the service registers users. */
     @Test
     public void testStartServiceForUser_withServiceInstance_registersUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         backupManagerService.setBackupServiceActive(mUserOneId, true);
 
         backupManagerService.startServiceForUser(mUserOneId, mUserOneService);
@@ -147,7 +151,7 @@ public class TrampolineRoboTest {
     /** Test that the service unregisters users when stopped. */
     @Test
     public void testStopServiceForUser_forRegisteredUser_unregistersCorrectUser() throws Exception {
-        Trampoline backupManagerService =
+        BackupManagerService backupManagerService =
                 createServiceAndRegisterUser(mUserOneId, mUserOneService);
         backupManagerService.startServiceForUser(mUserTwoId, mUserTwoService);
         ShadowBinder.setCallingUid(Process.SYSTEM_UID);
@@ -163,7 +167,7 @@ public class TrampolineRoboTest {
     /** Test that the service unregisters users when stopped. */
     @Test
     public void testStopServiceForUser_forRegisteredUser_tearsDownCorrectUser() throws Exception {
-        Trampoline backupManagerService =
+        BackupManagerService backupManagerService =
                 createServiceAndRegisterUser(mUserOneId, mUserOneService);
         backupManagerService.setBackupServiceActive(mUserTwoId, true);
         backupManagerService.startServiceForUser(mUserTwoId, mUserTwoService);
@@ -177,7 +181,7 @@ public class TrampolineRoboTest {
     /** Test that the service unregisters users when stopped. */
     @Test
     public void testStopServiceForUser_forUnknownUser_doesNothing() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         backupManagerService.setBackupServiceActive(mUserOneId, true);
         ShadowBinder.setCallingUid(Process.SYSTEM_UID);
 
@@ -194,7 +198,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testDataChanged_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -206,7 +210,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testDataChanged_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -218,7 +222,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testAgentConnected_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         IBinder agentBinder = mock(IBinder.class);
@@ -231,7 +235,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testAgentConnected_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         IBinder agentBinder = mock(IBinder.class);
@@ -244,7 +248,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testOpComplete_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -256,7 +260,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testOpComplete_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -272,7 +276,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testInitializeTransports_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         String[] transports = {TEST_TRANSPORT};
@@ -285,7 +289,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testInitializeTransports_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         String[] transports = {TEST_TRANSPORT};
@@ -298,7 +302,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testClearBackupData_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -310,7 +314,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testClearBackupData_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -322,7 +326,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetCurrentTransport_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -334,7 +338,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testGetCurrentTransport_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -347,7 +351,7 @@ public class TrampolineRoboTest {
     @Test
     public void testGetCurrentTransportComponent_onRegisteredUser_callsMethodForUser()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -360,7 +364,7 @@ public class TrampolineRoboTest {
     @Test
     public void testGetCurrentTransportComponent_onUnknownUser_doesNotPropagateCall()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -372,7 +376,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testListAllTransports_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -384,7 +388,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testListAllTransports_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -397,7 +401,7 @@ public class TrampolineRoboTest {
     @Test
     public void testListAllTransportComponents_onRegisteredUser_callsMethodForUser()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -410,7 +414,7 @@ public class TrampolineRoboTest {
     @Test
     public void testListAllTransportComponents_onUnknownUser_doesNotPropagateCall()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -422,7 +426,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSelectBackupTransport_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -434,7 +438,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testSelectBackupTransport_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -446,7 +450,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSelectTransportAsync_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         TransportData transport = backupTransport();
@@ -463,7 +467,7 @@ public class TrampolineRoboTest {
     @Test
     public void testSelectBackupTransportAsync_onUnknownUser_doesNotPropagateCall()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         TransportData transport = backupTransport();
@@ -479,7 +483,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetConfigurationIntent_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -491,7 +495,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testGetConfigurationIntent_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -503,7 +507,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetDestinationString_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -515,7 +519,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testGetDestinationString_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -527,7 +531,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetDataManagementIntent_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -539,7 +543,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testGetDataManagementIntent_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -551,7 +555,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetDataManagementLabel_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -563,7 +567,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testGetDataManagementLabel_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -576,7 +580,7 @@ public class TrampolineRoboTest {
     @Test
     public void testUpdateTransportAttributes_onRegisteredUser_callsMethodForUser()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         TransportData transport = backupTransport();
@@ -606,7 +610,7 @@ public class TrampolineRoboTest {
     @Test
     public void testUpdateTransportAttributes_onUnknownUser_doesNotPropagateCall()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         TransportData transport = backupTransport();
@@ -642,7 +646,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testSetBackupEnabled_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -657,7 +661,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testSetBackupEnabled_withPermission_propagatesForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
 
@@ -671,7 +675,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSetBackupEnabled_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -683,7 +687,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testSetBackupEnabled_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -695,7 +699,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSetAutoRestore_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -707,7 +711,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testSetAutoRestore_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -719,7 +723,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testIsBackupEnabled_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -731,7 +735,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testIsBackupEnabled_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -747,7 +751,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testIsAppEligibleForBackup_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -759,7 +763,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testIsAppEligibleForBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -772,7 +776,7 @@ public class TrampolineRoboTest {
     @Test
     public void testFilterAppsEligibleForBackup_onRegisteredUser_callsMethodForUser()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         String[] packages = {TEST_PACKAGE};
@@ -786,7 +790,7 @@ public class TrampolineRoboTest {
     @Test
     public void testFilterAppsEligibleForBackup_onUnknownUser_doesNotPropagateCall()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         String[] packages = {TEST_PACKAGE};
@@ -802,7 +806,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testBackupNow_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -815,7 +819,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testBackupNow_withPermission_propagatesForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
 
@@ -829,7 +833,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testBackupNow_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -841,7 +845,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testBackupNow_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -856,7 +860,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testRequestBackup_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         String[] packages = {TEST_PACKAGE};
@@ -876,7 +880,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testRequestBackup_withPermission_propagatesForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
 
@@ -893,7 +897,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testRequestBackup_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         String[] packages = {TEST_PACKAGE};
         IBackupObserver observer = mock(IBackupObserver.class);
@@ -908,7 +912,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testRequestBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         String[] packages = {TEST_PACKAGE};
         IBackupObserver observer = mock(IBackupObserver.class);
@@ -926,7 +930,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testCancelBackups_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -939,7 +943,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testCancelBackups_withPermission_propagatesForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
@@ -952,7 +956,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testCancelBackups_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -964,7 +968,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testCancelBackups_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -976,7 +980,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testBeginFullBackup_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
         FullBackupJob job = new FullBackupJob();
 
@@ -988,7 +992,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testBeginFullBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         FullBackupJob job = new FullBackupJob();
 
         backupManagerService.beginFullBackup(UserHandle.USER_SYSTEM, job);
@@ -999,7 +1003,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testEndFullBackup_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
 
         backupManagerService.endFullBackup(UserHandle.USER_SYSTEM);
@@ -1010,7 +1014,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testEndFullBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
 
         backupManagerService.endFullBackup(UserHandle.USER_SYSTEM);
 
@@ -1020,7 +1024,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testFullTransportBackup_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         String[] packages = {TEST_PACKAGE};
@@ -1033,7 +1037,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testFullTransportBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         String[] packages = {TEST_PACKAGE};
@@ -1050,7 +1054,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testRestoreAtInstall_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -1062,7 +1066,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testRestoreAtInstall_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -1074,7 +1078,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testBeginRestoreSession_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -1086,7 +1090,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testBeginRestoreSession_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -1099,7 +1103,7 @@ public class TrampolineRoboTest {
     @Test
     public void testGetAvailableRestoreToken_onRegisteredUser_callsMethodForUser()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -1111,7 +1115,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testGetAvailableRestoreToken_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -1127,7 +1131,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSetBackupPassword_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
         ShadowBinder.setCallingUserHandle(UserHandle.of(UserHandle.USER_SYSTEM));
 
@@ -1139,7 +1143,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testSetBackupPassword_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
 
         backupManagerService.setBackupPassword("currentPassword", "newPassword");
 
@@ -1149,7 +1153,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testHasBackupPassword_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserOneService);
         ShadowBinder.setCallingUserHandle(UserHandle.of(UserHandle.USER_SYSTEM));
 
@@ -1161,7 +1165,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testHasBackupPassword_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
 
         backupManagerService.hasBackupPassword();
 
@@ -1174,7 +1178,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testAdbBackup_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
@@ -1202,7 +1206,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testAdbBackup_withPermission_propagatesForNonCallingUser() throws Exception {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
 
@@ -1239,7 +1243,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testAdbBackup_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
@@ -1274,7 +1278,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testAdbBackup_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
@@ -1312,7 +1316,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testAdbRestore_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
@@ -1327,7 +1331,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testAdbRestore_withPermission_propagatesForNonCallingUser() throws Exception {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         registerUser(backupManagerService, mUserTwoId, mUserTwoService);
         ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
@@ -1341,7 +1345,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testAdbRestore_onRegisteredUser_callsMethodForUser() throws Exception {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
@@ -1354,7 +1358,7 @@ public class TrampolineRoboTest {
     /** Test that the backup service does not route methods for non-registered users. */
     @Test
     public void testAdbRestore_onUnknownUser_doesNotPropagateCall() throws Exception {
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
@@ -1374,7 +1378,7 @@ public class TrampolineRoboTest {
     @Test
     public void testAcknowledgeAdbBackupOrRestore_onRegisteredUser_callsMethodForUser()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         IFullBackupRestoreObserver observer = mock(IFullBackupRestoreObserver.class);
@@ -1400,7 +1404,7 @@ public class TrampolineRoboTest {
     @Test
     public void testAcknowledgeAdbBackupOrRestore_onUnknownUser_doesNotPropagateCall()
             throws Exception {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         IFullBackupRestoreObserver observer = mock(IFullBackupRestoreObserver.class);
@@ -1430,7 +1434,7 @@ public class TrampolineRoboTest {
     @Test
     public void testDump_onRegisteredUser_callsMethodForUser() throws Exception {
         grantDumpPermissions();
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         File testFile = createTestFile();
         FileDescriptor fileDescriptor = new FileDescriptor();
         PrintWriter printWriter = new PrintWriter(testFile);
@@ -1446,7 +1450,7 @@ public class TrampolineRoboTest {
     @Test
     public void testDump_onUnknownUser_doesNotPropagateCall() throws Exception {
         grantDumpPermissions();
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         File testFile = createTestFile();
         FileDescriptor fileDescriptor = new FileDescriptor();
         PrintWriter printWriter = new PrintWriter(testFile);
@@ -1461,7 +1465,7 @@ public class TrampolineRoboTest {
     @Test
     public void testDump_users_dumpsListOfRegisteredUsers() {
         grantDumpPermissions();
-        Trampoline backupManagerService = createSystemRegisteredService();
+        BackupManagerService backupManagerService = createSystemRegisteredService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         StringWriter out = new StringWriter();
         PrintWriter writer = new PrintWriter(out);
@@ -1471,7 +1475,7 @@ public class TrampolineRoboTest {
 
         writer.flush();
         assertEquals(
-                String.format("%s %d %d\n", Trampoline.DUMP_RUNNING_USERS_MESSAGE,
+                String.format("%s %d %d\n", BackupManagerService.DUMP_RUNNING_USERS_MESSAGE,
                         UserHandle.USER_SYSTEM, mUserOneId),
                 out.toString());
     }
@@ -1493,7 +1497,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testGetServiceForUser_withoutPermission_throwsSecurityExceptionForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
@@ -1510,7 +1514,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testGetServiceForUserIfCallerHasPermission_withPermission_worksForNonCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ true);
 
@@ -1525,7 +1529,7 @@ public class TrampolineRoboTest {
      */
     @Test
     public void testGetServiceForUserIfCallerHasPermission_withoutPermission_worksForCallingUser() {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
@@ -1534,25 +1538,98 @@ public class TrampolineRoboTest {
                 backupManagerService.getServiceForUserIfCallerHasPermission(mUserOneId, "test"));
     }
 
-    private Trampoline createService() {
-        return new Trampoline(mContext);
+    /**
+     * Test verifying that {@link BackupManagerService#MORE_DEBUG} is set to {@code false}. This is
+     * specifically to prevent overloading the logs in production.
+     */
+    @Test
+    public void testMoreDebug_isFalse() throws Exception {
+        boolean moreDebug = BackupManagerService.MORE_DEBUG;
+
+        assertThat(moreDebug).isFalse();
     }
 
-    private Trampoline createSystemRegisteredService() {
-        Trampoline trampoline = createService();
-        registerUser(trampoline, UserHandle.USER_SYSTEM, mUserSystemService);
-        return trampoline;
+    /** Test that the constructor handles {@code null} parameters. */
+    @Test
+    public void testConstructor_withNullContext_throws() throws Exception {
+        expectThrows(
+                NullPointerException.class,
+                () ->
+                        new BackupManagerService(
+                                /* context */ null,
+                                new SparseArray<>()));
+    }
+
+    /** Test that the constructor does not create {@link UserBackupManagerService} instances. */
+    @Test
+    public void testConstructor_doesNotRegisterUsers() throws Exception {
+        BackupManagerService backupManagerService = createService();
+
+        assertThat(backupManagerService.getUserServices().size()).isEqualTo(0);
+    }
+
+    // ---------------------------------------------
+    //  Lifecycle tests
+    // ---------------------------------------------
+
+    /** testOnStart_publishesService */
+    @Test
+    public void testOnStart_publishesService() {
+        BackupManagerService backupManagerService = mock(BackupManagerService.class);
+        BackupManagerService.Lifecycle lifecycle =
+                spy(new BackupManagerService.Lifecycle(mContext, backupManagerService));
+        doNothing().when(lifecycle).publishService(anyString(), any());
+
+        lifecycle.onStart();
+
+        verify(lifecycle).publishService(Context.BACKUP_SERVICE, backupManagerService);
+    }
+
+    /** testOnUnlockUser_forwards */
+    @Test
+    public void testOnUnlockUser_forwards() {
+        BackupManagerService backupManagerService = mock(BackupManagerService.class);
+        BackupManagerService.Lifecycle lifecycle =
+                new BackupManagerService.Lifecycle(mContext, backupManagerService);
+
+        lifecycle.onUnlockUser(UserHandle.USER_SYSTEM);
+
+        verify(backupManagerService).onUnlockUser(UserHandle.USER_SYSTEM);
+    }
+
+    /** testOnStopUser_forwards */
+    @Test
+    public void testOnStopUser_forwards() {
+        BackupManagerService backupManagerService = mock(BackupManagerService.class);
+        BackupManagerService.Lifecycle lifecycle =
+                new BackupManagerService.Lifecycle(mContext, backupManagerService);
+
+        lifecycle.onStopUser(UserHandle.USER_SYSTEM);
+
+        verify(backupManagerService).onStopUser(UserHandle.USER_SYSTEM);
+    }
+
+    private BackupManagerService createService() {
+        return new BackupManagerService(mContext);
+    }
+
+    private BackupManagerService createSystemRegisteredService() {
+        BackupManagerService backupManagerService = createService();
+        registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserSystemService);
+        return backupManagerService;
     }
 
     private void registerUser(
-            Trampoline trampoline, int userId, UserBackupManagerService userBackupManagerService) {
-        trampoline.setBackupServiceActive(userId, true);
-        trampoline.startServiceForUser(userId, userBackupManagerService);
+            BackupManagerService backupManagerService,
+            int userId,
+            UserBackupManagerService userBackupManagerService) {
+        backupManagerService.setBackupServiceActive(userId, true);
+        backupManagerService.startServiceForUser(userId, userBackupManagerService);
     }
 
-    private Trampoline createServiceAndRegisterUser(
+    private BackupManagerService createServiceAndRegisterUser(
             int userId, UserBackupManagerService userBackupManagerService) {
-        Trampoline backupManagerService = createService();
+        BackupManagerService backupManagerService = createService();
         backupManagerService.setBackupServiceActive(userBackupManagerService.getUserId(), true);
         backupManagerService.startServiceForUser(userId, userBackupManagerService);
         return backupManagerService;
