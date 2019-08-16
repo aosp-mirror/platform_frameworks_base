@@ -129,11 +129,11 @@ class IdmapDaemon {
         }
     }
 
-    static void startIdmapService() {
+    private static void startIdmapService() {
         SystemProperties.set("ctl.start", IDMAP_DAEMON);
     }
 
-    static void stopIdmapService() {
+    private static void stopIdmapService() {
         SystemProperties.set("ctl.stop", IDMAP_DAEMON);
     }
 
