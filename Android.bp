@@ -416,6 +416,13 @@ filegroup {
 }
 
 filegroup {
+    name: "graphicsstats_proto",
+    srcs: [
+        "libs/hwui/protos/graphicsstats.proto",
+    ],
+}
+
+filegroup {
     name: "libvibrator_aidl",
     srcs: [
         "core/java/android/os/IExternalVibrationController.aidl",

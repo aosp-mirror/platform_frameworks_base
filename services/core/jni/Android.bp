@@ -13,6 +13,7 @@ cc_library_static {
     ],
 
     srcs: [
+        ":graphicsstats_proto",
         "BroadcastRadio/JavaRef.cpp",
         "BroadcastRadio/NativeCallbackThread.cpp",
         "BroadcastRadio/BroadcastRadioService.cpp",
@@ -103,6 +104,11 @@ cc_defaults {
         "libinputflinger",
         "libinputflinger_base",
         "libinputservice",
+        "libprotobuf-cpp-lite",
+        "libprotoutil",
+        "libstatspull",
+        "libstatssocket",
+        "libstatslog",
         "libschedulerservicehidl",
         "libsensorservice",
         "libsensorservicehidl",

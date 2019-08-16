@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "Properties.h"
 #include "utils/Macros.h"
 
 #include <utils/Timers.h>
@@ -65,6 +66,7 @@ public:
     uint32_t jankFrameCount() const { return mJankFrameCount; }
     nsecs_t statsStartTime() const { return mStatStartTime; }
     uint32_t jankTypeCount(JankType type) const { return mJankTypeCounts[static_cast<int>(type)]; }
+    RenderPipelineType pipelineType() const { return mPipelineType; }
 
     struct HistogramEntry {
         uint32_t renderTimeMs;
@@ -103,6 +105,9 @@ private:
     uint32_t mTotalFrameCount;
     uint32_t mJankFrameCount;
     nsecs_t mStatStartTime;
+
+    // true if HWUI renders with Vulkan pipeline
+    RenderPipelineType mPipelineType;
 };
 
 // For testing
