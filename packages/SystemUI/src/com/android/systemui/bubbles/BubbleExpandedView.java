@@ -193,7 +193,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPm = context.getPackageManager();
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getSize(mDisplaySize);
+        // Get the real size -- this includes screen decorations (notches, statusbar, navbar).
+        wm.getDefaultDisplay().getRealSize(mDisplaySize);
         Resources res = getResources();
         mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
@@ -313,12 +314,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      */
     void updateInsets(WindowInsets insets) {
         if (usingActivityView()) {
-            int[] windowLocation = mActivityView.getLocationOnScreen();
-            final int windowBottom = windowLocation[1] + mActivityView.getHeight();
-            final int keyboardHeight = insets.getSystemWindowInsetBottom()
-                    - insets.getStableInsetBottom();
-            final int insetsBottom = Math.max(0,
-                    windowBottom + keyboardHeight - mDisplaySize.y);
+            int[] screenLoc = mActivityView.getLocationOnScreen();
+            final int activityViewBottom = screenLoc[1] + mActivityView.getHeight();
+            final int keyboardTop = mDisplaySize.y - insets.getSystemWindowInsetBottom();
+            final int insetsBottom = Math.max(activityViewBottom - keyboardTop, 0);
             mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
         }
     }
@@ -415,10 +414,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             Log.d(TAG, "updateHeight: bubble=" + getBubbleKey());
         }
         if (usingActivityView()) {
-            int max = getMaxExpandedHeight() - mSettingsIconHeight - mPointerHeight
-                    - mPointerMargin;
             float desiredHeight = Math.max(mBubble.getDesiredHeight(mContext), mMinHeight);
-            float height = Math.min(desiredHeight, max);
+            float height = Math.min(desiredHeight, getMaxExpandedHeight());
             height = Math.max(height, mMinHeight);
             LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
             mNeedsNewHeight =  lp.height != height;
@@ -438,7 +435,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     private int getMaxExpandedHeight() {
         int[] windowLocation = mActivityView.getLocationOnScreen();
-        return mDisplaySize.y - windowLocation[1] - mSettingsIconHeight;
+        int bottomInset = getRootWindowInsets() != null
+                ? getRootWindowInsets().getStableInsetBottom()
+                : 0;
+        return mDisplaySize.y - windowLocation[1] - mSettingsIconHeight - mPointerHeight
+                - mPointerMargin - bottomInset;
     }
 
     /**

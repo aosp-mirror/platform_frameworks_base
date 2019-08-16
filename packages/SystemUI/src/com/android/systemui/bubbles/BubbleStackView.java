@@ -408,14 +408,6 @@ public class BubbleStackView extends FrameLayout {
             if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }
-
-            float newY = getExpandedViewY();
-            if (newY < 0) {
-                // TODO: This means our expanded content is too big to fit on screen. Right now
-                // we'll let it translate off but we should be clipping it & pushing the header
-                // down so that it always remains visible.
-            }
-            mExpandedViewYAnim.animateToFinalPosition(newY);
             mExpandedAnimationController.updateYPosition(
                     // Update the insets after we're done translating otherwise position
                     // calculation for them won't be correct.
