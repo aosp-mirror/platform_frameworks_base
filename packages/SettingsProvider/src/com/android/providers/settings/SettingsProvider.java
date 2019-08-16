@@ -70,6 +70,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.provider.settings.validators.SystemSettingsValidators;
 import android.provider.settings.validators.Validator;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1717,7 +1718,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void validateSystemSettingValue(String name, String value) {
-        Validator validator = Settings.System.VALIDATORS.get(name);
+        Validator validator = SystemSettingsValidators.VALIDATORS.get(name);
         if (validator != null && !validator.validate(value)) {
             throw new IllegalArgumentException("Invalid value: " + value
                     + " for setting: " + name);

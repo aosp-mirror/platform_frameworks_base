@@ -24,6 +24,7 @@ import android.text.TextUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 /**
@@ -180,4 +181,27 @@ public class SettingsValidators {
     public static final Validator TTS_LIST_VALIDATOR = new TTSListValidator();
 
     public static final Validator TILE_LIST_VALIDATOR = new TileListValidator();
+
+    static final Validator DATE_FORMAT_VALIDATOR = value -> {
+        try {
+            new SimpleDateFormat(value);
+            return true;
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return false;
+        }
+    };
+
+    static final Validator COLON_SEPARATED_COMPONENT_LIST_VALIDATOR =
+            new ComponentNameListValidator(":");
+
+    static final Validator COLON_SEPARATED_PACKAGE_LIST_VALIDATOR =
+            new PackageNameListValidator(":");
+
+    static final Validator COMMA_SEPARATED_COMPONENT_LIST_VALIDATOR =
+            new ComponentNameListValidator(",");
+
+    static final Validator PERCENTAGE_INTEGER_VALIDATOR =
+            new InclusiveIntegerRangeValidator(0, 100);
+
+    static final Validator VIBRATION_INTENSITY_VALIDATOR = new InclusiveIntegerRangeValidator(0, 3);
 }
