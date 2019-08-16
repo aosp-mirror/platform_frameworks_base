@@ -4991,26 +4991,60 @@ public class DevicePolicyManager {
      * call {@link android.security.KeyChain#choosePrivateKeyAlias} first.
      *
      * The grantee app will receive the {@link android.security.KeyChain#ACTION_KEY_ACCESS_CHANGED}
-     * broadcast when access to a key is granted or revoked.
+     * broadcast when access to a key is granted.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if calling from a delegated certificate installer.
      * @param alias The alias of the key to grant access to.
      * @param packageName The name of the (already installed) package to grant access to.
-     * @param hasGrant Whether to grant access to the alias or revoke it.
      * @return {@code true} if the grant was set successfully, {@code false} otherwise.
      *
-     * @throws SecurityException if the caller is not a device owner, a profile  owner or
+     * @throws SecurityException if the caller is not a device owner, a profile owner or
      *         delegated certificate chooser.
      * @throws IllegalArgumentException if {@code packageName} or {@code alias} are empty, or if
      *         {@code packageName} is not a name of an installed package.
+     * @see #revokeKeyPairFromApp
      */
-    public boolean setKeyGrantForApp(@Nullable ComponentName admin, @NonNull String alias,
-            @NonNull String packageName, boolean hasGrant) {
-        throwIfParentInstance("addKeyGrant");
+    public boolean grantKeyPairToApp(@Nullable ComponentName admin, @NonNull String alias,
+            @NonNull String packageName) {
+        throwIfParentInstance("grantKeyPairToApp");
         try {
             return mService.setKeyGrantForApp(
-                    admin, mContext.getPackageName(), alias, packageName, hasGrant);
+                    admin, mContext.getPackageName(), alias, packageName, true);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device or profile owner, or delegated certificate chooser (an app that has been
+     * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to revoke an application's
+     * grant to a KeyChain key pair.
+     * Calls by the application to {@link android.security.KeyChain#getPrivateKey}
+     * will fail after the grant is revoked.
+     *
+     * The grantee app will receive the {@link android.security.KeyChain#ACTION_KEY_ACCESS_CHANGED}
+     * broadcast when access to a key is revoked.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *        {@code null} if calling from a delegated certificate installer.
+     * @param alias The alias of the key to revoke access from.
+     * @param packageName The name of the (already installed) package to revoke access from.
+     * @return {@code true} if the grant was revoked successfully, {@code false} otherwise.
+     *
+     * @throws SecurityException if the caller is not a device owner, a profile owner or
+     *         delegated certificate chooser.
+     * @throws IllegalArgumentException if {@code packageName} or {@code alias} are empty, or if
+     *         {@code packageName} is not a name of an installed package.
+     * @see #grantKeyPairToApp
+     */
+    public boolean revokeKeyPairFromApp(@Nullable ComponentName admin, @NonNull String alias,
+            @NonNull String packageName) {
+        throwIfParentInstance("revokeKeyPairFromApp");
+        try {
+            return mService.setKeyGrantForApp(
+                    admin, mContext.getPackageName(), alias, packageName, false);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
