@@ -3278,6 +3278,7 @@ public class Notification implements Parcelable
      * @hide
      */
     @Nullable
+    @SystemApi
     public Pair<RemoteInput, Action> findRemoteInputActionPair(boolean requiresFreeform) {
         if (actions == null) {
             return null;
@@ -3304,7 +3305,8 @@ public class Notification implements Parcelable
      *
      * @hide
      */
-    public List<Notification.Action> getContextualActions() {
+    @SystemApi
+    public @NonNull List<Notification.Action> getContextualActions() {
         if (actions == null) return Collections.emptyList();
 
         List<Notification.Action> contextualActions = new ArrayList<>();
@@ -7730,7 +7732,8 @@ public class Notification implements Parcelable
              * @hide
              */
             @Nullable
-            public static Message getMessageFromBundle(Bundle bundle) {
+            @SystemApi
+            public static Message getMessageFromBundle(@NonNull Bundle bundle) {
                 try {
                     if (!bundle.containsKey(KEY_TEXT) || !bundle.containsKey(KEY_TIMESTAMP)) {
                         return null;

@@ -110,6 +110,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @SystemApi
     public static final int USER_LOCKED_SOUND = 0x00000020;
 
     /**
