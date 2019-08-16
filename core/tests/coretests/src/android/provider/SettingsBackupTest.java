@@ -720,7 +720,6 @@ public class SettingsBackupTest {
                  Settings.Secure.BIOMETRIC_DEBUG_ENABLED,
                  Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
                  Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED,
-                 Settings.Secure.FACE_UNLOCK_EDUCATION_INFO_DISPLAYED,
                  Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED);
 
     @Test
