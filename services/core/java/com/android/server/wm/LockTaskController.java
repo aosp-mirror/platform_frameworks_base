@@ -280,6 +280,13 @@ public class LockTaskController {
     }
 
     /**
+     * @return true if currently in the lock task mode, otherwise, return false.
+     */
+    boolean isInLockTaskMode() {
+        return !mLockTaskModeTasks.isEmpty();
+    }
+
+    /**
      * @return whether the requested task is disallowed to be launched.
      */
     boolean isLockTaskModeViolation(TaskRecord task) {
