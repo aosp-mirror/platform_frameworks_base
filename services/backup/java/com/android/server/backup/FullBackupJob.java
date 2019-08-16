@@ -91,7 +91,7 @@ public class FullBackupJob extends JobService {
             mParamsForUser.put(userId, params);
         }
 
-        Trampoline service = Trampoline.getInstance();
+        BackupManagerService service = BackupManagerService.getInstance();
         return service.beginFullBackup(userId, this);
     }
 
@@ -105,7 +105,7 @@ public class FullBackupJob extends JobService {
             }
         }
 
-        Trampoline service = Trampoline.getInstance();
+        BackupManagerService service = BackupManagerService.getInstance();
         service.endFullBackup(userId);
 
         return false;
