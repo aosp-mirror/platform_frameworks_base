@@ -843,7 +843,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private boolean checkSinglePermissionInternal(int uid,
             @NonNull PermissionsState permissionsState, @NonNull String permissionName) {
-        if (!permissionsState.hasPermission(permissionName, UserHandle.getUserId(uid))) {
+        boolean hasPermission = permissionsState.hasPermission(permissionName,
+                UserHandle.getUserId(uid));
+
+        if (!hasPermission && mSettings.isPermissionRuntime(permissionName)) {
+            final String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
+            final int packageNamesSize = packageNames != null ? packageNames.length : 0;
+            for (int i = 0; i < packageNamesSize; i++) {
+                final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageNames[i]);
+                if (pkg != null && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
+                        && pkg.requestedPermissions.contains(permissionName)) {
+                    hasPermission = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasPermission) {
             return false;
         }
 
