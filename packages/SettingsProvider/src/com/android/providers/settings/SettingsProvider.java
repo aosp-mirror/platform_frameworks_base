@@ -314,11 +314,6 @@ public class SettingsProvider extends ContentProvider {
     public boolean onCreate() {
         Settings.setInSystemServer();
 
-        // fail to boot if there're any backed up settings that don't have a non-null validator
-        ensureAllBackedUpSystemSettingsHaveValidators();
-        ensureAllBackedUpGlobalSettingsHaveValidators();
-        ensureAllBackedUpSecureSettingsHaveValidators();
-
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
             mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -336,57 +331,6 @@ public class SettingsProvider extends ContentProvider {
         ServiceManager.addService("settings", new SettingsService(this));
         ServiceManager.addService("device_config", new DeviceConfigService(this));
         return true;
-    }
-
-    private void ensureAllBackedUpSystemSettingsHaveValidators() {
-        String offenders = getOffenders(concat(Settings.System.SETTINGS_TO_BACKUP,
-                Settings.System.LEGACY_RESTORE_SETTINGS), Settings.System.VALIDATORS);
-
-        failToBootIfOffendersPresent(offenders, "Settings.System");
-    }
-
-    private void ensureAllBackedUpGlobalSettingsHaveValidators() {
-        String offenders = getOffenders(concat(Settings.Global.SETTINGS_TO_BACKUP,
-                Settings.Global.LEGACY_RESTORE_SETTINGS), Settings.Global.VALIDATORS);
-
-        failToBootIfOffendersPresent(offenders, "Settings.Global");
-    }
-
-    private void ensureAllBackedUpSecureSettingsHaveValidators() {
-        String offenders = getOffenders(concat(Settings.Secure.SETTINGS_TO_BACKUP,
-                Settings.Secure.LEGACY_RESTORE_SETTINGS), Settings.Secure.VALIDATORS);
-
-        failToBootIfOffendersPresent(offenders, "Settings.Secure");
-    }
-
-    private void failToBootIfOffendersPresent(String offenders, String settingsType) {
-        if (offenders.length() > 0) {
-            throw new RuntimeException("All " + settingsType + " settings that are backed up"
-                    + " have to have a non-null validator, but those don't: " + offenders);
-        }
-    }
-
-    private String getOffenders(String[] settingsToBackup, Map<String,
-            SettingsValidators.Validator> validators) {
-        StringBuilder offenders = new StringBuilder();
-        for (String setting : settingsToBackup) {
-            if (validators.get(setting) == null) {
-                offenders.append(setting).append(" ");
-            }
-        }
-        return offenders.toString();
-    }
-
-    private final String[] concat(String[] first, String[] second) {
-        if (second == null || second.length == 0) {
-            return first;
-        }
-        final int firstLen = first.length;
-        final int secondLen = second.length;
-        String[] both = new String[firstLen + secondLen];
-        System.arraycopy(first, 0, both, 0, firstLen);
-        System.arraycopy(second, 0, both, firstLen, secondLen);
-        return both;
     }
 
     @Override
