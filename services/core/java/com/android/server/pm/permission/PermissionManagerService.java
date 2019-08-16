@@ -43,7 +43,6 @@ import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING
 import static com.android.server.pm.PackageManagerService.DEBUG_PERMISSIONS;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
-import static com.android.server.pm.permission.PermissionManagerService.killUid;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -782,6 +781,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public int checkPermission(String permName, String pkgName, int userId) {
+        // Not using Preconditions.checkNotNull() here for compatibility reasons.
+        if (permName == null || pkgName == null) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+        if (!mUserManagerInt.exists(userId)) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+
         final CheckPermissionDelegate checkPermissionDelegate;
         synchronized (mLock) {
             if (mCheckPermissionDelegate == null)  {
@@ -794,43 +801,70 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private int checkPermissionImpl(String permName, String pkgName, int userId) {
-        return checkPermissionInternal(permName, pkgName, getCallingUid(), userId);
-    }
-
-    private int checkPermissionInternal(String permName, String packageName, int callingUid,
-            int userId) {
-        if (!mUserManagerInt.exists(userId)) {
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(pkgName);
+        if (pkg == null) {
             return PackageManager.PERMISSION_DENIED;
         }
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
-        if (pkg != null && pkg.mExtras != null) {
+        return checkPermissionInternal(pkg, true, permName, userId);
+    }
+
+    private int checkPermissionInternal(@NonNull Package pkg, boolean isPackageExplicit,
+            @NonNull String permissionName, @UserIdInt int userId) {
+        final int callingUid = getCallingUid();
+        if (isPackageExplicit || pkg.mSharedUserId == null) {
             if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
                 return PackageManager.PERMISSION_DENIED;
             }
-            final PackageSetting ps = (PackageSetting) pkg.mExtras;
-            final boolean instantApp = ps.getInstantApp(userId);
-            final PermissionsState permissionsState = ps.getPermissionsState();
-            if (permissionsState.hasPermission(permName, userId)) {
-                if (instantApp) {
-                    synchronized (mLock) {
-                        BasePermission bp = mSettings.getPermissionLocked(permName);
-                        if (bp != null && bp.isInstant()) {
-                            return PackageManager.PERMISSION_GRANTED;
-                        }
-                    }
-                } else {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-            }
-            if (isImpliedPermissionGranted(permissionsState, permName, userId)) {
-                return PackageManager.PERMISSION_GRANTED;
+        } else {
+            if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+                return PackageManager.PERMISSION_DENIED;
             }
         }
+
+        final int uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
+        final PackageSetting ps = (PackageSetting) pkg.mExtras;
+        if (ps == null) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+        final PermissionsState permissionsState = ps.getPermissionsState();
+
+        if (checkSinglePermissionInternal(uid, permissionsState, permissionName)) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+
+        final String fullerPermissionName = FULLER_PERMISSION_MAP.get(permissionName);
+        if (fullerPermissionName != null
+                && checkSinglePermissionInternal(uid, permissionsState, fullerPermissionName)) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+
         return PackageManager.PERMISSION_DENIED;
+    }
+
+    private boolean checkSinglePermissionInternal(int uid,
+            @NonNull PermissionsState permissionsState, @NonNull String permissionName) {
+        if (!permissionsState.hasPermission(permissionName, UserHandle.getUserId(uid))) {
+            return false;
+        }
+
+        if (mPackageManagerInt.getInstantAppPackageName(uid) != null) {
+            return mSettings.isPermissionInstant(permissionName);
+        }
+
+        return true;
     }
 
     @Override
     public int checkUidPermission(String permName, int uid) {
+        // Not using Preconditions.checkNotNull() here for compatibility reasons.
+        if (permName == null) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+        final int userId = UserHandle.getUserId(uid);
+        if (!mUserManagerInt.exists(userId)) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+
         final CheckPermissionDelegate checkPermissionDelegate;
         synchronized (mLock) {
             if (mCheckPermissionDelegate == null)  {
@@ -842,11 +876,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 PermissionManagerService.this::checkUidPermissionImpl);
     }
 
-    private int checkUidPermissionImpl(@NonNull String permName, int uid) {
+    private int checkUidPermissionImpl(String permName, int uid) {
         final PackageParser.Package pkg = mPackageManagerInt.getPackage(uid);
-        synchronized (mLock) {
-            return checkUidPermissionInternal(permName, pkg, uid, getCallingUid());
-        }
+        return checkUidPermissionInternal(pkg, uid, permName);
     }
 
     /**
@@ -856,53 +888,31 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @see SystemConfig#getSystemPermissions()
      */
-    private int checkUidPermissionInternal(@NonNull String permName,
-            @Nullable PackageParser.Package pkg, int uid, int callingUid) {
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        final boolean isCallerInstantApp =
-                mPackageManagerInt.getInstantAppPackageName(callingUid) != null;
-        final boolean isUidInstantApp =
-                mPackageManagerInt.getInstantAppPackageName(uid) != null;
-        final int userId = UserHandle.getUserId(uid);
-        if (!mUserManagerInt.exists(userId)) {
-            return PackageManager.PERMISSION_DENIED;
+    private int checkUidPermissionInternal(@Nullable Package pkg, int uid,
+            @NonNull String permissionName) {
+        if (pkg != null) {
+            final int userId = UserHandle.getUserId(uid);
+            return checkPermissionInternal(pkg, false, permissionName, userId);
         }
 
-        if (pkg != null) {
-            if (pkg.mSharedUserId != null) {
-                if (isCallerInstantApp) {
-                    return PackageManager.PERMISSION_DENIED;
-                }
-            } else if (mPackageManagerInt.filterAppAccess(pkg, callingUid, callingUserId)) {
-                return PackageManager.PERMISSION_DENIED;
-            }
-            final PermissionsState permissionsState =
-                    ((PackageSetting) pkg.mExtras).getPermissionsState();
-            if (permissionsState.hasPermission(permName, userId)) {
-                if (isUidInstantApp) {
-                    if (mSettings.isPermissionInstant(permName)) {
-                        return PackageManager.PERMISSION_GRANTED;
-                    }
-                } else {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-            }
-            if (isImpliedPermissionGranted(permissionsState, permName, userId)) {
-                return PackageManager.PERMISSION_GRANTED;
-            }
-        } else {
-            ArraySet<String> perms = mSystemPermissions.get(uid);
-            if (perms != null) {
-                if (perms.contains(permName)) {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-                if (FULLER_PERMISSION_MAP.containsKey(permName)
-                        && perms.contains(FULLER_PERMISSION_MAP.get(permName))) {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-            }
+        if (checkSingleUidPermissionInternal(uid, permissionName)) {
+            return PackageManager.PERMISSION_GRANTED;
         }
+
+        final String fullerPermissionName = FULLER_PERMISSION_MAP.get(permissionName);
+        if (fullerPermissionName != null
+                && checkSingleUidPermissionInternal(uid, fullerPermissionName)) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+
         return PackageManager.PERMISSION_DENIED;
+    }
+
+    private boolean checkSingleUidPermissionInternal(int uid, @NonNull String permissionName) {
+        synchronized (mLock) {
+            ArraySet<String> permissions = mSystemPermissions.get(uid);
+            return permissions != null && permissions.contains(permissionName);
+        }
     }
 
     @Override
@@ -1962,18 +1972,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    /**
-     * Returns {@code true} if the permission can be implied from another granted permission.
-     * <p>Some permissions, such as ACCESS_FINE_LOCATION, imply other permissions,
-     * such as ACCESS_COURSE_LOCATION. If the caller holds an umbrella permission, give
-     * it access to any implied permissions.
-     */
-    private static boolean isImpliedPermissionGranted(PermissionsState permissionsState,
-            String permName, int userId) {
-        return FULLER_PERMISSION_MAP.containsKey(permName)
-                && permissionsState.hasPermission(FULLER_PERMISSION_MAP.get(permName), userId);
-    }
-
     private int adjustPermissionProtectionFlagsLocked(
             int protectionLevel, String packageName, int uid) {
         // Signature permission flags area always reported
@@ -2062,8 +2060,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         final int numPackages = allPackageNames.size();
                         for (int packageNum = 0; packageNum < numPackages; packageNum++) {
                             final String packageName = allPackageNames.get(packageNum);
-                            final int permissionState = checkPermissionInternal(
-                                    permissionName, packageName, UserHandle.USER_SYSTEM, userId);
+                            final int permissionState = checkPermission(permissionName, packageName,
+                                    userId);
                             if (permissionState == PackageManager.PERMISSION_GRANTED) {
                                 EventLog.writeEvent(0x534e4554, "72710897",
                                         newPackage.applicationInfo.uid,
