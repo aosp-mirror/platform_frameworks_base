@@ -16,7 +16,10 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Parcel;
@@ -26,6 +29,8 @@ import android.provider.Telephony.CellBroadcasts;
 import com.android.internal.telephony.CbGeoUtils;
 import com.android.internal.telephony.CbGeoUtils.Geometry;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -70,9 +75,11 @@ import java.util.List;
  *
  * @hide
  */
-public class SmsCbMessage implements Parcelable {
+@SystemApi
+public final class SmsCbMessage implements Parcelable {
 
-    protected static final String LOG_TAG = "SMSCB";
+    /** @hide */
+    public static final String LOG_TAG = "SMSCB";
 
     /** Cell wide geographical scope with immediate display (GSM/UMTS only). */
     public static final int GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE = 0;
@@ -81,16 +88,34 @@ public class SmsCbMessage implements Parcelable {
     public static final int GEOGRAPHICAL_SCOPE_PLMN_WIDE = 1;
 
     /** Location / service area wide geographical scope (GSM/UMTS only). */
-    public static final int GEOGRAPHICAL_SCOPE_LA_WIDE = 2;
+    public static final int GEOGRAPHICAL_SCOPE_LOCATION_AREA_WIDE = 2;
 
     /** Cell wide geographical scope (GSM/UMTS only). */
     public static final int GEOGRAPHICAL_SCOPE_CELL_WIDE = 3;
+
+    /** @hide */
+    @IntDef(prefix = { "GEOGRAPHICAL_SCOPE_" }, value = {
+            GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE,
+            GEOGRAPHICAL_SCOPE_PLMN_WIDE,
+            GEOGRAPHICAL_SCOPE_LOCATION_AREA_WIDE,
+            GEOGRAPHICAL_SCOPE_CELL_WIDE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GeographicalScope {}
 
     /** GSM or UMTS format cell broadcast. */
     public static final int MESSAGE_FORMAT_3GPP = 1;
 
     /** CDMA format cell broadcast. */
     public static final int MESSAGE_FORMAT_3GPP2 = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "MESSAGE_FORMAT_" }, value = {
+            MESSAGE_FORMAT_3GPP,
+            MESSAGE_FORMAT_3GPP2
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MessageFormat {}
 
     /** Normal message priority. */
     public static final int MESSAGE_PRIORITY_NORMAL = 0;
@@ -103,6 +128,16 @@ public class SmsCbMessage implements Parcelable {
 
     /** Emergency message priority. */
     public static final int MESSAGE_PRIORITY_EMERGENCY = 3;
+
+    /** @hide */
+    @IntDef(prefix = { "MESSAGE_PRIORITY_" }, value = {
+            MESSAGE_PRIORITY_NORMAL,
+            MESSAGE_PRIORITY_INTERACTIVE,
+            MESSAGE_PRIORITY_URGENT,
+            MESSAGE_PRIORITY_EMERGENCY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MessagePriority {}
 
     /** Format of this message (for interpretation of service category values). */
     private final int mMessageFormat;
@@ -123,6 +158,7 @@ public class SmsCbMessage implements Parcelable {
      * message is not binary 01, the Location Area is included for comparison. If the GS is
      * 00 or 11, the Cell ID is also included. LAC and Cell ID are -1 if not specified.
      */
+    @NonNull
     private final SmsCbLocation mLocation;
 
     /**
@@ -133,18 +169,22 @@ public class SmsCbMessage implements Parcelable {
     private final int mServiceCategory;
 
     /** Message language, as a two-character string, e.g. "en". */
+    @Nullable
     private final String mLanguage;
 
     /** Message body, as a String. */
+    @Nullable
     private final String mBody;
 
     /** Message priority (including emergency priority). */
     private final int mPriority;
 
     /** ETWS warning notification information (ETWS warnings only). */
+    @Nullable
     private final SmsCbEtwsInfo mEtwsWarningInfo;
 
     /** CMAS warning notification information (CMAS warnings only). */
+    @Nullable
     private final SmsCbCmasInfo mCmasWarningInfo;
 
     /** UNIX timestamp of when the message was received. */
@@ -157,8 +197,9 @@ public class SmsCbMessage implements Parcelable {
      * Create a new SmsCbMessage with the specified data.
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
-            SmsCbLocation location, int serviceCategory, String language, String body,
-            int priority, SmsCbEtwsInfo etwsWarningInfo, SmsCbCmasInfo cmasWarningInfo) {
+            @NonNull SmsCbLocation location, int serviceCategory, @Nullable String language,
+            @Nullable String body, int priority, @Nullable SmsCbEtwsInfo etwsWarningInfo,
+            @Nullable SmsCbCmasInfo cmasWarningInfo) {
 
         this(messageFormat, geographicalScope, serialNumber, location, serviceCategory, language,
                 body, priority, etwsWarningInfo, cmasWarningInfo, null /* geometries */,
@@ -167,6 +208,7 @@ public class SmsCbMessage implements Parcelable {
 
     /**
      * Create a new {@link SmsCbMessage} with the warning area coordinates information.
+     * @hide
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
             SmsCbLocation location, int serviceCategory, String language, String body,
@@ -186,8 +228,11 @@ public class SmsCbMessage implements Parcelable {
         mGeometries = geometries;
     }
 
-    /** Create a new SmsCbMessage object from a Parcel. */
-    public SmsCbMessage(Parcel in) {
+    /**
+     * Create a new SmsCbMessage object from a Parcel.
+     * @hide
+     */
+    public SmsCbMessage(@NonNull Parcel in) {
         mMessageFormat = in.readInt();
         mGeographicalScope = in.readInt();
         mSerialNumber = in.readInt();
@@ -252,8 +297,9 @@ public class SmsCbMessage implements Parcelable {
                 mGeometries != null ? CbGeoUtils.encodeGeometriesToString(mGeometries) : null);
     }
 
-    public static final Parcelable.Creator<SmsCbMessage> CREATOR
-            = new Parcelable.Creator<SmsCbMessage>() {
+    @NonNull
+    public static final Parcelable.Creator<SmsCbMessage> CREATOR =
+            new Parcelable.Creator<SmsCbMessage>() {
         @Override
         public SmsCbMessage createFromParcel(Parcel in) {
             return new SmsCbMessage(in);
@@ -270,7 +316,7 @@ public class SmsCbMessage implements Parcelable {
      *
      * @return Geographical scope
      */
-    public int getGeographicalScope() {
+    public @GeographicalScope int getGeographicalScope() {
         return mGeographicalScope;
     }
 
@@ -294,7 +340,8 @@ public class SmsCbMessage implements Parcelable {
      *
      * @return the geographical location code for duplicate message detection
      */
-    public SmsCbLocation getLocation() {
+    @NonNull
+    public android.telephony.SmsCbLocation getLocation() {
         return mLocation;
     }
 
@@ -315,6 +362,7 @@ public class SmsCbMessage implements Parcelable {
      *
      * @return Language code
      */
+    @Nullable
     public String getLanguageCode() {
         return mLanguage;
     }
@@ -324,6 +372,7 @@ public class SmsCbMessage implements Parcelable {
      *
      * @return Body, or null
      */
+    @Nullable
     public String getMessageBody() {
         return mBody;
     }
@@ -332,6 +381,7 @@ public class SmsCbMessage implements Parcelable {
      * Get the warning area coordinates information represent by polygons and circles.
      * @return a list of geometries, {@link Nullable} means there is no coordinate information
      * associated to this message.
+     * @hide
      */
     @Nullable
     public List<Geometry> getGeometries() {
@@ -350,7 +400,7 @@ public class SmsCbMessage implements Parcelable {
      * Get the message format ({@link #MESSAGE_FORMAT_3GPP} or {@link #MESSAGE_FORMAT_3GPP2}).
      * @return an integer representing 3GPP or 3GPP2 message format
      */
-    public int getMessageFormat() {
+    public @MessageFormat int getMessageFormat() {
         return mMessageFormat;
     }
 
@@ -360,7 +410,7 @@ public class SmsCbMessage implements Parcelable {
      * {@link #MESSAGE_PRIORITY_INTERACTIVE} or {@link #MESSAGE_PRIORITY_URGENT}.
      * @return an integer representing the message priority
      */
-    public int getMessagePriority() {
+    public @MessagePriority int getMessagePriority() {
         return mPriority;
     }
 
@@ -373,6 +423,7 @@ public class SmsCbMessage implements Parcelable {
      *
      * @return an SmsCbEtwsInfo object, or null if this is not an ETWS warning notification
      */
+    @Nullable
     public SmsCbEtwsInfo getEtwsWarningInfo() {
         return mEtwsWarningInfo;
     }
@@ -387,13 +438,14 @@ public class SmsCbMessage implements Parcelable {
      *
      * @return an SmsCbCmasInfo object, or null if this is not a CMAS warning notification
      */
+    @Nullable
     public SmsCbCmasInfo getCmasWarningInfo() {
         return mCmasWarningInfo;
     }
 
     /**
      * Return whether this message is an emergency (PWS) message type.
-     * @return true if the message is a public warning notification; false otherwise
+     * @return true if the message is an emergency notification; false otherwise
      */
     public boolean isEmergencyMessage() {
         return mPriority == MESSAGE_PRIORITY_EMERGENCY;
@@ -440,6 +492,7 @@ public class SmsCbMessage implements Parcelable {
     /**
      * @return the {@link ContentValues} instance that includes the cell broadcast data.
      */
+    @NonNull
     public ContentValues getContentValues() {
         ContentValues cv = new ContentValues(16);
         cv.put(CellBroadcasts.GEOGRAPHICAL_SCOPE, mGeographicalScope);
@@ -491,7 +544,8 @@ public class SmsCbMessage implements Parcelable {
      * @return a {@link SmsCbMessage} instance.
      * @throws IllegalArgumentException if one of the required columns is missing
      */
-    public static SmsCbMessage createFromCursor(Cursor cursor) {
+    @NonNull
+    public static SmsCbMessage createFromCursor(@NonNull Cursor cursor) {
         int geoScope = cursor.getInt(
                 cursor.getColumnIndexOrThrow(CellBroadcasts.GEOGRAPHICAL_SCOPE));
         int serialNum = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SERIAL_NUMBER));
