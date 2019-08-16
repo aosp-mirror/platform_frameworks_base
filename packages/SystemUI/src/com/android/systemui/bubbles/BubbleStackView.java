@@ -488,6 +488,12 @@ public class BubbleStackView extends FrameLayout {
     public void onOrientationChanged(int orientation) {
         mOrientation = orientation;
 
+        // Some resources change depending on orientation
+        Resources res = getContext().getResources();
+        mStatusBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+
         final RectF allowablePos = mStackAnimationController.getAllowableStackPositionRegion();
         mWasOnLeftBeforeRotation = mStackAnimationController.isStackOnLeftSide();
         mVerticalPosPercentBeforeRotation =
