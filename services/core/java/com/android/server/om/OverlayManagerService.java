@@ -262,7 +262,6 @@ public final class OverlayManagerService extends SystemService {
 
             initIfNeeded();
             onSwitchUser(UserHandle.USER_SYSTEM);
-            IdmapDaemon.stopIdmapService();
 
             publishBinderService(Context.OVERLAY_SERVICE, mService);
             publishLocalService(OverlayManagerService.class, this);
