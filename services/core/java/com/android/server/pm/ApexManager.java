@@ -38,6 +38,7 @@ import android.sysprop.ApexProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
@@ -263,7 +264,8 @@ abstract class ApexManager {
                     populateAllPackagesCacheIfNeeded();
                     mContext.unregisterReceiver(this);
                 }
-            }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+            }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED), /* broadcastPermission */ null,
+                    BackgroundThread.getHandler());
         }
 
         private void populateAllPackagesCacheIfNeeded() {
