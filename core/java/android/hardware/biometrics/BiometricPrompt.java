@@ -100,9 +100,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
-    public static final int DISMISSED_REASON_POSITIVE = 1;
+    public static final int DISMISSED_REASON_CONFIRMED = 1;
 
     /**
+     * Dialog is done animating away after user clicked on the button set via
+     * {@link BiometricPrompt.Builder#setNegativeButton(CharSequence, Executor,
+     * DialogInterface.OnClickListener)}.
      * @hide
      */
     public static final int DISMISSED_REASON_NEGATIVE = 2;
@@ -111,6 +114,25 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final int DISMISSED_REASON_USER_CANCEL = 3;
+
+    /**
+     * Authenticated, confirmation not required. Dialog animated away.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_CONFIRM_NOT_REQUIRED = 4;
+
+    /**
+     * Error message shown on SystemUI. When BiometricService receives this, the UI is already
+     * gone.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_ERROR = 5;
+
+    /**
+     * Dialog dismissal requested by BiometricService.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_SERVER_REQUESTED = 6;
 
     private static class ButtonInfo {
         Executor executor;
@@ -362,7 +384,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @Override
         public void onDialogDismissed(int reason) throws RemoteException {
             // Check the reason and invoke OnClickListener(s) if necessary
-            if (reason == DISMISSED_REASON_POSITIVE) {
+            if (reason == DISMISSED_REASON_CONFIRMED) {
                 mPositiveButtonInfo.executor.execute(() -> {
                     mPositiveButtonInfo.listener.onClick(null, DialogInterface.BUTTON_POSITIVE);
                 });

@@ -271,7 +271,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         default void onRotationProposal(int rotation, boolean isValid) { }
 
         default void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-                int type, boolean requireConfirmation, int userId) { }
+                int type, boolean requireConfirmation, int userId, String opPackageName) { }
         default void onBiometricAuthenticated(boolean authenticated, String failureReason) { }
         default void onBiometricHelp(String message) { }
         default void onBiometricError(String error) { }
@@ -741,7 +741,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
     @Override
     public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int type, boolean requireConfirmation, int userId) {
+            int type, boolean requireConfirmation, int userId, String opPackageName) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
@@ -749,6 +749,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
             args.argi1 = type;
             args.arg3 = requireConfirmation;
             args.argi2 = userId;
+            args.arg4 = opPackageName;
             mHandler.obtainMessage(MSG_BIOMETRIC_SHOW, args)
                     .sendToTarget();
         }
@@ -1036,7 +1037,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                                 (IBiometricServiceReceiverInternal) someArgs.arg2,
                                 someArgs.argi1 /* type */,
                                 (boolean) someArgs.arg3 /* requireConfirmation */,
-                                someArgs.argi2 /* userId */);
+                                someArgs.argi2 /* userId */,
+                                (String) someArgs.arg4 /* opPackageName */);
                     }
                     someArgs.recycle();
                     break;

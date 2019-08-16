@@ -420,7 +420,7 @@ public abstract class BiometricServiceBase extends SystemService
             throw new UnsupportedOperationException("Stub!");
         }
 
-        default void onAuthenticationFailedInternal(int cookie, boolean requireConfirmation)
+        default void onAuthenticationFailedInternal()
                 throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
@@ -457,10 +457,10 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         @Override
-        public void onAuthenticationFailedInternal(int cookie, boolean requireConfirmation)
+        public void onAuthenticationFailedInternal()
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationFailed(cookie, requireConfirmation);
+                getWrapperReceiver().onAuthenticationFailed();
             }
         }
     }

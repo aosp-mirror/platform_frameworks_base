@@ -27,8 +27,8 @@ oneway interface IBiometricServiceReceiverInternal {
     // Notify BiometricService that authentication was successful. If user confirmation is required,
     // the auth token must be submitted into KeyStore.
     void onAuthenticationSucceeded(boolean requireConfirmation, in byte[] token);
-    // Notify BiometricService that an error has occurred.
-    void onAuthenticationFailed(int cookie, boolean requireConfirmation);
+    // Notify BiometricService authentication was rejected.
+    void onAuthenticationFailed();
     // Notify BiometricService than an error has occured. Forward to the correct receiver depending
     // on the cookie.
     void onError(int cookie, int error, String message);

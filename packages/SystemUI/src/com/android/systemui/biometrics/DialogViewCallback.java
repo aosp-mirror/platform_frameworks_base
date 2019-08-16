@@ -16,36 +16,38 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.IntDef;
+
 /**
  * Callback interface for dialog views. These should be implemented by the controller (e.g.
  * FingerprintDialogImpl) and passed into their views (e.g. FingerprintDialogView).
  */
 public interface DialogViewCallback {
-    /**
-     * Invoked when the user cancels authentication by tapping outside the prompt, etc. The dialog
-     * should be dismissed.
-     */
-    void onUserCanceled();
+
+    int DISMISSED_USER_CANCELED = 1;
+    int DISMISSED_BUTTON_NEGATIVE = 2;
+    int DISMISSED_BUTTON_POSITIVE = 3;
+
+    int DISMISSED_AUTHENTICATED = 4;
+    int DISMISSED_ERROR = 5;
+    int DISMISSED_BY_SYSTEM_SERVER = 6;
+
+    @IntDef({DISMISSED_USER_CANCELED,
+            DISMISSED_BUTTON_NEGATIVE,
+            DISMISSED_BUTTON_POSITIVE,
+            DISMISSED_AUTHENTICATED,
+            DISMISSED_ERROR,
+            DISMISSED_BY_SYSTEM_SERVER})
+    @interface DismissedReason {}
 
     /**
-     * Invoked when an error is shown. The dialog should be dismissed after a set amount of time.
+     * Invoked when the dialog is dismissed
+     * @param reason
      */
-    void onErrorShown();
+    void onDismissed(@DismissedReason int reason);
 
     /**
-     * Invoked when the negative button is pressed. The client should be notified and the dialog
-     * should be dismissed.
-     */
-    void onNegativePressed();
-
-    /**
-     * Invoked when the positive button is pressed. The client should be notified and the dialog
-     * should be dismissed.
-     */
-    void onPositivePressed();
-
-    /**
-     * Invoked when the "try again" button is pressed.
+     * Invoked when the "try again" button is clicked
      */
     void onTryAgainPressed();
 }

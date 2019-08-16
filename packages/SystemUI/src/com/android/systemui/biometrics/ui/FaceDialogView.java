@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.biometrics;
+package com.android.systemui.biometrics.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -33,7 +33,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.DialogViewCallback;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
@@ -52,7 +54,8 @@ public class FaceDialogView extends BiometricDialogView {
     private static final int TEXT_ANIMATE_DISTANCE = 32; // dp
 
     private static final int SIZE_UNKNOWN = 0;
-    private static final int SIZE_SMALL = 1;
+    @VisibleForTesting
+    static final int SIZE_SMALL = 1;
     private static final int SIZE_GROWING = 2;
     private static final int SIZE_BIG = 3;
 
@@ -152,13 +155,13 @@ public class FaceDialogView extends BiometricDialogView {
         announceAccessibilityEvent();
     };
 
-    public FaceDialogView(Context context,
-            DialogViewCallback callback) {
-        super(context, callback);
+    protected FaceDialogView(Context context, DialogViewCallback callback, Injector injector) {
+        super(context, callback, injector);
         mIconController = new IconController();
     }
 
-    private void updateSize(int newSize) {
+    @VisibleForTesting
+    void updateSize(int newSize) {
         final float padding = dpToPixels(IMPLICIT_Y_PADDING);
         final float iconSmallPositionY = mDialog.getHeight() - mBiometricIcon.getHeight() - padding;
 
@@ -339,8 +342,8 @@ public class FaceDialogView extends BiometricDialogView {
     }
 
     @Override
-    public void onErrorReceived(String error) {
-        super.onErrorReceived(error);
+    public void onError(String error) {
+        super.onError(error);
         // All error messages will cause the dialog to go from small -> big. Error messages
         // are messages such as lockout, auth failed, etc.
         if (mSize == SIZE_SMALL) {
