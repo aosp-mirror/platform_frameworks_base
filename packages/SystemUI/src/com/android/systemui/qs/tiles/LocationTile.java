@@ -39,6 +39,11 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_location);
 
+    private static final int BATTERY_SAVING = Settings.Secure.LOCATION_MODE_BATTERY_SAVING;
+    private static final int SENSORS_ONLY = Settings.Secure.LOCATION_MODE_SENSORS_ONLY;
+    private static final int HIGH_ACCURACY = Settings.Secure.LOCATION_MODE_HIGH_ACCURACY;
+    private static final int OFF = Settings.Secure.LOCATION_MODE_OFF;
+
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;
     private final ActivityStarter mActivityStarter;
@@ -75,12 +80,28 @@ public class LocationTile extends QSTileImpl<BooleanState> {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 final boolean wasEnabled = mState.value;
                 mHost.openPanels();
-                mController.setLocationEnabled(!wasEnabled);
+                switchMode();
             });
             return;
         }
-        final boolean wasEnabled = mState.value;
-        mController.setLocationEnabled(!wasEnabled);
+        switchMode();
+    }
+
+    private void switchMode() {
+        int currentMode = mController.getCurrentMode();
+        if (currentMode == BATTERY_SAVING) {
+            //from battery saving to off
+            mController.setLocationEnabled(OFF);
+        } else if (currentMode == SENSORS_ONLY) {
+            //from sensor only to high precision
+            mController.setLocationEnabled(HIGH_ACCURACY);
+        } else if (currentMode == HIGH_ACCURACY) {
+            //from high precision to battery saving
+            mController.setLocationEnabled(BATTERY_SAVING);
+        } else {
+            //from off to sensor only
+            mController.setLocationEnabled(SENSORS_ONLY);
+        }
     }
 
     @Override
@@ -90,31 +111,49 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
         final boolean locationEnabled =  mController.isLocationEnabled();
-
         // Work around for bug 15916487: don't show location tile on top of lock screen. After the
         // bug is fixed, this should be reverted to only hiding it on secure lock screens:
         // state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
-        state.value = locationEnabled;
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
         if (state.disabledByPolicy == false) {
             checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_LOCATION);
         }
-        state.icon = mIcon;
-        state.slash.isSlashed = !state.value;
-        if (locationEnabled) {
-            state.label = mContext.getString(R.string.quick_settings_location_label);
-            state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_location_on);
-        } else {
-            state.label = mContext.getString(R.string.quick_settings_location_label);
-            state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_location_off);
+        int currentMode = mController.getCurrentMode();
+        switch (currentMode) {
+            case BATTERY_SAVING:
+                state.value = true;
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_battery_saving);
+                state.label = mContext.getString(R.string.quick_settings_location_label);
+                state.secondaryLabel = mContext.getString(R.string.quick_settings_location_secondary_battery_saving);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_location_battery_saving);
+                state.state = Tile.STATE_ACTIVE;
+                break;
+            case SENSORS_ONLY:
+                state.value = true;
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_gps_only);
+                state.label = mContext.getString(R.string.quick_settings_location_label);
+                state.secondaryLabel = mContext.getString(R.string.quick_settings_location_secondary_gps_only);
+                state.icon = mIcon;
+                state.state = Tile.STATE_ACTIVE;
+                break;
+            case HIGH_ACCURACY:
+                state.value = true;
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_high_accuracy);
+                state.label = mContext.getString(R.string.quick_settings_location_label);
+                state.secondaryLabel = mContext.getString(R.string.quick_settings_location_secondary_high_accuracy);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_location_high_accuracy);
+                state.state = Tile.STATE_ACTIVE;
+                break;
+            case OFF:
+                state.value = false;
+                state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_off);
+                state.label = mContext.getString(R.string.quick_settings_location_label);
+                state.secondaryLabel = mContext.getString(R.string.quick_settings_secondary_location_off);
+                state.icon = mIcon;
+                state.state = Tile.STATE_INACTIVE;
+                break;
         }
-        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
