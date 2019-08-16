@@ -66,6 +66,7 @@ class UiAutomationManager {
                     mUiAutomationServiceOwner.unlinkToDeath(this, 0);
                     mUiAutomationServiceOwner = null;
                     destroyUiAutomationService();
+                    Slog.v(LOG_TAG, "UiAutomation service owner died");
                 }
             };
 

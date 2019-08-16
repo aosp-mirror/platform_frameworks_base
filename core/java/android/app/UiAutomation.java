@@ -242,7 +242,7 @@ public final class UiAutomation {
             mUiAutomationConnection.connect(mClient, flags);
             mFlags = flags;
         } catch (RemoteException re) {
-            throw new RuntimeException("Error while connecting UiAutomation", re);
+            throw new RuntimeException("Error while connecting " + this, re);
         }
 
         synchronized (mLock) {
@@ -255,7 +255,7 @@ public final class UiAutomation {
                     final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                     final long remainingTimeMillis = CONNECT_TIMEOUT_MILLIS - elapsedTimeMillis;
                     if (remainingTimeMillis <= 0) {
-                        throw new RuntimeException("Error while connecting UiAutomation");
+                        throw new RuntimeException("Error while connecting " + this);
                     }
                     try {
                         mLock.wait(remainingTimeMillis);
@@ -290,7 +290,7 @@ public final class UiAutomation {
         synchronized (mLock) {
             if (mIsConnecting) {
                 throw new IllegalStateException(
-                        "Cannot call disconnect() while connecting!");
+                        "Cannot call disconnect() while connecting " + this);
             }
             throwIfNotConnectedLocked();
             mConnectionId = CONNECTION_ID_UNDEFINED;
@@ -299,7 +299,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.disconnect();
         } catch (RemoteException re) {
-            throw new RuntimeException("Error while disconnecting UiAutomation", re);
+            throw new RuntimeException("Error while disconnecting " + this, re);
         } finally {
             mRemoteCallbackThread.quit();
             mRemoteCallbackThread = null;
@@ -1184,19 +1184,29 @@ public final class UiAutomation {
         return result;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("UiAutomation@").append(Integer.toHexString(hashCode()));
+        stringBuilder.append("[id=").append(mConnectionId);
+        stringBuilder.append(", flags=").append(mFlags);
+        stringBuilder.append("]");
+        return stringBuilder.toString();
+    }
+
     private boolean isConnectedLocked() {
         return mConnectionId != CONNECTION_ID_UNDEFINED;
     }
 
     private void throwIfConnectedLocked() {
         if (mConnectionId != CONNECTION_ID_UNDEFINED) {
-            throw new IllegalStateException("UiAutomation not connected!");
+            throw new IllegalStateException("UiAutomation not connected, " + this);
         }
     }
 
     private void throwIfNotConnectedLocked() {
         if (!isConnectedLocked()) {
-            throw new IllegalStateException("UiAutomation not connected!");
+            throw new IllegalStateException("UiAutomation not connected, " + this);
         }
     }
 
@@ -1219,6 +1229,9 @@ public final class UiAutomation {
                     synchronized (mLock) {
                         mConnectionId = connectionId;
                         mLock.notifyAll();
+                    }
+                    if (Build.IS_DEBUGGABLE) {
+                        Log.v(LOG_TAG, "Init " + UiAutomation.this);
                     }
                 }
 
