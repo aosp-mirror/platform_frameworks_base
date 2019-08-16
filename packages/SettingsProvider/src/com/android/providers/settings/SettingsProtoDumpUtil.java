@@ -1607,9 +1607,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_P2P_DEVICE_NAME,
                 GlobalSettingsProto.Wifi.P2P_DEVICE_NAME);
         dumpSetting(s, p,
-                Settings.Global.WIFI_REENABLE_DELAY_MS,
-                GlobalSettingsProto.Wifi.REENABLE_DELAY_MS);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS,
                 GlobalSettingsProto.Wifi.EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS);
         dumpSetting(s, p,
