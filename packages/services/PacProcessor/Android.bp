@@ -21,3 +21,9 @@ android_app {
     certificate: "platform",
     jni_libs: ["libjni_pacprocessor"],
 }
+
+filegroup {
+    name: "PacProcessor-aidl-sources",
+    srcs: ["src/**/*.aidl"],
+    path: "src",
+}
