@@ -133,14 +133,24 @@ Asset::Asset(void)
  */
 /*static*/ Asset* Asset::createFromFile(const char* fileName, AccessMode mode)
 {
+    return createFromFd(open(fileName, O_RDONLY | O_BINARY), fileName, mode);
+}
+
+/*
+ * Create a new Asset from a file on disk.  There is a fair chance that
+ * the file doesn't actually exist.
+ *
+ * We can use "mode" to decide how we want to go about it.
+ */
+/*static*/ Asset* Asset::createFromFd(const int fd, const char* fileName, AccessMode mode)
+{
+    if (fd < 0) {
+        return NULL;
+    }
+
     _FileAsset* pAsset;
     status_t result;
     off64_t length;
-    int fd;
-
-    fd = open(fileName, O_RDONLY | O_BINARY);
-    if (fd < 0)
-        return NULL;
 
     /*
      * Under Linux, the lseek fails if we actually opened a directory.  To

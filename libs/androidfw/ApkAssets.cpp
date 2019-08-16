@@ -42,12 +42,16 @@ static const std::string kResourcesArsc("resources.arsc");
 
 ApkAssets::ApkAssets(ZipArchiveHandle unmanaged_handle,
                      const std::string& path,
-                     time_t last_mod_time)
-    : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path), last_mod_time_(last_mod_time) {
+                     time_t last_mod_time,
+                     bool for_loader)
+    : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path), last_mod_time_(last_mod_time),
+      for_loader(for_loader) {
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system) {
-  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, false /*load_as_shared_library*/);
+std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system,
+                                                 bool for_loader) {
+  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, false /*load_as_shared_library*/,
+                  for_loader);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadAsSharedLibrary(const std::string& path,
@@ -76,9 +80,21 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
                                                        const std::string& friendly_name,
-                                                       bool system, bool force_shared_lib) {
+                                                       bool system, bool force_shared_lib,
+                                                       bool for_loader) {
   return LoadImpl(std::move(fd), friendly_name, nullptr /*idmap_asset*/, nullptr /*loaded_idmap*/,
-                  system, force_shared_lib);
+                  system, force_shared_lib, for_loader);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadArsc(const std::string& path,
+                                                     bool for_loader) {
+  return LoadArscImpl({} /*fd*/, path, for_loader);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadArsc(unique_fd fd,
+                                                     const std::string& friendly_name,
+                                                     bool for_loader) {
+  return LoadArscImpl(std::move(fd), friendly_name, for_loader);
 }
 
 std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
@@ -104,7 +120,8 @@ std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
     unique_fd fd, const std::string& path, std::unique_ptr<Asset> idmap_asset,
-    std::unique_ptr<const LoadedIdmap> loaded_idmap, bool system, bool load_as_shared_library) {
+    std::unique_ptr<const LoadedIdmap> loaded_idmap, bool system, bool load_as_shared_library,
+    bool for_loader) {
   ::ZipArchiveHandle unmanaged_handle;
   int32_t result;
   if (fd >= 0) {
@@ -123,7 +140,8 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   time_t last_mod_time = getFileModDate(path.c_str());
 
   // Wrap the handle in a unique_ptr so it gets automatically closed.
-  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(unmanaged_handle, path, last_mod_time));
+  std::unique_ptr<ApkAssets>
+      loaded_apk(new ApkAssets(unmanaged_handle, path, last_mod_time, for_loader));
 
   // Find the resource table.
   ::ZipEntry entry;
@@ -152,7 +170,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
       reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
       loaded_apk->resources_asset_->getLength());
   loaded_apk->loaded_arsc_ =
-      LoadedArsc::Load(data, loaded_idmap.get(), system, load_as_shared_library);
+      LoadedArsc::Load(data, loaded_idmap.get(), system, load_as_shared_library, for_loader);
   if (loaded_apk->loaded_arsc_ == nullptr) {
     LOG(ERROR) << "Failed to load '" << kResourcesArsc << "' in APK '" << path << "'.";
     return {};
@@ -162,8 +180,53 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   return std::move(loaded_apk);
 }
 
+std::unique_ptr<const ApkAssets> ApkAssets::LoadArscImpl(unique_fd fd,
+                                                         const std::string& path,
+                                                         bool for_loader) {
+  std::unique_ptr<Asset> resources_asset;
+
+  if (fd >= 0) {
+    resources_asset = std::unique_ptr<Asset>(Asset::createFromFd(fd.release(), nullptr,
+        Asset::AccessMode::ACCESS_BUFFER));
+  } else {
+    resources_asset = CreateAssetFromFile(path);
+  }
+
+  if (resources_asset == nullptr) {
+    LOG(ERROR) << "Failed to open ARSC '" << path;
+    return {};
+  }
+
+  time_t last_mod_time = getFileModDate(path.c_str());
+
+  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(nullptr, path, last_mod_time, for_loader));
+  loaded_apk->resources_asset_ = std::move(resources_asset);
+
+  const StringPiece data(
+      reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
+      loaded_apk->resources_asset_->getLength());
+  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, nullptr, false, false, for_loader);
+  if (loaded_apk->loaded_arsc_ == nullptr) {
+    LOG(ERROR) << "Failed to load '" << kResourcesArsc << path;
+    return {};
+  }
+
+  // Need to force a move for mingw32.
+  return std::move(loaded_apk);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadEmpty(bool for_loader) {
+  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(nullptr, "", -1, for_loader));
+  loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
+  // Need to force a move for mingw32.
+  return std::move(loaded_apk);
+}
+
 std::unique_ptr<Asset> ApkAssets::Open(const std::string& path, Asset::AccessMode mode) const {
-  CHECK(zip_handle_ != nullptr);
+  // If this is a resource loader from an .arsc, there will be no zip handle
+  if (zip_handle_ == nullptr) {
+    return {};
+  }
 
   ::ZipEntry entry;
   int32_t result = ::FindEntry(zip_handle_.get(), path, &entry);
@@ -205,7 +268,10 @@ std::unique_ptr<Asset> ApkAssets::Open(const std::string& path, Asset::AccessMod
 
 bool ApkAssets::ForEachFile(const std::string& root_path,
                             const std::function<void(const StringPiece&, FileType)>& f) const {
-  CHECK(zip_handle_ != nullptr);
+  // If this is a resource loader from an .arsc, there will be no zip handle
+  if (zip_handle_ == nullptr) {
+    return false;
+  }
 
   std::string root_path_full = root_path;
   if (root_path_full.back() != '/') {
@@ -252,6 +318,11 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
 }
 
 bool ApkAssets::IsUpToDate() const {
+  // Loaders are invalidated by the app, not the system, so assume up to date
+  if (for_loader) {
+    return true;
+  }
+
   return last_mod_time_ == getFileModDate(path_.c_str());
 }
 

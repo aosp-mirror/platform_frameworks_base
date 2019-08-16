@@ -121,6 +121,11 @@ public:
      */
     const char* getAssetSource(void) const { return mAssetSource.string(); }
 
+    /*
+     * Create the asset from a file descriptor.
+     */
+    static Asset* createFromFd(const int fd, const char* fileName, AccessMode mode);
+
 protected:
     /*
      * Adds this Asset to the global Asset list for debugging and

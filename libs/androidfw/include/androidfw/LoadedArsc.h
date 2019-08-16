@@ -137,7 +137,8 @@ class LoadedPackage {
 
   static std::unique_ptr<const LoadedPackage> Load(const Chunk& chunk,
                                                    const LoadedIdmap* loaded_idmap, bool system,
-                                                   bool load_as_shared_library);
+                                                   bool load_as_shared_library,
+                                                   bool load_as_custom_loader);
 
   ~LoadedPackage();
 
@@ -185,6 +186,11 @@ class LoadedPackage {
   // Returns true if this package is from an overlay ApkAssets.
   inline bool IsOverlay() const {
     return overlay_;
+  }
+
+  // Returns true if this package is a custom loader and should behave like an overlay
+  inline bool IsCustomLoader() const {
+    return custom_loader_;
   }
 
   // Returns the map of package name to package ID used in this LoadedPackage. At runtime, a
@@ -260,6 +266,7 @@ class LoadedPackage {
   bool dynamic_ = false;
   bool system_ = false;
   bool overlay_ = false;
+  bool custom_loader_ = false;
   bool defines_overlayable_ = false;
 
   ByteBucketArray<TypeSpecPtr> type_specs_;
@@ -282,7 +289,8 @@ class LoadedArsc {
   static std::unique_ptr<const LoadedArsc> Load(const StringPiece& data,
                                                 const LoadedIdmap* loaded_idmap = nullptr,
                                                 bool system = false,
-                                                bool load_as_shared_library = false);
+                                                bool load_as_shared_library = false,
+                                                bool for_loader = false);
 
   // Create an empty LoadedArsc. This is used when an APK has no resources.arsc.
   static std::unique_ptr<const LoadedArsc> CreateEmpty();
@@ -311,7 +319,19 @@ class LoadedArsc {
   DISALLOW_COPY_AND_ASSIGN(LoadedArsc);
 
   LoadedArsc() = default;
-  bool LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap, bool load_as_shared_library);
+  bool LoadTable(
+      const Chunk& chunk,
+      const LoadedIdmap* loaded_idmap,
+      bool load_as_shared_library,
+      bool for_loader
+  );
+
+  static std::unique_ptr<const LoadedArsc> LoadData(std::unique_ptr<LoadedArsc>& loaded_arsc,
+                                                    const char* data,
+                                                    size_t length,
+                                                    const LoadedIdmap* loaded_idmap = nullptr,
+                                                    bool load_as_shared_library = false,
+                                                    bool for_loader = false);
 
   ResStringPool global_string_pool_;
   std::vector<std::unique_ptr<const LoadedPackage>> packages_;

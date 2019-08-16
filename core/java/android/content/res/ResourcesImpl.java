@@ -57,6 +57,8 @@ import android.view.DisplayAdjustments;
 
 import com.android.internal.util.GrowingArrayUtils;
 
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -376,7 +378,7 @@ public class ResourcesImpl {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ResourcesImpl#updateConfiguration");
         try {
             synchronized (mAccessLock) {
-                if (false) {
+                if (DEBUG_CONFIG) {
                     Slog.i(TAG, "**** Updating config of " + this + ": old config is "
                             + mConfiguration + " old compat is "
                             + mDisplayAdjustments.getCompatibilityInfo());
@@ -569,6 +571,20 @@ public class ResourcesImpl {
                 }
             }
             Arrays.fill(cachedXmlBlocks, null);
+        }
+    }
+
+    /**
+     * Wipe all caches that might be read and return an outdated object when resolving a resource.
+     */
+    public void clearAllCaches() {
+        synchronized (mAccessLock) {
+            mDrawableCache.clear();
+            mColorDrawableCache.clear();
+            mComplexColorCache.clear();
+            mAnimatorCache.clear();
+            mStateListAnimatorCache.clear();
+            flushLayoutCache();
         }
     }
 
@@ -802,6 +818,27 @@ public class ResourcesImpl {
     }
 
     /**
+     * Loads a Drawable from an encoded image stream, or null.
+     *
+     * This call will handle closing the {@link InputStream}.
+     */
+    @Nullable
+    private Drawable decodeImageDrawable(@NonNull InputStream inputStream,
+            @NonNull Resources wrapper, @NonNull TypedValue value) {
+        ImageDecoder.Source src = ImageDecoder.createSource(wrapper, inputStream, value.density);
+        try {
+            return ImageDecoder.decodeDrawable(src, (decoder, info, s) ->
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE));
+        } catch (IOException ignored) {
+            // This is okay. This may be something that ImageDecoder does not
+            // support, like SVG.
+            return null;
+        } finally {
+            IoUtils.closeQuietly(inputStream);
+        }
+    }
+
+    /**
      * Loads a drawable from XML or resources stream.
      *
      * @return Drawable, or null if Drawable cannot be decoded.
@@ -865,8 +902,12 @@ public class ResourcesImpl {
                 } else {
                     final InputStream is = mAssets.openNonAsset(
                             value.assetCookie, file, AssetManager.ACCESS_STREAMING);
-                    AssetInputStream ais = (AssetInputStream) is;
-                    dr = decodeImageDrawable(ais, wrapper, value);
+                    if (is instanceof AssetInputStream) {
+                        AssetInputStream ais = (AssetInputStream) is;
+                        dr = decodeImageDrawable(ais, wrapper, value);
+                    } else {
+                        dr = decodeImageDrawable(is, wrapper, value);
+                    }
                 }
             } finally {
                 stack.pop();
