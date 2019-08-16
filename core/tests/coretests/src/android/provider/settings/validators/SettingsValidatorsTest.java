@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.provider;
+package android.provider.settings.validators;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
-import android.provider.SettingsValidators.Validator;
+import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -138,7 +138,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testDiscreteValueValidator() {
         String[] beerTypes = new String[]{"Ale", "American IPA", "Stout"};
-        Validator v = new SettingsValidators.DiscreteValueValidator(beerTypes);
+        Validator v = new DiscreteValueValidator(beerTypes);
         assertTrue(v.validate("Ale"));
         assertTrue(v.validate("American IPA"));
         assertTrue(v.validate("Stout"));
@@ -148,14 +148,14 @@ public class SettingsValidatorsTest {
     @Test
     public void testDiscreteValueValidator_onNullValue_returnsFalse() {
         String[] discreteTypes = new String[]{"Type1", "Type2"};
-        Validator v = new SettingsValidators.DiscreteValueValidator(discreteTypes);
+        Validator v = new DiscreteValueValidator(discreteTypes);
 
         assertFalse(v.validate(null));
     }
 
     @Test
     public void testInclusiveIntegerRangeValidator() {
-        Validator v = new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
+        Validator v = new InclusiveIntegerRangeValidator(0, 5);
         assertTrue(v.validate("0"));
         assertTrue(v.validate("2"));
         assertTrue(v.validate("5"));
@@ -165,14 +165,14 @@ public class SettingsValidatorsTest {
 
     @Test
     public void testInclusiveIntegerRangeValidator_onNullValue_returnsFalse() {
-        Validator v = new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
+        Validator v = new InclusiveIntegerRangeValidator(0, 5);
 
         assertFalse(v.validate(null));
     }
 
     @Test
     public void testInclusiveFloatRangeValidator() {
-        Validator v = new SettingsValidators.InclusiveFloatRangeValidator(0.0f, 5.0f);
+        Validator v = new InclusiveFloatRangeValidator(0.0f, 5.0f);
         assertTrue(v.validate("0.0"));
         assertTrue(v.validate("2.0"));
         assertTrue(v.validate("5.0"));
@@ -182,14 +182,14 @@ public class SettingsValidatorsTest {
 
     @Test
     public void testInclusiveFloatRangeValidator_onNullValue_returnsFalse() {
-        Validator v = new SettingsValidators.InclusiveFloatRangeValidator(0.0f, 5.0f);
+        Validator v = new InclusiveFloatRangeValidator(0.0f, 5.0f);
 
         assertFalse(v.validate(null));
     }
 
     @Test
     public void testComponentNameListValidator() {
-        Validator v = new SettingsValidators.ComponentNameListValidator(",");
+        Validator v = new ComponentNameListValidator(",");
         assertTrue(v.validate("com.android.localtransport/.LocalTransport,"
                 + "com.google.android.gms/.backup.migrate.service.D2dTransport"));
         assertFalse(v.validate("com.google.5android,android"));
@@ -197,21 +197,21 @@ public class SettingsValidatorsTest {
 
     @Test
     public void testComponentNameListValidator_onNullValue_returnsFalse() {
-        Validator v = new SettingsValidators.ComponentNameListValidator(",");
+        Validator v = new ComponentNameListValidator(",");
 
         assertFalse(v.validate(null));
     }
 
     @Test
     public void testPackageNameListValidator() {
-        Validator v = new SettingsValidators.PackageNameListValidator(",");
+        Validator v = new PackageNameListValidator(",");
         assertTrue(v.validate("com.android.localtransport.LocalTransport,com.google.android.gms"));
         assertFalse(v.validate("5com.android.internal.backup.LocalTransport,android"));
     }
 
     @Test
     public void testPackageNameListValidator_onNullValue_returnsFalse() {
-        Validator v = new SettingsValidators.PackageNameListValidator(",");
+        Validator v = new PackageNameListValidator(",");
 
         assertFalse(v.validate(null));
     }
@@ -256,51 +256,41 @@ public class SettingsValidatorsTest {
 
     @Test
     public void testTTSListValidator_withValidInput_returnsTrue() {
-        Validator v = new SettingsValidators.TTSListValidator();
-
-        assertTrue(v.validate("com.foo.ttsengine:en-US,com.bar.ttsengine:es_ES"));
+        assertTrue(
+                SettingsValidators.TTS_LIST_VALIDATOR.validate(
+                        "com.foo.ttsengine:en-US,com.bar.ttsengine:es_ES"));
     }
 
     @Test
     public void testTTSListValidator_withInvalidInput_returnsFalse() {
-        Validator v = new SettingsValidators.TTSListValidator();
-
-        assertFalse(v.validate("com.foo.ttsengine:eng-USA,INVALID"));
+        assertFalse(
+                SettingsValidators.TTS_LIST_VALIDATOR.validate(
+                        "com.foo.ttsengine:eng-USA,INVALID"));
     }
 
     @Test
     public void testTTSListValidator_withEmptyInput_returnsFalse() {
-        Validator v = new SettingsValidators.TTSListValidator();
-
-        assertFalse(v.validate(""));
+        assertFalse(SettingsValidators.TTS_LIST_VALIDATOR.validate(""));
     }
 
     @Test
     public void testTTSListValidator_withNullInput_returnsFalse() {
-        Validator v = new SettingsValidators.TTSListValidator();
-
-        assertFalse(v.validate(null));
+        assertFalse(SettingsValidators.TTS_LIST_VALIDATOR.validate(null));
     }
 
     @Test
     public void testTileListValidator_withValidInput_returnsTrue() {
-        Validator v = new SettingsValidators.TileListValidator();
-
-        assertTrue(v.validate("1,2,3,4"));
+        assertTrue(SettingsValidators.TILE_LIST_VALIDATOR.validate("1,2,3,4"));
     }
 
     @Test
     public void testTileListValidator_withMissingValue_returnsFalse() {
-        Validator v = new SettingsValidators.TileListValidator();
-
-        assertFalse(v.validate("1,,3"));
+        assertFalse(SettingsValidators.TILE_LIST_VALIDATOR.validate("1,,3"));
     }
 
     @Test
     public void testTileListValidator_withNullInput_returnsFalse() {
-        Validator v = new SettingsValidators.TileListValidator();
-
-        assertFalse(v.validate(null));
+        assertFalse(SettingsValidators.TILE_LIST_VALIDATOR.validate(null));
     }
 
     @Test
