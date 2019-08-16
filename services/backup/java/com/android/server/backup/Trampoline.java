@@ -90,6 +90,9 @@ import java.util.Set;
  * UserHandle#USER_SYSTEM} and disables backup for all users.
  */
 public class Trampoline extends IBackupManager.Stub {
+    @VisibleForTesting
+    static final String DUMP_RUNNING_USERS_MESSAGE = "Backup Manager is running for users:";
+
     /**
      * Name of file that disables the backup service. If this file exists, then backup is disabled
      * for all users.
@@ -1442,12 +1445,33 @@ public class Trampoline extends IBackupManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) {
+            return;
+        }
         int userId = binderGetCallingUserId();
-        if (isUserReadyForBackup(userId)) {
-            mService.dump(fd, pw, args);
-        } else {
+        if (!isUserReadyForBackup(userId)) {
             pw.println("Inactive");
+            return;
+        }
+
+        if (args != null) {
+            for (String arg : args) {
+                if ("users".equals(arg.toLowerCase())) {
+                    pw.print(DUMP_RUNNING_USERS_MESSAGE);
+                    for (int i = 0; i < mUserServices.size(); i++) {
+                        pw.print(" " + mUserServices.keyAt(i));
+                    }
+                    pw.println();
+                    return;
+                }
+            }
+        }
+
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(UserHandle.USER_SYSTEM, "dump()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.dump(fd, pw, args);
         }
     }
 
