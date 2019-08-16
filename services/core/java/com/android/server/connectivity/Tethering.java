@@ -1314,11 +1314,15 @@ public class Tethering extends BaseNetworkObserver {
             mOffload.excludeDownstreamInterface(who.interfaceName());
             mForwardedDownstreams.remove(who);
 
-            // If this is a Wi-Fi interface, tell WifiManager of any errors.
+            // If this is a Wi-Fi interface, tell WifiManager of any errors
+            // or the inactive serving state.
             if (who.interfaceType() == TETHERING_WIFI) {
                 if (who.lastError() != TETHER_ERROR_NO_ERROR) {
                     getWifiManager().updateInterfaceIpState(
                             who.interfaceName(), IFACE_IP_MODE_CONFIGURATION_ERROR);
+                } else {
+                    getWifiManager().updateInterfaceIpState(
+                            who.interfaceName(), IFACE_IP_MODE_UNSPECIFIED);
                 }
             }
         }
