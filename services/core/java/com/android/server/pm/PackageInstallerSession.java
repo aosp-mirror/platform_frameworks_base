@@ -2337,6 +2337,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mInstallerPackageName", mInstallerPackageName);
         pw.printPair("mInstallerUid", mInstallerUid);
         pw.printPair("createdMillis", createdMillis);
+        pw.printPair("updatedMillis", updatedMillis);
         pw.printPair("stageDir", stageDir);
         pw.printPair("stageCid", stageCid);
         pw.println();
@@ -2356,6 +2357,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mFinalMessage", mFinalMessage);
         pw.printPair("params.isMultiPackage", params.isMultiPackage);
         pw.printPair("params.isStaged", params.isStaged);
+        pw.printPair("mParentSessionId", mParentSessionId);
+        pw.printPair("mChildSessionIds", mChildSessionIds);
+        pw.printPair("mStagedSessionApplied", mStagedSessionApplied);
+        pw.printPair("mStagedSessionFailed", mStagedSessionFailed);
+        pw.printPair("mStagedSessionReady", mStagedSessionReady);
+        pw.printPair("mStagedSessionErrorCode", mStagedSessionErrorCode);
+        pw.printPair("mStagedSessionErrorMessage", mStagedSessionErrorMessage);
         pw.println();
 
         pw.decreaseIndent();
