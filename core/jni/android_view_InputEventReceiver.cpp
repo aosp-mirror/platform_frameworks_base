@@ -83,7 +83,7 @@ private:
         return mInputConsumer.getChannel()->getName();
     }
 
-    virtual int handleEvent(int receiveFd, int events, void* data);
+    virtual int handleEvent(int receiveFd, int events, void* data) override;
 };
 
 
