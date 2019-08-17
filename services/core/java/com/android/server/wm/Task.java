@@ -380,7 +380,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
     boolean isResizeable() {
         return ActivityInfo.isResizeableMode(mResizeMode) || mSupportsPictureInPicture
-                || mWmService.mForceResizableTasks;
+                || mWmService.mAtmService.mForceResizableActivities;
     }
 
     /**

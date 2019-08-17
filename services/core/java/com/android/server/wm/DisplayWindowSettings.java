@@ -275,14 +275,14 @@ class DisplayWindowSettings {
         // This display used to be in freeform, but we don't support freeform anymore, so fall
         // back to fullscreen.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_FREEFORM
-                && !mService.mSupportsFreeformWindowManagement) {
+                && !mService.mAtmService.mSupportsFreeformWindowManagement) {
             return WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         }
         // No record is present so use default windowing mode policy.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
             final boolean forceDesktopMode = mService.mForceDesktopModeOnExternalDisplays
                     && displayId != Display.DEFAULT_DISPLAY;
-            windowingMode = mService.mSupportsFreeformWindowManagement
+            windowingMode = mService.mAtmService.mSupportsFreeformWindowManagement
                     && (mService.mIsPc || forceDesktopMode)
                     ? WindowConfiguration.WINDOWING_MODE_FREEFORM
                     : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;

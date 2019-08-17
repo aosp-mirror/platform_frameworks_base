@@ -61,13 +61,13 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     private ActivityMetricsLaunchObserver mLaunchObserver;
     private ActivityMetricsLaunchObserverRegistry mLaunchObserverRegistry;
 
-    private TestActivityStack mStack;
+    private ActivityStack mStack;
     private TaskRecord mTask;
     private ActivityRecord mActivityRecord;
     private ActivityRecord mActivityRecordTrampoline;
 
     @Before
-    public void setUpAMLO() throws Exception {
+    public void setUpAMLO() {
         mLaunchObserver = mock(ActivityMetricsLaunchObserver.class);
 
         // ActivityStackSupervisor always creates its own instance of ActivityMetricsLogger.
@@ -78,15 +78,19 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         // Sometimes we need an ActivityRecord for ActivityMetricsLogger to do anything useful.
         // This seems to be the easiest way to create an ActivityRecord.
-        mStack = mRootActivityContainer.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
-        mActivityRecord = new ActivityBuilder(mService).setTask(mTask).build();
+        mStack = new StackBuilder(mRootActivityContainer)
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setOnTop(true)
+                .setCreateActivity(true)
+                .build();
+        mTask = mStack.topTask();
+        mActivityRecord = mTask.getTopActivity();
         mActivityRecordTrampoline = new ActivityBuilder(mService).setTask(mTask).build();
     }
 
     @After
-    public void tearDownAMLO() throws Exception {
+    public void tearDownAMLO() {
         if (mLaunchObserverRegistry != null) {  // Don't NPE if setUp failed.
             mLaunchObserverRegistry.unregisterLaunchObserver(mLaunchObserver);
         }

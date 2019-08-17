@@ -45,8 +45,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     /** Verify that activity is finished correctly upon request. */
     @Test
     public void testActivityFinish() {
-        final TestActivityStack stack =
-                (TestActivityStack) new StackBuilder(mRootActivityContainer).build();
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
         final ActivityRecord activity = stack.getChildAt(0).getTopActivity();
         assertTrue("Activity must be finished", mService.finishActivity(activity.appToken,
                 0 /* resultCode */, null /* resultData */,

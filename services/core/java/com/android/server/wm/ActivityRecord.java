@@ -121,6 +121,7 @@ import static com.android.server.wm.ActivityStack.PAUSE_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
+import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
@@ -1372,16 +1373,17 @@ final class ActivityRecord extends ConfigurationContainer {
         return stack != null ? stack.getDisplay() : null;
     }
 
-    boolean changeWindowTranslucency(boolean toOpaque) {
-        if (fullscreen == toOpaque) {
-            return false;
+    boolean setOccludesParent(boolean occludesParent) {
+        final boolean changed = mAppWindowToken.setOccludesParent(occludesParent);
+        if (changed) {
+            if (!occludesParent) {
+                getActivityStack().convertActivityToTranslucent(this);
+            }
+            // Keep track of the number of fullscreen activities in this task.
+            task.numFullscreen += occludesParent ? +1 : -1;
+            mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         }
-
-        // Keep track of the number of fullscreen activities in this task.
-        task.numFullscreen += toOpaque ? +1 : -1;
-
-        fullscreen = toOpaque;
-        return true;
+        return changed;
     }
 
     void takeFromHistory() {

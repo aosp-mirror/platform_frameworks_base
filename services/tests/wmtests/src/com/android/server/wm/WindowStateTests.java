@@ -346,24 +346,28 @@ public class WindowStateTests extends WindowTestsBase {
         firstWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         secondWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        reset(sPowerManagerWrapper);
+        final WindowState.PowerManagerWrapper powerManagerWrapper =
+                mSystemServicesTestRule.getPowerManagerWrapper();
+        reset(powerManagerWrapper);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
 
-        reset(sPowerManagerWrapper);
+        reset(powerManagerWrapper);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
             boolean expectedWakeupCalled, boolean expectedCurrentLaunchCanTurnScreenOn) {
-        reset(sPowerManagerWrapper);
+        final WindowState.PowerManagerWrapper powerManagerWrapper =
+                mSystemServicesTestRule.getPowerManagerWrapper();
+        reset(powerManagerWrapper);
         appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
 
         if (expectedWakeupCalled) {
-            verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
         } else {
-            verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.
@@ -517,13 +521,19 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testGetTransformationMatrix() {
+        final int PARENT_WINDOW_OFFSET = 1;
+        final int DISPLAY_IN_PARENT_WINDOW_OFFSET = 2;
+        final int WINDOW_OFFSET = 3;
+        final float OFFSET_SUM =
+                PARENT_WINDOW_OFFSET + DISPLAY_IN_PARENT_WINDOW_OFFSET + WINDOW_OFFSET;
+
         synchronized (mWm.mGlobalLock) {
             final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-            win0.getFrameLw().offsetTo(1, 0);
 
             final DisplayContent dc = createNewDisplay();
+            win0.getFrameLw().offsetTo(PARENT_WINDOW_OFFSET, 0);
             dc.reparentDisplayContent(win0, win0.getSurfaceControl());
-            dc.updateLocation(win0, 2, 0);
+            dc.updateLocation(win0, DISPLAY_IN_PARENT_WINDOW_OFFSET, 0);
 
             final float[] values = new float[9];
             final Matrix matrix = new Matrix();
@@ -531,12 +541,12 @@ public class WindowStateTests extends WindowTestsBase {
             final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
             win1.mHasSurface = true;
             win1.mSurfaceControl = mock(SurfaceControl.class);
-            win1.getFrameLw().offsetTo(3, 0);
+            win1.getFrameLw().offsetTo(WINDOW_OFFSET, 0);
             win1.updateSurfacePosition(t);
             win1.getTransformationMatrix(values, matrix);
 
             matrix.getValues(values);
-            assertEquals(6f, values[Matrix.MTRANS_X], 0f);
+            assertEquals(OFFSET_SUM, values[Matrix.MTRANS_X], 0f);
             assertEquals(0f, values[Matrix.MTRANS_Y], 0f);
         }
     }

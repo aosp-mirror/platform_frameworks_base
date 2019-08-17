@@ -28,6 +28,7 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LE
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
+import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
@@ -591,9 +592,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
 
-    boolean mForceResizableTasks;
-    boolean mSupportsPictureInPicture;
-    boolean mSupportsFreeformWindowManagement;
     boolean mIsPc;
     /**
      * Flag that indicates that desktop mode is forced for public secondary screens.
@@ -819,7 +817,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mTransactionSequence;
 
     final WindowAnimator mAnimator;
-    final SurfaceAnimationRunner mSurfaceAnimationRunner;
+    SurfaceAnimationRunner mSurfaceAnimationRunner;
 
     /**
      * Keeps track of which animations got transferred to which animators. Entries will get cleaned
@@ -957,6 +955,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final ArrayList<AppFreezeListener> mAppFreezeListeners = new ArrayList<>();
 
+    @VisibleForTesting
+    final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener;
+
     interface AppFreezeListener {
         void onAppFreezeTimeout();
     }
@@ -1010,6 +1011,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
         mContext = context;
+        mIsPc = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mAllowBootMessages = showBootMsgs;
         mOnlyCore = onlyCore;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
@@ -1159,26 +1161,28 @@ public class WindowManagerService extends IWindowManager.Stub
         mSystemGestureExcludedByPreQStickyImmersive =
                 DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                         KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                new HandlerExecutor(mH), properties -> {
-                    synchronized (mGlobalLock) {
-                        final int exclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
-                                properties.getInt(KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
-                        final boolean excludedByPreQSticky = DeviceConfig.getBoolean(
-                                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                                KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
-                        if (mSystemGestureExcludedByPreQStickyImmersive != excludedByPreQSticky
-                                || mSystemGestureExclusionLimitDp != exclusionLimitDp) {
-                            mSystemGestureExclusionLimitDp = exclusionLimitDp;
-                            mSystemGestureExcludedByPreQStickyImmersive = excludedByPreQSticky;
-                            mRoot.forAllDisplays(DisplayContent::updateSystemGestureExclusionLimit);
-                        }
 
-                        mSystemGestureExclusionLogDebounceTimeoutMillis =
-                                DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                                        KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS, 0);
-                    }
-                });
+        mPropertiesChangedListener = properties -> {
+            synchronized (mGlobalLock) {
+                final int exclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
+                        properties.getInt(KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
+                final boolean excludedByPreQSticky = DeviceConfig.getBoolean(
+                        DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
+                if (mSystemGestureExcludedByPreQStickyImmersive != excludedByPreQSticky
+                        || mSystemGestureExclusionLimitDp != exclusionLimitDp) {
+                    mSystemGestureExclusionLimitDp = exclusionLimitDp;
+                    mSystemGestureExcludedByPreQStickyImmersive = excludedByPreQSticky;
+                    mRoot.forAllDisplays(DisplayContent::updateSystemGestureExclusionLimit);
+                }
+
+                mSystemGestureExclusionLogDebounceTimeoutMillis =
+                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                                KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS, 0);
+            }
+        };
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                new HandlerExecutor(mH), mPropertiesChangedListener);
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
     }
@@ -2595,7 +2599,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mRecentsAnimationController = controller;
     }
 
-    public RecentsAnimationController getRecentsAnimationController() {
+    RecentsAnimationController getRecentsAnimationController() {
         return mRecentsAnimationController;
     }
 
@@ -2603,74 +2607,37 @@ public class WindowManagerService extends IWindowManager.Stub
      * @return Whether the next recents animation can continue to start. Called from
      *         {@link RecentsAnimation#startRecentsActivity}.
      */
-    public boolean canStartRecentsAnimation() {
-        synchronized (mGlobalLock) {
-            // TODO(multi-display): currently only default display support recent activity
-            if (getDefaultDisplayContentLocked().mAppTransition.isTransitionSet()) {
-                return false;
-            }
-            return true;
+    boolean canStartRecentsAnimation() {
+        // TODO(multi-display): currently only default display support recent activity
+        if (getDefaultDisplayContentLocked().mAppTransition.isTransitionSet()) {
+            return false;
         }
+        return true;
     }
 
-    /**
-     * Cancels any running recents animation. The caller should NOT hold the WM lock while calling
-     * this method, as it will call back into AM and may cause a deadlock. Any locking will be done
-     * in the animation controller itself.
-     */
-    public void cancelRecentsAnimationSynchronously(
+    void cancelRecentsAnimation(
             @RecentsAnimationController.ReorderMode int reorderMode, String reason) {
         if (mRecentsAnimationController != null) {
             // This call will call through to cleanupAnimation() below after the animation is
             // canceled
-            mRecentsAnimationController.cancelAnimationSynchronously(reorderMode, reason);
+            mRecentsAnimationController.cancelAnimation(reorderMode, reason);
         }
     }
 
-    public void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
-        synchronized (mGlobalLock) {
-            if (mRecentsAnimationController != null) {
-                final RecentsAnimationController controller = mRecentsAnimationController;
-                mRecentsAnimationController = null;
-                controller.cleanupAnimation(reorderMode);
-                // TODO(mult-display): currently only default display support recents animation.
-                getDefaultDisplayContentLocked().mAppTransition.updateBooster();
-            }
+    void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
+        if (mRecentsAnimationController != null) {
+            final RecentsAnimationController controller = mRecentsAnimationController;
+            mRecentsAnimationController = null;
+            controller.cleanupAnimation(reorderMode);
+            // TODO(mult-display): currently only default display support recents animation.
+            getDefaultDisplayContentLocked().mAppTransition.updateBooster();
         }
     }
 
-    public void setAppFullscreen(IBinder token, boolean toOpaque) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken atoken = mRoot.getAppWindowToken(token);
-            if (atoken != null) {
-                atoken.setFillsParent(toOpaque);
-                setWindowOpaqueLocked(token, toOpaque);
-                mWindowPlacerLocked.requestTraversal();
-            }
-        }
-    }
-
-    public void setWindowOpaque(IBinder token, boolean isOpaque) {
-        synchronized (mGlobalLock) {
-            setWindowOpaqueLocked(token, isOpaque);
-        }
-    }
-
-    private void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
+    void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
         final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
         if (wtoken != null) {
-            final WindowState win = wtoken.findMainWindow();
-            if (win == null) {
-                return;
-            }
-            isOpaque = isOpaque & !PixelFormat.formatHasAlpha(win.getAttrs().format);
-            win.mWinAnimator.setOpaqueLocked(isOpaque);
-        }
-    }
-
-    public void setDockedStackCreateState(int mode, Rect bounds) {
-        synchronized (mGlobalLock) {
-            setDockedStackCreateStateLocked(mode, bounds);
+            wtoken.setMainWindowOpaque(isOpaque);
         }
     }
 
@@ -2679,14 +2646,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mDockedStackCreateBounds = bounds;
     }
 
-    public void checkSplitScreenMinimizedChanged(boolean animate) {
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            displayContent.getDockedDividerController().checkMinimizeChanged(animate);
-        }
+    void checkSplitScreenMinimizedChanged(boolean animate) {
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        displayContent.getDockedDividerController().checkMinimizeChanged(animate);
     }
 
-    public boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
+    boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
         final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
         return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
                 aspectRatio);
@@ -4847,8 +4812,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     synchronized (mGlobalLock) {
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                        displayContent.getDockedDividerController().reevaluateVisibility(false);
-                        displayContent.adjustForImeIfNeeded();
+                        if (displayContent != null) {
+                            displayContent.getDockedDividerController().reevaluateVisibility(false);
+                            displayContent.adjustForImeIfNeeded();
+                        }
                     }
                     break;
                 }
@@ -6495,31 +6462,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setForceResizableTasks(boolean forceResizableTasks) {
-        synchronized (mGlobalLock) {
-            mForceResizableTasks = forceResizableTasks;
-        }
-    }
-
-    public void setSupportsPictureInPicture(boolean supportsPictureInPicture) {
-        synchronized (mGlobalLock) {
-            mSupportsPictureInPicture = supportsPictureInPicture;
-        }
-    }
-
-    public void setSupportsFreeformWindowManagement(boolean supportsFreeformWindowManagement) {
-        synchronized (mGlobalLock) {
-            mSupportsFreeformWindowManagement = supportsFreeformWindowManagement;
-        }
-    }
-
     void setForceDesktopModeOnExternalDisplays(boolean forceDesktopModeOnExternalDisplays) {
         synchronized (mGlobalLock) {
             mForceDesktopModeOnExternalDisplays = forceDesktopModeOnExternalDisplays;
         }
     }
 
-    public void setIsPc(boolean isPc) {
+    @VisibleForTesting
+    void setIsPc(boolean isPc) {
         synchronized (mGlobalLock) {
             mIsPc = isPc;
         }
@@ -6546,7 +6496,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "registerPinnedStackListener()")) {
             return;
         }
-        if (!mSupportsPictureInPicture) {
+        if (!mAtmService.mSupportsPictureInPicture) {
             return;
         }
         synchronized (mGlobalLock) {

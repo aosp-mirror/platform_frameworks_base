@@ -241,7 +241,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Fetch all the surface controls and pass them to the client to get the animation
             // started. Cancel any existing recents animation running synchronously (do not hold the
             // WM lock)
-            mWindowManager.cancelRecentsAnimationSynchronously(REORDER_MOVE_TO_ORIGINAL_POSITION,
+            mWindowManager.cancelRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION,
                     "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
                     this, mDefaultDisplay.mDisplayId,
@@ -396,12 +396,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
     @Override
     public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode,
-            boolean runSychronously, boolean sendUserLeaveHint) {
-        if (runSychronously) {
-            finishAnimation(reorderMode, sendUserLeaveHint);
-        } else {
-            mService.mH.post(() -> finishAnimation(reorderMode, sendUserLeaveHint));
-        }
+            boolean sendUserLeaveHint) {
+        finishAnimation(reorderMode, sendUserLeaveHint);
     }
 
     @Override
@@ -435,8 +431,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         } else {
             // Just cancel directly to unleash from launcher when the next launching task is the
             // current top task.
-            mWindowManager.cancelRecentsAnimationSynchronously(REORDER_KEEP_IN_PLACE,
-                    "stackOrderChanged");
+            mWindowManager.cancelRecentsAnimation(REORDER_KEEP_IN_PLACE, "stackOrderChanged");
         }
     }
 

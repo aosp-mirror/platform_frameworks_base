@@ -40,12 +40,14 @@ import android.view.animation.Animation;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.WindowState.PowerManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.function.Supplier;
 
 class TestWindowManagerPolicy implements WindowManagerPolicy {
     private final Supplier<WindowManagerService> mWmSupplier;
+    private final PowerManagerWrapper mPowerManagerWrapper;
 
     int mRotationToReport = 0;
     boolean mKeyguardShowingAndNotOccluded = false;
@@ -53,8 +55,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     private Runnable mRunnableWhenAddingSplashScreen;
 
-    TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier) {
+    TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier,
+            PowerManagerWrapper powerManagerWrapper) {
         mWmSupplier = wmSupplier;
+        mPowerManagerWrapper = powerManagerWrapper;
     }
 
     @Override
@@ -121,7 +125,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             doReturn(mock(IBinder.class)).when(iWindow).asBinder();
             window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, atoken,
                     "Starting window", 0 /* ownerId */, false /* internalWindows */, wm,
-                    mock(Session.class), iWindow);
+                    mock(Session.class), iWindow, mPowerManagerWrapper);
             atoken.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {

@@ -168,8 +168,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     public interface RecentsAnimationCallbacks {
         /** Callback when recents animation is finished. */
-        void onAnimationFinished(@ReorderMode int reorderMode, boolean runSychronously,
-                boolean sendUserLeaveHint);
+        void onAnimationFinished(@ReorderMode int reorderMode, boolean sendUserLeaveHint);
     }
 
     private final IRecentsAnimationController mController =
@@ -221,8 +220,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 // prior to calling the callback
                 mCallbacks.onAnimationFinished(moveHomeToTop
                         ? REORDER_MOVE_TO_TOP
-                        : REORDER_MOVE_TO_ORIGINAL_POSITION,
-                        true /* runSynchronously */, sendUserLeaveHint);
+                        : REORDER_MOVE_TO_ORIGINAL_POSITION, sendUserLeaveHint);
                 mDisplayContent.mBoundsAnimationController.setAnimationType(FADE_IN);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -498,21 +496,15 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     void cancelAnimation(@ReorderMode int reorderMode, String reason) {
-        cancelAnimation(reorderMode, false /* runSynchronously */, false /*screenshot */, reason);
-    }
-
-    void cancelAnimationSynchronously(@ReorderMode int reorderMode, String reason) {
-        cancelAnimation(reorderMode, true /* runSynchronously */, false /* screenshot */, reason);
+        cancelAnimation(reorderMode, false /*screenshot */, reason);
     }
 
     void cancelAnimationWithScreenshot(boolean screenshot) {
-        cancelAnimation(REORDER_KEEP_IN_PLACE, true /* sync */, screenshot, "stackOrderChanged");
+        cancelAnimation(REORDER_KEEP_IN_PLACE, screenshot, "stackOrderChanged");
     }
 
-    private void cancelAnimation(@ReorderMode int reorderMode, boolean runSynchronously,
-            boolean screenshot, String reason) {
-        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason
-                + " runSynchronously=" + runSynchronously);
+    private void cancelAnimation(@ReorderMode int reorderMode, boolean screenshot, String reason) {
+        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason);
         synchronized (mService.getWindowManagerLock()) {
             if (mCanceled) {
                 // We've already canceled the animation
@@ -525,16 +517,14 @@ public class RecentsAnimationController implements DeathRecipient {
                 // Screen shot previous task when next task starts transition and notify the runner.
                 // We will actually finish the animation once the runner calls cleanUpScreenshot().
                 final Task task = mPendingAnimations.get(0).mTask;
-                final TaskSnapshot taskSnapshot = screenshotRecentTask(task, reorderMode,
-                        runSynchronously);
+                final TaskSnapshot taskSnapshot = screenshotRecentTask(task, reorderMode);
                 try {
                     mRunner.onAnimationCanceled(taskSnapshot);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to cancel recents animation", e);
                 }
                 if (taskSnapshot == null) {
-                    mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
-                            false /* sendUserLeaveHint */);
+                    mCallbacks.onAnimationFinished(reorderMode, false /* sendUserLeaveHint */);
                 }
             } else {
                 // Otherwise, notify the runner and clean up the animation immediately
@@ -545,8 +535,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to cancel recents animation", e);
                 }
-                mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
-                        false /* sendUserLeaveHint */);
+                mCallbacks.onAnimationFinished(reorderMode, false /* sendUserLeaveHint */);
             }
         }
     }
@@ -592,8 +581,7 @@ public class RecentsAnimationController implements DeathRecipient {
         return mRequestDeferCancelUntilNextTransition && mCancelDeferredWithScreenshot;
     }
 
-    TaskSnapshot screenshotRecentTask(Task task, @ReorderMode int reorderMode,
-            boolean runSynchronously) {
+    TaskSnapshot screenshotRecentTask(Task task, @ReorderMode int reorderMode) {
         final TaskSnapshotController snapshotController = mService.mTaskSnapshotController;
         final ArraySet<Task> tasks = Sets.newArraySet(task);
         snapshotController.snapshotTasks(tasks);
@@ -613,8 +601,7 @@ public class RecentsAnimationController implements DeathRecipient {
                     if (DEBUG_RECENTS_ANIMATIONS) {
                         Slog.d(TAG, "mRecentScreenshotAnimator finish");
                     }
-                    mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
-                            false /* sendUserLeaveHint */);
+                    mCallbacks.onAnimationFinished(reorderMode, false /* sendUserLeaveHint */);
                 }, mService);
         mRecentScreenshotAnimator.transferAnimation(task.mSurfaceAnimator);
         return taskSnapshot;

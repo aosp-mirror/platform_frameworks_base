@@ -28,13 +28,18 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
+import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
@@ -64,6 +69,7 @@ import android.util.DisplayMetrics;
 import android.util.Xml;
 import android.view.DisplayInfo;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -102,6 +108,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         TaskRecord.setTaskRecordFactory(null);
         mParentBounds = new Rect(10 /*left*/, 30 /*top*/, 80 /*right*/, 60 /*bottom*/);
+        removeGlobalMinSizeRestriction();
     }
 
     @Test
@@ -165,6 +172,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     /** Ensures that bounds on freeform stacks are not clipped. */
     @Test
+    @FlakyTest(bugId = 137879065)
     public void testAppBounds_FreeFormBounds() {
         final Rect freeFormBounds = new Rect(mParentBounds);
         freeFormBounds.offset(10, 10);
@@ -174,6 +182,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     /** Ensures that fully contained bounds are not clipped. */
     @Test
+    @FlakyTest(bugId = 137879065)
     public void testAppBounds_ContainedBounds() {
         final Rect insetBounds = new Rect(mParentBounds);
         insetBounds.inset(5, 5, 5, 5);
@@ -182,6 +191,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 137879065)
     public void testFitWithinBounds() {
         final Rect parentBounds = new Rect(10, 10, 200, 200);
         ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
@@ -221,6 +231,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
     @Test
+    @FlakyTest(bugId = 137879065)
     public void testBoundsOnModeChangeFreeformToFullscreen() {
         ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
         ActivityStack stack = new StackBuilder(mRootActivityContainer).setDisplay(display)
@@ -248,18 +259,6 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     /**
-     * This is a temporary hack to trigger an onConfigurationChange at the task level after an
-     * orientation is requested. Normally this is done by the onDescendentOrientationChanged call
-     * up the WM hierarchy, but since the WM hierarchy is mocked out, it doesn't happen here.
-     * TODO: remove this when we either get a WM hierarchy or when hierarchies are merged.
-     */
-    private void setActivityRequestedOrientation(ActivityRecord activity, int orientation) {
-        activity.setRequestedOrientation(orientation);
-        ConfigurationContainer taskRecord = activity.getParent();
-        taskRecord.onConfigurationChanged(taskRecord.getParent().getConfiguration());
-    }
-
-    /**
      * Tests that a task with forced orientation has orientation-consistent bounds within the
      * parent.
      */
@@ -268,49 +267,48 @@ public class TaskRecordTests extends ActivityTestsBase {
         final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
         final Rect fullScreenBoundsPort = new Rect(0, 0, 1080, 1920);
         DisplayInfo info = new DisplayInfo();
+        mService.mContext.getDisplay().getDisplayInfo(info);
         info.logicalWidth = fullScreenBounds.width();
         info.logicalHeight = fullScreenBounds.height();
         ActivityDisplay display = addNewActivityDisplayAt(info, POSITION_TOP);
         assertTrue(mRootActivityContainer.getActivityDisplay(display.mDisplayId) != null);
-        // Override display orientation. Normally this is available via DisplayContent, but DC
-        // is mocked-out.
-        display.getRequestedOverrideConfiguration().orientation =
-                Configuration.ORIENTATION_LANDSCAPE;
-        display.onRequestedOverrideConfigurationChanged(
-                display.getRequestedOverrideConfiguration());
+        // Fix the display orientation to landscape which is the natural rotation (0) for the test
+        // display.
+        final DisplayRotation dr = display.mDisplayContent.getDisplayRotation();
+        dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
+        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
+
         ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         TaskRecord task = stack.getChildAt(0);
         ActivityRecord root = task.getTopActivity();
-        assertEquals(root, task.getTopActivity());
 
         assertEquals(fullScreenBounds, task.getBounds());
 
         // Setting app to fixed portrait fits within parent
-        setActivityRequestedOrientation(root, SCREEN_ORIENTATION_PORTRAIT);
+        root.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(root, task.getRootActivity());
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getRootActivity().getOrientation());
-        assertTrue(task.getBounds().width() < task.getBounds().height());
+        assertThat(task.getBounds().width()).isLessThan(task.getBounds().height());
         assertEquals(fullScreenBounds.height(), task.getBounds().height());
 
         // Top activity gets used
         ActivityRecord top = new ActivityBuilder(mService).setTask(task).setStack(stack).build();
         assertEquals(top, task.getTopActivity());
-        setActivityRequestedOrientation(top, SCREEN_ORIENTATION_LANDSCAPE);
-        assertTrue(task.getBounds().width() > task.getBounds().height());
+        top.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertThat(task.getBounds().width()).isGreaterThan(task.getBounds().height());
         assertEquals(task.getBounds().width(), fullScreenBounds.width());
 
         // Setting app to unspecified restores
-        setActivityRequestedOrientation(top, SCREEN_ORIENTATION_UNSPECIFIED);
+        top.setRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
         assertEquals(fullScreenBounds, task.getBounds());
 
         // Setting app to fixed landscape and changing display
-        setActivityRequestedOrientation(top, SCREEN_ORIENTATION_LANDSCAPE);
-        // simulate display orientation changing (normally done via DisplayContent)
-        display.getRequestedOverrideConfiguration().orientation =
-                Configuration.ORIENTATION_PORTRAIT;
-        display.setBounds(fullScreenBoundsPort);
-        assertTrue(task.getBounds().width() > task.getBounds().height());
+        top.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        // Fix the display orientation to portrait which is 90 degrees for the test display.
+        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_90);
+
+        assertThat(task.getBounds().width()).isGreaterThan(task.getBounds().height());
         assertEquals(fullScreenBoundsPort.width(), task.getBounds().width());
 
         // in FREEFORM, no constraint
@@ -323,7 +321,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         // FULLSCREEN letterboxes bounds
         stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertTrue(task.getBounds().width() > task.getBounds().height());
+        assertThat(task.getBounds().width()).isGreaterThan(task.getBounds().height());
         assertEquals(fullScreenBoundsPort.width(), task.getBounds().width());
 
         // FREEFORM restores bounds as before
@@ -335,6 +333,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testIgnoresForcedOrientationWhenParentHandles() {
         final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
         DisplayInfo info = new DisplayInfo();
+        mService.mContext.getDisplay().getDisplayInfo(info);
         info.logicalWidth = fullScreenBounds.width();
         info.logicalHeight = fullScreenBounds.height();
         ActivityDisplay display = addNewActivityDisplayAt(info, POSITION_TOP);
@@ -355,7 +354,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         // Setting app to fixed portrait fits within parent, but TaskRecord shouldn't adjust the
         // bounds because its parent says it will handle it at a later time.
-        setActivityRequestedOrientation(root, SCREEN_ORIENTATION_PORTRAIT);
+        root.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(root, task.getRootActivity());
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getRootActivity().getOrientation());
         assertEquals(fullScreenBounds, task.getBounds());
@@ -646,7 +645,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         final ActivityRecord activity0 = task0.getChildAt(0);
 
         final TaskRecord task1 = getTestTask();
-        final ActivityRecord activity1 = task0.getChildAt(0);
+        final ActivityRecord activity1 = task1.getChildAt(0);
 
         assertEquals(task0.taskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));

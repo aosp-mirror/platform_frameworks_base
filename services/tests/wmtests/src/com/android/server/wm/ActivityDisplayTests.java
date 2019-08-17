@@ -28,6 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
@@ -140,7 +141,8 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     public void testNotResumeHomeStackOnRemovingDisplay() {
         // Create a display which supports system decoration and allows reparenting stacks to
         // another display when the display is removed.
-        final ActivityDisplay display = spy(createNewActivityDisplay());
+        final ActivityDisplay display = createNewActivityDisplay();
+        spyOn(display);
         doReturn(false).when(display).shouldDestroyContentOnRemove();
         doReturn(true).when(display).supportsSystemDecorations();
         mRootActivityContainer.addChild(display, ActivityDisplay.POSITION_TOP);
@@ -304,14 +306,18 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
         final ActivityStack stack4 = display.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final TaskRecord task1 = new TaskBuilder(mService.mStackSupervisor).setStack(
-                stack1).setTaskId(1).build();
-        final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor).setStack(
-                stack2).setTaskId(2).build();
-        final TaskRecord task3 = new TaskBuilder(mService.mStackSupervisor).setStack(
-                stack3).setTaskId(3).build();
-        final TaskRecord task4 = new TaskBuilder(mService.mStackSupervisor).setStack(
-                stack4).setTaskId(4).build();
+        final TaskRecord task1 = new TaskBuilder(mService.mStackSupervisor)
+                .setStack(stack1)
+                .build();
+        final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor)
+                .setStack(stack2)
+                .build();
+        final TaskRecord task3 = new TaskBuilder(mService.mStackSupervisor)
+                .setStack(stack3)
+                .build();
+        final TaskRecord task4 = new TaskBuilder(mService.mStackSupervisor)
+                .setStack(stack4)
+                .build();
 
         // Reordering stacks while removing stacks.
         doAnswer(invocation -> {

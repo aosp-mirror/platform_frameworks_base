@@ -96,7 +96,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
                     mWm.getDefaultDisplayContentLocked().getWindowingMode());
 
             mWm.mIsPc = true;
-            mWm.mSupportsFreeformWindowManagement = true;
+            mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
             mWm.mRoot.onSettingsRetrieved();
 
