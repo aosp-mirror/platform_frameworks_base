@@ -45,4 +45,10 @@
     <string-array name="config_vendorPlatformSignatures">
     </string-array>
 
+    <!-- Whether device has a physical display cutout -->
+    <bool name="config_physicalDisplayCutout">false</bool>
+
+    <!-- Whether device has a big physical display cutout -->
+    <bool name="config_bigPhysicalDisplayCutout">false</bool>
+
 </resources>
