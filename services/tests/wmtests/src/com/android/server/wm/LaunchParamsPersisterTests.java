@@ -104,6 +104,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         mDisplayUniqueId = "test:" + Integer.toString(sNextUniqueId++);
         final DisplayInfo info = new DisplayInfo();
+        mService.mContext.getDisplay().getDisplayInfo(info);
         info.uniqueId = mDisplayUniqueId;
         mTestDisplay = createNewActivityDisplay(info);
         mRootActivityContainer.addChild(mTestDisplay, ActivityDisplay.POSITION_TOP);

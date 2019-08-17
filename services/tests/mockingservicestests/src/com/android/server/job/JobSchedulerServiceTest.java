@@ -53,7 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 
 import com.android.server.AppStateTracker;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 
@@ -114,8 +114,8 @@ public class JobSchedulerServiceTest {
         when(mContext.getSystemService(NetworkPolicyManager.class))
                 .thenReturn(mock(NetworkPolicyManager.class));
         // Called in DeviceIdleJobsController constructor.
-        doReturn(mock(DeviceIdleController.LocalService.class))
-                .when(() -> LocalServices.getService(DeviceIdleController.LocalService.class));
+        doReturn(mock(DeviceIdleInternal.class))
+                .when(() -> LocalServices.getService(DeviceIdleInternal.class));
         // Used in JobStatus.
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));

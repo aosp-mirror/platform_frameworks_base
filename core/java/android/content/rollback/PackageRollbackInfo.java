@@ -76,10 +76,10 @@ public final class PackageRollbackInfo implements Parcelable {
     private final boolean mIsApex;
 
     /*
-     * The list of users the package is installed for.
+     * The list of users for which snapshots have been saved.
      */
     // NOTE: Not a part of the Parcelable representation of this object.
-    private final IntArray mInstalledUsers;
+    private final IntArray mSnapshottedUsers;
 
     /**
      * A mapping between user and an inode of theirs CE data snapshot.
@@ -148,8 +148,8 @@ public final class PackageRollbackInfo implements Parcelable {
     }
 
     /** @hide */
-    public IntArray getInstalledUsers() {
-        return mInstalledUsers;
+    public IntArray getSnapshottedUsers() {
+        return mSnapshottedUsers;
     }
 
     /** @hide */
@@ -179,14 +179,14 @@ public final class PackageRollbackInfo implements Parcelable {
     public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
             VersionedPackage packageRolledBackTo,
             @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
-            boolean isApex, @NonNull IntArray installedUsers,
+            boolean isApex, @NonNull IntArray snapshottedUsers,
             @NonNull SparseLongArray ceSnapshotInodes) {
         this.mVersionRolledBackFrom = packageRolledBackFrom;
         this.mVersionRolledBackTo = packageRolledBackTo;
         this.mPendingBackups = pendingBackups;
         this.mPendingRestores = pendingRestores;
         this.mIsApex = isApex;
-        this.mInstalledUsers = installedUsers;
+        this.mSnapshottedUsers = snapshottedUsers;
         this.mCeSnapshotInodes = ceSnapshotInodes;
     }
 
@@ -196,7 +196,7 @@ public final class PackageRollbackInfo implements Parcelable {
         this.mIsApex = in.readBoolean();
         this.mPendingRestores = null;
         this.mPendingBackups = null;
-        this.mInstalledUsers = null;
+        this.mSnapshottedUsers = null;
         this.mCeSnapshotInodes = null;
     }
 

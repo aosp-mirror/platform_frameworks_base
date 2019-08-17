@@ -95,7 +95,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void setUp() throws Exception {
         deleteRecursively(TEST_FOLDER);
 
-        mWm.setSupportsFreeformWindowManagement(false);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = false;
         mWm.setIsPc(false);
         mWm.setForceDesktopModeOnExternalDisplays(false);
 
@@ -134,7 +134,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_NoDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
@@ -144,7 +144,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_HasDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setForceDesktopModeOnExternalDisplays(true);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
@@ -155,7 +155,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFreeform_HasFreeformSupport_IsPc() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
@@ -168,7 +168,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testPrimaryDisplayUpdateToFreeform_HasFreeformSupport_IsPc() {
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
         mTarget.updateSettingsForDisplay(mPrimaryDisplay);
@@ -187,7 +187,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_NonPc_NoDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 
@@ -197,7 +197,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_NonPc_HasDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setForceDesktopModeOnExternalDisplays(true);
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
@@ -208,7 +208,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_IsPc() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);

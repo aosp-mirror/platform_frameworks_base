@@ -253,7 +253,7 @@ public class AlarmManagerServiceTest {
         doReturn(mIActivityManager).when(ActivityManager::getService);
         doReturn(mAppStateTracker).when(() -> LocalServices.getService(AppStateTracker.class));
         doReturn(null)
-                .when(() -> LocalServices.getService(DeviceIdleController.LocalService.class));
+                .when(() -> LocalServices.getService(DeviceIdleInternal.class));
         doReturn(mUsageStatsManagerInternal).when(
                 () -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),

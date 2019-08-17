@@ -295,7 +295,8 @@ public class DisplayRotation {
                 false /* forceRelayout */);
     }
 
-    private void setUserRotation(int userRotationMode, int userRotation) {
+    @VisibleForTesting
+    void setUserRotation(int userRotationMode, int userRotation) {
         if (isDefaultDisplay) {
             // We'll be notified via settings listener, so we don't need to update internal values.
             final ContentResolver res = mContext.getContentResolver();

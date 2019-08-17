@@ -27,6 +27,7 @@ interface IPhoneSubInfo {
     /**
      * Retrieves the unique device ID, e.g., IMEI for GSM phones.
      */
+    @UnsupportedAppUsage
     String getDeviceId(String callingPackage);
 
      /**

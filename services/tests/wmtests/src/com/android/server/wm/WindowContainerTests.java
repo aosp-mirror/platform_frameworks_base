@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -113,6 +114,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testAddChildSetsSurfacePosition() {
+        reset(mTransaction);
         try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
             WindowContainer child = new WindowContainer(mWm);
             child.setBounds(1, 1, 10, 10);

@@ -16,10 +16,10 @@
 
 package com.android.server.pm;
 
+import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
+
 import android.Manifest;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -28,11 +28,14 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.permission.IPermissionManager;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.server.FgThread;
+import com.android.server.compat.PlatformCompat;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -41,7 +44,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The entity responsible for filtering visibility between apps based on declarations in their
@@ -98,14 +100,11 @@ class AppsFilter {
 
     private final IPermissionManager mPermissionManager;
 
-    private final AppOpsManager mAppOpsManager;
-    private final ConfigProvider mConfigProvider;
+    private final FeatureConfig mFeatureConfig;
 
-    AppsFilter(ConfigProvider configProvider, IPermissionManager permissionManager,
-            AppOpsManager appOpsManager, String[] forceQueryableWhitelist,
-            boolean systemAppsQueryable) {
-        mConfigProvider = configProvider;
-        mAppOpsManager = appOpsManager;
+    AppsFilter(FeatureConfig featureConfig, IPermissionManager permissionManager,
+            String[] forceQueryableWhitelist, boolean systemAppsQueryable) {
+        mFeatureConfig = featureConfig;
         final HashSet<String> forceQueryableByDeviceSet = new HashSet<>();
         Collections.addAll(forceQueryableByDeviceSet, forceQueryableWhitelist);
         this.mForceQueryableByDevice = Collections.unmodifiableSet(forceQueryableByDeviceSet);
@@ -114,27 +113,83 @@ class AppsFilter {
         mSystemAppsQueryable = systemAppsQueryable;
     }
 
-    public static AppsFilter create(Context context) {
-        // tracks whether the feature is enabled where -1 is unknown, 0 is false and 1 is true;
-        final AtomicInteger featureEnabled = new AtomicInteger(-1);
+    public interface FeatureConfig {
+        /** Called when the system is ready and components can be queried. */
+        void onSystemReady();
 
+        /** @return true if we should filter apps at all. */
+        boolean isGloballyEnabled();
+
+        /** @return true if the feature is enabled for the given package. */
+        boolean packageIsEnabled(PackageParser.Package pkg);
+    }
+
+    private static class FeatureConfigImpl implements FeatureConfig {
+        private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
+
+        // STOPSHIP(patb): set this to true if we plan to launch this in R
+        private static final boolean DEFAULT_ENABLED_STATE = false;
+        private final PackageManagerService.Injector mInjector;
+        private volatile boolean mFeatureEnabled = DEFAULT_ENABLED_STATE;
+
+        private FeatureConfigImpl(PackageManagerService.Injector injector) {
+            mInjector = injector;
+        }
+
+        @Override
+        public void onSystemReady() {
+            mFeatureEnabled = DeviceConfig.getBoolean(
+                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME,
+                    DEFAULT_ENABLED_STATE);
+            DeviceConfig.addOnPropertiesChangedListener(
+                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
+                    properties -> {
+                        synchronized (FeatureConfigImpl.this) {
+                            mFeatureEnabled = properties.getBoolean(
+                                    FILTERING_ENABLED_NAME, DEFAULT_ENABLED_STATE);
+                        }
+                    });
+        }
+
+        @Override
+        public boolean isGloballyEnabled() {
+            return mFeatureEnabled;
+        }
+
+        @Override
+        public boolean packageIsEnabled(PackageParser.Package pkg) {
+            final PlatformCompat compatibility = mInjector.getCompatibility();
+            if (compatibility == null) {
+                Slog.wtf(TAG, "PlatformCompat is null");
+                return mFeatureEnabled;
+            }
+            return compatibility.isChangeEnabled(
+                    PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
+        }
+    }
+
+
+    public static AppsFilter create(PackageManagerService.Injector injector) {
         final boolean forceSystemAppsQueryable =
-                context.getResources().getBoolean(R.bool.config_forceSystemPackagesQueryable);
+                injector.getContext().getResources()
+                        .getBoolean(R.bool.config_forceSystemPackagesQueryable);
+        final FeatureConfig featureConfig = new FeatureConfigImpl(injector);
         final String[] forcedQueryablePackageNames;
         if (forceSystemAppsQueryable) {
             // all system apps already queryable, no need to read and parse individual exceptions
             forcedQueryablePackageNames = new String[]{};
         } else {
             forcedQueryablePackageNames =
-                    context.getResources().getStringArray(R.array.config_forceQueryablePackages);
+                    injector.getContext().getResources()
+                            .getStringArray(R.array.config_forceQueryablePackages);
             for (int i = 0; i < forcedQueryablePackageNames.length; i++) {
                 forcedQueryablePackageNames[i] = forcedQueryablePackageNames[i].intern();
             }
         }
         IPermissionManager permissionmgr =
                 (IPermissionManager) ServiceManager.getService("permissionmgr");
-        return new AppsFilter(() -> false, permissionmgr,
-                context.getSystemService(AppOpsManager.class), forcedQueryablePackageNames,
+
+        return new AppsFilter(featureConfig, permissionmgr, forcedQueryablePackageNames,
                 forceSystemAppsQueryable);
     }
 
@@ -184,6 +239,10 @@ class AppsFilter {
             currentUser.put(targetPackage.pkg.packageName, new HashSet<>());
         }
         currentUser.get(targetPackage.pkg.packageName).add(initiatingPackage.pkg.packageName);
+    }
+
+    public void onSystemReady() {
+        mFeatureConfig.onSystemReady();
     }
 
     /**
@@ -267,11 +326,11 @@ class AppsFilter {
      */
     public boolean shouldFilterApplication(int callingUid, @Nullable SettingBase callingSetting,
             PackageSetting targetPkgSetting, int userId) {
-        if (callingUid < Process.FIRST_APPLICATION_UID) {
+        final boolean featureEnabled = mFeatureConfig.isGloballyEnabled();
+        if (!featureEnabled && !DEBUG_RUN_WHEN_DISABLED) {
             return false;
         }
-        final boolean featureEnabled = mConfigProvider.isEnabled();
-        if (!featureEnabled && !DEBUG_RUN_WHEN_DISABLED) {
+        if (callingUid < Process.FIRST_APPLICATION_UID) {
             return false;
         }
         if (callingSetting == null) {
@@ -312,31 +371,21 @@ class AppsFilter {
                 return true;
             }
         }
-
         if (!featureEnabled) {
             return false;
         }
-        final int mode = mAppOpsManager
-                .checkOpNoThrow(AppOpsManager.OP_QUERY_ALL_PACKAGES, callingUid,
-                        callingPkgSetting.pkg.packageName);
-        switch (mode) {
-            case AppOpsManager.MODE_DEFAULT:
-                if (DEBUG_LOGGING) {
-                    Slog.d(TAG, "filtered interaction: " + callingPkgSetting.name + " -> "
-                            + targetPkgSetting.name + (DEBUG_ALLOW_ALL ? " ALLOWED" : ""));
-                }
-                return !DEBUG_ALLOW_ALL;
-            case AppOpsManager.MODE_ALLOWED:
-                // explicitly allowed to see all packages, don't filter
-                return false;
-            case AppOpsManager.MODE_ERRORED:
-                // deny / error: let's log so developer can audit usages
-                Slog.i(TAG, callingPkgSetting.pkg.packageName
-                        + " blocked from accessing " + targetPkgSetting.pkg.packageName);
-            case AppOpsManager.MODE_IGNORED:
-                // fall through
-            default:
-                return true;
+        if (mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
+            if (DEBUG_LOGGING) {
+                Slog.d(TAG, "interaction: " + callingPkgSetting.name + " -> "
+                        + targetPkgSetting.name + (DEBUG_ALLOW_ALL ? " ALLOWED" : "BLOCKED"));
+            }
+            return !DEBUG_ALLOW_ALL;
+        } else {
+            if (DEBUG_LOGGING) {
+                Slog.d(TAG, "interaction: " + callingPkgSetting.name + " -> "
+                        + targetPkgSetting.name + " DISABLED");
+            }
+            return false;
         }
     }
 
@@ -377,6 +426,13 @@ class AppsFilter {
                 && mImplicitlyQueryable.get(userId).get(callingName).contains(targetName)) {
             return false;
         }
+        if (callingPkgSetting.pkg.instrumentation.size() > 0) {
+            for (int i = 0, max = callingPkgSetting.pkg.instrumentation.size(); i < max; i++) {
+                if (callingPkgSetting.pkg.instrumentation.get(i).info.targetPackage == targetName) {
+                    return false;
+                }
+            }
+        }
         try {
             if (mPermissionManager.checkPermission(
                     Manifest.permission.QUERY_ALL_PACKAGES, callingName, userId)
@@ -400,7 +456,6 @@ class AppsFilter {
         pw.println();
         pw.println("Queries:");
         dumpState.onTitlePrinted();
-        pw.println("  enabled: " + mConfigProvider.isEnabled());
         pw.println("  system apps queryable: " + mSystemAppsQueryable);
         dumpPackageSet(pw, filteringPackageName, mForceQueryableByDevice, "System whitelist", "  ");
         dumpPackageSet(pw, filteringPackageName, mForceQueryable, "forceQueryable", "  ");
@@ -442,9 +497,4 @@ class AppsFilter {
             }
         }
     }
-
-    public interface ConfigProvider {
-        boolean isEnabled();
-    }
-
 }

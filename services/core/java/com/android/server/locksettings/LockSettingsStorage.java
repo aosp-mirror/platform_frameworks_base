@@ -35,6 +35,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.CredentialType;
@@ -140,7 +141,7 @@ class LockSettingsStorage {
                 dos.close();
                 return os.toByteArray();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Fail to serialze credential hash", e);
             }
         }
 
@@ -157,7 +158,7 @@ class LockSettingsStorage {
                 }
                 return new CredentialHash(hash, type);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Fail to deserialze credential hash", e);
             }
         }
     }
@@ -666,7 +667,7 @@ class LockSettingsStorage {
                 dos.writeInt(qualityForUi);
                 dos.write(payload);
             } catch (IOException e) {
-                throw new RuntimeException("ByteArrayOutputStream cannot throw IOException");
+                throw new IllegalStateException("ByteArrayOutputStream cannot throw IOException");
             }
             return os.toByteArray();
         }
@@ -674,6 +675,26 @@ class LockSettingsStorage {
 
     public interface Callback {
         void initialize(SQLiteDatabase db);
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        final UserManager um = UserManager.get(mContext);
+        for (UserInfo user : um.getUsers(false)) {
+            File userPath = getSyntheticPasswordDirectoryForUser(user.id);
+            pw.println(String.format("User %d [%s]:", user.id, userPath.getAbsolutePath()));
+            pw.increaseIndent();
+            File[] files = userPath.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    pw.println(String.format("%4d %s %s", file.length(),
+                            LockSettingsService.timestampToString(file.lastModified()),
+                            file.getName()));
+                }
+            } else {
+                pw.println("[Not found]");
+            }
+            pw.decreaseIndent();
+        }
     }
 
     static class DatabaseHelper extends SQLiteOpenHelper {

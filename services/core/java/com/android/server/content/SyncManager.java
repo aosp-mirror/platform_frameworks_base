@@ -102,7 +102,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.function.QuadConsumer;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accounts.AccountManagerService;
@@ -1634,8 +1634,8 @@ public class SyncManager {
 
         if (syncOperation.syncExemptionFlag
                 == ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP) {
-            DeviceIdleController.LocalService dic =
-                    LocalServices.getService(DeviceIdleController.LocalService.class);
+            DeviceIdleInternal dic =
+                    LocalServices.getService(DeviceIdleInternal.class);
             if (dic != null) {
                 dic.addPowerSaveTempWhitelistApp(Process.SYSTEM_UID,
                         syncOperation.owningPackage,

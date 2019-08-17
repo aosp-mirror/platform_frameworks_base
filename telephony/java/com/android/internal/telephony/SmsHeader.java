@@ -16,13 +16,12 @@
 
 package com.android.internal.telephony;
 
-import com.android.internal.telephony.SmsConstants;
+import android.annotation.UnsupportedAppUsage;
+
 import com.android.internal.util.HexDump;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
-import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 
 /**
@@ -74,6 +73,10 @@ public class SmsHeader {
 
     public static class PortAddrs {
         @UnsupportedAppUsage
+        public PortAddrs() {
+        }
+
+        @UnsupportedAppUsage
         public int destPort;
         @UnsupportedAppUsage
         public int origPort;
@@ -81,6 +84,10 @@ public class SmsHeader {
     }
 
     public static class ConcatRef {
+        @UnsupportedAppUsage
+        public ConcatRef() {
+        }
+
         @UnsupportedAppUsage
         public int refNumber;
         @UnsupportedAppUsage

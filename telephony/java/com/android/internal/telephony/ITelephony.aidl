@@ -94,6 +94,7 @@ interface ITelephony {
      * @param callingPackage the name of the package making the call.
      * @return returns true if the radio is on.
      */
+    @UnsupportedAppUsage
     boolean isRadioOn(String callingPackage);
 
     /**
@@ -1254,6 +1255,7 @@ interface ITelephony {
       * <p>Requires Permission:
       *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
       */
+    @UnsupportedAppUsage
     String getDeviceId(String callingPackage);
 
     /**

@@ -31,5 +31,7 @@
     <!--Percentage of the screen height, from the bottom, that a notification panel being peeked
     at will result in remaining closed the panel if released-->
     <integer name="notification_settle_close_percentage">80</integer>
+    <!-- The delay before the unlock dialog pops up -->
+    <integer name="unlock_dialog_delay_ms">3000</integer>
 
 </resources>

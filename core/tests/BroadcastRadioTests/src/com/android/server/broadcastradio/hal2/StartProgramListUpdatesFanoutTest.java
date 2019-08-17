@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +44,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
+import org.mockito.verification.VerificationWithTimeout;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -55,6 +57,8 @@ import java.util.List;
 @MediumTest
 public class StartProgramListUpdatesFanoutTest {
     private static final String TAG = "BroadcastRadioTests.hal2.StartProgramListUpdatesFanout";
+
+    private static final VerificationWithTimeout CB_TIMEOUT = timeout(100);
 
     // Mocks
     @Mock IBroadcastRadio mBroadcastRadioMock;
@@ -200,10 +204,10 @@ public class StartProgramListUpdatesFanoutTest {
 
         // Adding mDabEnsembleInfo should not update any client.
         updateHalProgramInfo(false, Arrays.asList(mDabEnsembleInfo), null);
-        verify(mAidlTunerCallbackMocks[0], times(1)).onProgramListUpdated(any());
-        verify(mAidlTunerCallbackMocks[1], times(2)).onProgramListUpdated(any());
-        verify(mAidlTunerCallbackMocks[2], times(1)).onProgramListUpdated(any());
-        verify(mAidlTunerCallbackMocks[3], times(2)).onProgramListUpdated(any());
+        verify(mAidlTunerCallbackMocks[0], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
+        verify(mAidlTunerCallbackMocks[1], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
+        verify(mAidlTunerCallbackMocks[2], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
+        verify(mAidlTunerCallbackMocks[3], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
     }
 
     @Test
@@ -240,7 +244,7 @@ public class StartProgramListUpdatesFanoutTest {
 
         // Update the HAL with mModifiedAmFmInfo, and verify only the remaining client is updated.
         updateHalProgramInfo(true, Arrays.asList(mModifiedAmFmInfo), null);
-        verify(mAidlTunerCallbackMocks[0], times(1)).onProgramListUpdated(any());
+        verify(mAidlTunerCallbackMocks[0], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
         verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], true,
                 Arrays.asList(mModifiedAmFmInfo), null);
 
@@ -313,6 +317,6 @@ public class StartProgramListUpdatesFanoutTest {
         }
         ProgramList.Chunk expectedChunk = new ProgramList.Chunk(purge, true, modifiedSet,
                 removedSet);
-        verify(clientMock).onProgramListUpdated(expectedChunk);
+        verify(clientMock, CB_TIMEOUT).onProgramListUpdated(expectedChunk);
     }
 }

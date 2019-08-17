@@ -29,7 +29,7 @@ import android.os.Message;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 
 /**
  * Track whether there are any active Bluetooth devices connected.
@@ -40,14 +40,14 @@ public class BluetoothConstraint implements IDeviceIdleConstraint {
 
     private final Context mContext;
     private final Handler mHandler;
-    private final DeviceIdleController.LocalService mLocalService;
+    private final DeviceIdleInternal mLocalService;
     private final BluetoothManager mBluetoothManager;
 
     private volatile boolean mConnected = true;
     private volatile boolean mMonitoring = false;
 
     public BluetoothConstraint(
-            Context context, Handler handler, DeviceIdleController.LocalService localService) {
+            Context context, Handler handler, DeviceIdleInternal localService) {
         mContext = context;
         mHandler = handler;
         mLocalService = localService;

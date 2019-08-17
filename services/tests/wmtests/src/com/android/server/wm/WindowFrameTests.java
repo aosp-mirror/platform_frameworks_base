@@ -57,6 +57,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
     private final IWindow mIWindow = new TestIWindow();
     private final Rect mEmptyRect = new Rect();
+    private DisplayContent mTestDisplayContent;
 
     static class FrameTestWindowState extends WindowState {
         boolean mDockedResizingForTest = false;
@@ -77,6 +78,9 @@ public class WindowFrameTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mStubStack = mock(TaskStack.class);
+        DisplayInfo testDisplayInfo = new DisplayInfo(mDisplayInfo);
+        testDisplayInfo.displayCutout = null;
+        mTestDisplayContent = createNewDisplay(testDisplayInfo);
     }
 
     // Do not use this function directly in the tests below. Instead, use more explicit function
@@ -98,6 +102,10 @@ public class WindowFrameTests extends WindowTestsBase {
 
     private void assertStableInset(WindowState w, int left, int top, int right, int bottom) {
         assertRect(w.getStableInsets(), left, top, right, bottom);
+    }
+
+    private void assertFrame(WindowState w, Rect frame) {
+        assertEquals(w.getFrameLw(), frame);
     }
 
     private void assertFrame(WindowState w, int left, int top, int right, int bottom) {
@@ -380,9 +388,10 @@ public class WindowFrameTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 137879065)
     public void testLayoutLetterboxedWindow() {
         // First verify task behavior in multi-window mode.
-        final DisplayInfo displayInfo = mWm.getDefaultDisplayContentLocked().getDisplayInfo();
+        final DisplayInfo displayInfo = mTestDisplayContent.getDisplayInfo();
         final int logicalWidth = displayInfo.logicalWidth;
         final int logicalHeight = displayInfo.logicalHeight;
 
@@ -413,13 +422,14 @@ public class WindowFrameTests extends WindowTestsBase {
         final Rect cf = new Rect(xInset, 0, logicalWidth - xInset, logicalHeight);
         Configuration config = new Configuration(w.mAppToken.getRequestedOverrideConfiguration());
         config.windowConfiguration.setBounds(cf);
+        config.windowConfiguration.setAppBounds(cf);
         w.mAppToken.onRequestedOverrideConfigurationChanged(config);
         pf.set(0, 0, logicalWidth, logicalHeight);
         task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         task.setBounds(null);
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw();
-        assertFrame(w, cf.left, cf.top, cf.right, cf.bottom);
+        assertFrame(w, cf);
         assertContentFrame(w, cf);
         assertContentInset(w, 0, 0, 0, 0);
     }
@@ -483,7 +493,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
         task.setWindowingMode(WINDOWING_MODE_FREEFORM);
 
-        DisplayContent dc = mWm.getDefaultDisplayContentLocked();
+        DisplayContent dc = mTestDisplayContent;
         dc.mInputMethodTarget = w;
         WindowState mockIme = mock(WindowState.class);
         Mockito.doReturn(true).when(mockIme).isVisibleNow();
@@ -537,7 +547,7 @@ public class WindowFrameTests extends WindowTestsBase {
         attrs.width = width;
         attrs.height = height;
 
-        AppWindowToken token = createAppWindowToken(mWm.getDefaultDisplayContentLocked(),
+        AppWindowToken token = createAppWindowToken(mTestDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
 
         FrameTestWindowState ws = new FrameTestWindowState(mWm, mIWindow, token, attrs);

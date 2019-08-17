@@ -117,7 +117,9 @@ typedef const std::function<void(std::string)>& fail_fn_t;
 
 static pid_t gSystemServerPid = 0;
 
+static constexpr const char* kPropFuse = "persist.sys.fuse";
 static constexpr const char* kZygoteClassName = "com/android/internal/os/Zygote";
+
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
@@ -704,15 +706,24 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
     return;
   }
 
-  const std::string& storage_source = ExternalStorageViews[mount_mode];
-
-  BindMount(storage_source, "/storage", fail_fn);
-
-  // Mount user-specific symlink helper into place
-  userid_t user_id = multiuser_get_user_id(uid);
+  const userid_t user_id = multiuser_get_user_id(uid);
   const std::string user_source = StringPrintf("/mnt/user/%d", user_id);
+  bool isFuse = GetBoolProperty(kPropFuse, false);
+
   CreateDir(user_source, 0751, AID_ROOT, AID_ROOT, fail_fn);
-  BindMount(user_source, "/storage/self", fail_fn);
+
+  if (isFuse) {
+    // TODO(b/135341433): Bind mount the appropriate storage view for the app given its permissions
+    // media and media_location permission access. This should prevent the kernel from incorrectly
+    // sharing a cache across permission buckets
+    BindMount(user_source, "/storage", fail_fn);
+  } else {
+    const std::string& storage_source = ExternalStorageViews[mount_mode];
+    BindMount(storage_source, "/storage", fail_fn);
+
+    // Mount user-specific symlink helper into place
+    BindMount(user_source, "/storage/self", fail_fn);
+  }
 }
 
 static bool NeedsNoRandomizeWorkaround() {

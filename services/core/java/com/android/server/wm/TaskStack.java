@@ -1666,7 +1666,7 @@ public class TaskStack extends WindowContainer<Task> implements
      *         default bounds.
      */
     Rect getPictureInPictureBounds(float aspectRatio, Rect stackBounds) {
-        if (!mWmService.mSupportsPictureInPicture) {
+        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
             return null;
         }
 
@@ -1762,7 +1762,7 @@ public class TaskStack extends WindowContainer<Task> implements
      * Sets the current picture-in-picture aspect ratio.
      */
     void setPictureInPictureAspectRatio(float aspectRatio) {
-        if (!mWmService.mSupportsPictureInPicture) {
+        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
             return;
         }
 
@@ -1792,7 +1792,7 @@ public class TaskStack extends WindowContainer<Task> implements
      * Sets the current picture-in-picture actions.
      */
     void setPictureInPictureActions(List<RemoteAction> actions) {
-        if (!mWmService.mSupportsPictureInPicture) {
+        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
             return;
         }
 

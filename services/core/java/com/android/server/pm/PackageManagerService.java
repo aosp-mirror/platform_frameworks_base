@@ -290,7 +290,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.AttributeCache;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -300,6 +300,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.DatabaseVersion;
@@ -816,7 +817,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<UserManagerService> mUserManagerProducer;
         private final Singleton<Settings> mSettingsProducer;
         private final Singleton<ActivityTaskManagerInternal> mActivityTaskManagerProducer;
-        private final Singleton<DeviceIdleController.LocalService> mLocalDeviceIdleController;
+        private final Singleton<DeviceIdleInternal> mLocalDeviceIdleController;
         private final Singleton<StorageManagerInternal> mStorageManagerInternalProducer;
         private final Singleton<NetworkPolicyManagerInternal> mNetworkPolicyManagerProducer;
         private final Singleton<PermissionPolicyInternal> mPermissionPolicyProducer;
@@ -824,6 +825,8 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<DisplayManager> mDisplayManagerProducer;
         private final Singleton<StorageManager> mStorageManagerProducer;
         private final Singleton<AppOpsManager> mAppOpsManagerProducer;
+        private final Singleton<AppsFilter> mAppsFilterProducer;
+        private final Singleton<PlatformCompat> mPlatformCompatProducer;
 
         Injector(Context context, Object lock, Installer installer,
                 Object installLock, PackageAbiHelper abiHelper,
@@ -832,14 +835,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 Producer<UserManagerService> userManagerProducer,
                 Producer<Settings> settingsProducer,
                 Producer<ActivityTaskManagerInternal> activityTaskManagerProducer,
-                Producer<DeviceIdleController.LocalService> deviceIdleControllerProducer,
+                Producer<DeviceIdleInternal> deviceIdleControllerProducer,
                 Producer<StorageManagerInternal> storageManagerInternalProducer,
                 Producer<NetworkPolicyManagerInternal> networkPolicyManagerProducer,
                 Producer<PermissionPolicyInternal> permissionPolicyProvider,
                 Producer<DeviceStorageMonitorInternal> deviceStorageMonitorProducer,
                 Producer<DisplayManager> displayManagerProducer,
                 Producer<StorageManager> storageManagerProducer,
-                Producer<AppOpsManager> appOpsManagerProducer) {
+                Producer<AppOpsManager> appOpsManagerProducer,
+                Producer<AppsFilter> appsFilterProducer,
+                Producer<PlatformCompat> platformCompatProducer) {
             mContext = context;
             mLock = lock;
             mInstaller = installer;
@@ -858,6 +863,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mDisplayManagerProducer = new Singleton<>(displayManagerProducer);
             mStorageManagerProducer = new Singleton<>(storageManagerProducer);
             mAppOpsManagerProducer = new Singleton<>(appOpsManagerProducer);
+            mAppsFilterProducer = new Singleton<>(appsFilterProducer);
+            mPlatformCompatProducer = new Singleton<>(platformCompatProducer);
         }
 
         /**
@@ -912,7 +919,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mActivityTaskManagerProducer.get(this, mPackageManager);
         }
 
-        public DeviceIdleController.LocalService getLocalDeviceIdleController() {
+        public DeviceIdleInternal getLocalDeviceIdleController() {
             return mLocalDeviceIdleController.get(this, mPackageManager);
         }
 
@@ -942,6 +949,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public AppOpsManager getAppOpsManager() {
             return mAppOpsManagerProducer.get(this, mPackageManager);
+        }
+
+        public AppsFilter getAppsFilter() {
+            return mAppsFilterProducer.get(this, mPackageManager);
+        }
+
+        public PlatformCompat getCompatibility() {
+            return mPlatformCompatProducer.get(this, mPackageManager);
         }
     }
 
@@ -1249,7 +1264,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setTemporaryAppWhitelistDuration(whitelistTimeout);
 
-            DeviceIdleController.LocalService idleController =
+            DeviceIdleInternal idleController =
                     mInjector.getLocalDeviceIdleController();
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
                     mIntentFilterVerifierComponent.getPackageName(), whitelistTimeout,
@@ -2273,9 +2288,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param packageVolume The storage volume of the package.
      * @param packageIsExternal true if the package is currently installed on
      * external/removable/unprotected storage.
-     * @return {@link StorageEnum#TYPE_UNKNOWN} if the package is not stored externally or the
-     * corresponding {@link StorageEnum} storage type value if it is.
-     * corresponding {@link StorageEnum} storage type value if it is.
+     * @return {@link StorageEnums#UNKNOWN} if the package is not stored externally or the
+     * corresponding {@link StorageEnums} storage type value if it is.
+     * corresponding {@link StorageEnums} storage type value if it is.
      */
     private static int getPackageExternalStorageType(VolumeInfo packageVolume,
             boolean packageIsExternal) {
@@ -2425,14 +2440,16 @@ public class PackageManagerService extends IPackageManager.Stub
                                 i.getPermissionManagerServiceInternal().getPermissionSettings(),
                                 lock),
                 new Injector.LocalServicesProducer<>(ActivityTaskManagerInternal.class),
-                new Injector.LocalServicesProducer<>(DeviceIdleController.LocalService.class),
+                new Injector.LocalServicesProducer<>(DeviceIdleInternal.class),
                 new Injector.LocalServicesProducer<>(StorageManagerInternal.class),
                 new Injector.LocalServicesProducer<>(NetworkPolicyManagerInternal.class),
                 new Injector.LocalServicesProducer<>(PermissionPolicyInternal.class),
                 new Injector.LocalServicesProducer<>(DeviceStorageMonitorInternal.class),
                 new Injector.SystemServiceProducer<>(DisplayManager.class),
                 new Injector.SystemServiceProducer<>(StorageManager.class),
-                new Injector.SystemServiceProducer<>(AppOpsManager.class));
+                new Injector.SystemServiceProducer<>(AppOpsManager.class),
+                (i, pm) -> AppsFilter.create(i),
+                (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"));
 
         PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);
         t.traceEnd(); // "create package manager"
@@ -2617,7 +2634,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mProtectedPackages = new ProtectedPackages(mContext);
 
         mApexManager = ApexManager.create(mContext);
-        mAppsFilter = AppsFilter.create(mContext);
+        mAppsFilter = mInjector.getAppsFilter();
 
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
@@ -2725,14 +2742,10 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
 
-            int preUpgradeSdkVersion = ver.sdkVersion;
-
             // save off the names of pre-existing system packages prior to scanning; we don't
             // want to automatically grant runtime permissions for new system apps
             if (mPromoteSystemApps) {
-                Iterator<PackageSetting> pkgSettingIter = mSettings.mPackages.values().iterator();
-                while (pkgSettingIter.hasNext()) {
-                    PackageSetting ps = pkgSettingIter.next();
+                for (PackageSetting ps : mSettings.mPackages.values()) {
                     if (isSystemApp(ps)) {
                         mExistingSystemPackages.add(ps.name);
                     }
@@ -14511,7 +14524,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
                             receivers, verificationState);
 
-                    DeviceIdleController.LocalService idleController =
+                    DeviceIdleInternal idleController =
                             mInjector.getLocalDeviceIdleController();
                     final long idleDuration = getVerificationTimeout();
 
@@ -14580,17 +14593,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
                     mPendingEnableRollback.append(enableRollbackToken, this);
 
-                    final int[] installedUsers;
-                    synchronized (mLock) {
-                        PackageSetting ps = mSettings.getPackageLPr(pkgLite.packageName);
-                        if (ps != null) {
-                            installedUsers = ps.queryInstalledUsers(mUserManager.getUserIds(),
-                                    true);
-                        } else {
-                            installedUsers = new int[0];
-                        }
-                    }
-
                     Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
@@ -14598,9 +14600,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
                             installFlags);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS,
-                            installedUsers);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
                             getRollbackUser().getIdentifier());
@@ -20458,6 +20457,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mContext.getContentResolver().registerContentObserver(android.provider.Settings.Secure
                         .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_ALL);
         co.onChange(true);
+
+        mAppsFilter.onSystemReady();
 
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.

@@ -349,25 +349,28 @@ public class SyntheticPasswordManager {
      * a default all-zero key is used. If the value is not specified, a fresh random secret is
      * generated as the value.
      *
-     * @return the value stored in the weaver slot
-     * @throws RemoteException
+     * @return the value stored in the weaver slot, or null if the operation fails
      */
-    private byte[] weaverEnroll(int slot, byte[] key, @Nullable byte[] value)
-            throws RemoteException {
+    private byte[] weaverEnroll(int slot, byte[] key, @Nullable byte[] value) {
         if (slot == INVALID_WEAVER_SLOT || slot >= mWeaverConfig.slots) {
-            throw new RuntimeException("Invalid slot for weaver");
+            throw new IllegalArgumentException("Invalid slot for weaver");
         }
         if (key == null) {
             key = new byte[mWeaverConfig.keySize];
         } else if (key.length != mWeaverConfig.keySize) {
-            throw new RuntimeException("Invalid key size for weaver");
+            throw new IllegalArgumentException("Invalid key size for weaver");
         }
         if (value == null) {
             value = secureRandom(mWeaverConfig.valueSize);
         }
-        int writeStatus = mWeaver.write(slot, toByteArrayList(key), toByteArrayList(value));
-        if (writeStatus != WeaverStatus.OK) {
-            Log.e(TAG, "weaver write failed, slot: " + slot + " status: " + writeStatus);
+        try {
+            int writeStatus = mWeaver.write(slot, toByteArrayList(key), toByteArrayList(value));
+            if (writeStatus != WeaverStatus.OK) {
+                Log.e(TAG, "weaver write failed, slot: " + slot + " status: " + writeStatus);
+                return null;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "weaver write failed", e);
             return null;
         }
         return value;
@@ -377,47 +380,53 @@ public class SyntheticPasswordManager {
      * Verify the supplied key against a weaver slot, returning a response indicating whether
      * the verification is successful, throttled or failed. If successful, the bound secret
      * is also returned.
-     * @throws RemoteException
      */
-    private VerifyCredentialResponse weaverVerify(int slot, byte[] key) throws RemoteException {
+    private VerifyCredentialResponse weaverVerify(int slot, byte[] key) {
         if (slot == INVALID_WEAVER_SLOT || slot >= mWeaverConfig.slots) {
-            throw new RuntimeException("Invalid slot for weaver");
+            throw new IllegalArgumentException("Invalid slot for weaver");
         }
         if (key == null) {
             key = new byte[mWeaverConfig.keySize];
         } else if (key.length != mWeaverConfig.keySize) {
-            throw new RuntimeException("Invalid key size for weaver");
+            throw new IllegalArgumentException("Invalid key size for weaver");
         }
         final VerifyCredentialResponse[] response = new VerifyCredentialResponse[1];
-        mWeaver.read(slot, toByteArrayList(key), (int status, WeaverReadResponse readResponse) -> {
-            switch (status) {
-                case WeaverReadStatus.OK:
-                    response[0] = new VerifyCredentialResponse(
-                            fromByteArrayList(readResponse.value));
-                    break;
-                case WeaverReadStatus.THROTTLE:
-                    response[0] = new VerifyCredentialResponse(readResponse.timeout);
-                    Log.e(TAG, "weaver read failed (THROTTLE), slot: " + slot);
-                    break;
-                case WeaverReadStatus.INCORRECT_KEY:
-                    if (readResponse.timeout == 0) {
-                        response[0] = VerifyCredentialResponse.ERROR;
-                        Log.e(TAG, "weaver read failed (INCORRECT_KEY), slot: " + slot);
-                    } else {
-                        response[0] = new VerifyCredentialResponse(readResponse.timeout);
-                        Log.e(TAG, "weaver read failed (INCORRECT_KEY/THROTTLE), slot: " + slot);
+        try {
+            mWeaver.read(slot, toByteArrayList(key),
+                    (int status, WeaverReadResponse readResponse) -> {
+                    switch (status) {
+                        case WeaverReadStatus.OK:
+                            response[0] = new VerifyCredentialResponse(
+                                    fromByteArrayList(readResponse.value));
+                            break;
+                        case WeaverReadStatus.THROTTLE:
+                            response[0] = new VerifyCredentialResponse(readResponse.timeout);
+                            Log.e(TAG, "weaver read failed (THROTTLE), slot: " + slot);
+                            break;
+                        case WeaverReadStatus.INCORRECT_KEY:
+                            if (readResponse.timeout == 0) {
+                                response[0] = VerifyCredentialResponse.ERROR;
+                                Log.e(TAG, "weaver read failed (INCORRECT_KEY), slot: " + slot);
+                            } else {
+                                response[0] = new VerifyCredentialResponse(readResponse.timeout);
+                                Log.e(TAG, "weaver read failed (INCORRECT_KEY/THROTTLE), slot: "
+                                        + slot);
+                            }
+                            break;
+                        case WeaverReadStatus.FAILED:
+                            response[0] = VerifyCredentialResponse.ERROR;
+                            Log.e(TAG, "weaver read failed (FAILED), slot: " + slot);
+                            break;
+                        default:
+                            response[0] = VerifyCredentialResponse.ERROR;
+                            Log.e(TAG, "weaver read unknown status " + status + ", slot: " + slot);
+                            break;
                     }
-                    break;
-                case WeaverReadStatus.FAILED:
-                    response[0] = VerifyCredentialResponse.ERROR;
-                    Log.e(TAG, "weaver read failed (FAILED), slot: " + slot);
-                    break;
-               default:
-                   response[0] = VerifyCredentialResponse.ERROR;
-                   Log.e(TAG, "weaver read unknown status " + status + ", slot: " + slot);
-                   break;
-            }
-        });
+                });
+        } catch (RemoteException e) {
+            response[0] = VerifyCredentialResponse.ERROR;
+            Log.e(TAG, "weaver read failed, slot: " + slot, e);
+        }
         return response[0];
     }
 
@@ -460,12 +469,15 @@ public class SyntheticPasswordManager {
      *
      */
     public AuthenticationToken newSyntheticPasswordAndSid(IGateKeeperService gatekeeper,
-            byte[] hash, byte[] credential, int userId) throws RemoteException {
+            byte[] hash, byte[] credential, int userId) {
         AuthenticationToken result = AuthenticationToken.create();
         GateKeeperResponse response;
         if (hash != null) {
-            response = gatekeeper.enroll(userId, hash, credential,
-                    result.deriveGkPassword());
+            try {
+                response = gatekeeper.enroll(userId, hash, credential, result.deriveGkPassword());
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Failed to enroll credential duing SP init", e);
+            }
             if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
                 Log.w(TAG, "Fail to migrate SID, assuming no SID, user " + userId);
                 clearSidForUser(userId);
@@ -484,9 +496,13 @@ public class SyntheticPasswordManager {
      * Used when adding password to previously-unsecured devices.
      */
     public void newSidForUser(IGateKeeperService gatekeeper, AuthenticationToken authToken,
-            int userId) throws RemoteException {
-        GateKeeperResponse response = gatekeeper.enroll(userId, null, null,
-                authToken.deriveGkPassword());
+            int userId) {
+        GateKeeperResponse response;
+        try {
+            response = gatekeeper.enroll(userId, null, null, authToken.deriveGkPassword());
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to create new SID for user", e);
+        }
         if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
             Log.e(TAG, "Fail to create new SID for user " + userId);
             return;
@@ -565,12 +581,8 @@ public class SyntheticPasswordManager {
             Set<Integer> usedSlots = getUsedWeaverSlots();
             if (!usedSlots.contains(slot)) {
                 Log.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);
-                try {
-                    weaverEnroll(slot, null, null);
-                    mPasswordSlotManager.markSlotDeleted(slot);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to destroy slot", e);
-                }
+                weaverEnroll(slot, null, null);
+                mPasswordSlotManager.markSlotDeleted(slot);
             } else {
                 Log.w(TAG, "Skip destroying reused weaver slot " + slot + " for user " + userId);
             }
@@ -608,7 +620,7 @@ public class SyntheticPasswordManager {
                 return i;
             }
         }
-        throw new RuntimeException("Run out of weaver slots.");
+        throw new IllegalStateException("Run out of weaver slots.");
     }
 
     /**
@@ -622,11 +634,12 @@ public class SyntheticPasswordManager {
      *
      * @see #newSidForUser
      * @see #clearSidForUser
+     * @return a new password handle for the wrapped SP blob
+     * @throw IllegalStateException if creation fails.
      */
     public long createPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
             byte[] credential, int credentialType, AuthenticationToken authToken,
-            int requestedQuality, int userId)
-                    throws RemoteException {
+            int requestedQuality, int userId) {
         if (credential == null || credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             credentialType = LockPatternUtils.CREDENTIAL_TYPE_NONE;
             credential = DEFAULT_PASSWORD;
@@ -642,10 +655,11 @@ public class SyntheticPasswordManager {
             // Weaver based user password
             int weaverSlot = getNextAvailableWeaverSlot();
             Log.i(TAG, "Weaver enroll password to slot " + weaverSlot + " for user " + userId);
-            byte[] weaverSecret = weaverEnroll(weaverSlot, passwordTokenToWeaverKey(pwdToken), null);
+            byte[] weaverSecret = weaverEnroll(weaverSlot, passwordTokenToWeaverKey(pwdToken),
+                    null);
             if (weaverSecret == null) {
-                Log.e(TAG, "Fail to enroll user password under weaver " + userId);
-                return DEFAULT_HANDLE;
+                throw new IllegalStateException(
+                        "Fail to enroll user password under weaver " + userId);
             }
             saveWeaverSlot(weaverSlot, handle, userId);
             mPasswordSlotManager.markSlotInUse(weaverSlot);
@@ -657,13 +671,22 @@ public class SyntheticPasswordManager {
         } else {
             // In case GK enrollment leaves persistent state around (in RPMB), this will nuke them
             // to prevent them from accumulating and causing problems.
-            gatekeeper.clearSecureUserId(fakeUid(userId));
+            try {
+                gatekeeper.clearSecureUserId(fakeUid(userId));
+            } catch (RemoteException ignore) {
+                Log.w(TAG, "Failed to clear SID from gatekeeper");
+            }
             // GateKeeper based user password
-            GateKeeperResponse response = gatekeeper.enroll(fakeUid(userId), null, null,
-                    passwordTokenToGkInput(pwdToken));
+            GateKeeperResponse response;
+            try {
+                response = gatekeeper.enroll(fakeUid(userId), null, null,
+                        passwordTokenToGkInput(pwdToken));
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Failed to enroll password for new SP blob", e);
+            }
             if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
-                Log.e(TAG, "Fail to enroll user password when creating SP for user " + userId);
-                return DEFAULT_HANDLE;
+                throw new IllegalStateException(
+                        "Fail to enroll user password when creating SP for user " + userId);
             }
             pwd.passwordHandle = response.getPayload();
             sid = sidFromPasswordHandle(pwd.passwordHandle);
@@ -680,14 +703,20 @@ public class SyntheticPasswordManager {
 
     public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
             byte[] userCredential, int credentialType,
-            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+            ICheckCredentialProgressCallback progressCallback) {
         PersistentData persistentData = mStorage.readPersistentDataBlock();
         if (persistentData.type == PersistentData.TYPE_SP) {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
             byte[] pwdToken = computePasswordToken(userCredential, pwd);
 
-            GateKeeperResponse response = gatekeeper.verifyChallenge(fakeUid(persistentData.userId),
-                    0 /* challenge */, pwd.passwordHandle, passwordTokenToGkInput(pwdToken));
+            GateKeeperResponse response;
+            try {
+                response = gatekeeper.verifyChallenge(fakeUid(persistentData.userId),
+                        0 /* challenge */, pwd.passwordHandle, passwordTokenToGkInput(pwdToken));
+            } catch (RemoteException e) {
+                Log.e(TAG, "FRP verifyChallenge failed", e);
+                return VerifyCredentialResponse.ERROR;
+            }
             return VerifyCredentialResponse.fromGateKeeperResponse(response);
         } else if (persistentData.type == PersistentData.TYPE_SP_WEAVER) {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
@@ -805,11 +834,9 @@ public class SyntheticPasswordManager {
         }
         if (isWeaverAvailable()) {
             int slot = getNextAvailableWeaverSlot();
-            try {
-                Log.i(TAG, "Weaver enroll token to slot " + slot + " for user " + userId);
-                weaverEnroll(slot, null, tokenData.weaverSecret);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to enroll weaver secret when activating token", e);
+            Log.i(TAG, "Weaver enroll token to slot " + slot + " for user " + userId);
+            if (weaverEnroll(slot, null, tokenData.weaverSecret) == null) {
+                Log.e(TAG, "Failed to enroll weaver secret when activating token");
                 return false;
             }
             saveWeaverSlot(slot, handle, userId);
@@ -859,7 +886,7 @@ public class SyntheticPasswordManager {
      */
     public AuthenticationResult unwrapPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
             long handle, byte[] credential, int userId,
-            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+            ICheckCredentialProgressCallback progressCallback) {
         if (credential == null) {
             credential = DEFAULT_PASSWORD;
         }
@@ -886,14 +913,28 @@ public class SyntheticPasswordManager {
             applicationId = transformUnderWeaverSecret(pwdToken, result.gkResponse.getPayload());
         } else {
             byte[] gkPwdToken = passwordTokenToGkInput(pwdToken);
-            GateKeeperResponse response = gatekeeper.verifyChallenge(fakeUid(userId), 0L,
-                    pwd.passwordHandle, gkPwdToken);
+            GateKeeperResponse response;
+            try {
+                response = gatekeeper.verifyChallenge(fakeUid(userId), 0L,
+                        pwd.passwordHandle, gkPwdToken);
+            } catch (RemoteException e) {
+                Log.e(TAG, "gatekeeper verify failed", e);
+                result.gkResponse = VerifyCredentialResponse.ERROR;
+                return result;
+            }
             int responseCode = response.getResponseCode();
             if (responseCode == GateKeeperResponse.RESPONSE_OK) {
                 result.gkResponse = VerifyCredentialResponse.OK;
                 if (response.getShouldReEnroll()) {
-                    GateKeeperResponse reenrollResponse = gatekeeper.enroll(fakeUid(userId),
-                            pwd.passwordHandle, gkPwdToken, gkPwdToken);
+                    GateKeeperResponse reenrollResponse;
+                    try {
+                        reenrollResponse = gatekeeper.enroll(fakeUid(userId),
+                                pwd.passwordHandle, gkPwdToken, gkPwdToken);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Fail to invoke gatekeeper.enroll", e);
+                        reenrollResponse = GateKeeperResponse.ERROR;
+                        // continue the flow anyway
+                    }
                     if (reenrollResponse.getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
                         pwd.passwordHandle = reenrollResponse.getPayload();
                         saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
@@ -922,7 +963,11 @@ public class SyntheticPasswordManager {
         // Supplied credential passes first stage weaver/gatekeeper check so it should be correct.
         // Notify the callback so the keyguard UI can proceed immediately.
         if (progressCallback != null) {
-            progressCallback.onCredentialVerified();
+            try {
+                progressCallback.onCredentialVerified();
+            } catch (RemoteException e) {
+                Log.w(TAG, "progressCallback throws exception", e);
+            }
         }
         result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_PASSWORD_BASED,
                 applicationId, sid, userId);
@@ -938,8 +983,7 @@ public class SyntheticPasswordManager {
      * verification to referesh the SID & Auth token maintained by the system.
      */
     public @NonNull AuthenticationResult unwrapTokenBasedSyntheticPassword(
-            IGateKeeperService gatekeeper, long handle, byte[] token, int userId)
-                    throws RemoteException {
+            IGateKeeperService gatekeeper, long handle, byte[] token, int userId) {
         AuthenticationResult result = new AuthenticationResult();
         byte[] secdiscardable = loadSecdiscardable(handle, userId);
         int slotId = loadWeaverSlot(handle, userId);
@@ -985,10 +1029,10 @@ public class SyntheticPasswordManager {
         if (version != SYNTHETIC_PASSWORD_VERSION_V3
                 && version != SYNTHETIC_PASSWORD_VERSION_V2
                 && version != SYNTHETIC_PASSWORD_VERSION_V1) {
-            throw new RuntimeException("Unknown blob version");
+            throw new IllegalArgumentException("Unknown blob version");
         }
         if (blob[1] != type) {
-            throw new RuntimeException("Invalid blob type");
+            throw new IllegalArgumentException("Invalid blob type");
         }
         final byte[] secret;
         if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
@@ -1028,38 +1072,48 @@ public class SyntheticPasswordManager {
      * decrypt SP.
      */
     public @Nullable VerifyCredentialResponse verifyChallenge(IGateKeeperService gatekeeper,
-            @NonNull AuthenticationToken auth, long challenge, int userId) throws RemoteException {
+            @NonNull AuthenticationToken auth, long challenge, int userId) {
         byte[] spHandle = loadSyntheticPasswordHandle(userId);
         if (spHandle == null) {
             // There is no password handle associated with the given user, i.e. the user is not
             // secured by lockscreen and has no SID, so just return here;
             return null;
         }
-        VerifyCredentialResponse result;
-        GateKeeperResponse response = gatekeeper.verifyChallenge(userId, challenge,
-                spHandle, auth.deriveGkPassword());
+        GateKeeperResponse response;
+        try {
+            response = gatekeeper.verifyChallenge(userId, challenge,
+                    spHandle, auth.deriveGkPassword());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Fail to verify with gatekeeper " + userId, e);
+            return VerifyCredentialResponse.ERROR;
+        }
         int responseCode = response.getResponseCode();
         if (responseCode == GateKeeperResponse.RESPONSE_OK) {
-            result = new VerifyCredentialResponse(response.getPayload());
+            VerifyCredentialResponse result = new VerifyCredentialResponse(response.getPayload());
             if (response.getShouldReEnroll()) {
-                response = gatekeeper.enroll(userId, spHandle,
-                        spHandle, auth.deriveGkPassword());
+                try {
+                    response = gatekeeper.enroll(userId, spHandle, spHandle,
+                            auth.deriveGkPassword());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to invoke gatekeeper.enroll", e);
+                    response = GateKeeperResponse.ERROR;
+                }
                 if (response.getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
                     spHandle = response.getPayload();
                     saveSyntheticPasswordHandle(spHandle, userId);
                     // Call self again to re-verify with updated handle
                     return verifyChallenge(gatekeeper, auth, challenge, userId);
                 } else {
+                    // Fall through, return result from the previous verification attempt.
                     Log.w(TAG, "Fail to re-enroll SP handle for user " + userId);
-                    // Fall through, return existing handle
                 }
             }
+            return result;
         } else if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
-            result = new VerifyCredentialResponse(response.getTimeout());
+            return new VerifyCredentialResponse(response.getTimeout());
         } else {
-            result = VerifyCredentialResponse.ERROR;
+            return VerifyCredentialResponse.ERROR;
         }
-        return result;
     }
 
     public boolean existsHandle(long handle, int userId) {
@@ -1183,7 +1237,7 @@ public class SyntheticPasswordManager {
     private byte[] passwordTokenToWeaverKey(byte[] token) {
         byte[] key = SyntheticPasswordCrypto.personalisedHash(PERSONALISATION_WEAVER_KEY, token);
         if (key.length < mWeaverConfig.keySize) {
-            throw new RuntimeException("weaver key length too small");
+            throw new IllegalArgumentException("weaver key length too small");
         }
         return Arrays.copyOf(key, mWeaverConfig.keySize);
     }

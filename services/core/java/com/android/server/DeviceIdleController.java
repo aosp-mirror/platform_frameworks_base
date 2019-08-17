@@ -1636,27 +1636,32 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    public class LocalService {
+    private class LocalService implements DeviceIdleInternal {
+        @Override
         public void onConstraintStateChanged(IDeviceIdleConstraint constraint, boolean active) {
             synchronized (DeviceIdleController.this) {
                 onConstraintStateChangedLocked(constraint, active);
             }
         }
 
+        @Override
         public void registerDeviceIdleConstraint(IDeviceIdleConstraint constraint, String name,
                 @IDeviceIdleConstraint.MinimumState int minState) {
             registerDeviceIdleConstraintInternal(constraint, name, minState);
         }
 
+        @Override
         public void unregisterDeviceIdleConstraint(IDeviceIdleConstraint constraint) {
             unregisterDeviceIdleConstraintInternal(constraint);
         }
 
+        @Override
         public void exitIdle(String reason) {
             exitIdleInternal(reason);
         }
 
         // duration in milliseconds
+        @Override
         public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
                 long duration, int userId, boolean sync, String reason) {
             addPowerSaveTempWhitelistAppInternal(callingUid, packageName, duration,
@@ -1664,26 +1669,31 @@ public class DeviceIdleController extends SystemService
         }
 
         // duration in milliseconds
+        @Override
         public void addPowerSaveTempWhitelistAppDirect(int uid, long duration, boolean sync,
                 String reason) {
             addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, sync, reason);
         }
 
         // duration in milliseconds
+        @Override
         public long getNotificationWhitelistDuration() {
             return mConstants.NOTIFICATION_WHITELIST_DURATION;
         }
 
+        @Override
         public void setJobsActive(boolean active) {
             DeviceIdleController.this.setJobsActive(active);
         }
 
         // Up-call from alarm manager.
+        @Override
         public void setAlarmsActive(boolean active) {
             DeviceIdleController.this.setAlarmsActive(active);
         }
 
         /** Is the app on any of the power save whitelists, whether system or user? */
+        @Override
         public boolean isAppOnWhitelist(int appid) {
             return DeviceIdleController.this.isAppOnWhitelistInternal(appid);
         }
@@ -1694,10 +1704,12 @@ public class DeviceIdleController extends SystemService
          * can change when the list changes, so it needs to be re-acquired when
          * {@link PowerManager#ACTION_POWER_SAVE_WHITELIST_CHANGED} is sent.
          */
+        @Override
         public int[] getPowerSaveWhitelistUserAppIds() {
             return DeviceIdleController.this.getPowerSaveWhitelistUserAppIds();
         }
 
+        @Override
         public int[] getPowerSaveTempWhitelistAppIds() {
             return DeviceIdleController.this.getAppIdTempWhitelistInternal();
         }
@@ -1767,7 +1779,8 @@ public class DeviceIdleController extends SystemService
             return mContext.getSystemService(SensorManager.class);
         }
 
-        ConstraintController getConstraintController(Handler handler, LocalService localService) {
+        ConstraintController getConstraintController(Handler handler,
+                DeviceIdleInternal localService) {
             if (mContext.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY)) {
                 return new TvConstraintController(mContext, handler);
@@ -1884,7 +1897,7 @@ public class DeviceIdleController extends SystemService
 
         mBinderService = new BinderService();
         publishBinderService(Context.DEVICE_IDLE_CONTROLLER, mBinderService);
-        publishLocalService(LocalService.class, new LocalService());
+        publishLocalService(DeviceIdleInternal.class, new LocalService());
     }
 
     @Override

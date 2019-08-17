@@ -365,4 +365,45 @@ public class CommandQueueTest extends SysuiTestCase {
         waitForIdleSync();
         verify(mCallbacks).onRecentsAnimationStateChanged(eq(true));
     }
+
+    @Test
+    public void testShowBiometricDialog() {
+        Bundle bundle = new Bundle();
+        String packageName = "test";
+        mCommandQueue.showBiometricDialog(bundle, null /* receiver */, 1, true, 3, packageName);
+        waitForIdleSync();
+        verify(mCallbacks).showBiometricDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3),
+                eq(packageName));
+    }
+
+    @Test
+    public void testOnBiometricAuthenticated() {
+        String failureReason = "test_failure_reason";
+        mCommandQueue.onBiometricAuthenticated(true /* authenticated */, failureReason);
+        waitForIdleSync();
+        verify(mCallbacks).onBiometricAuthenticated(eq(true), eq(failureReason));
+    }
+
+    @Test
+    public void testOnBiometricHelp() {
+        String helpMessage = "test_help_message";
+        mCommandQueue.onBiometricHelp(helpMessage);
+        waitForIdleSync();
+        verify(mCallbacks).onBiometricHelp(eq(helpMessage));
+    }
+
+    @Test
+    public void testOnBiometricError() {
+        String errorMessage = "test_error_message";
+        mCommandQueue.onBiometricError(errorMessage);
+        waitForIdleSync();
+        verify(mCallbacks).onBiometricError(eq(errorMessage));
+    }
+
+    @Test
+    public void testHideBiometricDialog() {
+        mCommandQueue.hideBiometricDialog();
+        waitForIdleSync();
+        verify(mCallbacks).hideBiometricDialog();
+    }
 }

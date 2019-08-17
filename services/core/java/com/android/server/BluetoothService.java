@@ -53,8 +53,11 @@ class BluetoothService extends SystemService {
 
     @Override
     public void onSwitchUser(int userHandle) {
-        initialize();
-        mBluetoothManagerService.handleOnSwitchUser(userHandle);
+        if (!mInitialized) {
+            initialize();
+        } else {
+            mBluetoothManagerService.handleOnSwitchUser(userHandle);
+        }
     }
 
     @Override

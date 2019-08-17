@@ -331,7 +331,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mController.layoutTask(task, null /* windowLayout */);
 
-        assertEquals(expected, task.getBounds());
+        // TaskRecord will make adjustments to requested bounds. We only need to guarantee that the
+        // reuqested bounds are expected.
+        assertEquals(expected, task.getRequestedOverrideBounds());
     }
 
     /**

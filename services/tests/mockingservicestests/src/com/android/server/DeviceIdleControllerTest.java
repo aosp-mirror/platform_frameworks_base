@@ -186,7 +186,7 @@ public class DeviceIdleControllerTest {
 
         @Override
         ConstraintController getConstraintController(
-                Handler handler, DeviceIdleController.LocalService localService) {
+                Handler handler, DeviceIdleInternal localService) {
             return constraintController;
         }
 
@@ -291,7 +291,7 @@ public class DeviceIdleControllerTest {
         // DeviceIdleController adds these to LocalServices in the constructor, so we have to remove
         // them after each test, otherwise, subsequent tests will fail.
         LocalServices.removeServiceForTest(AppStateTracker.class);
-        LocalServices.removeServiceForTest(DeviceIdleController.LocalService.class);
+        LocalServices.removeServiceForTest(DeviceIdleInternal.class);
     }
 
     @Test

@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 /**
  * Contains a list of string constants used to get or set telephone properties
  * in the system. You can use {@link android.os.SystemProperties os.SystemProperties}
@@ -101,6 +103,7 @@ public interface TelephonyProperties
      *  provider of the SIM. 5 or 6 decimal digits.
      *  Availability: SIM state must be "READY"
      */
+    @UnsupportedAppUsage
     static String PROPERTY_ICC_OPERATOR_NUMERIC = "gsm.sim.operator.numeric";
 
     /** PROPERTY_ICC_OPERATOR_ALPHA is also known as the SPN, or Service Provider Name.

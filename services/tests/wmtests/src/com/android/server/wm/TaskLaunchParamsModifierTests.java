@@ -1277,17 +1277,18 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     private ActivityRecord createSourceActivity(TestActivityDisplay display) {
-        final TestActivityStack stack = display.createStack(display.getWindowingMode(),
+        final ActivityStack stack = display.createStack(display.getWindowingMode(),
                 ACTIVITY_TYPE_STANDARD, true);
         return new ActivityBuilder(mService).setStack(stack).setCreateTask(true).build();
     }
 
     private void addFreeformTaskTo(TestActivityDisplay display, Rect bounds) {
-        final TestActivityStack stack = display.createStack(display.getWindowingMode(),
+        final ActivityStack stack = display.createStack(display.getWindowingMode(),
                 ACTIVITY_TYPE_STANDARD, true);
         stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         final TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
-        task.setBounds(bounds);
+        // Just work around the unnecessary adjustments for bounds.
+        task.getWindowConfiguration().setBounds(bounds);
     }
 
     private void assertEquivalentWindowingMode(int expected, int actual, int parentWindowingMode) {

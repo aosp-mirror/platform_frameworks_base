@@ -872,8 +872,8 @@ public class AccessibilityWindowManager {
                 RemoteAccessibilityConnection wrapper = new RemoteAccessibilityConnection(
                         windowId, connection, packageName, resolvedUid, resolvedUserId);
                 wrapper.linkToDeath();
-                getInteractionConnectionsForUserLocked(userId).put(windowId, wrapper);
-                getWindowTokensForUserLocked(userId).put(windowId, windowToken.asBinder());
+                getInteractionConnectionsForUserLocked(resolvedUserId).put(windowId, wrapper);
+                getWindowTokensForUserLocked(resolvedUserId).put(windowId, windowToken.asBinder());
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added user connection for pid:" + Binder.getCallingPid()
                             + " with windowId: " + windowId

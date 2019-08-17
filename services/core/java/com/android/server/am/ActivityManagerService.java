@@ -330,7 +330,7 @@ import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AttributeCache;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
@@ -1135,7 +1135,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Access to DeviceIdleController service.
      */
-    DeviceIdleController.LocalService mLocalDeviceIdleController;
+    DeviceIdleInternal mLocalDeviceIdleController;
 
     /**
      * Power-save whitelisted app-ids (not including except-idle-whitelisted ones).
@@ -1480,8 +1480,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     public ActivityTaskManagerService mActivityTaskManager;
     @VisibleForTesting
     public ActivityTaskManagerInternal mAtmInternal;
+    UriGrantsManagerInternal mUgmInternal;
     @VisibleForTesting
-    public UriGrantsManagerInternal mUgmInternal;
+    public final ActivityManagerInternal mInternal;
     final ActivityThread mSystemThread;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -2413,6 +2414,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
         mFactoryTest = FACTORY_TEST_OFF;
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+        mInternal = new LocalService();
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2566,6 +2569,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, "Setting background thread cpuset failed");
         }
 
+        mInternal = new LocalService();
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -2583,7 +2587,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService.publish();
         mAppOpsService.publish(mContext);
         Slog.d("AppOps", "AppOpsService published");
-        LocalServices.addService(ActivityManagerInternal.class, new LocalService());
+        LocalServices.addService(ActivityManagerInternal.class, mInternal);
         mActivityTaskManager.onActivityManagerInternalAdded();
         mUgmInternal.onActivityManagerInternalAdded();
         mPendingIntentController.onActivityManagerInternalAdded();
@@ -9003,8 +9007,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             t.traceBegin("controllersReady");
-            mLocalDeviceIdleController
-                    = LocalServices.getService(DeviceIdleController.LocalService.class);
+            mLocalDeviceIdleController =
+                    LocalServices.getService(DeviceIdleInternal.class);
             mActivityTaskManager.onSystemReady();
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();

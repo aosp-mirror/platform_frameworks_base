@@ -209,8 +209,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     // will show briefly and be replaced by "device locked out" message.
                     if (listener != null) {
                         if (isBiometricPrompt()) {
-                            listener.onAuthenticationFailedInternal(getCookie(),
-                                    getRequireConfirmation());
+                            listener.onAuthenticationFailedInternal();
                         } else {
                             listener.onAuthenticationFailed(getHalDeviceId());
                         }

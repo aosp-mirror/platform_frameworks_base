@@ -139,7 +139,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 
 import com.google.common.util.concurrent.AbstractFuture;
@@ -293,7 +293,7 @@ public class NetworkPolicyManagerServiceTest {
     };
 
     private void registerLocalServices() {
-        addLocalServiceMock(DeviceIdleController.LocalService.class);
+        addLocalServiceMock(DeviceIdleInternal.class);
 
         final UsageStatsManagerInternal usageStats =
                 addLocalServiceMock(UsageStatsManagerInternal.class);
@@ -442,7 +442,7 @@ public class NetworkPolicyManagerServiceTest {
         // Added in registerLocalServices()
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
-        LocalServices.removeServiceForTest(DeviceIdleController.LocalService.class);
+        LocalServices.removeServiceForTest(DeviceIdleInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
         LocalServices.removeServiceForTest(NetworkStatsManagerInternal.class);
     }

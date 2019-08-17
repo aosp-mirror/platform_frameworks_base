@@ -43,7 +43,6 @@ import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
 import static android.content.pm.ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
-import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
@@ -361,7 +360,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
     /**
-     * It is the same instance as {@link mGlobalLock}, just declared as a type that the
+     * It is the same instance as {@link #mGlobalLock}, just declared as a type that the
      * locked-region-code-injection does't recognize it. It is used to skip wrapping priority
      * booster for places that are already in the scope of another booster (e.g. computing oom-adj).
      *
@@ -730,7 +729,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
-        final boolean isPc = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         DisplayProperties.debug_force_rtl(forceRtl);
@@ -761,10 +759,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mSupportsPictureInPicture = false;
                 mSupportsMultiDisplay = false;
             }
-            mWindowManager.setForceResizableTasks(mForceResizableActivities);
-            mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
-            mWindowManager.setSupportsFreeformWindowManagement(mSupportsFreeformWindowManagement);
-            mWindowManager.setIsPc(isPc);
             mWindowManager.mRoot.onSettingsRetrieved();
             // This happens before any activities are started, so we can change global configuration
             // in-place.
@@ -821,8 +815,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 new TaskChangeNotificationController(mGlobalLock, mStackSupervisor, mH);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mH);
         mActivityStartController = new ActivityStartController(this);
-        mRecentTasks = createRecentTasks();
-        mStackSupervisor.setRecentTasks(mRecentTasks);
+        setRecentTasks(new RecentTasks(this, mStackSupervisor));
         mVrController = new VrController(mGlobalLock);
         mKeyguardController = mStackSupervisor.getKeyguardController();
     }
@@ -890,8 +883,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mode == AppOpsManager.MODE_ALLOWED;
     }
 
-    protected RecentTasks createRecentTasks() {
-        return new RecentTasks(this, mStackSupervisor);
+    @VisibleForTesting
+    protected void setRecentTasks(RecentTasks recentTasks) {
+        mRecentTasks = recentTasks;
+        mStackSupervisor.setRecentTasks(recentTasks);
     }
 
     RecentTasks getRecentTasks() {
@@ -1954,12 +1949,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null) {
                     return false;
                 }
-                final boolean translucentChanged = r.changeWindowTranslucency(true);
-                if (translucentChanged) {
-                    mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-                }
-                mWindowManager.setAppFullscreen(token, true);
-                return translucentChanged;
+                return r.setOccludesParent(true);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1982,13 +1972,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     ActivityRecord under = task.mActivities.get(index - 1);
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
-                final boolean translucentChanged = r.changeWindowTranslucency(false);
-                if (translucentChanged) {
-                    r.getActivityStack().convertActivityToTranslucent(r);
-                }
-                mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-                mWindowManager.setAppFullscreen(token, false);
-                return translucentChanged;
+                return r.setOccludesParent(false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2581,7 +2565,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + taskId + " to stack " + stackId);
                 }
                 if (stack.inSplitScreenPrimaryWindowingMode()) {
-                    mWindowManager.setDockedStackCreateState(
+                    mWindowManager.setDockedStackCreateStateLocked(
                             SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
                 }
                 task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
@@ -2700,7 +2684,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + " non-standard task " + taskId + " to split-screen windowing mode");
                 }
 
-                mWindowManager.setDockedStackCreateState(createMode, initialBounds);
+                mWindowManager.setDockedStackCreateStateLocked(createMode, initialBounds);
                 final int windowingMode = task.getWindowingMode();
                 final ActivityStack stack = task.getStack();
                 if (toTop) {
@@ -2802,7 +2786,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 // Cancel the recents animation synchronously (do not hold the WM lock)
-                mWindowManager.cancelRecentsAnimationSynchronously(restoreHomeStackPosition
+                mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
                         ? REORDER_MOVE_TO_ORIGINAL_POSITION
                         : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation/uid=" + callingUid);
             }

@@ -355,7 +355,9 @@ public class DockedStackDividerController {
 
     void getTouchRegion(Rect outRegion) {
         outRegion.set(mTouchRegion);
-        outRegion.offset(mWindow.getFrameLw().left, mWindow.getFrameLw().top);
+        if (mWindow != null) {
+            outRegion.offset(mWindow.getFrameLw().left, mWindow.getFrameLw().top);
+        }
     }
 
     private void resetDragResizingChangeReported() {

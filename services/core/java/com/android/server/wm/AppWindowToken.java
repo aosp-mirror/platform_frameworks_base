@@ -92,6 +92,7 @@ import android.content.ComponentName;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -153,8 +154,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     final ComponentName mActivityComponent;
     final boolean mVoiceInteraction;
 
-    /** @see WindowContainer#fillsParent() */
-    private boolean mFillsParent;
+    /**
+     * The activity is opaque and fills the entire space of this task.
+     * @see WindowContainer#fillsParent()
+     */
+    private boolean mOccludesParent;
     boolean mShowForAllUsers;
     int mTargetSdk;
 
@@ -373,7 +377,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         appToken = token;
         mActivityComponent = activityComponent;
         mVoiceInteraction = voiceInteraction;
-        mFillsParent = fillsParent;
+        mOccludesParent = fillsParent;
         mInputApplicationHandle = new InputApplicationHandle(appToken.asBinder());
     }
 
@@ -2354,11 +2358,29 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     boolean fillsParent() {
-        return mFillsParent;
+        return occludesParent();
     }
 
-    void setFillsParent(boolean fillsParent) {
-        mFillsParent = fillsParent;
+    /** Returns true if this activity is opaque and fills the entire space of this task. */
+    boolean occludesParent() {
+        return mOccludesParent;
+    }
+
+    boolean setOccludesParent(boolean occludesParent) {
+        final boolean changed = occludesParent != mOccludesParent;
+        mOccludesParent = occludesParent;
+        setMainWindowOpaque(occludesParent);
+        mWmService.mWindowPlacerLocked.requestTraversal();
+        return changed;
+    }
+
+    void setMainWindowOpaque(boolean isOpaque) {
+        final WindowState win = findMainWindow();
+        if (win == null) {
+            return;
+        }
+        isOpaque = isOpaque & !PixelFormat.formatHasAlpha(win.getAttrs().format);
+        win.mWinAnimator.setOpaqueLocked(isOpaque);
     }
 
     boolean containsDismissKeyguardWindow() {
@@ -3035,7 +3057,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         pw.println(prefix + "component=" + mActivityComponent.flattenToShortString());
         pw.print(prefix); pw.print("task="); pw.println(getTask());
-        pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);
+        pw.print(prefix); pw.print(" mOccludesParent="); pw.print(mOccludesParent);
                 pw.print(" mOrientation="); pw.println(mOrientation);
         pw.println(prefix + "hiddenRequested=" + hiddenRequested + " mClientHidden=" + mClientHidden
             + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
@@ -3152,7 +3174,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mThumbnail != null){
             mThumbnail.writeToProto(proto, THUMBNAIL);
         }
-        proto.write(FILLS_PARENT, mFillsParent);
+        proto.write(FILLS_PARENT, mOccludesParent);
         proto.write(APP_STOPPED, mAppStopped);
         proto.write(HIDDEN_REQUESTED, hiddenRequested);
         proto.write(CLIENT_HIDDEN, mClientHidden);
