@@ -26,7 +26,7 @@ import android.view.View;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSliceView;
-import com.android.systemui.SystemUIFactory;
+import com.android.systemui.SystemUIRootComponent;
 import com.android.systemui.qs.QSCarrierGroup;
 import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
@@ -62,7 +62,7 @@ public class InjectionInflationController {
     private final LayoutInflater.Factory2 mFactory = new InjectionFactory();
 
     @Inject
-    public InjectionInflationController(SystemUIFactory.SystemUIRootComponent rootComponent) {
+    public InjectionInflationController(SystemUIRootComponent rootComponent) {
         mViewCreator = rootComponent.createViewCreator();
         initInjectionMap();
     }

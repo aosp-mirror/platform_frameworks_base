@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package android.net.dhcp;
+package com.android.systemui;
 
 /**
- * Convenience wrapper around IDhcpServerCallbacks.Stub that implements getInterfaceVersion().
- * @hide
+ * Interface necessary to make Dagger happy. See {@link ContextComponentResolver}.
  */
-public abstract class DhcpServerCallbacks extends IDhcpServerCallbacks.Stub {
-    /**
-     * Get the version of the aidl interface implemented by the callbacks.
-     */
-    @Override
-    public int getInterfaceVersion() {
-        return IDhcpServerCallbacks.VERSION;
-    }
+public interface ContextComponentHelper {
+    /** Turns a classname into an instance of the class or returns null. */
+    <T> T resolve(String className);
 }
