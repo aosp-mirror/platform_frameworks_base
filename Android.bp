@@ -689,6 +689,7 @@ java_defaults {
     jarjar_rules: ":framework-jarjar-rules",
 
     static_libs: [
+        "mimemap",
         "apex_aidl_interface-java",
         "suspend_control_aidl_interface-java",
         "framework-protos",
