@@ -453,7 +453,6 @@ public final class ViewRootImpl implements ViewParent,
     boolean mReportNextDraw;
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
-    boolean mLastWasImTarget;
     boolean mForceNextWindowRelayout;
     CountDownLatch mWindowDrawCountDown;
 
@@ -619,6 +618,16 @@ public final class ViewRootImpl implements ViewParent,
             InputEventConsistencyVerifier.isInstrumentationEnabled() ?
                     new InputEventConsistencyVerifier(this, 0) : null;
 
+    private final ImeFocusController mImeFocusController;
+
+    /**
+     * @return {@link ImeFocusController} for this instance.
+     */
+    @NonNull
+    public ImeFocusController getImeFocusController() {
+        return mImeFocusController;
+    }
+
     private final InsetsController mInsetsController = new InsetsController(this);
 
     private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
@@ -704,6 +713,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         loadSystemProperties();
+        mImeFocusController = new ImeFocusController(this);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1048,11 +1058,6 @@ public final class ViewRootImpl implements ViewParent,
         if (split.length > 0) {
             mTag = TAG + "[" + split[split.length - 1] + "]";
         }
-    }
-
-    /** Whether the window is in local focus mode or not */
-    private boolean isInLocalFocusMode() {
-        return (mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE) != 0;
     }
 
     @UnsupportedAppUsage
@@ -2888,19 +2893,7 @@ public final class ViewRootImpl implements ViewParent,
         mViewVisibility = viewVisibility;
         mHadWindowFocus = hasWindowFocus;
 
-        if (hasWindowFocus && !isInLocalFocusMode()) {
-            final boolean imTarget = WindowManager.LayoutParams
-                    .mayUseInputMethod(mWindowAttributes.flags);
-            if (imTarget != mLastWasImTarget) {
-                mLastWasImTarget = imTarget;
-                InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
-                if (imm != null && imTarget) {
-                    imm.onPreWindowFocus(mView, hasWindowFocus);
-                    imm.onPostWindowFocus(mView, mView.findFocus(),
-                            mWindowAttributes.softInputMode, mWindowAttributes.flags);
-                }
-            }
-        }
+        mImeFocusController.onTraversal(hasWindowFocus, mWindowAttributes);
 
         // Remember if we must report the next draw.
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
@@ -3068,14 +3061,10 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             mAttachInfo.mHasWindowFocus = hasWindowFocus;
+            mAttachInfo.mHasImeFocus = mImeFocusController.updateImeFocusable(
+                    mWindowAttributes, true /* force */);
+            mImeFocusController.onPreWindowFocus(hasWindowFocus, mWindowAttributes);
 
-            mLastWasImTarget = WindowManager.LayoutParams
-                    .mayUseInputMethod(mWindowAttributes.flags);
-
-            InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
-            if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
-                imm.onPreWindowFocus(mView, hasWindowFocus);
-            }
             if (mView != null) {
                 mAttachInfo.mKeyDispatchState.reset();
                 mView.dispatchWindowFocusChanged(hasWindowFocus);
@@ -3087,11 +3076,10 @@ public final class ViewRootImpl implements ViewParent,
 
             // Note: must be done after the focus change callbacks,
             // so all of the view state is set up correctly.
+            mImeFocusController.onPostWindowFocus(mView.findFocus(), hasWindowFocus,
+                    mWindowAttributes);
+
             if (hasWindowFocus) {
-                if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
-                    imm.onPostWindowFocus(mView, mView.findFocus(),
-                            mWindowAttributes.softInputMode, mWindowAttributes.flags);
-                }
                 // Clear the forward bit.  We can just do this directly, since
                 // the window manager doesn't care about it.
                 mWindowAttributes.softInputMode &=
@@ -4887,10 +4875,7 @@ public final class ViewRootImpl implements ViewParent,
                     enqueueInputEvent(event, null, 0, true);
                 } break;
                 case MSG_CHECK_FOCUS: {
-                    InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
-                    if (imm != null) {
-                        imm.checkFocus();
-                    }
+                    getImeFocusController().checkFocus(false, true);
                 } break;
                 case MSG_CLOSE_SYSTEM_DIALOGS: {
                     if (mView != null) {
@@ -5454,23 +5439,20 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
-            if (mLastWasImTarget && !isInLocalFocusMode()) {
-                InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
-                if (imm != null) {
-                    final InputEvent event = q.mEvent;
-                    if (DEBUG_IMF) Log.v(mTag, "Sending input event to IME: " + event);
-                    int result = imm.dispatchInputEvent(event, q, this, mHandler);
-                    if (result == InputMethodManager.DISPATCH_HANDLED) {
-                        return FINISH_HANDLED;
-                    } else if (result == InputMethodManager.DISPATCH_NOT_HANDLED) {
-                        // The IME could not handle it, so skip along to the next InputStage
-                        return FORWARD;
-                    } else {
-                        return DEFER; // callback will be invoked later
-                    }
-                }
+            final int result = mImeFocusController.onProcessImeInputStage(
+                    q, q.mEvent, mWindowAttributes, this);
+            switch (result) {
+                case InputMethodManager.DISPATCH_IN_PROGRESS:
+                    // callback will be invoked later
+                    return DEFER;
+                case InputMethodManager.DISPATCH_NOT_HANDLED:
+                    // The IME could not handle it, so skip along to the next InputStage
+                    return FORWARD;
+                case InputMethodManager.DISPATCH_HANDLED:
+                    return FINISH_HANDLED;
+                default:
+                    throw new IllegalStateException("Unexpected result=" + result);
             }
-            return FORWARD;
         }
 
         @Override
