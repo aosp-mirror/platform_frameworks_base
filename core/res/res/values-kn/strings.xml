@@ -269,7 +269,7 @@
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ಸಂಪರ್ಕ"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"App ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಬ್ಯಾಟರಿಯನ್ನು ಉಪಯೋಗಿಸುತ್ತಿವೆ"</string>
-    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಬಳಸುತ್ತಿದೆ"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಆ್ಯಪ್, ಬ್ಯಾಟರಿಯನ್ನು ಬಳಸುತ್ತಿದೆ"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಬ್ಯಾಟರಿ ಬಳಸುತ್ತಿವೆ"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
