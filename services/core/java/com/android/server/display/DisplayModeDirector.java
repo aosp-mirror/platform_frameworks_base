@@ -525,8 +525,10 @@ public class DisplayModeDirector {
     }
 
     private final class SettingsObserver extends ContentObserver {
-        private final Uri mRefreshRateSetting =
+        private final Uri mPeakRefreshRateSetting =
                 Settings.System.getUriFor(Settings.System.PEAK_REFRESH_RATE);
+        private final Uri mMinRefreshRateSetting =
+                Settings.System.getUriFor(Settings.System.MIN_REFRESH_RATE);
         private final Uri mLowPowerModeSetting =
                 Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE);
 
@@ -542,7 +544,9 @@ public class DisplayModeDirector {
 
         public void observe() {
             final ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(mRefreshRateSetting, false /*notifyDescendants*/, this,
+            cr.registerContentObserver(mPeakRefreshRateSetting, false /*notifyDescendants*/, this,
+                    UserHandle.USER_SYSTEM);
+            cr.registerContentObserver(mMinRefreshRateSetting, false /*notifyDescendants*/, this,
                     UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mLowPowerModeSetting, false /*notifyDescendants*/, this,
                     UserHandle.USER_SYSTEM);
@@ -576,7 +580,8 @@ public class DisplayModeDirector {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             synchronized (mLock) {
-                if (mRefreshRateSetting.equals(uri)) {
+                if (mPeakRefreshRateSetting.equals(uri)
+                        || mMinRefreshRateSetting.equals(uri)) {
                     updateRefreshRateSettingLocked();
                 } else if (mLowPowerModeSetting.equals(uri)) {
                     updateLowPowerModeSettingLocked();
@@ -594,15 +599,22 @@ public class DisplayModeDirector {
                 vote = null;
             }
             updateVoteLocked(Vote.PRIORITY_LOW_POWER_MODE, vote);
-            mBrightnessObserver.onLowPowerModeEnabled(inLowPowerMode);
+            mBrightnessObserver.onLowPowerModeEnabledLocked(inLowPowerMode);
         }
 
         private void updateRefreshRateSettingLocked() {
+            float minRefreshRate = Settings.System.getFloat(mContext.getContentResolver(),
+                    Settings.System.MIN_REFRESH_RATE, 0f);
             float peakRefreshRate = Settings.System.getFloat(mContext.getContentResolver(),
                     Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate);
-            Vote vote = Vote.forRefreshRates(0f, peakRefreshRate);
+
+            if (peakRefreshRate < minRefreshRate) {
+                peakRefreshRate = minRefreshRate;
+            }
+
+            Vote vote = Vote.forRefreshRates(minRefreshRate, peakRefreshRate);
             updateVoteLocked(Vote.PRIORITY_USER_SETTING_REFRESH_RATE, vote);
-            mBrightnessObserver.onPeakRefreshRateEnabled(peakRefreshRate > 60f);
+            mBrightnessObserver.onRefreshRateSettingChangedLocked(minRefreshRate, peakRefreshRate);
         }
 
         public void dumpLocked(PrintWriter pw) {
@@ -781,10 +793,10 @@ public class DisplayModeDirector {
         private final Context mContext;
 
         // Enable light sensor only when mShouldObserveAmbientChange is true, screen is on, peak
-        // refresh rate enabled and low power mode off. After initialization, these states will
+        // refresh rate changeable and low power mode off. After initialization, these states will
         // be updated from the same handler thread.
         private boolean mScreenOn = false;
-        private boolean mPeakRefreshRateEnabled = false;
+        private boolean mRefreshRateChangeable = false;
         private boolean mLowPowerModeEnabled = false;
 
         BrightnessObserver(Context context, Handler handler) {
@@ -816,14 +828,19 @@ public class DisplayModeDirector {
             mDeviceConfigDisplaySettings.startListening();
         }
 
-        public void onPeakRefreshRateEnabled(boolean b) {
-            if (mPeakRefreshRateEnabled != b) {
-                mPeakRefreshRateEnabled = b;
+        public void onRefreshRateSettingChangedLocked(float min, float max) {
+            boolean changeable = (max - min > 1f && max > 60f);
+            if (mRefreshRateChangeable != changeable) {
+                mRefreshRateChangeable = changeable;
                 updateSensorStatus();
+                if (!changeable) {
+                    // Revoke previous vote from BrightnessObserver
+                    updateVoteLocked(Vote.PRIORITY_LOW_BRIGHTNESS, null);
+                }
             }
         }
 
-        public void onLowPowerModeEnabled(boolean b) {
+        public void onLowPowerModeEnabledLocked(boolean b) {
             if (mLowPowerModeEnabled != b) {
                 mLowPowerModeEnabled = b;
                 updateSensorStatus();
@@ -920,9 +937,11 @@ public class DisplayModeDirector {
                 mLightSensor = null;
             }
 
-            updateSensorStatus();
-            synchronized (mLock) {
-                onBrightnessChangedLocked();
+            if (mRefreshRateChangeable) {
+                updateSensorStatus();
+                synchronized (mLock) {
+                    onBrightnessChangedLocked();
+                }
             }
         }
 
@@ -988,7 +1007,7 @@ public class DisplayModeDirector {
             }
 
             if (mShouldObserveAmbientChange && mScreenOn && !mLowPowerModeEnabled
-                    && mPeakRefreshRateEnabled) {
+                    && mRefreshRateChangeable) {
                 mSensorManager.registerListener(mLightSensorListener,
                         mLightSensor, LIGHT_SENSOR_RATE_MS * 1000, mHandler);
             } else {
