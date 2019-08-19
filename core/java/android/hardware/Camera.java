@@ -2169,6 +2169,13 @@ public class Camera {
     }
 
     /**
+     * Setting camera audio restriction mode.
+     *
+     * @hide
+     */
+    public native final int setAudioRestriction(int mode);
+
+    /**
      * Image size (width and height dimensions).
      * @deprecated We recommend using the new {@link android.hardware.camera2} API for new
      *             applications.

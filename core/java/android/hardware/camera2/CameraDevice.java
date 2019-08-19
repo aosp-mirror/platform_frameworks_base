@@ -1256,14 +1256,16 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @param mode An enumeration selecting the audio restriction mode for this camera device.
      *
+     * @return The system-wide mute mode setting resulting from this call
+     *
      * @throws IllegalArgumentException if the mode is not supported
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
      */
-    public void setCameraAudioRestriction(@CAMERA_AUDIO_RESTRICTION int mode)
-            throws CameraAccessException {
+    public @CAMERA_AUDIO_RESTRICTION int setCameraAudioRestriction(
+            @CAMERA_AUDIO_RESTRICTION int mode) throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 

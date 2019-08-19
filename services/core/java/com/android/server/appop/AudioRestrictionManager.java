@@ -83,7 +83,7 @@ public class AudioRestrictionManager {
                 }
             }
 
-            final int mode = checkZenModeDRestrictionLocked(code, usage, uid, packageName);
+            final int mode = checkZenModeRestrictionLocked(code, usage, uid, packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 return mode;
             }
@@ -91,7 +91,7 @@ public class AudioRestrictionManager {
         return AppOpsManager.MODE_ALLOWED;
     }
 
-    private int checkZenModeDRestrictionLocked(int code, int usage, int uid, String packageName) {
+    private int checkZenModeRestrictionLocked(int code, int usage, int uid, String packageName) {
         final SparseArray<Restriction> usageRestrictions = mZenModeAudioRestrictions.get(code);
         if (usageRestrictions != null) {
             final Restriction r = usageRestrictions.get(usage);

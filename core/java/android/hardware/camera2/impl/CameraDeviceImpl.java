@@ -2570,8 +2570,11 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     @Override
-    public void setCameraAudioRestriction(@CAMERA_AUDIO_RESTRICTION int mode) {
-        // To be implemented.
-        return;
+    public @CAMERA_AUDIO_RESTRICTION int setCameraAudioRestriction(
+            @CAMERA_AUDIO_RESTRICTION int mode) throws CameraAccessException {
+        synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
+            return mRemoteDevice.setCameraAudioRestriction(mode);
+        }
     }
 }
