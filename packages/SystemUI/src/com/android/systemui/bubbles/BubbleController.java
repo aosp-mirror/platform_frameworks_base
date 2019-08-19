@@ -114,7 +114,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
-            DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED})
+            DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -127,6 +127,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_NO_LONGER_BUBBLE = 7;
     static final int DISMISS_USER_CHANGED = 8;
     static final int DISMISS_GROUP_CANCELLED = 9;
+    static final int DISMISS_INVALID_INTENT = 10;
 
     public static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
