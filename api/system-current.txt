@@ -4746,6 +4746,7 @@ package android.net.wifi {
     method @Deprecated public boolean isEphemeral();
     method @Deprecated public boolean isNoInternetAccessExpected();
     field @Deprecated public boolean allowAutojoin;
+    field @Deprecated public int carrierId;
     field @Deprecated public String creatorName;
     field @Deprecated public int creatorUid;
     field @Deprecated public String lastUpdateName;
@@ -4850,6 +4851,10 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiNetworkConnectionStatistics> CREATOR;
     field public int numConnection;
     field public int numUsage;
+  }
+
+  public static final class WifiNetworkSuggestion.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
   }
 
   public class WifiScanner {

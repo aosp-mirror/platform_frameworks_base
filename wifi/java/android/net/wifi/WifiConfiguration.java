@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
@@ -728,6 +729,14 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public String lastUpdateName;
+
+    /**
+     * The carrier ID identifies the operator who provides this network configuration.
+     *    see {@link TelephonyManager#getSimCarrierId()}
+     * @hide
+     */
+    @SystemApi
+    public int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
 
     /**
      * @hide
@@ -1850,6 +1859,7 @@ public class WifiConfiguration implements Parcelable {
                 .append(" PRIO: ").append(this.priority)
                 .append(" HIDDEN: ").append(this.hiddenSSID)
                 .append(" PMF: ").append(this.requirePMF)
+                .append("CarrierId: ").append(this.carrierId)
                 .append('\n');
 
 
@@ -2443,6 +2453,7 @@ public class WifiConfiguration implements Parcelable {
             randomizedMacExpirationTimeMs = source.randomizedMacExpirationTimeMs;
             requirePMF = source.requirePMF;
             updateIdentifier = source.updateIdentifier;
+            carrierId = source.carrierId;
         }
     }
 
@@ -2517,6 +2528,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(macRandomizationSetting);
         dest.writeInt(osu ? 1 : 0);
         dest.writeLong(randomizedMacExpirationTimeMs);
+        dest.writeInt(carrierId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2593,6 +2605,7 @@ public class WifiConfiguration implements Parcelable {
                 config.macRandomizationSetting = in.readInt();
                 config.osu = in.readInt() != 0;
                 config.randomizedMacExpirationTimeMs = in.readLong();
+                config.carrierId = in.readInt();
                 return config;
             }
 
