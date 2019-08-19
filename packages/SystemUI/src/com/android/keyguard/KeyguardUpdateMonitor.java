@@ -1446,6 +1446,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     protected void handleStartedGoingToSleep(int arg1) {
         checkIsHandlerThread();
+        mLockIconPressed = false;
         clearBiometricRecognized();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -1481,7 +1482,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private void handleScreenTurnedOff() {
         checkIsHandlerThread();
-        mLockIconPressed = false;
         mHardwareFingerprintUnavailableRetryCount = 0;
         mHardwareFaceUnavailableRetryCount = 0;
         for (int i = 0; i < mCallbacks.size(); i++) {
