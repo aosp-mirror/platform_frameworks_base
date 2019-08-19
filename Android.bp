@@ -25,10 +25,8 @@
 //
 // READ ME: ########################################################
 
-java_defaults {
-    name: "framework-defaults",
-    installable: true,
-
+filegroup {
+    name: "framework-defaults-java-srcs",
     srcs: [
         // From build/make/core/pathmap.mk FRAMEWORK_BASE_SUBDIRS
         "core/java/**/*.java",
@@ -47,7 +45,15 @@ java_defaults {
         "wifi/java/**/*.java",
         "keystore/java/**/*.java",
         "rs/java/**/*.java",
+    ],
+}
 
+java_defaults {
+    name: "framework-defaults",
+    installable: true,
+
+    srcs: [
+        ":framework-defaults-java-srcs",
         ":framework-javastream-protos",
 
         "core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl",
@@ -1753,10 +1759,10 @@ droidstubs {
     name: "hiddenapi-mappings",
     defaults: ["metalava-api-stubs-default"],
     srcs: [
-        ":openjdk_java_files",
+        ":framework-defaults-java-srcs",
         ":non_openjdk_java_files",
+        ":openjdk_java_files",
         ":opt-telephony-common-srcs",
-        "core/java/**/*.java",
     ],
     arg_files: [
         "core/res/AndroidManifest.xml",
