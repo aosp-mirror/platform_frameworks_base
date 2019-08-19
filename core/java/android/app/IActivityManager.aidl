@@ -287,7 +287,8 @@ interface IActivityManager {
     void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
     boolean isTopActivityImmersive();
-    void crashApplication(int uid, int initialPid, in String packageName, int userId, in String message);
+    void crashApplication(int uid, int initialPid, in String packageName, int userId,
+            in String message, boolean force);
     @UnsupportedAppUsage
     String getProviderMimeType(in Uri uri, int userId);
     // Cause the specified process to dump the specified heap.
