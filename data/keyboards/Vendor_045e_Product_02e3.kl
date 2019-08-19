@@ -1,4 +1,4 @@
-# Copyright (C) 2016 The Android Open Source Project
+# Copyright (C) 2019 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,34 +13,32 @@
 # limitations under the License.
 
 #
-# XBox One Controller - Model 1537 - USB
+# Microsoft X-Box One Elite Pad - Model 1698 - USB
 #
 
 # Mapping according to https://developer.android.com/training/game-controllers/controller-input.html
 
-key 304   BUTTON_A
-key 305   BUTTON_B
-key 307   BUTTON_X
-key 308   BUTTON_Y
+key 0x130   BUTTON_A
+key 0x131   BUTTON_B
+key 0x133   BUTTON_X
+key 0x134   BUTTON_Y
 
-key 310   BUTTON_L1
-key 311   BUTTON_R1
+key 0x136   BUTTON_L1
+key 0x137   BUTTON_R1
 
 # Triggers.
 axis 0x02 LTRIGGER
 axis 0x05 RTRIGGER
 
-# Left and right stick.
-# The reported value for flat is 128 out of a range from -32767 to 32768, which is absurd.
-# This confuses applications that rely on the flat value because the joystick actually
-# settles in a flat range of +/- 4096 or so.
-axis 0x00 X flat 4096
-axis 0x01 Y flat 4096
-axis 0x03 Z flat 4096
-axis 0x04 RZ flat 4096
+# Left stick
+axis 0x00 X
+axis 0x01 Y
+# Right stick
+axis 0x03 Z
+axis 0x04 RZ
 
-key 317   BUTTON_THUMBL
-key 318   BUTTON_THUMBR
+key 0x13d   BUTTON_THUMBL
+key 0x13e   BUTTON_THUMBR
 
 # Hat.
 axis 0x10 HAT_X
@@ -48,10 +46,11 @@ axis 0x11 HAT_Y
 
 
 # Mapping according to https://www.kernel.org/doc/Documentation/input/gamepad.txt
+
 # Two overlapping rectangles
-key 314   BUTTON_SELECT
+key 0x13a   BUTTON_SELECT
 # Hamburger - 3 parallel lines
-key 315   BUTTON_START
+key 0x13b   BUTTON_START
 
 # Xbox key
-key 316   BUTTON_MODE
+key 0x13c   BUTTON_MODE
