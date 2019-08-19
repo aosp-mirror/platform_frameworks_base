@@ -352,10 +352,10 @@ public class BugreportProgressService extends Service {
 
         private final BugreportInfo mInfo;
 
-        BugreportCallbackImpl(String name) {
+        BugreportCallbackImpl(String name, @Nullable String title, @Nullable String description) {
             // pid not used in this workflow, so setting default = 0
             mInfo = new BugreportInfo(mContext, 0 /* pid */, name,
-                    100 /* max progress*/);
+                    100 /* max progress*/, title, description);
         }
 
         @Override
@@ -578,6 +578,8 @@ public class BugreportProgressService extends Service {
         }
         int bugreportType = intent.getIntExtra(EXTRA_BUGREPORT_TYPE,
                 BugreportParams.BUGREPORT_MODE_INTERACTIVE);
+        String shareTitle = intent.getStringExtra(EXTRA_TITLE);
+        String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
 
         ParcelFileDescriptor screenshotFd = createReadWriteFile(BUGREPORT_DIR,
                 bugreportName + ".png");
@@ -595,7 +597,8 @@ public class BugreportProgressService extends Service {
                 + " bugreport file fd: " + bugreportFd
                 + " screenshot file fd: " + screenshotFd);
 
-        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(bugreportName);
+        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(bugreportName,
+                shareTitle, shareDescription);
         try {
             mBugreportManager.startBugreport(bugreportFd, screenshotFd,
                     new BugreportParams(bugreportType), executor, bugreportCallback);
@@ -982,7 +985,10 @@ public class BugreportProgressService extends Service {
             }
             screenshotFile = null;
         }
-        onBugreportFinished(id, bugreportFile, screenshotFile, info.title, info.description, max);
+        // TODO: Since we are passing id to the function, it should be able to find the info linked
+        // to the id and therefore use the value of shareTitle and shareDescription.
+        onBugreportFinished(id, bugreportFile, screenshotFile, info.shareTitle,
+                info.shareDescription, max);
     }
 
 
@@ -1844,6 +1850,14 @@ public class BugreportProgressService extends Service {
         String title;
 
         /**
+         * One-line summary of the bug; when set, will be used as the subject of the
+         * {@link Intent#ACTION_SEND_MULTIPLE} intent. This is the predefined title which is
+         * set initially when the request to take a bugreport is made. This overrides any changes
+         * in the title that the user makes after the bugreport starts.
+         */
+        String shareTitle;
+
+        /**
          * User-provided, detailed description of the bugreport; when set, will be added to the body
          * of the {@link Intent#ACTION_SEND_MULTIPLE} intent.
          */
@@ -1906,7 +1920,9 @@ public class BugreportProgressService extends Service {
         int screenshotCounter;
 
         /**
-         * Descriptive text that will be shown to the user in the notification message.
+         * Descriptive text that will be shown to the user in the notification message. This is the
+         * predefined description which is set initially when the request to take a bugreport is
+         * made.
          */
         String shareDescription;
 
@@ -1914,18 +1930,21 @@ public class BugreportProgressService extends Service {
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_STARTED.
          */
         BugreportInfo(Context context, int id, int pid, String name, int max) {
-            this(context, pid, name, max);
+            this(context, pid, name, max, null, null);
             this.id = id;
         }
 
         /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_REQUESTED.
          */
-        BugreportInfo(Context context, int pid, String name, int max) {
+        BugreportInfo(Context context, int pid, String name, int max, @Nullable String shareTitle,
+                @Nullable String shareDescription) {
             this.context = context;
             this.pid = pid;
             this.name = name;
             this.max = this.realMax = max;
+            this.shareTitle = shareTitle == null ? "" : shareTitle;
+            this.shareDescription = shareDescription == null ? "" : shareDescription;
         }
 
         /**
@@ -2019,6 +2038,7 @@ public class BugreportProgressService extends Service {
                 .append("\n\taddingDetailsToZip: ").append(addingDetailsToZip)
                 .append(" addedDetailsToZip: ").append(addedDetailsToZip)
                 .append("\n\tshareDescription: ").append(shareDescription)
+                .append("\n\tshareTitle: ").append(shareTitle)
                 .toString();
         }
 
@@ -2046,6 +2066,7 @@ public class BugreportProgressService extends Service {
             finished = in.readInt() == 1;
             screenshotCounter = in.readInt();
             shareDescription = in.readString();
+            shareTitle = in.readString();
         }
 
         @Override
@@ -2071,6 +2092,7 @@ public class BugreportProgressService extends Service {
             dest.writeInt(finished ? 1 : 0);
             dest.writeInt(screenshotCounter);
             dest.writeString(shareDescription);
+            dest.writeString(shareTitle);
         }
 
         @Override

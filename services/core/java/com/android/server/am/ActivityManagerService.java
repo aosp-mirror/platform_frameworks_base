@@ -282,6 +282,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -378,7 +379,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -436,6 +437,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // here so that while the job scheduler can depend on AMS, the other way around
     // need not be the case.
     public static final String ACTION_TRIGGER_IDLE = "com.android.server.ACTION_TRIGGER_IDLE";
+
+    private static final String INTENT_BUGREPORT_REQUESTED =
+            "com.android.internal.intent.action.BUGREPORT_REQUESTED";
+    private static final String SHELL_APP_PACKAGE = "com.android.shell";
 
     /** Control over CPU and battery monitoring */
     // write battery stats every 30 minutes.
@@ -554,6 +559,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     OomAdjuster mOomAdjuster;
     final LowMemDetector mLowMemDetector;
+
+    static final String EXTRA_TITLE = "android.intent.extra.TITLE";
+    static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
+    static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
@@ -8201,6 +8210,53 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Deprecated
     @Override
     public void requestBugReport(int bugreportType) {
+        requestBugReportWithDescription(null, null, bugreportType);
+    }
+
+    /**
+     * @deprecated This method is only used by a few internal components and it will soon be
+     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * No new code should be calling it.
+     */
+    @Deprecated
+    public void requestBugReportWithDescription(@Nullable String shareTitle,
+            @Nullable String shareDescription, int bugreportType) {
+        if (!TextUtils.isEmpty(shareTitle)) {
+            if (shareTitle.length() > MAX_BUGREPORT_TITLE_SIZE) {
+                String errorStr = "shareTitle should be less than " +
+                        MAX_BUGREPORT_TITLE_SIZE + " characters";
+                throw new IllegalArgumentException(errorStr);
+            }
+            if (!TextUtils.isEmpty(shareDescription)) {
+                int length = shareDescription.getBytes(StandardCharsets.UTF_8).length;
+                if (length > SystemProperties.PROP_VALUE_MAX) {
+                    String errorStr = "shareTitle should be less than " +
+                            SystemProperties.PROP_VALUE_MAX + " bytes";
+                    throw new IllegalArgumentException(errorStr);
+                } else {
+                    SystemProperties.set("dumpstate.options.description", shareDescription);
+                }
+            }
+            SystemProperties.set("dumpstate.options.title", shareTitle);
+            Slog.d(TAG, "Bugreport notification title " + shareTitle
+                    + " description " + shareDescription);
+        }
+        final boolean useApi = FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.USE_BUGREPORT_API);
+
+        if (useApi) {
+            // Create intent to trigger Bugreport API via Shell
+            Intent triggerShellBugreport = new Intent();
+            triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
+            triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
+            triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
+            if (shareTitle != null) {
+                triggerShellBugreport.putExtra(EXTRA_TITLE, shareTitle);
+            }
+            if (shareDescription != null) {
+                triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
+            }
+        }
         String extraOptions = null;
         switch (bugreportType) {
             case ActivityManager.BUGREPORT_OPTION_FULL:
@@ -8234,45 +8290,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             SystemProperties.set("dumpstate.options", extraOptions);
         }
         SystemProperties.set("ctl.start", "bugreport");
-    }
-
-    /**
-     * @deprecated This method is only used by a few internal components and it will soon be
-     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
-     * No new code should be calling it.
-     */
-    @Deprecated
-    private void requestBugReportWithDescription(String shareTitle, String shareDescription,
-                                                 int bugreportType) {
-        if (!TextUtils.isEmpty(shareTitle)) {
-            if (shareTitle.length() > MAX_BUGREPORT_TITLE_SIZE) {
-                String errorStr = "shareTitle should be less than " +
-                        MAX_BUGREPORT_TITLE_SIZE + " characters";
-                throw new IllegalArgumentException(errorStr);
-            } else {
-                if (!TextUtils.isEmpty(shareDescription)) {
-                    int length;
-                    try {
-                        length = shareDescription.getBytes("UTF-8").length;
-                    } catch (UnsupportedEncodingException e) {
-                        String errorStr = "shareDescription: UnsupportedEncodingException";
-                        throw new IllegalArgumentException(errorStr);
-                    }
-                    if (length > SystemProperties.PROP_VALUE_MAX) {
-                        String errorStr = "shareTitle should be less than " +
-                                SystemProperties.PROP_VALUE_MAX + " bytes";
-                        throw new IllegalArgumentException(errorStr);
-                    } else {
-                        SystemProperties.set("dumpstate.options.description", shareDescription);
-                    }
-                }
-                SystemProperties.set("dumpstate.options.title", shareTitle);
-            }
-        }
-
-        Slog.d(TAG, "Bugreport notification title " + shareTitle
-                + " description " + shareDescription);
-        requestBugReport(bugreportType);
     }
 
     /**
