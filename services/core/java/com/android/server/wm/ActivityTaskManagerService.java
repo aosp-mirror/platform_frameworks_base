@@ -211,7 +211,7 @@ import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
-import android.text.format.Time;
+import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Log;
@@ -5878,9 +5878,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 tracesFile = File.createTempFile("app_slow", null, tracesDir);
 
                 StringBuilder sb = new StringBuilder();
-                Time tobj = new Time();
-                tobj.set(System.currentTimeMillis());
-                sb.append(tobj.format("%Y-%m-%d %H:%M:%S"));
+                String timeString =
+                        TimeMigrationUtils.formatMillisWithFixedFormat(System.currentTimeMillis());
+                sb.append(timeString);
                 sb.append(": ");
                 TimeUtils.formatDuration(SystemClock.uptimeMillis()-startTime, sb);
                 sb.append(" since ");
