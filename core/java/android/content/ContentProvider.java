@@ -17,6 +17,7 @@
 package android.content;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
@@ -645,9 +646,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     boolean checkUser(int pid, int uid, Context context) {
-        return UserHandle.getUserId(uid) == context.getUserId()
-                || mSingleUser
-                || context.checkPermission(INTERACT_ACROSS_USERS, pid, uid)
+        if (UserHandle.getUserId(uid) == context.getUserId() || mSingleUser) {
+            return true;
+        }
+        return context.checkPermission(INTERACT_ACROSS_USERS, pid, uid) == PERMISSION_GRANTED
+                || context.checkPermission(INTERACT_ACROSS_USERS_FULL, pid, uid)
                 == PERMISSION_GRANTED;
     }
 
