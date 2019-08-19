@@ -987,7 +987,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } catch (NumberFormatException e) {
             packageName = arg;
         }
-        mInterface.crashApplication(-1, pid, packageName, userId, "shell-induced crash");
+        mInterface.crashApplication(-1, pid, packageName, userId, "shell-induced crash", false);
         return 0;
     }
 
