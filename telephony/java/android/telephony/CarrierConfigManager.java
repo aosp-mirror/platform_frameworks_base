@@ -2656,25 +2656,32 @@ public class CarrierConfigManager {
             "call_waiting_service_class_int";
 
     /**
-     * This configuration allow the system UI to display different 5G icon for different 5G status.
+     * This configuration allow the system UI to display different 5G icon for different 5G
+     * scenario.
      *
-     * There are four 5G status:
+     * There are five 5G scenarios:
      * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
      *    millimeter wave.
      * 2. connected: device currently connected to 5G cell as the secondary cell but not using
      *    millimeter wave.
-     * 3. not_restricted: device camped on a network that has 5G capability(not necessary to connect
-     *    a 5G cell as a secondary cell) and the use of 5G is not restricted.
-     * 4. restricted: device camped on a network that has 5G capability(not necessary to connect a
+     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability(not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in IDLE state.
+     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability(not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in CONNECTED state.
+     * 5. restricted: device camped on a network that has 5G capability(not necessary to connect a
      *    5G cell as a secondary cell) but the use of 5G is restricted.
      *
      * The configured string contains multiple key-value pairs separated by comma. For each pair,
      * the key and value is separated by a colon. The key is corresponded to a 5G status above and
      * the value is the icon name. Use "None" as the icon name if no icon should be shown in a
-     * specific 5G status.
+     * specific 5G scenario. If the scenario is "None", config can skip this key and value.
      *
-     * Here is an example of the configuration:
-     * "connected_mmwave:5GPlus,connected:5G,not_restricted:None,restricted:None"
+     * Here is an example:
+     * UE want to display 5GPlus icon for scenario#1, and 5G icon for scenario#2; otherwise no
+     * define.
+     * The configuration is: "connected_mmwave:5GPlus,connected:5G"
      *
      * @hide
      */
@@ -3510,7 +3517,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_CALLER_ID_USSD_BOOL, false);
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
-                "connected_mmwave:None,connected:5G,not_restricted:None,restricted:None");
+                "connected_mmwave:5G,connected:5G");
         sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
