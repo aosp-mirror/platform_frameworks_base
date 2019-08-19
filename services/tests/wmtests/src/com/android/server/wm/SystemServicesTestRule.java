@@ -415,8 +415,8 @@ public class SystemServicesTestRule implements TestRule {
             final AppOpsService aos = mock(AppOpsService.class);
             doReturn(aos).when(this).getAppOpsService();
             // Make sure permission checks aren't overridden.
-            doReturn(AppOpsManager.MODE_DEFAULT)
-                    .when(aos).noteOperation(anyInt(), anyInt(), anyString());
+            doReturn(AppOpsManager.MODE_DEFAULT).when(aos).noteOperation(anyInt(), anyInt(),
+                    anyString(), nullable(String.class));
 
             // UserManagerService
             final UserManagerService ums = mock(UserManagerService.class);

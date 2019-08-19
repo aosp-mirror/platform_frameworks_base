@@ -569,7 +569,8 @@ public final class ActiveServices {
                         r.lastActivity);
             }
             mAm.mAppOpsService.startOperation(AppOpsManager.getToken(mAm.mAppOpsService),
-                    AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, true);
+                    AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null,
+                    true);
         }
 
         final ServiceMap smap = getServiceMapLocked(r.userId);
@@ -1394,7 +1395,7 @@ public final class ActiveServices {
                         mAm.mAppOpsService.startOperation(
                                 AppOpsManager.getToken(mAm.mAppOpsService),
                                 AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
-                                true);
+                                null, true);
                         StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                                 r.appInfo.uid, r.shortInstanceName,
                                 StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER);
@@ -1427,7 +1428,8 @@ public final class ActiveServices {
                     // we have cleared the flag so can now drop it.
                     mAm.mAppOpsService.finishOperation(
                             AppOpsManager.getToken(mAm.mAppOpsService),
-                            AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
+                            AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
+                            null);
                 }
             }
         } else {
@@ -1444,7 +1446,7 @@ public final class ActiveServices {
                 }
                 mAm.mAppOpsService.finishOperation(
                         AppOpsManager.getToken(mAm.mAppOpsService),
-                        AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
+                        AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
                 StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                         r.appInfo.uid, r.shortInstanceName,
                         StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
@@ -2981,7 +2983,7 @@ public final class ActiveServices {
                         r.lastActivity);
             }
             mAm.mAppOpsService.finishOperation(AppOpsManager.getToken(mAm.mAppOpsService),
-                    AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
+                    AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
             mAm.mHandler.removeMessages(
                     ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_MSG, r);
             if (r.app != null) {
@@ -3039,7 +3041,7 @@ public final class ActiveServices {
             }
             mAm.mAppOpsService.finishOperation(
                     AppOpsManager.getToken(mAm.mAppOpsService),
-                    AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
+                    AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
             StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED, r.appInfo.uid,
                     r.shortInstanceName, StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);

@@ -401,7 +401,8 @@ public final class PermissionChecker {
         }
 
         if (forDataDelivery) {
-            if (appOpsManager.noteProxyOpNoThrow(op, packageName, uid, message)
+            // TODO moltmann: Set correct feature id
+            if (appOpsManager.noteProxyOpNoThrow(op, packageName, uid, null, message)
                     != AppOpsManager.MODE_ALLOWED) {
                 return PERMISSION_DENIED_APP_OP;
             }

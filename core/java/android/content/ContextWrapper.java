@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -156,6 +157,12 @@ public class ContextWrapper extends Context {
     @Override
     public String getOpPackageName() {
         return mBase.getOpPackageName();
+    }
+
+    /** @hide */
+    @Override
+    public @Nullable String getFeatureId() {
+        return mBase.getFeatureId();
     }
 
     @Override

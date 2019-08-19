@@ -811,6 +811,17 @@ public abstract class Context {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
+    /**
+     * <p>Features are used in complex apps to logically separate parts of the app. E.g. a
+     * blogging app might also have a instant messaging app built in.
+     *
+     * @return the feature id this context is for or {@code null} if this is the default
+     * feature.
+     */
+    public @Nullable String getFeatureId() {
+        return null;
+    }
+
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
 
@@ -5330,6 +5341,20 @@ public abstract class Context {
      * @return A {@link Context} for the display.
      */
     public abstract Context createDisplayContext(@NonNull Display display);
+
+    /**
+     * Return a new Context object for the current Context but for a different feature in the app.
+     * Features can be used by complex apps to separate logical parts.
+     *
+     * @param featureId The feature id or {@code null} to create a context for the default feature.
+     *
+     * @return A {@link Context} for the feature
+     *
+     * @see #getFeatureId()
+     */
+    public @NonNull Context createFeatureContext(@Nullable String featureId) {
+        return this;
+    }
 
     /**
      * Return a new Context object for the current Context but whose storage

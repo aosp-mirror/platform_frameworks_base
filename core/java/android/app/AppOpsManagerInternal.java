@@ -16,10 +16,11 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.TriFunction;
 
 /**
  * App ops service local interface.
@@ -60,12 +61,14 @@ public abstract class AppOpsManagerInternal {
          *
          * @param code The op code to note.
          * @param uid The UID for which to note.
-         * @param packageName The package for which to note.
+         * @param packageName The package for which to note. {@code null} for system package.
+         * @param featureId Id of the feature in the package
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        int noteOperation(int code, int uid, String packageName,
-                TriFunction<Integer, Integer, String, Integer> superImpl);
+        int noteOperation(int code, int uid, @Nullable String packageName,
+                @Nullable String featureId,
+                @NonNull QuadFunction<Integer, Integer, String, String, Integer> superImpl);
     }
 
     /**

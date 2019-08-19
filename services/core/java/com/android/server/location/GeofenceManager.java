@@ -304,7 +304,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
                 int op = LocationManagerService.resolutionLevelToOp(state.mAllowedResolutionLevel);
                 if (op >= 0) {
                     if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, state.mUid,
-                            state.mPackageName, state.mListenerIdentifier)
+                            state.mPackageName, null, state.mListenerIdentifier)
                             != AppOpsManager.MODE_ALLOWED) {
                         if (D) {
                             Slog.d(TAG, "skipping geofence processing for no op app: "

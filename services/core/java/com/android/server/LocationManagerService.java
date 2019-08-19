@@ -1705,7 +1705,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             int allowedResolutionLevel, @Nullable String message) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
-            if (mAppOps.noteOpNoThrow(op, uid, packageName, message)
+            if (mAppOps.noteOpNoThrow(op, uid, packageName, null, message)
                     != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }

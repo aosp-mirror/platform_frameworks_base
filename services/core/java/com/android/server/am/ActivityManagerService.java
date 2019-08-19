@@ -3154,7 +3154,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private boolean hasUsageStatsPermission(String callingPackage) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                Binder.getCallingUid(), callingPackage);
+                Binder.getCallingUid(), callingPackage, null);
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
                     == PackageManager.PERMISSION_GRANTED;
@@ -5856,8 +5856,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public int noteOp(String op, int uid, String packageName) {
+            // TODO moltmann: Allow to specify featureId
             return mActivityManagerService.mAppOpsService
-                    .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName);
+                    .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName, null);
         }
 
         @Override
@@ -6009,7 +6010,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         // ...and legacy apps get an AppOp check
         int appop = mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
-                uid, packageName);
+                uid, packageName, null);
         if (DEBUG_BACKGROUND_CHECK) {
             Slog.i(TAG, "Legacy app " + uid + "/" + packageName + " bg appop " + appop);
         }
@@ -19314,18 +19315,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int noteOperation(int code, int uid, String packageName,
-                TriFunction<Integer, Integer, String, Integer> superImpl) {
+        public int noteOperation(int code, int uid, @Nullable String packageName,
+                @Nullable String featureId,
+                @NonNull QuadFunction<Integer, Integer, String, String, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
-                            "com.android.shell", uid, packageName);
+                            "com.android.shell", null, uid, packageName, featureId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, uid, packageName);
+            return superImpl.apply(code, uid, packageName, featureId);
         }
 
         @Override
