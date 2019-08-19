@@ -1184,9 +1184,26 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             pw.println("Active install sessions:");
             pw.increaseIndent();
+
+            List<PackageInstallerSession> finalizedSessions = new ArrayList<>();
             int N = mSessions.size();
             for (int i = 0; i < N; i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
+                if (session.isStagedAndInTerminalState()) {
+                    finalizedSessions.add(session);
+                    continue;
+                }
+                session.dump(pw);
+                pw.println();
+            }
+            pw.println();
+            pw.decreaseIndent();
+
+            pw.println("Finalized install sessions:");
+            pw.increaseIndent();
+            N = finalizedSessions.size();
+            for (int i = 0; i < N; i++) {
+                final PackageInstallerSession session = finalizedSessions.get(i);
                 session.dump(pw);
                 pw.println();
             }
