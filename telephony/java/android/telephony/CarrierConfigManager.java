@@ -1375,6 +1375,13 @@ public class CarrierConfigManager {
             "read_only_apn_fields_string_array";
 
     /**
+     * Default value of APN types field if not specified by user when adding/modifying an APN.
+     * @hide
+     */
+    public static final String KEY_APN_SETTINGS_DEFAULT_APN_TYPES_STRING_ARRAY =
+            "apn_settings_default_apn_types_string_array";
+
+    /**
      * Boolean indicating if intent for emergency call state changes should be broadcast
      * @hide
      */
@@ -3191,6 +3198,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
         sDefaults.putStringArray(KEY_READ_ONLY_APN_TYPES_STRING_ARRAY, new String[] {"dun"});
         sDefaults.putStringArray(KEY_READ_ONLY_APN_FIELDS_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_APN_SETTINGS_DEFAULT_APN_TYPES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_SEVERE_WHEN_EXTREME_DISABLED_BOOL, true);
