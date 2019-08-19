@@ -46,7 +46,6 @@ import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEME
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
-import static android.os.Build.VERSION_CODES.N;
 import static android.os.FactoryTest.FACTORY_TEST_HIGH_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
@@ -1754,9 +1753,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final void activityDestroyed(IBinder token) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "ACTIVITY DESTROYED: " + token);
         synchronized (mGlobalLock) {
-            ActivityStack stack = ActivityRecord.getStackLocked(token);
-            if (stack != null) {
-                stack.activityDestroyedLocked(token, "activityDestroyed");
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                final ActivityRecord activity = ActivityRecord.forTokenLocked(token);
+                if (activity != null) {
+                    activity.destroyed("activityDestroyed");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
     }
@@ -3237,7 +3241,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null) {
                     return false;
                 }
-                return r.getActivityStack().safelyDestroyActivityLocked(r, "app-req");
+                return r.safelyDestroy("app-req");
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -6485,8 +6489,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
                 if (r != null && r.getActivityStack() != null) {
-                    r.getActivityStack().sendActivityResultLocked(callingUid, r, resultWho,
-                            requestCode, resultCode, data);
+                    r.sendResult(callingUid, resultWho, requestCode, resultCode, data);
                 }
             }
         }

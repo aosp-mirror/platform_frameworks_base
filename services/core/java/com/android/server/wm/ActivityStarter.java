@@ -55,6 +55,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -752,8 +753,8 @@ class ActivityStarter {
 
         if (err != START_SUCCESS) {
             if (resultRecord != null) {
-                resultStack.sendActivityResultLocked(
-                        -1, resultRecord, resultWho, requestCode, RESULT_CANCELED, null);
+                resultRecord.sendResult(INVALID_UID, resultWho, requestCode, RESULT_CANCELED,
+                        null /* data */);
             }
             SafeActivityOptions.abort(options);
             return err;
@@ -817,8 +818,8 @@ class ActivityStarter {
 
         if (abort) {
             if (resultRecord != null) {
-                resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
-                        RESULT_CANCELED, null);
+                resultRecord.sendResult(INVALID_UID, resultWho, requestCode, RESULT_CANCELED,
+                        null /* data */);
             }
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
@@ -1450,18 +1451,17 @@ class ActivityStarter {
      * TODO(b/131748165): Refactor the logic so we don't need to call this method everywhere.
      */
     private boolean handleBackgroundActivityAbort(ActivityRecord r) {
-        // TODO(b/131747138): Remove toast and refactor related code in Q release.
-        boolean abort = !mService.isBackgroundActivityStartsEnabled();
+        // TODO(b/131747138): Remove toast and refactor related code in R release.
+        final boolean abort = !mService.isBackgroundActivityStartsEnabled();
         if (!abort) {
             return false;
         }
-        ActivityRecord resultRecord = r.resultTo;
-        String resultWho = r.resultWho;
+        final ActivityRecord resultRecord = r.resultTo;
+        final String resultWho = r.resultWho;
         int requestCode = r.requestCode;
         if (resultRecord != null) {
-            ActivityStack resultStack = resultRecord.getActivityStack();
-            resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
-                    RESULT_CANCELED, null);
+            resultRecord.sendResult(INVALID_UID, resultWho, requestCode, RESULT_CANCELED,
+                    null /* data */);
         }
         // We pretend to the caller that it was really started to make it backward compatible, but
         // they will just get a cancel result.
@@ -1626,12 +1626,9 @@ class ActivityStarter {
         }
 
         if (mStartActivity.packageName == null) {
-            final ActivityStack sourceStack = mStartActivity.resultTo != null
-                    ? mStartActivity.resultTo.getActivityStack() : null;
-            if (sourceStack != null) {
-                sourceStack.sendActivityResultLocked(-1 /* callingUid */, mStartActivity.resultTo,
-                        mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED,
-                        null /* data */);
+            if (mStartActivity.resultTo != null) {
+                mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
+                        mStartActivity.requestCode, RESULT_CANCELED, null /* data */);
             }
             ActivityOptions.abort(mOptions);
             return START_CLASS_NOT_FOUND;
@@ -1708,8 +1705,8 @@ class ActivityStarter {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.mUserId,
                     mStartActivity.getTaskRecord().taskId);
         }
-        ActivityStack.logStartActivity(
-                EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.getTaskRecord());
+        mStartActivity.logStartActivity(
+                EventLogTags.AM_CREATE_ACTIVITY, mStartActivity.getTaskRecord());
         mTargetStack.mLastPausedActivity = null;
 
         mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
@@ -1927,17 +1924,14 @@ class ActivityStarter {
     }
 
     private void sendNewTaskResultRequestIfNeeded() {
-        final ActivityStack sourceStack = mStartActivity.resultTo != null
-                ? mStartActivity.resultTo.getActivityStack() : null;
-        if (sourceStack != null && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
+        if (mStartActivity.resultTo != null && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new task...
             // yet the caller has requested a result back.  Well, that is pretty messed up,
             // so instead immediately send back a cancel and let the new task continue launched
             // as normal without a dependency on its originator.
             Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
-            sourceStack.sendActivityResultLocked(-1 /* callingUid */, mStartActivity.resultTo,
-                    mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED,
-                    null /* data */);
+            mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
+                    mStartActivity.requestCode, RESULT_CANCELED, null /* data */);
             mStartActivity.resultTo = null;
         }
     }
@@ -2362,7 +2356,7 @@ class ActivityStarter {
             return;
         }
 
-        ActivityStack.logStartActivity(AM_NEW_INTENT, activity, activity.getTaskRecord());
+        activity.logStartActivity(AM_NEW_INTENT, activity.getTaskRecord());
         activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
                 mStartActivity.launchedFromPackage);
         mIntentDelivered = true;
@@ -2429,7 +2423,7 @@ class ActivityStarter {
             ActivityRecord top = sourceTask.performClearTaskLocked(mStartActivity, mLaunchFlags);
             mKeepCurTransition = true;
             if (top != null) {
-                ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, top.getTaskRecord());
+                mStartActivity.logStartActivity(AM_NEW_INTENT, top.getTaskRecord());
                 deliverNewIntent(top);
                 // For paranoia, make sure we have correctly resumed the top activity.
                 mTargetStack.mLastPausedActivity = null;
@@ -2448,7 +2442,7 @@ class ActivityStarter {
                 final TaskRecord task = top.getTaskRecord();
                 task.moveActivityToFrontLocked(top);
                 top.updateOptionsLocked(mOptions);
-                ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, task);
+                mStartActivity.logStartActivity(AM_NEW_INTENT, task);
                 deliverNewIntent(top);
                 mTargetStack.mLastPausedActivity = null;
                 if (mDoResume) {

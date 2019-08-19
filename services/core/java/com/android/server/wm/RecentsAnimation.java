@@ -149,8 +149,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // traversal in non-stopped state (ViewRootImpl.mStopped) that would initialize more
             // things (e.g. the measure can be done earlier). The actual stop will be performed when
             // it reports idle.
-            targetStack.addToStopping(targetActivity, true /* scheduleIdle */,
-                    true /* idleDelayed */, "preloadRecents");
+            targetActivity.addToStopping(true /* scheduleIdle */, true /* idleDelayed */,
+                    "preloadRecents");
         }
     }
 
