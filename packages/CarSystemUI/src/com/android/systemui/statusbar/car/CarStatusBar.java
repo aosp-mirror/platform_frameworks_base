@@ -32,7 +32,10 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.inputmethodservice.InputMethodService;
+import android.os.IBinder;
 import android.util.Log;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -87,8 +90,7 @@ import java.util.Map;
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
-public class CarStatusBar extends StatusBar implements
-        CarBatteryController.BatteryViewHandler {
+public class CarStatusBar extends StatusBar implements CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
     // used to calculate how fast to open or close the window
     private static final float DEFAULT_FLING_VELOCITY = 0;
@@ -169,6 +171,9 @@ public class CarStatusBar extends StatusBar implements
     private boolean mIsSwipingVerticallyToClose;
     // Whether heads-up notifications should be shown when shade is open.
     private boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
+    // If the nav bar should be hidden when the soft keyboard is visible.
+    private boolean mHideNavBarForKeyboard;
+    private boolean mBottomNavBarVisible;
 
     private final CarPowerStateListener mCarPowerStateListener =
             (int state) -> {
@@ -190,6 +195,12 @@ public class CarStatusBar extends StatusBar implements
         // builds the nav bar
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mDeviceIsProvisioned = mDeviceProvisionedController.isDeviceProvisioned();
+
+        // Keyboard related setup, before nav bars are created.
+        mHideNavBarForKeyboard = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
+        mBottomNavBarVisible = false;
+
         super.start();
         mTaskStackListener = new TaskStackListenerImpl();
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
@@ -720,6 +731,13 @@ public class CarStatusBar extends StatusBar implements
         buildNavBarContent();
         attachNavBarWindows();
 
+        // Try setting up the initial state of the nav bar if applicable.
+        if (result != null) {
+            setImeWindowStatus(Display.DEFAULT_DISPLAY, result.mImeToken,
+                    result.mImeWindowVis, result.mImeBackDisposition,
+                    result.mShowImeSwitcher);
+        }
+
         // There has been a car customized nav bar on the default display, so just create nav bars
         // on external displays.
         mNavigationBarController.createNavigationBars(false /* includeDefaultDisplay */, result);
@@ -758,21 +776,32 @@ public class CarStatusBar extends StatusBar implements
 
     }
 
-    private void attachNavBarWindows() {
-
-        if (mShowBottom) {
-            WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                    LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    PixelFormat.TRANSLUCENT);
-            lp.setTitle("CarNavigationBar");
-            lp.windowAnimations = 0;
-            mWindowManager.addView(mNavigationBarWindow, lp);
+    /**
+     * We register for soft keyboard visibility events such that we can hide the navigation bar
+     * giving more screen space to the IME. Note: this is optional and controlled by
+     * {@code com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard}.
+     */
+    @Override
+    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
+        if (!mHideNavBarForKeyboard) {
+            return;
         }
+
+        if (mContext.getDisplay().getDisplayId() != displayId) {
+            return;
+        }
+
+        boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
+        if (!isKeyboardVisible) {
+            attachBottomNavBarWindow();
+        } else {
+            detachBottomNavBarWindow();
+        }
+    }
+
+    private void attachNavBarWindows() {
+        attachBottomNavBarWindow();
 
         if (mShowLeft) {
             int width = mContext.getResources().getDimensionPixelSize(
@@ -808,7 +837,41 @@ public class CarStatusBar extends StatusBar implements
             rightlp.gravity = Gravity.RIGHT;
             mWindowManager.addView(mRightNavigationBarWindow, rightlp);
         }
+    }
 
+    private void attachBottomNavBarWindow() {
+        if (!mShowBottom) {
+            return;
+        }
+
+        if (mBottomNavBarVisible) {
+            return;
+        }
+        mBottomNavBarVisible = true;
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+        lp.setTitle("CarNavigationBar");
+        lp.windowAnimations = 0;
+        mWindowManager.addView(mNavigationBarWindow, lp);
+    }
+
+    private void detachBottomNavBarWindow() {
+        if (!mShowBottom) {
+            return;
+        }
+
+        if (!mBottomNavBarVisible) {
+            return;
+        }
+        mBottomNavBarVisible = false;
+        mWindowManager.removeView(mNavigationBarWindow);
     }
 
     private void buildBottomBar(int layout) {
