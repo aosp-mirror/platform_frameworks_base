@@ -36,6 +36,10 @@
 namespace android {
 namespace uirenderer {
 
+namespace skiapipeline {
+class FunctorDrawable;
+}
+
 enum class DisplayListOpType : uint8_t {
 #define X(T) T,
 #include "DisplayListOps.in"
@@ -119,6 +123,7 @@ private:
                    SkBlendMode, const SkRect*, const SkPaint*);
     void drawShadowRec(const SkPath&, const SkDrawShadowRec&);
     void drawVectorDrawable(VectorDrawableRoot* tree);
+    void drawWebView(skiapipeline::FunctorDrawable*);
 
     template <typename T, typename... Args>
     void* push(size_t, Args&&...);
@@ -203,6 +208,7 @@ public:
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
 
     void drawVectorDrawable(VectorDrawableRoot* tree);
+    void drawWebView(skiapipeline::FunctorDrawable*);
 
     /**
      * If "isClipMayBeComplex" returns false, it is guaranteed the current clip is a rectangle.
