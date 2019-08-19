@@ -175,6 +175,35 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
+    public void testNr5GIcon_NrNotRestrictedRrcCon_show5GIcon() {
+        setupNr5GIconConfigurationForNotRestrictedRrcCon();
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        updateDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
+        ServiceState ss = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED).when(ss).getNrState();
+        mPhoneStateListener.onServiceStateChanged(ss);
+
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, TelephonyIcons.ICON_5G,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, TelephonyIcons.ICON_5G, true, true);
+    }
+
+    @Test
+    public void testNr5GIcon_NrNotRestrictedRrcIdle_show5GIcon() {
+        setupNr5GIconConfigurationForNotRestrictedRrcIdle();
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        updateDataActivity(TelephonyManager.DATA_ACTIVITY_DORMANT);
+        ServiceState ss = Mockito.mock(ServiceState.class);
+        doReturn(NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED).when(ss).getNrState();
+        mPhoneStateListener.onServiceStateChanged(ss);
+
+        verifyDataIndicators(TelephonyIcons.ICON_5G);
+    }
+
+    @Test
     public void testNr5GIcon_NrConnectedWithoutMMWave_show5GIcon() {
         setupDefaultNr5GIconConfiguration();
         setupDefaultSignal();
