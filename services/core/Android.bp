@@ -1,3 +1,60 @@
+java_library {
+    name: "protolog-common",
+    srcs: [
+        "java/com/android/server/protolog/common/**/*.java",
+    ],
+    host_supported: true,
+}
+
+java_library {
+    name: "services.core.wm.protologgroups",
+    srcs: [
+        "java/com/android/server/wm/ProtoLogGroup.java",
+    ],
+    static_libs: ["protolog-common"],
+}
+
+genrule {
+    name: "services.core.protologsrc",
+    srcs: [":services.core.wm.protologgroups", "java/**/*.java"],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) transform-protolog-calls " +
+      "--protolog-class com.android.server.protolog.common.ProtoLog " +
+      "--protolog-impl-class com.android.server.protolog.ProtoLogImpl " +
+      "--loggroups-class com.android.server.wm.ProtoLogGroup " +
+      "--loggroups-jar $(location :services.core.wm.protologgroups) " +
+      "--output-srcjar $(out) " +
+      "$(locations java/**/*.java)",
+    out: ["services.core.protolog.srcjar"],
+}
+
+genrule {
+    name: "generate-protolog.json",
+    srcs: [":services.core.wm.protologgroups", "java/**/*.java"],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) generate-viewer-config " +
+      "--protolog-class com.android.server.protolog.common.ProtoLog " +
+      "--loggroups-class com.android.server.wm.ProtoLogGroup " +
+      "--loggroups-jar $(location :services.core.wm.protologgroups) " +
+      "--viewer-conf $(out) " +
+      "$(locations java/**/*.java)",
+    out: ["services.core.protolog.json"],
+}
+
+genrule {
+    name: "checked-protolog.json",
+    srcs: [
+        ":generate-protolog.json",
+        ":services.core.protolog.json",
+    ],
+    cmd: "cp $(location :generate-protolog.json) $(out) && " +
+      "{ diff $(out) $(location :services.core.protolog.json) >/dev/null 2>&1 || " +
+      "{ echo -e '##### ProtoLog viewer config is stale. ### \nRun: \n " +
+      "cp $(location :generate-protolog.json) " +
+      "$(location :services.core.protolog.json)\n' >&2 && false; } }",
+    out: ["services.core.protolog.json"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
 
@@ -12,7 +69,7 @@ java_library_static {
         ],
     },
     srcs: [
-        "java/**/*.java",
+        ":services.core.protologsrc",
         ":dumpstate_aidl",
         ":idmap2_aidl",
         ":installd_aidl",
@@ -34,6 +91,7 @@ java_library_static {
 
     required: [
         "gps_debug.conf",
+        "protolog.conf.json.gz",
     ],
 
     static_libs: [
@@ -80,4 +138,16 @@ java_library {
 prebuilt_etc {
     name: "gps_debug.conf",
     src: "java/com/android/server/location/gps_debug.conf",
+}
+
+genrule {
+    name: "services.core.json.gz",
+    srcs: [":checked-protolog.json"],
+    out: ["services.core.protolog.json.gz"],
+    cmd: "gzip < $(in) > $(out)",
+}
+
+prebuilt_etc {
+    name: "protolog.conf.json.gz",
+    src: ":services.core.json.gz",
 }

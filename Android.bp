@@ -244,8 +244,9 @@ java_defaults {
     },
 
     required: [
-        // TODO: remove gps_debug when the build system propagates "required" properly.
+        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
         "gps_debug.conf",
+	"protolog.conf.json.gz",
     ],
 }
 

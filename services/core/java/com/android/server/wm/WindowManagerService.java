@@ -265,6 +265,7 @@ import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
+import com.android.server.protolog.ProtoLogImpl;
 import com.android.server.utils.PriorityDump;
 
 import java.io.BufferedWriter;
@@ -5811,6 +5812,11 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print(mWindowTracing.getStatus() + "\n");
     }
 
+    private void dumpLogStatus(PrintWriter pw) {
+        pw.println("WINDOW MANAGER LOGGING (dumpsys window logging)");
+        pw.println(ProtoLogImpl.getSingleInstance().getStatus());
+    }
+
     private void dumpSessionsLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER SESSIONS (dumpsys window sessions)");
         for (int i=0; i<mSessions.size(); i++) {
@@ -6206,6 +6212,9 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("trace".equals(cmd)) {
                 dumpTraceStatus(pw);
                 return;
+            } else if ("logging".equals(cmd)) {
+                dumpLogStatus(pw);
+                return;
             } else if ("refresh".equals(cmd)) {
                 dumpHighRefreshRateBlacklist(pw);
                 return;
@@ -6264,6 +6273,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println(separator);
             }
             dumpTraceStatus(pw);
+            if (dumpAll) {
+                pw.println(separator);
+            }
+            dumpLogStatus(pw);
             if (dumpAll) {
                 pw.println(separator);
             }

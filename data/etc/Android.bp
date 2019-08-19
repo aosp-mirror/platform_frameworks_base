@@ -133,3 +133,8 @@ prebuilt_etc {
     sub_dir: "permissions",
     src: "com.android.timezone.updater.xml",
 }
+
+filegroup {
+    name: "services.core.protolog.json",
+    srcs: ["services.core.protolog.json"],
+}
