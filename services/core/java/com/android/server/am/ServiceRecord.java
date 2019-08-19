@@ -19,9 +19,7 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.app.INotificationManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,7 +31,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -798,6 +795,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             final String localPackageName = packageName;
             final int localForegroundId = foregroundId;
             final Notification _foregroundNoti = foregroundNoti;
+            final ServiceRecord record = this;
             ams.mHandler.post(new Runnable() {
                 public void run() {
                     NotificationManagerInternal nm = LocalServices.getService(
@@ -896,10 +894,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         Slog.w(TAG, "Error showing notification for service", e);
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
-                        ams.setServiceForeground(instanceName, ServiceRecord.this,
-                                0, null, 0, 0);
-                        ams.crashApplication(appUid, appPid, localPackageName, -1,
-                                "Bad notification for startForeground: " + e);
+                        ams.mServices.killMisbehavingService(record,
+                                appUid, appPid, localPackageName);
                     }
                 }
             });
