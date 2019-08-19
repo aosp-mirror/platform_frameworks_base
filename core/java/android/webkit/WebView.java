@@ -762,7 +762,7 @@ public class WebView extends AbsoluteLayout
      * encoded. If the data is base64 encoded, the value of the encoding
      * parameter must be {@code "base64"}. HTML can be encoded with {@link
      * android.util.Base64#encodeToString(byte[],int)} like so:
-     * <pre>
+     * <pre class="prettyprint">
      * String unencodedHtml =
      *     "&lt;html&gt;&lt;body&gt;'%28' is the code for '('&lt;/body&gt;&lt;/html&gt;";
      * String encodedHtml = Base64.encodeToString(unencodedHtml.getBytes(), Base64.NO_PADDING);
@@ -1854,7 +1854,7 @@ public class WebView extends AbsoluteLayout
      * important security note below for implications.
      * <p> Note that injected objects will not appear in JavaScript until the page is next
      * (re)loaded. JavaScript should be enabled before injecting the object. For example:
-     * <pre>
+     * <pre class="prettyprint">
      * class JsObject {
      *    {@literal @}JavascriptInterface
      *    public String toString() { return "injectedObject"; }
