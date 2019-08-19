@@ -1354,7 +1354,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Folyamatban van a csatlakoztatott eszköz töltése. Koppintson a további lehetőségekhez."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analóg audiotartozék észlelve"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"A csatlakoztatott eszköz nem kompatibilis ezzel a telefonnal. További információért koppintson ide."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hibakereső csatlakoztatva"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-hibakereső csatlakoztatva"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Koppintson az USB-hibakeresés kikapcsolásához"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Válassza ezt az USB hibakeresés kikapcsolásához."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Tesztelési alapkörnyezet mód engedélyezve"</string>

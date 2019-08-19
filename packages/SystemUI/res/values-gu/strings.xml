@@ -314,7 +314,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"શ્રવણ યંત્રો"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ચાલુ કરી રહ્યાં છીએ…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"તેજ"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"આપમેળે ફેરવો"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ઑટો રોટેટ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"સ્ક્રીનને આપમેળે ફેરવો"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> મોડ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"પરિભ્રમણ લૉક થયું"</string>
