@@ -2766,6 +2766,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadPolicyXml_readSnoozedNotificationsFromXml() throws Exception {
+        final String upgradeXml = "<notification-policy version=\"1\">"
+                + "<snoozed-notifications>></snoozed-notifications>"
+                + "</notification-policy>";
+        mService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())),
+                false,
+                UserHandle.USER_ALL);
+        verify(mSnoozeHelper, times(1)).readXml(any(XmlPullParser.class));
+    }
+
+    @Test
     public void testReadPolicyXml_readApprovedServicesFromSettings() throws Exception {
         final String preupgradeXml = "<notification-policy version=\"1\">"
                 + "<ranking></ranking>"
