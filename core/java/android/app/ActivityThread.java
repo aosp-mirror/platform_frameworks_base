@@ -190,6 +190,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6364,6 +6365,26 @@ public final class ActivityThread extends ClientTransactionHandler {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "NetworkSecurityConfigProvider.install");
         NetworkSecurityConfigProvider.install(appContext);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+
+        if (isAppDebuggable) {
+            try {
+                // Load all the agents in the code_cache/startup_agents directory.
+                // We pass the absolute path to the data_dir as an argument.
+                Path startup_path = appContext.getCodeCacheDir().toPath().resolve("startup_agents");
+                if (Files.exists(startup_path)) {
+                    for (Path p : Files.newDirectoryStream(startup_path)) {
+                        handleAttachAgent(
+                                p.toAbsolutePath().toString()
+                                + "="
+                                + appContext.getDataDir().toPath().toAbsolutePath().toString(),
+                                data.info);
+                    }
+                }
+            } catch (Exception e) {
+                // Ignored.
+            }
+        }
 
         // Continue loading instrumentation.
         if (ii != null) {
