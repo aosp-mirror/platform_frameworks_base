@@ -127,6 +127,7 @@ public class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     public static final boolean DEBUG_TRACE_GRANTS = false;
+    public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
 
     private static final int DEFAULT_EPHEMERAL_COOKIE_MAX_SIZE_BYTES = 16384; // 16KB
 
@@ -690,7 +691,7 @@ public class ApplicationPackageManager extends PackageManager {
             UserHandle user) {
         if (DEBUG_TRACE_GRANTS
                 && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
-            Log.i(TAG, "App " + mContext.getPackageName() + " is granting "
+            Log.i(TAG, "App " + mContext.getPackageName() + " is granting " + packageName + " "
                     + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
         }
         try {
@@ -708,9 +709,9 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public void revokeRuntimePermission(String packageName, String permName, UserHandle user) {
-        if (DEBUG_TRACE_GRANTS
+        if (DEBUG_TRACE_PERMISSION_UPDATES
                 && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
-            Log.i(TAG, "App " + mContext.getPackageName() + " is revoking "
+            Log.i(TAG, "App " + mContext.getPackageName() + " is revoking " + packageName + " "
                     + permName + " for user " + user.getIdentifier(), new RuntimeException());
         }
         try {
@@ -734,9 +735,10 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void updatePermissionFlags(String permName, String packageName,
             int flagMask, int flagValues, UserHandle user) {
-        if (DEBUG_TRACE_GRANTS
+        if (DEBUG_TRACE_PERMISSION_UPDATES
                 && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
             Log.i(TAG, "App " + mContext.getPackageName() + " is updating flags for "
+                    + packageName + " "
                     + permName + " for user " + user.getIdentifier() + ": "
                     + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_", flagMask)
                     + " := " + DebugUtils.flagsToString(
