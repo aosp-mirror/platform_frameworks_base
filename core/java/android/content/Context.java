@@ -37,6 +37,7 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
+import android.compat.IPlatformCompat;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -3064,6 +3065,7 @@ public abstract class Context {
             RESTRICTIONS_SERVICE,
             APP_OPS_SERVICE,
             CAMERA_SERVICE,
+            //@hide: PLATFORM_COMPAT_SERVICE,
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
@@ -4224,6 +4226,13 @@ public abstract class Context {
      */
     @SystemApi
     public static final String STATS_MANAGER = "stats";
+
+    /**
+     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
+     * {@link IPlatformCompat} IBinder for communicating with the platform compat service.
+     * @hide
+     */
+    public static final String PLATFORM_COMPAT_SERVICE = "platform_compat";
 
     /**
      * Service to capture a bugreport.
