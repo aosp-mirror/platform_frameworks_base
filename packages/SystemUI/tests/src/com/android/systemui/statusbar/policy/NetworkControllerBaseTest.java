@@ -228,6 +228,18 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         NetworkControllerImpl.Config.add5GIconMapping("connected:5g", mConfig);
     }
 
+    public void setupNr5GIconConfigurationForNotRestrictedRrcCon() {
+        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_con:5g", mConfig);
+    }
+
+    public void setupNr5GIconConfigurationForNotRestrictedRrcIdle() {
+        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_idle:5g", mConfig);
+    }
+
     public void setConnectivityViaBroadcast(
         int networkType, boolean validated, boolean isConnected) {
         setConnectivityCommon(networkType, validated, isConnected);
