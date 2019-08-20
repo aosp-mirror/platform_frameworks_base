@@ -20,6 +20,7 @@ android_robolectric_test {
     ],
     java_resource_dirs: ["config"],
     libs: [
+        "backup-encryption-protos",
         "platform-test-annotations",
         "testng",
     ],
