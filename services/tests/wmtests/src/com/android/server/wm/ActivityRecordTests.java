@@ -544,12 +544,16 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final ActivityDisplay newDisplay =
                 addNewActivityDisplayAt(info, ActivityDisplay.POSITION_TOP);
 
-        mTask.getConfiguration().densityDpi = 200;
+        final Configuration c =
+                new Configuration(mStack.getDisplay().getRequestedOverrideConfiguration());
+        c.densityDpi = 200;
+        mStack.getDisplay().onRequestedOverrideConfigurationChanged(c);
         mActivity = new ActivityBuilder(mService)
                 .setTask(mTask)
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
                 .setMaxAspectRatio(1.5f)
                 .build();
+        mActivity.visible = true;
 
         final Rect originalBounds = new Rect(mActivity.getBounds());
         final int originalDpi = mActivity.getConfiguration().densityDpi;
@@ -586,7 +590,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testSizeCompatMode_FixedScreenLayoutSizeBits() {
         final int fixedScreenLayout = Configuration.SCREENLAYOUT_LONG_NO
                 | Configuration.SCREENLAYOUT_SIZE_NORMAL;
-        mTask.getConfiguration().screenLayout = fixedScreenLayout
+        mTask.getRequestedOverrideConfiguration().screenLayout = fixedScreenLayout
                 | Configuration.SCREENLAYOUT_LAYOUTDIR_LTR;
         prepareFixedAspectRatioUnresizableActivity();
 
@@ -793,6 +797,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         setupDisplayContentForCompatDisplayInsets();
         mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
         mActivity.info.maxAspectRatio = 1.5f;
+        mActivity.visible = true;
         ensureActivityConfiguration();
     }
 
@@ -805,8 +810,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final DisplayContent displayContent = mStack.getDisplay().mDisplayContent;
         displayContent.mBaseDisplayWidth = width;
         displayContent.mBaseDisplayHeight = height;
-        mTask.getWindowConfiguration().setAppBounds(0, 0, width, height);
-        mTask.getWindowConfiguration().setRotation(ROTATION_0);
+        final Configuration c =
+                new Configuration(mStack.getDisplay().getRequestedOverrideConfiguration());
+        c.windowConfiguration.setBounds(new Rect(0, 0, width, height));
+        c.windowConfiguration.setAppBounds(0, 0, width, height);
+        c.windowConfiguration.setRotation(ROTATION_0);
+        mStack.getDisplay().onRequestedOverrideConfigurationChanged(c);
         return displayContent;
     }
 }
