@@ -2240,10 +2240,16 @@ public final class PowerManagerService extends SystemService
     private boolean maybeHideInattentiveSleepWarningLocked(long now, long showWarningTime) {
         long attentiveTimeout = getAttentiveTimeoutLocked();
 
-        if (mInattentiveSleepWarningOverlayController.isShown() && (attentiveTimeout < 0
-                || isBeingKeptFromShowingInattentiveSleepWarningLocked()
-                || now < showWarningTime)) {
-            mInattentiveSleepWarningOverlayController.dismiss();
+        if (!mInattentiveSleepWarningOverlayController.isShown()) {
+            return false;
+        }
+
+        if (mWakefulness != WAKEFULNESS_AWAKE) {
+            mInattentiveSleepWarningOverlayController.dismiss(false);
+            return true;
+        } else if (attentiveTimeout < 0 || isBeingKeptFromShowingInattentiveSleepWarningLocked()
+                || now < showWarningTime) {
+            mInattentiveSleepWarningOverlayController.dismiss(true);
             return true;
         }
 

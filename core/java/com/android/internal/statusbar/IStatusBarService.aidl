@@ -122,5 +122,5 @@ interface IStatusBarService
     /**
      * Dismiss the warning that the device is about to go to sleep due to user inactivity.
      */
-    void dismissInattentiveSleepWarning();
+    void dismissInattentiveSleepWarning(boolean animated);
 }

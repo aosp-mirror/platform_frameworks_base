@@ -307,7 +307,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * Called to notify System UI that the warning about the device going to sleep
          * due to prolonged user inactivity should be dismissed.
          */
-        default void dismissInattentiveSleepWarning() { }
+        default void dismissInattentiveSleepWarning(boolean animated) { }
     }
 
     public CommandQueue(Context context) {
@@ -816,9 +816,9 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void dismissInattentiveSleepWarning() {
+    public void dismissInattentiveSleepWarning(boolean animated) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_DISMISS_INATTENTIVE_SLEEP_WARNING)
+            mHandler.obtainMessage(MSG_DISMISS_INATTENTIVE_SLEEP_WARNING, animated)
                     .sendToTarget();
         }
     }
@@ -1175,7 +1175,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     break;
                 case MSG_DISMISS_INATTENTIVE_SLEEP_WARNING:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).dismissInattentiveSleepWarning();
+                        mCallbacks.get(i).dismissInattentiveSleepWarning((Boolean) msg.obj);
                     }
                     break;
             }
