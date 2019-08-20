@@ -160,8 +160,6 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(int, int, String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(String, int, String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
-    method public void startWatchingActive(@NonNull int[], @NonNull android.app.AppOpsManager.OnOpActiveChangedListener);
-    method public void stopWatchingActive(@NonNull android.app.AppOpsManager.OnOpActiveChangedListener);
     method public static int strOpToOp(@NonNull String);
     field public static final int HISTORICAL_MODE_DISABLED = 0; // 0x0
     field public static final int HISTORICAL_MODE_ENABLED_ACTIVE = 1; // 0x1
@@ -291,10 +289,6 @@ package android.app {
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
-  }
-
-  public static interface AppOpsManager.OnOpActiveChangedListener {
-    method public void onOpActiveChanged(int, int, String, boolean);
   }
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
