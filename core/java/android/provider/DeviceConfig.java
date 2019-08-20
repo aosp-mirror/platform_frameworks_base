@@ -314,13 +314,22 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SETTINGS_UI = "settings_ui";
 
     /**
-     * Namespace for window manager related features. The names to access the properties in this
-     * namespace should be defined in {@link WindowManager}.
+     * Namespace for android related features, i.e. for flags that affect not just a single
+     * component, but the entire system.
+     *
+     * The keys for this namespace are defined in {@link AndroidDeviceConfig}.
      *
      * @hide
      */
     @TestApi
-    public static final String NAMESPACE_WINDOW_MANAGER = "android:window_manager";
+    public static final String NAMESPACE_ANDROID = "android";
+
+    /**
+     * Namespace for window manager related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_WINDOW_MANAGER = "window_manager";
 
     /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
@@ -347,48 +356,6 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     public static final String NAMESPACE_PERMISSIONS = "permissions";
-
-    /**
-     * Interface for accessing keys belonging to {@link #NAMESPACE_WINDOW_MANAGER}.
-     * @hide
-     */
-    @TestApi
-    public interface WindowManager {
-
-        /**
-         * Key for accessing the system gesture exclusion limit (an integer in dp).
-         *
-         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
-         * @hide
-         */
-        @TestApi
-        String KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP = "system_gesture_exclusion_limit_dp";
-
-        /**
-         * Key for controlling whether system gestures are implicitly excluded by windows requesting
-         * sticky immersive mode from apps that are targeting an SDK prior to Q.
-         *
-         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
-         * @hide
-         */
-        @TestApi
-        String KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE =
-                "system_gestures_excluded_by_pre_q_sticky_immersive";
-
-        /**
-         * The minimum duration between gesture exclusion logging for a given window in
-         * milliseconds.
-         *
-         * Events that happen in-between will be silently dropped.
-         *
-         * A non-positive value disables logging.
-         *
-         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
-         * @hide
-         */
-        String KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS =
-                "system_gesture_exclusion_log_debounce_millis";
-    }
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
