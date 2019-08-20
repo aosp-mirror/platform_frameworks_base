@@ -122,7 +122,6 @@ import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
@@ -1592,8 +1591,7 @@ final class ActivityRecord extends ConfigurationContainer {
             if (!Objects.equals(cur.taskAffinity, taskAffinity)) {
                 break;
             }
-            cur.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                    "request-affinity", true /* oomAdj */);
+            cur.finishIfPossible("request-affinity", true /* oomAdj */);
         }
     }
 
@@ -1650,14 +1648,17 @@ final class ActivityRecord extends ConfigurationContainer {
     @interface FinishRequest {}
 
     /**
-     * See {@link #finishActivityLocked(int, Intent, String, boolean, boolean)}
+     * See {@link #finishIfPossible(int, Intent, String, boolean, boolean)}
      */
-    @FinishRequest int finishActivityLocked(int resultCode, Intent resultData, String reason,
-            boolean oomAdj) {
-        return finishActivityLocked(resultCode, resultData, reason, oomAdj, !PAUSE_IMMEDIATELY);
+    @FinishRequest int finishIfPossible(String reason, boolean oomAdj) {
+        return finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason,
+                oomAdj, !PAUSE_IMMEDIATELY);
     }
 
     /**
+     * Finish activity if possible. If activity was resumed - we must first pause it to make the
+     * activity below resumed. Otherwise we will try to complete the request immediately by calling
+     * {@link #completeFinishing(String)}.
      * @return One of {@link FinishRequest} values:
      * {@link #FINISH_RESULT_REMOVED} if this activity has been removed from the history list.
      * {@link #FINISH_RESULT_REQUESTED} if removal process was started, but it is still in the list
@@ -1665,7 +1666,7 @@ final class ActivityRecord extends ConfigurationContainer {
      * {@link #FINISH_RESULT_CANCELLED} if activity is already finishing or in invalid state and the
      * request to finish it was not ignored.
      */
-    @FinishRequest int finishActivityLocked(int resultCode, Intent resultData, String reason,
+    @FinishRequest int finishIfPossible(int resultCode, Intent resultData, String reason,
             boolean oomAdj, boolean pauseImmediately) {
         if (DEBUG_RESULTS || DEBUG_STATES) {
             Slog.v(TAG_STATES, "Finishing activity r=" + this + ", result=" + resultCode
@@ -1704,19 +1705,23 @@ final class ActivityRecord extends ConfigurationContainer {
             pauseKeyDispatchingLocked();
 
             final ActivityStack stack = getActivityStack();
-            stack.adjustFocusedActivityStack(this, "finishActivity");
+            stack.adjustFocusedActivityStack(this, "finishIfPossible");
 
             finishActivityResults(resultCode, resultData);
 
             final boolean endTask = index <= 0 && !task.isClearingToReuseTask();
             final int transit = endTask ? TRANSIT_TASK_CLOSE : TRANSIT_ACTIVITY_CLOSE;
-            if (stack.getResumedActivity() == this) {
-                if (DEBUG_VISIBILITY || DEBUG_TRANSITION) {
-                    Slog.v(TAG_TRANSITION, "Prepare close transition: finishing " + this);
-                }
+            if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
                             task.getTaskInfo());
+                }
+                // Prepare app close transition, but don't execute just yet. It is possible that
+                // an activity that will be made resumed in place of this one will immediately
+                // launch another new activity. In this case current closing transition will be
+                // combined with open transition for the new activity.
+                if (DEBUG_VISIBILITY || DEBUG_TRANSITION) {
+                    Slog.v(TAG_TRANSITION, "Prepare close transition: finishing " + this);
                 }
                 getDisplay().mDisplayContent.prepareAppTransition(transit, false);
 
@@ -1744,17 +1749,17 @@ final class ActivityRecord extends ConfigurationContainer {
                     mAtmService.getLockTaskController().clearLockedTask(task);
                 }
             } else if (!isState(PAUSING)) {
-                // If the activity is PAUSING, we will complete the finish once
-                // it is done pausing; else we can just directly finish it here.
-                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish not pausing: " + this);
                 if (visible) {
+                    // Prepare and execute close transition.
                     prepareActivityHideTransitionAnimation(transit);
                 }
 
-                final int finishMode = (visible || nowVisible) ? FINISH_AFTER_VISIBLE
-                        : FINISH_AFTER_PAUSE;
-                final boolean removedActivity = finishCurrentActivityLocked(finishMode, oomAdj,
-                        "finishActivityLocked") == null;
+                final boolean removedActivity = completeFinishing("finishIfPossible") == null;
+                // Performance optimization - only invoke OOM adjustment if the state changed to
+                // 'STOPPING'. Otherwise it will not change the OOM scores.
+                if (oomAdj && isState(STOPPING)) {
+                    mAtmService.updateOomAdj();
+                }
 
                 // The following code is an optimization. When the last non-task overlay activity
                 // is removed from the task, we remove the entire task from the stack. However,
@@ -1771,6 +1776,7 @@ final class ActivityRecord extends ConfigurationContainer {
                         taskOverlay.prepareActivityHideTransitionAnimation(transit);
                     }
                 }
+
                 return removedActivity ? FINISH_RESULT_REMOVED : FINISH_RESULT_REQUESTED;
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + this);
@@ -1789,101 +1795,123 @@ final class ActivityRecord extends ConfigurationContainer {
         dc.executeAppTransition();
     }
 
-    static final int FINISH_IMMEDIATELY = 0;
-    private static final int FINISH_AFTER_PAUSE = 1;
-    static final int FINISH_AFTER_VISIBLE = 2;
+    /**
+     * Complete activity finish request that was initiated earlier. If the activity is still
+     * pausing we will wait for it to complete its transition. If the activity that should appear in
+     * place of this one is not visible yet - we'll wait for it first. Otherwise - activity can be
+     * destroyed right away.
+     * @param reason Reason for finishing the activity.
+     * @return Flag indicating whether the activity was removed from history.
+     */
+    ActivityRecord completeFinishing(String reason) {
+        if (!finishing || isState(RESUMED)) {
+            throw new IllegalArgumentException(
+                    "Activity must be finishing and not resumed to complete, r=" + this
+                            + ", finishing=" + finishing + ", state=" + mState);
+        }
 
-    ActivityRecord finishCurrentActivityLocked(int mode, boolean oomAdj, String reason) {
-        // First things first: if this activity is currently visible,
-        // and the resumed activity is not yet visible, then hold off on
-        // finishing until the resumed one becomes visible.
+        if (isState(PAUSING)) {
+            // Activity is marked as finishing and will be processed once it completes.
+            return this;
+        }
 
+        boolean activityRemoved = false;
+
+        // If this activity is currently visible, and the resumed activity is not yet visible, then
+        // hold off on finishing until the resumed one becomes visible.
         // The activity that we are finishing may be over the lock screen. In this case, we do not
         // want to consider activities that cannot be shown on the lock screen as running and should
         // proceed with finishing the activity if there is no valid next top running activity.
         // Note that if this finishing activity is floating task, we don't need to wait the
         // next activity resume and can destroy it directly.
+        // TODO(b/137329632): find the next activity directly underneath this one, not just anywhere
+        final ActivityRecord next = getDisplay().topRunningActivity(
+                true /* considerKeyguardState */);
+        final boolean isVisible = visible || nowVisible;
         final ActivityStack stack = getActivityStack();
-        final ActivityDisplay display = getDisplay();
-        final ActivityRecord next = display.topRunningActivity(true /* considerKeyguardState */);
-        final boolean isFloating = getConfiguration().windowConfiguration.tasksAreFloating();
-
-        if (mode == FINISH_AFTER_VISIBLE && (visible || nowVisible)
-                && next != null && !next.nowVisible && !isFloating) {
+        final boolean notFocusedStack = stack != mRootActivityContainer.getTopDisplayFocusedStack();
+        if (isVisible && next != null && !next.nowVisible) {
             if (!mStackSupervisor.mStoppingActivities.contains(this)) {
-                stack.addToStopping(this, false /* scheduleIdle */, false /* idleDelayed */,
-                        "finishCurrentActivityLocked");
+                getActivityStack().addToStopping(this, false /* scheduleIdle */,
+                        false /* idleDelayed */, "finishCurrentActivityLocked");
             }
             if (DEBUG_STATES) {
                 Slog.v(TAG_STATES, "Moving to STOPPING: " + this + " (finish requested)");
             }
             setState(STOPPING, "finishCurrentActivityLocked");
-            if (oomAdj) {
-                mAtmService.updateOomAdj();
-            }
-            return this;
-        }
-
-        // make sure the record is cleaned out of other places.
-        mStackSupervisor.mStoppingActivities.remove(this);
-        mStackSupervisor.mGoingToSleepActivities.remove(this);
-        final ActivityState prevState = getState();
-        if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + this);
-
-        setState(FINISHING, "finishCurrentActivityLocked");
-
-        // Don't destroy activity immediately if the display contains home stack, although there is
-        // no next activity at the moment but another home activity should be started later. Keep
-        // this activity alive until next home activity is resumed then user won't see a temporary
-        // black screen.
-        final boolean noRunningStack = next == null && display.topRunningActivity() == null
-                && display.getHomeStack() == null;
-        final boolean noFocusedStack = stack != display.getFocusedStack();
-        final boolean finishingInNonFocusedStackOrNoRunning = mode == FINISH_AFTER_VISIBLE
-                && prevState == PAUSED && (noFocusedStack || noRunningStack);
-
-        if (mode == FINISH_IMMEDIATELY
-                || (prevState == PAUSED && (mode == FINISH_AFTER_PAUSE || inPinnedWindowingMode()))
-                || finishingInNonFocusedStackOrNoRunning
-                || prevState == STARTED
-                || prevState == STOPPING
-                || prevState == STOPPED
-                || prevState == ActivityState.INITIALIZING) {
-            makeFinishingLocked();
-            boolean activityRemoved = stack.destroyActivityLocked(this, true /* removeFromApp */,
-                    "finish-imm:" + reason);
-
-            if (finishingInNonFocusedStackOrNoRunning) {
-                // Finishing activity that was in paused state and it was in not currently focused
-                // stack, need to make something visible in its place. Also if the display does not
-                // have running activity, the configuration may need to be updated for restoring
-                // original orientation of the display.
+            if (notFocusedStack) {
                 mRootActivityContainer.ensureVisibilityAndConfig(next, getDisplayId(),
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
-            if (activityRemoved) {
-                mRootActivityContainer.resumeFocusedStacksTopActivities();
-            }
-            if (DEBUG_CONTAINERS) {
-                Slog.d(TAG_CONTAINERS, "destroyActivityLocked: finishCurrentActivityLocked r="
-                        + this + " destroy returned removed=" + activityRemoved);
-            }
-            return activityRemoved ? null : this;
+        } else if (isVisible && isState(PAUSED) && getActivityStack().isFocusedStackOnDisplay()
+                && !inPinnedWindowingMode()) {
+            // TODO(b/137329632): Currently non-focused stack is handled differently.
+            addToFinishingAndWaitForIdle();
+        } else {
+            // Not waiting for the next one to become visible - finish right away.
+            activityRemoved = destroyIfPossible(reason);
         }
 
-        // Need to go through the full pause cycle to get this
-        // activity into the stopped state and then finish it.
-        if (DEBUG_ALL) Slog.v(TAG, "Enqueueing pending finish: " + this);
+        return activityRemoved ? null : this;
+    }
+
+    /**
+     * Destroy and cleanup the activity both on client and server if possible. If activity is the
+     * last one left on display with home stack and there is no other running activity - delay
+     * destroying it until the next one starts.
+     */
+    boolean destroyIfPossible(String reason) {
+        setState(FINISHING, "destroyIfPossible");
+
+        // Make sure the record is cleaned out of other places.
+        mStackSupervisor.mStoppingActivities.remove(this);
+        mStackSupervisor.mGoingToSleepActivities.remove(this);
+
+        final ActivityStack stack = getActivityStack();
+        final ActivityDisplay display = getDisplay();
+        // TODO(b/137329632): Exclude current activity when looking for the next one with
+        //  ActivityDisplay#topRunningActivity().
+        final ActivityRecord next = display.topRunningActivity();
+        final boolean isLastStackOverEmptyHome =
+                next == null && stack.isFocusedStackOnDisplay() && display.getHomeStack() != null;
+        if (isLastStackOverEmptyHome) {
+            // Don't destroy activity immediately if this is the last activity on the display and
+            // the display contains home stack. Although there is no next activity at the moment,
+            // another home activity should be started later. Keep this activity alive until next
+            // home activity is resumed. This way the user won't see a temporary black screen.
+            addToFinishingAndWaitForIdle();
+            return false;
+        }
+        makeFinishingLocked();
+
+        boolean activityRemoved = getActivityStack().destroyActivityLocked(this,
+                true /* removeFromApp */, "finish-imm:" + reason);
+
+        // If the display does not have running activity, the configuration may need to be
+        // updated for restoring original orientation of the display.
+        if (next == null) {
+            mRootActivityContainer.ensureVisibilityAndConfig(next, getDisplayId(),
+                    false /* markFrozenIfConfigChanged */, true /* deferResume */);
+        }
+        if (activityRemoved) {
+            mRootActivityContainer.resumeFocusedStacksTopActivities();
+        }
+
+        if (DEBUG_CONTAINERS) {
+            Slog.d(TAG_CONTAINERS, "destroyIfPossible: r=" + this + " destroy returned removed="
+                    + activityRemoved);
+        }
+
+        return activityRemoved;
+    }
+
+    @VisibleForTesting
+    void addToFinishingAndWaitForIdle() {
+        if (DEBUG_STATES) Slog.v(TAG, "Enqueueing pending finish: " + this);
+        setState(FINISHING, "addToFinishingAndWaitForIdle");
         mStackSupervisor.mFinishingActivities.add(this);
         resumeKeyDispatchingLocked();
         mRootActivityContainer.resumeFocusedStacksTopActivities();
-        // If activity was not paused at this point - explicitly pause it to start finishing
-        // process. Finishing will be completed once it reports pause back.
-        if (isState(RESUMED) && stack.mPausingActivity != null) {
-            stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                    next /* resuming */, false /* dontWait */);
-        }
-        return this;
     }
 
     void makeFinishingLocked() {
