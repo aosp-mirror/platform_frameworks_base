@@ -461,7 +461,7 @@ public final class ContentService extends IContentService.Stub {
             }
 
             synchronized (mCache) {
-                final String providerPackageName = getProviderPackageName(uri);
+                final String providerPackageName = getProviderPackageName(uri, userHandle);
                 invalidateCacheLocked(userHandle, providerPackageName, uri);
             }
         } finally {
@@ -1145,9 +1145,9 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
-    private @Nullable String getProviderPackageName(Uri uri) {
-        final ProviderInfo pi = mContext.getPackageManager()
-                .resolveContentProvider(uri.getAuthority(), 0);
+    private @Nullable String getProviderPackageName(Uri uri, int userId) {
+        final ProviderInfo pi = mContext.getPackageManager().resolveContentProviderAsUser(
+                uri.getAuthority(), 0, userId);
         return (pi != null) ? pi.packageName : null;
     }
 
@@ -1200,7 +1200,7 @@ public final class ContentService extends IContentService.Stub {
         mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
                 packageName);
 
-        final String providerPackageName = getProviderPackageName(key);
+        final String providerPackageName = getProviderPackageName(key, userId);
         final Pair<String, Uri> fullKey = Pair.create(packageName, key);
 
         synchronized (mCache) {
@@ -1222,7 +1222,7 @@ public final class ContentService extends IContentService.Stub {
         mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
                 packageName);
 
-        final String providerPackageName = getProviderPackageName(key);
+        final String providerPackageName = getProviderPackageName(key, userId);
         final Pair<String, Uri> fullKey = Pair.create(packageName, key);
 
         synchronized (mCache) {
