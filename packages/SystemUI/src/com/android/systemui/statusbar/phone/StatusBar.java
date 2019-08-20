@@ -3928,6 +3928,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // execute the transition. The pulse callback will then be invoked when the scrims
             // are black, indicating that StatusBar is ready to present the rest of the UI.
             mPulsing = true;
+            mNotificationPanel.setPulseReason(reason);
             mDozeScrimController.pulse(new PulseCallback() {
                 @Override
                 public void onPulseStarted() {
