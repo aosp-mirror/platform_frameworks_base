@@ -48,7 +48,6 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings.Secure;
 import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
@@ -218,6 +217,15 @@ final class UiModeManagerService extends SystemService {
         }
     };
 
+    private final ContentObserver mDarkThemeObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            final int mode = Secure.getIntForUser(getContext().getContentResolver(),
+                    Secure.UI_NIGHT_MODE, mNightMode, 0);
+            SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME, Integer.toString(mode));
+        }
+    };
+
     @Override
     public void onSwitchUser(int userHandle) {
         super.onSwitchUser(userHandle);
@@ -293,6 +301,9 @@ final class UiModeManagerService extends SystemService {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         context.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
+
+        context.getContentResolver().registerContentObserver(Secure.getUriFor(Secure.UI_NIGHT_MODE),
+                false, mDarkThemeObserver, 0);
     }
 
     // Records whether setup wizard has happened or not and adds an observer for this user if not.
@@ -417,11 +428,6 @@ final class UiModeManagerService extends SystemService {
                         if (!mCarModeEnabled) {
                             Secure.putIntForUser(getContext().getContentResolver(),
                                     Secure.UI_NIGHT_MODE, mode, user);
-
-                            if (UserManager.get(getContext()).isPrimaryUser()) {
-                                SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME,
-                                        Integer.toString(mode));
-                            }
                         }
 
                         mNightMode = mode;
