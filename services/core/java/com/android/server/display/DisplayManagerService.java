@@ -2020,6 +2020,10 @@ public final class DisplayManagerService extends SystemService {
         @Override // Binder call
         public void resizeVirtualDisplay(IVirtualDisplayCallback callback,
                 int width, int height, int densityDpi) {
+            if (width <= 0 || height <= 0 || densityDpi <= 0) {
+                throw new IllegalArgumentException("width, height, and densityDpi must be "
+                        + "greater than 0");
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 resizeVirtualDisplayInternal(callback.asBinder(), width, height, densityDpi);
