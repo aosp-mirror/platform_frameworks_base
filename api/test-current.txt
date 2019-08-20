@@ -744,6 +744,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void addOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract boolean arePermissionsIndividuallyControlled();
+    method @Nullable public String getContentCaptureServicePackageName();
     method @Nullable @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
     method @Nullable public String getIncidentReportApproverPackageName();
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);

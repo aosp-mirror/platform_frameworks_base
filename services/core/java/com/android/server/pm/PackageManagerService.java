@@ -19751,6 +19751,23 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public String getContentCaptureServicePackageName() {
+        final String flattenedContentCaptureService =
+                mContext.getString(R.string.config_defaultContentCaptureService);
+
+        if (TextUtils.isEmpty(flattenedContentCaptureService)) {
+            return null;
+        }
+
+        final ComponentName contentCaptureServiceComponentName =
+                ComponentName.unflattenFromString(flattenedContentCaptureService);
+        if (contentCaptureServiceComponentName == null) {
+            return null;
+        }
+        return contentCaptureServiceComponentName.getPackageName();
+    }
+
+    @Override
     public void setApplicationEnabledSetting(String appPackageName,
             int newState, int flags, int userId, String callingPackage) {
         if (!mUserManager.exists(userId)) return;
