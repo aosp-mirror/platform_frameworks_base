@@ -12532,6 +12532,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!brief && !opts.oomOnly && (procs.size() == 1 || opts.isCheckinRequest || opts.packages)) {
             opts.dumpDetails = true;
         }
+        final int numProcs = procs.size();
+        final boolean collectNative = !opts.isCheckinRequest && numProcs > 1 && !opts.packages;
+        if (collectNative) {
+            // If we are showing aggregations, also look for native processes to
+            // include so that our aggregations are more accurate.
+            updateCpuStatsNow();
+        }
 
         dumpApplicationMemoryUsageHeader(pw, uptime, realtime, opts.isCheckinRequest, opts.isCompact);
 
@@ -12570,7 +12577,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean hasSwapPss = false;
 
         Debug.MemoryInfo mi = null;
-        for (int i = procs.size() - 1 ; i >= 0 ; i--) {
+        for (int i = numProcs - 1; i >= 0; i--) {
             final ProcessRecord r = procs.get(i);
             final IApplicationThread thread;
             final int pid;
@@ -12724,10 +12731,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         long nativeProcTotalPss = 0;
 
-        if (!opts.isCheckinRequest && procs.size() > 1 && !opts.packages) {
-            // If we are showing aggregations, also look for native processes to
-            // include so that our aggregations are more accurate.
-            updateCpuStatsNow();
+        if (collectNative) {
             mi = null;
             synchronized (mProcessCpuTracker) {
                 final int N = mProcessCpuTracker.countStats();
@@ -13095,6 +13099,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!brief && !opts.oomOnly && (procs.size() == 1 || opts.isCheckinRequest || opts.packages)) {
             opts.dumpDetails = true;
         }
+        final int numProcs = procs.size();
+        final boolean collectNative = numProcs > 1 && !opts.packages;
+        if (collectNative) {
+            // If we are showing aggregations, also look for native processes to
+            // include so that our aggregations are more accurate.
+            updateCpuStatsNow();
+        }
 
         ProtoOutputStream proto = new ProtoOutputStream(fd);
 
@@ -13136,7 +13147,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean hasSwapPss = false;
 
         Debug.MemoryInfo mi = null;
-        for (int i = procs.size() - 1 ; i >= 0 ; i--) {
+        for (int i = numProcs - 1; i >= 0; i--) {
             final ProcessRecord r = procs.get(i);
             final IApplicationThread thread;
             final int pid;
@@ -13283,10 +13294,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         long nativeProcTotalPss = 0;
 
-        if (procs.size() > 1 && !opts.packages) {
-            // If we are showing aggregations, also look for native processes to
-            // include so that our aggregations are more accurate.
-            updateCpuStatsNow();
+        if (collectNative) {
             mi = null;
             synchronized (mProcessCpuTracker) {
                 final int N = mProcessCpuTracker.countStats();
