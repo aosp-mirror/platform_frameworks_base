@@ -20,7 +20,8 @@ import android.content.pm.ParceledListSlice;
 import android.media.IRemoteVolumeController;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
-import android.media.session.ICallback;
+import android.media.session.IOnMediaKeyEventDispatchedListener;
+import android.media.session.IOnMediaKeyEventSessionChangedListener;
 import android.media.session.IOnMediaKeyListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
 import android.media.session.ISession;
@@ -62,8 +63,12 @@ interface ISessionManager {
     // For PhoneWindowManager to precheck media keys
     boolean isGlobalPriorityActive();
 
-    void registerCallback(in ICallback callback);
-    void unregisterCallback(in ICallback callback);
+    void addOnMediaKeyEventDispatchedListener(in IOnMediaKeyEventDispatchedListener listener);
+    void removeOnMediaKeyEventDispatchedListener(in IOnMediaKeyEventDispatchedListener listener);
+    void addOnMediaKeyEventSessionChangedListener(
+            in IOnMediaKeyEventSessionChangedListener listener);
+    void removeOnMediaKeyEventSessionChangedListener(
+            in IOnMediaKeyEventSessionChangedListener listener);
     void setOnVolumeKeyLongPressListener(in IOnVolumeKeyLongPressListener listener);
     void setOnMediaKeyListener(in IOnMediaKeyListener listener);
 
