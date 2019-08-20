@@ -856,6 +856,8 @@ public class AccessibilityRecord {
         mScrollY = record.mScrollY;
         mMaxScrollX = record.mMaxScrollX;
         mMaxScrollY = record.mMaxScrollY;
+        mScrollDeltaX = record.mScrollDeltaX;
+        mScrollDeltaY = record.mScrollDeltaY;
         mAddedCount = record.mAddedCount;
         mRemovedCount = record.mRemovedCount;
         mClassName = record.mClassName;
@@ -882,6 +884,8 @@ public class AccessibilityRecord {
         mScrollY = 0;
         mMaxScrollX = 0;
         mMaxScrollY = 0;
+        mScrollDeltaX = UNDEFINED;
+        mScrollDeltaY = UNDEFINED;
         mAddedCount = UNDEFINED;
         mRemovedCount = UNDEFINED;
         mClassName = null;
@@ -921,6 +925,8 @@ public class AccessibilityRecord {
         append(builder, "ScrollY", mScrollY);
         append(builder, "MaxScrollX", mMaxScrollX);
         append(builder, "MaxScrollY", mMaxScrollY);
+        append(builder, "ScrollDeltaX", mScrollDeltaX);
+        append(builder, "ScrollDeltaY", mScrollDeltaY);
         append(builder, "AddedCount", mAddedCount);
         append(builder, "RemovedCount", mRemovedCount);
         append(builder, "ParcelableData", mParcelableData);

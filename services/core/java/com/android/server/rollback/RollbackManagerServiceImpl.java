@@ -271,39 +271,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }, filter, null, getHandler());
     }
 
-    /**
-     * This method posts a blocking call to the handler thread, so it should not be called from
-     * that same thread.
-     * @throws {@link IllegalStateException} if called from {@link #mHandlerThread}
-     */
     @Override
     public ParceledListSlice getAvailableRollbacks() {
         enforceManageRollbacks("getAvailableRollbacks");
-        if (Thread.currentThread().equals(mHandlerThread)) {
-            Slog.wtf(TAG, "Calling getAvailableRollbacks from mHandlerThread "
-                    + "causes a deadlock");
-            throw new IllegalStateException("Cannot call RollbackManager#getAvailableRollbacks "
-                    + "from the handler thread!");
-        }
-
-        // Wait for the handler thread to get the list of available rollbacks
-        // to get the most up-to-date results. This is intended to reduce test
-        // flakiness when checking available rollbacks immediately after
-        // installing a package with rollback enabled.
-        CountDownLatch latch = new CountDownLatch(1);
-        getHandler().post(() -> latch.countDown());
-        try {
-            latch.await();
-        } catch (InterruptedException ie) {
-            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
-        }
-
         synchronized (mLock) {
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 Rollback rollback = mRollbacks.get(i);
                 if (rollback.state == Rollback.ROLLBACK_STATE_AVAILABLE) {
                     rollbacks.add(rollback.info);
+                }
+            }
+
+            // Also return new rollbacks for which the PackageRollbackInfo is complete.
+            for (NewRollback newRollback : mNewRollbacks) {
+                if (newRollback.rollback.info.getPackages().size()
+                        == newRollback.packageSessionIds.length
+                        && !newRollback.isCancelled) {
+                    rollbacks.add(newRollback.rollback.info);
                 }
             }
             return new ParceledListSlice<>(rollbacks);
@@ -558,6 +543,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     if (info.getPackageName().equals(packageName)) {
                         iter.remove();
                         deleteRollback(rollback);
+                        break;
+                    }
+                }
+            }
+            for (NewRollback newRollback : mNewRollbacks) {
+                for (PackageRollbackInfo info : newRollback.rollback.info.getPackages()) {
+                    if (info.getPackageName().equals(packageName)) {
+                        newRollback.isCancelled = true;
                         break;
                     }
                 }

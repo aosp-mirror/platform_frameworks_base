@@ -34,7 +34,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.SettingsValidators.Validator;
+import android.provider.settings.validators.Validator;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.BackupUtils;

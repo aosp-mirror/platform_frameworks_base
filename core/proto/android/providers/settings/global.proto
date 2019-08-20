@@ -995,7 +995,7 @@ message GlobalSettingsProto {
         optional SettingProto display_certification_on = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto display_wps_config = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto networks_available_notification_on = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto carrier_networks_available_notification_on = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 7; reserved "carrier_networks_available_notification_on";
         optional SettingProto networks_available_repeat_delay = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto country_code = 9;
         optional SettingProto framework_scan_interval_ms = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];

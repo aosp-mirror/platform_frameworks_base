@@ -1538,9 +1538,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                 GlobalSettingsProto.Wifi.NETWORKS_AVAILABLE_NOTIFICATION_ON);
         dumpSetting(s, p,
-                Settings.Global.WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                GlobalSettingsProto.Wifi.CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
                 GlobalSettingsProto.Wifi.NETWORKS_AVAILABLE_REPEAT_DELAY);
         dumpSetting(s, p,

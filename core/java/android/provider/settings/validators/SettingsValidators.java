@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package android.provider;
+package android.provider.settings.validators;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.text.TextUtils;
-
-import com.android.internal.util.ArrayUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -179,154 +177,7 @@ public class SettingsValidators {
         }
     };
 
-    public interface Validator {
-        /**
-         * Returns whether the input value is valid. Subclasses should handle the case where the
-         * input value is {@code null}.
-         */
-        boolean validate(@Nullable String value);
-    }
+    public static final Validator TTS_LIST_VALIDATOR = new TTSListValidator();
 
-    public static final class DiscreteValueValidator implements Validator {
-        private final String[] mValues;
-
-        public DiscreteValueValidator(String[] values) {
-            mValues = values;
-        }
-
-        @Override
-        public boolean validate(@Nullable String value) {
-            return ArrayUtils.contains(mValues, value);
-        }
-    }
-
-    public static final class InclusiveIntegerRangeValidator implements Validator {
-        private final int mMin;
-        private final int mMax;
-
-        public InclusiveIntegerRangeValidator(int min, int max) {
-            mMin = min;
-            mMax = max;
-        }
-
-        @Override
-        public boolean validate(@Nullable String value) {
-            try {
-                final int intValue = Integer.parseInt(value);
-                return intValue >= mMin && intValue <= mMax;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-    }
-
-    public static final class InclusiveFloatRangeValidator implements Validator {
-        private final float mMin;
-        private final float mMax;
-
-        public InclusiveFloatRangeValidator(float min, float max) {
-            mMin = min;
-            mMax = max;
-        }
-
-        @Override
-        public boolean validate(@Nullable String value) {
-            try {
-                final float floatValue = Float.parseFloat(value);
-                return floatValue >= mMin && floatValue <= mMax;
-            } catch (NumberFormatException | NullPointerException e) {
-                return false;
-            }
-        }
-    }
-
-    public static final class ComponentNameListValidator implements Validator {
-        private final String mSeparator;
-
-        public ComponentNameListValidator(String separator) {
-            mSeparator = separator;
-        }
-
-        @Override
-        public boolean validate(@Nullable String value) {
-            if (value == null) {
-                return false;
-            }
-            String[] elements = value.split(mSeparator);
-            for (String element : elements) {
-                if (!COMPONENT_NAME_VALIDATOR.validate(element)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    public static final class PackageNameListValidator implements Validator {
-        private final String mSeparator;
-
-        public PackageNameListValidator(String separator) {
-            mSeparator = separator;
-        }
-
-        @Override
-        public boolean validate(@Nullable String value) {
-            if (value == null) {
-                return false;
-            }
-            String[] elements = value.split(mSeparator);
-            for (String element : elements) {
-                if (!PACKAGE_NAME_VALIDATOR.validate(element)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    private abstract static class ListValidator implements Validator {
-        public boolean validate(@Nullable String value) {
-            if (!isEntryValid(value)) {
-                return false;
-            }
-            String[] items = value.split(",");
-            for (String item : items) {
-                if (!isItemValid(item)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        protected abstract boolean isEntryValid(String entry);
-
-        protected abstract boolean isItemValid(String item);
-    }
-
-    /** Ensure a restored value is a string in the format the text-to-speech system handles */
-    public static final class TTSListValidator extends ListValidator {
-        protected boolean isEntryValid(String entry) {
-            return entry != null && entry.length() > 0;
-        }
-
-        protected boolean isItemValid(String item) {
-            String[] parts = item.split(":");
-            // Replaces any old language separator (-) with the new one (_)
-            return ((parts.length == 2)
-                    && (parts[0].length() > 0)
-                    && ANY_STRING_VALIDATOR.validate(parts[0])
-                    && LOCALE_VALIDATOR.validate(parts[1].replace('-', '_')));
-        }
-    }
-
-    /** Ensure a restored value is suitable to be used as a tile name */
-    public static final class TileListValidator extends ListValidator {
-        protected boolean isEntryValid(String entry) {
-            return entry != null;
-        }
-
-        protected boolean isItemValid(String item) {
-            return item.length() > 0 && ANY_STRING_VALIDATOR.validate(item);
-        }
-    }
+    public static final Validator TILE_LIST_VALIDATOR = new TileListValidator();
 }

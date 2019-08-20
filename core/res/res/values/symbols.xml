@@ -2070,7 +2070,6 @@
   <java-symbol type="plurals" name="wifi_available" />
   <java-symbol type="plurals" name="wifi_available_detailed" />
   <java-symbol type="string" name="wifi_available_title" />
-  <java-symbol type="string" name="wifi_available_carrier_network_title" />
   <java-symbol type="string" name="wifi_available_title_connecting" />
   <java-symbol type="string" name="wifi_available_title_connected" />
   <java-symbol type="string" name="wifi_available_title_failed_to_connect" />
@@ -3846,5 +3845,7 @@
 
   <java-symbol type="string" name="config_factoryResetPackage" />
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
+
+  <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
 
 </resources>

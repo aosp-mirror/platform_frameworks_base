@@ -18,6 +18,7 @@ package com.android.server.notification;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertNull;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -37,9 +38,11 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.IntArray;
+import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
@@ -48,6 +51,15 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -69,6 +81,117 @@ public class SnoozeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testWriteXMLformattedCorrectly_testReadingCorrectTime()
+            throws XmlPullParserException, IOException {
+        final String max_time_str = Long.toString(Long.MAX_VALUE);
+        final String xml_string = "<snoozed-notifications>"
+                + "<notification version=\"1\" user-id=\"0\" notification=\"notification\" "
+                + "pkg=\"pkg\" key=\"key\" time=\"" + max_time_str + "\"/>"
+                + "<notification version=\"1\" user-id=\"0\" notification=\"notification\" "
+                + "pkg=\"pkg\" key=\"key2\" time=\"" + max_time_str + "\"/>"
+                + "</snoozed-notifications>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml_string.getBytes())), null);
+        mSnoozeHelper.readXml(parser);
+        assertTrue("Should read the notification time from xml and it should be more than zero",
+                0 < mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
+                        0, "pkg", "key").doubleValue());
+    }
+
+    @Test
+    public void testWriteXMLformattedCorrectly_testCorrectContextURI()
+            throws XmlPullParserException, IOException {
+        final String max_time_str = Long.toString(Long.MAX_VALUE);
+        final String xml_string = "<snoozed-notifications>"
+                + "<context version=\"1\" user-id=\"0\" notification=\"notification\" "
+                + "pkg=\"pkg\" key=\"key\" id=\"uri\"/>"
+                + "<context version=\"1\" user-id=\"0\" notification=\"notification\" "
+                + "pkg=\"pkg\" key=\"key2\" id=\"uri\"/>"
+                + "</snoozed-notifications>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml_string.getBytes())), null);
+        mSnoozeHelper.readXml(parser);
+        assertEquals("Should read the notification context from xml and it should be `uri",
+                "uri", mSnoozeHelper.getSnoozeContextForUnpostedNotification(
+                        0, "pkg", "key"));
+    }
+
+    @Test
+    public void testReadValidSnoozedFromCorrectly_timeDeadline()
+            throws XmlPullParserException, IOException {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 999999999);
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mSnoozeHelper.writeXml(serializer);
+        serializer.endDocument();
+        serializer.flush();
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), "utf-8");
+        mSnoozeHelper.readXml(parser);
+        assertTrue("Should read the notification time from xml and it should be more than zero",
+                0 < mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
+                        0, "pkg", r.getKey()).doubleValue());
+    }
+
+
+    @Test
+    public void testReadExpiredSnoozedNotification() throws
+            XmlPullParserException, IOException, InterruptedException {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 0);
+       // Thread.sleep(100);
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mSnoozeHelper.writeXml(serializer);
+        serializer.endDocument();
+        serializer.flush();
+        Thread.sleep(10);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), "utf-8");
+        mSnoozeHelper.readXml(parser);
+        int systemUser = UserHandle.SYSTEM.getIdentifier();
+        assertTrue("Should see a past time returned",
+                System.currentTimeMillis() >  mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
+                        systemUser, "pkg", r.getKey()).longValue());
+    }
+
+    @Test
+    public void testCleanupContextShouldRemovePersistedRecord() {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, "context");
+        mSnoozeHelper.cleanupPersistedContext(r.sbn.getKey());
+        assertNull(mSnoozeHelper.getSnoozeContextForUnpostedNotification(
+                r.getUser().getIdentifier(),
+                r.sbn.getPackageName(),
+                r.sbn.getKey()
+        ));
+    }
+
+    @Test
+    public void testReadNoneSnoozedNotification() throws XmlPullParserException,
+            IOException, InterruptedException {
+        NotificationRecord r = getNotificationRecord(
+                "pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 0);
+
+        assertEquals("should see a zero value for unsnoozed notification",
+                0L,
+                mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
+                        UserHandle.SYSTEM.getIdentifier(),
+                        "not_my_package", r.getKey()).longValue());
+    }
+
+    @Test
     public void testSnoozeForTime() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         mSnoozeHelper.snooze(r, 1000);
@@ -84,7 +207,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
     @Test
     public void testSnooze() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
-        mSnoozeHelper.snooze(r);
+        mSnoozeHelper.snooze(r, (String) null);
         verify(mAm, never()).setExactAndAllowWhileIdle(
                 anyInt(), anyLong(), any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(

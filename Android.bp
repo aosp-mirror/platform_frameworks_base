@@ -248,10 +248,6 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     javac_shard_size: 150,
-    required: [
-        "framework-platform-compat-config",
-        "libcore-platform-compat-config",
-    ],
 }
 
 java_library {
@@ -261,6 +257,10 @@ java_library {
     static_libs: [
         "framework-minus-apex",
         "jobscheduler-framework",
+    ],
+    required: [
+        "framework-platform-compat-config",
+        "libcore-platform-compat-config",
     ],
     sdk_version: "core_platform",
 }
