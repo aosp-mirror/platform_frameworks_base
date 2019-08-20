@@ -348,13 +348,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    protected abstract boolean isCalledForCurrentUserLocked();
+    protected abstract boolean hasRightsToCurrentUserLocked();
 
     @Override
     public List<AccessibilityWindowInfo> getWindows() {
         ensureWindowsAvailableTimed();
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return null;
             }
             final boolean permissionGranted =
@@ -387,7 +387,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     public AccessibilityWindowInfo getWindow(int windowId) {
         ensureWindowsAvailableTimed();
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return null;
             }
             final boolean permissionGranted =
@@ -420,7 +420,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         MagnificationSpec spec;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -481,7 +481,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         MagnificationSpec spec;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -542,7 +542,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         MagnificationSpec spec;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -602,7 +602,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         Region partialInteractiveRegion = Region.obtain();
         MagnificationSpec spec;
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdForFindFocusLocked(
@@ -663,7 +663,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         Region partialInteractiveRegion = Region.obtain();
         MagnificationSpec spec;
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -728,7 +728,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             throws RemoteException {
         final int resolvedWindowId;
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -748,7 +748,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public boolean performGlobalAction(int action) {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
         }
@@ -771,7 +771,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public float getMagnificationScale(int displayId) {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return 1.0f;
             }
         }
@@ -787,7 +787,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     public Region getMagnificationRegion(int displayId) {
         synchronized (mLock) {
             final Region region = Region.obtain();
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return region;
             }
             MagnificationController magnificationController =
@@ -810,7 +810,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public float getMagnificationCenterX(int displayId) {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return 0.0f;
             }
             MagnificationController magnificationController =
@@ -832,7 +832,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public float getMagnificationCenterY(int displayId) {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return 0.0f;
             }
             MagnificationController magnificationController =
@@ -864,7 +864,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public boolean resetMagnification(int displayId, boolean animate) {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
             if (!mSecurityPolicy.canControlMagnification(this)) {
@@ -886,7 +886,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     public boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX,
             float centerY, boolean animate) {
         synchronized (mLock) {
-            if (!isCalledForCurrentUserLocked()) {
+            if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
             if (!mSecurityPolicy.canControlMagnification(this)) {
