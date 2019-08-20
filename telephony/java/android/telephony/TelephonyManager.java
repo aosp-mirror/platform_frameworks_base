@@ -2789,6 +2789,55 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * Returns the bitmask for a given technology (network type)
+     * @param networkType for which bitmask is returned
+     * @return the network type bitmask
+     * {@hide}
+     */
+    public static @NetworkTypeBitMask long getBitMaskForNetworkType(@NetworkType int networkType) {
+        switch(networkType) {
+            case NETWORK_TYPE_GSM:
+                return NETWORK_TYPE_BITMASK_GSM;
+            case NETWORK_TYPE_GPRS:
+                return NETWORK_TYPE_BITMASK_GPRS;
+            case NETWORK_TYPE_EDGE:
+                return NETWORK_TYPE_BITMASK_EDGE;
+            case NETWORK_TYPE_CDMA:
+                return NETWORK_TYPE_BITMASK_CDMA;
+            case NETWORK_TYPE_1xRTT:
+                return NETWORK_TYPE_BITMASK_1xRTT;
+            case NETWORK_TYPE_EVDO_0:
+                return NETWORK_TYPE_BITMASK_EVDO_0;
+            case NETWORK_TYPE_EVDO_A:
+                return NETWORK_TYPE_BITMASK_EVDO_A;
+            case NETWORK_TYPE_EVDO_B:
+                return NETWORK_TYPE_BITMASK_EVDO_B;
+            case NETWORK_TYPE_EHRPD:
+                return NETWORK_TYPE_BITMASK_EHRPD;
+            case NETWORK_TYPE_HSUPA:
+                return NETWORK_TYPE_BITMASK_HSUPA;
+            case NETWORK_TYPE_HSDPA:
+                return NETWORK_TYPE_BITMASK_HSDPA;
+            case NETWORK_TYPE_HSPA:
+                return NETWORK_TYPE_BITMASK_HSPA;
+            case NETWORK_TYPE_HSPAP:
+                return NETWORK_TYPE_BITMASK_HSPAP;
+            case NETWORK_TYPE_UMTS:
+                return NETWORK_TYPE_BITMASK_UMTS;
+            case NETWORK_TYPE_TD_SCDMA:
+                return NETWORK_TYPE_BITMASK_TD_SCDMA;
+            case NETWORK_TYPE_LTE:
+                return NETWORK_TYPE_BITMASK_LTE;
+            case NETWORK_TYPE_LTE_CA:
+                return NETWORK_TYPE_BITMASK_LTE_CA;
+            case NETWORK_TYPE_NR:
+                return NETWORK_TYPE_BITMASK_NR;
+            default:
+                return NETWORK_TYPE_BITMASK_UNKNOWN;
+        }
+    }
+
     //
     //
     // SIM Card
