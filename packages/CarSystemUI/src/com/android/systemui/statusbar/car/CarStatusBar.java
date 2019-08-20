@@ -839,7 +839,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
     }
 
-    private void attachBottomNavBarWindow() {
+    /**
+     * Attaches the bottom nav bar window. Can be extended to modify the specific behavior of
+     * attaching the bottom nav bar.
+     */
+    protected void attachBottomNavBarWindow() {
         if (!mShowBottom) {
             return;
         }
@@ -862,7 +866,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mWindowManager.addView(mNavigationBarWindow, lp);
     }
 
-    private void detachBottomNavBarWindow() {
+    /**
+     * Detaches the bottom nav bar window. Can be extended to modify the specific behavior of
+     * detaching the bottom nav bar.
+     */
+    protected void detachBottomNavBarWindow() {
         if (!mShowBottom) {
             return;
         }
