@@ -1403,6 +1403,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     protected void handleStartedGoingToSleep(int arg1) {
+        mLockIconPressed = false;
         clearBiometricRecognized();
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
@@ -1438,7 +1439,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleScreenTurnedOff() {
-        mLockIconPressed = false;
         mHardwareFingerprintUnavailableRetryCount = 0;
         mHardwareFaceUnavailableRetryCount = 0;
         final int count = mCallbacks.size();
