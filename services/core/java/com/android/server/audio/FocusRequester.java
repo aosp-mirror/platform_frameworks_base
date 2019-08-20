@@ -405,7 +405,7 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     private boolean frameworkHandleFocusLoss(int focusLoss, @NonNull final FocusRequester frWinner,
                                              boolean forceDuck) {
-        if (frWinner.mCallingUid != this.mCallingUid) {
+        if (frWinner.mCallingUid == this.mCallingUid) {
             // the focus change is within the same app, so let the dispatching
             // happen as if the framework was not involved.
             return false;
