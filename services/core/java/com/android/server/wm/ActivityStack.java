@@ -106,6 +106,7 @@ import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.RootActivityContainer.FindTaskResult;
+import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -3316,6 +3317,7 @@ class ActivityStack extends ConfigurationContainer {
         // to activities in the same chain will depend on what the end activity of the chain needs.
         int replyChainEnd = -1;
         boolean canMoveOptions = true;
+        int numTasksCreated = 0;
 
         // We only do this for activities that are not the root of the task (since if we finish
         // the root, we may no longer have the task!).
@@ -3380,6 +3382,7 @@ class ActivityStack extends ConfigurationContainer {
                             target.info, null /* intent */, null /* voiceSession */,
                             null /* voiceInteractor */, false /* toTop */);
                     targetTask.affinityIntent = target.intent;
+                    numTasksCreated++;
                     if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
                             + " out to new task " + targetTask);
                 }
@@ -3408,6 +3411,7 @@ class ActivityStack extends ConfigurationContainer {
                 }
 
                 positionChildWindowContainerAtBottom(targetTask);
+                mStackSupervisor.mRecentTasks.add(targetTask);
                 replyChainEnd = -1;
             } else if (forceReset || finishOnTaskLaunch || clearWhenTaskReset) {
                 // If the activity should just be removed -- either
@@ -3452,6 +3456,27 @@ class ActivityStack extends ConfigurationContainer {
                 // activity that started it all doesn't want anything
                 // special, so leave it all as-is.
                 replyChainEnd = -1;
+            }
+        }
+
+        // Create target stack for the newly created tasks if necessary
+        if (numTasksCreated > 0) {
+            ActivityDisplay display = getDisplay();
+            final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
+            if (singleTaskInstanceDisplay) {
+                display = mRootActivityContainer.getDefaultDisplay();
+            }
+
+            if (singleTaskInstanceDisplay || display.alwaysCreateStack(getWindowingMode(),
+                    getActivityType())) {
+                for (int index = numTasksCreated - 1; index >= 0; index--) {
+                    final TaskRecord targetTask = mTaskHistory.get(index);
+                    final ActivityStack targetStack = display.getOrCreateStack(getWindowingMode(),
+                            getActivityType(), false /* onTop */);
+                    targetTask.reparent(targetStack, false /* toTop */,
+                            REPARENT_LEAVE_STACK_IN_PLACE, false /* animate */,
+                            true /* deferResume */, "resetTargetTask");
+                }
             }
         }
 
