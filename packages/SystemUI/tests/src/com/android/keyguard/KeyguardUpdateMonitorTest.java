@@ -16,15 +16,18 @@
 
 package com.android.keyguard;
 
+import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
+import static android.telephony.SubscriptionManager.NAME_SOURCE_DEFAULT_SOURCE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,6 +45,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.telephony.ServiceState;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -62,6 +66,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
@@ -73,7 +79,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 // new tests.
 @RunWithLooper(setAsMainLooper = true)
 public class KeyguardUpdateMonitorTest extends SysuiTestCase {
-
+    private static final String TEST_CARRIER = "TEST_CARRIER";
+    private static final String TEST_CARRIER_2 = "TEST_CARRIER_2";
+    private static final int TEST_CARRIER_ID = 1;
+    private static final String TEST_GROUP_UUID = "59b5c870-fc4c-47a4-a99e-9db826b48b24";
+    private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(1, "", 0,
+            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
+            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
+            TEST_CARRIER_ID, 0);
+    private static final SubscriptionInfo TEST_SUBSCRIPTION_2 = new SubscriptionInfo(2, "", 0,
+            TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
+            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
+            TEST_CARRIER_ID, 0);
     @Mock
     private KeyguardUpdateMonitor.StrongAuthTracker mStrongAuthTracker;
     @Mock
@@ -92,6 +109,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private SubscriptionManager mSubscriptionManager;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
@@ -119,6 +138,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         context.addMockSystemService(FaceManager.class, mFaceManager);
         context.addMockSystemService(UserManager.class, mUserManager);
         context.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
+        context.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
 
         mTestableLooper = TestableLooper.get(this);
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
@@ -439,6 +459,22 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         int user = KeyguardUpdateMonitor.getCurrentUser();
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */);
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
+    }
+
+    @Test
+    public void testGetSubscriptionInfo_whenInGroupedSubWithOpportunistic() {
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        list.add(TEST_SUBSCRIPTION_2);
+        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
+        mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
+                TEST_SUBSCRIPTION_2.getSubscriptionId());
+        mTestableLooper.processAllMessages();
+
+        List<SubscriptionInfo> listToVerify = mKeyguardUpdateMonitor
+                .getFilteredSubscriptionInfo(false);
+        assertThat(listToVerify.size()).isEqualTo(1);
+        assertThat(listToVerify.get(0)).isEqualTo(TEST_SUBSCRIPTION_2);
     }
 
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
