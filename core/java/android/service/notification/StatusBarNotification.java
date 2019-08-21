@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -172,6 +173,7 @@ public class StatusBarNotification implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public boolean isAppGroup() {
         if (getNotification().getGroup() != null || getNotification().getSortKey() != null) {
             return true;
