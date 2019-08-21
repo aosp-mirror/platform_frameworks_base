@@ -25,6 +25,10 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class KeyguardEnvironmentImpl implements KeyguardEnvironment {
 
     private static final String TAG = "KeyguardEnvironmentImpl";
@@ -34,6 +38,7 @@ public class KeyguardEnvironmentImpl implements KeyguardEnvironment {
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
 
+    @Inject
     public KeyguardEnvironmentImpl() {
     }
 

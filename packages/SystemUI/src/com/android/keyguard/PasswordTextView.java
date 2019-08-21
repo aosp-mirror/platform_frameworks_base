@@ -42,6 +42,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.EditText;
 
+import com.android.systemui.R;
+
 import java.util.ArrayList;
 import java.util.Stack;
 

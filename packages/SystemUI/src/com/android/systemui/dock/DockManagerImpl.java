@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.screenshot;
 
-import android.app.Activity;
-import android.os.Bundle;
+package com.android.systemui.dock;
 
-import com.android.systemui.tests.R;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-/**
- * A stub activity used in {@link ScreenshotTest}.
- */
-public class ScreenshotStubActivity extends Activity {
+@Singleton
+public class DockManagerImpl implements DockManager {
+
+    @Inject
+    public DockManagerImpl() {
+    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    public void addListener(DockEventListener callback) {
+    }
+
+    @Override
+    public void removeListener(DockEventListener callback) {
+    }
+
+    @Override
+    public boolean isDocked() {
+        return false;
     }
 }
