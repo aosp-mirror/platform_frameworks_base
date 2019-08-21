@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.net.wifi.WifiInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -364,7 +365,12 @@ public final class MacAddress implements Parcelable {
         long addr = r.nextLong() & VALID_LONG_MASK;
         addr |= LOCALLY_ASSIGNED_MASK;
         addr &= ~MULTICAST_MASK;
-        return new MacAddress(addr);
+        MacAddress mac = new MacAddress(addr);
+        // WifiInfo.DEFAULT_MAC_ADDRESS is being used for another purpose, so do not use it here.
+        if (mac.toString().equals(WifiInfo.DEFAULT_MAC_ADDRESS)) {
+            return createRandomUnicastAddress();
+        }
+        return mac;
     }
 
     /**
@@ -383,7 +389,12 @@ public final class MacAddress implements Parcelable {
         long addr = (base.mAddr & OUI_MASK) | (NIC_MASK & r.nextLong());
         addr |= LOCALLY_ASSIGNED_MASK;
         addr &= ~MULTICAST_MASK;
-        return new MacAddress(addr);
+        MacAddress mac = new MacAddress(addr);
+        // WifiInfo.DEFAULT_MAC_ADDRESS is being used for another purpose, so do not use it here.
+        if (mac.toString().equals(WifiInfo.DEFAULT_MAC_ADDRESS)) {
+            return createRandomUnicastAddress(base, r);
+        }
+        return mac;
     }
 
     // Convenience function for working around the lack of byte literals.
