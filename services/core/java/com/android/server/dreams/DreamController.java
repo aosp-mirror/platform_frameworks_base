@@ -16,9 +16,6 @@
 
 package com.android.server.dreams;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -136,14 +133,6 @@ final class DreamController {
             MetricsLogger.visible(mContext,
                     mCurrentDream.mCanDoze ? MetricsEvent.DOZING : MetricsEvent.DREAMING);
 
-            try {
-                mIWindowManager.addWindowToken(token, TYPE_DREAM, DEFAULT_DISPLAY);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Unable to add window token for dream.", ex);
-                stopDream(true /*immediate*/);
-                return;
-            }
-
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
             intent.setComponent(name);
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
@@ -212,9 +201,6 @@ final class DreamController {
             }
 
             if (oldDream.mService != null) {
-                // Tell the dream that it's being stopped so that
-                // it can shut down nicely before we yank its window token out from
-                // under it.
                 try {
                     oldDream.mService.detach();
                 } catch (RemoteException ex) {
@@ -233,12 +219,6 @@ final class DreamController {
                 mContext.unbindService(oldDream);
             }
             oldDream.releaseWakeLockIfNeeded();
-
-            try {
-                mIWindowManager.removeWindowToken(oldDream.mToken, DEFAULT_DISPLAY);
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Error removing window token for dream.", ex);
-            }
 
             mHandler.post(() -> mListener.onDreamStopped(oldDream.mToken));
         } finally {

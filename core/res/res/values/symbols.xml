@@ -1611,6 +1611,7 @@
   <java-symbol type="style" name="TextAppearance.SlidingTabNormal" />
   <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoFrame" />
   <java-symbol type="style" name="Theme.IconMenu" />
+  <java-symbol type="style" name="Theme.Dream" />
   <java-symbol type="style" name="Theme.DeviceDefault.VoiceInteractionSession" />
   <java-symbol type="style" name="Pointer" />
   <java-symbol type="style" name="LargePointer" />
