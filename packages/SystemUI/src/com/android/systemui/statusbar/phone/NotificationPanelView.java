@@ -53,6 +53,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -68,10 +69,13 @@ import com.android.systemui.R;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.HomeControlsPlugin;
+import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qs.QSFragment;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -192,6 +196,7 @@ public class NotificationPanelView extends PanelView implements
     private View mQsNavbarScrim;
     protected NotificationsQuickSettingsContainer mNotificationContainerParent;
     protected NotificationStackScrollLayout mNotificationStackScroller;
+    protected LinearLayout mHomeControlsLayout;
     private boolean mAnimateNextPositionUpdate;
 
     private int mTrackingPointer;
@@ -450,6 +455,7 @@ public class NotificationPanelView extends PanelView implements
         mBigClockContainer = findViewById(R.id.big_clock_container);
         keyguardClockSwitch.setBigClockContainer(mBigClockContainer);
 
+        mHomeControlsLayout = findViewById(R.id.home_controls_layout);
         mNotificationContainerParent = findViewById(R.id.notification_container_parent);
         mNotificationStackScroller = findViewById(R.id.notification_stack_scroller);
         mNotificationStackScroller.setOnHeightChangedListener(this);
@@ -480,6 +486,21 @@ public class NotificationPanelView extends PanelView implements
                 }
             }
         });
+
+        Dependency.get(PluginManager.class).addPluginListener(
+                new PluginListener<HomeControlsPlugin>() {
+
+                    @Override
+                    public void onPluginConnected(HomeControlsPlugin plugin,
+                                                  Context pluginContext) {
+                        plugin.sendParentGroup(mHomeControlsLayout);
+                    }
+
+                    @Override
+                    public void onPluginDisconnected(HomeControlsPlugin plugin) {
+
+                    }
+                }, HomeControlsPlugin.class, false);
     }
 
     @Override
@@ -1270,9 +1291,11 @@ public class NotificationPanelView extends PanelView implements
             if (mQsExpandImmediate) {
                 mNotificationStackScroller.setVisibility(View.GONE);
                 mQsFrame.setVisibility(View.VISIBLE);
+                mHomeControlsLayout.setVisibility(View.VISIBLE);
             } else {
                 mNotificationStackScroller.setVisibility(View.VISIBLE);
                 mQsFrame.setVisibility(View.GONE);
+                mHomeControlsLayout.setVisibility(View.GONE);
             }
         }
         return false;
@@ -1551,6 +1574,7 @@ public class NotificationPanelView extends PanelView implements
         if (mKeyguardShowing && isQsSplitEnabled()) {
             mNotificationStackScroller.setVisibility(View.VISIBLE);
             mQsFrame.setVisibility(View.VISIBLE);
+            mHomeControlsLayout.setVisibility(View.GONE);
         }
 
         if (oldState == StatusBarState.KEYGUARD
@@ -2099,8 +2123,10 @@ public class NotificationPanelView extends PanelView implements
                 t = (expandedHeight - panelHeightQsCollapsed)
                         / (panelHeightQsExpanded - panelHeightQsCollapsed);
             }
-            setQsExpansion(mQsMinExpansionHeight
-                    + t * (mQsMaxExpansionHeight - mQsMinExpansionHeight));
+            float targetHeight = mQsMinExpansionHeight
+                    + t * (mQsMaxExpansionHeight - mQsMinExpansionHeight);
+            setQsExpansion(targetHeight);
+            mHomeControlsLayout.setTranslationY(targetHeight);
         }
         updateExpandedHeight(expandedHeight);
         updateHeader();
