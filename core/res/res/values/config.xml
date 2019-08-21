@@ -1703,16 +1703,16 @@
         <!-- Add packages here -->
     </string-array>
 
-    <!-- The set of system packages on device that are queryable regardless of the contents of their
-         manifest. -->
+    <!-- The set of system packages on device that are queryable by any app regardless of the
+         contents of its manifest. -->
     <string-array name="config_forceQueryablePackages" translatable="false">
         <item>com.android.settings</item>
         <item>com.android.providers.settings</item>
         <!-- Add packages here -->
     </string-array>
 
-    <!-- If true, will force all packages on any system partition as queryable regardless of the
-         contents of their manifest. -->
+    <!-- If true, will force all packages on any system partition as queryable by any app regardless
+         of the contents of its manifest. -->
     <bool name="config_forceSystemPackagesQueryable">false</bool>
 
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not
