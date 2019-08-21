@@ -408,6 +408,7 @@ public interface ViewParent {
      *            or more of:
      *            <ul>
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
