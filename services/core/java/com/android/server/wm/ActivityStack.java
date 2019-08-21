@@ -63,7 +63,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
@@ -1547,7 +1546,7 @@ class ActivityStack extends ConfigurationContainer {
             if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
                     "Sleep => pause with userLeaving=false");
 
-            startPausingLocked(false, true, null, false);
+            startPausingLocked(false /* userLeaving */, true /* uiSleeping */, null /* resuming */);
             shouldSleep = false ;
         } else if (mPausingActivity != null) {
             // Still waiting for something to pause; can't sleep yet.
@@ -1617,13 +1616,11 @@ class ActivityStack extends ConfigurationContainer {
      * @param resuming The activity we are currently trying to resume or null if this is not being
      *                 called as part of resuming the top activity, so we shouldn't try to instigate
      *                 a resume here if not null.
-     * @param pauseImmediately True if the caller does not want to wait for the activity callback to
-     *                         complete pausing.
      * @return Returns true if an activity now is in the PAUSING state, and we are waiting for
      * it to tell us when it is done.
      */
     final boolean startPausingLocked(boolean userLeaving, boolean uiSleeping,
-            ActivityRecord resuming, boolean pauseImmediately) {
+            ActivityRecord resuming) {
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
                     + " state=" + mPausingActivity.getState());
@@ -1660,6 +1657,19 @@ class ActivityStack extends ConfigurationContainer {
         clearLaunchTime(prev);
 
         mService.updateCpuStats();
+
+        boolean pauseImmediately = false;
+        if (resuming != null && (resuming.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0) {
+            // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous
+            // activity to be paused, while at the same time resuming the new resume activity
+            // only if the previous activity can't go into Pip since we want to give Pip
+            // activities a chance to enter Pip before resuming the next activity.
+            final boolean lastResumedCanPip = prev != null && prev.checkEnterPictureInPictureState(
+                    "shouldResumeWhilePausing", userLeaving);
+            if (!lastResumedCanPip) {
+                pauseImmediately = true;
+            }
+        }
 
         if (prev.attachedToProcess()) {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending pause: " + prev);
@@ -1758,7 +1768,8 @@ class ActivityStack extends ConfigurationContainer {
         mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
     }
 
-    private void completePauseLocked(boolean resumeNext, ActivityRecord resuming) {
+    @VisibleForTesting
+    void completePauseLocked(boolean resumeNext, ActivityRecord resuming) {
         ActivityRecord prev = mPausingActivity;
         if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Complete pause: " + prev);
 
@@ -2594,7 +2605,6 @@ class ActivityStack extends ConfigurationContainer {
 
         mStackSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
-        boolean lastResumedCanPip = false;
         ActivityRecord lastResumed = null;
         final ActivityStack lastFocusedStack = display.getLastFocusedStack();
         if (lastFocusedStack != null && lastFocusedStack != this) {
@@ -2608,23 +2618,15 @@ class ActivityStack extends ConfigurationContainer {
                         + " next=" + next + " lastResumed=" + lastResumed);
                 userLeaving = false;
             }
-            lastResumedCanPip = lastResumed != null && lastResumed.checkEnterPictureInPictureState(
-                    "resumeTopActivity", userLeaving /* beforeStopping */);
         }
-        // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous activity
-        // to be paused, while at the same time resuming the new resume activity only if the
-        // previous activity can't go into Pip since we want to give Pip activities a chance to
-        // enter Pip before resuming the next activity.
-        final boolean resumeWhilePausing = (next.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0
-                && !lastResumedCanPip;
 
-        boolean pausing = display.pauseBackStacks(userLeaving, next, false);
+        boolean pausing = display.pauseBackStacks(userLeaving, next);
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Pausing " + mResumedActivity);
-            pausing |= startPausingLocked(userLeaving, false, next, false);
+            pausing |= startPausingLocked(userLeaving, false /* uiSleeping */, next);
         }
-        if (pausing && !resumeWhilePausing) {
+        if (pausing) {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.v(TAG_STATES,
                     "resumeTopActivityLocked: Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
@@ -3802,8 +3804,7 @@ class ActivityStack extends ConfigurationContainer {
         final long origId = Binder.clearCallingIdentity();
         for (int i = start; i > finishTo; i--) {
             final ActivityRecord r = activities.get(i);
-            r.finishIfPossible(resultCode, resultData, "navigate-up", true /* oomAdj */,
-                    !PAUSE_IMMEDIATELY);
+            r.finishIfPossible(resultCode, resultData, "navigate-up", true /* oomAdj */);
             // Only return the supplied result for the first activity finished
             resultCode = Activity.RESULT_CANCELED;
             resultData = null;
@@ -3840,8 +3841,7 @@ class ActivityStack extends ConfigurationContainer {
                 } catch (RemoteException e) {
                     foundParentInTask = false;
                 }
-                parent.finishIfPossible(resultCode, resultData, "navigate-top",
-                        true /* oomAdj */, !PAUSE_IMMEDIATELY);
+                parent.finishIfPossible(resultCode, resultData, "navigate-top", true /* oomAdj */);
             }
         }
         Binder.restoreCallingIdentity(origId);

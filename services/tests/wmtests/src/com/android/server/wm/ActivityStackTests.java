@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -977,6 +978,19 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         assertThat(mTask.mActivities).isEmpty();
         assertThat(mStack.getAllTasks()).isEmpty();
+    }
+
+    @Test
+    public void testCompletePauseOnResumeWhilePausingActivity() {
+        final ActivityRecord bottomActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        doReturn(true).when(bottomActivity).attachedToProcess();
+        mStack.mPausingActivity = null;
+        mStack.mResumedActivity = bottomActivity;
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.info.flags |= FLAG_RESUME_WHILE_PAUSING;
+
+        mStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */, topActivity);
+        verify(mStack).completePauseLocked(anyBoolean(), eq(topActivity));
     }
 
     @Test
