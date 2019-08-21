@@ -297,6 +297,11 @@ public class HdmiControlService extends SystemService {
             mHdmiControlBroadcastReceiver = new HdmiControlBroadcastReceiver();
 
     @Nullable
+    // Save callback when the device is still under logcial address allocation
+    // Invoke once new local device is ready.
+    private IHdmiControlCallback mDisplayStatusCallback = null;
+
+    @Nullable
     private HdmiCecController mCecController;
 
     // HDMI port information. Stored in the unmodifiable list to keep the static information
@@ -763,6 +768,11 @@ public class HdmiControlService extends SystemService {
                     // Address allocation completed for all devices. Notify each device.
                     if (allocatingDevices.size() == ++finished[0]) {
                         mAddressAllocated = true;
+                        // Reinvoke the saved display status callback once the local device is ready.
+                        if (mDisplayStatusCallback != null) {
+                            queryDisplayStatus(mDisplayStatusCallback);
+                            mDisplayStatusCallback = null;
+                        }
                         if (initiatedBy != INITIATED_BY_HOTPLUG) {
                             // In case of the hotplug we don't call onInitializeCecComplete()
                             // since we reallocate the logical address only.
@@ -2192,6 +2202,13 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private void queryDisplayStatus(final IHdmiControlCallback callback) {
         assertRunOnServiceThread();
+        if (!mAddressAllocated) {
+            mDisplayStatusCallback = callback;
+            Slog.d(TAG, "Local device is under address allocation. "
+                        + "Queue display callback for later process.");
+            return;
+        }
+
         HdmiCecLocalDevicePlayback source = playback();
         if (source == null) {
             Slog.w(TAG, "Local playback device not available");
