@@ -32,7 +32,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -359,8 +358,8 @@ public class PluginInstanceManager<T extends Plugin> {
                     if (DEBUG) Log.d(TAG, "createPlugin");
                     return new PluginInfo(pkg, cls, plugin, pluginContext, version);
                 } catch (InvalidVersionException e) {
-                    final int icon = mContext.getResources().getIdentifier("tuner", "drawable",
-                            mContext.getPackageName());
+                    final int icon = Resources.getSystem().getIdentifier(
+                            "stat_sys_warning", "drawable", "android");
                     final int color = Resources.getSystem().getIdentifier(
                             "system_notification_accent_color", "color", "android");
                     final Notification.Builder nb = new Notification.Builder(mContext,
@@ -392,8 +391,7 @@ public class PluginInstanceManager<T extends Plugin> {
                     PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
                     nb.addAction(new Action.Builder(null, "Disable plugin", pi).build());
                     mContext.getSystemService(NotificationManager.class)
-                            .notifyAsUser(cls, SystemMessage.NOTE_PLUGIN, nb.build(),
-                                    UserHandle.ALL);
+                            .notify(SystemMessage.NOTE_PLUGIN, nb.build());
                     // TODO: Warn user.
                     Log.w(TAG, "Plugin has invalid interface version " + plugin.getVersion()
                             + ", expected " + mVersion);
