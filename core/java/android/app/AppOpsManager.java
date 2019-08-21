@@ -1097,21 +1097,27 @@ public class AppOpsManager {
             "android:sms_financial_transactions";
 
     /** @hide Read media of audio type. */
+    @SystemApi @TestApi
     public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     /** @hide Write media of audio type. */
+    @SystemApi @TestApi
     public static final String OPSTR_WRITE_MEDIA_AUDIO = "android:write_media_audio";
     /** @hide Read media of video type. */
+    @SystemApi @TestApi
     public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     /** @hide Write media of video type. */
+    @SystemApi @TestApi
     public static final String OPSTR_WRITE_MEDIA_VIDEO = "android:write_media_video";
     /** @hide Read media of image type. */
+    @SystemApi @TestApi
     public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     /** @hide Write media of image type. */
+    @SystemApi @TestApi
     public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
     /** @hide Has a legacy (non-isolated) view of storage. */
-    @TestApi
-    @SystemApi
+    @SystemApi @TestApi
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+
     /** @hide Interact with accessibility. */
     @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
