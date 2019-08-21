@@ -4446,7 +4446,8 @@ class AlarmManagerService extends SystemService {
     }
 
     final class UidObserver extends IUidObserver.Stub {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
+            int capability) {
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {

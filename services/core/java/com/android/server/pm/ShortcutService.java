@@ -495,7 +495,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             injectPostToHandler(() -> handleOnUidStateChanged(uid, procState));
         }
 

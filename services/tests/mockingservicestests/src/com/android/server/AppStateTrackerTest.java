@@ -513,7 +513,8 @@ public class AppStateTrackerTest {
 
 
         mIUidObserver.onUidStateChanged(UID_2,
-                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 0);
+                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertTrue(instance.isUidActive(UID_1));
@@ -530,7 +531,8 @@ public class AppStateTrackerTest {
 
 
         mIUidObserver.onUidStateChanged(UID_1,
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertTrue(instance.isUidActive(UID_1));
@@ -564,7 +566,8 @@ public class AppStateTrackerTest {
         assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
 
         mIUidObserver.onUidStateChanged(UID_1,
-                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0);
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));
@@ -576,7 +579,8 @@ public class AppStateTrackerTest {
         assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
 
         mIUidObserver.onUidStateChanged(UID_1,
-                ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0);
+                ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));

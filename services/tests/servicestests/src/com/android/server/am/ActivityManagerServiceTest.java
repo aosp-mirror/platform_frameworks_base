@@ -571,7 +571,8 @@ public class ActivityManagerServiceTest {
                 verifyObserverReceivedChanges(observerToTest, changesToVerify, changeItems,
                         (observer, changeItem) -> {
                             verify(observer).onUidStateChanged(changeItem.uid,
-                                    changeItem.processState, changeItem.procStateSeq);
+                                    changeItem.processState, changeItem.procStateSeq,
+                                    ActivityManager.PROCESS_CAPABILITY_NONE);
                         });
             }
             // Verify there are no other callbacks for this observer.
@@ -619,7 +620,8 @@ public class ActivityManagerServiceTest {
         // First process state message is always delivered regardless of whether the process state
         // change is above or below the cutpoint (PROCESS_STATE_SERVICE).
         verify(observer).onUidStateChanged(TEST_UID,
-                changeItem.processState, changeItem.procStateSeq);
+                changeItem.processState, changeItem.procStateSeq,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_RECEIVER;
@@ -636,7 +638,8 @@ public class ActivityManagerServiceTest {
         // the current process state change is above cutpoint, so callback will be invoked with the
         // current process state change.
         verify(observer).onUidStateChanged(TEST_UID,
-                changeItem.processState, changeItem.procStateSeq);
+                changeItem.processState, changeItem.procStateSeq,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_TOP;
@@ -653,7 +656,8 @@ public class ActivityManagerServiceTest {
         // the current process state change is below cutpoint, so callback will be invoked with the
         // current process state change.
         verify(observer).onUidStateChanged(TEST_UID,
-                changeItem.processState, changeItem.procStateSeq);
+                changeItem.processState, changeItem.procStateSeq,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         verifyNoMoreInteractions(observer);
     }
 

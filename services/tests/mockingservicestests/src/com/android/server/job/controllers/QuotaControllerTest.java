@@ -233,7 +233,8 @@ public class QuotaControllerTest {
             doReturn(procState).when(mActivityMangerInternal).getUidProcessState(uid);
             SparseBooleanArray foregroundUids = mQuotaController.getForegroundUids();
             spyOn(foregroundUids);
-            mUidObserver.onUidStateChanged(uid, procState, 0);
+            mUidObserver.onUidStateChanged(uid, procState, 0,
+                    ActivityManager.PROCESS_CAPABILITY_NONE);
             if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
                 verify(foregroundUids, timeout(2 * SECOND_IN_MILLIS).times(1))
                         .put(eq(uid), eq(true));

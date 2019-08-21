@@ -1470,7 +1470,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq) throws RemoteException {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability)
+                throws RemoteException {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1478,7 +1479,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mPw.print(" procstate ");
                     mPw.print(ProcessList.makeProcStateString(procState));
                     mPw.print(" seq ");
-                    mPw.println(procStateSeq);
+                    mPw.print(procStateSeq);
+                    mPw.print(" capability ");
+                    mPw.println(capability);
                     mPw.flush();
                 } finally {
                     StrictMode.setThreadPolicy(oldPolicy);

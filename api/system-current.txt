@@ -391,7 +391,7 @@ package android.app {
     field public static final int UID_STATE_CACHED = 700; // 0x2bc
     field public static final int UID_STATE_FOREGROUND = 500; // 0x1f4
     field public static final int UID_STATE_FOREGROUND_SERVICE = 400; // 0x190
-    field public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300; // 0x12c
+    field @Deprecated public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300; // 0x12c
     field public static final int UID_STATE_PERSISTENT = 100; // 0x64
     field public static final int UID_STATE_TOP = 200; // 0xc8
   }

@@ -1359,7 +1359,8 @@ public class NetworkPolicyManagerServiceTest {
 
     private void callOnUidStateChanged(int uid, int procState, long procStateSeq)
             throws Exception {
-        mUidObserver.onUidStateChanged(uid, procState, procStateSeq);
+        mUidObserver.onUidStateChanged(uid, procState, procStateSeq,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         final CountDownLatch latch = new CountDownLatch(1);
         mService.mUidEventHandler.post(() -> {
             latch.countDown();
