@@ -32,6 +32,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.android.systemui.R;
+
 /***
  * This button is used by the device with embedded SIM card to disable current carrier to unlock
  * the device with no cellular service.
