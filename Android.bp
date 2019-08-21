@@ -263,6 +263,7 @@ java_library {
     required: [
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
+        "services-platform-compat-config",
     ],
 }
 
