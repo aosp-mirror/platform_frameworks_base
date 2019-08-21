@@ -43,6 +43,15 @@ interface IIncidentManager {
             FileDescriptor stream);
 
     /**
+     * Takes a report with the given args, reporting status to the optional listener.
+     * This should only be callable by dumpstate (enforced by callee).
+     *
+     * When the report is completed, the system report listener will be notified.
+     */
+    oneway void reportIncidentToDumpstate(FileDescriptor stream,
+            @nullable IIncidentReportStatusListener listener);
+
+    /**
      * Tell the incident daemon that the android system server is up and running.
      */
     oneway void systemRunning();
