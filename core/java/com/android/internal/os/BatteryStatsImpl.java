@@ -4754,11 +4754,11 @@ public class BatteryStatsImpl extends BatteryStats {
             final long uptime = mClocks.uptimeMillis();
 
             boolean updateHistory = false;
-            if (isScreenDoze(state)) {
+            if (isScreenDoze(state) && !isScreenDoze(oldState)) {
                 mHistoryCur.states |= HistoryItem.STATE_SCREEN_DOZE_FLAG;
                 mScreenDozeTimer.startRunningLocked(elapsedRealtime);
                 updateHistory = true;
-            } else if (isScreenDoze(oldState)) {
+            } else if (isScreenDoze(oldState) && !isScreenDoze(state)) {
                 mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_DOZE_FLAG;
                 mScreenDozeTimer.stopRunningLocked(elapsedRealtime);
                 updateHistory = true;
