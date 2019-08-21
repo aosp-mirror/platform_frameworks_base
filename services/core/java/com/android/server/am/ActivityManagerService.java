@@ -8221,6 +8221,35 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Deprecated
     public void requestBugReportWithDescription(@Nullable String shareTitle,
             @Nullable String shareDescription, int bugreportType) {
+        String type = null;
+        switch (bugreportType) {
+            case ActivityManager.BUGREPORT_OPTION_FULL:
+                type = "bugreportfull";
+                break;
+            case ActivityManager.BUGREPORT_OPTION_INTERACTIVE:
+                type = "bugreportplus";
+                break;
+            case ActivityManager.BUGREPORT_OPTION_REMOTE:
+                type = "bugreportremote";
+                break;
+            case ActivityManager.BUGREPORT_OPTION_WEAR:
+                type = "bugreportwear";
+                break;
+            case ActivityManager.BUGREPORT_OPTION_TELEPHONY:
+                type = "bugreporttelephony";
+                break;
+            case ActivityManager.BUGREPORT_OPTION_WIFI:
+                type = "bugreportwifi";
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Provided bugreport type is not correct, value: "
+                        + bugreportType);
+        }
+        // Always log caller, even if it does not have permission to dump.
+        Slog.i(TAG, type + " requested by UID " + Binder.getCallingUid());
+        enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
+
         if (!TextUtils.isEmpty(shareTitle)) {
             if (shareTitle.length() > MAX_BUGREPORT_TITLE_SIZE) {
                 String errorStr = "shareTitle should be less than " +
@@ -8244,7 +8273,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean useApi = FeatureFlagUtils.isEnabled(mContext,
                 FeatureFlagUtils.USE_BUGREPORT_API);
 
-        if (useApi) {
+        if (useApi && bugreportType == ActivityManager.BUGREPORT_OPTION_INTERACTIVE) {
             // Create intent to trigger Bugreport API via Shell
             Intent triggerShellBugreport = new Intent();
             triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
@@ -8256,40 +8285,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (shareDescription != null) {
                 triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
             }
+            // Send broadcast to shell to trigger bugreport using Bugreport API
+            mContext.sendBroadcast(triggerShellBugreport);
+        } else {
+            SystemProperties.set("dumpstate.options", type);
+            SystemProperties.set("ctl.start", "bugreport");
         }
-        String extraOptions = null;
-        switch (bugreportType) {
-            case ActivityManager.BUGREPORT_OPTION_FULL:
-                extraOptions = "bugreportfull";
-                break;
-            case ActivityManager.BUGREPORT_OPTION_INTERACTIVE:
-                extraOptions = "bugreportplus";
-                break;
-            case ActivityManager.BUGREPORT_OPTION_REMOTE:
-                extraOptions = "bugreportremote";
-                break;
-            case ActivityManager.BUGREPORT_OPTION_WEAR:
-                extraOptions = "bugreportwear";
-                break;
-            case ActivityManager.BUGREPORT_OPTION_TELEPHONY:
-                extraOptions = "bugreporttelephony";
-                break;
-            case ActivityManager.BUGREPORT_OPTION_WIFI:
-                extraOptions = "bugreportwifi";
-                break;
-            default:
-                throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
-                        + bugreportType);
-        }
-        // Always log caller, even if it does not have permission to dump.
-        String type = extraOptions == null ? "bugreport" : extraOptions;
-        Slog.i(TAG, type + " requested by UID " + Binder.getCallingUid());
-
-        enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
-        if (extraOptions != null) {
-            SystemProperties.set("dumpstate.options", extraOptions);
-        }
-        SystemProperties.set("ctl.start", "bugreport");
     }
 
     /**
