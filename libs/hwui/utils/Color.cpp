@@ -21,6 +21,7 @@
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
 #include <android/hardware_buffer.h>
+#include <android/native_window.h>
 #endif
 
 #include <algorithm>
@@ -30,11 +31,11 @@ namespace android {
 namespace uirenderer {
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
-SkImageInfo BufferDescriptionToImageInfo(const AHardwareBuffer_Desc& bufferDesc,
-                                         sk_sp<SkColorSpace> colorSpace) {
+static inline SkImageInfo createImageInfo(int32_t width, int32_t height, int32_t format,
+                                          sk_sp<SkColorSpace> colorSpace) {
     SkColorType colorType = kUnknown_SkColorType;
     SkAlphaType alphaType = kOpaque_SkAlphaType;
-    switch (bufferDesc.format) {
+    switch (format) {
         case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
             colorType = kN32_SkColorType;
             alphaType = kPremul_SkAlphaType;
@@ -56,10 +57,20 @@ SkImageInfo BufferDescriptionToImageInfo(const AHardwareBuffer_Desc& bufferDesc,
             alphaType = kPremul_SkAlphaType;
             break;
         default:
-            ALOGV("Unsupported format: %d, return unknown by default", bufferDesc.format);
+            ALOGV("Unsupported format: %d, return unknown by default", format);
             break;
     }
-    return SkImageInfo::Make(bufferDesc.width, bufferDesc.height, colorType, alphaType, colorSpace);
+    return SkImageInfo::Make(width, height, colorType, alphaType, colorSpace);
+}
+
+SkImageInfo ANativeWindowToImageInfo(const ANativeWindow_Buffer& buffer,
+                                     sk_sp<SkColorSpace> colorSpace) {
+    return createImageInfo(buffer.width, buffer.height, buffer.format, colorSpace);
+}
+
+SkImageInfo BufferDescriptionToImageInfo(const AHardwareBuffer_Desc& bufferDesc,
+                                         sk_sp<SkColorSpace> colorSpace) {
+    return createImageInfo(bufferDesc.width, bufferDesc.height, bufferDesc.format, colorSpace);
 }
 #endif
 
