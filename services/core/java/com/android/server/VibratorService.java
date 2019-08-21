@@ -1188,6 +1188,7 @@ public class VibratorService extends IVibratorService.Stub
     private static boolean isNotification(int usageHint) {
         switch (usageHint) {
             case AudioAttributes.USAGE_NOTIFICATION:
+            case AudioAttributes.USAGE_NOTIFICATION_EVENT:
             case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
             case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
             case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED:

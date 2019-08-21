@@ -223,7 +223,8 @@ public class FaceService extends BiometricServiceBase {
 
         @Override
         public boolean wasUserDetected() {
-            return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED;
+            return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED
+                    && mLastAcquire != FaceManager.FACE_ACQUIRED_SENSOR_DIRTY;
         }
 
         @Override
