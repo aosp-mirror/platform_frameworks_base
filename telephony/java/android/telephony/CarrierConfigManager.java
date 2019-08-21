@@ -3096,6 +3096,13 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_WPS_OVER_IMS_BOOL =
             "support_wps_over_ims_bool";
 
+    /**
+     * Holds the list of carrier certificate hashes. Note that each carrier has its own certificates
+     * @hide
+     */
+    public static final String KEY_CARRIER_CERTIFICATE_STRING_ARRAY =
+            "carrier_certificate_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3517,6 +3524,7 @@ public class CarrierConfigManager {
                         -89,  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
+        sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
     }
 
     /**
