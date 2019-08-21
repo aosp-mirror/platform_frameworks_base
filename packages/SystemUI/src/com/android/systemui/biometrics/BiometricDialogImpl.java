@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -36,6 +37,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
 import com.android.systemui.biometrics.ui.BiometricDialogView;
+import com.android.systemui.biometrics.ui.AuthContainerView;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.List;
@@ -46,6 +48,9 @@ import java.util.List;
  */
 public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callbacks,
         DialogViewCallback {
+    private static final String USE_NEW_DIALOG =
+            "com.android.systemui.biometrics.BiometricDialogImpl.USE_NEW_DIALOG";
+
     private static final String TAG = "BiometricDialogImpl";
     private static final boolean DEBUG = true;
 
@@ -253,7 +258,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                 requireConfirmation,
                 userId,
                 type,
-                opPackageName);
+                opPackageName,
+                skipAnimation);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type: " + type);
@@ -282,7 +288,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
         mReceiver = (IBiometricServiceReceiverInternal) args.arg2;
         mCurrentDialog = newDialog;
-        mCurrentDialog.show(mWindowManager, skipAnimation);
+        mCurrentDialog.show(mWindowManager);
     }
 
     private void onDialogDismissed(@DismissedReason int reason) {
@@ -309,14 +315,27 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
     }
 
-    protected BiometricDialog buildDialog(Bundle biometricPromptBundle,
-            boolean requireConfirmation, int userId, int type, String opPackageName) {
-        return new BiometricDialogView.Builder(mContext)
-                .setCallback(this)
-                .setBiometricPromptBundle(biometricPromptBundle)
-                .setRequireConfirmation(requireConfirmation)
-                .setUserId(userId)
-                .setOpPackageName(opPackageName)
-                .build(type);
+    protected BiometricDialog buildDialog(Bundle biometricPromptBundle, boolean requireConfirmation,
+            int userId, int type, String opPackageName, boolean skipIntro) {
+        if (Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), USE_NEW_DIALOG, userId, 0) != 0) {
+            return new AuthContainerView.Builder(mContext)
+                    .setCallback(this)
+                    .setBiometricPromptBundle(biometricPromptBundle)
+                    .setRequireConfirmation(requireConfirmation)
+                    .setUserId(userId)
+                    .setOpPackageName(opPackageName)
+                    .setSkipIntro(skipIntro)
+                    .build(type);
+        } else {
+            return new BiometricDialogView.Builder(mContext)
+                    .setCallback(this)
+                    .setBiometricPromptBundle(biometricPromptBundle)
+                    .setRequireConfirmation(requireConfirmation)
+                    .setUserId(userId)
+                    .setOpPackageName(opPackageName)
+                    .setSkipIntro(skipIntro)
+                    .build(type);
+        }
     }
 }

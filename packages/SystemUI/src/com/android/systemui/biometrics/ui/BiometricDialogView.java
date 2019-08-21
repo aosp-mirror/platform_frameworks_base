@@ -231,6 +231,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         private boolean mRequireConfirmation;
         private int mUserId;
         private String mOpPackageName;
+        private boolean mSkipIntro;
 
         public Builder(Context context) {
             mContext = context;
@@ -261,6 +262,11 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             return this;
         }
 
+        public Builder setSkipIntro(boolean skipIntro) {
+            mSkipIntro = skipIntro;
+            return this;
+        }
+
         public BiometricDialogView build(int type) {
             return build(type, new Injector());
         }
@@ -278,6 +284,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             dialog.setRequireConfirmation(mRequireConfirmation);
             dialog.setUserId(mUserId);
             dialog.setOpPackageName(mOpPackageName);
+            dialog.setSkipIntro(mSkipIntro);
             return dialog;
         }
     }
@@ -508,6 +515,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
     }
 
+
     @VisibleForTesting
     void updateSize(@DialogSize int newSize) {
         final float padding = Utils.dpToPixels(mContext, IMPLICIT_Y_PADDING);
@@ -733,8 +741,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
     }
 
     @Override
-    public void show(WindowManager wm, boolean skipIntroAnimation) {
-        setSkipIntro(skipIntroAnimation);
+    public void show(WindowManager wm) {
         wm.addView(this, getLayoutParams(mWindowToken));
     }
 

@@ -147,7 +147,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
     public void testShowInvoked_whenSystemRequested()
             throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any(), eq(false) /* skipIntro */);
+        verify(mDialog1).show(any());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
     @Test
     public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any(), eq(false) /* skipIntro */);
+        verify(mDialog1).show(any());
 
         showDialog(BiometricPrompt.TYPE_FACE);
 
@@ -223,13 +223,13 @@ public class BiometricDialogImplTest extends SysuiTestCase {
         verify(mDialog1).dismissWithoutCallback(eq(false) /* animate */);
 
         // Second dialog should be shown without animation
-        verify(mDialog2).show(any(), eq(true)) /* skipIntro */;
+        verify(mDialog2).show(any());
     }
 
     @Test
     public void testConfigurationPersists_whenOnConfigurationChanged() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any(), eq(false) /* skipIntro */);
+        verify(mDialog1).show(any());
 
         mBiometricDialogImpl.onConfigurationChanged(new Configuration());
 
@@ -244,7 +244,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
         verify(mDialog2).restoreState(captor2.capture());
 
         // Dialog for new configuration skips intro
-        verify(mDialog2).show(any(), eq(true) /* skipIntro */);
+        verify(mDialog2).show(any());
 
         // TODO: This should check all values we want to save/restore
         assertEquals(captor.getValue(), captor2.getValue());
@@ -305,7 +305,8 @@ public class BiometricDialogImplTest extends SysuiTestCase {
 
         @Override
         protected BiometricDialog buildDialog(Bundle biometricPromptBundle,
-                boolean requireConfirmation, int userId, int type, String opPackageName) {
+                boolean requireConfirmation, int userId, int type, String opPackageName,
+                boolean skipIntro) {
             BiometricDialog dialog;
             if (mBuildCount == 0) {
                 dialog = mDialog1;

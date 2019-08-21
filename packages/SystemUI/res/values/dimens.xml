@@ -1010,6 +1010,8 @@
     <dimen name="biometric_dialog_corner_size">4dp</dimen>
     <dimen name="biometric_dialog_animation_translation_offset">350dp</dimen>
     <dimen name="biometric_dialog_border_padding">4dp</dimen>
+    <dimen name="biometric_dialog_elevation">1dp</dimen>
+    <dimen name="biometric_dialog_icon_padding">16dp</dimen>
 
     <!-- Wireless Charging Animation values -->
     <dimen name="wireless_charging_dots_radius_start">0dp</dimen>
