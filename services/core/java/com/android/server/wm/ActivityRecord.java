@@ -1380,6 +1380,12 @@ final class ActivityRecord extends ConfigurationContainer {
             }
             // Keep track of the number of fullscreen activities in this task.
             task.numFullscreen += occludesParent ? +1 : -1;
+            fullscreen = occludesParent;
+        }
+        // Always ensure visibility if this activity doesn't occlude parent, so the
+        // {@link #returningOptions} of the activity under this one can be applied in
+        // {@link #handleAlreadyVisible()}.
+        if (changed || !occludesParent) {
             mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         }
         return changed;
