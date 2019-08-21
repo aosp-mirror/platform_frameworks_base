@@ -1814,8 +1814,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     public void onLockIconPressed() {
         mLockIconPressed = true;
-        mUserFaceAuthenticated.put(getCurrentUser(), false);
+        final int userId = getCurrentUser();
+        mUserFaceAuthenticated.put(userId, false);
         updateFaceListeningState();
+        mStrongAuthTracker.onStrongAuthRequiredChanged(userId);
     }
 
     private void startListeningForFingerprint() {
