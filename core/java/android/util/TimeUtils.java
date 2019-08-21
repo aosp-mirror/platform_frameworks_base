@@ -62,9 +62,9 @@ public class TimeUtils {
     }
 
     /**
-     * Tries to return a frozen ICU time zone that would have had the specified offset
-     * and DST value at the specified moment in the specified country.
-     * Returns null if no suitable zone could be found.
+     * Returns a frozen ICU time zone that has / would have had the specified offset and DST value
+     * at the specified moment in the specified country. Returns null if no suitable zone could be
+     * found.
      */
     private static android.icu.util.TimeZone getIcuTimeZone(
             int offset, boolean dst, long when, String country) {
@@ -73,8 +73,15 @@ public class TimeUtils {
         }
 
         android.icu.util.TimeZone bias = android.icu.util.TimeZone.getDefault();
-        return TimeZoneFinder.getInstance()
-                .lookupTimeZoneByCountryAndOffset(country, offset, dst, when, bias);
+        CountryTimeZones countryTimeZones =
+                TimeZoneFinder.getInstance().lookupCountryTimeZones(country);
+        if (countryTimeZones == null) {
+            return null;
+        }
+
+        CountryTimeZones.OffsetResult offsetResult =
+                countryTimeZones.lookupByOffsetWithBias(offset, dst, when, bias);
+        return offsetResult != null ? offsetResult.mTimeZone : null;
     }
 
     /**

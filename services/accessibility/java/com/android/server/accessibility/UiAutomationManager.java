@@ -66,6 +66,7 @@ class UiAutomationManager {
                     mUiAutomationServiceOwner.unlinkToDeath(this, 0);
                     mUiAutomationServiceOwner = null;
                     destroyUiAutomationService();
+                    Slog.v(LOG_TAG, "UiAutomation service owner died");
                 }
             };
 
@@ -263,7 +264,7 @@ class UiAutomationManager {
         }
 
         @Override
-        protected boolean isCalledForCurrentUserLocked() {
+        protected boolean hasRightsToCurrentUserLocked() {
             // Allow UiAutomation to work for any user
             return true;
         }

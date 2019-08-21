@@ -210,8 +210,7 @@ static void android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject 
     if (parcel) {
         bool isInitialized = parcel->readInt32();
         if (isInitialized) {
-            InputChannel* inputChannel = new InputChannel();
-            inputChannel->read(*parcel);
+            sp<InputChannel> inputChannel = InputChannel::read(*parcel);
 
             NativeInputChannel* nativeInputChannel = new NativeInputChannel(inputChannel);
 

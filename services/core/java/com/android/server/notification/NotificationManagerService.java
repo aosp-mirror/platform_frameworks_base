@@ -315,7 +315,7 @@ public class NotificationManagerService extends SystemService {
 
     static final int VIBRATE_PATTERN_MAXLEN = 8 * 2 + 1; // up to eight bumps
 
-    static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
+    static final int INVALID_UID = -1;
 
     static final boolean ENABLE_BLOCKED_TOASTS = true;
 
@@ -911,8 +911,22 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationError(int callingUid, int callingPid, String pkg, String tag,
                 int id, int uid, int initialPid, String message, int userId) {
+            final boolean fgService;
+            synchronized (mNotificationLock) {
+                NotificationRecord r = findNotificationLocked(pkg, tag, id, userId);
+                fgService = r != null && (r.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0;
+            }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0, 0, false, userId,
                     REASON_ERROR, null);
+            if (fgService) {
+                // Still crash for foreground services, preventing the not-crash behaviour abused
+                // by apps to give us a garbage notification and silently start a fg service.
+                Binder.withCleanCallingIdentity(
+                        () -> mAm.crashApplication(uid, initialPid, pkg, -1,
+                            "Bad notification(tag=" + tag + ", id=" + id + ") posted from package "
+                                + pkg + ", crashing app(uid=" + uid + ", pid=" + initialPid + "): "
+                                + message));
+            }
         }
 
         @Override
@@ -4699,6 +4713,12 @@ public class NotificationManagerService extends SystemService {
         // ensure opPkg is delegate if does not match pkg
         int uid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
 
+        if (uid == INVALID_UID) {
+            Slog.w(TAG, opPkg + ":" + callingUid + " trying to cancel notification "
+                    + "for nonexistent pkg " + pkg + " in user " + userId);
+            return;
+        }
+
         // if opPkg is not the same as pkg, make sure the notification given was posted
         // by opPkg
         if (!Objects.equals(pkg, opPkg)) {
@@ -4742,6 +4762,11 @@ public class NotificationManagerService extends SystemService {
         // Can throw a SecurityException if the calling uid doesn't have permission to post
         // as "pkg"
         final int notificationUid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
+
+        if (notificationUid == INVALID_UID) {
+            throw new SecurityException("Caller " + opPkg + ":" + callingUid
+                    + " trying to post for invalid pkg " + pkg + " in user " + incomingUserId);
+        }
 
         checkRestrictedCategories(notification);
 
@@ -5063,8 +5088,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    int resolveNotificationUid(String callingPkg, String targetPkg,
-            int callingUid, int userId) {
+    int resolveNotificationUid(String callingPkg, String targetPkg, int callingUid, int userId) {
         if (userId == UserHandle.USER_ALL) {
             userId = USER_SYSTEM;
         }
@@ -5075,16 +5099,16 @@ public class NotificationManagerService extends SystemService {
             return callingUid;
         }
 
-        int targetUid = -1;
+        int targetUid = INVALID_UID;
         try {
             targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
         } catch (NameNotFoundException e) {
-            /* ignore */
+            /* ignore, handled by caller */
         }
         // posted from app A on behalf of app B
-        if (targetUid != -1 && (isCallerAndroid(callingPkg, callingUid)
+        if (isCallerAndroid(callingPkg, callingUid)
                 || mPreferencesHelper.isDelegateAllowed(
-                        targetPkg, targetUid, callingPkg, callingUid))) {
+                        targetPkg, targetUid, callingPkg, callingUid)) {
             return targetUid;
         }
 

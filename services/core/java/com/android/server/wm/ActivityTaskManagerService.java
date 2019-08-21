@@ -86,6 +86,7 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.Scr
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
@@ -1614,8 +1615,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
-                    r.finishActivityLocked(resultCode, resultData, "app-request",
-                            true /* oomAdj */);
+                    r.finishIfPossible(resultCode, resultData, "app-request",
+                            true /* oomAdj */, !PAUSE_IMMEDIATELY);
                     res = r.finishing;
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");

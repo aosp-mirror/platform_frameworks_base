@@ -490,10 +490,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return null;
     }
 
-    ActivityStack getNextFocusableStack() {
-        return getNextFocusableStack(null /* currentFocus */, false /* ignoreCurrent */);
-    }
-
     ActivityStack getNextFocusableStack(ActivityStack currentFocus, boolean ignoreCurrent) {
         final int currentWindowingMode = currentFocus != null
                 ? currentFocus.getWindowingMode() : WINDOWING_MODE_UNDEFINED;

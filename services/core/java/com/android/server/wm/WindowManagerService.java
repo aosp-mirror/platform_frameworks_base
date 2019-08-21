@@ -7717,8 +7717,7 @@ public class WindowManagerService extends IWindowManager.Stub
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
 
-        IBinder token = new Binder();
-        mInputManager.registerInputChannel(inputChannel, token);
+        mInputManager.registerInputChannel(inputChannel, null /* generate new token */);
 
         // Prevent the java finalizer from breaking the input channel. But we won't
         // do any further management so we just release the java ref and let the
@@ -7726,7 +7725,7 @@ public class WindowManagerService extends IWindowManager.Stub
         inputChannel.release();
 
         InputWindowHandle h = new InputWindowHandle(null, null, displayId);
-        h.token = token;
+        h.token = inputChannel.getToken();
         h.name = name;
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         h.layoutParamsType = 0;

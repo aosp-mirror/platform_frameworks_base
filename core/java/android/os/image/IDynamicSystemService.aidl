@@ -79,10 +79,20 @@ interface IDynamicSystemService
     boolean setEnable(boolean enable, boolean oneShot);
 
     /**
-     * Write a chunk of the DynamicSystem system image
+     * Set the file descriptor that points to a ashmem which will be used
+     * to fetch data during the submitFromAshmem.
      *
-     * @return true if the call succeeds
+     * @param fd            fd that points to a ashmem
+     * @param size          size of the ashmem file
      */
-    boolean write(in byte[] buf);
+    boolean setAshmem(in ParcelFileDescriptor fd, long size);
 
+    /**
+     * Submit bytes to the DSU partition from the ashmem previously set with
+     * setAshmem.
+     *
+     * @param bytes         number of bytes that can be read from stream.
+     * @return              true on success, false otherwise.
+     */
+    boolean submitFromAshmem(long bytes);
 }

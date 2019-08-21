@@ -56,8 +56,6 @@ import static com.android.server.am.ActivityStackProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityStackProto.TASKS;
 import static com.android.server.wm.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
-import static com.android.server.wm.ActivityRecord.FINISH_AFTER_VISIBLE;
-import static com.android.server.wm.ActivityRecord.FINISH_IMMEDIATELY;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
@@ -1771,8 +1769,7 @@ class ActivityStack extends ConfigurationContainer {
                     if (r.finishing) {
                         if (DEBUG_PAUSE) Slog.v(TAG,
                                 "Executing finish of failed to pause activity: " + r);
-                        r.finishCurrentActivityLocked(FINISH_AFTER_VISIBLE, false,
-                                "activityPausedLocked");
+                        r.completeFinishing("activityPausedLocked");
                     }
                 }
             }
@@ -1790,8 +1787,7 @@ class ActivityStack extends ConfigurationContainer {
             prev.setState(PAUSED, "completePausedLocked");
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Executing finish of activity: " + prev);
-                prev = prev.finishCurrentActivityLocked(FINISH_AFTER_VISIBLE, false /* oomAdj */,
-                        "completePausedLocked");
+                prev = prev.completeFinishing("completePausedLocked");
             } else if (prev.hasProcess()) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueue pending stop if needed: " + prev
                         + " wasStopping=" + wasStopping + " visible=" + prev.visible);
@@ -2782,8 +2778,7 @@ class ActivityStack extends ConfigurationContainer {
                 !mLastNoHistoryActivity.finishing) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
-            mLastNoHistoryActivity.finishActivityLocked(Activity.RESULT_CANCELED,
-                    null /* resultData */, "resume-no-history", false /* oomAdj */);
+            mLastNoHistoryActivity.finishIfPossible("resume-no-history", false /* oomAdj */);
             mLastNoHistoryActivity = null;
         }
 
@@ -3018,8 +3013,7 @@ class ActivityStack extends ConfigurationContainer {
                 // If any exception gets thrown, toss away this
                 // activity and try the next one.
                 Slog.w(TAG, "Exception thrown during resume of " + next, e);
-                next.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                        "resume-exception", true /* oomAdj */);
+                next.finishIfPossible("resume-exception", true /* oomAdj */);
                 return true;
             }
         } else {
@@ -3446,8 +3440,8 @@ class ActivityStack extends ConfigurationContainer {
                     }
                     if (DEBUG_TASKS) Slog.w(TAG_TASKS,
                             "resetTaskIntendedTask: calling finishActivity on " + p);
-                    if (p.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                            "reset-task", false /* oomAdj */) == FINISH_RESULT_REMOVED) {
+                    if (p.finishIfPossible("reset-task", false /* oomAdj */)
+                            == FINISH_RESULT_REMOVED) {
                         end--;
                         srcPos--;
                     }
@@ -3531,8 +3525,7 @@ class ActivityStack extends ConfigurationContainer {
                         if (p.finishing) {
                             continue;
                         }
-                        p.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                                "move-affinity", false /* oomAdj */);
+                        p.finishIfPossible("move-affinity", false /* oomAdj */);
                     }
                 } else {
                     if (taskInsertionPoint < 0) {
@@ -3566,8 +3559,7 @@ class ActivityStack extends ConfigurationContainer {
                         if (targetNdx > 0) {
                             final ActivityRecord p = taskActivities.get(targetNdx - 1);
                             if (p.intent.getComponent().equals(target.intent.getComponent())) {
-                                p.finishActivityLocked(Activity.RESULT_CANCELED,
-                                        null /* resultData */, "replace", false /* oomAdj */);
+                                p.finishIfPossible("replace", false /* oomAdj */);
                             }
                         }
                     }
@@ -3755,8 +3747,8 @@ class ActivityStack extends ConfigurationContainer {
             if (!r.finishing) {
                 if (!shouldSleepActivities()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + r);
-                    if (r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                            "stop-no-history", false /* oomAdj */) != FINISH_RESULT_CANCELLED) {
+                    if (r.finishIfPossible("stop-no-history", false /* oomAdj */)
+                            != FINISH_RESULT_CANCELLED) {
                         // {@link adjustFocusedActivityStack} must have been already called.
                         r.resumeKeyDispatchingLocked();
                         return;
@@ -3815,8 +3807,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (r.resultTo == self && r.requestCode == requestCode) {
                     if ((r.resultWho == null && resultWho == null) ||
                         (r.resultWho != null && r.resultWho.equals(resultWho))) {
-                        r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                                "request-sub", false /* oomAdj */);
+                        r.finishIfPossible("request-sub", false /* oomAdj */);
                     }
                 }
             }
@@ -3846,8 +3837,7 @@ class ActivityStack extends ConfigurationContainer {
         int activityNdx = task.mActivities.indexOf(r);
         getDisplay().mDisplayContent.prepareAppTransition(
                 TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
-        r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */, reason,
-                false /* oomAdj */);
+        r.finishIfPossible(reason, false /* oomAdj */);
         finishedTask = task;
         // Also terminate any activities below it that aren't yet
         // stopped, to avoid a situation where one will get
@@ -3868,8 +3858,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (!r.isActivityTypeHome() || mService.mHomeProcess != r.app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + r.intent.getComponent().flattenToShortString());
-                    r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */, reason,
-                            false /* oomAdj */);
+                    r.finishIfPossible(reason, false /* oomAdj */);
                 }
             }
         }
@@ -3885,8 +3874,7 @@ class ActivityStack extends ConfigurationContainer {
                 for (int activityNdx = tr.mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                     ActivityRecord r = tr.mActivities.get(activityNdx);
                     if (!r.finishing) {
-                        r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                                "finish-voice", false /* oomAdj */);
+                        r.finishIfPossible("finish-voice", false /* oomAdj */);
                         didOne = true;
                     }
                 }
@@ -3924,8 +3912,7 @@ class ActivityStack extends ConfigurationContainer {
                 final ActivityRecord r = activities.get(activityNdx);
                 noActivitiesInStack = false;
                 Slog.d(TAG, "finishAllActivitiesImmediatelyLocked: finishing " + r);
-                r.finishCurrentActivityLocked(FINISH_IMMEDIATELY, false /* oomAdj */,
-                        "finishAllActivitiesImmediatelyLocked");
+                r.destroyIfPossible("finishAllActivitiesImmediatelyLocked");
             }
         }
         if (noActivitiesInStack) {
@@ -4029,7 +4016,8 @@ class ActivityStack extends ConfigurationContainer {
         final long origId = Binder.clearCallingIdentity();
         for (int i = start; i > finishTo; i--) {
             final ActivityRecord r = activities.get(i);
-            r.finishActivityLocked(resultCode, resultData, "navigate-up", true /* oomAdj */);
+            r.finishIfPossible(resultCode, resultData, "navigate-up", true /* oomAdj */,
+                    !PAUSE_IMMEDIATELY);
             // Only return the supplied result for the first activity finished
             resultCode = Activity.RESULT_CANCELED;
             resultData = null;
@@ -4066,8 +4054,8 @@ class ActivityStack extends ConfigurationContainer {
                 } catch (RemoteException e) {
                     foundParentInTask = false;
                 }
-                parent.finishActivityLocked(resultCode, resultData, "navigate-top",
-                        true /* oomAdj */);
+                parent.finishIfPossible(resultCode, resultData, "navigate-top",
+                        true /* oomAdj */, !PAUSE_IMMEDIATELY);
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -4312,10 +4300,13 @@ class ActivityStack extends ConfigurationContainer {
     }
 
     /**
-     * Destroy the current CLIENT SIDE instance of an activity.  This may be
-     * called both when actually finishing an activity, or when performing
-     * a configuration switch where we destroy the current client-side object
-     * but then create a new client-side object for this same HistoryRecord.
+     * Destroy the current CLIENT SIDE instance of an activity.  This may be * called both when
+     * actually finishing an activity, or when performing a configuration switch where we destroy
+     * the current client-side object but then create a new client-side object for this same
+     * HistoryRecord.
+     * Normally the server-side record will be removed when the client reports back after
+     * destruction. If, however, at this point there is no client process attached, the record will
+     * removed immediately.
      */
     final boolean destroyActivityLocked(ActivityRecord r, boolean removeFromApp, String reason) {
         if (DEBUG_SWITCH || DEBUG_CLEANUP) Slog.v(TAG_SWITCH,
@@ -4890,7 +4881,7 @@ class ActivityStack extends ConfigurationContainer {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                    r.finishActivityLocked(Activity.RESULT_CANCELED, null, "close-sys", true);
+                    r.finishIfPossible("close-sys", true /* oomAdj */);
                 }
             }
         }
@@ -4934,7 +4925,7 @@ class ActivityStack extends ConfigurationContainer {
                     didSomething = true;
                     Slog.i(TAG, "  Force finishing activity " + r);
                     lastTask = r.getTaskRecord();
-                    r.finishActivityLocked(Activity.RESULT_CANCELED, null, "force-stop", true);
+                    r.finishIfPossible("force-stop", true);
                 }
             }
         }
@@ -4988,8 +4979,7 @@ class ActivityStack extends ConfigurationContainer {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
             int activityTop = activities.size() - 1;
             if (activityTop >= 0) {
-                activities.get(activityTop).finishActivityLocked(Activity.RESULT_CANCELED, null,
-                        "unhandled-back", true);
+                activities.get(activityTop).finishIfPossible("unhandled-back", true /* oomAdj */);
             }
         }
     }
@@ -5025,8 +5015,7 @@ class ActivityStack extends ConfigurationContainer {
                     r.app = null;
                     getDisplay().mDisplayContent.prepareAppTransition(
                             TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
-                    r.finishCurrentActivityLocked(FINISH_IMMEDIATELY, false /* oomAdj */,
-                            "handleAppCrashedLocked");
+                    r.destroyIfPossible("handleAppCrashedLocked");
                 }
             }
         }

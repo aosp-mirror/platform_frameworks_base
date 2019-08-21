@@ -24,7 +24,6 @@ import android.telephony.NetworkService.NetworkServiceProvider;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
 
 /**
  * Network service callback. Object of this class is passed to NetworkServiceProvider upon
@@ -61,11 +60,11 @@ public class NetworkServiceCallback {
     /** Request failed */
     public static final int RESULT_ERROR_FAILED         = 5;
 
-    private final WeakReference<INetworkServiceCallback> mCallback;
+    private final INetworkServiceCallback mCallback;
 
     /** @hide */
     public NetworkServiceCallback(INetworkServiceCallback callback) {
-        mCallback = new WeakReference<>(callback);
+        mCallback = callback;
     }
 
     /**
@@ -78,15 +77,14 @@ public class NetworkServiceCallback {
      */
     public void onRequestNetworkRegistrationInfoComplete(int result,
                                                          @Nullable NetworkRegistrationInfo state) {
-        INetworkServiceCallback callback = mCallback.get();
-        if (callback != null) {
+        if (mCallback != null) {
             try {
-                callback.onRequestNetworkRegistrationInfoComplete(result, state);
+                mCallback.onRequestNetworkRegistrationInfoComplete(result, state);
             } catch (RemoteException e) {
                 Rlog.e(mTag, "Failed to onRequestNetworkRegistrationInfoComplete on the remote");
             }
         } else {
-            Rlog.e(mTag, "Weak reference of callback is null.");
+            Rlog.e(mTag, "onRequestNetworkRegistrationInfoComplete callback is null.");
         }
     }
 }
