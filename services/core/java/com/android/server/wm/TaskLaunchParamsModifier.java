@@ -159,11 +159,23 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // STEP 2: Resolve launch windowing mode.
-        // STEP 2.1: Determine if any parameter has specified initial bounds. That might be the
-        // launch bounds from activity options, or size/gravity passed in layout. It also treats the
-        // launch windowing mode in options as a suggestion for future resolution.
+        // STEP 2.1: Determine if any parameter can specify initial bounds/windowing mode. That
+        // might be the launch bounds from activity options, or size/gravity passed in layout. It
+        // also treats the launch windowing mode in options and source activity windowing mode in
+        // some cases as a suggestion for future resolution.
         int launchMode = options != null ? options.getLaunchWindowingMode()
                 : WINDOWING_MODE_UNDEFINED;
+        // In some cases we want to use the source's windowing mode as the default value, e.g. when
+        // source is a freeform window in a fullscreen display launching an activity on the same
+        // display.
+        if (launchMode == WINDOWING_MODE_UNDEFINED
+                && canInheritWindowingModeFromSource(display, source)) {
+            launchMode = source.getWindowingMode();
+            if (DEBUG) {
+                appendLog("inherit-from-source="
+                        + WindowConfiguration.windowingModeToString(launchMode));
+            }
+        }
         // hasInitialBounds is set if either activity options or layout has specified bounds. If
         // that's set we'll skip some adjustments later to avoid overriding the initial bounds.
         boolean hasInitialBounds = false;
@@ -340,6 +352,31 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return (displayId != INVALID_DISPLAY
                 && mSupervisor.mRootActivityContainer.getActivityDisplay(displayId) != null)
                 ? displayId : DEFAULT_DISPLAY;
+    }
+
+    private boolean canInheritWindowingModeFromSource(@NonNull ActivityDisplay display,
+            @Nullable ActivityRecord source) {
+        if (source == null) {
+            return false;
+        }
+
+        // There is not really any strong reason to tie the launching windowing mode and the source
+        // on freeform displays. The launching windowing mode is more tied to the content of the new
+        // activities.
+        if (display.inFreeformWindowingMode()) {
+            return false;
+        }
+
+        final int sourceWindowingMode = source.getWindowingMode();
+        if (sourceWindowingMode != WINDOWING_MODE_FULLSCREEN
+                && sourceWindowingMode != WINDOWING_MODE_FREEFORM) {
+            return false;
+        }
+
+        // Only inherit windowing mode if both source and target activities are on the same display.
+        // Otherwise we may have unintended freeform windows showing up if an activity in freeform
+        // window launches an activity on a fullscreen display by specifying display ID.
+        return display.mDisplayId == source.getDisplayId();
     }
 
     private boolean canApplyFreeformWindowPolicy(@NonNull ActivityDisplay display, int launchMode) {
