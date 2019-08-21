@@ -18,6 +18,7 @@ package android.view.autofill;
 
 import java.util.List;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
@@ -111,4 +112,8 @@ oneway interface IAutoFillManagerClient {
     */
    void getAugmentedAutofillClient(in IResultReceiver result);
 
+   /**
+    * Notifies disables autofill for the app or activity.
+    */
+   void notifyDisableAutofill(long disableDuration, in ComponentName componentName);
 }

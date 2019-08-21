@@ -43,6 +43,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
@@ -1737,6 +1738,26 @@ public final class AutofillManager {
 
             final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
             final ComponentName componentName = client.autofillClientGetComponentName();
+
+            if (!mEnabledForAugmentedAutofillOnly && mOptions != null
+                    && mOptions.isAutofillDisabledLocked(componentName)) {
+                if (mOptions.isAugmentedAutofillEnabled(mContext)) {
+                    if (sDebug) {
+                        Log.d(TAG, "startSession(" + componentName + "): disabled by service but "
+                                + "whitelisted for augmented autofill");
+                        flags |= FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
+                    }
+                } else {
+                    if (sDebug) {
+                        Log.d(TAG, "startSession(" + componentName + "): ignored because "
+                                + "disabled by service and not whitelisted for augmented autofill");
+                    }
+                    setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE, null);
+                    client.autofillClientResetableStateAvailable();
+                    return;
+                }
+            }
+
             mService.startSession(client.autofillClientGetActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
                     mCallback != null, flags, componentName,
@@ -2067,6 +2088,7 @@ public final class AutofillManager {
                     mServiceClientCleaner.clean();
                     mServiceClientCleaner = null;
                 }
+                notifyReenableAutofill();
             }
         }
         sDebug = (flags & SET_STATE_FLAG_DEBUG) != 0;
@@ -2400,6 +2422,37 @@ public final class AutofillManager {
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_HIDDEN);
             }
+        }
+    }
+
+    private void notifyDisableAutofill(long disableDuration, ComponentName componentName) {
+        synchronized (mLock) {
+            if (mOptions == null) {
+                return;
+            }
+            long expiration = SystemClock.elapsedRealtime() + disableDuration;
+            // Protect it against overflow
+            if (expiration < 0) {
+                expiration = Long.MAX_VALUE;
+            }
+            if (componentName != null) {
+                if (mOptions.disabledActivities == null) {
+                    mOptions.disabledActivities = new ArrayMap<>();
+                }
+                mOptions.disabledActivities.put(componentName.flattenToString(), expiration);
+            } else {
+                mOptions.appDisabledExpiration = expiration;
+            }
+        }
+    }
+
+    void notifyReenableAutofill() {
+        synchronized (mLock) {
+            if (mOptions == null) {
+                return;
+            }
+            mOptions.appDisabledExpiration = 0;
+            mOptions.disabledActivities = null;
         }
     }
 
@@ -3177,6 +3230,15 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.notifyNoFillUi(sessionId, id, sessionFinishedState));
+            }
+        }
+
+        @Override
+        public void notifyDisableAutofill(long disableDuration, ComponentName componentName)
+                throws RemoteException {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.notifyDisableAutofill(disableDuration, componentName));
             }
         }
 
