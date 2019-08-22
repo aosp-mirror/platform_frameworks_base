@@ -65,7 +65,7 @@ public class UsbHostManager {
     private final String[] mHostBlacklist;
 
     private final UsbAlsaManager mUsbAlsaManager;
-    private final UsbSettingsManager mSettingsManager;
+    private final UsbPermissionManager mPermissionManager;
 
     private final Object mLock = new Object();
     @GuardedBy("mLock")
@@ -232,13 +232,13 @@ public class UsbHostManager {
      * UsbHostManager
      */
     public UsbHostManager(Context context, UsbAlsaManager alsaManager,
-            UsbSettingsManager settingsManager) {
+            UsbPermissionManager permissionManager) {
         mContext = context;
 
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
         mUsbAlsaManager = alsaManager;
-        mSettingsManager = settingsManager;
+        mPermissionManager = permissionManager;
         String deviceConnectionHandler = context.getResources().getString(
                 com.android.internal.R.string.config_UsbDeviceConnectionHandling_component);
         if (!TextUtils.isEmpty(deviceConnectionHandler)) {
@@ -393,8 +393,8 @@ public class UsbHostManager {
                 addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT_BADDEVICE,
                         parser.getRawDescriptors());
             } else {
-                UsbSerialReader serialNumberReader = new UsbSerialReader(mContext, mSettingsManager,
-                        newDeviceBuilder.serialNumber);
+                UsbSerialReader serialNumberReader = new UsbSerialReader(mContext,
+                        mPermissionManager, newDeviceBuilder.serialNumber);
                 UsbDevice newDevice = newDeviceBuilder.build(serialNumberReader);
                 serialNumberReader.setDevice(newDevice);
 
@@ -444,7 +444,7 @@ public class UsbHostManager {
             if (device != null) {
                 Slog.d(TAG, "Removed device at " + deviceAddress + ": " + device.getProductName());
                 mUsbAlsaManager.usbDeviceRemoved(deviceAddress);
-                mSettingsManager.usbDeviceRemoved(device);
+                mPermissionManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
                 ConnectionRecord current = mConnected.get(deviceAddress);
                 // Tracking
@@ -484,9 +484,11 @@ public class UsbHostManager {
         }
     }
 
-    /* Opens the specified USB device */
-    public ParcelFileDescriptor openDevice(String deviceAddress, UsbUserSettingsManager settings,
-            String packageName, int uid) {
+    /**
+     *  Opens the specified USB device
+     */
+    public ParcelFileDescriptor openDevice(String deviceAddress,
+            UsbUserPermissionManager permissions, String packageName, int uid) {
         synchronized (mLock) {
             if (isBlackListed(deviceAddress)) {
                 throw new SecurityException("USB device is on a restricted bus");
@@ -498,7 +500,7 @@ public class UsbHostManager {
                         "device " + deviceAddress + " does not exist or is restricted");
             }
 
-            settings.checkPermission(device, packageName, uid);
+            permissions.checkPermission(device, packageName, uid);
             return nativeOpenDevice(deviceAddress);
         }
     }
