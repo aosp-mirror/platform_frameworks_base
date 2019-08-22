@@ -1355,7 +1355,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"चार्जर लावलेले डिव्हाइस. आणखी पर्यायांसाठी टॅप करा"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"अॅनालॉग ऑडिओ अॅक्‍सेसरी आढळली"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"या फोनसह संलग्‍न केलेले डीव्‍हाइस सुसंगत नाही. अधिक जाणून घेण्‍यासाठी टॅप करा."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबगिंग कनेक्‍ट केले"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB डीबगिंग बंद करण्यासाठी टॅप करा"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबगिंग बंद करण्यासाठी निवडा."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"टेस्ट हार्नेस मोड सुरू केला आहे"</string>
