@@ -481,9 +481,8 @@ package android.provider {
   @Deprecated public static class MediaStore.PendingParams {
     ctor public MediaStore.PendingParams(@NonNull android.net.Uri, @NonNull String, @NonNull String);
     method public void setDownloadUri(@Nullable android.net.Uri);
-    method public void setPrimaryDirectory(@Nullable String);
     method public void setRefererUri(@Nullable android.net.Uri);
-    method public void setSecondaryDirectory(@Nullable String);
+    method public void setRelativePath(@Nullable String);
   }
 
   @Deprecated public static class MediaStore.PendingSession implements java.lang.AutoCloseable {

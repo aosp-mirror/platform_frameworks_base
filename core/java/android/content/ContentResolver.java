@@ -475,11 +475,9 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public static final String ANY_CURSOR_ITEM_TYPE = "vnd.android.cursor.item/*";
 
-    /**
-     * Default MIME type for files whose type is otherwise unknown.
-     * @hide
-     */
-    public static final String MIME_TYPE_DEFAULT = "application/octet-stream";
+    /** {@hide} */
+    @Deprecated
+    public static final String MIME_TYPE_DEFAULT = ClipDescription.MIMETYPE_UNKNOWN;
 
     /** @hide */
     @UnsupportedAppUsage
