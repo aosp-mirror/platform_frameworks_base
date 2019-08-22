@@ -233,7 +233,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
         r.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
         mStack.moveToFront("testStopActivityWithDestroy");
-        mStack.stopActivityLocked(r);
+        r.stopIfPossible();
         // Mostly testing to make sure there is a crash in the call part, so if we get here we are
         // good-to-go!
     }
@@ -879,7 +879,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityRecord overlayActivity = new ActivityBuilder(mService).setTask(mTask)
                 .setComponent(new ComponentName("package.overlay", ".OverlayActivity")).build();
         // If the task only remains overlay activity, the task should also be removed.
-        // See {@link ActivityStack#removeActivityFromHistoryLocked}.
+        // See {@link ActivityStack#removeFromHistory}.
         overlayActivity.mTaskOverlay = true;
 
         // The activity without an app means it will be removed immediately.

@@ -106,6 +106,7 @@ import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
@@ -115,13 +116,13 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.wm.ActivityStack.LAUNCH_TICK;
-import static com.android.server.wm.ActivityStack.LAUNCH_TICK_MSG;
-import static com.android.server.wm.ActivityStack.PAUSE_TIMEOUT_MSG;
+import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_APP;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
@@ -133,6 +134,8 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_APP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONTAINERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
@@ -177,8 +180,10 @@ import android.app.WaitResult.LaunchState;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
+import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.MoveToDisplayItem;
 import android.app.servertransaction.MultiWindowModeChangeItem;
 import android.app.servertransaction.NewIntentItem;
@@ -198,12 +203,12 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -260,6 +265,8 @@ import java.util.Objects;
  */
 final class ActivityRecord extends ConfigurationContainer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_ATM;
+    private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
+    private static final String TAG_APP = TAG + POSTFIX_APP;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
@@ -281,6 +288,9 @@ final class ActivityRecord extends ConfigurationContainer {
     private static final String ATTR_RESOLVEDTYPE = "resolved_type";
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
     static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
+
+    // How many activities have to be scheduled to stop to force a stop pass.
+    private static final int MAX_STOPPING_TO_FORCE = 3;
 
     final ActivityTaskManagerService mAtmService; // owner
     final IApplicationToken.Stub appToken; // window manager token
@@ -1837,14 +1847,12 @@ final class ActivityRecord extends ConfigurationContainer {
         final ActivityStack stack = getActivityStack();
         final boolean notFocusedStack = stack != mRootActivityContainer.getTopDisplayFocusedStack();
         if (isVisible && next != null && !next.nowVisible) {
-            if (!mStackSupervisor.mStoppingActivities.contains(this)) {
-                getActivityStack().addToStopping(this, false /* scheduleIdle */,
-                        false /* idleDelayed */, "finishCurrentActivityLocked");
-            }
+            addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
+                    "completeFinishing");
             if (DEBUG_STATES) {
                 Slog.v(TAG_STATES, "Moving to STOPPING: " + this + " (finish requested)");
             }
-            setState(STOPPING, "finishCurrentActivityLocked");
+            setState(STOPPING, "completeFinishing");
             if (notFocusedStack) {
                 mRootActivityContainer.ensureVisibilityAndConfig(next, getDisplayId(),
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
@@ -1890,8 +1898,8 @@ final class ActivityRecord extends ConfigurationContainer {
         }
         makeFinishingLocked();
 
-        boolean activityRemoved = getActivityStack().destroyActivityLocked(this,
-                true /* removeFromApp */, "finish-imm:" + reason);
+        final boolean activityRemoved = destroyImmediately(true /* removeFromApp */,
+                "finish-imm:" + reason);
 
         // If the display does not have running activity, the configuration may need to be
         // updated for restoring original orientation of the display.
@@ -1920,6 +1928,183 @@ final class ActivityRecord extends ConfigurationContainer {
         mRootActivityContainer.resumeFocusedStacksTopActivities();
     }
 
+    /**
+     * Destroy the current CLIENT SIDE instance of an activity. This may be called both when
+     * actually finishing an activity, or when performing a configuration switch where we destroy
+     * the current client-side object but then create a new client-side object for this same
+     * HistoryRecord.
+     * Normally the server-side record will be removed when the client reports back after
+     * destruction. If, however, at this point there is no client process attached, the record will
+     * removed immediately.
+     */
+    boolean destroyImmediately(boolean removeFromApp, String reason) {
+        if (DEBUG_SWITCH || DEBUG_CLEANUP) {
+            Slog.v(TAG_SWITCH, "Removing activity from " + reason + ": token=" + this
+                    + ", app=" + (hasProcess() ? app.mName : "(null)"));
+        }
+
+        if (isState(DESTROYING, DESTROYED)) {
+            if (DEBUG_STATES) {
+                Slog.v(TAG_STATES, "activity " + this + " already destroying."
+                        + "skipping request with reason:" + reason);
+            }
+            return false;
+        }
+
+        EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY, mUserId,
+                System.identityHashCode(this), getTaskRecord().taskId, shortComponentName, reason);
+
+        boolean removedFromHistory = false;
+
+        cleanUp(false /* cleanServices */, false /* setState */);
+
+        final ActivityStack stack = getActivityStack();
+        final boolean hadApp = hasProcess();
+
+        if (hadApp) {
+            if (removeFromApp) {
+                app.removeActivity(this);
+                if (!app.hasActivities()) {
+                    mAtmService.clearHeavyWeightProcessIfEquals(app);
+                    // Update any services we are bound to that might care about whether
+                    // their client may have activities.
+                    // No longer have activities, so update LRU list and oom adj.
+                    app.updateProcessInfo(true /* updateServiceConnectionActivities */,
+                            false /* activityChange */, true /* updateOomAdj */);
+                }
+            }
+
+            boolean skipDestroy = false;
+
+            try {
+                if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + this);
+                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                        DestroyActivityItem.obtain(finishing, configChangeFlags));
+            } catch (Exception e) {
+                // We can just ignore exceptions here...  if the process has crashed, our death
+                // notification will clean things up.
+                if (finishing) {
+                    removeFromHistory(reason + " exceptionInScheduleDestroy");
+                    removedFromHistory = true;
+                    skipDestroy = true;
+                }
+            }
+
+            nowVisible = false;
+
+            // If the activity is finishing, we need to wait on removing it from the list to give it
+            // a chance to do its cleanup.  During that time it may make calls back with its token
+            // so we need to be able to find it on the list and so we don't want to remove it from
+            // the list yet.  Otherwise, we can just immediately put it in the destroyed state since
+            // we are not removing it from the list.
+            if (finishing && !skipDestroy) {
+                if (DEBUG_STATES) {
+                    Slog.v(TAG_STATES, "Moving to DESTROYING: " + this + " (destroy requested)");
+                }
+                setState(DESTROYING,
+                        "destroyActivityLocked. finishing and not skipping destroy");
+                stack.scheduleDestroyTimeoutForActivity(this);
+            } else {
+                if (DEBUG_STATES) {
+                    Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (destroy skipped)");
+                }
+                setState(DESTROYED,
+                        "destroyActivityLocked. not finishing or skipping destroy");
+                if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during destroy for activity " + this);
+                app = null;
+            }
+        } else {
+            // Remove this record from the history.
+            if (finishing) {
+                removeFromHistory(reason + " hadNoApp");
+                removedFromHistory = true;
+            } else {
+                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (no app)");
+                setState(DESTROYED, "destroyActivityLocked. not finishing and had no app");
+            }
+        }
+
+        configChangeFlags = 0;
+
+        if (!stack.removeActivityFromLRUList(this) && hadApp) {
+            Slog.w(TAG, "Activity " + this + " being finished, but not in LRU list");
+        }
+
+        return removedFromHistory;
+    }
+
+    boolean safelyDestroy(String reason) {
+        if (isDestroyable()) {
+            if (DEBUG_SWITCH) {
+                final ActivityStack stack = getActivityStack();
+                Slog.v(TAG_SWITCH, "Safely destroying " + this + " in state " + getState()
+                        + " resumed=" + stack.mResumedActivity
+                        + " pausing=" + stack.mPausingActivity
+                        + " for reason " + reason);
+            }
+            return destroyImmediately(true /* removeFromApp */, reason);
+        }
+        return false;
+    }
+
+    /** Note: call {@link #cleanUp(boolean, boolean)} before this method. */
+    void removeFromHistory(String reason) {
+        finishActivityResults(Activity.RESULT_CANCELED, null /* resultData */);
+        makeFinishingLocked();
+        if (ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE) {
+            Slog.i(TAG_ADD_REMOVE, "Removing activity " + this + " from stack callers="
+                    + Debug.getCallers(5));
+        }
+
+        takeFromHistory();
+        final ActivityStack stack = getActivityStack();
+        stack.removeTimeoutsForActivity(this);
+        if (DEBUG_STATES) {
+            Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (removed from history)");
+        }
+        setState(DESTROYED, "removeFromHistory");
+        if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + this);
+        app = null;
+        removeWindowContainer();
+        final TaskRecord task = getTaskRecord();
+        final boolean lastActivity = task.removeActivity(this);
+        // If we are removing the last activity in the task, not including task overlay activities,
+        // then fall through into the block below to remove the entire task itself
+        final boolean onlyHasTaskOverlays =
+                task.onlyHasTaskOverlayActivities(false /* excludingFinishing */);
+
+        if (lastActivity || onlyHasTaskOverlays) {
+            if (DEBUG_STATES) {
+                Slog.i(TAG, "removeFromHistory: last activity removed from " + this
+                        + " onlyHasTaskOverlays=" + onlyHasTaskOverlays);
+            }
+
+            // The following block can be executed multiple times if there is more than one overlay.
+            // {@link ActivityStackSupervisor#removeTaskByIdLocked} handles this by reverse lookup
+            // of the task by id and exiting early if not found.
+            if (onlyHasTaskOverlays) {
+                // When destroying a task, tell the supervisor to remove it so that any activity it
+                // has can be cleaned up correctly. This is currently the only place where we remove
+                // a task with the DESTROYING mode, so instead of passing the onlyHasTaskOverlays
+                // state into removeTask(), we just clear the task here before the other residual
+                // work.
+                // TODO: If the callers to removeTask() changes such that we have multiple places
+                //       where we are destroying the task, move this back into removeTask()
+                mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
+                        !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY, reason);
+            }
+
+            // We must keep the task around until all activities are destroyed. The following
+            // statement will only execute once since overlays are also considered activities.
+            if (lastActivity) {
+                stack.removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
+            }
+        }
+
+        cleanUpActivityServices();
+        removeUriPermissionsLocked();
+    }
+
     void makeFinishingLocked() {
         if (finishing) {
             return;
@@ -1932,6 +2117,96 @@ final class ActivityRecord extends ConfigurationContainer {
         if (mAtmService != null) {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
+    }
+
+    /**
+     * This method is to only be called from the client via binder when the activity is destroyed
+     * AND finished.
+     */
+    void destroyed(String reason) {
+        getActivityStack().removeDestroyTimeoutForActivity(this);
+
+        if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS, "activityDestroyedLocked: r=" + this);
+
+        if (!isState(DESTROYING, DESTROYED)) {
+            throw new IllegalStateException(
+                    "Reported destroyed for activity that is not destroying: r=" + this);
+        }
+
+        if (isInStackLocked()) {
+            cleanUp(true /* cleanServices */, false /* setState */);
+            removeFromHistory(reason);
+        }
+
+        mRootActivityContainer.resumeFocusedStacksTopActivities();
+    }
+
+    /**
+     * Perform the common clean-up of an activity record.  This is called both as part of
+     * destroyActivityLocked() (when destroying the client-side representation) and cleaning things
+     * up as a result of its hosting processing going away, in which case there is no remaining
+     * client-side state to destroy so only the cleanup here is needed.
+     *
+     * Note: Call before {@link #removeFromHistory(String)}.
+     */
+    void cleanUp(boolean cleanServices, boolean setState) {
+        final ActivityStack stack = getActivityStack();
+        stack.onActivityRemovedFromStack(this);
+
+        deferRelaunchUntilPaused = false;
+        frozenBeforeDestroy = false;
+
+        if (setState) {
+            setState(DESTROYED, "cleanUp");
+            if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during cleanUp for activity " + this);
+            app = null;
+        }
+
+        // Inform supervisor the activity has been removed.
+        mStackSupervisor.cleanupActivity(this);
+
+        // Remove any pending results.
+        if (finishing && pendingResults != null) {
+            for (WeakReference<PendingIntentRecord> apr : pendingResults) {
+                PendingIntentRecord rec = apr.get();
+                if (rec != null) {
+                    mAtmService.mPendingIntentController.cancelIntentSender(rec,
+                            false /* cleanActivity */);
+                }
+            }
+            pendingResults = null;
+        }
+
+        if (cleanServices) {
+            cleanUpActivityServices();
+        }
+
+        // Get rid of any pending idle timeouts.
+        stack.removeTimeoutsForActivity(this);
+        // Clean-up activities are no longer relaunching (e.g. app process died). Notify window
+        // manager so it can update its bookkeeping.
+        mAtmService.mWindowManager.notifyAppRelaunchesCleared(appToken);
+    }
+
+    /**
+     * Perform clean-up of service connections in an activity record.
+     */
+    private void cleanUpActivityServices() {
+        if (mServiceConnectionsHolder == null) {
+            return;
+        }
+        // Throw away any services that have been bound by this activity.
+        mServiceConnectionsHolder.disconnectActivityFromServices();
+    }
+
+    void logStartActivity(int tag, TaskRecord task) {
+        final Uri data = intent.getData();
+        final String strData = data != null ? data.toSafeString() : null;
+
+        EventLog.writeEvent(tag,
+                mUserId, System.identityHashCode(this), task.taskId,
+                shortComponentName, intent.getAction(),
+                intent.getType(), strData, intent.getFlags());
     }
 
     UriPermissionOwner getUriPermissionsLocked() {
@@ -1968,6 +2243,33 @@ final class ActivityRecord extends ConfigurationContainer {
                 results.remove(i);
             }
         }
+    }
+
+    void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
+            Intent data) {
+        if (callingUid > 0) {
+            mAtmService.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
+                    data, getUriPermissionsLocked(), mUserId);
+        }
+
+        if (DEBUG_RESULTS) {
+            Slog.v(TAG, "Send activity result to " + this
+                    + " : who=" + resultWho + " req=" + requestCode
+                    + " res=" + resultCode + " data=" + data);
+        }
+        if (isState(RESUMED) && attachedToProcess()) {
+            try {
+                final ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
+                list.add(new ResultInfo(resultWho, requestCode, resultCode, data));
+                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                        ActivityResultItem.obtain(list));
+                return;
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception thrown sending result to " + this, e);
+            }
+        }
+
+        addResultLocked(null /* from */, resultWho, requestCode, resultCode, data);
     }
 
     private void addNewIntentLocked(ReferrerIntent intent) {
@@ -2449,6 +2751,65 @@ final class ActivityRecord extends ConfigurationContainer {
         }
     }
 
+    void makeInvisible() {
+        if (!visible) {
+            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + this);
+            return;
+        }
+        // Now for any activities that aren't visible to the user, make sure they no longer are
+        // keeping the screen frozen.
+        if (DEBUG_VISIBILITY) {
+            Slog.v(TAG_VISIBILITY, "Making invisible: " + this + ", state=" + getState());
+        }
+        try {
+            final boolean canEnterPictureInPicture = checkEnterPictureInPictureState(
+                    "makeInvisible", true /* beforeStopping */);
+            // Defer telling the client it is hidden if it can enter Pip and isn't current paused,
+            // stopped or stopping. This gives it a chance to enter Pip in onPause().
+            // TODO: There is still a question surrounding activities in multi-window mode that want
+            // to enter Pip after they are paused, but are still visible. I they should be okay to
+            // enter Pip in those cases, but not "auto-Pip" which is what this condition covers and
+            // the current contract for "auto-Pip" is that the app should enter it before onPause
+            // returns. Just need to confirm this reasoning makes sense.
+            final boolean deferHidingClient = canEnterPictureInPicture
+                    && !isState(STOPPING, STOPPED, PAUSED);
+            setDeferHidingClient(deferHidingClient);
+            setVisible(false);
+
+            switch (getState()) {
+                case STOPPING:
+                case STOPPED:
+                    if (attachedToProcess()) {
+                        if (DEBUG_VISIBILITY) {
+                            Slog.v(TAG_VISIBILITY, "Scheduling invisibility: " + this);
+                        }
+                        mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(),
+                                appToken, WindowVisibilityItem.obtain(false /* showWindow */));
+                    }
+
+                    // Reset the flag indicating that an app can enter picture-in-picture once the
+                    // activity is hidden
+                    supportsEnterPipOnTaskSwitch = false;
+                    break;
+
+                case INITIALIZING:
+                case RESUMED:
+                case PAUSING:
+                case PAUSED:
+                case STARTED:
+                    addToStopping(true /* scheduleIdle */,
+                            canEnterPictureInPicture /* idleDelayed */, "makeInvisible");
+                    break;
+
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            // Just skip on any failure; we'll make it visible when it next restarts.
+            Slog.w(TAG, "Exception thrown making hidden: " + intent.getComponent(), e);
+        }
+    }
+
     /**
      * Make activity resumed or paused if needed.
      * @param activeActivity an activity that is resumed or just completed pause action.
@@ -2639,13 +3000,75 @@ final class ActivityRecord extends ConfigurationContainer {
         }
     }
 
+    void stopIfPossible() {
+        if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
+        final ActivityStack stack = getActivityStack();
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
+                || (info.flags & ActivityInfo.FLAG_NO_HISTORY) != 0) {
+            if (!finishing) {
+                if (!stack.shouldSleepActivities()) {
+                    if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + this);
+                    if (finishIfPossible("stop-no-history", false /* oomAdj */)
+                            != FINISH_RESULT_CANCELLED) {
+                        // {@link adjustFocusedActivityStack} must have been already called.
+                        resumeKeyDispatchingLocked();
+                        return;
+                    }
+                } else {
+                    if (DEBUG_STATES) {
+                        Slog.d(TAG_STATES, "Not finishing noHistory " + this
+                                + " on stop because we're just sleeping");
+                    }
+                }
+            }
+        }
+
+        if (!attachedToProcess()) {
+            return;
+        }
+        stack.adjustFocusedActivityStack(this, "stopActivity");
+        resumeKeyDispatchingLocked();
+        try {
+            stopped = false;
+            if (DEBUG_STATES) {
+                Slog.v(TAG_STATES, "Moving to STOPPING: " + this + " (stop requested)");
+            }
+            setState(STOPPING, "stopIfPossible");
+            if (DEBUG_VISIBILITY) {
+                Slog.v(TAG_VISIBILITY, "Stopping visible=" + visible + " for " + this);
+            }
+            if (!visible) {
+                setVisible(false);
+            }
+            EventLogTags.writeAmStopActivity(
+                    mUserId, System.identityHashCode(this), shortComponentName);
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                    StopActivityItem.obtain(visible, configChangeFlags));
+            if (stack.shouldSleepOrShutDownActivities()) {
+                setSleeping(true);
+            }
+            stack.scheduleStopTimeoutForActivity(this);
+        } catch (Exception e) {
+            // Maybe just ignore exceptions here...  if the process has crashed, our death
+            // notification will clean things up.
+            Slog.w(TAG, "Exception thrown during pause", e);
+            // Just in case, assume it to be stopped.
+            stopped = true;
+            if (DEBUG_STATES) Slog.v(TAG_STATES, "Stop failed; moving to STOPPED: " + this);
+            setState(STOPPED, "stopIfPossible");
+            if (deferRelaunchUntilPaused) {
+                destroyImmediately(true /* removeFromApp */, "stop-except");
+            }
+        }
+    }
+
     final void activityStoppedLocked(Bundle newIcicle, PersistableBundle newPersistentState,
             CharSequence description) {
         final ActivityStack stack = getActivityStack();
         final boolean isStopping = mState == STOPPING;
         if (!isStopping && mState != RESTARTING_PROCESS) {
             Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this);
-            stack.mHandler.removeMessages(STOP_TIMEOUT_MSG, this);
+            stack.removeStopTimeoutForActivity(this);
             return;
         }
         if (newPersistentState != null) {
@@ -2663,7 +3086,7 @@ final class ActivityRecord extends ConfigurationContainer {
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + this + ": " + mIcicle);
         if (!stopped) {
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to STOPPED: " + this + " (stop complete)");
-            stack.mHandler.removeMessages(STOP_TIMEOUT_MSG, this);
+            stack.removeStopTimeoutForActivity(this);
             stopped = true;
             if (isStopping) {
                 setState(STOPPED, "activityStoppedLocked");
@@ -2677,12 +3100,40 @@ final class ActivityRecord extends ConfigurationContainer {
                 clearOptionsLocked();
             } else {
                 if (deferRelaunchUntilPaused) {
-                    stack.destroyActivityLocked(this, true /* removeFromApp */, "stop-config");
+                    destroyImmediately(true /* removeFromApp */, "stop-config");
                     mRootActivityContainer.resumeFocusedStacksTopActivities();
                 } else {
                     mRootActivityContainer.updatePreviousProcess(this);
                 }
             }
+        }
+    }
+
+    void addToStopping(boolean scheduleIdle, boolean idleDelayed, String reason) {
+        if (!mStackSupervisor.mStoppingActivities.contains(this)) {
+            EventLog.writeEvent(EventLogTags.AM_ADD_TO_STOPPING, mUserId,
+                    System.identityHashCode(this), shortComponentName, reason);
+            mStackSupervisor.mStoppingActivities.add(this);
+        }
+
+        final ActivityStack stack = getActivityStack();
+        // If we already have a few activities waiting to stop, then give up on things going idle
+        // and start clearing them out. Or if r is the last of activity of the last task the stack
+        // will be empty and must be cleared immediately.
+        boolean forceIdle = mStackSupervisor.mStoppingActivities.size() > MAX_STOPPING_TO_FORCE
+                || (isRootOfTask() && stack.getChildCount() <= 1);
+        if (scheduleIdle || forceIdle) {
+            if (DEBUG_PAUSE) {
+                Slog.v(TAG_PAUSE, "Scheduling idle now: forceIdle=" + forceIdle
+                        + "immediate=" + !idleDelayed);
+            }
+            if (!idleDelayed) {
+                mStackSupervisor.scheduleIdleLocked();
+            } else {
+                mStackSupervisor.scheduleIdleTimeoutLocked(this);
+            }
+        } else {
+            stack.checkReadyForSleep();
         }
     }
 
@@ -2706,18 +3157,18 @@ final class ActivityRecord extends ConfigurationContainer {
             return false;
         }
 
-        Message msg = stack.mHandler.obtainMessage(LAUNCH_TICK_MSG, this);
-        stack.mHandler.removeMessages(LAUNCH_TICK_MSG);
-        stack.mHandler.sendMessageDelayed(msg, LAUNCH_TICK);
+        stack.removeLaunchTickMessages();
+        stack.scheduleLaunchTickForActivity(this);
         return true;
     }
 
     void finishLaunchTickingLocked() {
         launchTickTime = 0;
         final ActivityStack stack = getActivityStack();
-        if (stack != null) {
-            stack.mHandler.removeMessages(LAUNCH_TICK_MSG);
+        if (stack == null) {
+            return;
         }
+        stack.removeLaunchTickMessages();
     }
 
     // IApplicationToken
@@ -3694,7 +4145,7 @@ final class ActivityRecord extends ConfigurationContainer {
             if (!attachedToProcess()) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is destroying non-running " + this);
-                stack.destroyActivityLocked(this, true, "config");
+                destroyImmediately(true /* removeFromApp */, "config");
             } else if (mState == PAUSING) {
                 // A little annoying: we are waiting for this activity to finish pausing. Let's not
                 // do anything now, but just flag that it needs to be restarted when done pausing.
@@ -3878,7 +4329,7 @@ final class ActivityRecord extends ConfigurationContainer {
         } else {
             final ActivityStack stack = getActivityStack();
             if (stack != null) {
-                stack.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
+                stack.removePauseTimeoutForActivity(this);
             }
             setState(PAUSED, "relaunchActivityLocked");
         }
@@ -3918,7 +4369,7 @@ final class ActivityRecord extends ConfigurationContainer {
         if (!visible || mHaveState) {
             // Kill its process immediately because the activity should be in background.
             // The activity state will be update to {@link #DESTROYED} in
-            // {@link ActivityStack#cleanUpActivityLocked} when handling process died.
+            // {@link ActivityStack#cleanUp} when handling process died.
             mAtmService.mH.post(() -> {
                 final WindowProcessController wpc;
                 synchronized (mAtmService.mGlobalLock) {
