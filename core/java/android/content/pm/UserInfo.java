@@ -328,6 +328,14 @@ public class UserInfo implements Parcelable {
     }
 
     /** @hide */
+    public String toFullString() {
+        return "UserInfo[id=" + id
+                + ", name=" + name
+                + ", flags=" + flagsToString(flags)
+                + "]";
+    }
+
+    /** @hide */
     public static String flagsToString(int flags) {
         return DebugUtils.flagsToString(UserInfo.class, "FLAG_", flags);
     }
