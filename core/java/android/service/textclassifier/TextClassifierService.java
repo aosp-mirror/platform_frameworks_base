@@ -460,6 +460,7 @@ public abstract class TextClassifierService extends Service {
                 return;
             }
             try {
+                Slog.w(LOG_TAG, "Request fail: " + error);
                 callback.onFailure();
             } catch (RemoteException e) {
                 Slog.d(LOG_TAG, "Error calling callback");

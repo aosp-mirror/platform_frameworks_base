@@ -142,11 +142,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         synchronized (mLock) {
             UserState userState = getUserStateLocked(userId);
             if (!userState.bindLocked()) {
+                Slog.d(LOG_TAG, "Unable to bind TextClassifierService at suggestSelection.");
                 callback.onFailure();
             } else if (userState.isBoundLocked()) {
                 userState.mService.onSuggestSelection(sessionId, request, callback);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("suggestSelection",
                         () -> onSuggestSelection(sessionId, request, callback),
                         callback::onFailure, callback.asBinder(), this, userState));
             }
@@ -166,11 +167,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         synchronized (mLock) {
             UserState userState = getUserStateLocked(userId);
             if (!userState.bindLocked()) {
+                Slog.d(LOG_TAG, "Unable to bind TextClassifierService at classifyText.");
                 callback.onFailure();
             } else if (userState.isBoundLocked()) {
                 userState.mService.onClassifyText(sessionId, request, callback);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("classifyText",
                         () -> onClassifyText(sessionId, request, callback),
                         callback::onFailure, callback.asBinder(), this, userState));
             }
@@ -190,11 +192,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         synchronized (mLock) {
             UserState userState = getUserStateLocked(userId);
             if (!userState.bindLocked()) {
+                Slog.d(LOG_TAG, "Unable to bind TextClassifierService at generateLinks.");
                 callback.onFailure();
             } else if (userState.isBoundLocked()) {
                 userState.mService.onGenerateLinks(sessionId, request, callback);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("generateLinks",
                         () -> onGenerateLinks(sessionId, request, callback),
                         callback::onFailure, callback.asBinder(), this, userState));
             }
@@ -214,7 +217,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             if (userState.isBoundLocked()) {
                 userState.mService.onSelectionEvent(sessionId, event);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("selectionEvent",
                         () -> onSelectionEvent(sessionId, event),
                         null /* onServiceFailure */, null /* binder */, this, userState));
             }
@@ -238,7 +241,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             if (userState.isBoundLocked()) {
                 userState.mService.onTextClassifierEvent(sessionId, event);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("textClassifierEvent",
                         () -> onTextClassifierEvent(sessionId, event),
                         null /* onServiceFailure */, null /* binder */, this, userState));
             }
@@ -258,11 +261,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         synchronized (mLock) {
             UserState userState = getUserStateLocked(userId);
             if (!userState.bindLocked()) {
+                Slog.d(LOG_TAG, "Unable to bind TextClassifierService at detectLanguage.");
                 callback.onFailure();
             } else if (userState.isBoundLocked()) {
                 userState.mService.onDetectLanguage(sessionId, request, callback);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("detectLanguage",
                         () -> onDetectLanguage(sessionId, request, callback),
                         callback::onFailure, callback.asBinder(), this, userState));
             }
@@ -282,11 +286,13 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         synchronized (mLock) {
             UserState userState = getUserStateLocked(userId);
             if (!userState.bindLocked()) {
+                Slog.d(LOG_TAG,
+                        "Unable to bind TextClassifierService at suggestConversationActions.");
                 callback.onFailure();
             } else if (userState.isBoundLocked()) {
                 userState.mService.onSuggestConversationActions(sessionId, request, callback);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("suggestConversationActions",
                         () -> onSuggestConversationActions(sessionId, request, callback),
                         callback::onFailure, callback.asBinder(), this, userState));
             }
@@ -309,7 +315,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                         classificationContext, sessionId);
                 mSessionUserIds.put(sessionId, userId);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
+                userState.mPendingRequests.add(new PendingRequest("createTextClassificationSession",
                         () -> onCreateTextClassificationSession(classificationContext, sessionId),
                         null /* onServiceFailure */, null /* binder */, this, userState));
             }
@@ -332,9 +338,10 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 userState.mService.onDestroyTextClassificationSession(sessionId);
                 mSessionUserIds.remove(sessionId);
             } else {
-                userState.mPendingRequests.add(new PendingRequest(
-                        () -> onDestroyTextClassificationSession(sessionId),
-                        null /* onServiceFailure */, null /* binder */, this, userState));
+                userState.mPendingRequests.add(
+                        new PendingRequest("destroyTextClassificationSession",
+                                () -> onDestroyTextClassificationSession(sessionId),
+                                null /* onServiceFailure */, null /* binder */, this, userState));
             }
         }
     }
@@ -379,6 +386,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
     private static final class PendingRequest implements IBinder.DeathRecipient {
 
+        @Nullable private final String mName;
         @Nullable private final IBinder mBinder;
         @NonNull private final Runnable mRequest;
         @Nullable private final Runnable mOnServiceFailure;
@@ -394,11 +402,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
          * @param service
          * @param owningUser
          */
-        PendingRequest(
+        PendingRequest(@Nullable String name,
                 @NonNull ThrowingRunnable request, @Nullable ThrowingRunnable onServiceFailure,
                 @Nullable IBinder binder,
                 TextClassificationManagerService service,
                 UserState owningUser) {
+            mName = name;
             mRequest =
                     logOnFailure(Preconditions.checkNotNull(request), "handling pending request");
             mOnServiceFailure =
@@ -499,6 +508,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     request.mRequest.run();
                 } else {
                     if (request.mOnServiceFailure != null) {
+                        Slog.d(LOG_TAG, "Unable to bind TextClassifierService for PendingRequest "
+                                + request.mName);
                         request.mOnServiceFailure.run();
                     }
                 }
