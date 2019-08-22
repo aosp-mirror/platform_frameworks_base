@@ -24,6 +24,9 @@ import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.provider.settings.backup.GlobalSettings;
+import android.provider.settings.backup.SecureSettings;
+import android.provider.settings.backup.SystemSettings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -248,7 +251,7 @@ public class SettingsValidatorsTest {
 
     @Test
     public void ensureAllBackedUpSystemSettingsHaveValidators() {
-        String offenders = getOffenders(concat(Settings.System.SETTINGS_TO_BACKUP,
+        String offenders = getOffenders(concat(SystemSettings.SETTINGS_TO_BACKUP,
                 Settings.System.LEGACY_RESTORE_SETTINGS), SystemSettingsValidators.VALIDATORS);
 
         failIfOffendersPresent(offenders, "Settings.System");
@@ -295,7 +298,7 @@ public class SettingsValidatorsTest {
 
     @Test
     public void ensureAllBackedUpGlobalSettingsHaveValidators() {
-        String offenders = getOffenders(concat(Settings.Global.SETTINGS_TO_BACKUP,
+        String offenders = getOffenders(concat(GlobalSettings.SETTINGS_TO_BACKUP,
                 Settings.Global.LEGACY_RESTORE_SETTINGS), GlobalSettingsValidators.VALIDATORS);
 
         failIfOffendersPresent(offenders, "Settings.Global");
@@ -303,7 +306,7 @@ public class SettingsValidatorsTest {
 
     @Test
     public void ensureAllBackedUpSecureSettingsHaveValidators() {
-        String offenders = getOffenders(concat(Settings.Secure.SETTINGS_TO_BACKUP,
+        String offenders = getOffenders(concat(SecureSettings.SETTINGS_TO_BACKUP,
                 Settings.Secure.LEGACY_RESTORE_SETTINGS), SecureSettingsValidators.VALIDATORS);
 
         failIfOffendersPresent(offenders, "Settings.Secure");
