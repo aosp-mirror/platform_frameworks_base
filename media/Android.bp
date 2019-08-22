@@ -67,6 +67,7 @@ filegroup {
         "apex/java/android/media/Session2Link.java",
         "apex/java/android/media/Session2Token.java",
     ],
+    path: "apex/java",
 }
 
 filegroup {
@@ -79,6 +80,7 @@ filegroup {
         "apex/java/android/media/IMediaSession2.aidl",
         "apex/java/android/media/IMediaSession2Service.aidl",
     ],
+    path: "apex/java",
 }
 
 filegroup {
@@ -98,6 +100,7 @@ filegroup {
         "apex/java/android/media/BufferingParams.java",
         "apex/java/android/media/ProxyDataSourceCallback.java",
     ],
+    path: "apex/java",
 }
 
 metalava_updatable_media_args = " --error UnhiddenSystemApi " +

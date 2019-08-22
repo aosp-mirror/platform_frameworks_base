@@ -1026,6 +1026,18 @@ public class CarrierConfigManager {
             "call_forwarding_map_non_number_to_voicemail_bool";
 
     /**
+     * When {@code true}, the phone will always tell the IMS stack to keep RTT enabled and
+     * determine on a per-call basis (based on extras from the dialer app) whether a call should be
+     * an RTT call or not.
+     *
+     * When {@code false}, the old behavior is used, where the toggle in accessibility settings is
+     * used to set the IMS stack's RTT enabled state.
+     * @hide
+     */
+    public static final String KEY_IGNORE_RTT_MODE_SETTING_BOOL =
+            "ignore_rtt_mode_setting_bool";
+
+    /**
      * Determines whether conference calls are supported by a carrier.  When {@code true},
      * conference calling is supported, {@code false otherwise}.
      */
@@ -2678,10 +2690,12 @@ public class CarrierConfigManager {
      * the value is the icon name. Use "None" as the icon name if no icon should be shown in a
      * specific 5G scenario. If the scenario is "None", config can skip this key and value.
      *
+     * Icon name options: "5G_Plus", "5G".
+     *
      * Here is an example:
-     * UE want to display 5GPlus icon for scenario#1, and 5G icon for scenario#2; otherwise no
+     * UE want to display 5G_Plus icon for scenario#1, and 5G icon for scenario#2; otherwise no
      * define.
-     * The configuration is: "connected_mmwave:5GPlus,connected:5G"
+     * The configuration is: "connected_mmwave:5G_Plus,connected:5G"
      *
      * @hide
      */
@@ -3304,6 +3318,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_MAP_NON_NUMBER_TO_VOICEMAIL_BOOL, false);
+        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
@@ -3551,7 +3566,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL, false);
-        sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, false);
+        sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, true);
         sDefaults.putString(KEY_SMART_FORWARDING_CONFIG_COMPONENT_NAME_STRING, "");
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN,
                 false);

@@ -20,15 +20,16 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
-#include "android_os_Parcel.h"
-#include "android/graphics/GraphicsJNI.h"
-
 #include "core_jni_helpers.h"
+
+#include <android/graphics/canvas.h>
 #include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/Log.h>
+#include <private/android/AHardwareBufferHelpers.h>
 
+#include "android_os_Parcel.h"
 #include <binder/Parcel.h>
 
 #include <gui/Surface.h>
@@ -38,11 +39,6 @@
 #include <ui/GraphicBuffer.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
-
-#include <SkCanvas.h>
-#include <SkBitmap.h>
-#include <SkImage.h>
-#include <SkRegion.h>
 
 #include <utils/misc.h>
 #include <utils/Log.h>
@@ -232,37 +228,21 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         dirtyRectPtr = &dirtyRect;
     }
 
-    ANativeWindow_Buffer outBuffer;
-    status_t err = surface->lock(&outBuffer, dirtyRectPtr);
+    ANativeWindow_Buffer buffer;
+    status_t err = surface->lock(&buffer, dirtyRectPtr);
     if (err < 0) {
         const char* const exception = (err == NO_MEMORY) ?
-                OutOfResourcesException :
-                "java/lang/IllegalArgumentException";
+                OutOfResourcesException : IllegalArgumentException;
         jniThrowException(env, exception, NULL);
         return 0;
     }
 
-    SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
-                                         convertPixelFormat(outBuffer.format),
-                                         outBuffer.format == PIXEL_FORMAT_RGBX_8888
-                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType);
-
-    SkBitmap bitmap;
-    ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-    bitmap.setInfo(info, bpr);
-    if (outBuffer.width > 0 && outBuffer.height > 0) {
-        bitmap.setPixels(outBuffer.bits);
-    } else {
-        // be safe with an empty bitmap.
-        bitmap.setPixels(NULL);
-    }
-
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
-    nativeCanvas->setBitmap(bitmap);
+    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
+    ACanvas_setBuffer(canvas, &buffer, static_cast<int32_t>(surface->getBuffersDataSpace()));
 
     if (dirtyRectPtr) {
-        nativeCanvas->clipRect(dirtyRect.left, dirtyRect.top,
-                dirtyRect.right, dirtyRect.bottom, SkClipOp::kIntersect);
+        ACanvas_clipRect(canvas, {dirtyRect.left, dirtyRect.top,
+                                  dirtyRect.right, dirtyRect.bottom});
     }
 
     if (dirtyRectObj) {
@@ -288,8 +268,8 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     }
 
     // detach the canvas from the surface
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
-    nativeCanvas->setBitmap(SkBitmap());
+    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
+    ACanvas_setBuffer(canvas, nullptr, ADATASPACE_UNKNOWN);
 
     // unlock surface
     status_t err = surface->unlockAndPost();

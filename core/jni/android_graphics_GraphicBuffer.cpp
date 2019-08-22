@@ -21,11 +21,6 @@
 #include <inttypes.h>
 
 #include "android_os_Parcel.h"
-#include "android/graphics/GraphicsJNI.h"
-
-#include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/android_graphics_GraphicBuffer.h>
-
 #include <binder/Parcel.h>
 
 #include <log/log.h>
@@ -33,10 +28,10 @@
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 
-#include <hwui/Bitmap.h>
-
-#include <SkCanvas.h>
-#include <SkBitmap.h>
+#include <android/native_window.h>
+#include <android/graphics/canvas.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
+#include <private/android/AHardwareBufferHelpers.h>
 
 #include <private/gui/ComposerService.h>
 
@@ -146,23 +141,8 @@ static void android_graphics_GraphicBuffer_destroy(JNIEnv* env, jobject clazz,
 // Canvas management
 // ----------------------------------------------------------------------------
 
-static inline SkColorType convertPixelFormat(int32_t format) {
-    switch (format) {
-        case PIXEL_FORMAT_RGBA_8888:
-            return kN32_SkColorType;
-        case PIXEL_FORMAT_RGBX_8888:
-            return kN32_SkColorType;
-        case PIXEL_FORMAT_RGBA_FP16:
-            return kRGBA_F16_SkColorType;
-        case PIXEL_FORMAT_RGB_565:
-            return kRGB_565_SkColorType;
-        default:
-            return kUnknown_SkColorType;
-    }
-}
-
 static jboolean android_graphics_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
-        jlong wrapperHandle, jobject canvas, jobject dirtyRect) {
+        jlong wrapperHandle, jobject canvasObj, jobject dirtyRect) {
 
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
@@ -191,24 +171,16 @@ static jboolean android_graphics_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
         return JNI_FALSE;
     }
 
-    ssize_t bytesCount = buffer->getStride() * bytesPerPixel(buffer->getPixelFormat());
+    ANativeWindow_Buffer nativeBuffer;
+    nativeBuffer.width = buffer->getWidth();
+    nativeBuffer.height = buffer->getHeight();
+    nativeBuffer.stride = buffer->getStride();
+    nativeBuffer.format = AHardwareBuffer_convertFromPixelFormat(buffer->getPixelFormat());
+    nativeBuffer.bits = bits;
 
-    SkBitmap bitmap;
-    bitmap.setInfo(SkImageInfo::Make(buffer->getWidth(), buffer->getHeight(),
-                                     convertPixelFormat(buffer->getPixelFormat()),
-                                     kPremul_SkAlphaType),
-                   bytesCount);
-
-    if (buffer->getWidth() > 0 && buffer->getHeight() > 0) {
-        bitmap.setPixels(bits);
-    } else {
-        bitmap.setPixels(NULL);
-    }
-
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
-    nativeCanvas->setBitmap(bitmap);
-    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom,
-            SkClipOp::kIntersect);
+    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
+    ACanvas_setBuffer(canvas, &nativeBuffer, ADATASPACE_UNKNOWN);
+    ACanvas_clipRect(canvas, {rect.left, rect.top, rect.right, rect.bottom});
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,
@@ -219,13 +191,13 @@ static jboolean android_graphics_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
 }
 
 static jboolean android_graphics_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobject,
-        jlong wrapperHandle, jobject canvas) {
+        jlong wrapperHandle, jobject canvasObj) {
+    // release the buffer from the canvas
+    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
+    ACanvas_setBuffer(canvas, nullptr, ADATASPACE_UNKNOWN);
 
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
-    nativeCanvas->setBitmap(SkBitmap());
-
     if (wrapper) {
         status_t status = wrapper->get()->unlock();
         return status == 0 ? JNI_TRUE : JNI_FALSE;

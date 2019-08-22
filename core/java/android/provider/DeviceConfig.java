@@ -706,16 +706,11 @@ public final class DeviceConfig {
         synchronized (sLock) {
             for (int i = 0; i < sListeners.size(); i++) {
                 if (namespace.equals(sListeners.valueAt(i).first)) {
-                    final int j = i;
-                    sListeners.valueAt(i).second.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            Map<String, String> propertyMap = new HashMap(1);
-                            propertyMap.put(name, value);
-                            sListeners.keyAt(j)
-                                    .onPropertiesChanged(new Properties(namespace, propertyMap));
-                        }
-
+                    final OnPropertiesChangedListener listener = sListeners.keyAt(i);
+                    sListeners.valueAt(i).second.execute(() -> {
+                        Map<String, String> propertyMap = new ArrayMap<>(1);
+                        propertyMap.put(name, value);
+                        listener.onPropertiesChanged(new Properties(namespace, propertyMap));
                     });
                 }
             }
