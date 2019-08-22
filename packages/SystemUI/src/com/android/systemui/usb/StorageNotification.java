@@ -352,9 +352,8 @@ public class StorageNotification extends SystemUI {
         final VolumeRecord rec = mStorageManager.findRecordByUuid(vol.getFsUuid());
         final DiskInfo disk = vol.getDisk();
 
-        // Don't annoy when user dismissed in past.  (But make sure the disk is adoptable; we
-        // used to allow snoozing non-adoptable disks too.)
-        if (rec.isSnoozed() && disk.isAdoptable()) {
+        // Don't annoy when user dismissed in past.
+        if (rec.isSnoozed() && (disk.isAdoptable() || disk.isSd())) {
             return null;
         }
 
@@ -389,8 +388,7 @@ public class StorageNotification extends SystemUI {
                             buildUnmountPendingIntent(vol)))
                     .setContentIntent(browseIntent)
                     .setCategory(Notification.CATEGORY_SYSTEM);
-            // Non-adoptable disks can't be snoozed.
-            if (disk.isAdoptable()) {
+            if (disk.isAdoptable() || disk.isSd()) {
                 builder.setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()));
             }
 
