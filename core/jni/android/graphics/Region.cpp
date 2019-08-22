@@ -61,7 +61,7 @@ static void Region_setRegion(JNIEnv* env, jobject, jlong dstHandle, jlong srcHan
 
 static jboolean Region_setRect(JNIEnv* env, jobject, jlong dstHandle, jint left, jint top, jint right, jint bottom) {
     SkRegion* dst = reinterpret_cast<SkRegion*>(dstHandle);
-    bool result = dst->setRect(left, top, right, bottom);
+    bool result = dst->setRect({left, top, right, bottom});
     return boolTojboolean(result);
 }
 
@@ -92,10 +92,7 @@ static jboolean Region_getBoundaryPath(JNIEnv* env, jobject, jlong regionHandle,
 
 static jboolean Region_op0(JNIEnv* env, jobject, jlong dstHandle, jint left, jint top, jint right, jint bottom, jint op) {
     SkRegion* dst = reinterpret_cast<SkRegion*>(dstHandle);
-    SkIRect ir;
-
-    ir.set(left, top, right, bottom);
-    bool result = dst->op(ir, (SkRegion::Op)op);
+    bool result = dst->op({left, top, right, bottom}, (SkRegion::Op)op);
     return boolTojboolean(result);
 }
 
@@ -139,13 +136,13 @@ static jboolean Region_contains(JNIEnv* env, jobject region, jint x, jint y) {
 }
 
 static jboolean Region_quickContains(JNIEnv* env, jobject region, jint left, jint top, jint right, jint bottom) {
-    bool result = GetSkRegion(env, region)->quickContains(left, top, right, bottom);
+    bool result = GetSkRegion(env, region)->quickContains({left, top, right, bottom});
     return boolTojboolean(result);
 }
 
 static jboolean Region_quickRejectIIII(JNIEnv* env, jobject region, jint left, jint top, jint right, jint bottom) {
     SkIRect ir;
-    ir.set(left, top, right, bottom);
+    ir.setLTRB(left, top, right, bottom);
     bool result = GetSkRegion(env, region)->quickReject(ir);
     return boolTojboolean(result);
 }
@@ -224,7 +221,7 @@ static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
 
     SkRegion* region = new SkRegion;
     for (size_t x = 0; x + 4 <= rects.size(); x += 4) {
-        region->op(rects[x], rects[x+1], rects[x+2], rects[x+3], SkRegion::kUnion_Op);
+        region->op({rects[x], rects[x+1], rects[x+2], rects[x+3]}, SkRegion::kUnion_Op);
     }
 
     return reinterpret_cast<jlong>(region);

@@ -361,7 +361,7 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
 
 void Bitmap::getBounds(SkRect* bounds) const {
     SkASSERT(bounds);
-    bounds->set(0, 0, SkIntToScalar(width()), SkIntToScalar(height()));
+    bounds->setIWH(width(), height());
 }
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration

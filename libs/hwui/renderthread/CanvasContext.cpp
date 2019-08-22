@@ -726,7 +726,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
         // New surface needs a full draw
         dirty->setEmpty();
     } else {
-        if (!dirty->isEmpty() && !dirty->intersect(0, 0, frame.width(), frame.height())) {
+        if (!dirty->isEmpty() && !dirty->intersect(SkRect::MakeIWH(frame.width(), frame.height()))) {
             ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?", SK_RECT_ARGS(*dirty),
                   frame.width(), frame.height());
             dirty->setEmpty();
@@ -735,7 +735,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
     }
 
     if (dirty->isEmpty()) {
-        dirty->set(0, 0, frame.width(), frame.height());
+        dirty->setIWH(frame.width(), frame.height());
     }
 
     // At this point dirty is the area of the window to update. However,
@@ -751,7 +751,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
         if (frame.bufferAge() > (int)mSwapHistory.size()) {
             // We don't have enough history to handle this old of a buffer
             // Just do a full-draw
-            dirty->set(0, 0, frame.width(), frame.height());
+            dirty->setIWH(frame.width(), frame.height());
         } else {
             // At this point we haven't yet added the latest frame
             // to the damage history (happens below)
