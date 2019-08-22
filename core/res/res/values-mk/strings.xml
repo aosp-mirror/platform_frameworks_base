@@ -71,10 +71,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Одбивање несакани вознемирувачки повици"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Испорака на повикувачки број"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Не вознемирувај"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: не е ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: не е ограничен"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, ID на повикувач е скриен. Следен повик: скриен"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, ID на повикувач е скриен. Следен повик: не е скриен"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, ID на повикувач не е скриен. Следен повик: скриен"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, ID на повикувач не е скриен. Следен повик: не е скриен"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не може да го промените поставувањето за ID на повикувач."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Нема услуга за мобилен интернет"</string>
