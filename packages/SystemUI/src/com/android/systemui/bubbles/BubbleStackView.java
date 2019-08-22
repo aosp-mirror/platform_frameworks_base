@@ -340,7 +340,7 @@ public class BubbleStackView extends FrameLayout {
 
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getSize(mDisplaySize);
+        wm.getDefaultDisplay().getRealSize(mDisplaySize);
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -487,6 +487,10 @@ public class BubbleStackView extends FrameLayout {
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
     public void onOrientationChanged(int orientation) {
         mOrientation = orientation;
+
+        // Display size is based on the rotation device was in when requested, we should update it
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        wm.getDefaultDisplay().getRealSize(mDisplaySize);
 
         // Some resources change depending on orientation
         Resources res = getContext().getResources();
