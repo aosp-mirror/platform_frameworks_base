@@ -46,6 +46,7 @@ import android.testing.TestableLooper;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 

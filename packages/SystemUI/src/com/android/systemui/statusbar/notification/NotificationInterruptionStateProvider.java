@@ -42,9 +42,13 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Provides heads-up and pulsing state for notification entries.
  */
+@Singleton
 public class NotificationInterruptionStateProvider {
 
     private static final String TAG = "InterruptionStateProvider";
@@ -72,6 +76,7 @@ public class NotificationInterruptionStateProvider {
     protected boolean mUseHeadsUp = false;
     private boolean mDisableNotificationAlerts;
 
+    @Inject
     public NotificationInterruptionStateProvider(Context context) {
         this(context,
                 (PowerManager) context.getSystemService(Context.POWER_SERVICE),
