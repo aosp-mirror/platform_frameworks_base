@@ -143,7 +143,7 @@
     <string name="data_usage_ota" msgid="5377889154805560860">"సిస్టమ్ అప్‌డేట్‌లు"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB టీథరింగ్"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"పోర్టబుల్ హాట్‌స్పాట్"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"బ్లూటూత్ టీథరింగ్"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"బ్లూటూత్ టెథెరింగ్"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"టీథరింగ్"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"టీథరింగ్ &amp; పోర్టబుల్ హాట్‌స్పాట్"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"అన్ని కార్యాలయ అనువర్తనాలు"</string>
