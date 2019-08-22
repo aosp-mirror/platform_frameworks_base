@@ -276,6 +276,13 @@ public class BubbleFlyoutView extends FrameLayout {
 
     /** Sets the percentage that the flyout should be collapsed into dot form. */
     void setCollapsePercent(float percentCollapsed) {
+        // This is unlikely, but can happen in a race condition where the flyout view hasn't been
+        // laid out and returns 0 for getWidth(). We check for this condition at the sites where
+        // this method is called, but better safe than sorry.
+        if (Float.isNaN(percentCollapsed)) {
+            return;
+        }
+
         mPercentTransitionedToDot = Math.max(0f, Math.min(percentCollapsed, 1f));
         mPercentStillFlyout = (1f - mPercentTransitionedToDot);
 

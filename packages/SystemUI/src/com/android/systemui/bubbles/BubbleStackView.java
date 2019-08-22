@@ -1078,6 +1078,12 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void onFlyoutDragged(float deltaX) {
+        // This shouldn't happen, but if it does, just wait until the flyout lays out. This method
+        // is continually called.
+        if (mFlyout.getWidth() <= 0) {
+            return;
+        }
+
         final boolean onLeft = mStackAnimationController.isStackOnLeftSide();
         mFlyoutDragDeltaX = deltaX;
 
@@ -1096,7 +1102,6 @@ public class BubbleStackView extends FrameLayout {
             // after it has already become the dot.
             final boolean overscrollingLeft =
                     (onLeft && collapsePercent > 1f) || (!onLeft && collapsePercent < 0f);
-
             overscrollTranslation =
                     (overscrollingPastDot ? collapsePercent - 1f : collapsePercent * -1)
                             * (overscrollingLeft ? -1 : 1)
