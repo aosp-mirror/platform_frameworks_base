@@ -150,6 +150,14 @@ public class StagingManager {
             return;
         }
 
+        // Verify signing details for downgrade
+        // Allow downgrading from B to A iff it is possible to upgrade from A to B
+        if (existingApexPkg.getLongVersionCode() > newApexPkg.getLongVersionCode()
+                && existingSigningDetails.checkCapability(signingDetails,
+                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
+            return;
+        }
+
         throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                 "APK-container signature of APEX package " + packageName + " with version "
                         + newApexPkg.versionCodeMajor + " and path " + apexPath + " is not"
