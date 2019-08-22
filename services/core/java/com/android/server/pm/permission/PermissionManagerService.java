@@ -67,6 +67,7 @@ import android.content.pm.PackageParser.Package;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Build;
@@ -2348,10 +2349,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         // or has updated its target SDK and AR is no longer implicit to it.
                         // This is a compatibility workaround for apps when AR permission was
                         // split in Q.
-                        int numSplitPerms = PermissionManager.SPLIT_PERMISSIONS.size();
+                        final List<SplitPermissionInfoParcelable> permissionList =
+                                getSplitPermissions();
+                        int numSplitPerms = permissionList.size();
                         for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-                            PermissionManager.SplitPermissionInfo sp =
-                                    PermissionManager.SPLIT_PERMISSIONS.get(splitPermNum);
+                            SplitPermissionInfoParcelable sp = permissionList.get(splitPermNum);
                             String splitPermName = sp.getSplitPermission();
                             if (sp.getNewPermissions().contains(permName)
                                     && origPermissions.hasInstallPermission(splitPermName)) {
@@ -2920,10 +2922,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         String pkgName = pkg.packageName;
         ArrayMap<String, ArraySet<String>> newToSplitPerms = new ArrayMap<>();
 
-        int numSplitPerms = PermissionManager.SPLIT_PERMISSIONS.size();
+        final List<SplitPermissionInfoParcelable> permissionList = getSplitPermissions();
+        int numSplitPerms = permissionList.size();
         for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-            PermissionManager.SplitPermissionInfo spi =
-                    PermissionManager.SPLIT_PERMISSIONS.get(splitPermNum);
+            SplitPermissionInfoParcelable spi = permissionList.get(splitPermNum);
 
             List<String> newPerms = spi.getNewPermissions();
             int numNewPerms = newPerms.size();
@@ -2989,6 +2991,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         return updatedUserIds;
+    }
+
+    @Override
+    public List<SplitPermissionInfoParcelable> getSplitPermissions() {
+        return PermissionManager.splitPermissionInfoListToParcelableList(
+                SystemConfig.getInstance().getSplitPermissions());
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {
