@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.providers.media.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.soundpicker.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
@@ -45,4 +45,4 @@
         android:layout_centerVertical="true"
         android:scaleType="centerCrop"
         android:layout_marginRight="20dp" />
-</com.android.providers.media.CheckedListItem>
+</com.android.soundpicker.CheckedListItem>
