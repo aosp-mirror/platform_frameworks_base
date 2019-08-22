@@ -468,7 +468,13 @@ public class AccessibilitySecurityPolicy {
         }
     }
 
-    boolean hasPermission(String permission) {
+    /**
+     * Permission check to caller.
+     *
+     * @param permission The permission to check
+     * @return true if caller has permission
+     */
+    public boolean hasPermission(@NonNull String permission) {
         return mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED;
     }
 
