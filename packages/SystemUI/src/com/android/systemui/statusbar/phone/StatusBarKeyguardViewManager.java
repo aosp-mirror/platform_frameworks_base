@@ -220,7 +220,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBiometricUnlockController = biometricUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
-                mExpansionCallback);
+                mExpansionCallback, bypassController);
         mNotificationPanelView = notificationPanelView;
         notificationPanelView.addExpansionListener(this);
         mBypassController = bypassController;

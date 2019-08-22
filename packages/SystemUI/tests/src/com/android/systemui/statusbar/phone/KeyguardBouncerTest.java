@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -84,6 +85,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Mock
     private UnlockMethodCache mUnlockMethodCache;
     @Mock
+    private KeyguardBypassController mKeyguardBypassController;
+    @Mock
     private Handler mHandler;
 
     private KeyguardBouncer mBouncer;
@@ -98,7 +101,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         when(mKeyguardHostView.getHeight()).thenReturn(500);
         mBouncer = new KeyguardBouncer(getContext(), mViewMediatorCallback,
                 mLockPatternUtils, container, mDismissCallbackRegistry, mFalsingManager,
-                mExpansionCallback, mUnlockMethodCache, mKeyguardUpdateMonitor, mHandler) {
+                mExpansionCallback, mUnlockMethodCache, mKeyguardUpdateMonitor,
+                mKeyguardBypassController, mHandler) {
             @Override
             protected void inflateView() {
                 super.inflateView();
@@ -388,6 +392,15 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
         mBouncer.hide(false /* destroyView */);
         verify(mHandler).removeCallbacks(eq(showRunnable.getValue()));
+    }
+
+    @Test
+    public void testShow_delaysIfFaceAuthIsRunning_unlessBypass() {
+        when(mUnlockMethodCache.isFaceAuthEnabled()).thenReturn(true);
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
+        mBouncer.show(true /* reset */);
+
+        verify(mHandler, never()).postDelayed(any(), anyLong());
     }
 
     @Test
