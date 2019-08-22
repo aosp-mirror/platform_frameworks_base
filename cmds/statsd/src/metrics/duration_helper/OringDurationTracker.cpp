@@ -26,20 +26,16 @@ using std::pair;
 
 OringDurationTracker::OringDurationTracker(
         const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
-        sp<ConditionWizard> wizard, int conditionIndex, const vector<Matcher>& dimensionInCondition,
+        sp<ConditionWizard> wizard, int conditionIndex,
         bool nesting, int64_t currentBucketStartNs, int64_t currentBucketNum,
         int64_t startTimeNs, int64_t bucketSizeNs, bool conditionSliced, bool fullLink,
         const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-    : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
+    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting,
                       currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
                       conditionSliced, fullLink, anomalyTrackers),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
-    if (mWizard != nullptr) {
-        mSameConditionDimensionsInTracker =
-            mWizard->equalOutputDimensions(conditionIndex, mDimensionInCondition);
-    }
 }
 
 unique_ptr<DurationTracker> OringDurationTracker::clone(const int64_t eventTime) {
@@ -227,17 +223,10 @@ void OringDurationTracker::onSlicedConditionMayChange(bool overallCondition,
                 ++it;
                 continue;
             }
-            std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
             ConditionState conditionState =
                 mWizard->query(mConditionTrackerIndex, condIt->second,
-                               mDimensionInCondition,
-                               !mSameConditionDimensionsInTracker,
-                               !mHasLinksToAllConditionDimensionsInTracker,
-                               &conditionDimensionKeySet);
-            if (conditionState != ConditionState::kTrue ||
-                (mDimensionInCondition.size() != 0 &&
-                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) ==
-                         conditionDimensionKeySet.end())) {
+                               !mHasLinksToAllConditionDimensionsInTracker);
+            if (conditionState != ConditionState::kTrue) {
                 startedToPaused.push_back(*it);
                 it = mStarted.erase(it);
                 VLOG("Key %s started -> paused", key.toString().c_str());
@@ -262,17 +251,10 @@ void OringDurationTracker::onSlicedConditionMayChange(bool overallCondition,
                 ++it;
                 continue;
             }
-            std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
             ConditionState conditionState =
                 mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key],
-                               mDimensionInCondition,
-                               !mSameConditionDimensionsInTracker,
-                               !mHasLinksToAllConditionDimensionsInTracker,
-                               &conditionDimensionKeySet);
-            if (conditionState == ConditionState::kTrue &&
-                (mDimensionInCondition.size() == 0 ||
-                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
-                         conditionDimensionKeySet.end())) {
+                               !mHasLinksToAllConditionDimensionsInTracker);
+            if (conditionState == ConditionState::kTrue) {
                 pausedToStarted.push_back(*it);
                 it = mPaused.erase(it);
                 VLOG("Key %s paused -> started", key.toString().c_str());

@@ -84,29 +84,14 @@ public:
     //                       condition.
     // [allConditions]: all condition trackers. This is needed because the condition evaluation is
     //                  done recursively
-    // [dimensionFields]: the needed dimension fields which should be all or subset of the condition
-    //                    tracker output dimension.
-    // [isSubOutputDimensionFields]: true if the needed dimension fields which is strictly subset of
-    //                               the condition tracker output dimension.
     // [isPartialLink]: true if the link specified by 'conditionParameters' contains all the fields
     //                  in the condition tracker output dimension.
     // [conditionCache]: the cache holding the condition evaluation values.
-    // [dimensionsKeySet]: the dimensions where the sliced condition is true. For combination
-    //                    condition, it assumes that only one child predicate is sliced.
     virtual void isConditionMet(
             const ConditionKey& conditionParameters,
             const std::vector<sp<ConditionTracker>>& allConditions,
-            const vector<Matcher>& dimensionFields,
-            const bool isSubOutputDimensionFields,
             const bool isPartialLink,
-            std::vector<ConditionState>& conditionCache,
-            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
-
-    virtual ConditionState getMetConditionDimension(
-            const std::vector<sp<ConditionTracker>>& allConditions,
-            const vector<Matcher>& dimensionFields,
-            const bool isSubOutputDimensionFields,
-            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
+            std::vector<ConditionState>& conditionCache) const = 0;
 
     // return the list of LogMatchingTracker index that this ConditionTracker uses.
     virtual const std::set<int>& getLogTrackerIndex() const {

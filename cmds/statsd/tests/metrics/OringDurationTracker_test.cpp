@@ -51,7 +51,6 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -62,7 +61,7 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  false, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, false, false, {});
 
@@ -84,7 +83,6 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -94,7 +92,7 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
     int64_t bucketNum = 0;
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, false, false, {});
 
@@ -117,7 +115,6 @@ TEST(OringDurationTrackerTest, TestStopAll) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -127,7 +124,7 @@ TEST(OringDurationTrackerTest, TestStopAll) {
     int64_t bucketNum = 0;
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, false, false, {});
 
@@ -147,7 +144,6 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -158,7 +154,7 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, false, false, {});
 
@@ -186,13 +182,12 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
     key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
-    EXPECT_CALL(*wizard, query(_, key1, _, _, _, _))  // #4
+    EXPECT_CALL(*wizard, query(_, key1, _))  // #4
             .WillOnce(Return(ConditionState::kFalse));
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -203,7 +198,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  false, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, true, false, {});
 
@@ -224,13 +219,12 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
     key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
-    EXPECT_CALL(*wizard, query(_, key1, _, _, _, _))
+    EXPECT_CALL(*wizard, query(_, key1, _))
             .Times(2)
             .WillOnce(Return(ConditionState::kFalse))
             .WillOnce(Return(ConditionState::kTrue));
@@ -243,7 +237,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  false, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, true, false, {});
 
@@ -266,13 +260,12 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
     key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
-    EXPECT_CALL(*wizard, query(_, key1, _, _, _, _))  // #4
+    EXPECT_CALL(*wizard, query(_, key1, _))  // #4
             .WillOnce(Return(ConditionState::kFalse));
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -282,7 +275,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
     int64_t bucketNum = 0;
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, true, false, {});
 
@@ -306,7 +299,6 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);
@@ -324,7 +316,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, true, false, {anomalyTracker});
 
@@ -371,7 +363,6 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
 }
 
 TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp2) {
-    vector<Matcher> dimensionInCondition;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);
@@ -387,7 +378,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp2) {
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     OringDurationTracker tracker(kConfigKey, metricId, DEFAULT_METRIC_DIMENSION_KEY, wizard, 1,
-                                 dimensionInCondition,
+
                                  true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, true, false, {anomalyTracker});
 
@@ -415,7 +406,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp3) {
     for (int j = 0; j < 3; j++) {
         int64_t thresholdNs = j * bucketSizeNs + 5 * NS_PER_SEC;
         for (int i = 0; i <= 7; ++i) {
-            vector<Matcher> dimensionInCondition;
+
             Alert alert;
             alert.set_id(101);
             alert.set_metric_id(1);
@@ -432,7 +423,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp3) {
             sp<DurationAnomalyTracker> anomalyTracker =
                 new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
             OringDurationTracker tracker(kConfigKey, metricId, DEFAULT_METRIC_DIMENSION_KEY,
-                                         wizard, 1, dimensionInCondition,
+                                         wizard, 1,
                                          true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                          bucketSizeNs, true, false, {anomalyTracker});
 
@@ -472,7 +463,6 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);
@@ -491,7 +481,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  true /*nesting*/, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, false, false, {anomalyTracker});
 
@@ -522,7 +512,6 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
 
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    vector<Matcher> dimensionInCondition;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);
@@ -541,7 +530,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
     sp<AlarmMonitor> alarmMonitor;
     sp<DurationAnomalyTracker> anomalyTracker =
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
-    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1,
                                  true /*nesting*/, bucketStartTimeNs, 0, bucketStartTimeNs,
                                  bucketSizeNs, false, false, {anomalyTracker});
 

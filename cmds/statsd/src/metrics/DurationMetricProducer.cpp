@@ -47,7 +47,6 @@ const int FIELD_ID_DURATION_METRICS = 6;
 const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
-const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
 const int FIELD_ID_IS_ACTIVE = 14;
 // for DurationMetricDataWrapper
 const int FIELD_ID_DATA = 1;
@@ -100,12 +99,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
         ALOGE("Position ANY in dimension_in_what not supported.");
     }
 
-    if (metric.has_dimensions_in_condition()) {
-        translateFieldMatcher(metric.dimensions_in_condition(), &mDimensionsInCondition);
-    }
-
-    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what()) ||
-            HasPositionALL(metric.dimensions_in_condition());
+    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what());
 
     if (metric.links().size() > 0) {
         for (const auto& link : metric.links()) {
@@ -115,19 +109,16 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
             translateFieldMatcher(link.fields_in_condition(), &mc.conditionFields);
             mMetric2ConditionLinks.push_back(mc);
         }
+        mConditionSliced = true;
     }
-    mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
     mUnSlicedPartCondition = ConditionState::kUnknown;
 
     mUseWhatDimensionAsInternalDimension = equalDimensions(mDimensionsInWhat, mInternalDimensions);
-    if (mWizard != nullptr && mConditionTrackerIndex >= 0) {
-        mSameConditionDimensionsInTracker =
-            mWizard->equalOutputDimensions(mConditionTrackerIndex, mDimensionsInCondition);
-        if (mMetric2ConditionLinks.size() == 1) {
-            mHasLinksToAllConditionDimensionsInTracker =
-                mWizard->equalOutputDimensions(mConditionTrackerIndex,
-                                               mMetric2ConditionLinks.begin()->conditionFields);
-        }
+    if (mWizard != nullptr && mConditionTrackerIndex >= 0 &&
+            mMetric2ConditionLinks.size() == 1) {
+        mHasLinksToAllConditionDimensionsInTracker =
+            mWizard->equalOutputDimensions(mConditionTrackerIndex,
+                                           mMetric2ConditionLinks.begin()->conditionFields);
     }
     flushIfNeededLocked(startTimeNs);
     // Adjust start for partial bucket
@@ -164,13 +155,13 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
         case DurationMetric_AggregationType_SUM:
             return make_unique<OringDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
-                    mDimensionsInCondition, mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
+                    mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
                     mTimeBaseNs, mBucketSizeNs, mConditionSliced,
                     mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
         case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
-                    mDimensionsInCondition, mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
+                    mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
                     mTimeBaseNs, mBucketSizeNs, mConditionSliced,
                     mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
     }
@@ -178,13 +169,11 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
 
 // SlicedConditionChange optimization case 1:
 // 1. If combination condition, logical operation is AND, only one sliced child predicate.
-// 2. No condition in dimension
-// 3. The links covers all dimension fields in the sliced child condition predicate.
+// 2. The links covers all dimension fields in the sliced child condition predicate.
 void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool condition,
                                                                    const int64_t eventTime) {
     if (mMetric2ConditionLinks.size() != 1 ||
-        !mHasLinksToAllConditionDimensionsInTracker ||
-        !mDimensionsInCondition.empty()) {
+        !mHasLinksToAllConditionDimensionsInTracker) {
         return;
     }
 
@@ -249,107 +238,11 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool conditio
     }
 }
 
-
-// SlicedConditionChange optimization case 2:
-// 1. If combination condition, logical operation is AND, only one sliced child predicate.
-// 2. Has dimensions_in_condition and it equals to the output dimensions of the sliced predicate.
-void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(bool condition,
-                                                                   const int64_t eventTime) {
-    if (mMetric2ConditionLinks.size() > 1 || !mSameConditionDimensionsInTracker) {
-        return;
-    }
-
-    auto dimensionsChangedToTrue = mWizard->getChangedToTrueDimensions(mConditionTrackerIndex);
-    auto dimensionsChangedToFalse = mWizard->getChangedToFalseDimensions(mConditionTrackerIndex);
-
-    bool  currentUnSlicedPartCondition = true;
-    if (!mWizard->IsSimpleCondition(mConditionTrackerIndex)) {
-        ConditionState unslicedPartState =
-            mWizard->getUnSlicedPartConditionState(mConditionTrackerIndex);
-        // When the unsliced part is still false, return directly.
-        if (mUnSlicedPartCondition == ConditionState::kFalse &&
-            unslicedPartState == ConditionState::kFalse) {
-            return;
-        }
-        mUnSlicedPartCondition = unslicedPartState;
-        currentUnSlicedPartCondition = mUnSlicedPartCondition > 0;
-    }
-
-    const std::set<HashableDimensionKey>* trueDimensionsToProcess = nullptr;
-    const std::set<HashableDimensionKey>* falseDimensionsToProcess = nullptr;
-
-    std::set<HashableDimensionKey> currentTrueConditionDimensions;
-    if (dimensionsChangedToTrue == nullptr || dimensionsChangedToFalse == nullptr ||
-        (dimensionsChangedToTrue->empty() && dimensionsChangedToFalse->empty())) {
-        mWizard->getTrueSlicedDimensions(mConditionTrackerIndex, &currentTrueConditionDimensions);
-        trueDimensionsToProcess = &currentTrueConditionDimensions;
-    } else if (currentUnSlicedPartCondition) {
-        // Handles the condition change from the sliced predicate. If the unsliced condition state
-        // is not true, not need to do anything.
-        trueDimensionsToProcess = dimensionsChangedToTrue;
-        falseDimensionsToProcess = dimensionsChangedToFalse;
-    }
-
-    if (trueDimensionsToProcess == nullptr && falseDimensionsToProcess == nullptr) {
-        return;
-    }
-
-    for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
-        if (falseDimensionsToProcess != nullptr) {
-            for (const auto& changedDim : *falseDimensionsToProcess) {
-                auto condIt = whatIt.second.find(changedDim);
-                if (condIt != whatIt.second.end()) {
-                    condIt->second->onConditionChanged(false, eventTime);
-                }
-            }
-        }
-        if (trueDimensionsToProcess != nullptr) {
-            HashableDimensionKey linkedConditionDimensionKey;
-            if (!trueDimensionsToProcess->empty() && mMetric2ConditionLinks.size() == 1) {
-                getDimensionForCondition(whatIt.first.getValues(),
-                                         mMetric2ConditionLinks[0],
-                                         &linkedConditionDimensionKey);
-            }
-            for (auto& trueDim : *trueDimensionsToProcess) {
-                auto condIt = whatIt.second.find(trueDim);
-                if (condIt != whatIt.second.end()) {
-                    condIt->second->onConditionChanged(
-                            currentUnSlicedPartCondition, eventTime);
-                } else {
-                    if (mMetric2ConditionLinks.size() == 0 ||
-                        trueDim.contains(linkedConditionDimensionKey)) {
-                        if (!whatIt.second.empty()) {
-                            auto newEventKey = MetricDimensionKey(whatIt.first, trueDim);
-                            if (hitGuardRailLocked(newEventKey)) {
-                                continue;
-                            }
-                            unique_ptr<DurationTracker> newTracker =
-                                whatIt.second.begin()->second->clone(eventTime);
-                            if (newTracker != nullptr) {
-                                newTracker->setEventKey(newEventKey);
-                                newTracker->onConditionChanged(true, eventTime);
-                                whatIt.second[trueDim] = std::move(newTracker);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 void DurationMetricProducer::onSlicedConditionMayChangeInternalLocked(bool overallCondition,
         const int64_t eventTimeNs) {
     bool changeDimTrackable = mWizard->IsChangedDimensionTrackable(mConditionTrackerIndex);
-    if (changeDimTrackable && mHasLinksToAllConditionDimensionsInTracker &&
-        mDimensionsInCondition.empty()) {
+    if (changeDimTrackable && mHasLinksToAllConditionDimensionsInTracker) {
         onSlicedConditionMayChangeLocked_opt1(overallCondition, eventTimeNs);
-        return;
-    }
-
-    if (changeDimTrackable && mSameConditionDimensionsInTracker &&
-        mMetric2ConditionLinks.size() <= 1) {
-        onSlicedConditionMayChangeLocked_opt2(overallCondition, eventTimeNs);
         return;
     }
 
@@ -357,68 +250,6 @@ void DurationMetricProducer::onSlicedConditionMayChangeInternalLocked(bool overa
     for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
         for (auto& pair : whatIt.second) {
             pair.second->onSlicedConditionMayChange(overallCondition, eventTimeNs);
-        }
-    }
-
-    if (mDimensionsInCondition.empty()) {
-        return;
-    }
-
-    if (mMetric2ConditionLinks.empty()) {
-        std::unordered_set<HashableDimensionKey> conditionDimensionsKeySet;
-        mWizard->getMetConditionDimension(mConditionTrackerIndex, mDimensionsInCondition,
-                                          !mSameConditionDimensionsInTracker,
-                                          &conditionDimensionsKeySet);
-        for (const auto& whatIt : mCurrentSlicedDurationTrackerMap) {
-            for (const auto& pair : whatIt.second) {
-                conditionDimensionsKeySet.erase(pair.first);
-            }
-        }
-        for (const auto& conditionDimension : conditionDimensionsKeySet) {
-            for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
-                if (!whatIt.second.empty()) {
-                    auto newEventKey = MetricDimensionKey(whatIt.first, conditionDimension);
-                    if (hitGuardRailLocked(newEventKey)) {
-                        continue;
-                    }
-                    unique_ptr<DurationTracker> newTracker =
-                        whatIt.second.begin()->second->clone(eventTimeNs);
-                    if (newTracker != nullptr) {
-                        newTracker->setEventKey(MetricDimensionKey(newEventKey));
-                        newTracker->onSlicedConditionMayChange(overallCondition, eventTimeNs);
-                        whatIt.second[conditionDimension] = std::move(newTracker);
-                    }
-                }
-            }
-        }
-    } else {
-        for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
-            ConditionKey conditionKey;
-            for (const auto& link : mMetric2ConditionLinks) {
-                getDimensionForCondition(whatIt.first.getValues(), link,
-                                         &conditionKey[link.conditionId]);
-            }
-            std::unordered_set<HashableDimensionKey> conditionDimensionsKeys;
-            mWizard->query(mConditionTrackerIndex, conditionKey, mDimensionsInCondition,
-                           !mSameConditionDimensionsInTracker,
-                           !mHasLinksToAllConditionDimensionsInTracker,
-                           &conditionDimensionsKeys);
-
-            for (const auto& conditionDimension : conditionDimensionsKeys) {
-                if (!whatIt.second.empty() &&
-                    whatIt.second.find(conditionDimension) == whatIt.second.end()) {
-                    auto newEventKey = MetricDimensionKey(whatIt.first, conditionDimension);
-                    if (hitGuardRailLocked(newEventKey)) {
-                        continue;
-                    }
-                    auto newTracker = whatIt.second.begin()->second->clone(eventTimeNs);
-                    if (newTracker != nullptr) {
-                        newTracker->setEventKey(newEventKey);
-                        newTracker->onSlicedConditionMayChange(overallCondition, eventTimeNs);
-                        whatIt.second[conditionDimension] = std::move(newTracker);
-                    }
-                }
-            }
         }
     }
 }
@@ -524,12 +355,6 @@ void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
             uint64_t dimenPathToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_PATH_IN_WHAT);
             writeDimensionPathToProto(mDimensionsInWhat, protoOutput);
-            protoOutput->end(dimenPathToken);
-        }
-        if (!mDimensionsInCondition.empty()) {
-            uint64_t dimenPathToken = protoOutput->start(
-                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_PATH_IN_CONDITION);
-            writeDimensionPathToProto(mDimensionsInCondition, protoOutput);
             protoOutput->end(dimenPathToken);
         }
     }
@@ -790,52 +615,24 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
 
     bool condition;
     ConditionKey conditionKey;
-    std::unordered_set<HashableDimensionKey> dimensionKeysInCondition;
     if (mConditionSliced) {
         for (const auto& link : mMetric2ConditionLinks) {
             getDimensionForCondition(event.getValues(), link, &conditionKey[link.conditionId]);
         }
 
         auto conditionState =
-            mWizard->query(mConditionTrackerIndex, conditionKey, mDimensionsInCondition,
-                           !mSameConditionDimensionsInTracker,
-                           !mHasLinksToAllConditionDimensionsInTracker,
-                           &dimensionKeysInCondition);
+            mWizard->query(mConditionTrackerIndex, conditionKey,
+                           !mHasLinksToAllConditionDimensionsInTracker);
         condition = conditionState == ConditionState::kTrue;
-        if (mDimensionsInCondition.empty() && condition) {
-            dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
-        }
     } else {
         // TODO: The unknown condition state is not handled here, we should fix it.
         condition = mCondition == ConditionState::kTrue;
-        if (condition) {
-            dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
-        }
     }
 
     condition = condition && mIsActive;
 
-    if (dimensionKeysInCondition.empty()) {
-        handleStartEvent(MetricDimensionKey(dimensionInWhat, DEFAULT_DIMENSION_KEY),
-                         conditionKey, condition, event);
-    } else {
-        auto whatIt = mCurrentSlicedDurationTrackerMap.find(dimensionInWhat);
-        // If the what dimension is already there, we should update all the trackers even
-        // the condition is false.
-        if (whatIt != mCurrentSlicedDurationTrackerMap.end()) {
-            for (const auto& condIt : whatIt->second) {
-                const bool cond = dimensionKeysInCondition.find(condIt.first) !=
-                        dimensionKeysInCondition.end() && condition;
-                handleStartEvent(MetricDimensionKey(dimensionInWhat, condIt.first),
-                    conditionKey, cond, event);
-                dimensionKeysInCondition.erase(condIt.first);
-            }
-        }
-        for (const auto& conditionDimension : dimensionKeysInCondition) {
-            handleStartEvent(MetricDimensionKey(dimensionInWhat, conditionDimension), conditionKey,
-                             condition, event);
-        }
-    }
+    handleStartEvent(MetricDimensionKey(dimensionInWhat, DEFAULT_DIMENSION_KEY),
+                     conditionKey, condition, event);
 }
 
 size_t DurationMetricProducer::byteSizeLocked() const {

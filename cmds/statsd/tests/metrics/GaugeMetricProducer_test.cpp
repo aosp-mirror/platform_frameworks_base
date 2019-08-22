@@ -485,10 +485,6 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
     dim->set_field(tagId);
     dim->add_child()->set_field(1);
 
-    dim = metric.mutable_dimensions_in_condition();
-    dim->set_field(conditionTag);
-    dim->add_child()->set_field(1);
-
     UidMap uidMap;
     SimpleAtomMatcher atomMatcher;
     atomMatcher.set_atom_id(tagId);
@@ -496,18 +492,14 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
         new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    EXPECT_CALL(*wizard, query(_, _, _, _, _, _))
+    EXPECT_CALL(*wizard, query(_, _, _))
             .WillRepeatedly(
                     Invoke([](const int conditionIndex, const ConditionKey& conditionParameters,
-                              const vector<Matcher>& dimensionFields, const bool isSubsetDim,
-                              const bool isPartialLink,
-                              std::unordered_set<HashableDimensionKey>* dimensionKeySet) {
-                        dimensionKeySet->clear();
+                              const bool isPartialLink) {
                         int pos[] = {1, 0, 0};
                         Field f(conditionTag, pos, 0);
                         HashableDimensionKey key;
                         key.mutableValues()->emplace_back(f, Value((int32_t)1000000));
-                        dimensionKeySet->insert(key);
 
                         return ConditionState::kTrue;
                     }));
@@ -537,9 +529,6 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
     const auto& key = gaugeProducer.mCurrentSlicedBucket->begin()->first;
     EXPECT_EQ(1UL, key.getDimensionKeyInWhat().getValues().size());
     EXPECT_EQ(1000, key.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-
-    EXPECT_EQ(1UL, key.getDimensionKeyInCondition().getValues().size());
-    EXPECT_EQ(1000000, key.getDimensionKeyInCondition().getValues()[0].mValue.int_value);
 
     EXPECT_EQ(0UL, gaugeProducer.mPastBuckets.size());
 

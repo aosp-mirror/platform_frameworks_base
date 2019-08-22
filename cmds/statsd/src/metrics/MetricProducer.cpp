@@ -52,38 +52,24 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
 
     bool condition;
     ConditionKey conditionKey;
-    std::unordered_set<HashableDimensionKey> dimensionKeysInCondition;
     if (mConditionSliced) {
         for (const auto& link : mMetric2ConditionLinks) {
             getDimensionForCondition(event.getValues(), link, &conditionKey[link.conditionId]);
         }
         auto conditionState =
-            mWizard->query(mConditionTrackerIndex, conditionKey, mDimensionsInCondition,
-                           !mSameConditionDimensionsInTracker,
-                           !mHasLinksToAllConditionDimensionsInTracker,
-                           &dimensionKeysInCondition);
+            mWizard->query(mConditionTrackerIndex, conditionKey,
+                           !mHasLinksToAllConditionDimensionsInTracker);
         condition = (conditionState == ConditionState::kTrue);
     } else {
         // TODO: The unknown condition state is not handled here, we should fix it.
         condition = mCondition == ConditionState::kTrue;
     }
 
-    if (mDimensionsInCondition.empty() && condition) {
-        dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
-    }
-
     HashableDimensionKey dimensionInWhat;
     filterValues(mDimensionsInWhat, event.getValues(), &dimensionInWhat);
     MetricDimensionKey metricKey(dimensionInWhat, DEFAULT_DIMENSION_KEY);
-    for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
-        metricKey.setDimensionKeyInCondition(conditionDimensionKey);
-        onMatchedLogEventInternalLocked(
-                matcherIndex, metricKey, conditionKey, condition, event);
-    }
-    if (dimensionKeysInCondition.empty()) {
-        onMatchedLogEventInternalLocked(
-                matcherIndex, metricKey, conditionKey, condition, event);
-    }
+    onMatchedLogEventInternalLocked(
+            matcherIndex, metricKey, conditionKey, condition, event);
 }
 
 bool MetricProducer::evaluateActiveStateLocked(int64_t elapsedTimestampNs) {

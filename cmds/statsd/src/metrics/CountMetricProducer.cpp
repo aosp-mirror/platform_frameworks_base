@@ -48,7 +48,6 @@ const int FIELD_ID_COUNT_METRICS = 5;
 const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
-const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
 const int FIELD_ID_IS_ACTIVE = 14;
 
 // for CountMetricDataWrapper
@@ -82,12 +81,7 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
         mContainANYPositionInDimensionsInWhat = HasPositionANY(metric.dimensions_in_what());
     }
 
-    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what()) ||
-            HasPositionALL(metric.dimensions_in_condition());
-
-    if (metric.has_dimensions_in_condition()) {
-        translateFieldMatcher(metric.dimensions_in_condition(), &mDimensionsInCondition);
-    }
+    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what());
 
     if (metric.links().size() > 0) {
         for (const auto& link : metric.links()) {
@@ -99,8 +93,6 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
         }
         mConditionSliced = true;
     }
-
-    mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
 
     flushIfNeededLocked(startTimeNs);
     // Adjust start for partial bucket
@@ -171,13 +163,6 @@ void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
             writeDimensionPathToProto(mDimensionsInWhat, protoOutput);
             protoOutput->end(dimenPathToken);
         }
-        if (!mDimensionsInCondition.empty()) {
-            uint64_t dimenPathToken = protoOutput->start(
-                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_PATH_IN_CONDITION);
-            writeDimensionPathToProto(mDimensionsInCondition, protoOutput);
-            protoOutput->end(dimenPathToken);
-        }
-
     }
 
     uint64_t protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_COUNT_METRICS);

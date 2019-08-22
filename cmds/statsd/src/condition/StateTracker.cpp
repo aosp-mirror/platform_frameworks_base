@@ -178,11 +178,8 @@ void StateTracker::evaluateCondition(const LogEvent& event,
 
 void StateTracker::isConditionMet(
         const ConditionKey& conditionParameters, const vector<sp<ConditionTracker>>& allConditions,
-        const vector<Matcher>& dimensionFields,
-        const bool isSubOutputDimensionFields,
         const bool isPartialLink,
-        vector<ConditionState>& conditionCache,
-        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
+        vector<ConditionState>& conditionCache) const {
     if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
         // it has been evaluated.
         VLOG("Yes, already evaluated, %lld %d", (long long)mConditionId, conditionCache[mIndex]);
@@ -193,10 +190,6 @@ void StateTracker::isConditionMet(
     if (pair == conditionParameters.end()) {
         if (mSlicedState.size() > 0) {
             conditionCache[mIndex] = ConditionState::kTrue;
-
-            for (const auto& state : mSlicedState) {
-                dimensionsKeySet.insert(state.second);
-            }
         } else {
             conditionCache[mIndex] = ConditionState::kUnknown;
         }
@@ -208,23 +201,7 @@ void StateTracker::isConditionMet(
     auto it = mSlicedState.find(primaryKey);
     if (it != mSlicedState.end()) {
         conditionCache[mIndex] = ConditionState::kTrue;
-        dimensionsKeySet.insert(it->second);
     }
-}
-
-ConditionState StateTracker::getMetConditionDimension(
-        const std::vector<sp<ConditionTracker>>& allConditions,
-        const vector<Matcher>& dimensionFields,
-        const bool isSubOutputDimensionFields,
-        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
-    if (mSlicedState.size() > 0) {
-        for (const auto& state : mSlicedState) {
-            dimensionsKeySet.insert(state.second);
-        }
-        return ConditionState::kTrue;
-    }
-
-    return mInitialValue;
 }
 
 }  // namespace statsd
