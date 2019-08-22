@@ -20,9 +20,9 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 #include "android_hardware_input_InputWindowHandle.h"
-#include "android/graphics/Region.h"
 #include "core_jni_helpers.h"
 
+#include <android/graphics/region.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android-base/chrono_utils.h>
 #include <nativehelper/JNIHelp.h>
@@ -425,20 +425,19 @@ static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong transactionObj,
 static void nativeSetTransparentRegionHint(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jobject regionObj) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    SkRegion* region = android_graphics_Region_getSkRegion(env, regionObj);
-    if (!region) {
+    graphics::RegionIterator iterator(env, regionObj);
+    if (!iterator.isValid()) {
         doThrowIAE(env);
         return;
     }
 
-    const SkIRect& b(region->getBounds());
-    Region reg(Rect(b.fLeft, b.fTop, b.fRight, b.fBottom));
-    if (region->isComplex()) {
-        SkRegion::Iterator it(*region);
-        while (!it.done()) {
-            const SkIRect& r(it.rect());
-            reg.addRectUnchecked(r.fLeft, r.fTop, r.fRight, r.fBottom);
-            it.next();
+    ARect bounds = iterator.getTotalBounds();
+    Region reg({bounds.left, bounds.top, bounds.right, bounds.bottom});
+    if (iterator.isComplex()) {
+        while (!iterator.isDone()) {
+            ARect rect = iterator.getRect();
+            reg.addRectUnchecked(rect.left, rect.top, rect.right, rect.bottom);
+            iterator.next();
         }
     }
 
