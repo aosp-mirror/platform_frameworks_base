@@ -1899,7 +1899,7 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бардык тилдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бардык аймактар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Издөө"</string>
-    <string name="app_suspended_title" msgid="2075071241147969611">"Колдонмо жеткиликтсиз"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Колдонмо жеткиликсиз"</string>
     <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> колдонмосу учурда жеткиликсиз. Анын жеткиликтүүлүгү <xliff:g id="APP_NAME_1">%2$s</xliff:g> тарабынан башкарылат."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Кеңири маалымат"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жумуш профили күйгүзүлсүнбү?"</string>
