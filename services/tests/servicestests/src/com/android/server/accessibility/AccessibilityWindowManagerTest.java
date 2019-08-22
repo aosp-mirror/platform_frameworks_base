@@ -79,17 +79,22 @@ public class AccessibilityWindowManagerTest {
     private static final int USER_SYSTEM_ID = UserHandle.USER_SYSTEM;
     private static final int USER_PROFILE = 11;
     private static final int USER_PROFILE_PARENT = 1;
-    // TO-DO [Multi-Display] : change the display count to 2
-    private static final int DISPLAY_COUNT = 1;
+    private static final int SECONDARY_DISPLAY_ID = Display.DEFAULT_DISPLAY + 1;
     private static final int NUM_GLOBAL_WINDOWS = 4;
     private static final int NUM_APP_WINDOWS = 4;
-    private static final int NUM_OF_WINDOWS = (NUM_GLOBAL_WINDOWS + NUM_APP_WINDOWS)
-            * DISPLAY_COUNT;
+    private static final int NUM_OF_WINDOWS = (NUM_GLOBAL_WINDOWS + NUM_APP_WINDOWS);
     private static final int DEFAULT_FOCUSED_INDEX = 1;
     private static final int SCREEN_WIDTH = 1080;
     private static final int SCREEN_HEIGHT = 1920;
 
     private AccessibilityWindowManager mA11yWindowManager;
+    // Window manager will support multiple focused window if config_perDisplayFocusEnabled is true,
+    // i.e., each display would have its current focused window, and one of all focused windows
+    // would be top focused window. Otherwise, window manager only supports one focused window
+    // at all displays, and that focused window would be top focused window.
+    private boolean mSupportPerDisplayFocus = false;
+    private int mTopFocusedDisplayId = Display.INVALID_DISPLAY;
+    private IBinder mTopFocusedWindowToken = null;
 
     // List of window token, mapping from windowId -> window token.
     private final SparseArray<IWindow> mA11yWindowTokens = new SparseArray<>();
@@ -123,12 +128,9 @@ public class AccessibilityWindowManagerTest {
                 mMockA11yEventSender,
                 mMockA11ySecurityPolicy,
                 mMockA11yUserManager);
-
-        for (int i = 0; i < DISPLAY_COUNT; i++) {
-            when(mMockWindowManagerInternal.setWindowsForAccessibilityCallback(eq(i), any()))
-                    .thenReturn(true);
-            startTrackingPerDisplay(i);
-        }
+        // Starts tracking window of default display and sets the default display
+        // as top focused display before each testing starts.
+        startTrackingPerDisplay(Display.DEFAULT_DISPLAY);
 
         // AccessibilityEventSender is invoked during onWindowsForAccessibilityChanged.
         // Resets it for mockito verify of further test case.
@@ -143,7 +145,7 @@ public class AccessibilityWindowManagerTest {
     @Test
     public void startTrackingWindows_shouldEnableWindowManagerCallback() {
         // AccessibilityWindowManager#startTrackingWindows already invoked in setup.
-        assertTrue(mA11yWindowManager.isTrackingWindowsLocked());
+        assertTrue(mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY));
         final WindowsForAccessibilityCallback callbacks =
                 mCallbackOfWindows.get(Display.DEFAULT_DISPLAY);
         verify(mMockWindowManagerInternal).setWindowsForAccessibilityCallback(
@@ -152,11 +154,11 @@ public class AccessibilityWindowManagerTest {
 
     @Test
     public void stopTrackingWindows_shouldDisableWindowManagerCallback() {
-        assertTrue(mA11yWindowManager.isTrackingWindowsLocked());
+        assertTrue(mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY));
         Mockito.reset(mMockWindowManagerInternal);
 
-        mA11yWindowManager.stopTrackingWindows();
-        assertFalse(mA11yWindowManager.isTrackingWindowsLocked());
+        mA11yWindowManager.stopTrackingWindows(Display.DEFAULT_DISPLAY);
+        assertFalse(mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY));
         verify(mMockWindowManagerInternal).setWindowsForAccessibilityCallback(
                 eq(Display.DEFAULT_DISPLAY), isNull());
 
@@ -164,15 +166,29 @@ public class AccessibilityWindowManagerTest {
 
     @Test
     public void stopTrackingWindows_shouldClearWindows() {
-        assertTrue(mA11yWindowManager.isTrackingWindowsLocked());
+        assertTrue(mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY));
         final int activeWindowId = mA11yWindowManager.getActiveWindowId(USER_SYSTEM_ID);
 
-        mA11yWindowManager.stopTrackingWindows();
-        assertNull(mA11yWindowManager.getWindowListLocked());
+        mA11yWindowManager.stopTrackingWindows(Display.DEFAULT_DISPLAY);
+        assertNull(mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY));
         assertEquals(mA11yWindowManager.getFocusedWindowId(AccessibilityNodeInfo.FOCUS_INPUT),
                 AccessibilityWindowInfo.UNDEFINED_WINDOW_ID);
         assertEquals(mA11yWindowManager.getActiveWindowId(USER_SYSTEM_ID),
                 activeWindowId);
+    }
+
+    @Test
+    public void stopTrackingWindows_onNonTopFocusedDisplay_shouldNotResetTopFocusWindow()
+            throws RemoteException {
+        // At setup, the default display sets be the top focused display and
+        // its current focused window sets be the top focused window.
+        // Starts tracking window of second display.
+        startTrackingPerDisplay(SECONDARY_DISPLAY_ID);
+        assertTrue(mA11yWindowManager.isTrackingWindowsLocked(SECONDARY_DISPLAY_ID));
+        // Stops tracking windows of second display.
+        mA11yWindowManager.stopTrackingWindows(SECONDARY_DISPLAY_ID);
+        assertNotEquals(mA11yWindowManager.getFocusedWindowId(AccessibilityNodeInfo.FOCUS_INPUT),
+                AccessibilityWindowInfo.UNDEFINED_WINDOW_ID);
     }
 
     @Test
@@ -196,10 +212,66 @@ public class AccessibilityWindowManagerTest {
     }
 
     @Test
+    public void
+            onWindowsChanged_focusChangeOnNonTopFocusedDisplay_perDisplayFocusOn_notChangeWindow()
+            throws RemoteException {
+        // At setup, the default display sets be the top focused display and
+        // its current focused window sets be the top focused window.
+        // Sets supporting multiple focused window, i.e., config_perDisplayFocusEnabled is true.
+        mSupportPerDisplayFocus = true;
+        // Starts tracking window of second display.
+        startTrackingPerDisplay(SECONDARY_DISPLAY_ID);
+        // Gets the active window.
+        final int activeWindowId = mA11yWindowManager.getActiveWindowId(USER_SYSTEM_ID);
+        // Gets the top focused window.
+        final int topFocusedWindowId =
+                mA11yWindowManager.getFocusedWindowId(AccessibilityNodeInfo.FOCUS_INPUT);
+        // Changes the current focused window at second display.
+        changeFocusedWindowOnDisplayPerDisplayFocusConfig(SECONDARY_DISPLAY_ID,
+                DEFAULT_FOCUSED_INDEX + 1, Display.DEFAULT_DISPLAY, DEFAULT_FOCUSED_INDEX);
+
+        onWindowsForAccessibilityChanged(SECONDARY_DISPLAY_ID, SEND_ON_WINDOW_CHANGES);
+        // The active window should not be changed.
+        assertEquals(activeWindowId, mA11yWindowManager.getActiveWindowId(USER_SYSTEM_ID));
+        // The top focused window should not be changed.
+        assertEquals(topFocusedWindowId,
+                mA11yWindowManager.getFocusedWindowId(AccessibilityNodeInfo.FOCUS_INPUT));
+    }
+
+    @Test
+    public void
+            onWindowChange_focusChangeToNonTopFocusedDisplay_perDisplayFocusOff_shouldChangeWindow()
+            throws RemoteException {
+        // At setup, the default display sets be the top focused display and
+        // its current focused window sets be the top focused window.
+        // Sets not supporting multiple focused window, i.e., config_perDisplayFocusEnabled is
+        // false.
+        mSupportPerDisplayFocus = false;
+        // Starts tracking window of second display.
+        startTrackingPerDisplay(SECONDARY_DISPLAY_ID);
+        // Gets the active window.
+        final int activeWindowId = mA11yWindowManager.getActiveWindowId(USER_SYSTEM_ID);
+        // Gets the top focused window.
+        final int topFocusedWindowId =
+                mA11yWindowManager.getFocusedWindowId(AccessibilityNodeInfo.FOCUS_INPUT);
+        // Changes the current focused window from default display to second display.
+        changeFocusedWindowOnDisplayPerDisplayFocusConfig(SECONDARY_DISPLAY_ID,
+                DEFAULT_FOCUSED_INDEX, Display.DEFAULT_DISPLAY, DEFAULT_FOCUSED_INDEX);
+
+        onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+        onWindowsForAccessibilityChanged(SECONDARY_DISPLAY_ID, SEND_ON_WINDOW_CHANGES);
+        // The active window should be changed.
+        assertNotEquals(activeWindowId, mA11yWindowManager.getActiveWindowId(USER_SYSTEM_ID));
+        // The top focused window should be changed.
+        assertNotEquals(topFocusedWindowId,
+                mA11yWindowManager.getFocusedWindowId(AccessibilityNodeInfo.FOCUS_INPUT));
+    }
+
+    @Test
     public void onWindowsChanged_shouldReportCorrectLayer() {
         // AccessibilityWindowManager#onWindowsForAccessibilityChanged already invoked in setup.
         List<AccessibilityWindowInfo> a11yWindows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         for (int i = 0; i < a11yWindows.size(); i++) {
             final AccessibilityWindowInfo a11yWindow = a11yWindows.get(i);
             final WindowInfo windowInfo = mWindowInfos.get(Display.DEFAULT_DISPLAY).get(i);
@@ -212,7 +284,7 @@ public class AccessibilityWindowManagerTest {
     public void onWindowsChanged_shouldReportCorrectOrder() {
         // AccessibilityWindowManager#onWindowsForAccessibilityChanged already invoked in setup.
         List<AccessibilityWindowInfo> a11yWindows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         for (int i = 0; i < a11yWindows.size(); i++) {
             final AccessibilityWindowInfo a11yWindow = a11yWindows.get(i);
             final IBinder windowToken = mA11yWindowManager
@@ -226,31 +298,31 @@ public class AccessibilityWindowManagerTest {
     public void onWindowsChangedAndForceSend_shouldUpdateWindows() {
         final WindowInfo windowInfo = mWindowInfos.get(Display.DEFAULT_DISPLAY).get(0);
         final int correctLayer =
-                mA11yWindowManager.getWindowListLocked().get(0).getLayer();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY).get(0).getLayer();
         windowInfo.layer += 1;
 
         onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, FORCE_SEND);
         assertNotEquals(correctLayer,
-                mA11yWindowManager.getWindowListLocked().get(0).getLayer());
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY).get(0).getLayer());
     }
 
     @Test
     public void onWindowsChangedNoForceSend_layerChanged_shouldNotUpdateWindows() {
         final WindowInfo windowInfo = mWindowInfos.get(Display.DEFAULT_DISPLAY).get(0);
         final int correctLayer =
-                mA11yWindowManager.getWindowListLocked().get(0).getLayer();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY).get(0).getLayer();
         windowInfo.layer += 1;
 
         onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
         assertEquals(correctLayer,
-                mA11yWindowManager.getWindowListLocked().get(0).getLayer());
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY).get(0).getLayer());
     }
 
     @Test
     public void onWindowsChangedNoForceSend_windowChanged_shouldUpdateWindows()
             throws RemoteException {
         final AccessibilityWindowInfo oldWindow =
-                mA11yWindowManager.getWindowListLocked().get(0);
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY).get(0);
         final IWindow token = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
                 true, USER_SYSTEM_ID);
         final WindowInfo windowInfo = WindowInfo.obtain();
@@ -262,7 +334,7 @@ public class AccessibilityWindowManagerTest {
 
         onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
         assertNotEquals(oldWindow,
-                mA11yWindowManager.getWindowListLocked().get(0));
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY).get(0));
     }
 
     @Test
@@ -274,7 +346,8 @@ public class AccessibilityWindowManagerTest {
         windowInfo.focused = true;
 
         onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
-        assertTrue(mA11yWindowManager.getWindowListLocked().get(0).isFocused());
+        assertTrue(mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY).get(0)
+                .isFocused());
     }
 
     @Test
@@ -305,7 +378,7 @@ public class AccessibilityWindowManagerTest {
     @Test
     public void getWindowTokenForUserAndWindowId_shouldNotNull() {
         final List<AccessibilityWindowInfo> windows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         for (int i = 0; i < windows.size(); i++) {
             final int windowId = windows.get(i).getId();
 
@@ -317,7 +390,7 @@ public class AccessibilityWindowManagerTest {
     @Test
     public void findWindowId() {
         final List<AccessibilityWindowInfo> windows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         for (int i = 0; i < windows.size(); i++) {
             final int windowId = windows.get(i).getId();
             final IBinder windowToken = mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(
@@ -339,7 +412,7 @@ public class AccessibilityWindowManagerTest {
         onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
 
         final List<AccessibilityWindowInfo> a11yWindows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         final Region outBounds = new Region();
         int windowId = a11yWindows.get(0).getId();
 
@@ -362,7 +435,7 @@ public class AccessibilityWindowManagerTest {
 
         onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
         final List<AccessibilityWindowInfo> a11yWindows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         final Region outBounds = new Region();
         int windowId = a11yWindows.get(1).getId();
 
@@ -375,7 +448,7 @@ public class AccessibilityWindowManagerTest {
     public void computePartialInteractiveRegionForWindow_notVisible_returnEmptyRegion() {
         // Since z-order #0 WindowInfo is full screen, z-order #1 WindowInfo should be invisible.
         final List<AccessibilityWindowInfo> a11yWindows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         final Region outBounds = new Region();
         int windowId = a11yWindows.get(1).getId();
 
@@ -393,7 +466,7 @@ public class AccessibilityWindowManagerTest {
         onWindowsForAccessibilityChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
 
         final List<AccessibilityWindowInfo> a11yWindows =
-                mA11yWindowManager.getWindowListLocked();
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
         final Region outBounds = new Region();
         int windowId = a11yWindows.get(1).getId();
 
@@ -413,7 +486,7 @@ public class AccessibilityWindowManagerTest {
                 .thenReturn(eventWindowToken);
 
         final int noUse = 0;
-        mA11yWindowManager.stopTrackingWindows();
+        mA11yWindowManager.stopTrackingWindows(Display.DEFAULT_DISPLAY);
         mA11yWindowManager.updateActiveAndAccessibilityFocusedWindowLocked(USER_SYSTEM_ID,
                 eventWindowId,
                 noUse,
@@ -553,7 +626,7 @@ public class AccessibilityWindowManagerTest {
                 mA11yWindowManager.getConnectionLocked(
                         USER_SYSTEM_ID, newFocusWindowId).getRemote();
 
-        mA11yWindowManager.stopTrackingWindows();
+        mA11yWindowManager.stopTrackingWindows(Display.DEFAULT_DISPLAY);
         final int noUse = 0;
         mA11yWindowManager.updateActiveAndAccessibilityFocusedWindowLocked(USER_SYSTEM_ID,
                 defaultFocusWindowId,
@@ -636,20 +709,27 @@ public class AccessibilityWindowManagerTest {
                     false, USER_SYSTEM_ID);
             addWindowInfo(windowInfosForDisplay, token, layer++);
         }
-        // Setups default focus.
-        windowInfosForDisplay.get(DEFAULT_FOCUSED_INDEX).focused = true;
+        // Sets up current focused window of display.
+        // Each display has its own current focused window if config_perDisplayFocusEnabled is true.
+        // Otherwise only default display needs to current focused window.
+        if (mSupportPerDisplayFocus || displayId == Display.DEFAULT_DISPLAY) {
+            windowInfosForDisplay.get(DEFAULT_FOCUSED_INDEX).focused = true;
+        }
         // Turns on windows tracking, and update window info.
-        mA11yWindowManager.startTrackingWindows();
+        when(mMockWindowManagerInternal.setWindowsForAccessibilityCallback(eq(displayId), any()))
+                .thenReturn(true);
+        mA11yWindowManager.startTrackingWindows(displayId);
         // Puts window lists into array.
         mWindowInfos.put(displayId, windowInfosForDisplay);
-        // Sets the default display as the top focused display.
+        // Sets the default display is the top focused display and
+        // its current focused window is the top focused window.
         if (displayId == Display.DEFAULT_DISPLAY) {
             setTopFocusedWindowAndDisplay(displayId, DEFAULT_FOCUSED_INDEX);
         }
         // Invokes callback for sending window lists to A11y framework.
         onWindowsForAccessibilityChanged(displayId, FORCE_SEND);
 
-        assertEquals(mA11yWindowManager.getWindowListLocked().size(),
+        assertEquals(mA11yWindowManager.getWindowListLocked(displayId).size(),
                 windowInfosForDisplay.size());
     }
 
@@ -700,12 +780,9 @@ public class AccessibilityWindowManagerTest {
 
     private void setTopFocusedWindowAndDisplay(int displayId, int index) {
         // Sets the top focus window.
-        final IBinder eventWindowToken = mWindowInfos.get(displayId).get(index).token;
-        when(mMockWindowManagerInternal.getFocusedWindowToken())
-                .thenReturn(eventWindowToken);
+        mTopFocusedWindowToken = mWindowInfos.get(displayId).get(index).token;
         // Sets the top focused display.
-        when(mMockWindowManagerInternal.getDisplayIdForWindow(eventWindowToken))
-                .thenReturn(displayId);
+        mTopFocusedDisplayId = displayId;
     }
 
     private void onWindowsForAccessibilityChanged(int displayId, boolean forceSend) {
@@ -714,7 +791,38 @@ public class AccessibilityWindowManagerTest {
             callbacks = getWindowsForAccessibilityCallbacks(displayId);
             mCallbackOfWindows.put(displayId, callbacks);
         }
-        callbacks.onWindowsForAccessibilityChanged(forceSend, mWindowInfos.get(displayId));
+        callbacks.onWindowsForAccessibilityChanged(forceSend, mTopFocusedDisplayId,
+                mTopFocusedWindowToken, mWindowInfos.get(displayId));
+    }
+
+    private void changeFocusedWindowOnDisplayPerDisplayFocusConfig(
+            int changeFocusedDisplayId, int newFocusedWindowIndex, int oldTopFocusedDisplayId,
+            int oldFocusedWindowIndex) {
+        if (mSupportPerDisplayFocus) {
+            // Gets the old focused window of display which wants to change focused window.
+            WindowInfo focusedWindowInfo =
+                    mWindowInfos.get(changeFocusedDisplayId).get(oldFocusedWindowIndex);
+            // Resets the focus of old focused window.
+            focusedWindowInfo.focused = false;
+            // Gets the new window of display which wants to change focused window.
+            focusedWindowInfo =
+                    mWindowInfos.get(changeFocusedDisplayId).get(newFocusedWindowIndex);
+            // Sets the focus of new focused window.
+            focusedWindowInfo.focused = true;
+        } else {
+            // Gets the window of display which wants to change focused window.
+            WindowInfo focusedWindowInfo =
+                    mWindowInfos.get(changeFocusedDisplayId).get(newFocusedWindowIndex);
+            // Sets the focus of new focused window.
+            focusedWindowInfo.focused = true;
+            // Gets the old focused window of old top focused display.
+            focusedWindowInfo =
+                    mWindowInfos.get(oldTopFocusedDisplayId).get(oldFocusedWindowIndex);
+            // Resets the focus of old focused window.
+            focusedWindowInfo.focused = false;
+            // Changes the top focused display and window.
+            setTopFocusedWindowAndDisplay(changeFocusedDisplayId, newFocusedWindowIndex);
+        }
     }
 
     static class WindowIdMatcher extends TypeSafeMatcher<AccessibilityEvent> {

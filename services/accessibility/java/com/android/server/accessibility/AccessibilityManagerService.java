@@ -272,9 +272,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
         mMainHandler = new MainHandler(mContext.getMainLooper());
         mGlobalActionPerformer = new GlobalActionPerformer(mContext, mWindowManagerService);
-        mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
+        mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
         mSecurityPolicy.setAccessibilityWindowManager(mA11yWindowManager);
 
         registerBroadcastReceivers();
@@ -580,9 +580,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // Make sure clients receiving this event will be able to get the
             // current state of the windows as the window manager may be delaying
             // the computation for performance reasons.
-            // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY
-            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-                    && mA11yWindowManager.isTrackingWindowsLocked()) {
+            // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY.
+            boolean shouldComputeWindows = false;
+            synchronized (mLock) {
+                if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                        && mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY)) {
+                    shouldComputeWindows = true;
+                }
+            }
+            if (shouldComputeWindows) {
                 WindowManagerInternal wm = LocalServices.getService(WindowManagerInternal.class);
                 wm.computeWindowsForAccessibility(Display.DEFAULT_DISPLAY);
             }
@@ -1656,10 +1662,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        if (observingWindows) {
-            mA11yWindowManager.startTrackingWindows();
-        } else {
-            mA11yWindowManager.stopTrackingWindows();
+        // Gets all valid displays and start tracking windows of each display if there is at least
+        // one bound service that can retrieve window content.
+        final ArrayList<Display> displays = getValidDisplayList();
+        for (int i = 0; i < displays.size(); i++) {
+            final Display display = displays.get(i);
+            if (display != null) {
+                if (observingWindows) {
+                    mA11yWindowManager.startTrackingWindows(display.getDisplayId());
+                } else {
+                    mA11yWindowManager.stopTrackingWindows(display.getDisplayId());
+                }
+            }
         }
     }
 
@@ -2559,6 +2573,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
                 updateMagnificationLocked(userState);
+                updateWindowsForAccessibilityCallbackLocked(userState);
             }
         }
 
@@ -2586,6 +2601,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (mMagnificationController != null) {
                 mMagnificationController.onDisplayRemoved(displayId);
             }
+            mA11yWindowManager.stopTrackingWindows(displayId);
         }
 
         @Override
