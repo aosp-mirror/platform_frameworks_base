@@ -22,6 +22,8 @@ import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
+
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
 
@@ -2689,5 +2691,52 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setBubblesAllowed(PKG_O, UID_O, false);
         assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
         verify(mHandler, times(1)).requestSort();
+    }
+
+    @Test
+    public void testTooManyChannels() {
+        for (int i = 0; i < NOTIFICATION_CHANNEL_COUNT_LIMIT; i++) {
+            NotificationChannel channel = new NotificationChannel(String.valueOf(i),
+                    String.valueOf(i), NotificationManager.IMPORTANCE_HIGH);
+            mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, true);
+        }
+        try {
+            NotificationChannel channel = new NotificationChannel(
+                    String.valueOf(NOTIFICATION_CHANNEL_COUNT_LIMIT),
+                    String.valueOf(NOTIFICATION_CHANNEL_COUNT_LIMIT),
+                    NotificationManager.IMPORTANCE_HIGH);
+            mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, true);
+            fail("Allowed to create too many notification channels");
+        } catch (IllegalStateException e) {
+            // great
+        }
+    }
+
+    @Test
+    public void testTooManyChannels_xml() throws Exception {
+        String extraChannel = "EXTRA";
+        String extraChannel1 = "EXTRA1";
+
+        // create first... many... directly so we don't need a big xml blob in this test
+        for (int i = 0; i < NOTIFICATION_CHANNEL_COUNT_LIMIT; i++) {
+            NotificationChannel channel = new NotificationChannel(String.valueOf(i),
+                    String.valueOf(i), NotificationManager.IMPORTANCE_HIGH);
+            mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, true);
+        }
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"" + extraChannel + "\" name=\"hi\" importance=\"3\"/>"
+                + "<channel id=\"" + extraChannel1 + "\" name=\"hi\" importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, extraChannel, true));
+        assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, extraChannel1, true));
     }
 }
