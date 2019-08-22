@@ -177,7 +177,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Pokusili jste se smazat příliš mnoho položek <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Úložiště tabletu je plné. Uvolněte místo smazáním některých souborů."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Úložiště hodinek je plné. Uvolněte místo smazáním některých souborů."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Úložiště televize je plné. Uvolněte místo smazáním některých souborů."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Úložiště zařízení Android TV je plné. Uvolněte místo smazáním některých souborů."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Paměť telefonu je plná. Uvolněte místo smazáním některých souborů."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="few">Certifikační autority byly nainstalovány</item>
@@ -199,7 +199,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti tabletu"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Možnosti televize"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Možnosti zařízení Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Možnosti telefonu"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Tichý režim"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Zapnout bezdrátové připojení"</string>
@@ -217,7 +217,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Restartování…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet se vypne."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televize se vypne."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"zařízení Android TV se vypne."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Hodinky se vypnou."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Váš telefon bude vypnut."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Chcete zařízení vypnout?"</string>
@@ -226,7 +226,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nejnovější"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Žádné nové aplikace"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Možnosti tabletu"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Možnosti televize"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Možnosti zařízení Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Možnosti telefonu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zámek obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnout"</string>
@@ -358,7 +358,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čtení textových zpráv (SMS nebo MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Tato aplikace může číst všechny SMS (textové zprávy) uložené v tabletu."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Tato aplikace může číst všechny SMS (textové zprávy) uložené v televizi."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Tato aplikace může číst všechny SMS (textové zprávy) uložené v zařízení Android TV."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Tato aplikace může číst všechny SMS (textové zprávy) uložené v telefonu."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"příjem textových zpráv (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikaci přijmout a zpracovat zprávy WAP. Toto oprávnění umožňuje sledovat přijaté zprávy nebo je smazat, aniž by se vám zobrazily."</string>
@@ -380,7 +380,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Tato aplikace může využívat data na pozadí. Zvýší se využití dat."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"trvalé spuštění aplikace"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Umožňuje aplikaci uložit některé své části trvale do paměti. Může to omezit paměť dostupnou pro ostatní aplikace a zpomalit tak tablet."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Umožňuje aplikaci zapsat své jednotlivé části natrvalo do paměti. To může omezit paměť dostupnou pro ostatní aplikace a zpomalit tak televizi."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Umožňuje aplikaci zapsat své jednotlivé části natrvalo do paměti. To může omezit paměť dostupnou pro ostatní aplikace a zařízení Android TV tak zpomalit."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Umožňuje aplikaci uložit některé své části trvale do paměti. Může to omezit paměť dostupnou pro ostatní aplikace a zpomalit tak telefon."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"spouštění služeb na popředí"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Povolte aplikaci využívání služeb na popředí."</string>
@@ -390,35 +390,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Umožňuje aplikaci upravit data nastavení systému. Škodlivé aplikace mohou poškodit konfiguraci systému."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"spuštění při startu"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Umožňuje aplikaci spuštění ihned po spuštění systému. Toto oprávnění může zpomalit spuštění tabletu a umožnit aplikaci celkově zpomalit tablet, protože bude neustále spuštěna."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Umožňuje aplikaci spustit se ihned po spuštění systému. Toto oprávnění může zpomalit spouštění televize a umožňuje aplikaci celkově zpomalit výkon, protože bude neustále spuštěna."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Umožňuje aplikaci spustit se ihned po spuštění systému. Toto oprávnění může zpomalit spouštění zařízení Android TV. Aplikace také zařízení bude moci celkově zpomalit tím, že bude neustále spuštěná."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Umožňuje aplikaci spuštění ihned po spuštění systému. Toto oprávnění může zpomalit spuštění telefonu a umožnit aplikaci celkově zpomalit telefon, protože bude neustále spuštěna."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"odeslání trvalého vysílání"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může tablet zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může televizi zpomalit či způsobit její nestabilitu, protože bude používat příliš mnoho paměti."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení. Nadměrné používání může zařízení Android TV zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"čtení kontaktů"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Umožňuje aplikaci číst údaje o kontaktech uložených v tabletu, včetně toho, jak často voláte, posíláte e‑maily nebo jinak komunikujete s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Umožňuje aplikaci číst údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e‑maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění umožňuje aplikacím ukládat údaje o vašich kontaktech a škodlivé aplikace mohou sdílet údaje o kontaktech bez vašeho vědomí."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Umožňuje aplikaci číst údaje o kontaktech uložených v zařízení Android TV, včetně toho, jak často voláte, posíláte e‑maily nebo jinými způsoby komunikujete s konkrétními osobami. Toto oprávnění aplikacím umožňuje ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Umožňuje aplikaci číst údaje o kontaktech uložených v telefonu, včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"úprava kontaktů"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Umožňuje aplikaci upravit údaje o kontaktech uložených v tabletu včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Umožňuje aplikaci upravit údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e‑maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Umožňuje aplikaci upravit údaje o kontaktech uložených v zařízení Android TV včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Umožňuje aplikaci upravit údaje o kontaktech uložených v telefonu včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"čtení seznamu hovorů"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Tato aplikace může číst historii volání."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"zápis do seznamu hovorů"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Umožňuje aplikaci upravovat seznam hovorů vašeho tabletu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Umožňuje aplikaci upravovat seznam hovorů vaší televize včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Umožňuje aplikaci upravovat seznam hovorů na zařízení Android TV, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Umožňuje aplikaci upravovat seznam hovorů vašeho telefonu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"přístup k tělesným senzorům (např. snímače tepu)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Umožňuje aplikaci používat data ze senzorů, které sledují vaši fyzickou kondici, například tepovou frekvenci."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Čtení událostí v kalendáři včetně podrobností"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Tato aplikace může číst všechny události v kalendáři uložené v tabletu a sdílet či ukládat data kalendáře."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Tato aplikace může číst všechny události v kalendáři uložené v televizi a sdílet či ukládat data kalendáře."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Tato aplikace může číst všechny události v kalendáři uložené v zařízení Android TV a sdílet či ukládat data kalendáře."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Tato aplikace může číst všechny události v kalendáři uložené v telefonu a sdílet či ukládat data kalendáře."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"přidávání a upravování událostí kalendářů a odesílání e-mailů bez vědomí vlastníka"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Tato aplikace může přidat, odstranit či změnit události v kalendáři uložené v tabletu. Může také odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Tato aplikace může přidat, odstranit či změnit události v kalendáři uložené v televizi. Může také odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Tato aplikace může přidávat, odstraňovat či měnit události v kalendáři uložené v zařízení Android TV. Může také odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Tato aplikace může přidat, odstranit či změnit události v kalendáři uložené v telefonu. Může také odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"přístup k dalším příkazům poskytovatele polohy"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Umožňuje aplikaci přístup k dalším příkazům poskytovatele polohy. To aplikaci umožní zasahovat do fungování systému GPS a dalších zdrojů polohy."</string>
@@ -426,7 +426,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Tato aplikace může zjistit vaši přesnou polohu, jen když běží na popředí. Aby tyto služby určování polohy mohla aplikace používat, musí být v telefonu dostupné a musí být zapnuté. Tyto služby mohou způsobit rychlejší vybíjení baterie."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"přístup k přibližené poloze (na základě sítě) jen na popředí"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi (ale pouze pokud je aplikace na popředí). Aby tyto služby určování polohy mohla aplikace používat, musí být v tabletu dostupné a musí být zapnuté."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi (ale pouze pokud je aplikace na popředí). Aby tyto služby určování polohy mohla aplikace používat, musí být v televizi dostupné a musí být zapnuté."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi (ale pouze pokud je aplikace na popředí). Aby tyto služby určování polohy mohla aplikace používat, musí být v zařízení Android TV dostupné a musí být zapnuté."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi (ale pouze pokud je aplikace na popředí). Aby tyto služby určování polohy mohla aplikace používat, musí být v telefonu dostupné a musí být zapnuté."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"přístup k poloze na pozadí"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Bude-li oprávnění uděleno dodatečně k přístupu k přibližné nebo přesné poloze, aplikace bude moci používat polohu při spuštění na pozadí."</string>
@@ -440,6 +440,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Tyto aplikace dokážou rozpoznat vaši fyzickou aktivitu."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"pořizování fotografií a videí"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Tato aplikace může pomocí fotoaparátu kdykoli pořídit snímek nebo nahrát video."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"přímé volání na telefonní čísla"</string>
@@ -457,14 +461,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"přístup k telefonním číslům"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Umožňuje aplikaci přístup k telefonním číslům v zařízení."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"bránění přechodu tabletu do režimu spánku"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"zabránění přechodu televize do režimu spánku"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"bránění přechodu zařízení Android TV do režimu spánku"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"bránění přechodu telefonu do režimu spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikaci zabránit přechodu tabletu do režimu spánku."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Umožňuje aplikaci zabránit přechodu televize do režimu spánku."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Umožňuje aplikaci zabránit přechodu zařízení Android TV do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Umožňuje aplikaci zabránit přechodu telefonu do režimu spánku."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"Infračervený přenos"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Umožňuje aplikaci využívat infračervený vysílač tabletu."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Umožňuje aplikaci používat infračervený vysílač televize."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Umožňuje aplikaci používat infračervený vysílač zařízení Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Umožňuje aplikaci využívat infračervený vysílač telefonu."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"nastavení tapety"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Umožňuje aplikaci nastavit tapetu systému."</string>
@@ -472,11 +476,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Umožňuje aplikaci nastavit nápovědu pro velikost tapety systému."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"nastavení časového pásma"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Umožňuje aplikaci změnit časové pásmo tabletu."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Umožňuje aplikaci změnit časové pásmo televize."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Umožňuje aplikaci změnit časové pásmo zařízení Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Umožňuje aplikaci změnit časové pásmo telefonu."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"vyhledávání účtů v zařízení"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Umožňuje aplikaci získat seznam účtů v tabletu. Mohou sem patřit i účty vytvořené aplikacemi, které jste nainstalovali."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Umožňuje aplikaci získat seznam účtů, o kterých má televize informace. Tento seznam může zahrnovat jakékoli účty vytvořené aplikacemi, které jste nainstalovali."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Umožňuje aplikaci získat seznam účtů v zařízení Android TV. Tento seznam může zahrnovat jakékoli účty vytvořené aplikacemi, které jste nainstalovali."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Umožňuje aplikaci získat seznam účtů v telefonu. Mohou sem patřit i účty vytvořené aplikacemi, které jste nainstalovali."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"zobrazování síťových připojení"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Umožňuje aplikaci zobrazit informace o síťových připojeních, například o tom, které sítě jsou k dispozici a které jsou připojené."</string>
@@ -492,21 +496,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Umožňuje aplikaci připojit se k přístupovým bodům Wi-Fi či se od nich odpojit a provádět změny konfigurace zařízení pro sítě Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"povolení příjmu Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Umožňuje aplikaci přijímat pakety odeslané do všech zařízení v síti Wi-Fi nejen pomocí tabletu, ale i prostřednictvím adres vícesměrového vysílání. Spotřeba energie je vyšší než u režimu bez vícesměrového vysílání (multicast)."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Umožňuje aplikaci přijímat pakety odeslané do všech zařízení v síti Wi-Fi s využitím vícesměrových adres, nejen do vaší televizi. Spotřeba energie je vyšší než u režimu bez vícesměrového vysílání."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Umožňuje aplikaci přijímat pakety odeslané vícesměrového vysílání do všech zařízení v síti Wi-Fi, nejen do tohoto zařízení Android TV. Spotřeba energie je vyšší než u režimu bez vícesměrového vysílání."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Umožňuje aplikaci přijímat pakety odeslané do všech zařízení v síti Wi-Fi nejen pomocí telefonu, ale i prostřednictvím adres vícesměrového vysílání. Spotřeba energie je vyšší než u režimu bez vícesměrového vysílání (multicast)."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"přístup do nastavení Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Umožňuje aplikaci konfigurovat místní tablet s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Umožňuje aplikaci konfigurovat místní televizi s Bluetooth a vyhledávat a provádět párování se vzdálenými zařízeními."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Umožňuje aplikaci konfigurovat rozhraní Bluetooth na zařízení Android TV a vyhledávat vzdálená zařízení a spárovávat se s nimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"připojení a odpojení od sítě WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Umožňuje aplikaci zjistit, zda je povoleno připojení WiMAX, a také získat informace o všech připojených sítích WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"měnit stav připojení WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Umožňuje aplikaci připojovat tablet k sítím WiMAX a odpojovat jej od nich."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Umožňuje aplikaci připojovat televizi k sítím WiMAX a také ji od nich odpojovat."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Umožňuje aplikaci připojovat zařízení Android TV k sítím WiMAX a odpojovat jej od nich."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Umožňuje aplikaci připojovat telefon k sítím WiMAX a odpojovat jej od nich."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"párování se zařízeními Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Umožňuje aplikaci zobrazit konfiguraci tabletu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Umožňuje aplikaci zobrazit konfiguraci Bluetooth v televizi a vytvářet a přijímat spojení se spárovanými zařízeními."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Umožňuje aplikaci zobrazit konfiguraci rozhraním Bluetooth na zařízení Android TV a vytvářet a přijímat připojení ke spárovaným zařízením."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Umožňuje aplikaci zobrazit konfiguraci telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ovládání technologie NFC"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
@@ -663,10 +667,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Sledovat pokusy o odemknutí obrazovky"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout tablet nebo vymazat z tabletu všechna data, pokud bylo zadáno příliš mnoho nesprávných hesel."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Umožňuje monitorovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout televizi nebo vymazat veškerá data v televizi, pokud je zadáno příliš mnoho nesprávných hesel."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud jich bude zadáno příliš mnoho, uzamknout zařízení Android TV nebo z něj vymazat všechna data."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout telefon nebo vymazat z telefonu všechna data, pokud bylo zadáno příliš mnoho nesprávných hesel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout tablet nebo vymazat veškerá data uživatele."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout televizi nebo vymazat veškerá data uživatele."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud jich bude zadáno příliš mnoho, uzamknout zařízení Android TV nebo z něj vymazat všechna data tohoto uživatele."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout telefon nebo vymazat veškerá data uživatele."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Změnit zámek obrazovky"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Změnit zámek obrazovky."</string>
@@ -674,11 +678,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Řídit, jak a kdy se obrazovka uzamkne."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazat všechna data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Bez upozornění smazat všechna data tabletu obnovením továrních dat."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Umožňuje provést obnovení továrních dat a bez varování tím vymazat data v televizi."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Provést obnovení továrních dat a bez upozornění tím vymazat data v zařízení Android TV."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez upozornění smazat všechna data telefonu obnovením továrních dat."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Vymazat data uživatele"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Vymazat data tohoto uživatele v tomto tabletu bez upozornění."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Vymazat data tohoto uživatele v této televizi bez upozornění."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Bez upozornění vymazat data tohoto uživatele v tomto zařízení Android TV."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Vymazat data tohoto uživatele v tomto telefonu bez upozornění."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavit globální proxy server zařízení"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Nastaví globální proxy server, který bude používán, když je zásada zapnuta. Globální proxy server může nastavit pouze vlastník zařízení."</string>
@@ -826,9 +830,9 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Zkusit znovu"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Funkce a data jsou k dispozici po odemčení"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Překročili jste maximální povolený počet pokusů o odemknutí obličejem."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Není vložena SIM karta"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Chybí SIM karta"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabletu není SIM karta."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"V televizi není SIM karta."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"V zařízení Android TV není SIM karta."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná SIM karta."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Vložte SIM kartu."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta chybí nebo je nečitelná. Vložte SIM kartu."</string>
@@ -851,13 +855,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně zadali heslo. \n\nZkuste to znovu za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně zadali kód PIN. \n\nZkuste to znovu za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%2$d</xliff:g>) budete požádáni o odemčení tabletu pomocí přihlášení Google.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"<xliff:g id="NUMBER_0">%1$d</xliff:g>× jste nesprávně načrtli bezpečnostní gesto. Po dalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspěšných pokusech budete požádáni o odemčení televize pomocí přihlášení přes Google.\n\nOpakujte akci za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně zadali bezpečnostní gesto. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech budete požádáni o odemknutí zařízení Android TV přihlášením k účtu Google.\n\nZkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%2$d</xliff:g>) budete požádáni o odemčení telefonu pomocí přihlášení Google.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER_0">%1$d</xliff:g>krát. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v tabletu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"<xliff:g id="NUMBER_0">%1$d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. Po dalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspěšných pokusech bude v televizi obnoveno tovární nastavení a veškerá uživatelská data budou ztracena."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout zařízení Android TV nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v zařízení Android TV obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefon jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER_0">%1$d</xliff:g>krát. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v telefonu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER">%d</xliff:g>krát. V tabletu se teď obnoví výchozí tovární nastavení."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"<xliff:g id="NUMBER">%d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. V televizi teď bude obnoveno tovární nastavení."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout zařízení Android TV nesprávným způsobem. V zařízení Android TV se teď obnoví výchozí tovární nastavení."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER">%d</xliff:g>krát. V telefonu se teď obnoví výchozí tovární nastavení."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Sekundy zbývající do dalšího pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zapomněli jste gesto?"</string>
@@ -944,7 +948,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Umožňuje aplikaci číst historii všech adres URL navštívených v Prohlížeči a všechny záložky v Prohlížeči. Poznámka: Pro prohlížeče třetí strany a jiné aplikace umožňující procházení webu toto oprávnění platit nemusí."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"psaní webových záložek a historie"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Umožňuje aplikaci upravit historii prohlížeče nebo záložky uložené v tabletu. Aplikace s tímto oprávněním může vymazat či pozměnit data prohlížeče. Poznámka: Pro prohlížeče třetí strany a jiné aplikace umožňující procházení webu toto oprávnění platit nemusí."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Umožňuje aplikaci upravovat historii prohlížeče a záložky uložené v televizi. Aplikaci to může umožnit vymazat nebo upravit data prohlížeče. Poznámka: Pro prohlížeče třetí strany a jiné aplikace umožňující procházení webu toto oprávnění platit nemusí."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Umožňuje aplikaci upravovat historii Prohlížeče a záložky uložené v zařízení Android TV. Aplikaci to může umožnit vymazat nebo upravit data Prohlížeče. Poznámka: Pro prohlížeče třetí strany a jiné aplikace umožňující procházení webu toto oprávnění platit nemusí."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Umožňuje aplikaci upravit historii prohlížeče nebo záložky uložené v telefonu. Aplikace s tímto oprávněním může vymazat či pozměnit data prohlížeče. Poznámka: Pro prohlížeče třetí strany a jiné aplikace umožňující procházení webu toto oprávnění platit nemusí."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nastavení budíku"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Umožňuje aplikaci nastavit budík v nainstalované aplikaci budík. Některé aplikace budík tuto funkci nemusí obsahovat."</string>
@@ -1293,7 +1297,6 @@
       <item quantity="one">K dispozici je veřejná síť Wi-Fi</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Připojení k otevřené síti Wi-Fi"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Připojte se k síti Wi-Fi operátora"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Připojování k síti Wi-Fi..."</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Připojeno k síti Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Připojení k síti Wi-Fi se nezdařilo"</string>
@@ -1351,7 +1354,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Zadejte požadovaný kód PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet se při připojení k zařízení <xliff:g id="DEVICE_NAME">%1$s</xliff:g> dočasně odpojí od sítě Wi-Fi"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Zatímco bude televize připojena k zařízení <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, dočasně se odpojí od sítě Wi-Fi."</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Zatímco bude zařízení Android TV připojeno k zařízení <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, dočasně se odpojí od sítě Wi-Fi."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefon se při připojení k zařízení <xliff:g id="DEVICE_NAME">%1$s</xliff:g> dočasně odpojí od sítě Wi-Fi"</string>
     <string name="select_character" msgid="3365550120617701745">"Vkládání znaků"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Odesílání zpráv SMS"</string>
@@ -1698,13 +1701,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně zadali heslo. \n\nZkuste to znovu za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste zadali nesprávné bezpečnostní gesto. \n\nZkuste to znovu za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v tabletu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"<xliff:g id="NUMBER_0">%1$d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. Po dalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspěšných pokusech bude v televizi obnoveno tovární nastavení a veškerá uživatelská data budou ztracena."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout zařízení Android TV nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v zařízení Android TV obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v telefonu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. V tabletu se teď obnoví výchozí tovární nastavení."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"<xliff:g id="NUMBER">%d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. V televizi teď bude obnoveno tovární nastavení."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout zařízení Android TV nesprávným způsobem. V zařízení Android TV se teď obnoví výchozí tovární nastavení."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. V telefonu se teď obnoví výchozí tovární nastavení."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%2$d</xliff:g>dalších neúspěšných pokusech budete požádáni o odemčení tabletu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"<xliff:g id="NUMBER_0">%1$d</xliff:g>× jste nesprávně načrtli bezpečnostní gesto. Po dalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspěšných pokusech budete požádáni o odemčení televize pomocí e-mailového účtu.\n\nOpakujte akci za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně zadali bezpečnostní gesto. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech budete požádáni o odemknutí zařízení Android TV pomocí e‑mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech budete požádáni o odemčení telefonu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Odebrat"</string>
@@ -2067,6 +2070,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Klepnutím zkontrolujete, co je blokováno."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Systém"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Nastavení"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Pohotovostní režim"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Zařízení Android TV se brzy vypne, stisknutím tlačítka ho ponecháte zapnuté."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Zařízení se brzy vypne, stisknutím ho ponecháte zapnuté."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Fotoaparát"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"zobrazení přes ostatní aplikace na obrazovce"</string>

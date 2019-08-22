@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Cuba memadamkan terlalu banyak <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Storan tablet penuh. Padamkan beberapa fail untuk mengosongkan ruang."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Storan tontonan penuh. Padamkan beberapa fail untuk mengosongkan ruang."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Storan TV penuh. Padam beberapa fail untuk mengosongkan ruang."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Storan peranti Android TV penuh. Padamkan sebahagian fail untuk mengosongkan ruang."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Storan telefon penuh. Padamkan beberapa fail untuk mengosongkan ruang."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Sijil kuasa dipasang</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Pencetakan dilumpuhkan oleh <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Pilihan tablet"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Pilihan TV"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Pilihan Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Pilihan telefon"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Mod senyap"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Hidupkan wayarles"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Memulakan semula…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Mematikan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet anda akan dimatikan."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV anda akan dimatikan."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Peranti Android TV anda akan ditutup."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Tontonan anda akan dimatikan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon anda akan dimatikan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Adakah anda mahu menutup?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Baru-baru ini"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Tiada apl terbaharu"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Pilihan tablet"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Pilihan TV"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Pilihan Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Pilihan telefon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Kunci skrin"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Matikan kuasa"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Membenarkan apl menghantar mesej SMS. Ini boleh menyebabkan caj di luar jangkaan. Apl hasad boleh membuat anda kerugian wang dengan menghantar mesej tanpa pengesahan anda."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"baca mesej teks anda (SMS atau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Apl ini boleh membaca semua mesej SMS (teks) yang disimpan pada tablet anda."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Apl ini boleh membaca semua mesej SMS (teks) yang disimpan pada TV anda."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Apl ini boleh membaca semua mesej SMS (teks) yang disimpan pada peranti Android TV anda."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Apl ini boleh membaca semua mesej SMS (teks) yang disimpan pada telefon anda."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"terima mesej teks (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Membenarkan apl menerima dan memproses mesej WAP. Kebenaran ini termasuk keupayaan untuk memantau atau memadam mesej yang dihantar kepada anda tanpa menunjukkannya kepada anda."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Apl ini boleh menggunakan data di latar belakang. Tindakan ini mungkin meningkatkan penggunaan data."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"buatkan apl sentiasa berjalan"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Membenarkan apl untuk membuat sebahagian dirinya berterusan dalam memori. Ini boleh mengehadkan memori yang tersedia kepada apl lain dan menjadikan tablet perlahan."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Membenarkan apl menjadikan sebahagian daripada apl kekal dalam memori. Ini boleh mengehadkan memori yang tersedia kepada apl lain dan menjadikan TV perlahan."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Membenarkan sebahagian daripada apl kekal dalam memori. Keadaan ini boleh mengehadkan memori yang tersedia kepada apl lain dan memperlahankan peranti Android TV anda."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Membenarkan apl untuk membuat sebahagian dari dirinya berterusan dalam memori. Ini boleh mengehadkan memori yang tersedia kepada apl lain dan menjadikan telefon perlahan."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"jalankan perkhidmatan latar depan"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Membenarkan apl menggunakan perkhidmatan latar depan."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Membenarkan apl untuk mengubah suai data tetapan sistem. Apl hasad boleh merosakkan konfigurasi sistem anda."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"jalankan pada permulaan"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Membenarkan apl untuk memulakan dirinya sendiri sebaik sahaja sistem selesai mengebut. Ini boleh membuat masa untuk menghidupkan tablet menjadi lebih lama dan membenarkan apl untuk memperlahankan keseluruhan tablet dengan sentiasa berjalan."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Membenarkan apl untuk bermula sendiri sebaik sahaja sistem selesai membut. Ini boleh menjadikan masa lebih lama diambil untuk memulakan TV dan membenarkan apl memperlahankan tablet secara keseluruhan dengan sentiasa berjalan."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Membenarkan apl untuk bermula sendiri sebaik sahaja sistem selesai mengebut. Hal ini boleh menyebabkan peranti Android TV anda mengambil masa yang lebih lama untuk dihidupkan dan membenarkan apl memperlahankan keseluruhan peranti kerana sentiasa dijalankan."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Membenarkan apl bermula sendiri sebaik sahaja sistem telah selesai mengebut. Ini boleh menjadikannya mengambil masa yang lama untuk menghidupkan telefon dan membenarkan apl untuk melambatkan keseluruhan telefon dengan sentiasa berjalan."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"hantar siaran lekit"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Membenarkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Penggunaan berlebihan boleh membuatkan tablet perlahan atau tidak stabil kerana menggunakan terlalu banyak memori."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Membenarkan apl menghantar siaran lekit, yang kekal selepas siaran tamat. Penggunaan yang berlebihan boleh menjadikan TV perlahan atau tidak stabil akibat penggunaan terlalu banyak memori."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Membenarkan apl menghantar siaran lekit, yang kekal selepas siaran tamat. Penggunaan secara berlebihan boleh menyebabkan peranti Android TV anda menjadi perlahan atau tidak stabil kerana menggunakan terlalu banyak memori."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Membenarkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Penggunaan berlebihan boleh membuat telefon perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"baca kenalan anda"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Membenarkan apl membaca data tentang kenalan anda yang tersimpan di tablet anda, termasuk kekerapan anda memanggil, menghantar e-mel atau berkomunikasi dalam cara lain dengan individu tertentu. Kebenaran ini membenarkan apl untuk menyimpan data kenalan anda dan apl hasad boleh berkongsi data kenalan anda tanpa pengetahuan anda."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Membenarkan apl membaca data mengenai kenalan anda yang disimpan pada TV anda, termasuk kekerapan anda memanggil, menghantar e-mel atau berkomunikasi dalam cara lain dengan individu tertentu. Kebenaran ini membenarkan apl untuk menyimpan data kenalan anda dan apl hasad mungkin berkongsi data kenalan tanpa pengetahuan anda."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Membenarkan apl membaca data tentang kenalan anda yang tersimpan pada peranti Android TV, termasuk kekerapan anda membuat panggilan, menghantar e-mel atau berkomunikasi melalui cara lain dengan individu tertentu. Kebenaran ini membenarkan apl menyimpan data kenalan anda dan apl hasad mungkin berkongsi data kenalan tanpa pengetahuan anda."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Membenarkan apl membaca data tentang kenalan anda yang tersimpan di telefon anda, termasuk kekerapan anda memanggil, menghantar e-mel atau berkomunikasi dalam cara lain dengan individu tertentu. Kebenaran ini membenarkan apl untuk menyimpan data kenalan anda dan apl hasad boleh berkongsi data kenalan anda tanpa pengetahuan anda."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ubah suai kenalan anda"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada tablet anda, termasuk kekerapan siapa anda panggil, hantar e-mel atau berkomunikasi dalam cara lain dengan kenalan tertentu. Kebenaran ini membenarkan apl untuk memadam data kenalan."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Membenarkan apl mengubah suai data mengenai kenalan anda yang disimpan pada TV anda, termasuk kekerapan anda membuat panggilan, menghantar e-mel atau berkomunikasi dalam cara lain dengan kenalan tertentu. Kebenaran ini membenarkan apl untuk memadam data kenalan."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada peranti Android TV anda, termasuk kekerapan anda membuat panggilan, menghantar e-mel atau berkomunikasi melalui cara lain dengan kenalan tertentu. Kebenaran ini membenarkan apl memadam data kenalan."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada telefon anda, termasuk kekerapan siapa anda panggil, hantar e-mel atau berkomunikasi dalam cara lain dengan kenalan tertentu. Kebenaran ini membenarkan apl untuk memadam data kenalan."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"baca log panggilan"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Apl ini boleh membaca sejarah panggilan anda."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"tulis log panggilan"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Membenarkan apl untuk mengubah suai panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Membenarkan apl untuk mengubah suai log panggilan TV anda, termasuk data mengenai panggilan masuk atau keluar. Apl hasad mungkin menggunakan ini untuk memadam atau mengubah suai log panggilan anda."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Membenarkan apl mengubah suai log panggilan peranti Android TV anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakan keupayaan ini untuk memadamkan atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Membenarkan apl untuk mengubah suai panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"akss pndia bdn (spt pmntau kdr dnyt jntg)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Membenarkan apl mengakses data dari penderia yang memantau keadaan fizikal anda, seperti kadar denyutan jantung anda."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Baca acara dan butiran kalendar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Apl ini boleh membaca semua acara kalendar yang disimpan pada tablet anda dan berkongsi atau menyimpan data kalendar anda."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Apl ini boleh membaca semua acara kaledar yang disimpan pada TV anda dan berkongsi atau menyimpan data kalendar anda."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Apl ini boleh membaca semua acara kalendar yang disimpan pada peranti Android TV anda dan berkongsi atau menyimpan data kalendar anda."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Apl ini boleh membaca semua acara kalendar yang disimpan pada telefon anda dan berkongsi atau menyimpan data kalendar anda."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"tambah atau ubah suai acara kalendar dan hantar e-mel kepada tetamu tanpa pengetahuan pemilik"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Apl ini boleh menambah, mengalih keluar atau mengubah acara kalendar pada tablet anda. Apl ini boleh menghantar mesej yang mungkin kelihatan seperti dihantar oleh pemilik kalendar atau mengubah acara tanpa memaklumi pemilik acara itu."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Apl ini boleh menambah, mengalih keluar atau mengubah acara kalendar pada TV anda. Apl ini boleh menghantar mesej yang mungkin kelihatan seperti dihantar oleh pemilik kalendar atau mengubah acara tanpa memaklumi pemilik acara itu."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Apl ini boleh menambah, mengalih keluar atau mengubah acara kalendar pada peranti Android TV anda. Apl ini boleh menghantar mesej yang mungkin kelihatan seperti dihantar oleh pemilik kalendar atau mengubah acara tanpa memberitahu pemilik acara itu."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Apl ini boleh menambah, mengalih keluar atau mengubah acara kalendar pada telefon anda. Apl ini boleh menghantar mesej yang mungkin kelihatan seperti dihantar oleh pemilik kalendar atau mengubah acara tanpa memaklumi pemilik acara itu."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah tambahan pembekal lokasi"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Membenarkan apl mengakses arahan pembekal lokasi tambahan. Ini boleh membenarkan apl untuk campur tangan dengan operasi GPS atau sumber lokasi lain."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Apl ini boleh mendapatkan lokasi tepat anda hanya apabila apl tersebut berada di latar depan. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada telefon anda untuk membolehkan apl menggunakan perkhidmatan tersebut. Tindakan ini mungkin meningkatkan penggunaan bateri."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"akses lokasi anggaran (berdasarkan rangkaian) hanya di latar depan"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Apl ini boleh mendapatkan lokasi anda berdasarkan sumber rangkaian seperti menara selular dan rangkaian Wi-Fi, tetapi hanya apabila apl itu di latar depan. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada tablet anda untuk membolehkan apl menggunakan perkhidmatan tersebut."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Apl ini boleh mendapatkan lokasi anda berdasarkan sumber rangkaian seperti menara selular dan rangkaian Wi-Fi, tetapi hanya apabila apl itu di latar depan. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada TV anda untuk membolehkan apl menggunakan perkhidmatan tersebut."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Apl ini boleh mendapatkan lokasi anda berdasarkan sumber rangkaian seperti menara selular dan rangkaian Wi-Fi, tetapi hanya apabila apl itu di latar depan. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada peranti Android TV anda untuk membolehkan apl menggunakan perkhidmatan tersebut."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Apl ini boleh mendapatkan lokasi anda berdasarkan sumber rangkaian seperti menara selular dan rangkaian Wi-Fi, tetapi hanya apabila apl itu di latar depan. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada telefon anda untuk membolehkan apl menggunakan perkhidmatan tersebut."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"akses lokasi di latar belakang"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jika tindakan ini dibenarkan bagi akses lokasi anggaran atau lokasi tepat, apl tersebut boleh mengakses lokasi itu semasa berjalan di latar belakang."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Apl ini dapat mengecam aktiviti fizikal anda."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Apl ini boleh mengambil gambar dan merakam video menggunakan kamera pada bila-bila masa."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"kawal getaran"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Membenarkan apl mengawal penggetar."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil terus nombor telefon"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"baca nombor telefon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Membenarkan apl mengakses nombor telefon peranti."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"menghalang tablet daripada tidur"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"halang TV daripada tidur"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"menghalang peranti Android TV anda daripada tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"halang telefon daripada tidur"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Membenarkan apl menghalang tablet daripada tidur."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Membenarkan apl menghalang TV daripada tidur."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Membenarkan apl menghalang peranti Android TV anda daripada tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Membenarkan apl menghalang telefon daripada tidur."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"hantar inframerah"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Membenarkan apl menggunakan pemancar inframerah tablet."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Membenarkan apl menggunakan pemancar inframerah TV."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Membenarkan apl menggunakan pemancar inframerah peranti Android TV anda."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Membenarkan apl menggunakan pemancar inframerah telefon."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"tetapkan kertas dinding"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Membenarkan apl menetapkan kertas dinding sistem."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Membenarkan apl menetapkan pembayang saiz kertas dinding sistem."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"tetapkan zon waktu"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Membenarkan apl menukar zon waktu tablet."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Membenarkan apl menukar zon waktu TV."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Membenarkan apl mengubah zon waktu peranti Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Membenarkan apl menukar zon waktu telefon."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"cari akaun pada peranti"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh tablet. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang telah anda pasang."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Membenarkan apl mendapatkan senarai akaun yang diketahui oleh TV. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang telah anda pasang."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh peranti Android TV anda. Akaun ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang telah anda pasang."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh telefon. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang telah anda pasang."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"lihat sambungan rangkaian"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Membenarkan apl melihat maklumat tentang sambungan rangkaian seperti rangkaian mana yang wujud dan bersambung."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Membenarkan apl menyambung ke dan memutuskan sambungan dari titik capaian Wi-Fi dan membuat perubahan kepada konfigurasi peranti untuk rangkaian Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"benarkan penerimaan Wi-Fi Multisiar"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat multisiar, bukan hanya tablet anda. Apl menggunakan lebih kuasa berbanding mod bukan multisiar."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat berbilang penghantaran, bukan TV anda sahaja. Mod ini menggunakan lebih banyak kuasa berbanding mod bukan berbilang penghantaran."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat multisiar, bukan hanya peranti Android TV anda. Ciri ini menggunakan lebih banyak kuasa berbanding dengan mod bukan multisiar."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat multisiar, bukan hanya telefon anda. Ia menggunakan lebih kuasa berbanding mod bukan multisiar."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"akses tetapan Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Membenarkan apl mengkonfigurasikan tablet Bluetooth setempat dan menemui serta berpasangan dengan peranti jauh."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Membenarkan apl mengkonfigurasi TV Bluetooth tempatan dan menemui serta berpasangan dengan peranti jauh."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Membenarkan apl mengkonfigurasikan Bluetooth pada peranti Android TV anda dan mencari serta bergandingan dengan peranti jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Membenarkan apl mengkonfigurasikan telefon Bluetooth setempat dan menemui serta berpasangan dengan peranti jauh."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambung dan putuskan sambungan WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Membenarkan apl menentukan sama ada WiMaX didayakan dan maklumat tentang sebarang rangkaian WiMaX yang disambungkan."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"tukar keadaan WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Membenarkan apl untuk menyambungkan tablet ke dan menyahsambungkan tablet dari rangkaian WiMaX."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Membenarkan apl menyambungkan TV ke dan memutuskan sambungan TV daripada rangkaian WiMAX."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Membenarkan apl menyambungkan peranti Android TV anda ke dan memutuskan peranti Android TV anda daripada rangkaian WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Membenarkan apl untuk menyambungkan telefon ke dan menyahsambung telefon dari rangkaian WiMaX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"berpasangan dengan peranti Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Membenarkan apl melihat konfigurasi Bluetooth pada tablet dan untuk membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Membenarkan apl melihat konfigurasi Bluetooth pada TV dan untuk membuat serta menerima sambungan dengan peranti yang digandingkan."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Membenarkan apl melihat konfigurasi Bluetooth pada peranti Android TV anda dan membuat serta menerima sambungan dengan peranti yang digandingkan."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Membenarkan apl melihat konfigurasi Bluetooth pada telefon dan membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"mengawal Komunikasi Medan Dekat"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Membenarkan apl berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan  dan PIN kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Pantau percubaan buka kunci skrin"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Memantau bilangan kata laluan yang tersilap ditaip apabila membuka skrin, dan mengunci tablet atau memadam semua data tablet jika terlalu banyak kesilapan menaip kata laluan."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci TV atau padam semua data TV jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data peranti Android TV jika terlalu banyak kata laluan yang salah ditaip."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Memantau bilangan kata laluan salah yang ditaip semasa membuka skrin, dan mengunci telefon atau memadam semua data telefon jika terlalu banyak kata laluan salah ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci tablet atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci TV atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data pengguna ini jika terlalu banyak kata laluan yang salah ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci telefon atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Tukar kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Tukar kunci skrin."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengawal cara dan masa skrin dikunci."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Padam data TV tanpa amaran dengan melakukan tetapan semula data kilang."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Padamkan data peranti Android TV anda tanpa amaran dengan melaksanakan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Memadamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Padam data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Padam data pengguna ini pada TV ini tanpa amaran."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Padamkan data pengguna ini pada peranti Android TV tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Padam data pengguna ini pada telefon ini tanpa amaran."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Tetapkan proksi global peranti"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Tetapkan proksi global peranti untuk digunakan sementara dasar didayakan. Hanya pemilik peranti boleh menetapkan proksi global."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Telah melepasi had cubaan Buka Kunci Wajah"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Tiada kad SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tiada kad SIM dalam tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Tiada kad SIM dalam TV."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Tiada kad SIM dalam peranti Android TV anda."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Kad SIM tiada dalam telefon."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Masukkan kad SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Kad SIM tiada atau tidak boleh dibaca. Sila masukkan kad SIM."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah menaip PIN yang salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Anda telah tersilap lukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta untuk membuka kunci TV anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam masa <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta untuk membuka kunci peranti Android TV anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Sila cuba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Anda telah mencuba membuka kunci TV secara tidak betul sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, TV akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Anda telah cuba membuka peranti Android TV secara salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, peranti Android TV anda akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah mencuba untuk membuka kunci telefon dengan salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, telefon akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Anda telah cuba membuka kunci TV secara tidak betul sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. TV kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Anda telah cuba membuka peranti Android TV secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Peranti Android TV anda kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Cuba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> saat."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa corak?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Membenarkan apl membaca sejarah semua URL yang telah Penyemak Imbas lawati dan semua penanda halaman Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"tulis penanda buku dan sejarah web"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Membenarkan apl mengubah suai sejarah atau penanda halaman Penyemak Imbas yang tersimpan pada tablet anda. Ini boleh membenarkan apl untuk memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Membenarkan apl untuk mengubah suai sejarah Penyemak Imbas atau penanda halaman yang disimpan pada TV anda. Ini mungkin membenarkan apl untuk memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Membenarkan apl mengubah suai sejarah atau penanda halaman Penyemak Imbas yang disimpan pada peranti Android TV anda. Ini mungkin membenarkan apl memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Membenarkan apl mengubah suai sejarah atau penanda halaman Penyemak Imbas yang tersimpan pada telefon anda. Ini boleh membenarkan apl untuk memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"tetapkan penggera"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Membenarkan apl untuk menetapkan penggera dalam apl penggera jam yang dipasang. Sesetengah applikasi jam penggera tidak boleh melaksanakan ciri ini."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Rangkaian Wi-Fi terbuka tersedia</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Sambung ke rangkaian Wi-Fi terbuka"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Sambung ke rangkaian Wi-Fi pembawa"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Menyambung ke rangkaian Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Disambungkan ke rangkaian Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Tidak dapat menyambung ke rangkaian Wi-Fi"</string>
@@ -1307,7 +1310,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Taipkan PIN yang diperlukan:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Sambungan tablet ke Wi-Fi akan diputuskan buat sementara waktu semasa tablet bersambung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"TV akan memutuskan sambungan dari Wi-Fi buat sementara waktu semasa disambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Peranti Android TV anda akan diputuskan sambungan daripada Wi-Fi untuk sementara waktu semasa peranti ini disambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Sambungan telefon ke Wi-Fi akan diputuskan buat sementara waktu semasa telefon bersambung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
@@ -1650,13 +1653,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Anda telah cuba membuka kunci TV secara tidak betul sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, TV akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Anda telah cuba membuka peranti Android TV secara salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, peranti Android TV anda akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Anda telah mencuba untuk membuka kunci telefon dengan salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, telefon akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Anda telah cuba membuka kunci TV secara tidak betul sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. TV kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Anda telah cuba membuka peranti Android TV secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Peranti Android TV anda kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula ke tetapan lalai kilang."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Anda telah tersilap lukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta untuk membuka kunci TV anda menggunakan akaun e-mel.\n\n Cuba lagi dalam masa <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta untuk membuka kunci peranti Android TV anda menggunakan akaun e-mel.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> saat."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alih keluar"</string>
@@ -1997,6 +2000,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Ketik untuk menyemak item yang disekat."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Tetapan"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Tunggu sedia"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Peranti Android TV akan mati tidak lama lagi; tekan butang untuk memastikan peranti terus hidup."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Peranti akan mati tidak lama lagi; tekan untuk memastikan peranti terus hidup."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"dipaparkan di atas apl lain pada skrin anda"</string>

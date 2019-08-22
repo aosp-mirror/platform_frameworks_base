@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Көптеген <xliff:g id="CONTENT_TYPE">%s</xliff:g> мазмұнын жоюға әрекет жасалды."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Планшет жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Сағат жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"ТД жады толы. Орынды босату үшін кейбір файлдарды жойыңыз."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV құрылғысының жады толы. Орын босату үшін кейбір файлдарды өшіріп тастаңыз."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Телефон жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other"> Сертификат құқықтары орнатылды</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Басып шығаруды <xliff:g id="OWNER_APP">%s</xliff:g> өшірді."</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Планшет опциялары"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"ТД опциялары"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV опциялары"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Телефон опциялары"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Үнсіз режим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Сымды қосу"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Қайта іске қосылуда…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Өшірілуде…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшет өшіріледі."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ТД өшіріледі."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV құрылғысы өшеді."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Сағатыңыз өшіріледі."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон өшіріледі."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Өшіру керек пе?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Жуықта қолданылған"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Жақындағы қолданбалар жоқ"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Планшет опциялары"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"ТД опциялары"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV опциялары"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Телефон опциялары"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Экранды құлыптау"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Өшіру"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Қолданбаға SMS хабарларын жіберу мүмкіндігін береді. Бұл қосымша төлемдерге себеп болуы мүмкін. Залалды қолданбалар сіздің құптауыңызсыз хабар жіберіп, қосымша шығынға себеп болуы мүмкін."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"өзіңіздің мәтін хабарларыңызды оқу (SMS немесе MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Бұл қолданба планшетте сақталған барлық SMS (мәтіндік) хабарларын оқи алады."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Бұл қолданба теледидарда сақталған барлық SMS (мәтіндік) хабарларын оқи алады."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Бұл қолданба Android TV құрылғыңызда сақталған SMS (мәтіндік) хабарлардың барлығын оқи алады."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Бұл қолданба телефонда сақталған барлық SMS (мәтіндік) хабарларын оқи алады."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"мәтін хабарларын алу (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Қолданбаға WAP хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Қолданба деректерді фондық режимде пайдалана алады. Бұл – деректер трафигін арттыруы мүмкін."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"қолданбаны әрқашан жұмыс істейтін ету"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Қолданбаға өзінің бөліктерін жадта бекіндіру мүмкіндігін береді. Бұл басқа қолданбалардың жадқа қол жетімділігін шектеп, планшетті баяулатуы мүмкін."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Қолданбаға өзінің бөліктерін жадта тұрақты етуге рұқсат етеді. Бұл басқа қолданбаларға қол жетімді жадты шектеп, ТД баяулатуы мүмкін."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Қолданба өзіне тиесілі элементтерді жадта тұрақты сақтай алатын болады. Басқа қолданбалар үшін жад көлемі шектеліп, Android TV құрылғысының жылдамдығын төмендетуі мүмкін."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Қолданбаға өзінің бөліктерін жадта бекіндіру мүмкіндігін береді. Бұл басқа қолданбалардың жадқа қол жетімділігін шектеп, телефонды баяулатуы мүмкін."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"басымдылығы жоғары қызметті іске қосу"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Қолданбаға басымдылығы жоғары қызметтерді пайдалануға рұқсат береді."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Қолданбаға жүйенің параметрлерінің деректерін өзгертуге рұқсат береді. Зиянкес қолданбалар жүйенің конфигурациясын бүлдіруі мүмкін."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"басталу барысында қосылу"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Қолданбаға жүйе жүктелуін аяқтағаннан кейін өзін іске қосуға рұқсат береді. Бұл планшеттің іске қосылуын ұзағырақ етуі және қолданбаның әрқашан жұмыс істеу арқылы жалпы планшетті баяулатуына мүмкіндік беруі мүмкін."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Қолданбаға жүйе жүктелуін аяқтай сала өзін іске қосуға рұқсат етеді. Бұл ТД іске қосуды ұзағырақ етуі және қолданбаға әрқашан жұмыс істеп тұру арқылы бүкіл планшетті баяулатуға мүмкіндік беруі мүмкін."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Жүйе жүктеліп бола салысымен, қолданба өздігінен іске қосыла алатын болады. Ол Android TV құрылғыңыздың ұзақ қосылуына әкелуі және үнемі жұмыс істеп тұрғандықтан, құрылғыңыздың жалпы жылдамдығын төмендетуі мүмкін."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Қолданбаға жүйе жүктелуін аяқтағаннан кейін өзін іске қосуға рұқсат береді. Бұл телефонның іске қосылуын ұзағырақ етуі және қолданбаның әрқашан жұмыс істеу арқылы жалпы телефонды баяулатуына мүмкіндік беруі мүмкін."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"жабысқақ ақпаратты жіберу"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Қолданбаға хабар тарату аяқталғанда сақталатын жабысқақ хабар тарату мүмкіндігін береді. Тым көп қолдану планшет жұмысын баяулатады немесе жадты көп қолдану арқылы жұмысын тұрақсыздандырады."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Қолданбаға тарату аяқталғаннан кейін қалатын тұтқыр таратылымдарды жіберуге рұқсат етеді. Артық пайдалану тым көп жадты пайдалануға әкеліп, ТД баяу немесе тұрақсыз етуі мүмкін."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Қолданба трансляция біткеннен кейін сақталатын бекітілген трансляцияларды жібере алатын болады. Тым жиі пайдалансаңыз, жад толып, Android TV құрылғысы баяу немесе тұрақсыз жұмыс істеуі мүмкін."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Қолданбаға хабар тарату аяқталғанда сақталатын жабысқақ хабар тарату мүмкіндігін береді. Тым көп қолдану телефон жұмысын баяулатады немесе жадты көп қолдану арқылы жұмысын тұрақсыздандырады."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"контактілерді оқу"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Қолданбаға планшетте сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты оқу мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді сақтау мүмкіндігін береді және залалды қолданбалар байланыстар туралы деректерді сіздің келісіміңізсіз бөлісуі ықтимал."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Қолданбаға теледидарда сақталған контактілеріңіз, соның ішінде, сіз белгілі бір тұлғаларға қоңырау шалу, электрондық хабарлар жіберу немесе басқа жолдармен байланысу жиілігіңіз туралы деректерді оқуға рұқсат етеді. Бұл рұқсат қолданбаларға контакт деректерін сақтауға рұқсат етеді және зиянкес қолданбалар сіз білместен контакт деректерін бөлісуі мүмкін."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Қолданба Android TV құрылғыңызда сақталған контактілер туралы деректі оқи алатын болады. Бұл деректерге белгілі бір адамдарға қаншалықты жиі қоңырау шалатыныңыз, электрондық хабар жазатыныңыз немесе басқа жолмен хабарласатыныңыз туралы ақпарат кіреді. Бұл рұқсат арқылы қолданбалар контакт туралы деректерді сақтай алады. Ал зиянды қолданбалар контакт туралы деректерді сіздің рұқсатыңызсыз бөлісуі мүмкін."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Қолданбаға телефонда сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты оқу мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді сақтау мүмкіндігін береді және залалды қолданбалар байланыстар туралы деректерді сіздің келісіміңізсіз бөлісуі ықтимал."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"контактілерді өзгерту"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Қолданбаға планшетте сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты өзгерту мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді өшіру мүмкіндігін береді."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Қолданбаға теледидарда сақталған контактілер, соның ішінде, белгілі бір контактілерге қоңырау шалу, электрондық хабарлар жіберу немесе басқа жолдармен байланысу жиілігі туралы деректерді өзгертуге рұқсат етеді. Бұл рұқсат қолданбаларға контакт деректерін жоюға рұқсат етеді."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Қолданба Android TV құрылғыңызда сақталған контактілер туралы деректі өзгерте алатын болады. Бұл деректерге белгілі бір контактіге қаншалықты жиі қоңырау шалатыныңыз, электрондық хабар жазатыныңыз немесе басқа жолмен хабарласатыныңыз туралы ақпарат кіреді. Бұл рұқсаттың көмегімен қолданбалар контакт туралы деректерді жоя алады."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Қолданбаға телефонда сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты өзгерту мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді өшіру мүмкіндігін береді."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"қоңыраулар тіркеуін оқу"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Бұл қолданба қоңыраулар тарихын оқи алады."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"қоңырау тіркеуді жазу"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Қолданбаға сіздің планшетіңіздегі қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Қолданбаға ТД қоңыраулар журналын, соның ішінде, кіріс және шығыс қоңыраулар туралы деректерді өзгертуге рұқсат етеді. Зиянкес қолданбалар мұны қоңыраулар журналын өшіру немесе өзгерту үшін пайдалануы мүмкін."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Қолданба Android TV құрылғысының қоңыраулар журналын, сонымен қатар кіріс және шығыс қоңыраулар туралы деректерді өзгерте алатын болады. Қоңыраулар журналын деректерден тазарту немесе оны өзгерту үшін зиянды қолданбалар осы рұқсатты пайдалануы мүмкін."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Қолданбаға сіздің телефоныңыздың қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"дене датчиктеріне (мысалы, жүрек соғу жиілігінің мониторларына) қатынасу"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Қолданбаға жүрек соғу жиілігіңіз сияқты дене күйіңізді бақылайтын сенсорлардың деректеріне қатынасуға рұқсат етеді."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Күнтізбе оқиғалары мен мәліметтерін оқу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Бұл қолданба планшетте сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Бұл қолданба теледидарда сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Бұл қолданба Android TV құрылғыңызда сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Бұл қолданба телефонда сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"күнтізбе шараларын қосу немесе өзгерту және пайдаланушының қатысуынсыз қонақтардың эл. пошталарына жіберу."</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Бұл қолданба планшеттегі күнтізбе оқиғаларын енгізе, өшіре не өзгерте алады. Ол күнтізбе иелерінен келгендей болып көрінетін хабарларды жіберуі немесе иелеріне хабарламай, оқиғаларды өзгертуі мүмкін."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Бұл қолданба теледидардағы күнтізбе оқиғаларын енгізе, өшіре не өзгерте алады. Ол күнтізбе иелерінен келгендей болып көрінетін хабарларды жіберуі немесе иелеріне хабарламай, оқиғаларды өзгертуі мүмкін."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Бұл қолданбаның Android TV құрылғысында күнтізбе іс-шараларын қосу, өшіруне өзгерту мүмкіндігі бар. Ол күнтізбе иелерінен келгендей етіп хабарлар жібере алады немесе иелеріне хабарламай, іс-шараларды өзгерте алады."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Бұл қолданба телефондағы күнтізбе оқиғаларын енгізе, өшіре не өзгерте алады. Ол күнтізбе иелерінен келгендей болып көрінетін хабарларды жіберуі немесе иелеріне хабарламай, оқиғаларды өзгертуі мүмкін."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"қосымша аймақ жабдықтаушы пәрмендеріне қол жетімділік"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Қолданбаға орын жеткізушісінің қосымша пәрмендеріне қатынасуға рұқсат береді. Бұл қолданбаға GPS немесе басқа орын көздерінің жұмысына кедергі келтіруге рұқсат беруі мүмкін."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Бұл қолданба нақты орналасқан жеріңіз туралы ақпаратты экранда ашық тұрғанда ғана анықтай алады. Қолданба бұл орынды анықтау қызметтерін пайдалана алуы үшін, олар қосулы әрі телефонда қолжетімді болуы керек. Батарея көбірек тұтынылуы мүмкін."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"болжалды геодерекке (желі негізінде) тек экрандық режимде кіру"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Бұл қолданба орналасқан жеріңізді ұялы байланыс мұнаралары мен Wi-Fi желілері сияқты желі көздерінің негізінде анықтайды. Бірақ бұл үшін қолданба экрандық режимде жұмыс істеп тұруы керек. Қолданба бұл орынды анықтау қызметтерін пайдалана алуы үшін, олар қосулы әрі планшетте қолжетімді болуы керек."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Бұл қолданба орналасқан жеріңізді ұялы байланыс мұнаралары мен Wi-Fi желілері сияқты желі көздерінің негізінде анықтайды. Бірақ бұл үшін қолданба экранда ашық тұруы керек. Қолданба бұл орынды анықтау қызметтерін пайдалана алуы үшін, олар қосулы әрі теледидарда қолжетімді болуы керек."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Бұл қолданба орналасқан жеріңізді ұялы байланыс мұнаралары мен Wi-Fi желілері сияқты желі көздерінің негізінде анықтайды. Бірақ бұл үшін қолданба ашық тұруы керек. Қолданба орынды анықтау қызметтерін пайдалана алуы үшін, олар қосулы әрі Android TV құрылғысында қолжетімді болуы керек."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Бұл қолданба орналасқан жеріңізді ұялы байланыс мұнаралары мен Wi-Fi желілері сияқты желі көздерінің негізінде анықтайды. Бірақ бұл үшін қолданба экранда ашық тұруы керек. Қолданба бұл орынды анықтау қызметтерін пайдалана алуы үшін, олар қосулы әрі телефонда қолжетімді болуы керек."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"геодеректерді фондық режимде пайдалану"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Егер ол шамамен есептегендегі немесе нақты орынды пайдалануға рұқсат алса, қолданба фондық режимде жұмыс істеп тұрып-ақ геодеректерді пайдалана алады."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Бұл қолданба физикалық әрекетті тани алады."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"фотосурет жасау және бейне жазу"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Бұл қолданба кез келген уақытта камерамен суретке түсіруі және бейнелерді жазуы мүмкін."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"тербелісті басқару"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"нөмірлерге тікелей телефон шалу"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"телефон нөмірлерін оқу"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Қолданбаға құрылғының телефон нөмірлерін алуға мүмкіндік береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ТД ұйықтауын болдырмау"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"Android TV құрылғыңызды ұйқы режиміне өткізбеу"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"телефонды ұйқыдан бөгеу"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Қолданбаға планшеттің ұйқыға кетуін болдырмауға рұқсат береді."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Қолданбаға ТД ұйқыға кетуін болдырауға рұқсат етеді."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Қолданба Android TV құрылғысын \"Ұйқы\" режиміне өткізбейтін болады."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Қолданбаға телефонның ұйқыға кетуін болдырмауға рұқсат береді."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"инфрақызыл қабылдау"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Қолданбаға планшеттің инфрақызыл қабылдағышын қолдану мүмкіндігін береді."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Қолданбаға ТД инфрақызыл таратқышын пайдалануға рұқсат етеді."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Қолданба Android TV құрылғыңыздың инфрақызыл датчигін пайдалана алатын болады."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Қолданбаға телефонның инфрақызыл қабылдағышын қолдану мүмкіндігін береді."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"артқы фонды орнату"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Қолданбаға жүйелік экранның артқы фонын орнатуға рұқсат береді."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Қолданбаға жүйелік экранның артқы фонының өлшемі туралы кеңестерді орнатуға рұқсат береді."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"уақыт аймағын реттеу"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Қолданбаға планшеттің уақыт белдеуін өзгертуге рұқсат береді."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Қолданбаға ТД уақыт белдеуін өзгертуге рұқсат етеді."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Қолданба Android TV құрылғыңыздың уақыт белдеуін өзгерте алатын болады."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Қолданбаға телефонның уақыт белдеуін өзгертуге рұқсат береді."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"құрылғыдағы есептік жазбаларды табу"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Қолданбаға планшет арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Қолданбаға ТД үшін белгілі есептік жазбалар тізімін алуға рұқсат етеді. Бұл сіз орнатқан қолданбалар жасаған кез келген есептік жазбаларды қамтуы мүмкін."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Қолданба Android TV құрылғыңыз танитын есептік жазбалардың тізімін ала алатын болады. Оған сіз орнатқан қолданбалар арқылы жасалған кез келген есептік жазба кіруі мүмкін."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Қолданбаға телефон арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"желі байланыстарын көру"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Қолданбаға желі байланысы туралы ақпаратты, мысалы, қайсысы бар және қосылған деген сияқты, көру мүмкіндігін береді."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Қолданбаларға Wi-Fi нүктелеріне қосылу және ажырау және Wi-Fi желілеріне арналған құрылғы конфигурацияларына өзгерістер енгізу мүмкіндігін береді."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi бірнеше мекенжайға ақпарат тарату мүмкіндігі"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Қолданбаға Wi-Fi желісіндегі барлық құрылғыларға мекенжайлар тобы арқылы, сіздің планшетіңіз арқылы ғана емес, жіберілген жинақтарды алу мүмкіндігін береді. Бұл мекенжайлар тобы емес режимге қарағанда қуатты көбірек тұтынуы мүмкін."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Қолданбаға теледидарыңызға ғана емес, топтық мекенжайларды пайдаланып Wi-Fi желісіндегі барлық құрылғыларға жіберілген бумаларды алуға рұқсат етеді. Бұған топтық емес режимнен көбірек қуат пайдаланылады."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Осы рұқсат арқылы қолданба Android TV құрылғысын ғана емес, топтық мекенжайларды пайдаланып, Wi-Fi желісіне қосылған барлық құрылғыларға жіберілген пакеттерді қабылдай алады. Ол әдеттегі режимге қарағанда қуатты көп тұтынады."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Қолданбаға Wi-Fi желісіндегі барлық құрылғыларға мекенжайлар тобы арқылы, сіздің телефоныңыз арқылы ғана емес, жіберілген жинақтарды алу мүмкіндігін береді. Бұл мекенжайлар тобы емес режимге қарағанда қуатты көбірек тұтынуы мүмкін."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth параметрлеріне кіру"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Қолданбаға жергілікті Bluetooth планшетін конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат береді."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Қолданбаға жергілікті Bluetooth теледидарын конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат етеді."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Қолданба Android TV құрылғыңыздағы Bluetooth функциясын конфигурациялай алады және қашықтағы құрылғыларды анықтап, олармен жұптай алады."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Қолданбаға жергілікті Bluetooth телефонын конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат береді."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX байланысына жалғану және ажырау"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Қолданбаға WiMAX қосылғаны және қосылған қандай да WiMAX желісі жайлы ақпаратты анықтау мүмкіндігін береді."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX күйін өзгерту"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Қолданбаларға планшетті WiMAX желілеріне қосу және ажырату мүмкіндіктерін береді."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Қолданбаға теледидарға қосылуға және теледидарды WiMAX желілерінен ажыратуға рұқсат етеді."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Осы рұқсат арқылы қолданба Android TV құрылғысын WiMAX желілеріне қосуға және ажыратуға мүмкіндік береді."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Қолданбаларға телефонды WiMAX желілеріне қосу және ажырату мүмкіндіктерін береді."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth құрылғыларымен жұпталу"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Қолданбаға планшеттегі Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Қолданбаға теледидардағы Bluetooth конфигурациясын көруге және жұпталған құрылғылармен байланыстарды қабылдауға рұқсат етеді."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Қолданба Android TV құрылғыңыздағы Bluetooth конфигурациясын көре алады және жұпталған құрылғылармен байланыс орнатып, оларды қабылдай алатын болады."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Қолданбаға телефондағы Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC функциясын басқару"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Экран құлпын ашу әркеттерін бақылау"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Экран бекітпесін ашу кезінде терілген дұрыс емес құпия сөздердің санын бақылау және тым көп дұрыс емес құпия сөз терілсе, ТД бекіту немесе бүкіл ТД деректерін өшіру."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және Android TV құрылғыңыздың барлық деректерінен тазарту."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және телефонды бекіту немесе тым көп қате құпия сөздер терілген болса, телефонның бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, планшетті бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, теледидарды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және барлық пайдаланушы деректерінен тазарту."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, телефонды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран құлпын өзгерту"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран құлпын өзгерту."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Экранның қашан және қалай құлыптанатынын басқару."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Барлық деректерді өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Зауыттық деректерді қалпына келтіруді орындау арқылы ТД деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Зауыттық деректерді қалпына келтіру арқылы Android TV құрылғыңыздың деректерін ескертусіз тазартыңыз."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Зауыттық деректерге қайтару арқылы телефон деректерін ескертусіз өшіру."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Пайдаланушы деректерін өшіру"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Осы пайдаланушының осы планшеттегі деректерін ескертусіз өшіру."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Осы пайдаланушының осы теледидардағы деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Android TV құрылғысын осы пайдаланушы деректерінен ескертусіз тазартыңыз."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Осы пайдаланушының осы телефондағы деректерін ескертусіз өшіру."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Құрылғы жаһандық прокси қызметін орнату"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Саясат қосулы болғанда пайдаланылатын құрылғының ғаламдық прокси-серверін орнатыңыз. Ғаламдық прокси-серверді тек құрылғы иесі орната алады."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Бет-әлпет арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM картасы жоқ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Планшетте SIM картасы жоқ."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"ТД ішінде SIM картасы жоқ."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Android TV құрылғыңызда SIM картасы жоқ."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Телефонда SIM картасы жоқ."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM картасын салыңыз."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM картасы жоқ немесе оны оқу мүмкін емес. SIM картасына салыңыз."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Құпия сөзді <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN кодын <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп планшет бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс емес салдыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін сізден Google кіруді пайдаланып ТД бекітпесін ашу сұралады.\n\n Әрекетті <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталаңыз."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін Google есептік жазбаңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп телефон бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Планшеттің бекітпесін ашуға <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін, телефон зауыттың бастапқы параметрлеріне қайта реттеледі және пайдаланушы деректері жоғалады."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"ТД бекітпесін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс емес ашу әрекетін жасадыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін ТД зауыттық әдепкі параметрлері қалпына келтіріледі және бүкіл пайдаланушы деректері жоғалады."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Android TV құрылғыңыздың құлпын <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс ашпадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың зауыттық әдепкі параметрлері қайтарылады және одан барлық пайдаланушы деректері өшіп қалады."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Телефонның бекітпесін ашуға <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін, телефон зауыттың бастапқы параметрлеріне қайта реттеледі және пайдаланушы деректері жоғалады."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Планшетті ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Планшет зауыттың бастапқы параметрлеріне қайта реттеледі."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"ТД бекітпесін <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс емес ашу әрекетін жасадыңыз. ТД қазір зауыттық әдепкі параметрлерге қалпына келтіріледі."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Android TV құрылғыңыздың құлпын <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс ашпадыңыз. Енді Android TV құрылғыңыздың зауыттық әдепкі параметрлері қайтарылады."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Телефонды ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Телефон зауыттың бастапқы параметрлеріне қайта реттеледі."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Кескінді ұмытып қалдыңыз ба?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Қолданбаларға Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін оқу мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"веб бетбелгілер және тарих жазу"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Қолданбаларға планшетте сақталған Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін оқу мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Қолданбаға теледидарда сақталған браузер тарихын немесе бетбелгілерін өзгертуге рұқсат етеді. Бұл қолданбаға браузер деректерін өшіруге немесе өзгертуге рұқсат етуі мүмкін. Ескертпе: бұл рұқсатты үшінші тарап браузерлері немесе вебті шолу мүмкіндіктері бар басқа қолданбалар күшіне енгізе алмайды."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Қолданба Android TV құрылғысында сақталған браузер тарихын немесе бетбелгілерді өзгерте алатын болады. Ол қолданбаға браузер деректерінен тазартуға немесе оларды өзгертуге мүмкіндік бере алады. Ескертпе: бұл рұқсатты интернет беттерін аша алатын басқа браузерлер немесе қолданбалар пайдалана алмайды."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Қолданбаларға телефонда сақталған Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін өзгерту мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"дабылды орнату"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Қолданбаға орнатылған оятқыш қолданбасында дабылды орнатуға рұқсат береді. Кейбір қолданбаларда бұл мүмкіндік іске асырылмауы мүмкін."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Ашық Wi-Fi желісі қол жетімді</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Ашық Wi‑Fi желісіне қосылу"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Оператордың Wi‑Fi желісіне қосылу"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi желісіне қосылуда"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi желісіне қосылды"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi желісіне қосылмады"</string>
@@ -1308,7 +1311,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Өтінілген PIN кодты теру:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Планшет <xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысына қосылғанша Wi-Fi байланысынан уақытша ажыратылады"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысына қосулы кезде ТД Wi-Fi желісінен уақытша ажыратылады"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысына қосулы тұрғанда, Android TV құрылғысы Wi-Fi желісінен уақытша ажырайды."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысына жалғанып тұрғанда телефон уақытша Wi-Fi байланысынан ажыратылады"</string>
     <string name="select_character" msgid="3365550120617701745">"Таңба енгізу"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS хабарларын жіберу"</string>
@@ -1651,13 +1654,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Құпия сөзді <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Планшетті ашуға <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңыз бастапқы зауыттық параметрлеріне қайта реттеледі және барлық пайдаланушы деректері жойылады."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"ТД бекітпесін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс емес ашу әрекетін жасадыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін ТД зауыттық әдепкі параметрлері қалпына келтіріледі және бүкіл пайдаланушы деректері жоғалады."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Android TV құрылғыңыздың құлпын <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс ашпадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың зауыттық әдепкі параметрлері қайтарылады және одан барлық пайдаланушы деректері өшіп қалады."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Телефонды ашуға <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңыз бастапқы зауыттық параметрлеріне қайта реттеледі және барлық пайдаланушы деректері жойылады."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Планшетті ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Планшет бастапқы зауыттық параметрлеріне қайта реттеледі."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"ТД бекітпесін <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс емес ашу әрекетін жасадыңыз. ТД қазір зауыттық әдепкі параметрлерге қалпына келтіріледі."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Android TV құрылғыңыздың құлпын <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс ашпадыңыз. Енді Android TV құрылғыңыздың зауыттық әдепкі параметрлері қайтарылады."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Телефонды ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Телефон бастапқы зауыттық параметрлеріне қайта реттеледі."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. After <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін планшетіңізді есептік жазба арқылы ашу өтінішін аласыз.\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін сізден электрондық пошта есептік жазбасын пайдаланып ТД бекітпесін ашу сұралады.\n\n Әрекетті <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталаңыз."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін есептік жазбаңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды есептік жазба арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып тастау"</string>
@@ -1998,6 +2001,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Жүйе"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Параметрлер"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Күту режимі"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV құрылғысы жақын арада өшеді. Оны қосулы ұстау үшін басыңыз."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Құрылғы жақын арада өшеді. Оны қосулы ұстау үшін басыңыз."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"экранда басқа қолданбалардың үстінен көрсету"</string>

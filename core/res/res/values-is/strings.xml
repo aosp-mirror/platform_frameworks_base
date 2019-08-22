@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Reynt var að eyða of mörgum <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Geymslurými spjaldtölvunnar er fullt. Eyddu einhverjum skrám til að losa um pláss."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Geymsla úrsins er full. Eyddu einhverjum skrám til að búa til pláss."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Geymslurými sjónvarpsins er fullt. Eyddu skrám til að losa um pláss."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Geymsla Android TV tækisins er full. Eyddu einhverjum skrám til að losa um pláss."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Geymslurými símans er fullt. Eyddu einhverjum skrám til að losa um pláss."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">CA-vottorð hafa verið sett upp</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> lokaði á prentun."</string>
     <string name="me" msgid="6545696007631404292">"Ég"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Valkostir spjaldtölvu"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Sjónvarpsvalkostir"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Valkostir Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Valkostir síma"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Hljóðlaus stilling"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Kveikja á þráðlausum samskiptum"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Endurræsir…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Slekkur…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Slökkt verður á spjaldtölvunni."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Slökkt verður á sjónvarpinu."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Slökkt verður á Android TV tækinu."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Slökkt verður á úrinu."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Slökkt verður á símanum."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Viltu slökkva?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nýleg"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Engin nýleg forrit."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Valkostir spjaldtölvu"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Sjónvarpsvalkostir"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Valkostir Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Valkostir síma"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skjálás"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Slökkva"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Leyfir forriti að senda SMS-skilaboð. Þetta getur valdið óvæntri gjaldtöku. Spilliforrit geta kostað þig peninga með því að senda skilaboð án staðfestingar frá þér."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lesa textaskilaboð (SMS eða MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Þetta forrit getur lesið öll SMS-skilaboð (textaskilaboð) sem eru vistuð í spjaldtölvunni."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Þetta forrit getur lesið öll SMS-skilaboð (textaskilaboð) sem eru vistuð í sjónvarpinu."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Þetta forrit getur lesið öll SMS-skilaboð (textaskilaboð) sem eru vistuð í Android TV tækinu."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Þetta forrit getur lesið öll SMS-skilaboð (textaskilaboð) sem eru vistuð í símanum."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"taka á móti textaskilaboðum (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leyfir forriti að taka á móti og vinna úr WAP-skilaboðum. Þessi heimild felur í sér möguleikann á að fylgjast með eða eyða skilaboðum sem þér eru send án þess að birta þér þau."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Þetta forrit getur notað gagnamagn í bakgrunni. Þetta gæti aukið notkun gagnamagns."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"láta forrit keyra stöðugt"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Leyfir forriti að gera hluta sjálfs sín varanlega í minni. Þetta getur takmarkað það minni sem býðst öðrum forritum og þannig hægt á spjaldtölvunni."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Leyfir forriti að gera hluta sjálfs sín varanlega í minni. Þetta getur takmarkað það minni sem býðst öðrum forritum og þannig hægt á sjónvarpinu."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Leyfir forritinu að gera hluta þess varanlega í minni. Þetta getur takmarkað það minni sem býðst öðrum forritum og þannig hægt á Android TV tækinu."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Leyfir forriti að gera hluta sjálfs sín varanlega í minni. Þetta getur takmarkað það minni sem býðst öðrum forritum og þannig hægt á símanum."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"keyra þjónustu í forgrunni"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Leyfir forritinu að nota þjónustu sem er í forgrunni."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Leyfir forriti að breyta stillingagögnum kerfisins. Spilliforrit geta spillt grunnstillingu kerfisins."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"keyra við ræsingu"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Leyfir forriti að ræsa sig um leið og kerfið hefur lokið við ræsingu. Þetta getur tafið ræsingu spjaldtölvunnar og valdið því að forritið hægir á allri virkni tölvunnar með því að vera stöðugt í gangi."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Leyfir forriti að ræsa sig um leið og kerfið hefur lokið við ræsingu. Þetta getur tafið ræsingu sjónvarpsins og valdið því að forritið hægi á allri virkni þess með því að vera stöðugt í gangi."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Leyfir forriti að ræsa sig um leið og kerfið hefur lokið við ræsingu. Þetta getur tafið ræsingu Android TV tækisins og valdið því að forritið hægi á allri virkni þess með því að vera stöðugt í gangi."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Leyfir forriti að ræsa sig um leið og kerfið hefur lokið við ræsingu. Þetta getur tafið ræsingu símans og valdið því að forritið hægir á allri virkni símans með því að vera stöðugt í gangi."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"senda út viðvarandi tilkynningu"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Leyfir forriti að senda viðvarandi tilkynningar, sem eru áfram í gangi eftir birtingu. Of mikil notkun þeirra getur hægt á virkni spjaldtölvunnar eða gert hana óstöðuga með því að nota of mikið af minni hennar."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Leyfir forriti að senda viðvarandi tilkynningar, sem eru áfram í gangi eftir birtingu. Of mikil notkun þeirra getur hægt á virkni sjónvarpsins eða gert það óstöðugt með því að nota of mikið af minni þess."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Leyfir forritinu að senda viðvarandi tilkynningar, sem eru áfram í gangi eftir birtingu. Of mikil notkun þeirra getur hægt á virkni Android TV tækisins eða gert það óstöðugt með því að nota of mikið af minni þess."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Leyfir forriti að senda viðvarandi tilkynningar, sem eru áfram í gangi eftir birtingu. Of mikil notkun þeirra getur hægt á virkni símans eða gert hann óstöðugan með því að nota of mikið af minni hans."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"lesa tengiliði"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Leyfir forriti að lesa gögn um tengiliði sem vistuð eru í spjaldtölvunni, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að vista tengiliðagögnin þín og spilliforrit kunna að deila tengiliðaupplýsingum án þinnar vitundar."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Leyfir forriti að lesa gögn um tengiliði sem vistuð eru í sjónvarpinu, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að vista tengiliðagögnin þín og spilliforrit kunna að deila tengiliðaupplýsingum án þinnar vitundar."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Leyfir forriti að lesa gögn um tengiliði sem vistuð eru í Android TV, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að vista tengiliðagögnin þín og spilliforrit kunna að deila tengiliðaupplýsingum án þinnar vitundar."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Leyfir forriti að lesa gögn um tengiliði sem vistuð eru í símanum, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að vista tengiliðagögnin þín og spilliforrit kunna að deila tengiliðaupplýsingum án þinnar vitundar."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"breyta tengiliðunum þínum"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Leyfir forriti að breyta gögnum um tengiliði sem vistuð eru í spjaldtölvunni, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að eyða tengiliðagögnum."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Leyfir forriti að breyta gögnum um tengiliði sem vistuð eru í sjónvarpinu, þ. á m. um tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að eyða tengiliðagögnum."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Leyfir forriti að breyta gögnum um tengiliði sem vistuð eru í Android TV, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að eyða tengiliðagögnum."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Leyfir forriti að breyta gögnum um tengiliði sem vistuð eru í símanum, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að eyða tengiliðagögnum."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lesa símtalaskrá"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Þetta forrit getur lesið símtalaferilinn þinn."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"skrifa símtalaskrá"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Leyfir forriti að breyta símtalaskrá spjaldtölvunnar, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Leyfir forriti að breyta símtalaskrá sjónvarpsins, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Leyfir forritinu að breyta símtalaskrá Android TV tækisins, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Leyfir forriti að breyta símtalaskrá símans, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"fá aðgang að líkamsskynjurum (s.s. hjartsláttarmælum)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Veitir forritinu aðgang að gögnum frá skynjurum sem fylgjast með líkamsstarfsemi þinni, svo sem hjartslætti."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Lesa dagatalsviðburði og upplýsingar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í spjaldtölvunni og deilt eða vistað dagatalsgögnin þín."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í sjónvarpinu og deilt eða vistað dagatalsgögnin þín."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í Android TV og deilt eða vistað dagatalsgögnin þín."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Þetta forrit getur lesið alla dagatalsviðburði sem eru vistaðir í símanum og deilt eða vistað dagatalsgögnin þín."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"bæta við eða breyta dagatalsviðburðum og senda gestum tölvupóst að eigendum forspurðum"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Þetta forrit getur bætt við, fjarlægt eða breytt dagatalsviðburðum í spjaldtölvunni. Þetta forrit getur sent skilaboð sem geta virst koma ffrá eigendum dagatala eða breytt viðburðum án þess að láta eigendurna vita."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Þetta forrit getur bætt við, fjarlægt eða breytt dagatalsviðburðum í sjónvarpinu. Þetta forrit getur sent skilaboð sem geta virst koma ffrá eigendum dagatala eða breytt viðburðum án þess að láta eigendurna vita."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Þetta forrit getur bætt við, fjarlægt eða breytt dagatalsviðburðum í Android TV tækinu. Þetta forrit getur sent skilaboð sem geta virst koma frá eigendum dagatala eða breytt viðburðum án þess að láta eigendurna vita."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Þetta forrit getur bætt við, fjarlægt eða breytt dagatalsviðburðum í símanum. Þetta forrit getur sent skilaboð sem geta virst koma ffrá eigendum dagatala eða breytt viðburðum án þess að láta eigendurna vita."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"aðgangur að viðbótarskipunum staðsetningarveitu"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Leyfir forriti að fá aðgang að fleiri skipunum staðsetningarveitu. Þetta getur gert forritinu kleift að hafa áhrif á virkni GPS og annars staðsetningarbúnaðar."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Þetta forrit getur aðeins séð staðsetningu þína þegar það er í forgrunni. Það verður að vera kveikt á þessari staðsetningarþjónustu og hún þarf að vera aðgengileg í símanum til að forritið geti notað hana. Þetta getur aukið rafhlöðunotkun."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"aðgangur að áætlaðri staðsetningu (út frá netkerfi), aðeins í forgrunni"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Þetta forrit getur séð staðsetningu þína út frá netkerfum á borð við farsímasenda og Wi-Fi net, en þó aðeins þegar það er í forgrunni. Það verður að vera kveikt á þessari staðsetningarþjónustu og hún þarf að vera aðgengileg spjaldtölvunni til að forritið geti notað hana."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Þetta forrit getur séð staðsetningu þína út frá netkerfum á borð við farsímasenda og Wi-Fi net, en þó aðeins þegar það er í forgrunni. Það verður að vera kveikt á þessari staðsetningarþjónustu og hún þarf að vera aðgengileg sjónvarpinu til að forritið geti notað hana."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Þetta forrit getur séð staðsetningu þína út frá netkerfum á borð við farsímasenda og Wi-Fi net, en þó aðeins þegar það er í forgrunni. Það verður að vera kveikt á þessari staðsetningarþjónustu og hún þarf að vera aðgengileg Android TV tækinu til að forritið geti notað hana."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Þetta forrit getur séð staðsetningu þína út frá netkerfum á borð við farsímasenda og Wi-Fi net, en þó aðeins þegar það er í forgrunni. Það verður að vera kveikt á þessari staðsetningarþjónustu og hún þarf að vera aðgengileg símanum til að forritið geti notað hana."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"aðgangur að staðsetningu í bakgrunni"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ef þetta er veitt til viðbótar við aðgang að áætlaðri eða nákvæmri staðsetningu getur forritið fengið aðgang að staðsetningu á meðan það keyrir í bakgrunni."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Þetta forrit getur greint hreyfingu þína."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"taka myndir og myndskeið"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Þetta forrit getur tekið myndir og tekið upp myndskeið með myndavélinni hvenær sem er."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"stjórna titringi"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"hringja beint í símanúmer"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lesa símanúmer"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Veitir forritinu aðgang að símanúmerum tækisins."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"koma í veg fyrir að spjaldtölvan fari í biðstöðu"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"koma í veg fyrir að sjónvarpið fari í biðstöðu"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"koma í veg fyrir að Android TV fari í biðstöðu"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"koma í veg fyrir að síminn fari í biðstöðu"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Leyfir forriti að koma í veg fyrir að spjaldtölvan fari í biðstöðu."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Leyfir forriti að koma í veg fyrir að sjónvarpið fari í biðstöðu."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Leyfir forritinu að koma í veg fyrir að Android TV tækið fari í biðstöðu."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Leyfir forriti að koma í veg fyrir að síminn fari í biðstöðu."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"senda innrauð merki"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Leyfir forriti að nota innrauðan sendi spjaldtölvunnar."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Leyfir forriti að nota innrauðan sendi sjónvarpsins."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Leyfir forritinu að nota innrauðan sendi Android TV til auðkenningar."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Leyfir forriti að nota innrauðan sendi símans."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"velja veggfóður"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Leyfir forriti að velja veggfóður kerfisins."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Leyfir forriti að stilla stærðarleiðréttingu veggfóðurs í kerfinu."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"stilla tímabelti"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Leyfir forriti að breyta tímabelti spjaldtölvunnar."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Leyfir forriti að breyta tímabelti sjónvarpsins."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Leyfir forritinu að breyta tímabelti Android TV tækisins."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Leyfir forriti að breyta tímabelti símans."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"finna reikninga í tækinu"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Leyfir forriti að fá lista yfir reikninga sem spjaldtölvan þekkir. Þar á meðal kunna að vera reikningar stofnaðir af forritum sem þú hefur sett upp."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Leyfir forriti að fá lista yfir reikninga sem sjónvarpið þekkir. Þar á meðal kunna að vera reikningar stofnaðir af forritum sem þú hefur sett upp."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Leyfir forritinu að fá lista yfir reikninga sem Android TV þekkir. Þar á meðal kunna að vera reikningar stofnaðir af forritum sem þú hefur sett upp."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Leyfir forriti að fá lista yfir reikninga sem síminn þekkir. Þar á meðal kunna að vera reikningar stofnaðir af forritum sem þú hefur sett upp."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"skoða nettengingar"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Leyfir forriti að skoða upplýsingar um nettengingar, svo sem hvaða net eru til og eru tengd."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Leyfir forriti að tengjast og aftengjast Wi-Fi aðgangsstöðum og gera breytingar á grunnstillingu tækisins fyrir Wi-Fi net."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"leyfa móttöku Wi-Fi fjöldasendinga"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Leyfir forriti að taka á móti pökkum sem sendir eru til allra tækja innan þráðlauss nets með fjöldasendingum, ekki bara spjaldtölvunnar þinnar. Það gengur hraðar á rafhlöðuna en stilling án fjöldasendinga."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Leyfir forriti að taka á móti pökkum sem sendir eru til allra tækja innan þráðlauss nets með fjöldasendingum, ekki bara sjónvarpsins. Það eyðir meira rafmagni en stilling án fjöldasendinga."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Leyfir forritinu að taka á móti pökkum sem sendir eru til allra tækja innan þráðlauss nets með fjöldasendingum, ekki bara Android TV tækisins. Þetta eyðir meira rafmagni en stilling án fjöldasendinga."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Leyfir forriti að taka á móti pökkum sem sendir eru til allra tækja innan þráðlauss nets með fjöldasendingum, ekki bara símans þíns. Það gengur hraðar á rafhlöðuna en stilling án fjöldasendinga."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"aðgangur að Bluetooth-stillingum"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Leyfir forriti að stilla Bluetooth-spjaldtölvuna og finna og parast við fjartengd tæki."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Leyfir forriti að stilla Bluetooth-sjónvarp og finna og parast við fjartengd tæki."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Leyfir forritinu að stilla Bluetooth í Android TV og finna og parast við fjartengd tæki."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Leyfir forriti að stilla Bluetooth-símann og finna og parast við fjartengd tæki."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"tengjast og aftengja frá WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Leyfir forriti að greina hvort WiMAX er virkt og upplýsingar um tengd WiMAX-net."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"breyta stöðu WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Leyfir forriti að tengja og aftengja spjaldtölvuna við WiMAX-net."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Leyfir forriti að tengja sjónvarpið við WiMAX-net og aftengja frá þeim."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Leyfir forritinu að tengja Android TV við WiMAX-net og aftengja frá þeim."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Leyfir forriti að tengja og aftengja símann við WiMAX-net."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"parast við Bluetooth-tæki"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Leyfir forriti að skoða grunnstillingu Bluetooth í spjaldtölvunni og koma á og samþykkja tengingar við pöruð tæki."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Leyfir forriti að skoða stillingu Bluetooth í sjónvarpinu og tengjast og samþykkja tengingar við pöruð tæki."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Leyfir forriti að skoða stillingu Bluetooth í Android TV og tengjast og samþykkja tengingar við pöruð tæki."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Leyfir forriti að skoða grunnstillingu Bluetooth í símanum og koma á og samþykkja tengingar við pöruð tæki."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"stjórna nándarsamskiptum (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Leyfir forriti að eiga samskipti við NFC-merki, -spjöld og -lesara (nándarsamskipti)."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stjórna lengd og fjölda stafa í aðgangsorðum og PIN-númerum skjáláss."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Fylgjast með tilraunum til að taka skjáinn úr lás"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa spjaldtölvunni eða eyða öllum gögnum hennar ef rangt aðgangsorð er fært inn of oft."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa sjónvarpinu eða eyða öllum gögnum þess ef rangt aðgangsorð er fært inn of oft."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa Android TV tækinu eða eyða öllum gögnum tækisins ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa símanum eða eyða öllum gögnum hans ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa spjaldtölvunni eða eyða öllum gögnum viðkomandi notanda ef rangt aðgangsorð er fært inn of oft."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa sjónvarpinu eða eyða öllum gögnum viðkomandi notanda ef rangt aðgangsorð er fært inn of oft."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa Android TV eða eyða öllum gögnum viðkomandi notanda ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa símanum eða eyða öllum gögnum viðkomandi notanda ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Breyta skjálásnum"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Breyta skjálásnum."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Stjórna hvernig og hvenær skjárinn læsist."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Eyða öllum gögnum"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Eyða gögnum spjaldtölvunnar fyrirvaralaust með núllstillingu."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Eyða gögnum sjónvarpsins fyrirvaralaust með núllstillingu."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Eyða gögnum Android TV tækisins án viðvörunar með því að núllstilla það."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Eyða gögnum símans fyrirvaralaust með núllstillingu."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Eyða gögnum notanda"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Eyða gögnum viðkomandi notanda í þessari spjaldtölvu án viðvörunar."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Eyða gögnum viðkomandi notanda í þessu sjónvarpi án viðvörunar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Eyða gögnum þessa notanda úr þessu Android TV tæki án viðvörunar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Eyða gögnum viðkomandi notanda í þessum síma án viðvörunar."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Stilla altækan proxy-þjón fyrir tækið"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Velja altækan proxy-þjón tækisins sem nota á þegar stefnan er virk. Aðeins eigandi tækisins getur valið altækan proxy-þjón."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Hámarksfjölda tilrauna til að opna með andliti náð"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ekkert SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Ekkert SIM-kort í spjaldtölvunni."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Ekkert SIM-kort í sjónvarpinu."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Ekkert SIM-kort er í Android TV tækinu."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Ekkert SIM-kort í símanum."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Settu SIM-kort í."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kort vantar eða það er ekki læsilegt. Settu SIM-kort í."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Þú hefur slegið inn rangt aðgangsorð <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Þú hefur slegið inn rangt PIN-númer <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Þú hefur teiknað opnunarmynstrið rangt <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður beðið um að þú notir Google innskráningu til að opna spjaldtölvuna.\n\n Prófaðu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Ef þú teiknar rangt mynstur í <xliff:g id="NUMBER_1">%2$d</xliff:g> skipti í viðbót verður beðið um að þú skráir þig inn á Google til að opna fyrir sjónvarpið.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verðurðu beðin(n) um að opna Android TV tækið með því að skrá þig inn á Google.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Þú hefur teiknað opnunarmynstrið rangt <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður beðið um að þú notir Google innskráningu til að opna símann.\n\n Prófaðu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> tilraunir til að taka spjaldtölvuna úr lás. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður spjaldtölvan stillt á sjálfgefnar stillingar og öll notandagögn hennar glatast."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> árangurslausar tilraunir til að taka sjónvarpið úr lás. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> skipti í viðbót án árangurs verður sjónvarpið stillt á verksmiðjustillingar og þú glatar öllum notandagögnum."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> árangurslausar tilraunir til að opna Android TV tækið. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður Android TV tækið endurstillt á sjálfgefnar stillingar og öll notendagögn þess glatast."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> tilraunir til að taka símann úr lás. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður síminn stilltur á sjálfgefnar stillingar og öll notandagögn hans glatast."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> tilraunir til að taka spjaldtölvuna úr lás. Spjaldtölvan verður nú stillt á sjálfgefnar stillingar."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> árangurslausar tilraunir til að taka sjónvarpið úr lás. Sjónvarpið verður nú stillt aftur á verksmiðjustillingar."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> árangurslausar tilraunir til að opna Android TV tækið. Android TV tækið verður nú endurstillt á sjálfgefnar stillingar."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> tilraunir til að taka símann úr lás. Síminn verður nú stilltur á sjálfgefnar stillingar."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Reyndu aftur eftir <xliff:g id="NUMBER">%d</xliff:g> sekúndur."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Gleymdirðu mynstrinu?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Leyfir forriti að lesa feril allra vefslóða sem opnaðar hafa verið í vafranum og öll bókamerki vafrans. Athugaðu: Ekki er víst að þessi heimild sé virt í vöfrum frá þriðja aðila eða öðrum forritum með vafraeiginleika."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"skrifa vefbókamerki og -feril"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Leyfir forriti að breyta vafraferlinum eða bókamerkjum sem vistuð eru í spjaldtölvunni. Þetta getur gert forritinu kleift að eyða eða breyta vafragögnum. Athugaðu: Ekki er víst að þessi heimild sé virt í vöfrum frá þriðja aðila eða öðrum forritum með vafraeiginleika."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Leyfir forriti að breyta vafraferlinum eða bókamerkjum sem vistuð eru í sjónvarpinu. Þetta getur gert forritinu kleift að eyða eða breyta vafragögnum. Athugaðu: Ekki er víst að þessi heimild sé virt í vöfrum frá þriðja aðila eða öðrum forritum með vafraeiginleika."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Leyfir forriti að breyta vafraferlinum eða bókamerkjum sem vistuð eru í Android TV tækinu. Þetta getur gert forritinu kleift að eyða eða breyta vafragögnum. Athugaðu: Ekki er víst að þessi heimild sé virt í vöfrum frá þriðja aðila eða öðrum forritum með vafraeiginleika."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Leyfir forriti að breyta vafraferlinum eða bókamerkjum sem vistuð eru í símanum. Þetta getur gert forritinu kleift að eyða eða breyta vafragögnum. Athugaðu: Ekki er víst að þessi heimild sé virt í vöfrum frá þriðja aðila eða öðrum forritum með vafraeiginleika."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"stilla vekjara"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Leyfir forriti að stilla vekjara á uppsettri vekjaraklukku. Verið getur að sum vekjaraklukkuforrit séu ekki búin þessum eiginleika."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="other">Opin Wi-Fi net í boði</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Tengjast opnu Wi-Fi neti"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Tengjast við Wi‑Fi net símafyrirtækis"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Tengist við Wi-Fi net"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Tengt við Wi‑Fi net"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Ekki hægt að tengjast Wi-Fi neti"</string>
@@ -1308,7 +1311,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Sláðu inn PIN-númerið sem er krafist:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-númer:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Wi-Fi tengingu spjaldtölvunnar verður tímabundið slitið á meðan hún er tengd við <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Sjónvarpið mun tímabundið aftengjast Wi-Fi á meðan það er tengt við <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV mun tímabundið aftengjast Wi-Fi á meðan það er tengt við <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Síminn mun tímabundið aftengjast Wi-Fi á meðan hann er tengdur við <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Setja inn staf"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-skilaboð send"</string>
@@ -1651,13 +1654,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Þú hefur slegið inn rangt aðgangsorð <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> tilraunir til að opna spjaldtölvuna. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður tölvan stillt á sjálfgefar stillingar og öll notandagögn hennar glatast."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> árangurslausar tilraunir til að taka sjónvarpið úr lás. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> skipti í viðbót án árangurs verður sjónvarpið stillt á verksmiðjustillingar og þú glatar öllum notandagögnum."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> árangurslausar tilraunir til að opna Android TV tækið. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður Android TV tækið endurstillt á sjálfgefnar stillingar og öll notendagögn þess glatast."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Þú hefur gert <xliff:g id="NUMBER_0">%1$d</xliff:g> tilraunir til að opna símann. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður síminn stilltur á sjálfgefnar stillingar og öll notandagögn hans glatast."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> tilraunir til að opna spjaldtölvuna án árangurs. Hún verður nú stillt á sjálfgefnar stillingar."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> árangurslausar tilraunir til að taka sjónvarpið úr lás. Sjónvarpið verður nú stillt aftur á verksmiðjustillingar."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> árangurslausar tilraunir til að opna Android TV tækið. Android TV tækið verður nú endurstillt á sjálfgefnar stillingar."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> tilraunir til að opna símann án árangurs. Hann verður nú stilltur á sjálfgefnar stillingar."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður þú beðin(n) um að opna spjaldtölvuna með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Ef þú teiknar rangt mynstur í <xliff:g id="NUMBER_1">%2$d</xliff:g> skipti í viðbót verður beðið um að þú notir tölvupóstreikning til að opna fyrir sjónvarpið.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verðurðu beðin(n) um að opna Android TV tækið með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður þú beðin(n) um að opna símann með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjarlægja"</string>
@@ -1998,6 +2001,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Ýttu til að skoða hvað lokað hefur verið á."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Kerfi"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Stillingar"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Biðstaða"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV tækið slekkur á sér fljótlega. Ýttu á takka til að það slokkni ekki á því."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Tækið slekkur á sér fljótlega. Ýttu á takka til að það slokkni ekki á því."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Myndavél"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Hljóðnemi"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"birt yfir öðrum forritum á skjánum"</string>

@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"För många <xliff:g id="CONTENT_TYPE">%s</xliff:g> att ta bort."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pekdatorns lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Klockans lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Lagringsutrymmet på TV:n är fullt. Ta bort några filer för att frigöra utrymme."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV-enhetens lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Mobilens lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Certifikatutfärdare har installerats</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Utskrift har inaktiverats av <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Alternativ för surfplattan"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV-alternativ"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Alternativ för Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefonalternativ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Tyst läge"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Aktivera trådlöst"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Startar om …"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV:n stängs av."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV-enheten stängs av."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Klockan stängs av."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon stängs av."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vill du stänga av?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Senaste"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Inga aktiva appar."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Alternativ för surfplattan"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Tv-alternativ"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Alternativ för Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Stäng av"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Appen kan läsa alla sms som sparats på surfplattan."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Appen kan läsa alla sms som sparats på TV:n."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Appen kan läsa alla sms som sparats på Android TV-enheten."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Appen kan läsa alla sms som sparats på mobilen."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ta emot textmeddelanden (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillåter att appen tar emot och hanterar WAP-meddelanden. Med den här behörigheten kan appen övervaka eller ta bort meddelanden som skickats till dig utan att visa dem för dig."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Data kan användas i bakgrunden av appen. Det kan öka dataanvändningen."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"se till att appen alltid körs"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör surfplattan långsam."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Tillåter att en app gör vissa delar beständiga i minnet. Det kan begränsa mängden minne som är tillgänglig för andra appar och gör TV:n långsammare."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör Android TV-enheten långsam."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör mobilen långsam."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"kör tjänst i förgrunden"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Tillåter att appen använder tjänster i förgrunden."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Tillåter att appen ändrar systemets inställningar. Skadliga appar kan skada systemets konfiguration."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"köra vid start"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Tillåter att appen startar automatiskt när systemet har startats om. Detta kan innebära att det tar längre tid att starta surfplattan och att surfplattan blir långsammare i och med att appen hela tiden körs i bakgrunden."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Tillåter att appen startas så snart systemet har slutat starta om. Det kan göra att det tar längre tid att starta tv:n och dessutom kan appen göra hela surfplattan långsammare genom att alltid köra den."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Tillåter att appen startar automatiskt när systemet har startats om. Detta kan innebära att det tar längre tid att starta Android TV-enheten och att enheten blir långsammare i och med att appen hela tiden körs i bakgrunden."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Tillåter att appen startar automatiskt när systemet har startats om. Detta kan innebära att det tar längre tid att starta mobilen och att mobilen blir långsammare i och med att appen hela tiden körs i bakgrunden."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"Skicka sticky broadcast"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Tillåter att appen skickar sticky broadcasts, som finns kvar när sändningen är slut. Vid intensiv användning kan mobilen bli långsam eller instabil eftersom minnet överbelastas."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Tillåter att appen skickar sticky broadcasts som finns kvar när sändningen är slut. Överdriven användning kan göra TV:n seg eller instabil eftersom den använder för mycket minne."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Tillåter att appen skickar sticky-sändningar som finns kvar när sändningen är slut. Vid intensiv användning kan Android TV-enheten bli långsam eller instabil eftersom för mycket minne används."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Tillåter att appen skickar sticky broadcast, som finns kvar när sändningen är slut. Vid intensiv användning kan mobilen bli långsam eller instabil eftersom minnet överbelastas."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"läsa dina kontakter"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Tillåter att appen läser kontaktuppgifter som sparats på surfplattan, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Tillåter att appen läser data om dina kontakter som sparats på TV:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med enskilda individer. Med den här behörigheten kan appar spara dina kontaktuppgifter och skadliga appar kan dela kontaktuppgifter utan att du vet om det."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Tillåter att appen läser kontaktuppgifter som sparats på Android TV-enheten, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med enskilda personer. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Tillåter att appen läser kontaktuppgifter som sparats på mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ändra kontakterna"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tillåter att appen ändrar kontaktuppgifter som sparats på surfplattan, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Tillåter att appen ändrar uppgifterna om dina kontakter som har sparats på TV:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med särskilda kontakter. Med den här behörigheten kan appar ta bort kontaktuppgifter."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Tillåter att appen ändrar kontaktuppgifter som sparats på Android TV-enheten, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med enskilda kontakter. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillåter att appen ändrar kontaktuppgifter som sparats på mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"läs samtalslogg"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Appen kan läsa din samtalshistorik."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"skriv samtalslogg"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tillåter att appen gör ändringar i pekdatorns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Tillåter att appen gör ändringar i TV:ns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga appar kan använda detta för att rensa eller ändra din samtalslista."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Tillåter att appen gör ändringar i Android TV-enhetens samtalshistorik, inklusive i uppgifter om inkommande och utgående samtal. Skadliga appar kan använda detta för att radera eller ändra samtalshistoriken."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tillåter att appen gör ändringar i mobilens samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"få åtkomst till kroppssensorer (till exempel pulsmätare)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ger appen åtkomst till information från sensorer om ditt fysiska tillstånd, till exempel din puls."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Läsa kalenderhändelser och kalenderuppgifter"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Appen kan läsa alla kalenderhändelser som sparats på surfplattan och dela eller spara uppgifter i din kalender."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Appen kan läsa alla kalenderhändelser som sparats på TV:n och dela eller spara uppgifter i din kalender."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Appen kan läsa alla kalenderhändelser som sparats på Android TV-enheten och dela eller spara uppgifter i din kalender."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Appen kan läsa alla kalenderhändelser som sparats på mobilen och dela eller spara uppgifter i din kalender."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"lägga till eller ändra kalenderuppgifter och skicka e-post till gäster utan ägarens vetskap"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på surfplattan. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på TV:n. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på Android TV-enheten. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på mobilen. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Den här appen kan endast få information om din exakta plats när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem. Detta kan leda till ökad batteriförbrukning."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"endast åtkomst till beräknad plats (nätverksbaserad) i förgrunden"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Appen kan endast få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk, när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på surfplattan om appen ska kunna använda dem."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Appen kan endast få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk, när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på tv:n om appen ska kunna använda dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Appen kan få information om din plats från olika nätverkskällor, som mobilmaster och Wi-Fi-nätverk, men endast när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på Android TV-enheten om appen ska kunna använda dem."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Appen kan endast få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk, när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"få åtkomst till platsinformation i bakgrunden"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Om denna behörighet ges utöver ungefärlig eller exakt platsåtkomst får appen åtkomst till platsinformation när den körs i bakgrunden."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Den här appen kan känna igen fysisk aktivitet."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder och spela in videoklipp"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Appen kan ta kort och spela in video med kameran när som helst."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Tillåter att appen styr vibrationen."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringa telefonnummer direkt"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"läsa telefonnummer"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Appen beviljas åtkomst till enhetens telefonnummer."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"förhindra att surfplattan går in i viloläge"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"förhindra att TV:n försätts i viloläge"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"förhindra att Android TV-enheten försätts i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"förhindra att telefonen sätts i viloläge"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Tillåter att appen förhindrar att surfplattan går in i viloläge."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Tillåter att appen förhindrar att TV:n försätts i viloläge."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Tillåter att appen förhindrar att Android TV-enheten försätts i viloläge."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Tillåter att appen förhindrar att mobilen går in i viloläge."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"tillåt IR-sändning"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Tillåter att appen använder surfplattans IR-sändare."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Tillåter att appen använder den infraröda sändaren på TV:n."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Tillåter att appen använder Android TV-enhetens infraröda sändare."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Tillåter att appen använder mobilens IR-sändare."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ange bakgrund"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Tillåter att appen anger systemets bakgrund."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Tillåter att appen ger tips om systemets bakgrundsstorlek."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"ange tidszon"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Tillåter att appen ändrar pekdatorns tidszon."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Tillåter att appen ändrar tidszonen på TV:n."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Tillåter att appen ändrar tidszon på Android TV-enheten."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillåter att appen ändrar mobilens tidszon."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"hitta konton på enheten"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen laddar ned en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Tillåter att appen hämtar listan med konton som TV:n kan identifiera. Den kan innehålla konton som skapats av appar som du har installerat."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Tillåter att appen hämtar en lista över alla kända konton på Android TV-enheten. Detta kan omfatta alla konton som skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tillåter att appen hämtar en lista över alla kända konton på mobilen. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"visa nätverksanslutningar"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Tillåter att appen kommer åt information om nätverksanslutningarna, till exempel vilka nätverk som finns och är anslutna."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Tillåter att appen ansluter till och kopplar från Wi-Fi-åtkomstpunkter samt gör ändringar i enhetens konfiguration för Wi-Fi-nätverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillåt Wi-Fi multicast-mottagning"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här surfplattan. Detta drar mer batteri än när multicastläget inte används."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Tillåter att appen tar emot paket som skickats till alla enheter i ett Wi-Fi-nätverk med multicastadress, inte bara till TV:n. Detta drar mer batteri än när multicastläget inte används."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här Android TV-enheten. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här mobilen. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och parkopplar den till fjärrenheter."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Tillåter att appen konfigurerar Bluetooth på Android TV-enheten samt upptäcker fjärrenheter och parkopplar enheten med dem."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"ändra WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillåter att appen ansluter surfplattan till eller kopplar från WiMAX-nätverk."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Tillåter att appen ansluter TV:n till och kopplar från TV:n från WiMAX-nätverk."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Tillåter att appen ansluter Android TV-enheten till och kopplar bort den från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tillåter att appen ansluter mobilen till eller kopplar från WiMAX-nätverk."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"parkoppla till Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Tillåter att appen visar konfigurationen av Bluetooth på TV:n och godkänner alla anslutningar till kopplade enheter."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Tillåter att appen läser Android TV-enhetens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tillåter att appen kommer åt mobilens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrollera närfältskommunikationen"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Tillåter att appen kommunicerar med etiketter, kort och läsare för närfältskommunikation (NFC)."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Övervaka försök att låsa upp skärmen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås surfplattan eller ta bort alla data från surfplattan om för många felaktiga försök görs."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Övervakar antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och låser TV:n eller rensar alla uppgifter på TV:n om för många felaktiga lösenord har skrivits in."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa all data på Android TV-enheten om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås mobilen eller ta bort alla data från mobilen om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås surfplattan eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås TV:n eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås mobilen eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Ändra skärmlåset"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ändra skärmlåset."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollera hur och när skärmlåset aktiveras."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Radera all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ta bort data från surfplattan utan förvarning genom att återställa standardinställningarna."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Rensar uppgifterna på TV:n utan föregående varning genom att återställa standardinställningarna."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Radera data på Android TV-enheten utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ta bort data från mobilen utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Radera användaruppgifter"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Rensa användarens uppgifter på den här surfplattan utan förvarning."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Rensa användarens uppgifter på den här TV:n utan förvarning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Radera den här användarens data på den här Android TV-enheten utan förvarning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Rensa användarens data på den här mobilen utan förvarning."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ange global proxyserver"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Ange enhetens globala proxy som ska användas när policyn aktiveras. Det är bara enhetens ägare som kan ange global proxy."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Inget SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Inget SIM-kort i surfplattan."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Det finns inget SIM-kort i TV:n."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Inget SIM-kort i Android TV-enheten."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Inget SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Sätt i ett SIM-kort."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kort saknas eller kan inte läsas. Sätt i ett SIM-kort."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> försök till ombeds du att låsa upp surfplattan med din Google-inloggning.\n\n Försök igen om  <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Du har ritat fel mönster för upplåsning <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök blir du ombedd att låsa upp TV:n genom att logga in på Google.\n\n Försök igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> försök måste du låsa upp Android TV-enheten med hjälp av dina inloggningsuppgifter på Google.\n\n Försök igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> försök till ombeds du att låsa upp mobilen med uppgifterna som du använder när du loggar in på Google.\n\n Försök igen om  <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök till kommer surfplattan att återställas till fabriksinställningarna. Du förlorar då alla användardata."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök kommer TV:n att återställas till standardinställningarna och alla användaruppgifter kommer att gå förlorade."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Du har gjort <xliff:g id="NUMBER_0">%1$d</xliff:g> misslyckade försök att låsa upp Android TV-enheten. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök återställs standardinställningarna på Android TV-enheten och all användardata försvinner."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök till kommer mobilen att återställas till fabriksinställningarna. Du förlorar då alla användardata."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Surfplattan återställs nu till fabriksinställningarna."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER">%d</xliff:g> gånger. TV:n kommer nu att återställas till standardinställningarna."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Du har gjort <xliff:g id="NUMBER">%d</xliff:g> misslyckade försök att låsa upp Android TV-enheten. Android TV-enheten återställs nu till standardinställningarna."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Mobilen återställs nu till fabriksinställningarna."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Glömt ditt grafiska lösenord?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Tillåter att appen läser historiken för besökta sidor och alla bokmärken i webbläsaren. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"skriva bokmärken och historik på webben"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på surfplattan. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Tillåter att appen ändrar webbläsarens historik eller bokmärken som har sparats på TV:n. Appen kan därmed rensa eller ändra uppgifter i webbläsaren. Obs! Den här behörigheten kanske inte gäller för webbläsare från tredje part eller andra appar med webbfunktioner."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på Android TV-enheten. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på telefonen. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ställa in ett alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillåter att appen ställer in ett alarm i en befintlig alarmapp. Vissa alarmappar har inte den här funktionen."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Öppet Wi-Fi-nätverk är tillgängligt</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Anslut till ett öppet Wi-Fi-nätverk"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Anslut till operatörens Wi-Fi-nätverk"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Ansluter till Wi-Fi-nätverk"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ansluten till Wi-Fi-nätverket"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Det gick inte att ansluta till Wi‑Fi-nätverket"</string>
@@ -1307,7 +1310,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ange den obligatoriska PIN-koden:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kod:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Surfplattans Wi-Fi-anslutning kommer tillfälligt att avbrytas när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"TV:n kopplas tillfälligt från Wi-Fi-nätverket när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV-enheten kopplas tillfälligt från Wi-Fi medan den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Mobilen kommer tillfälligt att kopplas från Wi-Fi när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Infoga tecken"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Skickar SMS"</string>
@@ -1650,13 +1653,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök återställs surfplattan till fabriksinställningarna. Du förlorar då alla användardata."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök kommer TV:n att återställas till standardinställningarna och alla användaruppgifter kommer att gå förlorade."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Du har gjort <xliff:g id="NUMBER_0">%1$d</xliff:g> misslyckade försök att låsa upp Android TV-enheten. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök återställs standardinställningarna på Android TV-enheten och all användardata försvinner."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök återställs mobilen till fabriksinställningarna. Du förlorar då alla användardata."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Surfplattan återställs nu till fabriksinställningarna."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER">%d</xliff:g> gånger. TV:n kommer nu att återställas till standardinställningarna."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Du har gjort <xliff:g id="NUMBER">%d</xliff:g> misslyckade försök att låsa upp Android TV-enheten. Android TV-enheten återställs nu till standardinställningarna."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Mobilen återställs nu till fabriksinställningarna."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> försök ombeds du låsa upp surfplattan med ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Du har ritat fel mönster för upplåsning <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> misslyckade försök blir du ombedd att låsa upp TV:n via ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> försök måste du låsa upp Android TV-enheten med hjälp av ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> försök ombeds du låsa upp mobilen med hjälp av ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ta bort"</string>
@@ -1997,6 +2000,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tryck om du vill se vad som blockeras."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Inställningar"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Viloläge"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV-enheten stängs snart av. Tryck på en knapp för att behålla den på."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Enheten stängs snart av. Tryck för att behålla den på."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"visar över andra appar på mobilen"</string>

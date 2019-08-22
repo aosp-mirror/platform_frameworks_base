@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Berupaya menghapus terlalu banyak <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Penyimpanan tablet penuh. Hapus beberapa file untuk mengosongkan ruang."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Penyimpanan arloji penuh. Hapus beberapa file untuk mengosongkan ruang."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Penyimpanan TV sudah penuh. Hapus beberapa file untuk mengosongkan ruang."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Penyimpanan perangkat Android TV penuh. Hapus beberapa file untuk mengosongkan ruang penyimpanan."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Penyimpanan di ponsel penuh. Hapus sebagian file untuk mengosongkan ruang."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Otoritas sertifikat berhasil dipasang</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Fitur pencetakan dinonaktifkan oleh <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opsi tablet"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Opsi TV"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Opsi Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opsi telepon"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Mode senyap"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Hidupkan nirkabel"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Memulai kembali…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Sedang mematikan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet Anda akan dimatikan."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV akan dimatikan."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Perangkat Android TV akan dimatikan."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Arloji Anda akan dimatikan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ponsel Anda akan dimatikan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Anda ingin mematikannya?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Terbaru"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Tidak ada apl terbaru."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opsi tablet"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Opsi TV"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Opsi Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opsi telepon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Kunci layar"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Matikan perangkat"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Memungkinkan aplikasi mengirim pesan SMS. Izin ini dapat mengakibatkan biaya tak terduga. Aplikasi berbahaya dapat membebankan biaya kepada Anda dengan mengirim pesan tanpa konfirmasi dari Anda."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"membaca pesan teks (SMS atau MMS) Anda"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Aplikasi ini dapat membaca semua SMS yang tersimpan di tablet."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Aplikasi ini dapat membaca semua SMS yang tersimpan di TV."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Aplikasi ini dapat membaca semua pesan SMS (teks) yang disimpan di perangkat Android TV."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Aplikasi ini dapat membaca semua SMS yang tersimpan di ponsel."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"terima pesan teks (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Memungkinkan aplikasi menerima dan memproses pesan WAP. Izin ini mencakup kemampuan untuk memantau atau menghapus pesan yang dikirim kepada Anda tanpa menunjukkannya kepada Anda."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Aplikasi ini dapat menggunakan data di latar belakang. Dapat meningkatkan penggunaan data."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"membuat apl selalu berjalan"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Memungkinkan aplikasi membuat bagian dari dirinya sendiri terus-menerus berada dalam memori. Izin ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga menjadikan tablet lambat."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Mengizinkan aplikasi untuk membuat bagian dirinya tetap berada dalam memori. Izin ini dapat membatasi memori yang tersedia untuk aplikasi lain yang membuat TV menjadi lambat."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Mengizinkan aplikasi membuat bagian dirinya tetap ada di memori. Hal ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga perangkat Android TV menjadi lambat."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Memungkinkan aplikasi membuat bagian dari dirinya sendiri terus-menerus berada dalam memori. Izin ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga menjadikan ponsel lambat."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"jalankan layanan di latar depan"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Mengizinkan aplikasi menggunakan layanan di latar depan."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Mengizinkan apl memodifikasi data setelan sistem. Apl berbahaya dapat merusak konfigurasi sistem anda."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"dijalankan saat dimulai"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Mengizinkan apl memulai sendiri segera setelah sistem selesai booting. Hal ini dapat memperpanjang waktu yang diperlukan untuk memulai tablet dan memungkinkan apl memperlambat tablet secara keseluruhan jika terus berjalan."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Mengizinkan aplikasi untuk memulai sendiri segera setelah sistem selesai booting. Izin ini dapat membuat lebih lama memulai TV dan memungkinkan aplikasi memperlambat tablet secara keseluruhan karena selalu berjalan."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Mengizinkan aplikasi memulai sendiri segera setelah sistem selesai booting. Hal ini dapat memperpanjang waktu yang diperlukan untuk memulai perangkat Android TV dan memungkinkan aplikasi memperlambat perangkat secara keseluruhan jika terus berjalan."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Mengizinkan apl memulai sendiri segera setelah sistem selesai booting. Hal ini dapat memperpanjang waktu yang diperlukan untuk memulai ponsel dan memungkinkan apl memperlambat ponsel secara keseluruhan jika terus berjalan."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"kirim siaran memikat"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Memungkinkan aplikasi mengirim siaran permanen, yang tetap ada setelah siaran berakhir. Penggunaan yang berlebihan dapat membuat tablet menjadi lambat atau tidak stabil dengan memicu penggunaan memori yang terlalu banyak."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Mengizinkan aplikasi untuk mengirim siaran lekat, yang tetap ada setelah siaran berakhir. Penggunaan yang berlebihan dapat membuat TV menjadi lambat atau tidak stabil karena menyebabkan penggunaan memori yang terlalu besar."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Mengizinkan aplikasi mengirim siaran permanen, yang tetap ada setelah siaran berakhir. Penggunaan yang berlebihan dapat membuat perangkat Android TV menjadi lambat atau tidak stabil dengan memicu penggunaan memori yang terlalu banyak."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Memungkinkan aplikasi mengirim siaran permanen, yang tetap ada setelah siaran berakhir. Penggunaan yang berlebihan dapat membuat ponsel menjadi lambat atau tidak stabil dengan memicu penggunaan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"baca kontak Anda"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Memungkinkan aplikasi membaca data tentang kontak yang disimpan pada tablet Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Izin ini memungkinkan aplikasi menyimpan data kontak, dan aplikasi berbahaya dapat berbagi data kontak tanpa sepengetahuan Anda."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Mengizinkan aplikasi untuk membaca data tentang kontak yang disimpan di TV, termasuk seberapa sering Anda melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan individu tertentu. Izin ini memungkinkan aplikasi untuk menyimpan data kontak, dan aplikasi yang berbahaya mungkin membagikan data kontak tanpa sepengetahuan Anda."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Mengizinkan aplikasi membaca data tentang kontak yang disimpan di perangkat Android TV, termasuk frekuensi yang Anda gunakan saat melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan individu tertentu. Izin ini memungkinkan aplikasi menyimpan data kontak, dan aplikasi berbahaya dapat membagikan data kontak tanpa sepengetahuan Anda."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Memungkinkan aplikasi membaca data tentang kontak yang disimpan pada ponsel Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Izin ini memungkinkan aplikasi menyimpan data kontak, dan aplikasi berbahaya dapat berbagi data kontak tanpa sepengetahuan Anda."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ubah kontak Anda"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Memungkinkan aplikasi mengubah data tentang kontak yang tersimpan dalam tablet Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan kontak tertentu. Izin ini memungkinkan aplikasi menghapus data kontak."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Mengizinkan aplikasi untuk mengubah data tentang kontak yang disimpan di TV, termasuk seberapa sering Anda melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan kontak tertentu. Izin ini memungkinkan aplikasi menghapus data kontak."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Mengizinkan aplikasi mengubah data tentang kontak yang disimpan di perangkat Android TV Anda, termasuk frekuensi yang Anda gunakan saat melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan kontak tertentu. Izin ini memungkinkan aplikasi menghapus data kontak."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Memungkinkan aplikasi mengubah data tentang kontak yang tersimpan dalam ponsel Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan kontak tertentu. Izin ini memungkinkan aplikasi menghapus data kontak."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"membaca log panggilan"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Aplikasi ini dapat membaca histori panggilan."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"menulis log panggilan"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Memungkinkan apl memodifikasi log panggilan tablet Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk menghapus atau memodifikasi log panggilan Anda."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Mengizinkan aplikasi untuk memodifikasi log panggilan TV, termasuk data tentang panggilan masuk dan keluar. Aplikasi berbahaya mungkin menggunakan ini untuk menghapus atau memodifikasi log panggilan."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Mengizinkan aplikasi mengubah log panggilan perangkat Android TV, termasuk data tentang panggilan masuk dan keluar. Aplikasi berbahaya dapat menggunakan izin ini untuk menghapus atau mengubah log panggilan Anda."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Memungkinkan apl memodifikasi log panggilan ponsel Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk menghapus atau memodifikasi log panggilan Anda."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"akses sensor tubuh (misalnya, monitor detak jantung)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Mengizinkan aplikasi untuk mengakses data dari sensor yang memantau kondisi fisik Anda, seperti denyut jantung."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Baca acara kalender dan detailnya"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Aplikasi ini dapat membaca semua acara kalender yang tersimpan di tablet dan membagikan atau menyimpan data kalender."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Aplikasi ini dapat membaca semua acara kalender yang tersimpan di TV dan membagikan atau menyimpan data kalender."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Aplikasi ini dapat membaca semua acara kalender yang tersimpan di perangkat Android TV dan membagikan atau menyimpan data kalender."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Aplikasi ini dapat membaca semua acara kalender yang tersimpan di ponsel dan membagikan atau menyimpan data kalender."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"menambah atau mengubah acara kalender dan mengirim email kepada tamu tanpa sepengetahuan pemilik"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di tablet. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di TV. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di perangkat Android TV. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di ponsel. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aplikasi ini bisa mendapatkan lokasi pasti Anda ketika aplikasi berada di latar depan. Fitur layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar dapat digunakan oleh aplikasi. Fitur ini dapat meningkatkan konsumsi baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"akses perkiraan lokasi (berbasis jaringan) hanya di latar depan"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di tablet agar aplikasi dapat menggunakannya."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di TV agar aplikasi dapat menggunakannya."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Aplikasi ini dapat mengetahui lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, tetapi hanya jika aplikasi berada di latar depan. Layanan lokasi ini harus diaktifkan dan tersedia di perangkat Android TV agar dapat digunakan oleh aplikasi."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di ponsel agar aplikasi dapat menggunakannya."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"akses lokasi di latar belakang"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jika aplikasi diberi izin tambahan ke akses lokasi perkiraan atau akurat, aplikasi dapat mengakses lokasi saat bekerja di latar belakang."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Aplikasi ini dapat mengenali aktivitas fisik Anda."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Aplikasi ini dapat mengambil foto dan merekam video menggunakan kamera kapan saja."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrol getaran"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Mengizinkan aplikasi untuk mengendalikan vibrator."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil nomor telepon secara langsung"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"membaca nomor telepon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Mengizinkan aplikasi mengakses nomor telepon perangkat."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"cegah tablet dari tidur"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"cegah agar TV tidak tidur"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"cegah perangkat Android TV tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"mencegah ponsel menjadi tidak aktif"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Mengizinkan apl mencegah tablet tidur."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Mengizinkan aplikasi untuk mencegah agar TV tidak tidur."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Mengizinkan aplikasi untuk mencegah perangkat Android TV tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Mengizinkan apl mencegah ponsel tidur."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"pancarkan inframerah"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Memungkinkan aplikasi menggunakan pemancar inframerah tablet."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Mengizinkan aplikasi untuk menggunakan pemancar inframerah TV."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Mengizinkan aplikasi menggunakan pemancar inframerah perangkat Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Memungkinkan aplikasi menggunakan pemancar inframerah ponsel."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"atur wallpaper"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Mengizinkan apl menyetel wallpaper sistem."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Mengizinkan apl menyetel petunjuk ukuran wallpaper sistem."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"atur zona waktu"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Mengizinkan apl mengubah zona waktu tablet."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Mengizinkan aplikasi untuk mengubah zona waktu TV."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Mengizinkan aplikasi mengubah zona waktu perangkat Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Mengizinkan apl mengubah zona waktu pada ponsel."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"cari akun pada perangkat"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh tablet. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Mengizinkan aplikasi untuk mendapatkan daftar akun yang dikenal oleh TV. Daftar ini mungkin meliputi akun yang dibuat oleh aplikasi yang telah dipasang."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Mengizinkan aplikasi mendapatkan daftar akun yang dikenal oleh perangkat Android TV. Ini mungkin mencakup akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh ponsel. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"lihat sambungan jaringan"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Memungkinkan aplikasi melihat informasi tentang sambungan jaringan, misalnya jaringan yang ada dan tersambung."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Memungkinkan aplikasi menyambung ke dan memutus dari titik akses Wi-Fi, dan mengubah konfigurasi perangkat untuk jaringan Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Izinkan penerimaan Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Memungkinkan aplikasi menerima paket yang dikirim ke semua perangkat melalui jaringan Wi-Fi menggunakan alamat multicast, bukan hanya tablet Anda. Izin ini akan menggunakan lebih banyak daya daripada mode selain multicast."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Mengizinkan aplikasi untuk menerima paket yang dikirimkan ke semua perangkat di jaringan Wi-Fi menggunakan alamat multitransmisi, bukan hanya TV. Ini menggunakan lebih banyak daya daripada mode non-multitransmisi."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Mengizinkan aplikasi menerima paket yang dikirimkan ke semua perangkat melalui jaringan Wi-Fi menggunakan alamat multicast, bukan hanya perangkat Android TV Anda. Izin ini menggunakan lebih banyak daya daripada mode selain multicast."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Memungkinkan aplikasi menerima paket yang dikirim ke semua perangkat melalui jaringan Wi-Fi menggunakan alamat multicast, bukan hanya ponsel Anda. Izin ini akan menggunakan lebih banyak daya daripada mode selain multicast."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"akses setelan Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Mengizinkan apl mengonfigurasi tablet Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Mengizinkan aplikasi untuk mengonfigurasi TV Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Mengizinkan aplikasi mengonfigurasi Bluetooth di perangkat Android TV, serta menemukan dan menyambungkan dengan perangkat jarak jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Mengizinkan apl mengonfigurasi ponsel Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambungkan dan putuskan dari WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Memungkinkan aplikasi menentukan apakah WiMAX diaktifkan dan informasi tentang jaringan WiMAX apa saja yang tersambung."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"Ganti status WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Memungkinkan aplikasi menyambungkan tablet ke dan memutus tablet dari jaringan WiMAX."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Mengizinkan aplikasi untuk menghubungkan TV ke dan memutuskan hubungan TV dari jaringan WiMAX."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Mengizinkan aplikasi menghubungkan perangkat Android TV ke, dan memutuskan hubungan perangkat Android TV dari, jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Memungkinkan aplikasi menyambungkan ponsel ke dan memutus ponsel dari jaringan WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"sandingkan dengan perangkat Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di tablet, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Mengizinkan aplikasi untuk melihat konfigurasi Bluetooth di TV, dan melakukan serta menerima hubungan dengan perangkat yang disandingkan."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Mengizinkan aplikasi melihat konfigurasi Bluetooth di perangkat Android TV, serta melakukan dan menerima sambungan dengan perangkat yang tersambung."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di ponsel, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrol NFC"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Mengizinkan apl berkomunikasi dengan tag, kartu, dan alat pembaca Komunikasi Nirkabel Jarak Dekat (NFC)."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Pantau upaya pembukaan kunci layar"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci TV atau menghapus semua data TV jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci perangkat Android TV atau menghapus semua data perangkat Android TV jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data ponsel jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci TV atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci perangkat Android TV atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Mengubah kunci layar"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mengubah kunci layar."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengontrol cara dan kapan layar mengunci."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Menghapus semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Menghapus data tablet tanpa peringatan dengan mereset ke setelan pabrik."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Menghapus data TV tanpa peringatan dengan mengembalikan ke setelan pabrik."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Menghapus data perangkat Android TV tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Menghapus data ponsel tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Menghapus data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Menghapus data pengguna ini di tablet ini tanpa peringatan."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Menghapus data pengguna ini di TV ini tanpa peringatan."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Menghapus data pengguna ini di perangkat Android TV ini tanpa peringatan."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Menghapus data pengguna ini di ponsel ini tanpa peringatan."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Setel proxy global perangkat"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Menyetel proxy global perangkat yang akan digunakan jika kebijakan diaktifkan. Hanya pemilik perangkat yang dapat menyetel proxy global."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Percobaan Face Unlock melebihi batas maksimum"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Tidak ada kartu SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tidak ada kartu SIM dalam tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Tidak ada kartu SIM di TV."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Tidak ada kartu SIM di perangkat Android TV."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Tidak ada Kartu SIM di dalam ponsel."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Masukkan kartu SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Kartu SIM tidak ada atau tidak dapat dibaca. Masukkan kartu SIM."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik sandi. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik PIN. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci tablet menggunakan proses masuk Google.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, Anda akan diminta untuk membuka kunci TV menggunakan info masuk Google.\n\n Coba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda salah menggambar pola pembuka kunci. Setelah gagal <xliff:g id="NUMBER_1">%2$d</xliff:g> kali lagi, Anda akan diminta membuka kunci perangkat Android TV menggunakan login Google.\n\n Coba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan proses masuk Google.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> upaya gagal lagi, tablet akan disetel ulang ke setelan default pabrik dan semua data pengguna hilang."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci TV dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, TV akan dikembalikan ke setelan default pabrik dan semua data pengguna akan hilang."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali gagal membuka kunci perangkat Android TV. Setelah gagal <xliff:g id="NUMBER_1">%2$d</xliff:g> kali lagi, perangkat Android TV akan direset ke default pabrik dan semua data pengguna akan hilang."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> upaya gagal lagi, ponsel akan disetel ulang ke setelan default pabrik dan semua data pengguna hilang."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini tablet akan disetel ulang ke setelan default pabrik."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci TV dengan tidak benar. TV sekarang akan dikembalikan ke setelan default pabrik."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Anda telah <xliff:g id="NUMBER">%d</xliff:g> kali gagal membuka kunci perangkat Android TV. Perangkat Android TV sekarang akan direset ke default pabrik."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini ponsel akan disetel ulang ke setelan default pabrik."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Coba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> detik."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa pola?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Memungkinkan aplikasi membaca histori semua URL yang telah dikunjungi Browser, dan semua bookmark Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"tulis histori dan bookmark web"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Memungkinkan aplikasi mengubah histori atau bookmark Browser yang tersimpan dalam tablet Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Mengizinkan aplikasi untuk memodifikasi histori atau bookmark Browser yang disimpan di TV. Izin ini memungkinkan aplikasi untuk menghapus atau memodifikasi data Browser. Catatan: izin ini mungkin diterapkan oleh browser pihak ketiga atau aplikasi lain yang memiliki kemampuan menjelajah web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Mengizinkan aplikasi mengubah histori atau bookmark Browser yang disimpan di perangkat Android TV. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini mungkin tidak diterapkan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Memungkinkan aplikasi mengubah histori atau bookmark Browser yang tersimpan dalam ponsel Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setel alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Mengizinkan apl menyetel alarm di apl jam alarm yang terpasang. Beberapa apl jam alarm mungkin tidak menerapkan fitur ini."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Jaringan Wi-Fi terbuka tersedia</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Hubungkan ke jaringan Wi-Fi terbuka"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Hubungkan ke jaringan Wi-Fi operator"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Menghubungkan ke jaringan Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Terhubung ke jaringan Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Tidak dapat menghubungkan ke jaringan Wi‑Fi"</string>
@@ -1307,7 +1310,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ketik PIN yang diminta:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Sambungan tablet akan diputuskan dari Wi-Fi untuk sementara saat tersambung dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"TV akan memutuskan hubungan sementara dari Wi-Fi saat terhubung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Perangkat Android TV akan memutuskan hubungan sementara dari Wi-Fi saat terhubung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Ponsel akan terputus sementara dari Wi-Fi saat tersambung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Sisipkan huruf"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Mengirim pesan SMS"</string>
@@ -1650,13 +1653,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik sandi. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali gagal saat berusaha membuka kunci tablet. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, tablet akan disetel ulang ke setelan default pabrik dan semua data pengguna akan hilang."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci TV dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, TV akan dikembalikan ke setelan default pabrik dan semua data pengguna akan hilang."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali gagal membuka kunci perangkat Android TV. Setelah gagal <xliff:g id="NUMBER_1">%2$d</xliff:g> kali lagi, perangkat Android TV akan direset ke default pabrik dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali gagal saat berusaha membuka kunci ponsel. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, ponsel akan disetel ulang ke setelan default pabrik dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Anda telah <xliff:g id="NUMBER">%d</xliff:g> kali gagal saat berusaha membuka kunci tablet. Kini tablet akan disetel ulang ke setelan default pabrik."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci TV dengan tidak benar. TV sekarang akan dikembalikan ke setelan default pabrik."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Anda telah <xliff:g id="NUMBER">%d</xliff:g> kali gagal membuka kunci perangkat Android TV. Perangkat Android TV sekarang akan direset ke default pabrik."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah <xliff:g id="NUMBER">%d</xliff:g> kali gagal saat berusaha untuk membuka kunci ponsel. Kini ponsel akan disetel ulang ke setelan default pabrik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci tablet menggunakan akun email.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, Anda akan diminta untuk membuka kunci TV menggunakan akun email.\n\n Coba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah gagal <xliff:g id="NUMBER_1">%2$d</xliff:g> kali lagi, Anda akan diminta membuka kunci perangkat Android TV menggunakan akun email.\n\n Coba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan akun email.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Hapus"</string>
@@ -1997,6 +2000,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Ketuk untuk memeriksa item yang diblokir."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Setelan"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Siaga"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Perangkat Android TV akan segera dimatikan; tekan tombol untuk terus menyalakannya."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Perangkat akan segera dimatikan, tekan untuk terus menyalakannya."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ditampilkan di atas aplikasi lain di layar"</string>

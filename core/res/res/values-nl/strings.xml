@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Geprobeerd om te veel instanties van <xliff:g id="CONTENT_TYPE">%s</xliff:g> te verwijderen."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tabletgeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Horlogegeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Tv-opslag is vol. Verwijder een aantal bestanden om ruimte vrij te maken."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Opslag van Android TV-apparaat is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefoongeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Certificeringsinstanties geïnstalleerd</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Afdrukken uitgeschakeld door <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tabletopties"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV-opties"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Opties voor Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefoonopties"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Stille modus"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Draadloos inschakelen"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Opnieuw opstarten…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Uitschakelen..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Je tablet wordt uitgeschakeld."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Je tv wordt uitgeschakeld.."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Je Android TV-apparaat wordt uitgeschakeld."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Je horloge wordt uitgeschakeld."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Je telefoon wordt uitgeschakeld."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Wil je afsluiten?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Geen recente apps."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tabletopties"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"TV-opties"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Opties voor Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefoonopties"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Uitschakelen"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Hiermee kan de app sms-berichten verzenden. Dit kan tot onverwachte kosten leiden. Schadelijke apps kunnen u geld kosten doordat ze zonder je bevestiging berichten kunnen verzenden."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"je tekstberichten (SMS of MMS) lezen"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Deze app kan alle sms-berichten lezen die zijn opgeslagen op je tablet."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Deze app kan alle sms-berichten lezen die zijn opgeslagen op je tv."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Deze app kan alle sms-berichten lezen die zijn opgeslagen op je Android TV-apparaat."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Deze app kan alle sms-berichten lezen die zijn opgeslagen op je telefoon."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tekstberichten (WAP) ontvangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar je apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Deze app kan op de achtergrond data verbruiken. Dit kan het datagebruik verhogen."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"app altijd laten uitvoeren"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Hiermee kan de app gedeelten van zichzelf persistent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor de tablet trager kan worden."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Hiermee kan de app gedeelten van zichzelf persistent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor de tv trager kan worden."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Hiermee kan de app gedeelten van zichzelf permanent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor het Android TV-apparaat trager kan worden."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Hiermee kan de app gedeelten van zichzelf persistent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor de telefoon trager kan worden."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"service op de voorgrond uitvoeren"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Hiermee kan de app gebruikmaken van services op de voorgrond."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Hiermee kan de app de instellingsgegevens van het systeem aanpassen. Schadelijke apps kunnen de configuratie van je systeem verstoren."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"uitvoeren bij opstarten"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Hiermee kan de app zichzelf laten starten zodra het systeem is opgestart. Hierdoor kan het langer duren voordat de tablet is opgestart en een app kan altijd actief zijn, wat de tablet kan vertragen."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Hiermee kan de app zichzelf laten starten zodra het systeem is opgestart. Hierdoor kan het langer duren voordat de tv is opgestart en een app kan altijd actief zijn, wat de tablet kan vertragen."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Hiermee kan de app zichzelf laten starten zodra het systeem is opgestart. Hierdoor kan het langer duren voordat het Android TV-apparaat is opgestart en kan een app altijd actief zijn, wat het apparaat kan vertragen."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Hiermee kan de app zichzelf starten zodra het systeem klaar is met opstarten. Hierdoor kan het langer duren voordat de telefoon is opgestart en kan de app de telefoonprocessen vertragen door altijd actief te zijn."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sticky broadcast verzenden"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Bij overmatig gebruik kan de tablet traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Hiermee kan de app sticky broadcasts verzenden die achterblijven nadat de uitzending is afgelopen. Overmatig gebruik kan de tv traag instabiel maken doordat er te veel geheugen wordt gebruikt."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Hiermee kan de app sticky broadcasts verzenden die worden behouden nadat de broadcast is beëindigd. Bij overmatig gebruik kan het Android TV-apparaat traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Bij overmatig gebruik kan de telefoon traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"je contacten lezen"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je Android TV-apparaat, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"je contacten aanpassen"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je Android TV-apparaat, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met dit recht kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekslijst lezen"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Deze app kan je gespreksgeschiedenis lezen."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekslijst schrijven"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app de gesprekslijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app de gesprekslijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Toestaan dat de app de gesprekslijst van je Android TV-apparaat aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app de gesprekslijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"toegang tot lichaamssensoren (zoals hartslagmeters)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die je lichamelijke conditie controleren, zoals je hartslag."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Agenda-afspraken en -gegevens lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je tablet en je agendagegevens delen of opslaan."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je tv en je agendagegevens delen of opslaan."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je Android TV-apparaat en je agendagegevens delen of opslaan."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je telefoon en je agendagegevens delen of opslaan."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"agenda-afspraken toevoegen of wijzigen en e-mails verzenden aan gasten zonder medeweten van de eigenaren"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Deze app kan agenda-afspraken toevoegen, verwijderen of wijzigen op je tablet. Deze app kan berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken aanpassen zonder dit aan de eigenaar te melden."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Deze app kan agenda-afspraken toevoegen, verwijderen of wijzigen op je tv. Deze app kan berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken aanpassen zonder dit aan de eigenaar te melden."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Deze app kan agenda-afspraken toevoegen, verwijderen of wijzigen op je Android TV-apparaat. Deze app kan berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken aanpassen zonder dit aan de eigenaar te melden."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Deze app kan agenda-afspraken toevoegen, verwijderen of wijzigen op je telefoon. Deze app kan berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken aanpassen zonder dit aan de eigenaar te melden."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang tot extra opdrachten van locatieaanbieder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Hiermee kan de app toegang krijgen tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van gps of andere locatiebronnen te verstoren."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Deze app kan je exacte locatie ophalen wanneer de app op de voorgrond wordt uitgevoerd. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je telefoon. Hierdoor kan het batterijverbruik toenemen."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"alleen toegang tot geschatte locatie (op basis van netwerk) op de voorgrond"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je tablet."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je tv."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen als de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je Android TV-apparaat."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je telefoon."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"toegang tot locatie op de achtergrond"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Als dit wordt verleend als aanvulling op toegang tot de geschatte of precieze locatie, kan de app toegang tot de locatie krijgen terwijl de app actief is op de achtergrond."</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Deze app kan je fysieke activiteit herkennen."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"foto\'s en video\'s maken"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Deze app kan op elk moment foto\'s maken en video\'s opnemen met de camera."</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Een app of service toegang tot systeemcamera\'s geven om foto\'s en video\'s te maken"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Deze gemachtigde app/systeem-app kan op elk gewenst moment foto\'s maken en video\'s opnemen met een systeemcamera. De app moet ook het recht android.permission.CAMERA hebben."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"trilling beheren"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Hiermee kan de app de trilstand beheren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
@@ -451,14 +453,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefoonnummers lezen"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Hiermee kan de app toegang krijgen tot de telefoonnummers van het apparaat."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"voorkomen dat tablet overschakelt naar slaapmodus"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"voorkomen dat tv overschakelt naar slaapmodus"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"voorkomen dat je Android TV overschakelt naar slaapstand"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Hiermee kan de app voorkomen dat de tablet overschakelt naar de slaapmodus."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Hiermee kan de app voorkomen dat de tv overschakelt naar de slaapmodus."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Hiermee kan de app voorkomen dat het Android TV-apparaat overschakelt naar de slaapstand."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Hiermee kan de app voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"infrarood verzenden"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Hiermee kan de app de infraroodzender van de tablet gebruiken."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Hiermee kan de app de infraroodzender van de tv gebruiken."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Hiermee kan de app de infraroodzender van het Android TV-apparaat gebruiken."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Hiermee kan de app de infraroodzender van de telefoon gebruiken."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"achtergrond instellen"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Hiermee kan de app de systeemachtergrond instellen."</string>
@@ -466,11 +468,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Hiermee kan de app de grootte van de achtergrond instellen."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"tijdzone instellen"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Hiermee kan de app de tijdzone van de tablet wijzigen."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Hiermee kan de app de tijdzone van de tv wijzigen."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Hiermee kan de app de tijdzone van je Android TV-apparaat wijzigen."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Hiermee kan de app de tijdzone van de telefoon wijzigen."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"accounts op het apparaat vinden"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Hiermee krijgt de app toegang tot de lijst met accounts die op de tablet bekend zijn. Dit kunnen ook accounts zijn die zijn gemaakt door apps die je hebt geïnstalleerd."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Hiermee krijgt de app toegang tot de lijst met accounts die op de tv bekend zijn. Dit kunnen ook accounts zijn die zijn gemaakt door apps die je hebt geïnstalleerd."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Hiermee kan de app de lijst met accounts ophalen die op het Android TV-apparaat bekend zijn. Dit kunnen ook accounts zijn die zijn gemaakt door apps die je hebt geïnstalleerd."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Hiermee krijgt de app toegang tot de lijst met accounts die op de telefoon bekend zijn. Dit kunnen ook accounts zijn die zijn gemaakt door apps die je hebt geïnstalleerd."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"netwerkverbindingen weergeven"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Hiermee kan de app informatie bekijken over netwerkverbindingen, zoals welke netwerken er zijn en welke verbonden zijn."</string>
@@ -486,21 +488,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Hiermee kan de app zich koppelen aan en ontkoppelen van wifi-toegangspunten en wijzigingen aanbrengen in de apparaatconfiguratie voor wifi-netwerken."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wifi Multicast-ontvangst toestaan"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je tablet. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Hiermee kan de app pakketten ontvangen die zijn verzonden naar alle apparaten op een Wi-Fi-netwerk met multicastadressen en niet alleen je tv. Er wordt meer stroom verbruikt dan in de niet-multicastmodus."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je Android TV-apparaat. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je telefoon. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth-instellingen openen"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Hiermee kan de app de configuratie van de lokale Bluetooth-tv weergeven en externe apparaten zoeken en een koppeling maken."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Hiermee kan de app Bluetooth op je Android TV-apparaat configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-status wijzigen"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Hiermee kan de app de tablet verbinden met WiMAX-netwerken en de verbinding daarmee verbreken."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Hiermee kan de app een verbinding maken tussen de tv en WiMAX-netwerken en deze verbinding verbreken."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Hiermee kan de app verbinding maken met je Android TV-apparaat en je Android TV-apparaat loskoppelen van WiMAX-netwerken."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Hiermee kan de app de telefoon verbinden met WiMAX-netwerken en de verbinding daarmee verbreken."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Koppelen met Bluetooth-apparaten"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Hiermee kan de app de Bluetooth-configuratie van de tablet bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Hiermee kan de app de configuratie van Bluetooth op de tv weergeven en verbindingen met gekoppelde apparaten maken en accepteren."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Hiermee kan de app de Bluetooth-configuratie van het Android TV-apparaat bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Hiermee kan de app de Bluetooth-configuratie van de telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Near Field Communication regelen"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
@@ -657,10 +659,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Pogingen voor schermontgrendeling bijhouden"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens op de tablet wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tv vergrendelen of alle gegevens op de tv wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en het Android TV-apparaat vergrendelen of alle gegevens van het Android TV-apparaat wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens op de telefoon wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tv vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en het Android TV-apparaat vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"De schermvergrendeling wijzigen"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"De schermvergrendeling wijzigen."</string>
@@ -668,11 +670,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheren hoe en wanneer het scherm wordt vergrendeld."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle gegevens wissen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"De gegevens van de tv zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"De gegevens van het Android TV-apparaat zonder waarschuwing wissen door de fabrieksinstellingen terug te zetten."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"De gegevens van de telefoon zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Gebruikersgegevens wissen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"De gegevens van deze gebruiker op deze tablet zonder waarschuwing wissen."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"De gegevens van deze gebruiker op deze tv zonder waarschuwing wissen."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"De gegevens van deze gebruiker op dit Android TV-apparaat zonder waarschuwing wissen."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"De gegevens van deze gebruiker op deze telefoon zonder waarschuwing wissen."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Algemene proxy voor het apparaat instellen"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"De algemene proxy voor het apparaat instellen die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eigenaar van het apparaat kan de algemene proxy instellen."</string>
@@ -822,7 +824,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximaal aantal pogingen voor Ontgrendelen via gezichtsherkenning overschreden"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Geen simkaart"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Geen simkaart in tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Geen simkaart in de tv."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Geen simkaart in je Android TV-apparaat."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Geen simkaart in telefoon."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Plaats een simkaart."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"De simkaart ontbreekt of kan niet worden gelezen. Plaats een simkaart."</string>
@@ -845,13 +847,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Je hebt je wachtwoord <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het  opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Je hebt je pincode <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt u gevraagd je tablet te ontgrendelen met je aanmeldingsgegevens voor Google.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog <xliff:g id="NUMBER_1">%2$d</xliff:g> onjuiste pogingen, wordt je gevraagd je tv te ontgrendelen met je inloggegevens voor Google.\n\n Probeer het opnieuw over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen word je gevraagd om je Android TV-apparaat te ontgrendelen met je Google-inloggegevens.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt u gevraagd je telefoon te ontgrendelen met je aanmeldingsgegevens voor Google.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de tablet en gaan alle gebruikersgegevens verloren."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Je hebt op onjuiste wijze <xliff:g id="NUMBER_0">%1$d</xliff:g> keer geprobeerd de tv te ontgrendelen. Na nog <xliff:g id="NUMBER_1">%2$d</xliff:g> onjuiste pogingen, wordt de tv hersteld naar de fabriekswaarden en gaan alle gebruikersgegevens verloren."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om je Android TV-apparaat te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt je Android TV-apparaat teruggezet op de fabrieksinstellingen en gaan alle gebruikersgegevens verloren."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Je hebt nu <xliff:g id="NUMBER_0">%1$d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de telefoon en gaan alle gebruikersgegevens verloren."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de tablet."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Je hebt op onjuiste wijze <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de tv te ontgrendelen. De tv wordt nu hersteld naar de fabrieksinstellingen."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om je Android TV-apparaat te ontgrendelen. Je Android TV-apparaat wordt nu teruggezet op de fabrieksinstellingen."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de telefoon."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Patroon vergeten?"</string>
@@ -938,7 +940,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Hiermee kan de app de geschiedenis lezen van alle URL\'s die in de systeemeigen browser zijn bezocht, en alle bladwijzers in de systeemeigen browser. Let op: deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"webbladwijzers en -geschiedenis schrijven"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je tablet. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden.."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je tv. De app kan browsergegevens wissen of aanpassen. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Hiermee kan de app de browsergeschiedenis of opgeslagen bladwijzers bewerken op je Android TV-apparaat. Hierdoor kan de app mogelijk browsergegevens wissen of aanpassen. Opmerking: Dit recht kan niet worden afgedwongen door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je telefoon. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"een wekker instellen"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een wekker instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
@@ -1249,7 +1251,6 @@
       <item quantity="one">Open wifi-netwerk beschikbaar</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Verbinding maken met een open wifi-netwerk"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Verbinden met wifi-netwerk van provider"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Verbinden met wifi-netwerk"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Verbonden met een wifi-netwerk"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kan geen verbinding maken met het wifi-netwerk"</string>
@@ -1307,7 +1308,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer de gewenste pincode in:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pincode"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl de telefoon is verbonden met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"De tv verbreekt tijdelijk de verbinding met wifi terwijl verbonden met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl het Android TV-apparaat is verbonden met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl de telefoon verbonden is met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>
@@ -1650,13 +1651,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Je hebt je wachtwoord <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de tablet en gaan alle gebruikersgegevens verloren."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Je hebt op onjuiste wijze <xliff:g id="NUMBER_0">%1$d</xliff:g> keer geprobeerd de tv te ontgrendelen. Na nog <xliff:g id="NUMBER_1">%2$d</xliff:g> onjuiste pogingen, wordt de tv hersteld naar de fabriekswaarden en gaan alle gebruikersgegevens verloren."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om je Android TV-apparaat te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt je Android TV-apparaat teruggezet op de fabrieksinstellingen en gaan alle gebruikersgegevens verloren."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Je hebt nu <xliff:g id="NUMBER_0">%1$d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de telefoon en gaan alle gebruikersgegevens verloren."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de tablet."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Je hebt op onjuiste wijze <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de tv te ontgrendelen. De tv wordt nu hersteld naar de fabrieksinstellingen."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om je Android TV-apparaat te ontgrendelen. Je Android TV-apparaat wordt nu teruggezet op de fabrieksinstellingen."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de telefoon."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt u gevraagd je tablet te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog <xliff:g id="NUMBER_1">%2$d</xliff:g> onjuiste pogingen, wordt je gevraagd je tv te ontgrendelen met een e-mailaccount.\n\n Probeer het opnieuw over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen word je gevraagd je Android TV-apparaat te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt u gevraagd je telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
@@ -1997,6 +1998,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Systeem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Instellingen"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Stand-by"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Het Android TV-apparaat wordt binnenkort uitgeschakeld. Druk op een knop om het ingeschakeld te houden."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Het apparaat wordt binnenkort uitgeschakeld. Druk om het ingeschakeld te houden."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Camera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Microfoon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"wordt weergegeven vóór andere apps op je scherm"</string>

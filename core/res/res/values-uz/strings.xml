@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Juda ko‘p elementni (<xliff:g id="CONTENT_TYPE">%s</xliff:g>) o‘chirib tashlashga urindingiz."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planshet xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV qurilmasi xotirasida joy qolmadi. Joy ochish uchun ayrim fayllarni oʻchirib tashlang."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Sertifikat markazi sertifikatlari o‘rnatildi</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
     <string name="me" msgid="6545696007631404292">"Men"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planshet sozlamalari"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV tanlamalari"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV parametrlari"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefon sozlamalari"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Ovozsiz usul"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Simsiz tarmoqchi yoqish"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Qayta ishga tushirilmoqda…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"O‘chirilmoqda…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planshetingiz o‘chiriladi."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizoringiz o‘chadi."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV qurilmangiz oʻchiriladi."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Soatingiz o‘chiriladi."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefoningiz o‘chiriladi."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"O‘chirmoqchimisiz?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Yaqinda"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"So‘nggi foydalanilgan ilovalar yo‘q."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Planshet sozlamalari"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"TV tanlamalari"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV parametrlari"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefon sozlamalari"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekran qulfi"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"O‘chirish"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ilovaga SMS xabarlarini jo‘natish uchun ruxsat beradi. Bu kutilmagan xarajatlarga sabab bo‘lishi mumkin. Zararli ilovalar sizdan so‘roqsiz xabarlar jo‘natish orqali pulingizni sarflashi mumkin."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"matn xabarlaringizni o‘qish (SMS yoki MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Bu ilova planshetdagi barcha SMS xabarlarini o‘qiy oladi."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Bu ilova televizordagi barcha SMS xabarlarini o‘qiy oladi."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Bu ilova Android TV qurilmangizda saqlangan barcha SMS (matnli) xabarlarni oʻqishi mumkin."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Bu ilova telefondagi barcha SMS xabarlarini o‘qiy oladi."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"WAP xabarlarni olish"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ilovaga WAP xabarlarni qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Ushbu huquq sizga ko‘rsatmasdan sizga yuborilgan xabarlarni kuzatish yoki o‘chirish xususiyatiga ham ega."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Bu ilova orqa fonda internetdan foydalanadi. Bunda trafik sarflanishi mumkin."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ilovani doim ishlab turadigan qilish"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va planshetni sekin ishlashiga sabab bo‘lishi mumkin."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ilovaga o‘zining muayyan qismlarining xotiraning turg‘un qismiga aylantirish huquqini beradi. Bunda, boshqa ilovalar uchun xotiradan ajratilgan joy cheklanib, televizorning ishlashi sekinlashishi mumkin."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Ilovaga oʻzining muayyan qismlarining xotiraning turgʻun qismiga aylantirish huquqini beradi. Bunda, boshqa ilovalar uchun xotiradan ajratilgan joy cheklanib, Android TV qurilmangizning ishlashi sekinlashishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va telefonni sekin ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"faol xizmatlarni ishga tushirish"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Ilovaga faol xizmatlardan foydalanishga ruxsat beradi."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Ilova tizim sozlamalarini o‘zgartirishi mumkin. Zararli dasturlar uning yordamida tizimni ishdan chiqarishi mumkin."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"tizim ishga tushganda bajarish"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Ilova tizim qayta yoqilganidan so‘ng o‘zini ishga tushirishi mumkin. Bu planshetning yonish vaqtini uzaytirishi va doimiy ishlab turivchi ilova tufayli uning tezkor ishlashini kamaytirishi mumkin."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Ilovaga tizim ishga tushishi bilanoq o‘zi ham ishga tushadigan qilib qo‘yish huquqini beradi. Buning natijasida televizorning ishga tushishi sekinlashishi hamda ilovaning doimiy ravishda ishlab turishi oqibatida butun planshetning ishlashi sekinlashi mumkin."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Ilovaga tizim ishga tushishi bilanoq oʻzi ham ishga tushadigan qilib qoʻyish huquqini beradi. Buning natijasida Android TV qurilmasining ishga tushishi sekinlashishi hamda ilovaning doimiy ravishda ishlab turishi oqibatida butun qurilmaning ishlashi sekinlashi mumkin."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ilova tizim qayta yoqilganidan so‘ng o‘zini ishga tushirishi mumkin. Bu telefonning yonish vaqtini uzaytirishi va doimiy ishlab turivchi ilova tufayli uning tezkor ishlashini kamaytirishi mumkin."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"xabarlarni keyinchalik saqlash sharti bilan yuborish"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Ilova yuborilganidan keyin o‘chib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan noto‘g‘ri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Ilova yuborilganidan keyin o‘chib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan noto‘g‘ri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Ilova yuborilganidan keyin oʻchib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan notoʻgʻri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ilova yuborilganidan keyin o‘chib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan noto‘g‘ri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"kontaktlaringizni ko‘rish"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Ilovaga planshetingizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘qishga ruxsat beradi. Ushbu ruxsat ilovalarga aloqa ma’lumotlaringizni saqlash uchun ruxsat beradi va zararli ilovalar sizga bildirmasdan kontaktlar ma’lumotlaringizni boshqalarga ulashishi mumkin."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Ilovaga televizoringizda saqlanayotgan kontaktlar haqidagi ma’lumotlarni, jumladan, muayyan shaxslar bilan qo‘ng‘iroqlashish, e-pochta orqali xabarlashish yoki muloqot qilish oralig‘i haqidagi ma’lumotlarni o‘qish huquqini beradi. Ushbu ruxsatnoma ilovalarga kontaktlaringiz haqidagi ma’lumotlarni saqlash huquqini berib, zararli ilovalar uning yordamida kontakt ma’lumotlarini sizdan beruxsat boshqalarga ulashishi mumkin."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Ilovaga Android TV qurilmangizdagi kontaktlar haqidagi axborotni, jumladan, muayyan shaxslar bilan chaqiruv, email orqali xabarlashish yoki muloqot qilish takroriyligi haqidagi axborotni oʻqish huquqini beradi. Bu ruxsat ilovalarga kontaktlaringizga oid axborotni saqlash huquqini berib, zararli ilovalar uning yordamida kontakt maʼlumotlarini sizdan beruxsat boshqalarga ulashishi mumkin."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Ilovaga telefoningizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘qishga ruxsat beradi. Ushbu ruxsat ilovalarga kontaktlar ma’lumotlaringizni saqlash uchun ruxsat beradi va zararli ilovalar sizga bildirmasdan aloqa ma’lumotlaringizni boshqalarga ulashishi mumkin."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"kontaktlaringizni tahrirlash"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Ilovaga planshetingizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Ushbu ruxsat ilovalarga kontaktlar ma’lumotlarini o‘chirishga ruxsat beradi."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Ilovaga televizoringizga saqlangan kontaktlar haqidagi ma’lumotlarni, jumladan, muayyan shaxslar bilan qo‘ng‘iroqlashish, e-pochta orqali xabarlashish yoki boshqa usullarda muloqot qilish oralig‘ini o‘zgartirish huquqini beradi. Ushbu ruxsatnoma ilovalarga kontaktlar haqidagi ma’lumotlarni o‘chirish huquqini beradi."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Ilovaga Android TV qurilmangizda saqlangan kontaktlar haqidagi axborotni, jumladan, muayyan kontakt bilan chaqiruv, email yoki boshqa usullar orqali muloqot qilish takroriyligini tahrirlash huquqini beradi. Bu ruxsat orqali ilovalar kontaktlar haqidagi axborotni oʻchirib tashlashi mumkin."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Ilovaga telefoningizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Ushbu ruxsat ilovalarga kontaktlar ma’lumotlarini o‘chirishga ruxsat beradi."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"qo‘ng‘iroq jurnallarini o‘qish"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Bu ilova chaqiruvlar tarixini o‘qiy oladi."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"qo‘ng‘iroq jurnaliga yozish"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ilovaga planshetingizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ilovaga televizoringizdagi qo‘ng‘iroqlar jurnali, kirish va chiqish qo‘ng‘rioqlari haqidagi ma’lumotlarni o‘zgartirish huquqini beradi. Zararli ilovalar undan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Ilovaga Android TV qurilmangizdagi chaqiruvlar jurnali, kirish va chiqish chaqiruvlari haqidagi axborotni oʻzgartirish huquqini beradi. Zararli ilovalar undan chaqiruvlar jurnalini oʻzgartirish yoki oʻchirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ilovaga telefoningizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"tana sezgichlari (m-n, yurak urishi sensori) ma’lumotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ilovaga sezgichlardan olingan jismoniy holatingiz haqidagi ma’lumotlarni, masalan, yurak urishini kuzatish uchun ruxsat beradi."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Taqvim tadbirlari va tafsilotlarini o‘qish"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Bu ilova planshetdagi barcha taqvim tadbirlarini o‘qiy olishi hamda taqvim ma’lumotlarini ulashishi yoki saqlashi mumkin."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Bu ilova televizordagi barcha taqvim tadbirlarini o‘qiy olishi hamda taqvim ma’lumotlarini ulashishi yoki saqlashi mumkin."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Bu ilova Android TV qurilmangizda barcha taqvim tadbirlarini oʻqiy olishi hamda taqvim maʼlumotlarini ulashishi yoki saqlashi mumkin."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Bu ilova telefondagi barcha taqvim tadbirlarini o‘qiy olishi hamda taqvim ma’lumotlarini ulashishi yoki saqlashi mumkin."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"taqvimga tadbir qo‘shish/o‘zgartirish yoki taqvim egasini ogohlantirmasdan mehmonlarga elektron xat yuborish"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Bu ilova planshetga taqvim tadbirlarini qo‘shishi, olib tashlashi yoki o‘zgartirishi mumkin. Bu ilova taqvim egalari nomidan ko‘rinadigan SMS yuborishi yoki egalarini ogohlantirmasdan tadbirlarni o‘zgartirishi mumkin."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Bu ilova televizorga taqvim tadbirlarini qo‘shishi, olib tashlashi yoki o‘zgartirishi mumkin. Bu ilova taqvim egalari nomidan ko‘rinadigan SMS yuborishi yoki egalarini ogohlantirmasdan tadbirlarni o‘zgartirishi mumkin."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Bu ilova Android TV qurilmangizga taqvim tadbirlarini kiritishi, olib tashlashi yoki oʻzgartirishi mumkin. Bu ilova taqvim egalari nomidan koʻrinadigan SMS yuborishi yoki egalarini ogohlantirmasdan tadbirlarni oʻzgartirishi mumkin."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Bu ilova telefonga taqvim tadbirlarini qo‘shishi, olib tashlashi yoki o‘zgartirishi mumkin. Bu ilova taqvim egalari nomidan ko‘rinadigan SMS yuborishi yoki egalarini ogohlantirmasdan tadbirlarni o‘zgartirishi mumkin."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qo‘shimcha manzillarga kirish buyruqlari"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu ilova faqat fon rejimida aniq joylashuv axborotingizdan foydalanishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq turishi va ishlashi kerak. Bunda batareya sarfi oshishi mumkin."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"faqat faol rejimda taxminiy joylashuv axborotiga (tarmoq asosida) ruxsat"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular planshetingizda yoniq bo‘lishi va ishlashi kerak."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular televizoringizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular Android TV qurilmangizda yoniq boʻlishi va ishlashi kerak."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq bo‘lishi va ishlashi kerak."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"fonda joylashuv axborotidan foydalanish"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Agar taxminiy yoki aniq joylashuv axborotiga qo‘shimcha tarzda ruxsat berilgan bo‘lsa, ilova ishlayotganda joylashuv axborotidan fonda foydalana oladi."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Bu ilova jismoniy harakatlaringizni aniqlay oladi."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"rasm va videoga olish"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Bu ilova xohlagan vaqtda kamera orqali suratga olishi va video yozib olishi mumkin."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"tebranishni boshqarish"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon raqamlariga tog‘ridan to‘g‘ri qo‘ng‘iroq qilish"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon raqamlarini o‘qish"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Ilovaga qurilmaning telefon raqamlaridan foydalanishiga ruxsat beradi."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planshetni uyquga ketishiga yo‘l qo‘ymaslik"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"televizorning uyqu rejimiga o‘tishining oldini olish"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"Android TV qurilmasining uyqu rejimiga kirishining oldini olish"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonni uxlashiga yo‘l qo‘ymaslik"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ilova planshetning uyqu rejimiga o‘tib qolishining oldini olishi mumkin."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Ilovaga televizorning uyqu rejimiga o‘tishining oldini olish huquqini beradi."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Ilovaga Android TV qurilmangizning uyqu rejimiga oʻtishining oldini olish huquqini beradi."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Ilova telefonning uyqu rejimiga o‘tib qolishining oldini olishi mumkin."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"infraqizil signal jo‘natish"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Dasturga planshetdagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Ilovaga televizorning infraqizil uzatkichidan foydalanish huquqini beradi."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Ilovaga Android TV qurilmangizning infraqizil uzatkichidan foydalanish huquqini beradi."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Dasturga telefondagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"fonga rasm o‘rnatish"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Ilova tizim uchun orqa fon rasmlarini o‘rnatishi mumkin."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Ilova tizimning orqa fon rasmlari uchun o‘lchamlarini ko‘rsatishi mumkin."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"vaqt mintaqasini sozlash"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Iloba planshetdagi vaqt zonasini o‘zgartirishi mumkin."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Ilovaga televizorning vaqt zonasini o‘zgartirish huquqini beradi."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Ilova Android TV qurilmangizdagi vaqt mintaqasini oʻzgartirishi mumkin."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Ilova telefondagi vaqt zonasini o‘zgartirishi mumkin."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"qurilmadagi hisoblarni qidirish"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Ilovaga planshetdagi hisoblar ro‘yxatini olishga ruxsat beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kirishi mumkin."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Ilovaga televizor tomonidan aniqlangan hisoblar ro‘yxatini olish huquqini beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kiradi."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Ilovaga Android TV qurilmasi tomonidan aniqlangan hisoblar roʻyxatini olish huquqini beradi. Bunga siz oʻrnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kiradi."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Ilovaga telefondagi hisoblar ro‘yxatini olishga ruxsat beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kirishi mumkin."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"tarmoq ulanishlarini ko‘rish"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Ilovaga mavjud va ulangan tarmoqlar kabi tarmoqqa ulanishlar haqidagi ma’lumotni ko‘rish imkonini beradi."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ilovaga Wi-Fi ulanish nuqtalariga ulanish va ulardan uzilishga hamda Wi-Fi tarmoqlari uchun qurilmalar sozlamasiga o‘zgartirishlar kiritishga ruxsat beradi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi Multicast qabul qilishga ruxsat berish"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Ilovaga Wi-Fi tarmoq orqali guruh manzillardan foydalanib, faqat planshetingizga emas, balki barcha qurilmalarga yuborilgan paketlarni qabul qilishga ruxsat beradi. U oddiy rejimdagidan ko‘ra ko‘proq quvvat sarflaydi."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Ilovaga faqat televizoringizga emas, balki biror Wi-Fi tarmog‘iga ulangan barcha qurilmalarga ommaviy uzatish manzillari orqali yuborilgan paketlarni qabul qilish huquqini beradi."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Ilovaga faqat Android TV qurilmangizga emas, balki biror Wi-Fi tarmoqqa ulangan barcha qurilmalarga ommaviy uzatish manzillari orqali yuborilgan paketlarni qabul qilish huquqini beradi."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Ilovaga Wi-Fi tarmoq orqali guruh manzillardan foydalanib, faqat telefoningizga emas, balki barcha qurilmalarga yuborilgan paketlarni qabul qilishga ruxsat beradi. U oddiy rejimdagidan ko‘ra ko‘proq quvvat sarflaydi."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth sozlamalariga kirish"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ilova Bluetooth funksiyali mahalliy planshet sozlamalarini sozlashi hamda masofadan turib qurilmalarni aniqlash va ular bilan juftlashishni amalga oshirishi mumkin."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Ilovaga mahalliy Bluetooth TV qurilmasini sozlash hamda masofadagi qurilmalarni aniqlash va ularga ulanish huquqini beradi."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Ilovaga mahalliy Android TV qurilmangizda Bluetooth aloqasini sozlash hamda masofadagi qurilmalarni aniqlash va ularga ulanish huquqini beradi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ilova Bluetooth funksiyali mahalliy telefon sozlamalarini sozlashi hamda masofadan turib qurilmalarni aniqlash va ular bilan juftlashishni amalga oshirishi mumkin."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX’ga ulanish va uzish"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ilovaga har qanday ulangan WiMAX tarmoqlari haqida va yoqilgan WiMAX tarmoqlarini aniqlashga ruxsat beradi."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX holatini o‘zgartirish"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ilovaga planshetni WiMAX tarmoqlariga ulashga va ulardan uzishga ruxsat beradi."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Ilovaga televizorni WiMAX tarmoqlariga ulash va ulardan uzish huquqini beradi."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Ilovaga Android TV qurilangizni WiMAX tarmoqlarga ulash va ulardan uzish huquqini beradi."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ilovaga telefonni WiMAX tarmoqlariga ulashga va ulardan uzishga ruxsat beradi."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth qurilmalar bilan bog‘lanish"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Ilovaga planshetdagi Bluetooth‘ning sozlamasini ko‘rishga va bog‘langan qurilmalarga ulanish va ulardan ulanish so‘rovlarini qabul qulishga imkon beradi."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Ilovaga televizordagi Bluetooth sozlamalarini ko‘rish hamda juftlashgan qurilmalar bilan aloqa o‘rnatish va ulanishlarni qabul qilish huquqini beradi."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Ilovaga Android TV qurilmangizdagi Bluetooth sozlamasini koʻrishga va bogʻlangan qurilmalarga ulanish va ulardan ulanish talablarni qabul qilishga imkon beradi."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Ilovaga telefondagi Bluetooth‘ning sozlamasini ko‘rishga va bog‘langan qurilmalarga ulanish va ulardan ulanish so‘rovlarini qabul qulishga imkon beradi."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC modulini boshqarish"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekranni qulfdan chiqarishga urinishlarni nazorat qilish"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Ekranni qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta noto‘g‘ri kiritilsa, planshetni qulflaydi yoki undagi ma’lumotlarni o‘chirib tashlaydi."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Ekranni qulfdan chiqarishda noto‘g‘ri kiritilgan parollarni sonini kuzatib boradi hamda agar parol juda ko‘p marta noto‘g‘ri kiritilsa, televizorni qulflash yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Ekran qulfini ochishda kiritilgan xato parollar sonini kuzatib boradi va agar parol juda koʻp marta xato kiritilsa, Android TV qurilmasini qulflaydi yoki undagi barcha maʼlumotlarni oʻchirib tashlaydi."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Ekranni qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta noto‘g‘ri kiritilsa, telefonni qulflaydi yoki undagi ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, planshetni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, televizorni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Ekran qulfini ochishda kiritilgan xato parollar sonini kuzatib boradi va agar parol juda koʻp marta xato kiritilsa, Android TV qurilmangizni qulflaydi yoki undagi barcha maʼlumotlarni oʻchirib tashlaydi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, telefonni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekran qulfini almashtirish"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ekran qulfini almashtiradi."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ekranning qachon va qanday qulflanishini boshqaradi."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Hamma narsani tozalash"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Planshetdagi hamma narsani tozalab tashlaydi va uning sozlamalarini asliga qaytaradi."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Zavod sozlamalarini tiklaydi va televizordagi barcha ma’lumotlarni ogohlantirishsiz o‘chirib tashlaydi."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Android TV qurilmangizdagi hamma narsani tozalab tashlaydi va uning sozlamalarini asliga qaytaradi."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Telefondagi hamma narsani tozalab tashlaydi va uning sozlamalarini asliga qaytaradi."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Foydalanuvchi ma’lumotlarini o‘chirish"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Ushbu planshetdagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Ushbu televizordagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Bu Android TV qurilmangizdagi foydalanuvchi maʼlumotlarini ogohlantirishsiz oʻchirib tashlaydi."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Ushbu telefondagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Qurilmaga global proksi o‘rnatish"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Qoida faollashtirilgan vaqtda ishlatiladigan qurilmaning global proksi-serverini o‘rnatadi. Faqat qurilma egasi global proksi-serverini o‘rnatishi mumkin."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Yuzni tanitib qulfni ochishga urinish miqdoridan oshib ketdi"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM karta solinmagan"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planshetingizda SIM karta yo‘q."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Televizorda SIM karta yo‘q."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Android TV qurilmangizda SIM karta topilmadi."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefoningizda SIM karta yo‘q."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM kartani soling."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta solinmagan yoki u yaroqsiz. SIM kartani soling."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Siz parolni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Siz PIN-kodni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Telefon qulfini ochish uchun yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri urinish qilsangiz, sizdan Google hisobingizga kirish talab qilinadi. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qayta urining."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizni qulfdan chiqarish uchun Google hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qaytadan urining."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta xato kiritdingiz. Android TV qurilmasi qulfini ochish uchun yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta xato urinish qilsangiz, sizdan Google hisobingizga kirish talab qilinadi. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan keyin qayta urining."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Telefon qulfini ochish uchun yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri urinish qilsangiz, sizdan Google hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Planshet qulfini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta ochishga urinib ko‘rdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng, planshet ishlab chiqarilgan holatiga tiklanadi va barcha foydalanuvchi ma’lumotlari yo‘qoladi."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizda zavod sozlamalari qayta tiklanadi hamda undagi barcha ma’lumotlaringiz o‘chib ketadi."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Android TV qurilmasi qulfini ochish uchun <xliff:g id="NUMBER_0">%1$d</xliff:g> marta xato urinildi. Yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta xato urinilgandan keyin Android TV qurilmangiz zavod sozlamalariga qaytariladi va barcha foydalanuvchi maʼlumotlari oʻchirib tashlanadi."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefon qulfini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta ochishga urinib ko‘rdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng, telefon ishlab chiqarilgan holatiga tiklanadi va barcha foydalanuvchi ma’lumotlari yo‘qoladi."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Planshet qulfini <xliff:g id="NUMBER">%d</xliff:g> marta ochishga urinib ko‘rdingiz. Planshet hozir ishlab chiqarilgan holatiga tiklanadi."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER">%d</xliff:g> marta noto‘g‘ri kiritdingiz. Endi, televizoringizda zavod sozlamalari qayta tiklanadi."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Android TV qurilmasi qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta xato urinildi. Android TV qurilmangiz endi zavod sozlamalariga qaytariladi."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon qulfini <xliff:g id="NUMBER">%d</xliff:g> marta ochishga urinib ko‘rdingiz. Telefon hozir ishlab chiqarilgan holatiga tiklanadi."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Grafik kalit esingizdan chiqdimi?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Ilovaga brauzer orqali kirilgan barcha manzillar tarixi va brauzer xatcho‘plarini o‘qish uchun ruxsat beradi. Diqqat qiling: ushbu ruxsat uchinchi taraf brauzerlari yoki internetni ko‘rsatish qobiliyatiga ega boshqa ilovalardan talab qilinmasligi mumkin."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"veb xatcho‘plar va tarixga yozish"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Ilovaga planshetingizga zaxiralangan brauzer tarixi yoki xatcho‘plarini o‘zgartirish uchun ruxsat beradi. Bu ilovaga brauzer ma’lumotlarini o‘zgartirish yoki o‘chirishga ruxsat berishi mumkin. Diqqat qiling: ushbu ruxsat uchinchi taraf brauzerlari yoki internetni ko‘rsatish qobiliyatiga ega boshqa ilovalardan talab qilinmasligi mumkin."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Ilovaga televizoringizga saqlangan Brauzer tarixi yoki xatcho‘plarni o‘zgartirish huquqini beradi. Buning yordamida ilova Brauzer ma’lumotlarini tozalashi yoki o‘zgartirishi mumkin. Eslatma: ushbu ruxsatnoma uchinchi tomon brauzerlari yoki veb-sahifalarni ko‘rsatish imkoniyatiga ega boshqa ilovalar tomonidan ishlatilmasligi mumkin."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Ilovaga Android TV qurilmangizga saqlangan brauzer tarixi yoki bukmarklarni tahrirlash huquqini beradi. Buning yordamida ilova brauzer maʼlumotlarini tozalashi yoki oʻzgartirishi mumkin. Eslatma: ushbu ruxsatnoma uchinchi tomon brauzerlari yoki veb-sahifalarni koʻrsatish imkoniyatiga ega boshqa ilovalar tomonidan ishlatilmasligi mumkin."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ilovaga telefoningizga zaxiralangan brauzer tarixi yoki xatcho‘plarini o‘zgartirish uchun ruxsat beradi. Bu ilovaga brauzer ma’lumotlarini o‘zgartirish yoki o‘chirishga ruxsat berishi mumkin. Diqqat qiling: ushbu ruxsat uchinchi taraf brauzerlari yoki internetni ko‘rsatish qobiliyatiga ega boshqa ilovalardan talab qilinmasligi mumkin."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"signal o‘rnatish"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ilova uyg‘otkichni sozlashi mumkin. Ba’zi soat ilovalari ushbu funksiyani qo‘llab-quvvatlamasligi mumkin."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Ochiq Wi-Fi tarmog‘i aniqlandi</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Ochiq Wi‑Fi tarmoqqa ulaning"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Aloqa operatori Wi-Fi tarmog‘iga ulanish"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi tarmoqqa ulanmoqda"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi tarmoqqa ulanildi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi-Fi tarmoqqa ulanib bo‘lmadi"</string>
@@ -1308,7 +1311,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"So‘ralgan PIN kodni kiriting:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN kod:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Planshet <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ga ulanganligi tufayli vaqtincha Wi-Fi tarmog‘idan uzildi."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Televizor <xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulangan vaqtda Wi-Fi tarmog‘idan vaqtinchalik uziladi"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV qurilmangiz <xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulangani uchun u vaqtincha Wi-Fi tarmoqdan uzildi."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefon <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ga ulanganligi tufayli vaqtincha Wi-Fi tarmog‘idan uzildi."</string>
     <string name="select_character" msgid="3365550120617701745">"Belgilarni kiriting"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS xabarlar yuborilmoqda"</string>
@@ -1651,13 +1654,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Siz parolni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Siz planshet qulfini ochish uchun <xliff:g id="NUMBER_0">%1$d</xliff:g> marta muvaffaqiyatsiz urindingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng planshetning zavod sozlamalari tiklanadi va barcha foydalanuvchi ma’lumotlari o‘chiriladi."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizda zavod sozlamalari qayta tiklanadi hamda undagi barcha ma’lumotlaringiz o‘chib ketadi."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Android TV qurilmasi qulfini ochish uchun <xliff:g id="NUMBER_0">%1$d</xliff:g> marta xato urinildi. Yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta xato urinilgandan keyin Android TV qurilmangiz zavod sozlamalariga qaytariladi va barcha foydalanuvchi maʼlumotlari oʻchirib tashlanadi."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Siz telefon qulfini ochish uchun <xliff:g id="NUMBER_0">%1$d</xliff:g> marta muvaffaqiyatsiz urindingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng telefonning zavod sozlamalari tiklanadi va barcha foydalanuvchi ma’lumotlari o‘chiriladi."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Planshet qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta muvaffaqiyatsiz urinib ko‘rdingiz. Planshetning hozir zavod sozlamari tiklanadi."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER">%d</xliff:g> marta noto‘g‘ri kiritdingiz. Endi, televizoringizda zavod sozlamalari qayta tiklanadi."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Android TV qurilmasi qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta xato urinildi. Android TV qurilmangiz endi zavod sozlamalariga qaytariladi."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta muvaffaqiyatsiz urinib ko‘rdingiz. Telefonning hozir zavod sozlamari tiklanadi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Siz grafik kalitni  <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, planshet qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizni qulfdan chiqarish uchun sizda e-pochta hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qaytadan urining."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Grafik kalit <xliff:g id="NUMBER_0">%1$d</xliff:g> marta xato chizildi. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan keyin, sizdan e-pochtangizdan foydalanib, Android TV qurilmangiz qulfini ochishingiz soʻraladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan keyin qayta urining."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Olib tashlash"</string>
@@ -1998,6 +2001,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nimalar bloklanganini tekshirish uchun bosing"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Tizim"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Sozlamalar"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Kutib turing"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV qurilmasi oʻchish arafasida, yoniq qolishi uchun istalgan tugmani bosing."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Qurilma oʻchish arafasida, yoniq qolishi uchun istalgan tugmani bosing"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ekranda boshqa ilovalar ustidan ochiladi"</string>
