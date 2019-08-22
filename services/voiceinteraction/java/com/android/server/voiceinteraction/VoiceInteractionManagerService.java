@@ -1281,9 +1281,12 @@ public class VoiceInteractionManagerService extends SystemService {
 
             RoleObserver(@NonNull @CallbackExecutor Executor executor) {
                 mRm.addOnRoleHoldersChangedListenerAsUser(executor, this, UserHandle.ALL);
-                UserHandle currentUser = UserHandle.of(LocalServices.getService(
-                        ActivityManagerInternal.class).getCurrentUserId());
-                onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT, currentUser);
+                // Sync only if assistant role has been initialized.
+                if (mRm.isRoleAvailable(RoleManager.ROLE_ASSISTANT)) {
+                    UserHandle currentUser = UserHandle.of(LocalServices.getService(
+                            ActivityManagerInternal.class).getCurrentUserId());
+                    onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT, currentUser);
+                }
             }
 
             private @NonNull String getDefaultRecognizer(@NonNull UserHandle user) {
