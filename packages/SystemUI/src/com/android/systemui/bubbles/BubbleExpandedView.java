@@ -105,6 +105,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private Drawable mAppIcon;
 
     private BubbleController mBubbleController = Dependency.get(BubbleController.class);
+    private WindowManager mWindowManager;
 
     private BubbleStackView mStackView;
 
@@ -202,9 +203,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         super(context, attrs, defStyleAttr, defStyleRes);
         mPm = context.getPackageManager();
         mDisplaySize = new Point();
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         // Get the real size -- this includes screen decorations (notches, statusbar, navbar).
-        wm.getDefaultDisplay().getRealSize(mDisplaySize);
+        mWindowManager.getDefaultDisplay().getRealSize(mDisplaySize);
         Resources res = getResources();
         mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
@@ -326,7 +327,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (usingActivityView()) {
             int[] screenLoc = mActivityView.getLocationOnScreen();
             final int activityViewBottom = screenLoc[1] + mActivityView.getHeight();
-            final int keyboardTop = mDisplaySize.y - insets.getSystemWindowInsetBottom();
+            final int keyboardTop = mDisplaySize.y - Math.max(insets.getSystemWindowInsetBottom(),
+                    insets.getDisplayCutout() != null
+                            ? insets.getDisplayCutout().getSafeInsetBottom()
+                            : 0);
             final int insetsBottom = Math.max(activityViewBottom - keyboardTop, 0);
             mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
         }
@@ -444,6 +448,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     private int getMaxExpandedHeight() {
+        mWindowManager.getDefaultDisplay().getRealSize(mDisplaySize);
         int[] windowLocation = mActivityView.getLocationOnScreen();
         int bottomInset = getRootWindowInsets() != null
                 ? getRootWindowInsets().getStableInsetBottom()
