@@ -74,6 +74,9 @@ public class PreferencesHelper implements RankingConfig {
     private static final String NON_BLOCKABLE_CHANNEL_DELIM = ":";
 
     @VisibleForTesting
+    static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 5000;
+
+    @VisibleForTesting
     static final String TAG_RANKING = "ranking";
     private static final String TAG_PACKAGE = "package";
     private static final String TAG_CHANNEL = "channel";
@@ -180,6 +183,7 @@ public class PreferencesHelper implements RankingConfig {
                                     // noop
                                 }
                             }
+                            boolean skipWarningLogged = false;
 
                             PackagePreferences r = getOrCreatePackagePreferencesLocked(name, uid,
                                     XmlUtils.readIntAttribute(
@@ -226,6 +230,14 @@ public class PreferencesHelper implements RankingConfig {
                                 }
                                 // Channels
                                 if (TAG_CHANNEL.equals(tagName)) {
+                                    if (r.channels.size() >= NOTIFICATION_CHANNEL_COUNT_LIMIT) {
+                                        if (!skipWarningLogged) {
+                                            Slog.w(TAG, "Skipping further channels for " + r.pkg
+                                                    + "; app has too many");
+                                            skipWarningLogged = true;
+                                        }
+                                        continue;
+                                    }
                                     String id = parser.getAttributeValue(null, ATT_ID);
                                     String channelName = parser.getAttributeValue(null, ATT_NAME);
                                     int channelImportance = XmlUtils.readIntAttribute(
@@ -694,6 +706,10 @@ public class PreferencesHelper implements RankingConfig {
 
                 updateConfig();
                 return needsPolicyFileChange;
+            }
+
+            if (r.channels.size() >= NOTIFICATION_CHANNEL_COUNT_LIMIT) {
+                throw new IllegalStateException("Limit exceed; cannot create more channels");
             }
 
             needsPolicyFileChange = true;
