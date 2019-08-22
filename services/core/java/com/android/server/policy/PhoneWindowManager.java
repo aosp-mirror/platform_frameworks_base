@@ -3120,8 +3120,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 || Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
             try {
-                ActivityManager.getService()
-                        .requestBugReport(ActivityManager.BUGREPORT_OPTION_FULL);
+                ActivityManager.getService().requestFullBugReport();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error taking bugreport", e);
             }
