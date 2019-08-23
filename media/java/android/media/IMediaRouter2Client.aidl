@@ -16,10 +16,12 @@
 
 package android.media;
 
+import android.media.MediaRoute2ProviderInfo;
+
 /**
  * @hide
  */
 oneway interface IMediaRouter2Client {
-    void notifyStateChanged();
     void notifyRestoreRoute();
+    void notifyProviderInfosUpdated(in List<MediaRoute2ProviderInfo> providers);
 }

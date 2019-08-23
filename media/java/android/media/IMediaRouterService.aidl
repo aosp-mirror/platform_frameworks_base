@@ -42,7 +42,7 @@ interface IMediaRouterService {
     void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction);
 
     // Methods for media router 2
-    void registerClient2AsUser(IMediaRouter2Client client, String packageName, int userId);
+    void registerClient2(IMediaRouter2Client client, String packageName);
     void unregisterClient2(IMediaRouter2Client client);
     void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route, in Intent request);
     /**
@@ -54,8 +54,7 @@ interface IMediaRouterService {
     void selectRoute2(IMediaRouter2Client client, in @nullable MediaRoute2Info route);
     void setControlCategories(IMediaRouter2Client client, in List<String> categories);
 
-    void registerManagerAsUser(IMediaRouter2Manager manager,
-            String packageName, int userId);
+    void registerManager(IMediaRouter2Manager manager, String packageName);
     void unregisterManager(IMediaRouter2Manager manager);
     /**
      * Changes the selected route of an application.

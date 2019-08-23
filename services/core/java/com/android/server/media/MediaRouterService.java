@@ -435,12 +435,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void registerClient2AsUser(IMediaRouter2Client client, String packageName, int userId) {
+    public void registerClient2(IMediaRouter2Client client, String packageName) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
         }
-        mService2.registerClientAsUser(client, packageName, userId);
+        mService2.registerClient(client, packageName);
     }
 
     // Binder call
@@ -464,13 +464,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void registerManagerAsUser(IMediaRouter2Manager manager,
-            String packageName, int userId) {
+    public void registerManager(IMediaRouter2Manager manager, String packageName) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
         }
-        mService2.registerManagerAsUser(manager, packageName, userId);
+        mService2.registerManager(manager, packageName);
     }
 
     // Binder call

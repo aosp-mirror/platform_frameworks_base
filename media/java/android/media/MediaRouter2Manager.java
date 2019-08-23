@@ -25,7 +25,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -104,26 +103,28 @@ public class MediaRouter2Manager {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(callback, "callback must not be null");
 
+        CallbackRecord callbackRecord;
         synchronized (mCallbacks) {
             if (findCallbackRecordIndexLocked(callback) >= 0) {
                 Log.w(TAG, "Ignoring to add the same callback twice.");
                 return;
             }
-            synchronized (sLock) {
-                if (mCallbacks.size() == 0) {
-                    Client client = new Client();
-                    try {
-                        mMediaRouterService.registerManagerAsUser(client, mPackageName,
-                                UserHandle.myUserId());
-                        mClient = client;
-                    } catch (RemoteException ex) {
-                        Log.e(TAG, "Unable to register media router manager.", ex);
-                    }
+            callbackRecord = new CallbackRecord(executor, callback);
+            mCallbacks.add(callbackRecord);
+        }
+
+        synchronized (sLock) {
+            if (mClient == null) {
+                Client client = new Client();
+                try {
+                    mMediaRouterService.registerManager(client, mPackageName);
+                    mClient = client;
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to register media router manager.", ex);
                 }
+            } else {
+                callbackRecord.notifyRoutes();
             }
-            CallbackRecord record = new CallbackRecord(executor, callback);
-            mCallbacks.add(record);
-            record.notifyRoutes();
         }
     }
 
@@ -149,6 +150,7 @@ public class MediaRouter2Manager {
                     } catch (RemoteException ex) {
                         Log.e(TAG, "Unable to unregister media router manager", ex);
                     }
+                    mClient.notifyProviderInfosUpdated(Collections.emptyList());
                     mClient = null;
                 }
             }
@@ -255,6 +257,10 @@ public class MediaRouter2Manager {
             final MediaRoute2ProviderInfo prevProvider = mProviders.get(index);
             final Set<String> updatedRouteIds = new HashSet<>();
             for (MediaRoute2Info routeInfo : routes) {
+                if (!routeInfo.isValid()) {
+                    Log.w(TAG, "Ignoring invalid route : " + routeInfo);
+                    continue;
+                }
                 final MediaRoute2Info prevRoute = prevProvider.getRoute(routeInfo.getId());
                 if (prevRoute == null) {
                     notifyRouteAdded(routeInfo);
@@ -303,7 +309,7 @@ public class MediaRouter2Manager {
     void notifyRouteListChanged() {
         for (CallbackRecord record: mCallbacks) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onRouteListChanged(mRoutes));
+                    () -> record.mCallback.onRoutesChanged(mRoutes));
         }
     }
 
@@ -369,10 +375,10 @@ public class MediaRouter2Manager {
         public void onRouteSelected(@NonNull String packageName, @Nullable MediaRoute2Info route) {}
 
         /**
-         * Called when the list of routes are changed.
+         * Called when the list of routes is changed.
          * A client may refresh available routes for each application.
          */
-        public void onRouteListChanged(@NonNull List<MediaRoute2Info> routes) {}
+        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
     }
 
     final class CallbackRecord {
@@ -385,6 +391,7 @@ public class MediaRouter2Manager {
         }
 
         void notifyRoutes() {
+            mExecutor.execute(() -> mCallback.onRoutesChanged(mRoutes));
             for (MediaRoute2Info routeInfo : mRoutes) {
                 mExecutor.execute(
                         () -> mCallback.onRouteAdded(routeInfo));
