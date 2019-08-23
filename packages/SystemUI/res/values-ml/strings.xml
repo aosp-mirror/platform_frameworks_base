@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ആവശ്യം കുറഞ്ഞ അറിയിപ്പുകൾ ചുവടെ നൽകിയിരിക്കുന്നു"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"തുറക്കുന്നതിന് വീണ്ടും ടാപ്പുചെയ്യുക"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"തുറക്കാൻ മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"വീണ്ടും ശ്രമിക്കാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ഈ ഉപകരണം മാനേജുചെയ്യുന്നത് നിങ്ങളുടെ സ്ഥാപനമാണ്"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> മാനേജുചെയ്യുന്ന ഉപകരണമാണിത്"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ഫോൺ ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'ഹോം\' ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, \'തിരികെ പോവുക\', \'അവലോകനം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, \'തിരികെ പോവുക\', \'ഹോം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ മുകളിലേക്ക് സ്വെെപ്പ് ചെയ്‌ത് പിടിക്കുക"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"മനസ്സിലായി"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"വേണ്ട, നന്ദി"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"സ്‌ക്രീൻ പിൻ ചെയ്തു"</string>

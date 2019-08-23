@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähem kiireloomulised märguanded on allpool"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Avamiseks puudutage uuesti"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Pühkige avamiseks üles"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Uuesti proovimiseks pühkige üles"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Seda seadet haldab teie organisatsioon"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Seda seadet haldab <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefoni kasutamiseks pühkige ikoonilt eemale"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Avakuva."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Avakuva"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Ekraanikuva vabastamiseks pühkige üles ja hoidke sõrme ekraanil"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Selge"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Tänan, ei"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekraanikuva on kinnitatud"</string>

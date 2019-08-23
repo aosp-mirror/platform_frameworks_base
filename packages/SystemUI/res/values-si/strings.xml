@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"හදිසිය අඩු දැනුම් දීම් පහත"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"විවෘත කිරීමට නැවත තට්ටු කරන්න"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"විවෘත කිරීමට ස්වයිප් කරන්න"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"නැවත උත්සාහ කිරීමට ඉහළට ස්වයිප් කරන්න"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"මෙම උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබේ"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> මගින් කළමනාකරණය කෙරේ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"දුරකථනය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"මෙම තිර ඇමුණුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"මෙම තිරය ඇමුණුම ගැලවීමට, මුල් පිටුව බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"මෙම තිරය ගැලවීමට, ඉහළට ස්වයිප් කර අල්ලාගෙන සිටින්න"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"හරි, තේරුණා"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"එපා ස්තූතියි"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"තිරය අමුණා ඇත"</string>
