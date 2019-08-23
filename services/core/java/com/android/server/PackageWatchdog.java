@@ -25,7 +25,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
-import android.net.NetworkStackClient;
+import android.net.ConnectivityModuleConnector;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -116,7 +116,7 @@ public class PackageWatchdog {
     // File containing the XML data of monitored packages /data/system/package-watchdog.xml
     private final AtomicFile mPolicyFile;
     private final ExplicitHealthCheckController mHealthCheckController;
-    private final NetworkStackClient mNetworkStackClient;
+    private final ConnectivityModuleConnector mConnectivityModuleConnector;
     @GuardedBy("mLock")
     private boolean mIsPackagesReady;
     // Flag to control whether explicit health checks are supported or not
@@ -138,7 +138,7 @@ public class PackageWatchdog {
                                 "package-watchdog.xml")),
                 new Handler(Looper.myLooper()), BackgroundThread.getHandler(),
                 new ExplicitHealthCheckController(context),
-                NetworkStackClient.getInstance());
+                ConnectivityModuleConnector.getInstance());
     }
 
     /**
@@ -147,13 +147,13 @@ public class PackageWatchdog {
     @VisibleForTesting
     PackageWatchdog(Context context, AtomicFile policyFile, Handler shortTaskHandler,
             Handler longTaskHandler, ExplicitHealthCheckController controller,
-            NetworkStackClient networkStackClient) {
+            ConnectivityModuleConnector connectivityModuleConnector) {
         mContext = context;
         mPolicyFile = policyFile;
         mShortTaskHandler = shortTaskHandler;
         mLongTaskHandler = longTaskHandler;
         mHealthCheckController = controller;
-        mNetworkStackClient = networkStackClient;
+        mConnectivityModuleConnector = connectivityModuleConnector;
         loadFromFile();
     }
 
@@ -179,7 +179,7 @@ public class PackageWatchdog {
                     () -> syncRequestsAsync());
             setPropertyChangedListenerLocked();
             updateConfigs();
-            registerNetworkStackHealthListener();
+            registerConnectivityModuleHealthListener();
         }
     }
 
@@ -743,11 +743,11 @@ public class PackageWatchdog {
         }
     }
 
-    private void registerNetworkStackHealthListener() {
+    private void registerConnectivityModuleHealthListener() {
         // TODO: have an internal method to trigger a rollback by reporting high severity errors,
         // and rely on ActivityManager to inform the watchdog of severe network stack crashes
         // instead of having this listener in parallel.
-        mNetworkStackClient.registerHealthListener(
+        mConnectivityModuleConnector.registerHealthListener(
                 packageName -> {
                     final VersionedPackage pkg = getVersionedPackage(packageName);
                     if (pkg == null) {
