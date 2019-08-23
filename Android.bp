@@ -185,6 +185,7 @@ framework_srcs = [
 
     // AIDL sources from external directories
     ":dumpstate_aidl",
+    ":framework_native_aidl",
     ":gatekeeper_aidl",
     ":gsiservice_aidl",
     ":incidentcompanion_aidl",
@@ -238,12 +239,6 @@ java_defaults {
     srcs: framework_srcs,
 
     aidl: {
-        // TODO(b/70046217) remove this by moving the AIDL files into frameworks/base
-        // so that they are referenced via framework-core-sources
-        include_dirs: [
-            "frameworks/native/aidl/binder",
-            "frameworks/native/aidl/gui",
-        ],
         generate_get_transaction_name: true,
     },
 
