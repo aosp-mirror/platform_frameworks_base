@@ -459,7 +459,7 @@ public class StackAnimationController extends
                                     : 0);
             allowableRegion.bottom =
                     mLayout.getHeight()
-                            - mBubbleIconBitmapSize
+                            - mBubbleSize
                             - mBubblePaddingTop
                             - (mImeHeight > Float.MIN_VALUE ? mImeHeight + mBubblePaddingTop : 0f)
                             - Math.max(
@@ -681,6 +681,20 @@ public class StackAnimationController extends
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
     }
+
+    /**
+     * Update effective screen width based on current orientation.
+     * @param orientation Landscape or portrait.
+     */
+    public void updateOrientation(int orientation) {
+        if (mLayout != null) {
+            Resources res = mLayout.getContext().getResources();
+            mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+            mStatusBarHeight = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.status_bar_height);
+        }
+    }
+
 
     /** Moves the stack, without any animation, to the starting position. */
     private void moveStackToStartPosition() {

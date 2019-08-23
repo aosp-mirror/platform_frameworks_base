@@ -230,7 +230,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPointerView.setVisibility(INVISIBLE);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
-                R.dimen.bubble_expanded_header_height);
+                R.dimen.bubble_settings_size);
         mSettingsIcon = findViewById(R.id.settings_button);
         mSettingsIcon.setOnClickListener(this);
 

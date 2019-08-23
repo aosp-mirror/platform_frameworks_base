@@ -140,9 +140,15 @@ public class ExpandedAnimationController
     public void updateOrientation(int orientation) {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mScreenWidth = mDisplaySize.y;
-            return;
+        } else {
+            mScreenWidth = mDisplaySize.x;
         }
-        mScreenWidth = mDisplaySize.x;
+        if (mLayout != null) {
+            Resources res = mLayout.getContext().getResources();
+            mStatusBarHeight = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.status_bar_height);
+            mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        }
     }
 
     /**
