@@ -232,6 +232,9 @@ static const char* kGenerationalCCRuntimeOption = "-Xgc:generational_cc";
 // Copying (CC) garbage collector.
 static const char* kNoGenerationalCCRuntimeOption = "-Xgc:nogenerational_cc";
 
+// Phenotype property name for enabling profiling the boot class path.
+static const char* PROFILE_BOOT_CLASS_PATH = "profilebootclasspath";
+
 // Feature flag name for running the JIT in Zygote experiment, b/119800099.
 static const char* ENABLE_APEX_IMAGE = "enable_apex_image";
 // Flag to pass to the runtime when using the apex image.
@@ -677,6 +680,24 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
     char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
 
+    // Read if we are using the profile configuration, do this at the start since the last ART args
+    // take precedence.
+    property_get("dalvik.vm.profilebootclasspath", propBuf, "");
+    std::string profile_boot_class_path = propBuf;
+    // Empty means the property is unset and we should default to the phenotype property.
+    // The possible values are {"true", "false", ""}
+    if (profile_boot_class_path.empty()) {
+        profile_boot_class_path = server_configurable_flags::GetServerConfigurableFlag(
+                RUNTIME_NATIVE_BOOT_NAMESPACE,
+                PROFILE_BOOT_CLASS_PATH,
+                /*default_value=*/ "");
+    }
+    if (profile_boot_class_path == "true") {
+        addOption("-Xps-profile-boot-class-path");
+        addOption("-Xps-profile-aot-code");
+        addOption("-Xjitsaveprofilinginfo");
+    }
+
     std::string use_apex_image =
         server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
                                                              ENABLE_APEX_IMAGE,
@@ -794,13 +815,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseRuntimeOption("dalvik.vm.jittransitionweight",
                        jittransitionweightOptBuf,
                        "-Xjittransitionweight:");
-
-    property_get("dalvik.vm.profilebootimage", propBuf, "");
-    if (strcmp(propBuf, "true") == 0) {
-        addOption("-Xps-profile-boot-class-path");
-        addOption("-Xps-profile-aot-code");
-    }
-
     /*
      * Madvise related options.
      */
