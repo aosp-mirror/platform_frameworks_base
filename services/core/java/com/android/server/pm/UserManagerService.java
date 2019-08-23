@@ -3939,9 +3939,23 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public boolean isDeviceManaged() {
+            synchronized (mUsersLock) {
+                return mIsDeviceManaged;
+            }
+        }
+
+        @Override
         public void setUserManaged(@UserIdInt int userId, boolean isManaged) {
             synchronized (mUsersLock) {
                 mIsUserManaged.put(userId, isManaged);
+            }
+        }
+
+        @Override
+        public boolean isUserManaged(@UserIdInt int userId) {
+            synchronized (mUsersLock) {
+                return mIsUserManaged.get(userId);
             }
         }
 
@@ -4165,6 +4179,7 @@ public class UserManagerService extends IUserManager.Stub {
             return restrictions != null && restrictions.getBoolean(restrictionKey);
         }
 
+        @Override
         public @Nullable UserInfo getUserInfo(@UserIdInt int userId) {
             UserData userData;
             synchronized (mUsersLock) {

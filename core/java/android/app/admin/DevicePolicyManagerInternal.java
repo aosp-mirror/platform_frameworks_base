@@ -153,4 +153,11 @@ public abstract class DevicePolicyManagerInternal {
      * Do not call it directly. Use {@link DevicePolicyCache#getInstance()} instead.
      */
     protected abstract DevicePolicyCache getDevicePolicyCache();
+
+    /**
+     * @return cached version of device state related to DPM that can be accessed without risking
+     * deadlocks.
+     * Do not call it directly. Use {@link DevicePolicyCache#getInstance()} instead.
+     */
+    protected abstract DeviceStateCache getDeviceStateCache();
 }

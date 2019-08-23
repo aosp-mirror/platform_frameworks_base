@@ -29,6 +29,7 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DeviceStateCache;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.pm.UserInfo;
@@ -37,6 +38,7 @@ import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.security.KeyStore;
@@ -91,6 +93,8 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     FakeGsiService mGsiService;
     PasswordSlotManagerTestable mPasswordSlotManager;
     RecoverableKeyStoreManager mRecoverableKeyStoreManager;
+    UserManagerInternal mUserManagerInternal;
+    DeviceStateCache mDeviceStateCache;
     protected boolean mHasSecureLockScreen;
 
     @Override
@@ -108,6 +112,8 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mGsiService = new FakeGsiService();
         mPasswordSlotManager = new PasswordSlotManagerTestable();
         mRecoverableKeyStoreManager = mock(RecoverableKeyStoreManager.class);
+        mUserManagerInternal = mock(UserManagerInternal.class);
+        mDeviceStateCache = mock(DeviceStateCache.class);
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -144,7 +150,8 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mAuthSecretService = mock(IAuthSecret.class);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
-                mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager);
+                mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager,
+                mUserManagerInternal, mDeviceStateCache);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);
@@ -172,6 +179,9 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
                 new ComponentName("com.dummy.package", ".FakeDeviceOwner"));
+        when(mUserManagerInternal.isDeviceManaged()).thenReturn(true);
+        when(mDeviceStateCache.isDeviceProvisioned()).thenReturn(true);
+
         mLocalService = LocalServices.getService(LockSettingsInternal.class);
     }
 
@@ -184,6 +194,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         when(mUserManager.getProfileParent(eq(profileId))).thenReturn(PRIMARY_USER_INFO);
         when(mUserManager.isUserRunning(eq(profileId))).thenReturn(true);
         when(mUserManager.isUserUnlocked(eq(profileId))).thenReturn(true);
+        when(mUserManagerInternal.isUserManaged(eq(profileId))).thenReturn(true);
         return userInfo;
     }
 
