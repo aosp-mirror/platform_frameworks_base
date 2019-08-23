@@ -405,6 +405,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Weniger dringende Benachrichtigungen unten"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Erneut tippen, um Benachrichtigung zu öffnen"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Zum Öffnen nach oben wischen"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Zum Wiederholen nach oben wischen"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Dieses Gerät wird von deiner Organisation verwaltet"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Dieses Gerät wird von <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> verwaltet"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Zum Öffnen des Telefons vom Symbol wegwischen"</string>
@@ -548,6 +549,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Um die Fixierung für diesen Bildschirm aufzuheben, berühre und halte \"Zurück\" und \"Übersicht\""</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Um die Fixierung für diesen Bildschirm aufzuheben, berühre und halte \"Zurück\" und \"Startbildschirm\""</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Zum Loslösen des Bildschirms nach oben wischen und halten"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ok"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nein danke"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Der Bildschirm ist angepinnt"</string>
