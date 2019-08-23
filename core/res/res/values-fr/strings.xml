@@ -1361,8 +1361,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Rétablissez la configuration d\'usine pour désactiver le mode Atelier de test."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Présence de liquide ou de saletés dans le port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Le port USB est désactivé automatiquement. Appuyez sur cette notification pour en savoir plus."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Autoriser l\'utilisation du port USB"</string>
-    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Le téléphone ne détecte plus les liquides ni les saletés."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Le port USB peut être utilisé"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Aucun liquide ni corps étranger à signaler"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Création du rapport de bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bug ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Partage du rapport de bug…"</string>
@@ -1586,7 +1586,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Lancer le navigateur ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prendre l\'appel ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Toujours"</string>
-    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Définir cette activité comme toujours ouverte"</string>
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Toujours ouvrir avec cette application"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Une seule fois"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Paramètres"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s n\'est pas compatible avec le profil professionnel."</string>

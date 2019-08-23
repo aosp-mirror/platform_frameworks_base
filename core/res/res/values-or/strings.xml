@@ -1343,7 +1343,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"କୌଣସି ଅନୁମତିର ଆବଶ୍ୟକତା ନାହିଁ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ଶୁଳ୍କ ଲାଗୁ ହୋଇପାରେ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ଠିକ୍‍ ଅଛି"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB ମାଧ୍ୟମରେ ଏହି ଡିଭାଇସ୍‌କୁ ଚାର୍ଜ କରନ୍ତୁ"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB ମାଧ୍ୟମରେ ଏହି ଡିଭାଇସ୍‌ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB ମାଧ୍ୟମରେ ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ଫାଇଲ୍ ଟ୍ରାନ୍ସଫର୍ ଚାଲୁ କରାଗଲା"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB ମାଧ୍ୟମରେ PTPକୁ ଚାଲୁ କରାଗଲା"</string>
