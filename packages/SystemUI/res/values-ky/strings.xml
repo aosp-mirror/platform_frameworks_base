@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ачуу үчүн кайра таптап коюңуз"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Ачуу үчүн өйдө сүрүңүз"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Кайра аракет кылуу үчүн экранды өйдө сүрүңүз"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Бул түзмөк уюмуңуз тарабынан башкарылат"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> тарабынан башкарылат"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Сүрөтчөнү серпип телефонго өтүңүз"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Башкы бет\" баскычын басып, кармап туруңуз."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Бул экранды бошотуу үчүн \"Артка\" жана \"Сереп салуу\" баскычтарын басып, кармап туруңуз"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Бул экранды бошотуу үчүн \"Артка\" жана \"Башкы бет\" баскычтарын басып, кармап туруңуз"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Бул экранды бошотуу үчүн аны өйдө сүрүп, кармап туруңуз"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Түшүндүм"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Жок, рахмат"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Экран кадалды"</string>

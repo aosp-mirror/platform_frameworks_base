@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Kam ahamiyatli bildirishnomalarni pastda ko‘rsatish"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ochish uchun yana bosing"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Ochish uchun tepaga suring"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Tepaga suring va qayta urining"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Bu – tashkilotingiz tomonidan boshqariladigan qurilma"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Bu – <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tomonidan boshqariladigan qurilma"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefonni ochish uchun suring"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmlarni birga bosib turing."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Bu ekrandan chiqish uchun Orqaga va Menyu tugmalarini bosib turing"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Bu ekrandan chiqish uchun Orqaga va Boshi tugmalarini bosib turing"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Bu ekrandan chiqish uchun tepaga surib, bosib turing"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Yo‘q, kerakmas"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekran mahkamlandi"</string>
