@@ -16,11 +16,11 @@
 
 package com.android.server.compat;
 
-import android.compat.IPlatformCompat;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.util.Slog;
 
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
