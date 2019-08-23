@@ -88,6 +88,7 @@ import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -506,6 +507,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * If the {@link NotificationShelf} should be visible when dark.
      */
     private boolean mAnimateBottomOnLayout;
+    private int mPulseReason;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -1355,7 +1357,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mIsClipped = clipped;
         }
 
-        if (!mPulsing && mAmbientState.isFullyDark()) {
+        if ((!mPulsing || mPulseReason == DozeLog.PULSE_REASON_DOCKING)
+                && mAmbientState.isFullyDark()) {
             setClipBounds(null);
         } else if (mAmbientState.isDarkAtAll()) {
             clipToOutline = true;
@@ -5177,6 +5180,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateContentHeight();
         requestChildrenUpdate();
         notifyHeightChangeListener(null, animated);
+    }
+
+    public void setPulseReason(int pulseReason) {
+        mPulseReason = pulseReason;
+        updateClipping();
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
