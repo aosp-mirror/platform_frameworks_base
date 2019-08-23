@@ -261,11 +261,12 @@ abstract class ApexManager {
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    populateAllPackagesCacheIfNeeded();
+                    // Post populateAllPackagesCacheIfNeeded to a background thread, since it's
+                    // expensive to run it in broadcast handler thread.
+                    BackgroundThread.getHandler().post(() -> populateAllPackagesCacheIfNeeded());
                     mContext.unregisterReceiver(this);
                 }
-            }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED), /* broadcastPermission */ null,
-                    BackgroundThread.getHandler());
+            }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         }
 
         private void populateAllPackagesCacheIfNeeded() {
