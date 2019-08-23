@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.compat;
+package com.android.internal.compat;
 
 import android.content.pm.ApplicationInfo;
 
