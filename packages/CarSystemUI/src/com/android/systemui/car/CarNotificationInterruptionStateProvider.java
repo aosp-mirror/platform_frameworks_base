@@ -21,9 +21,15 @@ import android.content.Context;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** Auto-specific implementation of {@link NotificationInterruptionStateProvider}. */
+@Singleton
 public class CarNotificationInterruptionStateProvider extends
         NotificationInterruptionStateProvider {
+
+    @Inject
     public CarNotificationInterruptionStateProvider(Context context) {
         super(context);
     }

@@ -47,6 +47,8 @@ android_app {
         "androidx.lifecycle_lifecycle-extensions",
         "SystemUI-tags",
         "SystemUI-proto",
+        "dagger2-2.19",
+        "//external/kotlinc:kotlin-annotations",
     ],
 
     libs: [
