@@ -20,6 +20,9 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.text.BidiFormatter;
+import android.text.format.Formatter;
+import android.text.format.Formatter.BytesResult;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -37,10 +40,6 @@ import java.text.DecimalFormat;
  * Layout for the data usage detail in quick settings.
  */
 public class DataUsageDetailView extends LinearLayout {
-
-    private static final double KB = 1000;
-    private static final double MB = 1000 * KB;
-    private static final double GB = 1000 * MB;
 
     private final DecimalFormat FORMAT = new DecimalFormat("#.##");
 
@@ -74,23 +73,23 @@ public class DataUsageDetailView extends LinearLayout {
             titleId = R.string.quick_settings_cellular_detail_data_usage;
             bytes = info.usageLevel;
             top = res.getString(R.string.quick_settings_cellular_detail_data_warning,
-                    formatBytes(info.warningLevel));
+                    formatDataUsage(info.warningLevel));
         } else if (info.usageLevel <= info.limitLevel) {
             // over warning, under limit
             titleId = R.string.quick_settings_cellular_detail_remaining_data;
             bytes = info.limitLevel - info.usageLevel;
             top = res.getString(R.string.quick_settings_cellular_detail_data_used,
-                    formatBytes(info.usageLevel));
+                    formatDataUsage(info.usageLevel));
             bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
-                    formatBytes(info.limitLevel));
+                    formatDataUsage(info.limitLevel));
         } else {
             // over limit
             titleId = R.string.quick_settings_cellular_detail_over_limit;
             bytes = info.usageLevel - info.limitLevel;
             top = res.getString(R.string.quick_settings_cellular_detail_data_used,
-                    formatBytes(info.usageLevel));
+                    formatDataUsage(info.usageLevel));
             bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
-                    formatBytes(info.limitLevel));
+                    formatDataUsage(info.limitLevel));
             usageColorState = Utils.getColorError(mContext);
         }
 
@@ -101,7 +100,7 @@ public class DataUsageDetailView extends LinearLayout {
         final TextView title = findViewById(android.R.id.title);
         title.setText(titleId);
         final TextView usage = findViewById(R.id.usage_text);
-        usage.setText(formatBytes(bytes));
+        usage.setText(formatDataUsage(bytes));
         usage.setTextColor(usageColorState);
         final DataUsageGraph graph = findViewById(R.id.usage_graph);
         graph.setLevels(info.limitLevel, info.warningLevel, info.usageLevel);
@@ -123,20 +122,10 @@ public class DataUsageDetailView extends LinearLayout {
 
     }
 
-    private String formatBytes(long bytes) {
-        final long b = Math.abs(bytes);
-        double val;
-        String suffix;
-        if (b > 100 * MB) {
-            val = b / GB;
-            suffix = "GB";
-        } else if (b > 100 * KB) {
-            val = b / MB;
-            suffix = "MB";
-        } else {
-            val = b / KB;
-            suffix = "KB";
-        }
-        return FORMAT.format(val * (bytes < 0 ? -1 : 1)) + " " + suffix;
+    private CharSequence formatDataUsage(long byteValue) {
+        final BytesResult res = Formatter.formatBytes(mContext.getResources(), byteValue,
+                Formatter.FLAG_IEC_UNITS);
+        return BidiFormatter.getInstance().unicodeWrap(mContext.getString(
+                com.android.internal.R.string.fileSizeSuffix, res.value, res.units));
     }
 }
