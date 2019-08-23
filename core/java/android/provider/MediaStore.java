@@ -553,7 +553,7 @@ public final class MediaStore {
      * By default no pending items are returned.
      *
      * @see MediaColumns#IS_PENDING
-     * @see MediaStore#setIncludePending(Uri)
+     * @see MediaStore#getIncludePending(Uri)
      */
     public static @NonNull Uri setIncludePending(@NonNull Uri uri) {
         return setIncludePending(uri.buildUpon()).build();
@@ -562,6 +562,17 @@ public final class MediaStore {
     /** @hide */
     public static @NonNull Uri.Builder setIncludePending(@NonNull Uri.Builder uriBuilder) {
         return uriBuilder.appendQueryParameter(PARAM_INCLUDE_PENDING, "1");
+    }
+
+    /**
+     * Return if any pending media items should be included in calls such as
+     * {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
+     *
+     * @see MediaColumns#IS_PENDING
+     * @see MediaStore#setIncludePending(Uri)
+     */
+    public static boolean getIncludePending(@NonNull Uri uri) {
+        return parseBoolean(uri.getQueryParameter(MediaStore.PARAM_INCLUDE_PENDING));
     }
 
     /**
@@ -594,9 +605,21 @@ public final class MediaStore {
      * {@link UnsupportedOperationException} will be thrown when the returned
      * {@link Uri} is used, such as when the caller doesn't hold
      * {@link android.Manifest.permission#ACCESS_MEDIA_LOCATION}.
+     *
+     * @see MediaStore#getRequireOriginal(Uri)
      */
     public static @NonNull Uri setRequireOriginal(@NonNull Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_REQUIRE_ORIGINAL, "1").build();
+    }
+
+    /**
+     * Return if the caller requires the original file contents when calling
+     * {@link ContentResolver#openFileDescriptor(Uri, String)}.
+     *
+     * @see MediaStore#setRequireOriginal(Uri)
+     */
+    public static boolean getRequireOriginal(@NonNull Uri uri) {
+        return parseBoolean(uri.getQueryParameter(MediaStore.PARAM_REQUIRE_ORIGINAL));
     }
 
     /**
@@ -666,45 +689,11 @@ public final class MediaStore {
                     (System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS) / 1000);
         }
 
-        /**
-         * Optionally set the primary directory under which this pending item
-         * should be persisted. Only specific well-defined directories from
-         * {@link Environment} are allowed based on the media type being
-         * inserted.
-         * <p>
-         * For example, when creating pending {@link MediaStore.Images.Media}
-         * items, only {@link Environment#DIRECTORY_PICTURES} or
-         * {@link Environment#DIRECTORY_DCIM} are allowed.
-         * <p>
-         * You may leave this value undefined to store the media in a default
-         * location. For example, when this value is left undefined, pending
-         * {@link MediaStore.Audio.Media} items are stored under
-         * {@link Environment#DIRECTORY_MUSIC}.
-         *
-         * @see MediaColumns#PRIMARY_DIRECTORY
-         */
-        public void setPrimaryDirectory(@Nullable String primaryDirectory) {
-            if (primaryDirectory == null) {
-                this.insertValues.remove(MediaColumns.PRIMARY_DIRECTORY);
+        public void setRelativePath(@Nullable String relativePath) {
+            if (relativePath == null) {
+                this.insertValues.remove(MediaColumns.RELATIVE_PATH);
             } else {
-                this.insertValues.put(MediaColumns.PRIMARY_DIRECTORY, primaryDirectory);
-            }
-        }
-
-        /**
-         * Optionally set the secondary directory under which this pending item
-         * should be persisted. Any valid directory name is allowed.
-         * <p>
-         * You may leave this value undefined to store the media as a direct
-         * descendant of the {@link #setPrimaryDirectory(String)} location.
-         *
-         * @see MediaColumns#SECONDARY_DIRECTORY
-         */
-        public void setSecondaryDirectory(@Nullable String secondaryDirectory) {
-            if (secondaryDirectory == null) {
-                this.insertValues.remove(MediaColumns.SECONDARY_DIRECTORY);
-            } else {
-                this.insertValues.put(MediaColumns.SECONDARY_DIRECTORY, secondaryDirectory);
+                this.insertValues.put(MediaColumns.RELATIVE_PATH, relativePath);
             }
         }
 
@@ -1470,7 +1459,14 @@ public final class MediaStore {
                     .appendPath("downloads").build();
         }
 
-        /** @hide */
+        /**
+         * Get the content:// style URI for a single row in the downloads table
+         * on the given volume.
+         *
+         * @param volumeName the name of the volume to get the URI for
+         * @param id the download to get the URI for
+         * @return the URI to the downloads table on the given volume
+         */
         public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
             return ContentUris.withAppendedId(getContentUri(volumeName), id);
         }
@@ -1795,7 +1791,14 @@ public final class MediaStore {
                         .appendPath("media").build();
             }
 
-            /** @hide */
+            /**
+             * Get the content:// style URI for a single row in the images table
+             * on the given volume.
+             *
+             * @param volumeName the name of the volume to get the URI for
+             * @param id the image to get the URI for
+             * @return the URI to the images table on the given volume
+             */
             public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
                 return ContentUris.withAppendedId(getContentUri(volumeName), id);
             }
@@ -2282,7 +2285,14 @@ public final class MediaStore {
                         .appendPath("media").build();
             }
 
-            /** @hide */
+            /**
+             * Get the content:// style URI for a single row in the audio table
+             * on the given volume.
+             *
+             * @param volumeName the name of the volume to get the URI for
+             * @param id the audio to get the URI for
+             * @return the URI to the audio table on the given volume
+             */
             public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
                 return ContentUris.withAppendedId(getContentUri(volumeName), id);
             }
@@ -3031,7 +3041,14 @@ public final class MediaStore {
                         .appendPath("media").build();
             }
 
-            /** @hide */
+            /**
+             * Get the content:// style URI for a single row in the videos table
+             * on the given volume.
+             *
+             * @param volumeName the name of the volume to get the URI for
+             * @param id the video to get the URI for
+             * @return the URI to the videos table on the given volume
+             */
             public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
                 return ContentUris.withAppendedId(getContentUri(volumeName), id);
             }
@@ -3294,6 +3311,13 @@ public final class MediaStore {
             }
         }
         return volumeName;
+    }
+
+    private static boolean parseBoolean(@Nullable String value) {
+        if (value == null) return false;
+        if ("1".equals(value)) return true;
+        if ("true".equalsIgnoreCase(value)) return true;
+        return false;
     }
 
     /**

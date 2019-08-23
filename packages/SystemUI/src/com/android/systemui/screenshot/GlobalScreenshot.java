@@ -87,6 +87,7 @@ import com.android.systemui.util.NotificationChannels;
 
 import libcore.io.IoUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
@@ -254,8 +255,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             // Save the screenshot to the MediaStore
             final MediaStore.PendingParams params = new MediaStore.PendingParams(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mImageFileName, "image/png");
-            params.setPrimaryDirectory(Environment.DIRECTORY_PICTURES);
-            params.setSecondaryDirectory(Environment.DIRECTORY_SCREENSHOTS);
+            params.setRelativePath(Environment.DIRECTORY_PICTURES + File.separator
+                    + Environment.DIRECTORY_SCREENSHOTS);
 
             final Uri uri = MediaStore.createPending(context, params);
             final MediaStore.PendingSession session = MediaStore.openPending(context, uri);

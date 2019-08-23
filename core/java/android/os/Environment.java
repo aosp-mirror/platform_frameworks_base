@@ -168,8 +168,11 @@ public class Environment {
         return DIR_ANDROID_ROOT;
     }
 
-    /** {@hide} */
-    @TestApi
+    /**
+     * Return root directory where all external storage devices will be mounted.
+     * For example, {@link #getExternalStorageDirectory()} will appear under
+     * this location.
+     */
     public static @NonNull File getStorageDirectory() {
         return DIR_ANDROID_STORAGE;
     }
