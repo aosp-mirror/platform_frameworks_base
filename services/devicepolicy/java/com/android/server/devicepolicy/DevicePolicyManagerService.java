@@ -10151,10 +10151,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             UserHandle.myUserId(), ACTION_PROVISION_MANAGED_USER).toArray(
                             new String[0]);
                 }
-                UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
-                        userType, userInfoFlags, disallowedPackages);
-                if (userInfo != null) {
-                    user = userInfo.getUserHandle();
+                try {
+                    UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
+                            userType, userInfoFlags, disallowedPackages);
+                    if (userInfo != null) {
+                        user = userInfo.getUserHandle();
+                    }
+                } catch (UserManager.CheckedUserOperationException e) {
+                    Log.e(LOG_TAG, "Couldn't createUserEvenWhenDisallowed", e);
                 }
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
