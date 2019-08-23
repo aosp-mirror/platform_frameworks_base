@@ -29,6 +29,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from datetime import timedelta
 from typing import Iterable, Optional, List
 
 DIR = os.path.abspath(os.path.dirname(__file__))
@@ -173,7 +174,7 @@ def build_protobuf(page_runs, inode2filename, filters=[]):
   return trace_file
 
 def calc_trace_end_time(trace2db: Trace2Db,
-                        trace_duration: Optional[int]) -> float:
+                        trace_duration: Optional[timedelta]) -> float:
   """
   Calculates the end time based on the trace duration.
   The start time is the first receiving mm file map event.
@@ -189,9 +190,9 @@ def calc_trace_end_time(trace2db: Trace2Db,
       MmFilemapAddToPageCache.raw_ftrace_entry).order_by(
       RawFtraceEntry.timestamp).first()
 
-  return first_event.raw_ftrace_entry.timestamp + trace_duration
+  return first_event.raw_ftrace_entry.timestamp + trace_duration.total_seconds()
 
-def query_add_to_page_cache(trace2db: Trace2Db, trace_duration: Optional[int]):
+def query_add_to_page_cache(trace2db: Trace2Db, trace_duration: Optional[timedelta]):
   end_time = calc_trace_end_time(trace2db, trace_duration)
   # SELECT * FROM tbl ORDER BY id;
   return trace2db.session.query(MmFilemapAddToPageCache).join(
@@ -210,7 +211,7 @@ def transform_perfetto_trace_to_systrace(path_to_perfetto_trace: str,
 
 def run(sql_db_path:str,
         trace_file:str,
-        trace_duration:Optional[int],
+        trace_duration:Optional[timedelta],
         output_file:str,
         inode_table:str,
         filter:List[str]) -> int:
@@ -292,11 +293,14 @@ def main(argv):
   if options.sql_db:
     sql_db_path = options.sql_db
 
+  trace_duration = timedelta(milliseconds=options.trace_duration) if \
+    options.trace_duration is not None else None
+
   # if the input is systrace
   if options.trace_file:
     return run(sql_db_path,
                options.trace_file,
-               options.trace_duration,
+               trace_duration,
                options.output_file,
                inode_table,
                options.filter)
@@ -308,7 +312,7 @@ def main(argv):
                                          trace_file.name)
     return run(sql_db_path,
                trace_file.name,
-               options.trace_duration,
+               trace_duration,
                options.output_file,
                inode_table,
                options.filter)
