@@ -250,7 +250,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     }
 
     public UsbDeviceManager(Context context, UsbAlsaManager alsaManager,
-            UsbSettingsManager settingsManager) {
+            UsbSettingsManager settingsManager, UsbPermissionManager permissionManager) {
         mContext = context;
         mContentResolver = context.getContentResolver();
         PackageManager pm = mContext.getPackageManager();
@@ -284,13 +284,13 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
              * Initialze the legacy UsbHandler
              */
             mHandler = new UsbHandlerLegacy(FgThread.get().getLooper(), mContext, this,
-                    alsaManager, settingsManager);
+                    alsaManager, permissionManager);
         } else {
             /**
              * Initialize HAL based UsbHandler
              */
             mHandler = new UsbHandlerHal(FgThread.get().getLooper(), mContext, this,
-                    alsaManager, settingsManager);
+                    alsaManager, permissionManager);
         }
 
         if (nativeIsStartRequested()) {
@@ -468,7 +468,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         private final Context mContext;
         private final UsbAlsaManager mUsbAlsaManager;
-        private final UsbSettingsManager mSettingsManager;
+        private final UsbPermissionManager mPermissionManager;
         private NotificationManager mNotificationManager;
 
         protected long mScreenUnlockedFunctions;
@@ -489,12 +489,12 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         protected static final String USB_PERSISTENT_CONFIG_PROPERTY = "persist.sys.usb.config";
 
         UsbHandler(Looper looper, Context context, UsbDeviceManager deviceManager,
-                UsbAlsaManager alsaManager, UsbSettingsManager settingsManager) {
+                UsbAlsaManager alsaManager, UsbPermissionManager permissionManager) {
             super(looper);
             mContext = context;
             mUsbDeviceManager = deviceManager;
             mUsbAlsaManager = alsaManager;
-            mSettingsManager = settingsManager;
+            mPermissionManager = permissionManager;
             mContentResolver = context.getContentResolver();
 
             mCurrentUser = ActivityManager.getCurrentUser();
@@ -625,7 +625,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 // successfully entered accessory mode
                 String[] accessoryStrings = mUsbDeviceManager.getAccessoryStrings();
                 if (accessoryStrings != null) {
-                    UsbSerialReader serialReader = new UsbSerialReader(mContext, mSettingsManager,
+                    UsbSerialReader serialReader = new UsbSerialReader(mContext, mPermissionManager,
                             accessoryStrings[UsbAccessory.SERIAL_STRING]);
 
                     mCurrentAccessory = new UsbAccessory(
@@ -663,7 +663,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
             if (mCurrentAccessory != null) {
                 if (mBootCompleted) {
-                    mSettingsManager.usbAccessoryRemoved(mCurrentAccessory);
+                    mPermissionManager.usbAccessoryRemoved(mCurrentAccessory);
                 }
                 mCurrentAccessory = null;
             }
@@ -1343,8 +1343,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private boolean mUsbDataUnlocked;
 
         UsbHandlerLegacy(Looper looper, Context context, UsbDeviceManager deviceManager,
-                UsbAlsaManager alsaManager, UsbSettingsManager settingsManager) {
-            super(looper, context, deviceManager, alsaManager, settingsManager);
+                UsbAlsaManager alsaManager, UsbPermissionManager permissionManager) {
+            super(looper, context, deviceManager, alsaManager, permissionManager);
             try {
                 readOemUsbOverrideConfig(context);
                 // Restore default functions.
@@ -1738,8 +1738,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         protected boolean mCurrentUsbFunctionsRequested;
 
         UsbHandlerHal(Looper looper, Context context, UsbDeviceManager deviceManager,
-                UsbAlsaManager alsaManager, UsbSettingsManager settingsManager) {
-            super(looper, context, deviceManager, alsaManager, settingsManager);
+                UsbAlsaManager alsaManager, UsbPermissionManager permissionManager) {
+            super(looper, context, deviceManager, alsaManager, permissionManager);
             try {
                 ServiceNotification serviceNotification = new ServiceNotification();
 
@@ -1977,7 +1977,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      * @param uid Uid of the caller
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory,
-            UsbUserSettingsManager settings, int uid) {
+            UsbUserPermissionManager permissions, int uid) {
         UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
         if (currentAccessory == null) {
             throw new IllegalArgumentException("no accessory attached");
@@ -1988,7 +1988,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        settings.checkPermission(accessory, uid);
+        permissions.checkPermission(accessory, uid);
         return nativeOpenAccessory();
     }
 

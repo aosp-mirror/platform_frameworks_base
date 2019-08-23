@@ -783,7 +783,7 @@ class UsbProfileGroupSettingsManager {
             return;
         }
 
-        mSettingsManager.getSettingsForUser(UserHandle.getUserId(appInfo.uid))
+        mSettingsManager.mUsbService.getPermissionsForUser(UserHandle.getUserId(appInfo.uid))
                 .grantDevicePermission(device, appInfo.uid);
 
         Intent activityIntent = new Intent(intent);
@@ -844,14 +844,15 @@ class UsbProfileGroupSettingsManager {
         }
 
         if (defaultActivity != null) {
-            UsbUserSettingsManager defaultRIUserSettings = mSettingsManager.getSettingsForUser(
-                    UserHandle.getUserId(defaultActivity.applicationInfo.uid));
+            UsbUserPermissionManager defaultRIUserPermissions =
+                    mSettingsManager.mUsbService.getPermissionsForUser(
+                            UserHandle.getUserId(defaultActivity.applicationInfo.uid));
             // grant permission for default activity
             if (device != null) {
-                defaultRIUserSettings.
-                        grantDevicePermission(device, defaultActivity.applicationInfo.uid);
+                defaultRIUserPermissions
+                        .grantDevicePermission(device, defaultActivity.applicationInfo.uid);
             } else if (accessory != null) {
-                defaultRIUserSettings.grantAccessoryPermission(accessory,
+                defaultRIUserPermissions.grantAccessoryPermission(accessory,
                         defaultActivity.applicationInfo.uid);
             }
 
