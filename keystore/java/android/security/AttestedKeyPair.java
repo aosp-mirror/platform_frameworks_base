@@ -23,6 +23,7 @@ import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,7 +37,7 @@ import java.util.List;
 
 public final class AttestedKeyPair {
     private final KeyPair mKeyPair;
-    private final Certificate[] mAttestationRecord;
+    private final List<Certificate> mAttestationRecord;
 
     /**
      * Public constructor for creating a new instance (useful for testing).
@@ -44,9 +45,22 @@ public final class AttestedKeyPair {
      * @param keyPair the key pair associated with the attestation record.
      * @param attestationRecord attestation record for the provided key pair.
      */
-    public AttestedKeyPair(@Nullable KeyPair keyPair, @Nullable Certificate[] attestationRecord) {
+    public AttestedKeyPair(
+            @Nullable KeyPair keyPair, @NonNull List<Certificate> attestationRecord) {
         mKeyPair = keyPair;
         mAttestationRecord = attestationRecord;
+    }
+
+    /**
+     * @hide used by platform.
+     */
+    public AttestedKeyPair(@Nullable KeyPair keyPair, @Nullable Certificate[] attestationRecord) {
+        mKeyPair = keyPair;
+        if (attestationRecord == null) {
+            mAttestationRecord = new ArrayList();
+        } else {
+            mAttestationRecord = Arrays.asList(attestationRecord);
+        }
     }
 
     /**
@@ -73,9 +87,6 @@ public final class AttestedKeyPair {
      * Key Attestation</a> for the format of the attestation record inside the certificate.
      */
     public @NonNull List<Certificate> getAttestationRecord() {
-        if (mAttestationRecord == null) {
-            return new ArrayList();
-        }
-        return Arrays.asList(mAttestationRecord);
+        return Collections.unmodifiableList(mAttestationRecord);
     }
 }
