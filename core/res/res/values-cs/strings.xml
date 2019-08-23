@@ -825,7 +825,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Zkusit znovu"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Funkce a data jsou k dispozici po odemčení"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Překročili jste maximální povolený počet pokusů o odemknutí obličejem."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Není vložena SIM karta"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Chybí SIM karta"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabletu není SIM karta."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"V televizi není SIM karta."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná SIM karta."</string>

@@ -625,7 +625,7 @@
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改網路使用量計算方式"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允許應用程式修改應用程式網路使用量的計算方式 (不建議一般應用程式使用)。"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"存取通知"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"允許應用程式擷取、檢查及清除通知 (包括由其他應用程式發佈的通知)。"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"允許應用程式擷取、檢查及清除通知 (包括由其他應用程式發布的通知)。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"繫結至通知接聽器服務"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允許應用程式繫結至通知接聽器服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"繫結至條件提供者服務"</string>
@@ -1567,13 +1567,13 @@
     <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"「<xliff:g id="APP">%s</xliff:g>」的數據用量比平常多"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全性憑證"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"憑證有效。"</string>
-    <string name="issued_to" msgid="454239480274921032">"發佈至："</string>
+    <string name="issued_to" msgid="454239480274921032">"發布至："</string>
     <string name="common_name" msgid="2233209299434172646">"常用名稱："</string>
     <string name="org_name" msgid="6973561190762085236">"機構："</string>
     <string name="org_unit" msgid="7265981890422070383">"機構單位："</string>
-    <string name="issued_by" msgid="2647584988057481566">"發佈者："</string>
+    <string name="issued_by" msgid="2647584988057481566">"發布者："</string>
     <string name="validity_period" msgid="8818886137545983110">"有效期間："</string>
-    <string name="issued_on" msgid="5895017404361397232">"發佈日期："</string>
+    <string name="issued_on" msgid="5895017404361397232">"發布日期："</string>
     <string name="expires_on" msgid="3676242949915959821">"到期日："</string>
     <string name="serial_number" msgid="758814067660862493">"序號："</string>
     <string name="fingerprints" msgid="4516019619850763049">"指紋"</string>
