@@ -1,5 +1,6 @@
 # JobSchedulerFrameworkInitializer must always be preloaded because it registers the job scheduler
 # service wrapper to SystemServiceRegistry.
+android.app.DeviceIdleFrameworkInitializer
 android.app.job.JobSchedulerFrameworkInitializer
 android.icu.impl.coll.CollationRoot
 android.icu.impl.IDNA2003
