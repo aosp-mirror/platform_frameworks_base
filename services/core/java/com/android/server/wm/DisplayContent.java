@@ -796,10 +796,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mTmpApplySurfaceChangesTransactionState.obscured = true;
             }
 
-            mTmpApplySurfaceChangesTransactionState.displayHasContent |=
-                    root.handleNotObscuredLocked(w,
-                            mTmpApplySurfaceChangesTransactionState.obscured,
-                            mTmpApplySurfaceChangesTransactionState.syswin);
+            final boolean displayHasContent = root.handleNotObscuredLocked(w,
+                    mTmpApplySurfaceChangesTransactionState.obscured,
+                    mTmpApplySurfaceChangesTransactionState.syswin);
+
+            if (!mTmpApplySurfaceChangesTransactionState.displayHasContent
+                    && !getDisplayPolicy().isWindowExcludedFromContent(w)) {
+                mTmpApplySurfaceChangesTransactionState.displayHasContent |= displayHasContent;
+            }
 
             if (w.mHasSurface && isDisplayed) {
                 final int type = w.mAttrs.type;
