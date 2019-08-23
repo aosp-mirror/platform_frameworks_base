@@ -124,20 +124,17 @@ final class AccessibilityController {
                 return false;
             }
 
-            final Display display = dc.getDisplay();
             if (mWindowsForAccessibilityObserver.get(displayId) != null) {
+                final Display display = dc.getDisplay();
                 if (display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null) {
                     // The window observer of this embedded display had been set from
-                    // window manager after setting its parent window
+                    // window manager after setting its parent window.
                     return true;
                 } else {
                     throw new IllegalStateException(
                             "Windows for accessibility callback of display "
                                     + displayId + " already set!");
                 }
-            }
-            if (display.getType() == Display.TYPE_OVERLAY) {
-                return false;
             }
             mWindowsForAccessibilityObserver.put(displayId,
                     new WindowsForAccessibilityObserver(mService, displayId, callback));
@@ -287,9 +284,8 @@ final class AccessibilityController {
     }
 
     public boolean hasCallbacksLocked() {
-        // TODO: support multi-display for windows observer
         return (mDisplayMagnifiers.size() > 0
-                || mWindowsForAccessibilityObserver != null);
+                || mWindowsForAccessibilityObserver.size() > 0);
     }
 
     public void setForceShowMagnifiableBoundsLocked(int displayId, boolean show) {
@@ -1158,15 +1154,15 @@ final class AccessibilityController {
             }
 
             List<WindowInfo> windows = new ArrayList<>();
+            final int topFocusedDisplayId;
+            IBinder topFocusedWindowToken = null;
 
             synchronized (mService.mGlobalLock) {
-                // Do not send the windows if there is no current focus as
+                // Do not send the windows if there is no top focus as
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.
-                // TODO [Multi-Display] : only checks top focused window
-                if (!isCurrentFocusWindowOnDefaultDisplay()) {
-                    return;
-                }
+                final WindowState topFocusedWindowState = getTopFocusWindow();
+                if (topFocusedWindowState == null) return;
 
                 final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
                 if (dc == null) {
@@ -1229,9 +1225,13 @@ final class AccessibilityController {
 
                 visibleWindows.clear();
                 addedWindows.clear();
-            }
 
-            mCallback.onWindowsForAccessibilityChanged(forceSend, windows);
+                // Gets the top focused display Id and window token for supporting multi-display.
+                topFocusedDisplayId = mService.mRoot.getTopFocusedDisplayContent().getDisplayId();
+                topFocusedWindowToken = topFocusedWindowState.mClient.asBinder();
+            }
+            mCallback.onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
+                    topFocusedWindowToken, windows);
 
             // Recycle the windows as we do not need them.
             clearAndRecycleWindows(windows);
@@ -1410,22 +1410,9 @@ final class AccessibilityController {
             }
             return displayParentWindow;
         }
-        // TODO [Multi-Display] : only checks top focused window
-        private boolean isCurrentFocusWindowOnDefaultDisplay() {
-            final WindowState focusedWindow =
-                    mService.mRoot.getTopFocusedDisplayContent().mCurrentFocus;
-            if (focusedWindow == null) {
-                return false;
-            }
 
-            final WindowState rootDisplayParentWindow = findRootDisplayParentWindow(focusedWindow);
-            if (!focusedWindow.isDefaultDisplay()
-                    && (rootDisplayParentWindow == null
-                    || !rootDisplayParentWindow.isDefaultDisplay())) {
-                return false;
-            }
-
-            return true;
+        private WindowState getTopFocusWindow() {
+            return mService.mRoot.getTopFocusedDisplayContent().mCurrentFocus;
         }
 
         private class MyHandler extends Handler {

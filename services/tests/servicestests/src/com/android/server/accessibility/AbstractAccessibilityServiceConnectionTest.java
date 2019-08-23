@@ -76,6 +76,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.testing.DexmakerShareClassLoaderRule;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
@@ -178,7 +179,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         // Fake a11yWindowInfo and remote a11y connection for tests.
         addA11yWindowInfo(mA11yWindowInfos, WINDOWID, false);
         addA11yWindowInfo(mA11yWindowInfos, PIP_WINDOWID, true);
-        when(mMockA11yWindowManager.getWindowListLocked()).thenReturn(mA11yWindowInfos);
+        when(mMockA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY))
+                .thenReturn(mA11yWindowInfos);
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
                 .thenReturn(mA11yWindowInfos.get(0));
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(PIP_WINDOWID))
@@ -289,8 +291,9 @@ public class AbstractAccessibilityServiceConnectionTest {
 
     @Test
     public void getWindows_notTrackingWindows_invokeOnClientChange() {
-        when(mMockA11yWindowManager.getWindowListLocked()).thenReturn(null);
-        when(mMockA11yWindowManager.isTrackingWindowsLocked()).thenReturn(false);
+        when(mMockA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY)).thenReturn(null);
+        when(mMockA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY))
+                .thenReturn(false);
 
         mServiceConnection.getWindows();
         verify(mMockSystemSupport).onClientChangeLocked(false);
@@ -315,8 +318,9 @@ public class AbstractAccessibilityServiceConnectionTest {
 
     @Test
     public void getWindow_notTrackingWindows_invokeOnClientChange() {
-        when(mMockA11yWindowManager.getWindowListLocked()).thenReturn(null);
-        when(mMockA11yWindowManager.isTrackingWindowsLocked()).thenReturn(false);
+        when(mMockA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY)).thenReturn(null);
+        when(mMockA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY))
+                .thenReturn(false);
 
         mServiceConnection.getWindow(WINDOWID);
         verify(mMockSystemSupport).onClientChangeLocked(false);
