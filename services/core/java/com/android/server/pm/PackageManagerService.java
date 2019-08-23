@@ -23736,38 +23736,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public int getTargetSdk(int uid) {
-            int userId = UserHandle.getUserId(uid);
-
-            synchronized (mLock) {
-                final Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
-                if (obj instanceof PackageSetting) {
-                    final PackageSetting ps = (PackageSetting) obj;
-                    if (!ps.getInstalled(userId)) {
-                        return 0;
-                    }
-                    return ps.pkg.applicationInfo.targetSdkVersion;
-                } else if (obj instanceof SharedUserSetting) {
-                    int maxTargetSdk = 0;
-                    final SharedUserSetting sus = (SharedUserSetting) obj;
-                    final int numPkgs = sus.packages.size();
-                    for (int i = 0; i < numPkgs; i++) {
-                        final PackageSetting ps = sus.packages.valueAt(i);
-                        if (!ps.getInstalled(userId)) {
-                            continue;
-                        }
-                        if (ps.pkg.applicationInfo.targetSdkVersion < maxTargetSdk) {
-                            continue;
-                        }
-                        maxTargetSdk = ps.pkg.applicationInfo.targetSdkVersion;
-                    }
-                    return maxTargetSdk;
-                }
-                return 0;
-            }
-        }
-
-        @Override
         public boolean isCallerInstallerOfRecord(
                 @NonNull PackageParser.Package pkg, int callingUid) {
             synchronized (mLock) {
