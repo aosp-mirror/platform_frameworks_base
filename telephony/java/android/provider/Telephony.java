@@ -3034,6 +3034,20 @@ public final class Telephony {
              * <P>Type: INTEGER</P>
              */
             public static final String CHARSET = "charset";
+
+            /**
+             * Generates a Addr {@link Uri} for message, used to perform Addr table operation
+             * for mms.
+             *
+             * @param messageId the messageId used to generate Addr {@link Uri} dynamically
+             * @return the addrUri used to perform Addr table operation for mms
+             */
+            @NonNull
+            public static Uri getAddrUriForMessage(@NonNull String messageId) {
+                Uri addrUri = Mms.CONTENT_URI.buildUpon()
+                        .appendPath(String.valueOf(messageId)).appendPath("addr").build();
+                return addrUri;
+            }
         }
 
         /**
@@ -3052,11 +3066,16 @@ public final class Telephony {
             }
 
             /**
+             * The name of part table.
+             */
+            private static final String TABLE_PART = "part";
+
+            /**
              * The {@code content://} style URL for this table. Can be appended with a part ID to
              * address individual parts.
              */
             @NonNull
-            public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, "part");
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, TABLE_PART);
 
             /**
              * The identifier of the message which this part belongs to.
@@ -3135,6 +3154,21 @@ public final class Telephony {
              * <P>Type: TEXT</P>
              */
             public static final String TEXT = "text";
+
+            /**
+             * Generates a Part {@link Uri} for message, used to perform Part table operation
+             * for mms.
+             *
+             * @param messageId the messageId used to generate Part {@link Uri} dynamically
+             * @return the partUri used to perform Part table operation for mms
+             */
+            @NonNull
+            public static Uri getPartUriForMessage(@NonNull String messageId) {
+                Uri partUri = Mms.CONTENT_URI.buildUpon()
+                        .appendPath(String.valueOf(messageId)).appendPath(
+                                TABLE_PART).build();
+                return partUri;
+            }
         }
 
         /**
