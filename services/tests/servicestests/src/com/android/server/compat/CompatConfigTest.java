@@ -173,34 +173,6 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testSystemAppDisabledChangeEnabled() {
-        CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true)); // disabled
-        ApplicationInfo sysApp = makeAppInfo("system.app", 1);
-        sysApp.flags |= ApplicationInfo.FLAG_SYSTEM;
-        assertThat(pc.isChangeEnabled(1234L, sysApp)).isTrue();
-    }
-
-    @Test
-    public void testSystemAppOverrideIgnored() {
-        CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false));
-        pc.addOverride(1234L, "system.app", false);
-        ApplicationInfo sysApp = makeAppInfo("system.app", 1);
-        sysApp.flags |= ApplicationInfo.FLAG_SYSTEM;
-        assertThat(pc.isChangeEnabled(1234L, sysApp)).isTrue();
-    }
-
-    @Test
-    public void testSystemAppTargetSdkIgnored() {
-        CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false));
-        ApplicationInfo sysApp = makeAppInfo("system.app", 1);
-        sysApp.flags |= ApplicationInfo.FLAG_SYSTEM;
-        assertThat(pc.isChangeEnabled(1234L, sysApp)).isTrue();
-    }
-
-    @Test
     public void testReadConfig() {
         Change[] changes = {new Change(1234L, "MY_CHANGE1", false, 2), new Change(1235L,
                 "MY_CHANGE2", true, null), new Change(1236L, "MY_CHANGE3", false, null)};
