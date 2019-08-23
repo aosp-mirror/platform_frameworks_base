@@ -5144,7 +5144,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (child.getVisibility() != View.GONE) {
-            child.notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
 
         if (mTransientIndices != null) {
@@ -5432,7 +5432,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         dispatchViewRemoved(view);
 
         if (view.getVisibility() != View.GONE) {
-            view.notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
 
         int transientCount = mTransientIndices == null ? 0 : mTransientIndices.size();
@@ -5740,7 +5740,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         dispatchVisibilityAggregated(isAttachedToWindow() && getWindowVisibility() == VISIBLE
                 && isShown());
-        child.notifySubtreeAccessibilityStateChangedIfNeeded();
+        notifySubtreeAccessibilityStateChangedIfNeeded();
     }
 
     /**
@@ -6146,8 +6146,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (invalidate) {
             invalidateViewProperty(false, false);
         }
-        notifySubtreeAccessibilityStateChanged(
-                this, this, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+        notifySubtreeAccessibilityStateChangedIfNeeded();
     }
 
     @Override
