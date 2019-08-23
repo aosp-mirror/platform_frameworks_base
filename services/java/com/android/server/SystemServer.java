@@ -37,6 +37,8 @@ import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
+import android.net.ConnectivityModuleConnector;
+import android.net.Network;
 import android.net.NetworkStackClient;
 import android.os.BaseBundle;
 import android.os.Binder;
@@ -1269,6 +1271,14 @@ public final class SystemServer {
             mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
             traceEnd();
 
+            traceBeginAndSlog("InitConnectivityModuleConnector");
+            try {
+                ConnectivityModuleConnector.getInstance().init(context);
+            } catch (Throwable e) {
+                reportWtf("initializing ConnectivityModuleConnector", e);
+            }
+            traceEnd();
+
             traceBeginAndSlog("InitNetworkStackClient");
             try {
                 NetworkStackClient.getInstance().init();
@@ -2163,7 +2173,7 @@ public final class SystemServer {
                 // ActivityManagerService.mSystemReady and ActivityManagerService.mProcessesReady
                 // are set to true. Be careful if moving this to a different place in the
                 // startup sequence.
-                NetworkStackClient.getInstance().start(context);
+                NetworkStackClient.getInstance().start();
             } catch (Throwable e) {
                 reportWtf("starting Network Stack", e);
             }
