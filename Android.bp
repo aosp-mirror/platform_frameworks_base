@@ -26,65 +26,164 @@
 // READ ME: ########################################################
 
 filegroup {
-    name: "framework-defaults-java-srcs",
+    name: "framework-core-sources",
     srcs: [
-        // From build/make/core/pathmap.mk FRAMEWORK_BASE_SUBDIRS
         "core/java/**/*.java",
-        "graphics/java/**/*.java",
-        "location/java/**/*.java",
-        "lowpan/java/**/*.java",
-        "media/java/**/*.java",
-        "media/mca/effect/java/**/*.java",
-        "media/mca/filterfw/java/**/*.java",
-        "media/mca/filterpacks/java/**/*.java",
-        "drm/java/**/*.java",
-        "opengl/java/**/*.java",
-        "sax/java/**/*.java",
-        "telecomm/java/**/*.java",
-        "telephony/java/**/*.java",
-        "wifi/java/**/*.java",
-        "keystore/java/**/*.java",
-        "rs/java/**/*.java",
+        "core/java/**/*.aidl",
     ],
+    path: "core/java",
 }
 
-// TODO(b/70046217): make these as filegroups where the base directory for aidl files
-// is given as 'path'. Eliminate the need for aidl_local_include_dirs.
+filegroup {
+    name: "framework-drm-sources",
+    srcs: [
+        "drm/java/**/*.java",
+    ],
+    path: "drm/java",
+}
+
+filegroup {
+    name: "framework-graphics-sources",
+    srcs: [
+        "graphics/java/**/*.java",
+        "graphics/java/**/*.aidl",
+    ],
+    path: "graphics/java",
+}
+
+filegroup {
+    name: "framework-keystore-sources",
+    srcs: [
+        "keystore/java/**/*.java",
+        "keystore/java/**/*.aidl",
+    ],
+    path: "keystore/java",
+}
+
+filegroup {
+    name: "framework-location-sources",
+    srcs: [
+        "location/java/**/*.java",
+        "location/java/**/*.aidl",
+    ],
+    path: "location/java",
+}
+
+filegroup {
+    name: "framework-lowpan-sources",
+    srcs: [
+        "lowpan/java/**/*.java",
+        "lowpan/java/**/*.aidl",
+    ],
+    path: "lowpan/java",
+}
+
+filegroup {
+    name: "framework-media-sources",
+    srcs: [
+        "media/java/**/*.java",
+        "media/java/**/*.aidl",
+    ],
+    path: "media/java",
+}
+
+filegroup {
+    name: "framework-mca-effect-sources",
+    srcs: [
+        "media/mca/effect/java/**/*.java",
+    ],
+    path: "media/mca/effect/java",
+}
+
+filegroup {
+    name: "framework-mca-filterfw-sources",
+    srcs: [
+        "media/mca/filterfw/java/**/*.java",
+    ],
+    path: "media/mca/filterfw/java",
+}
+
+filegroup {
+    name: "framework-mca-filterpacks-sources",
+    srcs: [
+        "media/mca/filterpacks/java/**/*.java",
+    ],
+    path: "media/mca/filterpacks/java",
+}
+
+filegroup {
+    name: "framework-opengl-sources",
+    srcs: [
+        "opengl/java/**/*.java",
+    ],
+    path: "opengl/java",
+}
+
+filegroup {
+    name: "framework-rs-sources",
+    srcs: [
+        "rs/java/**/*.java",
+    ],
+    path: "rs/java",
+}
+
+filegroup {
+    name: "framework-sax-sources",
+    srcs: [
+        "sax/java/**/*.java",
+    ],
+    path: "sax/java",
+}
+
+filegroup {
+    name: "framework-telecomm-sources",
+    srcs: [
+        "telecomm/java/**/*.java",
+        "telecomm/java/**/*.aidl",
+    ],
+    path: "telecomm/java",
+}
+
+filegroup {
+    name: "framework-telephony-sources",
+    srcs: [
+        "telephony/java/**/*.java",
+        "telephony/java/**/*.aidl",
+    ],
+    path: "telephony/java",
+}
+
+filegroup {
+    name: "framework-wifi-sources",
+    srcs: [
+        "wifi/java/**/*.java",
+        "wifi/java/**/*.aidl",
+    ],
+    path: "wifi/java",
+}
+
 framework_srcs = [
-    // java sources under this directory
-    "core/java/**/*.java",
-    "drm/java/**/*.java",
-    "graphics/java/**/*.java",
-    "keystore/java/**/*.java",
-    "location/java/**/*.java",
-    "lowpan/java/**/*.java",
-    "media/java/**/*.java",
-    "media/mca/effect/java/**/*.java",
-    "media/mca/filterfw/java/**/*.java",
-    "media/mca/filterpacks/java/**/*.java",
-    "opengl/java/**/*.java",
-    "rs/java/**/*.java",
-    "sax/java/**/*.java",
-    "telecomm/java/**/*.java",
-    "telephony/java/**/*.java",
-    "wifi/java/**/*.java",
+    // Java/AIDL sources under frameworks/base
+    ":framework-core-sources",
+    ":framework-drm-sources",
+    ":framework-graphics-sources",
+    ":framework-keystore-sources",
+    ":framework-location-sources",
+    ":framework-lowpan-sources",
+    ":framework-media-sources",
+    ":framework-mca-effect-sources",
+    ":framework-mca-filterfw-sources",
+    ":framework-mca-filterpacks-sources",
+    ":framework-opengl-sources",
+    ":framework-rs-sources",
+    ":framework-sax-sources",
+    ":framework-telecomm-sources",
+    ":framework-telephony-sources",
+    ":framework-wifi-sources",
+    ":PacProcessor-aidl-sources",
+    ":ProxyHandler-aidl-sources",
 
-    // aidl under this directory
-    // b/70046217#comment15 These MUST come after all java srcs.
-    // TODO(b/70046217) remove the above requirement
-    "core/java/**/*.aidl",
-    "graphics/java/**/*.aidl",
-    "keystore/java/**/*.aidl",
-    "location/java/**/*.aidl",
-    "lowpan/java/**/*.aidl",
-    "media/java/**/*.aidl",
-    "packages/services/PacProcessor/**/*.aidl",
-    "packages/services/Proxy/**/*.aidl",
-    "telecomm/java/**/*.aidl",
-    "telephony/java/**/*.aidl",
-    "wifi/java/**/*.aidl",
-
-    // aidl from external directories
+    // AIDL sources from external directories
     ":dumpstate_aidl",
     ":gatekeeper_aidl",
     ":gsiservice_aidl",
@@ -106,47 +205,28 @@ framework_srcs = [
     ":framework-statslog-gen",
 ]
 
-framework_aidl_local_include_dirs = [
-    "core/java",
-    "drm/java",
-    "graphics/java",
-    "keystore/java",
-    "location/java",
-    "lowpan/java",
-    "media/java",
-    "media/apex/java",
-    "media/mca/effect/java",
-    "media/mca/filterfw/java",
-    "media/mca/filterpacks/java",
-    "opengl/java",
-    "rs/java",
-    "sax/java",
-    "telecomm/java",
-    "telephony/java",
-    "wifi/java",
-]
-
-framework_aidl_external_include_dirs = [
-    "frameworks/av/camera/aidl",
-    "frameworks/av/media/libaudioclient/aidl",
-    "frameworks/native/aidl/binder",
-    "frameworks/native/aidl/gui",
-    "frameworks/native/cmds/dumpstate/binder",
-    "frameworks/native/libs/incidentcompanion/binder",
-    "system/bt/binder",
-    "system/core/gatekeeperd/binder",
-    "system/core/storaged/binder",
-    "system/gsid/aidl",
-    "system/security/keystore/binder",
-    "system/update_engine/binder_bindings",
-    "system/vold/binder",
-]
-
 java_defaults {
     name: "framework-aidl-export-defaults",
-
     aidl: {
-        export_include_dirs: framework_aidl_local_include_dirs,
+        export_include_dirs: [
+            "core/java",
+            "drm/java",
+            "graphics/java",
+            "keystore/java",
+            "location/java",
+            "lowpan/java",
+            "media/java",
+            "media/apex/java",
+            "media/mca/effect/java",
+            "media/mca/filterfw/java",
+            "media/mca/filterpacks/java",
+            "opengl/java",
+            "rs/java",
+            "sax/java",
+            "telecomm/java",
+            "telephony/java",
+            "wifi/java",
+        ],
     },
 }
 
@@ -158,8 +238,12 @@ java_defaults {
     srcs: framework_srcs,
 
     aidl: {
-        local_include_dirs: framework_aidl_local_include_dirs,
-        include_dirs: framework_aidl_external_include_dirs,
+        // TODO(b/70046217) remove this by moving the AIDL files into frameworks/base
+        // so that they are referenced via framework-core-sources
+        include_dirs: [
+            "frameworks/native/aidl/binder",
+            "frameworks/native/aidl/gui",
+        ],
         generate_get_transaction_name: true,
     },
 
@@ -803,7 +887,6 @@ stubs_defaults {
         "test-runner/src/**/*.java",
     ],
     srcs_lib: "framework",
-    srcs_lib_whitelist_dirs: frameworks_base_subdirs,
     srcs_lib_whitelist_pkgs: packages_to_document,
     libs: framework_docs_only_libs,
     local_sourcepaths: frameworks_base_subdirs,
@@ -860,7 +943,6 @@ stubs_defaults {
         ":updatable-media-srcs-without-aidls",
     ],
     srcs_lib: "framework",
-    srcs_lib_whitelist_dirs: frameworks_base_subdirs,
     srcs_lib_whitelist_pkgs: packages_to_document,
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
@@ -1181,8 +1263,7 @@ droidstubs {
 droidstubs {
     name: "hiddenapi-mappings",
     defaults: ["metalava-api-stubs-default"],
-    srcs: [
-        ":framework-defaults-java-srcs",
+    srcs: framework_srcs + [
         ":non_openjdk_java_files",
         ":openjdk_java_files",
         ":opt-telephony-common-srcs",
@@ -1322,8 +1403,6 @@ filegroup {
 aidl_mapping {
     name: "framework-aidl-mappings",
     srcs: framework_srcs,
-    local_include_dirs: framework_aidl_local_include_dirs,
-    include_dirs: framework_aidl_external_include_dirs,
     output: "framework-aidl-mappings.txt",
 }
 
