@@ -209,7 +209,7 @@ void log_envelope(const ReportFileProto& envelope) {
     }
     ALOGD("  data_file=%s", envelope.data_file().c_str());
     ALOGD("  privacy_policy=%d", envelope.privacy_policy());
-    ALOGD("  data_file_size=%lld", envelope.data_file_size());
+    ALOGD("  data_file_size=%" PRIi64, (int64_t)envelope.data_file_size());
     ALOGD("  completed=%d", envelope.completed());
     ALOGD("}");
 }
