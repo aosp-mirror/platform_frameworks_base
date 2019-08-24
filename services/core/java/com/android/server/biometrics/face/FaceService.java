@@ -53,6 +53,7 @@ import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -101,6 +102,9 @@ public class FaceService extends BiometricServiceBase {
 
     private static final String NOTIFICATION_TAG = "FaceService";
     private static final int NOTIFICATION_ID = 1;
+
+    private static final String SKIP_KEYGUARD_ACQUIRE_IGNORE_LIST =
+            "com.android.server.biometrics.face.skip_keyguard_acquire_ignore_list";
 
     /**
      * Events for bugreports.
@@ -1047,6 +1051,9 @@ public class FaceService extends BiometricServiceBase {
     public FaceService(Context context) {
         super(context);
 
+        final boolean ignoreKeyguardBlacklist = Settings.Secure.getInt(context.getContentResolver(),
+                SKIP_KEYGUARD_ACQUIRE_IGNORE_LIST, 0) != 0;
+
         mUsageStats = new UsageStats(context);
 
         mNotificationManager = getContext().getSystemService(NotificationManager.class);
@@ -1055,10 +1062,11 @@ public class FaceService extends BiometricServiceBase {
                 .getIntArray(R.array.config_face_acquire_biometricprompt_ignorelist);
         mBiometricPromptIgnoreListVendor = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_vendor_biometricprompt_ignorelist);
-        mKeyguardIgnoreList = getContext().getResources()
+        mKeyguardIgnoreList = ignoreKeyguardBlacklist ? new int[0] : getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_keyguard_ignorelist);
-        mKeyguardIgnoreListVendor = getContext().getResources()
-                .getIntArray(R.array.config_face_acquire_vendor_keyguard_ignorelist);
+        mKeyguardIgnoreListVendor =
+                ignoreKeyguardBlacklist ? new int[0] : getContext().getResources()
+                        .getIntArray(R.array.config_face_acquire_vendor_keyguard_ignorelist);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()
