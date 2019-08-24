@@ -1342,7 +1342,6 @@ class UserController implements Handler.Callback {
     }
 
     boolean switchUser(final int targetUserId) {
-        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "switchUser");
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
         int currentUserId = getCurrentUserId();
         UserInfo targetUserInfo = getUserInfo(targetUserId);
