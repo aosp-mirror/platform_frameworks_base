@@ -21,14 +21,16 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-
+import com.android.systemui.car.CarNotificationEntryManager;
+import com.android.systemui.car.CarNotificationInterruptionStateProvider;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -41,19 +43,32 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A dagger module for injecting default implementations of components of System UI that may be
- * overridden by the System UI implementation.
- */
 @Module
-abstract class SystemUIDefaultModule {
+abstract class CarSystemUIModule {
+
+    @Binds
+    abstract NotificationInterruptionStateProvider bindNotificationInterruptionStateProvider(
+            CarNotificationInterruptionStateProvider notificationInterruptionStateProvider);
+
+    @Singleton
+    @Provides
+    @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
+    static boolean provideAllowNotificationLongPress() {
+        return false;
+    }
+
+    /**
+     * Use {@link CarNotificationEntryManager}, which does nothing when adding a notification.
+     */
+    @Binds
+    abstract NotificationEntryManager bindNotificationEntryManager(
+            CarNotificationEntryManager notificationEntryManager);
 
     @Singleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
-    @Nullable
     static String provideLeakReportEmail() {
-        return null;
+        return "buganizer-system+181579@google.com";
     }
 
     @Binds
@@ -76,10 +91,7 @@ abstract class SystemUIDefaultModule {
         return SysUiServiceProvider.getComponent(context, StatusBar.class);
     }
 
-    @Singleton
-    @Provides
-    @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
-    static boolean provideAllowNotificationLongPress() {
-        return true;
-    }
+    @Binds
+    abstract SystemUIRootComponent bindSystemUIRootComponent(
+            CarSystemUIRootComponent systemUIRootComponent);
 }

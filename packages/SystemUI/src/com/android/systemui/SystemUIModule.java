@@ -16,8 +16,6 @@
 
 package com.android.systemui;
 
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -26,7 +24,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.util.AsyncSensorManager;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -49,12 +46,5 @@ public abstract class SystemUIModule {
             return null;
         }
         return new KeyguardLiftController(context, statusBarStateController, asyncSensorManager);
-    }
-
-    @Singleton
-    @Provides
-    @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
-    static boolean provideAllowNotificationLongPress() {
-        return true;
     }
 }

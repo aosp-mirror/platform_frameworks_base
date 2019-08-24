@@ -215,9 +215,11 @@ public class SmsCbConstants {
     public static final int MESSAGE_ID_CMAS_ALERT_STATE_LOCAL_TEST_LANGUAGE
             = 0x112F; // 4399
 
-    /** End of CMAS Message Identifier range (including future extensions). */
-    public static final int MESSAGE_ID_CMAS_LAST_IDENTIFIER
-            = 0x112F; // 4399
+    /** CMAS Message Identifier for CMAS geo fencing trigger message. */
+    public static final int MESSAGE_ID_CMAS_GEO_FENCING_TRIGGER = 0x1130; // 4440
+
+    /** End of CMAS Message Identifier range. */
+    public static final int MESSAGE_ID_CMAS_LAST_IDENTIFIER = MESSAGE_ID_CMAS_GEO_FENCING_TRIGGER;
 
     /** End of PWS Message Identifier range (includes ETWS, CMAS, and future extensions). */
     public static final int MESSAGE_ID_PWS_LAST_IDENTIFIER
