@@ -31,8 +31,6 @@ public:
     ReliableSurface(sp<Surface>&& surface);
     ~ReliableSurface();
 
-    void setDequeueTimeout(nsecs_t timeout) { mSurface->setDequeueTimeout(timeout); }
-
     int reserveNext();
 
     void allocateBuffers() { mSurface->allocateBuffers(); }
