@@ -5,3 +5,9 @@ android_app {
     certificate: "platform",
     privileged: true,
 }
+
+filegroup {
+    name: "ProxyHandler-aidl-sources",
+    srcs: ["src/**/*.aidl"],
+    path: "src",
+}
