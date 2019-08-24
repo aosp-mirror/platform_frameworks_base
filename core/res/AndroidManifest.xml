@@ -4616,8 +4616,9 @@
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+                android:theme="@style/Theme.DeviceDefault.DayNight"
                 android:configChanges="orientation|keyboardHidden"
+                android:icon="@drawable/platlogo"
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.DisableCarModeActivity"
@@ -4939,6 +4940,7 @@
         <service
                 android:name="com.android.server.autofill.AutofillCompatAccessibilityService"
                 android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+                android:visibleToInstantApps="true"
                 android:exported="true">
             <meta-data
                     android:name="android.accessibilityservice"

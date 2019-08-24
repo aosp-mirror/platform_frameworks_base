@@ -28,11 +28,14 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INST
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
 
+import static java.lang.Integer.min;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.UserHandle;
 
@@ -73,6 +76,41 @@ public abstract class SoftRestrictedPermissionPolicy {
             };
 
     /**
+     * TargetSDK is per package. To make sure two apps int the same shared UID do not fight over
+     * what to set, always compute the combined targetSDK.
+     *
+     * @param context A context
+     * @param appInfo The app that is changed
+     * @param user The user the app belongs to
+     *
+     * @return The minimum targetSDK of all apps sharing the uid of the app
+     */
+    private static int getMinimumTargetSDK(@NonNull Context context,
+            @NonNull ApplicationInfo appInfo, @NonNull UserHandle user) {
+        PackageManager pm = context.getPackageManager();
+
+        int minimumTargetSDK = appInfo.targetSdkVersion;
+
+        String[] uidPkgs = pm.getPackagesForUid(appInfo.uid);
+        if (uidPkgs != null) {
+            for (String uidPkg : uidPkgs) {
+                if (!uidPkg.equals(appInfo.packageName)) {
+                    ApplicationInfo uidPkgInfo;
+                    try {
+                        uidPkgInfo = pm.getApplicationInfoAsUser(uidPkg, 0, user);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        continue;
+                    }
+
+                    minimumTargetSDK = min(minimumTargetSDK, uidPkgInfo.targetSdkVersion);
+                }
+            }
+        }
+
+        return minimumTargetSDK;
+    }
+
+    /**
      * Get the policy for a soft restricted permission.
      *
      * @param context A context to use
@@ -99,12 +137,36 @@ public abstract class SoftRestrictedPermissionPolicy {
                 final int targetSDK;
 
                 if (appInfo != null) {
-                    flags = context.getPackageManager().getPermissionFlags(permission,
-                            appInfo.packageName, user);
+                    PackageManager pm = context.getPackageManager();
+                    flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
                     applyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
-                    hasRequestedLegacyExternalStorage = appInfo.hasRequestedLegacyExternalStorage();
-                    targetSDK = appInfo.targetSdkVersion;
+                    targetSDK = getMinimumTargetSDK(context, appInfo, user);
+
+                    boolean hasAnyRequestedLegacyExternalStorage =
+                            appInfo.hasRequestedLegacyExternalStorage();
+
+                    // hasRequestedLegacyExternalStorage is per package. To make sure two apps in
+                    // the same shared UID do not fight over what to set, always compute the
+                    // combined hasRequestedLegacyExternalStorage
+                    String[] uidPkgs = pm.getPackagesForUid(appInfo.uid);
+                    if (uidPkgs != null) {
+                        for (String uidPkg : uidPkgs) {
+                            if (!uidPkg.equals(appInfo.packageName)) {
+                                ApplicationInfo uidPkgInfo;
+                                try {
+                                    uidPkgInfo = pm.getApplicationInfoAsUser(uidPkg, 0, user);
+                                } catch (PackageManager.NameNotFoundException e) {
+                                    continue;
+                                }
+
+                                hasAnyRequestedLegacyExternalStorage |=
+                                        uidPkgInfo.hasRequestedLegacyExternalStorage();
+                            }
+                        }
+                    }
+
+                    hasRequestedLegacyExternalStorage = hasAnyRequestedLegacyExternalStorage;
                 } else {
                     flags = 0;
                     applyRestriction = false;
@@ -155,7 +217,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                     final int flags = context.getPackageManager().getPermissionFlags(permission,
                             appInfo.packageName, user);
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
-                    targetSDK = appInfo.targetSdkVersion;
+                    targetSDK = getMinimumTargetSDK(context, appInfo, user);
                 } else {
                     isWhiteListed = false;
                     targetSDK = 0;

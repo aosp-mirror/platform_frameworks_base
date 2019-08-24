@@ -38,6 +38,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -620,9 +621,10 @@ public class NotificationPanelView extends PanelView implements
 
     private Rect calculateGestureExclusionRect() {
         Rect exclusionRect = null;
-        if (isFullyCollapsed()) {
+        Region touchableRegion = mHeadsUpManager.calculateTouchableRegion();
+        if (isFullyCollapsed() && touchableRegion != null) {
             // Note: The heads up manager also calculates the non-pinned touchable region
-            exclusionRect = mHeadsUpManager.calculateTouchableRegion();
+            exclusionRect = touchableRegion.getBounds();
         }
         return exclusionRect != null
                 ? exclusionRect
@@ -732,8 +734,7 @@ public class NotificationPanelView extends PanelView implements
             if (suppressedSummary) {
                 continue;
             }
-            if (!mLockscreenUserManager.shouldShowOnKeyguard(
-                    row.getStatusBarNotification())) {
+            if (!mLockscreenUserManager.shouldShowOnKeyguard(row.getEntry())) {
                 continue;
             }
             if (row.isRemoved()) {

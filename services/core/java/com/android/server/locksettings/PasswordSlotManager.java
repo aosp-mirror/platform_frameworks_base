@@ -122,7 +122,7 @@ public class PasswordSlotManager {
      */
     public void markSlotDeleted(int slot) throws RuntimeException {
         ensureSlotMapLoaded();
-        if (mSlotMap.containsKey(slot) && mSlotMap.get(slot) != getMode()) {
+        if (mSlotMap.containsKey(slot) && !mSlotMap.get(slot).equals(getMode())) {
             throw new RuntimeException("password slot " + slot + " cannot be deleted");
         }
         mSlotMap.remove(slot);

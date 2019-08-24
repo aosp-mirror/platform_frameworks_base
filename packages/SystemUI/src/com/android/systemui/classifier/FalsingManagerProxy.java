@@ -65,6 +65,7 @@ public class FalsingManagerProxy implements FalsingManager {
             public void onPluginConnected(FalsingPlugin plugin, Context context) {
                 FalsingManager pluginFalsingManager = plugin.getFalsingManager(context);
                 if (pluginFalsingManager != null) {
+                    mInternalFalsingManager.cleanup();
                     mInternalFalsingManager = pluginFalsingManager;
                 }
             }
@@ -91,7 +92,10 @@ public class FalsingManagerProxy implements FalsingManager {
     @VisibleForTesting
     public void setupFalsingManager(Context context) {
         boolean brightlineEnabled = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, BRIGHTLINE_FALSING_MANAGER_ENABLED, false);
+                DeviceConfig.NAMESPACE_SYSTEMUI, BRIGHTLINE_FALSING_MANAGER_ENABLED, true);
+        if (mInternalFalsingManager != null) {
+            mInternalFalsingManager.cleanup();
+        }
         if (!brightlineEnabled) {
             mInternalFalsingManager = new FalsingManagerImpl(context);
         } else {
@@ -289,5 +293,10 @@ public class FalsingManagerProxy implements FalsingManager {
     @Override
     public void dump(PrintWriter pw) {
         mInternalFalsingManager.dump(pw);
+    }
+
+    @Override
+    public void cleanup() {
+        mInternalFalsingManager.cleanup();
     }
 }

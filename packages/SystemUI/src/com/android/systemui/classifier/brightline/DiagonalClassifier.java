@@ -16,8 +16,12 @@
 
 package com.android.systemui.classifier.brightline;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DIAGONAL_HORIZONTAL_ANGLE_RANGE;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DIAGONAL_VERTICAL_ANGLE_RANGE;
 import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
+
+import android.provider.DeviceConfig;
 
 /**
  * False on swipes that are too close to 45 degrees.
@@ -35,8 +39,20 @@ class DiagonalClassifier extends FalsingClassifier {
     private static final float ONE_HUNDRED_EIGHTY_DEG = (float) (Math.PI);
     private static final float THREE_HUNDRED_SIXTY_DEG = (float) (2 * Math.PI);
 
+    private final float mHorizontalAngleRange;
+    private final float mVerticalAngleRange;
+
     DiagonalClassifier(FalsingDataProvider dataProvider) {
         super(dataProvider);
+
+        mHorizontalAngleRange = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_DIAGONAL_HORIZONTAL_ANGLE_RANGE,
+                HORIZONTAL_ANGLE_RANGE);
+        mVerticalAngleRange = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_DIAGONAL_VERTICAL_ANGLE_RANGE,
+                VERTICAL_ANGLE_RANGE);
     }
 
     @Override
@@ -52,11 +68,11 @@ class DiagonalClassifier extends FalsingClassifier {
             return false;
         }
 
-        float minAngle = DIAGONAL - HORIZONTAL_ANGLE_RANGE;
-        float maxAngle = DIAGONAL + HORIZONTAL_ANGLE_RANGE;
+        float minAngle = DIAGONAL - mHorizontalAngleRange;
+        float maxAngle = DIAGONAL + mHorizontalAngleRange;
         if (isVertical()) {
-            minAngle = DIAGONAL - VERTICAL_ANGLE_RANGE;
-            maxAngle = DIAGONAL + VERTICAL_ANGLE_RANGE;
+            minAngle = DIAGONAL - mVerticalAngleRange;
+            maxAngle = DIAGONAL + mVerticalAngleRange;
         }
 
         return angleBetween(angle, minAngle, maxAngle)

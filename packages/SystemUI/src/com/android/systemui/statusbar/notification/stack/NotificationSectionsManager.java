@@ -133,7 +133,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             if (child instanceof ExpandableNotificationRow
                     && child.getVisibility() != View.GONE) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!row.getEntry().isHighPriority()) {
+                if (!row.getEntry().isTopBucket()) {
                     firstGentleNotifIndex = i;
                     mFirstGentleNotif = row;
                     break;
@@ -248,7 +248,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             View child = mParent.getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!row.getEntry().isHighPriority()) {
+                if (!row.getEntry().isTopBucket()) {
                     break;
                 } else {
                     lastChildBeforeGap = row;
