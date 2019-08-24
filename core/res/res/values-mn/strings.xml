@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Хэт олон <xliff:g id="CONTENT_TYPE">%s</xliff:g>-г устгах оролдлого хийсэн байна."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Таблетийн сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Цагны сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Телевизийн санах ой дүүрсэн байна. Зай гаргахын тулд зарим файлыг устгана уу."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TВ төхөөрөмжийн хадгалах сан дүүрсэн байна. Зай гаргахын тулд зарим файлыг устгана уу."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Утасны сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Сертификатын эрхийг суулгасан</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> хэвлэх үйлдлийг идэвхгүй болгосон."</string>
     <string name="me" msgid="6545696007631404292">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Таблетын сонголтууд"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Телевиз сонголтууд"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android ТВ-н сонголт"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Утасны сонголт"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Дуугүй горим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Утасгүй холбоог асаах"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Дахин эхэлж байна..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Унтрааж байна…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таны таблет унтрах болно."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Таны телевиз унтрах болно."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Таны Android ТВ төхөөрөмж унтарна."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Таны цаг унтрах болно."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Таны утас унтрах болно."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Та унтраах уу?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Сүүлийн"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Сүүлийн апп хоосон."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Таблет сонголт"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Телевизийн сонголтууд"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android ТВ-н сонголт"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Утасны сонголтууд"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Дэлгэцний түгжээ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Унтраах"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Апп нь SMS мессеж илгээх боломжтой. Энэ нь санаандгүй төлбөрт оруулж болзошгүй. Хортой апп нь таны зөвшөөрөлгүйгээр мессеж илгээн таныг төлбөрт оруулж болзошгүй."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"таны текст мессежийг унших(SMS эсвэл MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Энэ апп таны таблетад хадгалсан бүх SMS (текст) зурвасыг унших боломжтой."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Энэ апп таны ТВ-д хадгалсан бүх SMS (текст) зурвасыг унших боломжтой."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Энэ апп таны Android ТВ төхөөрөмжид хадгалсан бүх SMS (текст) мессежийг уншиж чадна."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Энэ апп таны утсанд хадгалсан бүх SMS (текст) зурвасыг унших боломжтой."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"текст мессеж(WAP) хүлээн авах"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Апп нь WAP мессежийг хүлээн авах болон биелүүлэх боломжтой. Энэ зөвшөөрөл нь танд илгээсэн мессежийг танд харуулалгүйгээр хянах эсвэл устгах боломжийг агуулна."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Энэ апп цаана ажиллах боломжтой. Энэ нь датаны хэрэглээг нэмэгдүүлж болзошгүй."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"апп-г байнга ажиллуулах"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Апп нь өөрийн хэсгийн санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан таблетыг удаашруулах болно."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Апп-д өөрийн бүрэлдэхүүн хэсгийг санах ойд хадгалахыг зөвшөөрдөг. Энэ нь бусад аппликэйшнүүдийн ашиглах санах ойн хэмжээг хязгаарлахаас гадна, телевизийг удаашруулна."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Аппад өөрийн хэсгийг санах ойд тогтмол хадгалахыг зөвшөөрнө. Энэ нь таны Android ТВ төхөөрөмжийг удаашруулж буй бусад аппад боломжтой санах ойг хязгаарлаж болно."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Апп нь өөрийн хэсгийг санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан утсыг удаашруулах болно."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"интерактив (foreground) үйлчилгээг ажиллуулах"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Аппад интерактив (foreground) үйлчилгээг ашиглахыг зөвшөөрнө үү."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Апп нь системийн тохиргооны датаг өөрчлөх боломжтой. Хортой апп нь таны системийн тохиргоог сүйтгэх боломжтой."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"Эхлэхэд ажиллуулах"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Апп нь систем асаж дуусахад шууд өөрийгөө асаах боломжтой. Ингэснээр таблетыг асахад их хугацаа орох болон байнга ажилладаг апп нь таблетийг бүхэлд нь удаашруулах боломжтой."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Апп-д систем эхлэхэд өөрийгөө эхлүүлэхийг зөвшөөрдөг. Энэ нь телевизийг эхлэх хугацааг удаашруулах боломжтойгоос гадна, апп-д байнга ажиллаж байх учир таблетын хурдыг ерөнхийд нь бууруулж болох юм."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Аппад системийг ачаалж дуусмагц өөрийгөө эхлүүлэхийг зөвшөөрнө. Энэ нь таны Android ТВ төхөөрөмжийн эхлэх хугацааг удаашруулах боломжтойгоос гадна аппыг тогтмол ажиллуулснаар төхөөрөмжийн ерөнхий хурдыг удаашруулж болзошгүй."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Апп нь систем асаж дуусахад шууд өөрийгөө асаах боломжтой. Ингэснээр утсыг асахад их хугацаа орох болон байнга ажилладаг апп нь утсыг бүхэлд нь удаашруулах боломжтой."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"тасардаггүй өргөн дамжууллыг илгээх"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Апп нь өргөн дамжуулал дууссаны дараа үлдсэн өргөн дамжуулалыг илгээх боломжтой. Ихээр ашиглах нь хэт их санах ой ашиглан таблетыг удаашруулах болон тогтворгүй болгох боломжтой."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Апп-д нэвтрүүлэг дууссан ч мэдээллийг илгээхийг зөвшөөрдөг. Хэт их хэрэглэх нь санах ойн ачааллыг нэмэгдүүлж, улмаар телевизийг удаан, тогтворгүй болгодог."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Аппад нэвтрүүлэг дууссаны дараа үлдэх бэхлэгдсэн нэвтрүүлэг илгээхийг зөвшөөрнө. Хэт их ашиглах нь санах ойн ачааллыг нэмэгдүүлж, улмаар таны Android ТВ төхөөрөмжийг удаан эсвэл тогтворгүй болгож болзошгүй."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Апп нь өргөн дамжуулал дууссаны дараа үлдсэн өргөн дамжуулалыг илгээх боломжтой. Ихээр ашиглах нь хэт их санах ой ашиглан утсыг удаашруулах болон тогтворгүй болгох боломжтой."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"өөрийн харилцагчдыг унших"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл тусгай харилцагдчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан таблет дээр хадгалагдсан харилцагчдын талаарх датаг унших боломжтой. Энэ зөвшөөрөл нь апп-д таны харилцагчийн датаг хадгалах боломжийг олгох ба хортой апп нь танд мэдэгдэлгүйгээр харилцагчийн датаг хуваалцах боломжтой."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Апп-д таны бусад руу илгээсэн дуудлага, и-мэйл эсвэл бусад байдлаар харилцсан давтамж гэх мэт телевизэд хадгалагдсан холбоо барих хаягийн тухай мэдээллийг уншихыг зөвшөөрдөг. Энэ зөвшөөрөл нь апп-д таны холбоо барих хаягийн мэдээллийг хадгалахыг зөвшөөрдөг бөгөөд  хорлонтой аппликэйшнүүд танд мэдэгдэлгүйгээр эдгээр дуудлагын өгөгдлийг бусадтай хуваалцаж болох юм."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Аппaд таны тодорхой хувь хүн рүү хийсэн дуудлага, бичсэн имэйл эсвэл бусад аргаар харилцсан байдлын давтамж зэрэг таны Android ТВ төхөөрөмжид хадгалсан харилцагчдын талаарх өгөгдлийг өөрчлөхийг зөвшөөрнө. Энэ зөвшөөрөл нь аппуудад таны харилцагчийн өгөгдлийг хадгалахыг зөвшөөрөх бөгөөд хортой аппууд танд мэдэгдэлгүйгээр харилцагчийн өгөгдлийг бусадтай хуваалцаж болзошгүй."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл тусгай харилцагчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан таны утсан дээр хадгалагдсан харилцагчдын талаарх датаг унших боломжтой. Энэ зөвшөөрөл нь апп-д таны харилцагчийн датаг хадгалах боломжийг олгох ба хортой апп нь танд мэдэгдэлгүйгээр харилцагчийн датаг хуваалцах боломжтой."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"таны харилцагчдыг өөрчлөх"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл тусгай харилцагчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан таны таблет дээр хадгалагдсан харилцагчдын талаарх датаг өөрчлөх боломжтой. Энэ зөвшөөрөл нь апп-д харилцагчийн датаг устгах боломжийг олгоно."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Апп-д таны бусад руу илгээсэн дуудлага, и-мэйл эсвэл бусад байдлаар харилцсан давтамж гэх мэт телевизэд хадгалагдсан холбоо барих хаягийн тухай мэдээллийг өөрчлөхийг зөвшөөрдөг. Энэ зөвшөөрөл нь апп-д таны холбоо барих хаягийн мэдээллийг устгахыг зөвшөөрдөг."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Аппaд таны тодорхой харилцагч руу хийсэн дуудлага, бичсэн имэйл эсвэл бусад аргаар харилцсан байдлын давтамж зэрэг таны Android ТВ төхөөрөмжид хадгалсан харилцагчдын талаарх өгөгдлийг өөрчлөхийг зөвшөөрнө. Энэ зөвшөөрөл нь аппуудад харилцагчийн өгөгдлийг устгахыг зөвшөөрнө."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл харилцагдчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан утсан дээр хадгалагдсан харилцагчдын талаарх датаг өөрчлөх боломжтой. Энэ зөвшөөрөл нь апп-д харилцагчийн датаг устгах боломжийг олгоно."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"дуудлагын логийг унших"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Энэ апп таны дуудлагын түүхийг унших боломжтой."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"дуудлагын логруу бичих"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Апп нь таны таблетын ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг унших боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Апп-д орж ирсэн болон гадагш хийсэн телевизийн дуудлагын бүртгэлийг өөрчлөхийг зөвшөөрдөг. Хорлонтой апликейшнүүд үүнийг ашиглан таны дуудлагын бүртгэлийг устгах эсвэл өөрчилж болох юм."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Аппад таны Android ТВ төхөөрөмжийн ирсэн болон залгасан дуудлага зэрэг өгөгдөл бүхий дуудлагын жагсаалтыг өөрчлөхийг зөвшөөрнө. Хортой аппууд үүнийг ашиглан таны дуудлагын жагсаалтыг устгаж эсвэл өөрчилж болзошгүй."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"биеийн мэдрэгчид хандах (зүрхний хэмнэл шалгагч г.м)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Апп-т таны зүрхний цохилт гэх мэт биеийн байдлыг хянадаг мэдрэгчдийн датанд хандалт хийх боломж олгоно."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Хуанлийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Энэ апп таны таблетад хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Энэ апп таны ТВ-д хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Энэ апп таны Android ТВ төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Энэ апп таны утсанд хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"календарын хуваарийг нэмэх эсвэл өөрчлөх болон эзэмшигчид мэдэгдэлгүйгээр зочидруу имэйл илгээх"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Энэ апп таны таблет дээр хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс зурвас илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Энэ апп таны ТВ-д хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс зурвас илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Энэ апп таны Android ТВ төхөөрөмжид календарийн арга хэмжээ нэмэх, үүнийг устгах, эсвэл өөрчлөх боломжтой. Энэ апп календарийн өмчлөгчөөс ирсэн мэт харагдаж болох мессеж илгээх эсвэл арга хэмжээг өмчлөгчид нь мэдэгдэлгүйгээр өөрчлөх боломжтой."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Энэ апп таны утсанд хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс зурвас илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"байршил нийлүүлэгчийн нэмэлт тушаалд хандах"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Апп нь байршил нийлүүлэгчийн нэмэлт тушаалд хандах боломжтой. Энэ нь апп-д GPS эсвэл бусад байршлын үйлчилгээний ажиллагаанд нөлөөлөх боломжийг олгоно."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Энэ апп нь зөвхөн нүүр хэсэгт байх үедээ л таны байршлыг нарийн тогтоох боломжтой. Апп эдгээр байршлын үйлчилгээг ашиглахын тулд эдгээрийг таны утсан дээр асааж идэвхтэй байлгах шаардлагатай. Энэ нь батарейны хэрэглээг ихэсгэж болзошгүй."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"ойролцоох байршилд (сүлжээнд суурилсан) зөвхөн дэлгэц дээр хандах"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Энэ апп зөвхөн дэлгэц дээр байх үед үүрэн цамхаг, Wi-Fi сүлжээ зэрэг сүлжээний эх сурвалжид тулгуурлан таны байршлыг мэдэх боломжтой. Та энэ аппад эдгээр байршлын үйлчилгээг ашиглуулахын тулд эдгээрийг таблет дээрээ асааж, боломжтой байлгах шаардлагатай."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Энэ апп зөвхөн дэлгэц дээр байх үед үүрэн цамхаг, Wi-Fi сүлжээ зэрэг сүлжээний эх сурвалжид тулгуурлан таны байршлыг мэдэх боломжтой. Та энэ аппад эдгээр байршлын үйлчилгээг ашиглуулахын тулд эдгээрийг TB дээрээ асааж, боломжтой байлгах шаардлагатай."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Энэ апп зөвхөн дэлгэц дээр байх үед үүрэн цамхаг, Wi-Fi сүлжээ зэрэг сүлжээний эх сурвалжид тулгуурлан таны байршлыг мэдэх боломжтой. Та энэ аппад эдгээр байршлын үйлчилгээг ашиглуулахын тулд эдгээрийг Android TB төхөөрөмж дээрээ асааж, боломжтой байлгах шаардлагатай."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Энэ апп зөвхөн дэлгэц дээр байх үед үүрэн цамхаг, Wi-Fi сүлжээ зэрэг сүлжээний эх сурвалжид тулгуурлан таны байршлыг мэдэх боломжтой. Та энэ аппад эдгээр байршлын үйлчилгээг ашиглуулахын тулд эдгээрийг утсан дээрээ асааж, боломжтой байлгах шаардлагатай."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"байршилд ард хандах"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Хэрэв үүнийг ойролцоо эсвэл нарийвчилсан байршлын хандалтад нэмэлтээр зөвшөөрсөн бол энэ апп ард ажиллах явцдаа байршилд хандаж болно."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Энэ апп таны биеийн дасгал хөдөлгөөнийг таних боломжтой."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"зураг авах болон видео бичих"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Энэ апп ямар ч үед камер ашиглан зураг авж, видео хийх боломжтой."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"чичиргээг удирдах"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Апп нь чичиргээг удирдах боломжтой."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"утасны дугаарт шууд дуудлага хийх"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"утасны дугаарыг унших"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Төхөөрөмжийн утасны дугаарт хандах зөвшөөрлийг апп-д олгоно."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"таблетыг унтуулахгүй байлгах"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"Телевиз-ийн гэрэл унтрахаас сэргийл"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"таны Android TВ төхөөрөмжийг идэвхгүй болохоос сэргийлэх"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"утсыг унтуулахгүй байлгах"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Апп нь таблетыг унтахаас сэргийлэх боломжтой"</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Апп-д телевизийг унтраахгүй байлгахыг зөвшөөрдөг."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Аппад таны Android ТВ төхөөрөмжийг идэвхгүй болохоос сэргийлэхийг зөвшөөрнө."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Апп нь утсыг унтахаас сэргийлэх боломжтой"</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"хэт улаанаар дамжуулах"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Апп-д таблетын хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Апп-д телевизийн хэт улаан туяаны дамжуулагчийг ашиглах боломжийг олгодог."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Аппад таны Android ТВ төхөөрөмжийн хэт улаан туяаны дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Апп-д утасны хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ханын зургийг тохируулах"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Апп нь системийн ханын зургийг тохируулах боломжтой."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Апп нь системийн ханын зургийн хэмжээний саналыг тохируулах боломжтой"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"цагийн бүсийн тохиргоо"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Апп нь таблетын цагийн бүсийг солих боломжтой."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Апп-д телевизийн цагийн бүсийг өөрчлөхийг зөвшөөрдөг."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Аппад таны Android ТВ төхөөрөмжийн цагийн бүсийг өөрчлөхийг зөвшөөрнө."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Апп нь утасны цагийн бүсийг өөрчлөх боломжтой."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"төхөөрөмж дээрх акаунтыг олох"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Апп нь таблетэд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликейшнүүдийг үүсгэсэн бүх акаунтууд хамрагдана."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Телевизийн жагсаалтад байгаа акаунтуудын хаягийг апп-д авахыг зөвшөөрдөг. Энэ нь таны суулгасан бусад аппликэйшнүүдийн бий болгосон акаунтуудыг оруулж болно."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Аппад таны Android ТВ төхөөрөмжөөр танигдсан бүртгэлийн жагсаалтыг авахыг зөвшөөрнө. Үүнд таны суулгасан аппуудын үүсгэсэн аливаа бүртгэлийг оруулж болзошгүй."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Апп нь утсанд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликейшнүүдийг үүсгэсэн бүх акаунтууд хамрагдана."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"сүлжээний холболтыг үзэх"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Апп нь сүлжээ байгаа болон холбогдсон эсэх зэрэг сүлжээний холболтын талаарх мэдээллийг харах боломжтой."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Апп нь Wi-Fi холболтын цэгтэй холбогдох буюу салах боломжтой ба тохируулсан Wi-Fi сүлжээнд өөрчлөлт хийх боломжтой."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi олон дамжуулалт хүлээн авахыг зөвшөөрөх"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Апп нь олон дамжуулал ашиглан Wi-Fi сүлжээн дэх бүх төхөөрөмжрүү пакет илгээх болон хүлээн авах боломжтой. Энэ нь олон дамжуулал ашиглахгүй горимоос илүү их тэжээл зарцуулна."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Апп-д зөвхөн таны телевиз ч биш, Wi-Fi сүлжээг ашиглаж буй бүх төхөөрөмжид илгээсэн мэдээллийг хүлээн авахыг зөвшөөрдөг. Энэ нь олон хаягт горимоос илүү их эрчим хүч хэрэглэдэг."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Аппад таны Android ТВ төхөөрөмжөөс гадна Wi-Fi сүлжээг ашиглаж буй бүх төхөөрөмжид илгээсэн багцыг олон цэгийн хаяг ашиглан хүлээн авахыг зөвшөөрнө. Энэ нь олон цэгийн бус горимоос илүү их тэжээл ашиглана."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Апп нь олон дамжуулал ашиглан Wi-Fi сүлжээн дэх бүх төхөөрөмжрүү пакет илгээх болон хүлээн авах боломжтой. Энэ нь олон дамжуулал ашиглахгүй горимоос илүү их тэжээл зарцуулна."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth тохиргоонд хандах"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Апп нь дотоод блютүүт таблетын тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Телевизийн суурин Bluetooth-г тохируулах, алсын төхөөрөмжийг илрүүлэх болон холбогдохыг апп-д зөвшөөрдөг."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Аппад таны Android ТВ төхөөрөмжийн Bluetooth-г тохируулах болон алсын төхөөрөмжүүдийг илрүүлж, тэдгээртэй хослуулахыг зөвшөөрнө."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Апп нь утасны дотоод блютүүтыг тохируулах боломжтой ба гадаад төхөөрөмжийг олох болон хос үүсгэх боломжтой."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-д холбогдох болон салах"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Апп нь WiMAX идэвхтэй эсэх болон холбогдсон WiMAX сүлжээний талаар мэдээллийг тодорхойлох боломжтой."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX статусыг солих"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Апп нь WiMAX сүлжээнд таблетыг холбох болон салгах боломжтой."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Телевизийг WiMAX сүлжээнд холбох, салгахыг апп-д зөвшөөрдөг."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Аппад таны Android ТВ төхөөрөмжид холбогдож, үүнийг WiMAX сүлжээнээс салгахыг зөвшөөрнө."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Апп нь WiMAX сүлжээнд утсыг холбох болон салгах боломжтой."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth төхөөрөмжтэй хос үүсгэх"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Апп нь таблет дээрх блютүүт тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Телевизийн Bluetooth тохиргоог нээж харах, бусад төхөөрөмжтэй холболт хийх болон хүлээн авахыг апп-д зөвшөөрдөг."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Аппад таны Android ТВ төхөөрөмж дээрх Bluetooth-н тохируулгыг харах болон хослуулсан төхөөрөмжүүдтэй холболт хийж, холболтыг баталгаажуулахыг зөвшөөрнө."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Апп нь утсан дээрх Bluetooth тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ойролцоо талбарын холбоог удирдах"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Апп нь Ойролцоо Талбарын Холболт(NFC) таг, карт, болон уншигчтай холбогдох боломжтой."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал таблетыг түгжих болон таблетын бүх датаг арилгана"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Дэлгэцийн түгжээг тайлахад оруулсан буруу нууц үгийн давтамжийг хянаад телевиз-г түгж эсвэл буруу нууц үг хэт олон удаа орсон тохиолдолд телевиз-ийн бүх датаг устга."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Дэлгэцийн түгжээг тайлахаар буруу оруулсан нууц үгийн тоог хянаж, нууц үгийг хэт олон удаа буруу оруулсан тохиолдолд таны Android ТВ төхөөрөмжийг түгжиж эсвэл үүний бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах, ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал утсыг түгжих болон утасны бүх датаг арилгана"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Дэлгэцийн түгжээг тайлахад оруулсан буруу нууц үгийн давтамжийг хянаж таблетыг түгжих эсвэл буруу нууц үгийг хэт олон удаа оруулсан тохиолдолд энэ хэрэглэгчийн мэдээллийг устгах."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Дэлгэцийн түгжээг тайлахад оруулсан буруу нууц үгийн давтамжийг хянаж телевизийг түгжих эсвэл буруу нууц үгийг хэт олон удаа оруулсан тохиолдолд энэ хэрэглэгчийн мэдээллийг устгах."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Дэлгэцийн түгжээг тайлахаар буруу оруулсан нууц үгийн тоог хянаж, нууц үгийг хэт олон удаа буруу оруулсан тохиолдолд таны Android ТВ төхөөрөмжийг түгжиж эсвэл энэ хэрэглэгчийн бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Дэлгэцийн түгжээг тайлахад оруулсан буруу нууц үгийн давтамжийг хянаж гар утсыг түгжих эсвэл буруу нууц үгийг хэт олон удаа оруулсан тохиолдолд энэ хэрэглэгчийн мэдээллийг устгах."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Дэлгэцийн түгжээг өөрчлөх"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Дэлгэцийн түгжээг өөрчлөх."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Дэлгэц хэзээ яаж түгжихийг удирдах"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Бүх датаг арилгах"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Үйлдвэрийн дата утгыг өгсөнөөр таблетын дата шууд арилгагдана."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Анхааруулга өгөхгүйгээр үйлдвэрээс хийгдсэн тохиргоонд эргэн шилжих байдлаар телевиз-ийн датаг устга."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Таны Android ТВ төхөөрөмжийн өгөгдлийг танд анхааруулалгүйгээр үйлдвэрээс гарсан төлөвт шилжүүлэн устгана."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Сануулахгүйгээр утасны бүх мэдээллийг устгаж, үйлдвэрийн өгөгдмөл байдалд шилжүүлнэ"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Хэрэглэгчийн мэдээллийг арилгах"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ таблет дээрх мэдээллийг устгах."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ телевизор дээрх мэдээллийг устгах."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Энэ Android ТВ төхөөрөмж дээрх хэрэглэгчийн өгөгдлийг хэрэглэгчид анхааруулалгүйгээр устгана."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ гар утсан дээрх мэдээллийг устгах."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Төхөрөөмжийн глобал проксиг тохируулах"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Бодлогыг ашиглах боломжтой үед төхөөрөмжийн олон улсын эрхийг тохируулах. Зөвхөн төхөөрөмж эзэмшигч нь олон улсын эрхийг тохируулах боломжтой."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Нүүрээр түгжээ тайлах оролдлогын тоо дээд хэмжээнээс хэтэрсэн"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM карт байхгүй"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Таблет SIM картгүй."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Телевиз сим картгүй байна."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Таны Android ТВ төхөөрөмжид SIM карт алга."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Утсанд SIM карт байхгүй."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM картыг оруулна уу."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM карт байхгүй эсвэл унших боломжгүй. SIM карт оруулна уу."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Та нууц үгээ <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд Google нэвтрэлтээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Та зурган түгжээгээ <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оруулсан байна. Та дахиж <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсны дараагаар та телевизийнхээ түгжээг Google акаунтандаа нэвтэрч тайлах шаардлагатай болно.\n\n Та <xliff:g id="NUMBER_2">%3$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурсан байна. Та дахин <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсан тохиолдолд Android ТВ төхөөрөмжийнхөө түгжээг тайлахын тулд Google-д нэвтрэх шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оролдвол, та таблетаа тайлахын тулд Google нэвтрэлтээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Та таблетыг тайлах гэж <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оролдвол таблет үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Та <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа телевизийнхээ түгжээг тайлах оролдлогыг амжилтгүй хийсэн байна. Та дахиж <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсны дараагаар телевизийн тохиргоо үйлдвэрээс гарсан анхны тохиргоонд шилжих бөгөөд хэрэглэгчийн бүх мэдээлэл устах болно."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Та Android ТВ төхөөрөмжийнхөө түгжээг тайлахаар <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдсон байна. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаагийн амжилтгүй оролдлогын дараагаас таны Android ТВ төхөөрөмжийг үйлдвэрийн өгөгдмөл төлөвт шинэчлэх бөгөөд хэрэглэгчийн бүх өгөгдөл устах болно."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Та утсыг тайлах гэж <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оролдвол утас үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Та таблетыг <xliff:g id="NUMBER">%d</xliff:g> удаа тайлах гэж буруу оролдлоо. Таблет одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Та телевизийнхээ түгжээг <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Телевиз үйлдвэрээс гарсан анхны тохиргоонд шилжих болно."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Та Android ТВ төхөөрөмжийнхөө түгжээг тайлахаар <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдсон байна. Таны Android ТВ төхөөрөмжийг одоо үйлдвэрийн өгөгдмөл төлөвт шинэчилнэ."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Та утсыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Утас одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Хээг мартсан уу?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Апп нь Хөтчийн зочилж байсан бүх URL-н түүх болон Хөтчийн бүх хавчуургыг унших боломжтой. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадавхтай аппликейшнүүдэд ашиглагдахгүй байх боломжтой."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"вэб хавчуурга болон түүхийг бичих"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Апп нь таны таблет дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликейшнд ажиллахгүй байх боломжтой."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Апп-д телевиз-д хадгалагдсан Вэб хөтчийн түүх, хавчуургыг өөрчлөхийг зөвшөөрдөг. Энэ нь апп-д Вэб хөтчийн датаг устгах эсвэо өөрчлөхийг зөвшөөрч болох юм. Жич: энэ зөвшөөрөл нь гуравдагч вэб хөтөч эсвэл вэб хайлт хийх чадвартай апп-ны хувьд үйлчлэхгүй."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Аппад таны Android ТВ төхөөрөмжид хадгалсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөхийг зөвшөөрнө. Энэ нь аппад Хөтчийн өгөгдлийг устгах эсвэл өөрчлөхийг зөвшөөрч болзошгүй. Санамж: энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вэб хөтчийн чадамжтай бусад аппад хэрэгжихгүй байж болзошгүй."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликейшнд ажиллахгүй байх боломжтой."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Нээлттэй Wi-Fi сүлжээ ашиглах боломжтой</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Нээлттэй Wi‑Fi сүлжээнд холбогдох"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Оператор Wi‑Fi сүлжээнд холбогдох"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi сүлжээнд холбогдож байна"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi сүлжээнд холбогдлоо"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi сүлжээнд холбогдож чадсангүй"</string>
@@ -1307,7 +1310,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Шаардлагатай PIN-г бичнэ үү:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Таблет <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тэй холбогдох үедээ түр зуур Wi-Fi-с салах болно."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Телевиз нь <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-д холбогдсон үедээ түр зуур Wi-Fi холболтоос салгагдана."</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Таны Android ТВ төхөөрөмж <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-д холбогдсон үед Wi-Fi-с түр хугацаанд сална"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Утас <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тай холбогдох үедээ түр зуур Wi-Fi-с салах болно."</string>
     <string name="select_character" msgid="3365550120617701745">"Тэмдэгт оруулах"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS мессеж илгээж байна"</string>
@@ -1650,13 +1653,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Та таблетыг тайлах гэж <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оролдвол таблет үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Та <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа телевизийнхээ түгжээг тайлах оролдлогыг амжилтгүй хийсэн байна. Та дахиж <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсны дараагаар телевизийн тохиргоо үйлдвэрээс гарсан анхны тохиргоонд шилжих бөгөөд хэрэглэгчийн бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Та Android ТВ төхөөрөмжийнхөө түгжээг тайлахаар <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдсон байна. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаагийн амжилтгүй оролдлогын дараагаас таны Android ТВ төхөөрөмжийг үйлдвэрийн өгөгдмөл төлөвт шинэчлэх бөгөөд хэрэглэгчийн бүх өгөгдөл устах болно."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Та утсыг тайлах гэж <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оролдвол утас үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Та таблетыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Таблет одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Та телевизийнхээ түгжээг <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Телевиз үйлдвэрээс гарсан анхны тохиргоонд шилжих болно."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Та Android ТВ төхөөрөмжийнхөө түгжээг тайлахаар <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдсон байна. Таны Android ТВ төхөөрөмжийг одоо үйлдвэрийн өгөгдмөл төлөвт шинэчилнэ."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Та утсыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Утас одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд имэйл бүртгэл шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Та зурган түгжээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оруулсан байна. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсны дараагаар та телевизийнхээ түгжээг и-мэйл дансаа ашиглан тайлах хэрэгтэй болно.\n\n Та <xliff:g id="NUMBER_2">%3$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурсан байна. Та дахин <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оролдсон тохиолдолд Android ТВ төхөөрөмжийнхөө түгжээг имэйл бүртгэлээрээ тайлах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та утсаа тайлахын тулд имэйл бүртгэлээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Устгах"</string>
@@ -1997,6 +2000,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Тохиргоо"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Зогсолтын горим"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Андройд ТВ төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд дарна уу."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд дарна уу."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камер"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"таны дэлгэцэд бусад аппын дээр харуулж байна"</string>

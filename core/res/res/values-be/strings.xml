@@ -177,7 +177,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Вы прабавалі выдаліць надта шмат элементаў <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Памяць планшэта поўная. Выдаліце некаторыя файлы, каб вызваліць месца."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Сховішча гадзінніка перапоўнена. Выдаліце некаторыя файлы, каб вызваліць месца."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Сховішча тэлевізара перапоўнена. Выдаліце некаторыя файлы, каб вызваліць месца."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Сховішча прылады Android TV запоўнена. Выдаліце частку файлаў, каб вызваліць месца."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Памяць тэлефона поўная. Выдаліце ​​некаторыя файлы, каб вызваліць месца."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">Усталяваны цэнтры сертыфікацыі</item>
@@ -199,7 +199,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Друк адключаны ўладальнікам праграмы <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Параметры планшэта"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Параметры ТБ"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Параметры Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Параметры тэлефона"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Бязгучны рэжым"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Уключыць бесправадную сетку"</string>
@@ -217,7 +217,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Перазапуск..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключэнне..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшэт будзе адключаны."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Ваш тэлевізар будзе выключаны."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Ваша прылада Android TV будзе выключана."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Ваш гадзіннік будзе выключаны."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ваш тэлефон будзе выключаны."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Закрыць?"</string>
@@ -226,7 +226,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Нядаўнія"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Няма апошніх прыкладанняў."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Параметры планшэта"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Параметры ТБ"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Параметры Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры тэлефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блакіроўка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Выключыць"</string>
@@ -358,7 +358,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Дазваляе прыкладанне для адпраўкі SMS паведамленняў. Гэта можа прывесці да нечаканых абвінавачванняў. Шкоднасныя праграмы могуць каштаваць вам грошай на адпраўку паведамленняў без вашага пацвярджэння."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"чытанне сваiх тэкставых паведамленняў (SMS ці MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Гэта праграма можа чытаць усе SMS-паведамленні (тэкставыя паведамленні), захаваныя на вашым планшэце."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Гэта праграма можа чытаць усе SMS-паведамленні (тэкставыя паведамленні), захаваныя на вашым тэлевізары."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Гэта праграма можа счытваць усе SMS (тэкставыя паведамленні), захаваныя на прыладзе Android TV."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Гэта праграма можа чытаць усе SMS-паведамленні (тэкставыя паведамленні), захаваныя на вашым тэлефоне."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"атрыманне тэкставых паведамленняў (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Дазваляе прыкладанням атрымліваць і апрацоўваць паведамленні WAP. Дзякуючы гэтаму дазволу можна кантраляваць або выдаляць паведамленні, пасланыя вам, не паказваючы іх."</string>
@@ -380,7 +380,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Гэта праграма можа выкарыстоўваць даныя ў фоне. Гэта можа прывесці да павелічэння аб\'ёму трафіка."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"прымусіць прыкладанне працаваць заўсёды"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу планшэта."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Дазваляе праграме пастаянна захоўваць некаторыя свае часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых праграм, i запаволiць працу тэлевізара."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Дазваляе праграме пастаянна захоўваць некаторыя свае часткі ў памяці прылады. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых праграм, і запаволіць працу прылады Android TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу тэлефона."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"запусціць асноўныя сэрвісы"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Дазваляе праграме выкарыстоўваць асноўныя сэрвісы."</string>
@@ -390,35 +390,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Дазваляе прыкладаннем змяняць дадзеныя налад сістэмы. Шкоднасныя прыкладанні могуць пашкодзіць канфігурацыю вашай сістэмы."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"запуск пры загрузцы сістэмы"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Дазваляе прыкладанню самастойна запускацца, як толькі сістэма будзе цалкам загружана. Гэта можа павялічыць час запуску планшэту і дазволіць прыкладанню запаволіць увесь планшэт, прымушаючы яго працаваць заўсёды."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Дазваляе праграме самастойна запускацца, як толькі сістэма будзе цалкам загружана. Гэта можа павялічыць час запуску тэлевізара і дазволіць праграме, пастаянна працуючы, запаволіць увесь тэлевізар."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Дазваляе праграме запускацца самастойна адразу пасля загрузкі сістэмы. Гэта можа павялічыць час запуску прылады Android TV і, паколькі праграма заўсёды запушчана, увогуле запаволіць працу прылады."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Дазваляе прыкладанням самастойна запускацца, як толькі сістэма будзе цалкам запушчана. Гэта можа павялічыць час запуску тэлефону і дазволіць прыкладанню запаволіць увесь тэлефон, прымушаючы яго працаваць заўсёды."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"адпраўляць нетэрмiновую рассылку"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Дазваляе прыкладанням адпраўляць далейшыя звязаныя перадачы, якія застаюцца пасля заканчэння асноўнай перадачы. Злоўжыванне можа зрабіць працу планшэта павольнай або няўстойлівай, прымушаючы яго выкарыстоўваць занадта шмат памяці."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Дазваляе праграме адпраўляць «ліпучыя» трансляцыі, якія застаюцца актыўнымі пасля завяршэння перадачы. Злоўжыванне гэтым можа зрабіць працу тэлевізара павольнай або няўстойлівай, прымушаючы яго выкарыстоўваць занадта шмат памяці."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Дазваляе праграме адпраўляць замацаваныя трансляцыі, якія застаюцца пасля заканчэння асноўнай трансляцыі. Злоўжыванне гэтым можа зрабіць працу прылады Android TV павольнай або няўстойлівай, прымушаючы яе выкарыстоўваць занадта шмат памяці."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Дазваляе прыкладанню адпраўляць далейшыя звязаныя перадачы, якія застаюцца пасля заканчэння асноўнай перадачы. Злоўжыванне можа зрабіць працу тэлефона павольнай або няўстойлівай, прымушаючы яго выкарыстоўваць занадта шмат памяці."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"чытанне кантактаў"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Дазваляе прыкладанням счытваць дадзеныя аб кантактах, якія захоўваюцца на планшэце, у тым ліку звесткi пра тое, як часта вы выклiкалi канкрэтных абанентаў, пiсалi iм па электроннай пошце або кантактавалi іншымi спосабамі. Дзякуючы гэтаму дазволу прыкладаннi могуць захоўваць дадзеныя гiсторыi выклiкаў, а шкоднасныя прыкладаннi могуць адпраўляць кантактныя дадзеныя без вашага ведама."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Дазваляе праграме счытваць даныя аб кантактах, якія захоўваюцца на вашым тэлевізары, у тым ліку звесткi пра тое, як часта вы выклiкалi канкрэтных абанентаў, пiсалi iм па электроннай пошце або кантактавалi з імі іншымi спосабамі. Праграмы з гэтым дазволам могуць захоўваць даныя вашай гiсторыi выклiкаў, а шкодныя праграмы могуць абагульваць даныя аб кантактах без вашага ведама."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Дазваляе праграме счытваць даныя пра кантакты, якія захоўваюцца на прыладзе Android TV, у тым ліку звесткі пра тое, як часта вы выклікалі пэўных абанентаў, пісалі ім электронныя лісты ці звязваліся з імі іншымі спосабамі. Гэты дазвол дае праграмам магчымасць захоўваць даныя пра кантакты, а шкодныя праграмы могуць абагульваць гэтыя даныя без вашага ведама."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Дазваляе прыкладанням счытваць дадзеныя аб кантактах, якія захоўваюцца на тэлефоне, у тым ліку звесткi пра частату, з якой вы выклiкалi iх, пiсалi iм па электроннай пошце ці кантактавалi іншым спосабам. Дзякуючы гэтаму дазволу прыкладаннi могуць захоўваць дадзеныя гiсторыi выклiкаў, а шкоднасныя прыкладаннi могуць адпраўляць кантактныя дадзеныя без вашага ведама."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"змена кантактаў"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Дазваляе прыкладанням змяняць дадзеныя аб кантактах, якія захоўваюцца на планшэце, у тым ліку частата, з якой вы выклiкалi асоб, пiсалi па электроннай пошце ці іншым спосабам кантактавалi з iмі. З гэтым дазволам прыкладаннi змогуць выдаляць кантактныя дадзеныя."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Дазваляе праграме змяняць даныя аб кантактах, якія захоўваюцца на вашым тэлевізары, у тым ліку звесткi пра тое, як часта вы выклiкалi канкрэтных абанентаў, пiсалi iм па электроннай пошце або кантактавалi з імі іншымi спосабамі. Гэта дазваляе праграмам выдаляць даныя аб кантактах."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Дазваляе праграме змяняць даныя пра кантакты, якія захоўваюцца на прыладзе Android TV, у тым ліку звесткі пра тое, як часта вы выклікалі пэўных абанентаў, пісалі ім электронныя лісты ці звязваліся з імі іншымi спосабамі. Гэты дазвол дае праграмам магчымасць выдаляць даныя пра кантакты."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Дазваляе прыкладанням змяняць дадзеныя аб кантактах, якія захоўваюцца на тэлефоне, у тым ліку частата, з якой вы выклiкалi асоб, пiсалi па электроннай пошце ці іншым спосабам кантактавалi з iмі. З гэтым дазволам прыкладаннi змогуць выдаляць кантактныя дадзеныя."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"чытанне гiсторыi выклікаў"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Гэта праграма можа чытаць вашу гісторыю выклікаў."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"запіс гiсторыi выклікаў"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Дазваляе прыкладанню змяняць гiсторыю выклiкаў планшэта, у тым лiку дадзеныя пра ўваходныя i зыходныя выклiкi. Шкоднасныя прыкладаннi могуць выкарыстоўваць гэта, каб выдаляць або змяняць гiсторыю выклікаў."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Дазваляе праграме змяняць гiсторыю выклiкаў вашага тэлевізара, у тым лiку даныя пра ўваходныя i выходныя выклiкi. Шкодныя праграмы могуць выкарыстоўваць гэта, каб выдаляць або змяняць гiсторыю выклікаў."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Дазваляе праграме змяняць журнал выклікаў прылады Android TV, у тым ліку даныя пра ўваходныя і выходныя выклікі. Шкодныя праграмы могуць злоўжыць гэтым і сцерці ці змяніць даныя ў журнале выклікаў."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Дазваляе прыкладанням змяняць гiсторыю выклiкаў тэлефону, у тым лiку дадзеныя пра ўваходныя і зыходныя выклiкi. Шкоднасныя прыкладаннi могуць выкарыстоўваць гэта, каб выдаляць або змяняць гiсторыю выклікаў."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"атрымліваць доступ да датчыкаў цела (напрыклад, пульсометраў)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Дазваляе праграме атрымліваць доступ да даных з датчыкаў, якія назіраюць за вашым фізічным станам, напрыклад, за частатой пульсу."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Чытаць падзеі календара і падрабязныя звесткі"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Гэта праграма можа чытаць усе падзеі календара, захаваныя на вашым планшэце, і абагульваць ці захоўваць даныя календара."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Гэта праграма можа чытаць усе падзеі календара, захаваныя на вашым тэлевізары, і абагульваць ці захоўваць даныя календара."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Гэта праграма можа счытваць усе падзеі календара, захаваныя на прыладзе Android TV, і абагульваць ці захоўваць яго даныя."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Гэта праграма можа чытаць усе падзеі календара, захаваныя на вашым тэлефоне, і абагульваць ці захоўваць даныя календара."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"дадаваць ці змяняць падзеі календара і адпраўляць электронную пошту да гасцей без ведама ўладальнікаў"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Гэта праграма можа дадаваць, выдаляць або змяняць падзеі календара на вашым планшэце. Гэта праграма можа адпраўляць паведамленні, якія могуць здавацца адпраўленымі ўладальнікамі календара, або змяняць падзеі без апавяшчэння іх уладальнікаў."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Гэта праграма можа дадаваць, выдаляць або змяняць падзеі календара на вашым тэлевізары. Гэта праграма можа адпраўляць паведамленні, якія могуць здавацца адпраўленымі ўладальнікамі календара, або змяняць падзеі без апавяшчэння іх уладальнікаў."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Гэта праграма можа дадаваць, выдаляць або змяняць падзеі календара на прыладзе Android TV. Гэта праграма можа адпраўляць паведамленні ад імя ўладальніка календара або змяняць падзеі без апавяшчэння іх уладальнікаў."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Гэта праграма можа дадаваць, выдаляць або змяняць падзеі календара на вашым тэлефоне. Гэта праграма можа адпраўляць паведамленні, якія могуць здавацца адпраўленымі ўладальнікамі календара, або змяняць падзеі без апавяшчэння іх уладальнікаў."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"доступ да дадатковых камандаў пастаўшчыка месцазнаходжання"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Дазваляе праграме атрымліваць доступ да дадатковых каманд службаў вызначэння месцазнаходжання. Гэта можа дазволіць праграме ўмешвацца ў функцыянаванне GPS або іншых крыніц даных аб месцазнаходжаннi."</string>
@@ -426,7 +426,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Гэта праграма можа атрымліваць звесткі пра ваша дакладнае месцазнаходжанне толькі ў асноўным рэжыме. Службы геалакацыі павінны быць уключаны і даступныя на вашым тэлефоне, каб праграма магла імі карыстацца. Гэта можа павялічыць спажыванне зараду акумулятара."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"доступ да прыблізнага месцазнаходжання (на падставе сеткі) толькі ў актыўным рэжыме"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне толькі ў актыўным рэжыме на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Каб праграма магла карыстацца гэтымі службамі геалакацыі, неабходна ўключыць і зрабіць іх даступнымі на планшэце."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне толькі ў актыўным рэжыме на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Каб праграма магла карыстацца гэтымі службамі геалакацыі, неабходна ўключыць і зрабіць іх даступнымі на тэлевізары."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне толькі ў актыўным рэжыме на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Уключыце гэтыя службы геалакацыі і зрабіце іх даступнымі на прыладзе Android TV, каб праграма магла выкарыстоўваць іх даныя."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне толькі ў актыўным рэжыме на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Каб праграма магла карыстацца гэтымі службамі геалакацыі, неабходна ўключыць і зрабіць іх даступнымі на тэлефоне."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"доступ да вызначэння месцазнаходжання ў фонавым рэжыме"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Акрамя доступу да прыкладнага ці дакладнага месцазнаходжання праграма можа мець доступ да вызначэння геалакацыі ў фонавым рэжыме працы. На гэта патрабуецца дазвол."</string>
@@ -440,6 +440,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Гэта праграма можа распазнаваць фізічную актыўнасць."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"рабіць фатаграфіі і відэа"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Гэта праграма можа рабіць фота і запісваць відэа з дапамогай камеры ў любы час."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"кіраванне вібрацыяй"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Дазваляе прыкладанням кіраваць вібрацыяй."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"непасрэдна набіраць тэлефонныя нумары"</string>
@@ -457,14 +461,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"счытваць нумары тэлефонаў"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Дазваляе праграме атрымліваць доступ да нумароў тэлефонаў на прыладзе."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"прадухіліць планшэт ад пераходу ў рэжым сну"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"прадухіленне пераходу тэлевізара ў рэжым сну"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"прадухіляць пераход прылады Android TV у рэжым сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"забараняць тэлефону пераходзіць ў рэжым сну"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дазваляе прыкладанням прадухіляць пераход планшэта ў рэжым сну."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Дазваляе праграме прадухіляць пераход тэлевізара ў рэжым сну."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Дазваляе праграме прадухіляць пераход прылады Android TV у рэжым сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Дазваляе прыкладанням прадухіляць тэлефон ад пераходу ў рэжым сну."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"карыстацца інфрачырвоным перадатчыкам"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Дазваляе праграме выкарыстоўваць інфрачырвоны перадатчык планшэта."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Дазваляе праграме выкарыстоўваць інфрачырвоны перадатчык тэлевізара."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Дазваляе праграме выкарыстоўваць інфрачырвоны перадатчык прылады Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Дазваляе праграме выкарыстоўваць інфрачырвоны перадатчык тэлефона."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"усталёўваць шпалеры"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Дазваляе прыкладанням ксталёўваць сiстэмныя шпалеры."</string>
@@ -472,11 +476,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дазваляе прыкладанням задаваць падказкі па памеры сістэмных шпалер."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"усталёўваць часавы пояс"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Дазваляе праграмам змяняць часавы пояс планшэта."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Дазваляе праграме змяняць часавы пояс тэлевізара."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Дазваляе праграме змяняць часавы пояс прылады Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дазваляе праграме змяняць часавы пояс тэлефона."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"пошук уліковых запісаў на прыладзе"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Дазваляе прыкладанню атрымлiваць спіс уліковых запісаў, вядомых планшэту. Сярод iх могуць быць улiковыя запiсы, створаныя прыкладаннямi, якiя вы ўсталявалi."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Дазваляе праграме атрымлiваць спіс уліковых запісаў, вядомых тэлевізару. Сярод iх могуць быць любыя ўлiковыя запiсы, створаныя праграмамі, якiя вы ўсталявалi."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Дазваляе праграме мець доступ да спіса ўліковых запісаў, у якія можна заходзіць з прылады Android TV. Сярод іх могуць быць уліковыя запісы, створаныя ва ўсталяваных вамі праграмах."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Дазваляе прыкладанню атрымлiваць спіс уліковых запісаў, вядомых тэлефону. Сярод iх могуць быць улiковыя запiсы, створаныя прыкладаннямi, якiя вы ўсталявалi."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"прагляд сеткавых злучэнняў"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Дазваляе прыкладанню праглядаць звесткi пра падключэннi да сеткi, напрыклад пра тое, якiя сеткi iснуюць i з якiмi ёсць сувязь."</string>
@@ -492,21 +496,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Дазваляе прыкладанням падключацца да кропак доступу Wi-Fi і адключацца ад iх, а таксама ўносіць змяненні ў канфiгурацыю прылад сеткі Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"дазваляе прыём Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Дазваляе прыкладанням атрымліваць пакеты, адпраўленыя на ўсе прылады з сеткi Wi-Fi з дапамогай групавых адрасоў, а не толькі на ваш планшэт. Будзе выкарыстоўвацца больш энергіі, чым у рэжыме нешматадраснай перадачы."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Дазваляе праграме атрымліваць пакеты, адпраўленыя ўсім прыладам у сетцы Wi-Fi з дапамогай адрасоў шматадраснай рассылкі, а не толькі на ваш тэлевізар. Будзе выкарыстоўвацца больш энергіі, чым у нешматадрасным рэжыме."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Дазваляе праграме атрымліваць пакеты, адпраўленыя на ўсе прылады ў сетцы Wi-Fi з дапамогай групавых адрасоў, а не толькі на вашу прыладу Android TV. Праз гэта будзе спажывацца больш энергіі, чым у рэжыме нешматадраснай перадачы."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Дазваляе прыкладанням атрымліваць пакеты, адпраўленыя на ўсе прылады з сеткi Wi-Fi з дапамогай групавых адрасоў, а не толькі на ваш тэлефон. Будзе выкарыстоўвацца больш энергіі, чым у рэжыме нешматадраснай перадачы."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"атрыманне доступу да налад прылады Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дазваляе прыкладанням наладжваць лакальны планшэт Bluetooth, выяўляць і падлучаць выдаленыя прылады."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Дазваляе праграме наладжваць канфігурацыю лакальнага тэлевізара з Bluetooth, а таксама выяўляць аддаленыя прылады і спалучацца з імі."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Дазваляе праграме наладжваць канфігурацыю Bluetooth на прыладзе Android TV, а таксама выяўляць аддаленыя прылады і спалучацца з імі."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дазваляе прыкладанням наладжваць лакальны тэлефон Bluetooth, а таксама знаходзіць выдаленыя прылады i падлучацца да ix."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"падключаць да WiMAX i адключаць ад яго"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Дазваляе прыкладанню вызначаць, ці ўключаны WiMAX, і інфармацыю пра любую сетку WiMAX, якая спалучана з iншымi."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"Змяніць стан WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Дазваляе прыкладанням падключаць планшэт да сеткі WiMAX i адключаць яго ад яе."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Дазваляе праграме падлучаць тэлевізар да сетак WiMAX і адлучаць яго ад іх."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Дазваляе праграме падключацца да прылады Android TV і адключаць прыладу Android TV ад сетак WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Дазваляе прыкладанням падключацца да сетак WiMAX і адключацца ад iх."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"падлучэнне да прылады Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Дазваляе прыкладанню праглядаць канфігурацыю Bluetooth на планшэце , а таксама здзяйсняць і прымаць злучэнні са спалучанымі прыладамі."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Дазваляе праграме праглядаць канфігурацыю Bluetooth на тэлевізары, а таксама выконваць і прымаць злучэнні са спалучанымі прыладамі."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Дазваляе праграме праглядаць канфігурацыю Bluetooth на прыладзе Android TV, а таксама выконваць і дазваляць злучэнні са спалучанымі прыладамі."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Дазваляе прыкладанню праглядаць канфігурацыю Bluetooth на тэлефоне , а таксама здзяйсняць і прымаць злучэнні са спалучанымі прыладамі."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"кантроль Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дазваляе прыкладаннzv спалучацца з тэгамі, картамі і счытваючымі прыладамі Near Field Communication (NFC)."</string>
@@ -663,10 +667,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Кіраваць даўжынёй і сімваламі, дазволенымі пры ўводзе пароляў і PIN-кодаў блакіроўкі экрана."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Сачыць за спробамі разблакіроўкі экрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Сачыць за колькасцю няправільных набраных пароляў падчас разблакоўкі экрана і блакаваць планшэт або сціраць усе дадзеныя на ім, калі няправільны пароль набраны занадта шмат разоў."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць тэлевізар або сціраць усе даныя на ім, калі няправільны пароль набраны занадта шмат разоў."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і заблакіраваць прыладу Android TV або сцерці ўсе даныя на прыладзе, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Сачыць за колькасцю няправільных набраных пароляў падчас разблакоўкі экрана і блакаваць тяэлефон або сціраць усе дадзеныя на ім, калі набрана занадта шмат няправільных пароляў."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць планшэт або сцерці ўсе даныя гэтага карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць тэлевізар або сцерці ўсе даныя гэтага карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і заблакіраваць прыладу Android TV або сцерці ўсе даныя карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць тэлефон або сцерці ўсе даныя гэтага карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Змяніць блакіроўку экрана"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змяніць блакіроўку экрана."</string>
@@ -674,11 +678,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Кіраваць як і калі блакіруецца экран."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Сцерці ўсе даныя"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Cцерці даныя з планшэта без папярэджання, выканаўшы скід да заводскіх даных."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сцерці даныя з тэлевізара без папярэджання, выканаўшы скід да заводскіх налад."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Сцерці даныя з прылады Android TV без папярэджання, выканаўшы скід да заводскіх налад."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Сцерці даныя з тэлефона без папярэджання, выканаўшы скід да заводскіх налад."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Сцерці карыстальніцкія даныя"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Сцерці даныя гэтага карыстальніка на дадзеным планшэце без папярэджання."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Сцерці даныя гэтага карыстальніка на дадзеным тэлевізары без папярэджання."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Сцерці даныя карыстальніка з гэтай прылады Android TV без папярэджання."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Сцерці даныя гэтага карыстальніка на дадзеным тэлефоне без папярэджання."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Усталяваць глабальны проксі прылады"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Задаць агульны проксі-cервер прылады, які будзе выкарыстоўвацца, калі прылада актыўная. Толькі ўладальнік прылады можа задаць агульны проксі-сервер."</string>
@@ -828,7 +832,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Перавышана максімальная колькасць спроб разблакоўкі праз Фэйскантроль"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Няма SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Няма SIM-карты ў планшэце."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"У тэлевізары няма SIM-карты."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"У вашай прыладзе Android TV няма SIM-карты."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"У тэлефоне няма SIM-карты."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Усталюйце SIM-карту."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-карта адсутнічае ці не чытаецца. Устаўце SIM-карту."</string>
@@ -841,7 +845,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Спыніць"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Перамотка назад"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Перамотка ўперад"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Толькі экстраныя выклікі"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Толькі экстранныя выклікі"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сетка заблакаваная"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблакавана PUK-кодам."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Глядзіце \"Інструкцыю для карыстальніка\" або звяжыцеся са службай тэхнiчнай падтрымкі."</string>
@@ -851,13 +855,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Вы няправільна ўвялі пароль пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПаўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Вы няправільна ўвялі PIN-код пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПаўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакаваць планшэт з дапамогай уваходу ў Google.\n\n Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Вы няправільна нарысавалі ўзор разблакіроўкі столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакіраваць тэлевізар з дапамогай імя карыстальніка Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Вы няправільна нарысавалі ўзор разблакіроўкі столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакіраваць прыладу Android TV з дапамогай імя карыстальніка Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакаваць тэлефон з дапамогай уваходу ў Google.\n\n Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Вы няправільна спрабавалі разблакаваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%1$d</xliff:g>). Пасля яшчэ некалькiх спробаў (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Вы не змаглі разблакіраваць тэлевізар столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя даныя будуць згублены."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Вы зрабілі некалькі няўдалых спроб (<xliff:g id="NUMBER_0">%1$d</xliff:g>) разблакіраваць прыладу Android TV. Калі наступныя разы (<xliff:g id="NUMBER_1">%2$d</xliff:g>) будуць такімі ж няўдачнымі, налады прылады Android TV скінуцца да заводскіх значэнняў і ўсе карыстальніцкія даныя будуць страчаны."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Вы няправільна спрабавалі разблакаваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%1$d</xliff:g>). Пасля яшчэ некалькiх спробаў (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Вы няправільна спрабавалі разблакаваць планшэт некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да заводскіх налад."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Вы не змаглі разблакіраваць тэлевізар столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Цяпер ён будзе скінуты да заводскіх налад."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Вы зрабілі некалькі няўдалых спроб (<xliff:g id="NUMBER">%d</xliff:g>) разблакіраваць прыладу Android TV. Цяпер яе налады будуць скінуты да заводскіх значэнняў."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Вы няправільна спрабавалі разблакаваць тэлефон некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да заводскіх налад."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> с."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забылі ўзор?"</string>
@@ -944,7 +948,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Дазваляе прыкладанню счытваць усе URL-адрасы, якiя былi наведаны ў браўзеры, а таксама ўсе закладкi. Увага: гэты дазвол нельга ажыццяўляць пабочнымi браўзерамi або iншымi прыкладаннямi з уласцiвасцямi браўзера."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"запіс вэб-закладак і гісторыi"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Дазваляе прыкладанням змяняць гісторыю браўзера або закладкі, якiя захоўваюцца на планшэце. Гэта можа дазволіць прыкладанню выдаляць або змяняць дадзеныя браўзера. Увага: гэты дазвол не распаўсюджваецца на пабочныя браўзеры i iншыя прыкладаннi з функцыямi браўзера."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Дазваляе праграме змяняць гісторыю Браўзера або закладкі, якiя захоўваюцца на вашым тэлевізары. Гэта можа дазволіць праграме сціраць або змяняць даныя Браўзера. Увага: гэты дазвол можа не распаўсюджвацца на староннія браўзеры або iншыя праграмы з магчымасцямі прагляду вэб-старонак."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Дазваляе праграме змяняць гісторыю браўзера і закладкі, якія захоўваюцца на прыладзе Android TV. Гэта можа дазволіць праграме сціраць або змяняць даныя браўзера. Увага! Гэты дазвол можа не распаўсюджвацца на староннія браўзеры і іншыя праграмы з магчымасцямі прагляду вэб-старонак."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Дазваляе прыкладанню змяняць гісторыю браўзера, і закладкі, захаваныя ў тэлефоне. Гэта дазволіць прыкладанню выдаляць або змяняць дадзеныя браўзера. Увага: гэты дазвол можа не дзейнiчаць для іншых браўзераў і іншых прыкладанняў з магчымасцямі вэб-браўзера."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"усталёўка сігналу"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дазваляе прыкладанню ўсталёўваць сігнал на ўсталяваным прыкладанні будзільніка. Пэўныя прыкладанні будзільніка не могуць рэалізоўваць гэтую магчымасць."</string>
@@ -1293,7 +1297,6 @@
       <item quantity="other">адкрытай сеткі Wi-Fi даступна</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Падключыцеся да адкрытай сеткі Wi-Fi"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Падключэнне да сеткі Wi‑Fi аператара"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Падключэнне да сеткі Wi‑Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Выканана падключэнне да адкрытай сеткі Wi‑Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не атрымалася падключыцца да адкрытай сеткі Wi‑Fi"</string>
@@ -1351,7 +1354,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Увядзіце патрэбны PIN-код:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-код"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Тэлефон будзе часова адключаны ад сеткі Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Тэлевізар будзе часова адключаны ад сеткі Wi-Fi, пакуль ён падключаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Прылада Android TV будзе часова адключана ад сеткі Wi-Fi, пакуль яна падключана да прылады \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\""</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Тэлефон будзе часова адключаны ад Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Уставіць сімвал"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Адпраўка SMS"</string>
@@ -1400,7 +1403,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Выяўлены аксесуар аналагавага аўдыя"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Далучаная прылада не сумяшчальная з гэтым тэлефонам. Націсніце, каб даведацца больш."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Адладка па USB падключана"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Націсніце, каб адключыць адладку па USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Націсніце, каб выключыць адладку па USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Выберыце, каб адключыць адладку USB."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Тэставы рэжым уключаны"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Каб выключыць тэставы рэжым, скіньце налады да заводскіх значэнняў."</string>
@@ -1698,13 +1701,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Вы няправільна ўвялі пароль пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Вы няправільна спрабавалі разблакiраваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%1$d</xliff:g>). Пасля яшчэ некалькiх спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Вы не змаглі разблакіраваць тэлевізар столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя даныя будуць згублены."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Вы зрабілі некалькі няўдалых спроб (<xliff:g id="NUMBER_0">%1$d</xliff:g>) разблакіраваць прыладу Android TV. Калі наступныя разы (<xliff:g id="NUMBER_1">%2$d</xliff:g>) будуць такімі ж няўдачнымі, налады прылады Android TV скінуцца да заводскіх значэнняў і ўсе карыстальніцкія даныя будуць страчаны."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Вы няправільна спрабавалі разблакiраваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%1$d</xliff:g>). Пасля яшчэ некалькiх спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да завадскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Вы няправільна спрабавалі разблакiраваць планшэт некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да завадскіх налад."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Вы не змаглі разблакіраваць тэлевізар столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Цяпер ён будзе скінуты да заводскіх налад."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Вы зрабілі некалькі няўдалых спроб (<xliff:g id="NUMBER">%d</xliff:g>) разблакіраваць прыладу Android TV. Цяпер яе налады будуць скінуты да заводскіх значэнняў."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Вы няправільна спрабавалі разблакiраваць тэлефон некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да завадскіх налад."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Вы няправільна ўвялі ўзор разблакiроўкi столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакiраваць тэлевізар з дапамогай уліковага запісу вашай электроннай пошты.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Вы няправільна нарысавалі ўзор разблакіроўкі столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакіраваць прыладу Android TV, увайшоўшы ва ўліковы запіс электроннай пошты.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Выдалiць"</string>
@@ -2067,6 +2070,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Націсніце, каб паглядзець заблакіраванае."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Сістэма"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Налады"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Рэжым чакання"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Прылада Android TV неўзабаве выключыцца. Каб пакінуць яе ўключанай, націсніце кнопку."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Прылада неўзабаве выключыцца. Націсніце, каб пакінуць яе ўключанай."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Мікрафон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"паказваецца паверх іншых праграм на экране"</string>

@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"ඉතා වැඩි <xliff:g id="CONTENT_TYPE">%s</xliff:g> මැකීමට උත්සාහ කරන ලදී."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ටැබ්ලට් ආචයනය පිරි ඇත. ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ඔරලෝසුවේ ආචනයනය පිරී ඇත. ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"රූපවාහිනී ගබඩාව පිරී ඇත. අවකාශය හිස් කිරීමට තව ගොනු මකා දමන්න."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV උපාංගය උපාංග ගබඩාව පිරී ඇත ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"දුරකථන ආචයනය පිරී ඇත. ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">සහතික අධිකාරි ස්ථාපනය කරන ලදී</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> විසින් මුද්‍රණය කිරීම අබල කර ඇත."</string>
     <string name="me" msgid="6545696007631404292">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ටැබ්ලට විකල්ප"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"රූපවාහිනී විකල්ප"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV විකල්ප"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"දුරකථන විකල්පයන්"</string>
     <string name="silent_mode" msgid="7167703389802618663">"නිහඬ ආකාරය"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"නොරැහන් සක්‍රිය කරන්න"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"යළි ආරම්භ කරමින්..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"වසා දමමින්…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ඔබගේ ටැබ්ලටය වැසේ."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ඔබගේ රූපවාහිනිය වසා දැමෙනු ඇත."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"ඔබගේ Android TV උපාංගය වැසෙනු ඇත."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"ඔබගේ ඔරලෝසුව වැසේ."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ඔබගේ දුරකථනය වැසේ."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ඔබට වසා දැමීමට අවශ්‍යද?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"මෑත"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"මෑත යෙදුම් නැත."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ටැබ්ලට් විකල්ප"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"රූපවාහිනී විකල්ප"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV විකල්ප"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"දුරකථන විකල්ප"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"තිර අගුල"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"බල රහිත"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS පණිවිඩ යැවීමට යෙදුමට අවසර දෙන්න. මෙමඟින් බලාපොරොත්තු නොවූ ප්‍රතිඵල අත් විය හැක. අනිෂ්ට යෙදුම් ඔබගේ තහවුරුවකින් තොරව පණිවිඩ යැවීම මඟින් ඔබගේ මුදල් වැය කල හැක."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ඔබගේ පෙළ පණිවුඩ කියවන්න (SMS හෝ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු SMS (පෙළ) පණිවිඩ කියවීමට හැකිය."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"මෙම යෙදුමට ඔබගේ TV මත ගබඩා වී ඇති සියලු SMS (පෙළ) පණිවිඩ කියවීමට හැකිය."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"මෙම යෙදුමට ඔබගේ Android TV උපාංගය මත ගබඩා වී ඇති සියලු SMS (පෙළ) පණිවිඩ කියවීමට හැකිය."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"මෙම යෙදුමට ඔබගේ TV මත ගබඩා වී ඇති සියලු SMS (පෙළ) පණිවිඩ කියවීමට හැකිය."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"පෙළ පණිවිඩ ලබාගැනීම (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP පණිවිඩ ලැබීමට සහ ක්‍රියාවලි කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙහි ඔබව ඒවාට පෙන්වීමකින් තොරව ඔබට පණිවිඩ නිරීක්ෂණයට හෝ මැකීමට හැකියාව ඇතුළත් වේ."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"මෙම යෙදුමට පසුබිමේ දත්ත භාවිත කිරීමට හැකිය. මෙය දත්ත භාවිතය වැඩි කළ හැකිය."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"යෙදුම සැමවිටම ධාවනය කරන්න"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"මතකයේ පවතින එහි කොටස් නොනැසී පැවතීමට යෙදුමට අවසර දෙන්න. වෙනත් යෙදුම් වලට මතකය සීමා කිරීමෙන් ටැබ්ලටය පමා කිරීම මගින්  මෙමගින් කළ හැක."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"යෙදුමේ කොටසක් මතකය තුළ එයට ස්ථාවර තබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය වෙනත් යෙදුම් වලට තිබෙන මතකය සීමා කරයි සහ රූපවාහිනිය මන්දගාමී කරයි."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"මතකයේ නොනැසී පවතින එහි කොටස් සෑදීමට යෙදුමට ඉඩ දෙයි. මෙය ඔබගේ Android TV උපාංගය මන්දගාමී කිරීමෙන් වෙනත් යෙදුම්වලට ලබා ගත හැකි මතකය සීමා කළ හැකිය."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"යෙදුමට තම කොටස් මතකය තුල නොබිඳීව රඳා පවත්වාගෙන යාමට අවසර දෙන්න. මෙය දුරකථනය මන්දගාමී කරමින් අනෙකුත් උපාංගයන් සඳහා ඉතිරි මතකය සීමා කිරීමට හැක."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"පෙරබිම් සේවාව ධාවනය කරන්න"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"පෙරබිම් සේවා භාවිත කිරීමට යෙදුමට ඉඩ දෙයි."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"පද්ධති සැකසීම් දත්ත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් ඔබගේ පද්ධති වින්‍යාස දෝෂ ගැන්විය හැක."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ආරම්භයේදී ධාවනය කිරීම"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"පද්ධතිය ඇරඹුම අවසන් වූ වහාම යෙදුම ආරම්භ වීමට යෙදුමට අවසර දෙන්න. ටැබ්ලටය ආරම්භ කිරීමට මෙමඟින් පමා කළ හැකි අතර සැමවිටම ධාවනය වන නිසා සම්පූර්ණ ටැබ්ලටයම ප්‍රමාද කිරීමට යෙදුමට අවසර දෙයි."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"පද්ධතිය ආරම්භය(බුට් වීම) අවසන් වූ විගසම යෙදුමට එය විසින් ආරම්භ වීමට ඉඩ දෙන්න. රූපවාහිනිය ආරම්භ වීමට මෙය ටික වේලාවක් ගනී සහ සැමවිටම ධාවනය වීම මඟින් සමස්ත ටැබ්ලටයම මන්දගාමී කිරීමට ඉඩ දෙයි."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"පද්ධතිය ඇරඹුම අවසන් වූ වහාම යෙදුම ආරම්භ වීමට යෙදුමට ඉඩ දෙයි. ඔබගේ Android TV උපාංගය ආරම්භ කිරීමට මෙමඟින් කල් ගත විය හැකි අතර සැම විටම ධාවනය වීමෙන් සම්පූර්ණ උපාංගයම මන්දගාමී කිරීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"පද්ධතිය ඇරඹුම අවසන් වූ වහාම යෙදුම ආරම්භ වීමට යෙදුමට අවසර දෙන්න. දුරකථනය ආරම්භ කිරීමට මෙමඟින් පමා කළ හැකි අතර සැමවිටම ධාවනය වන නිසා සම්පූර්ණ දුරකථනයේම ක්‍රියාකාරිත්වය ප්‍රමාද කිරීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"බැඳුණු විකාශනය යැවීම"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ප්‍රචාරණයට පසුවද පවතින, ප්‍රචාරණයන් යැවීමට යෙදුමට අවසර දෙන්න. වැඩිපුර මතකය භාවිතය හේතු කොට, අධික භාවිතය මඟින් ටැබ්ලටය පමා කිරීම හෝ අස්ථිර කළ හැක."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"යෙදුමට විකාශයෙන් පසුවද ඉතිරි වන, පවතින විකාශන යැවීමට අවසර දෙයි. වැඩියෙන් භාවිතයෙන් වැඩිපුර මතකය භාවිත මගින් රූපවාහිනිය මන්දගාමී හෝ ස්ථායී බව නැති කරනු ඇත."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"යෙදුමට විකාශයෙන් පසුවද ඉතිරි වන, ඇලවෙන විකාශ යැවීමට ඉඩ දෙයි. වැඩියෙන් භාවිතය වැඩිපුර මතකය භාවිත කිරීම මගින් ඔබේ Android TV උපාංගය මන්දගාමී හෝ අස්ථායී බවට පත් කළ හැකිය."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ප්‍රචාරණයට පසුවද පවතින, ප්‍රචාරණයන් යැවීමට යෙදුමට අවසර දෙන්න. වැඩිපුර මතකය භාවිතය හේතු කොට, අධික භාවිතය මඟින් දුරකථනය පමා කිරීම හෝ අස්ථිර කළ හැක."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"ඔබගේ සම්බන්ධතා කියවීම"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"සඳහන් පුද්ගලයන් හට ඔබ ඇමතුම් ගත්, ඊ-තැපැල්, හෝ  අනෙකුත් ආකාර වලින් සන්නිවේදනය කරගත් සංඛ්‍යතද ඇතුළුව, ඔබගේ ටැබ්ලටයේ ගබඩාවී ඇති සම්බන්ධතා පිළිබඳ දත්ත කියවීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය මඟින් යෙදුම්වලට ඔබගේ සම්බන්ධතා පිළිබඳ දත්ත සුරැකීමට ඉඩ ලබා දෙන අතර, අනිෂ්ට යෙදුම් විසින් ඔබ නොදැනුවත්වම සම්බන්ධතා දත්ත බෙදා ගැනීමට ඉඩ ඇත."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"විශේෂි පුද්ගලයන් සමඟ ඔබ ඇමතූ, ඊ-තැපැල් කළ, හෝ වෙනත් ආකාර වලින් ඔබ සන්නිවේදනය කළ වාර ගණන් ඇතුළුව ඔබගේ රූපවාහිනියේ ගබඩා කර ඇති ඔබගේ සමබන්ධතා පිළිබඳ දත්ත කියවීමට යෙදුමට ඉඩ ලැබේ. ඔබගේ සම්බන්ධතා තොරතුරු සුරැකීමට මෙයින් යෙදුමට අවසර ලැබේ, සහ ඔබගේ දැනුමකින් තොරව සමබන්ධතා දත්ත අනිෂ්ට යෙදුම් බෙදාගනී."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"ඔබ නිශ්චිත පුද්ගලයන් ඇමතූ, ඉ-තැපැල් කළ හෝ වෙනත් ආකාරයකින් සන්නිවේදනය කළ වාර ගණනද ඇතුළුව, ඔබගේ Android TV උපාංගයේ ගබඩා කර ඇති ඔබගේ සම්බන්ධතා පිළිබඳ දත්ත කියවීමට යෙදුමට ඉඩ දෙයි. මෙම අවසරය යෙදුම්වලට ඔබගේ සම්බන්ධතා දත්ත සුරැකීමට ඉඩ දෙන අතර, අනිෂ්ට යෙදුම් ඔබගේ දැනුමෙන් තොරව සම්බන්ධතා දත්ත බෙදා ගත හැකිය."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"නියමිත පුද්ගලයන් සමග ඔබ ඇමතු, ඊ-තැපැල් කළ හෝ වෙනත් ආකාරයකින් සන්නිවේදනය කළ සංඛ්‍යාතය ඇතුලත් ඔබගේ දුරකථනයේ ආචයනය කරන ලද ඔබගේ සම්බන්ධතා ගැන දත්ත කියවීමට යෙදුමට අවසර දෙන්න. ඔබගේ සම්බන්ධතා දත්ත උපස්ථ කිරීමට මෙම අවසරය යෙදුමට අවසර දෙන අතර ඔබගේ දැනුමකින් තොරව අනිෂ්ට යෙදුම් සම්බන්ධතා දත්ත බෙදාගැනීම කළ හැක."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ඔබගේ සම්බන්ධතා වෙනස් කිරීම"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"නියමිත පුද්ගලයන්ට ඔබ ඇමතූ, ඊ-තැපැල් කළ හෝ ඇමතුම් කළ සංඛ්‍යාත ඇතුලත් ඔබගේ ටැබ්ලටයේ ආචයනය කරන ලද සම්බන්ධතා (ලිපින) දත්ත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙන් යෙදුමට සම්බන්ධතා දත්ත මැකීමට අවසර දෙයි."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"සඳහන් පුද්ගලයන්ට ඔබ ඇමතූ, ඊ-තැපැල් කළ හෝ ඇමතුම් කළ සංඛ්‍යාන ඇතුලත් ඔබගේ දුරකථනයේ ආචයනය කරන ලද සම්බන්ධතා (ලිපින) දත්ත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙන් යෙදුමට සම්බන්ධතා දත්ත මැකීමට අවසර දෙයි."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"ඔබ නිශ්චිත සම්බන්ධතා ඇමතූ, ඉ-තැපැල් කළ හෝ වෙනත් ආකාරයකින් සන්නිවේදනය කළ වාර ගණනද ඇතුළුව, ඔබගේ Android TV උපාංගයේ ගබඩා කර ඇති ඔබගේ සම්බන්ධතා පිළිබඳ දත්ත වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි. මෙම අවසරය යෙදුම්වලට සම්බන්ධතා දත්ත මැකීමට ඉඩ දෙයි."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"සඳහන් පුද්ගලයන්ට ඔබ ඇමතූ, ඊ-තැපැල් කළ හෝ ඇමතුම් කළ සංඛ්‍යාන ඇතුලත් ඔබගේ දුරකථනයේ ආචයනය කරන ලද සම්බන්ධතා (ලිපින) දත්ත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙන් යෙදුමට සම්බන්ධතා දත්ත මැකීමට අවසර දෙයි."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ඇමතුම් ලොගය කියවන්න"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"මෙම යෙදුමට ඔබේ ඇමතුම් ඉතිහාසය කියවීමට හැකිය."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ඇමතුම් ලොගය ලිවීම"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ Android TV උපාංගයෙහි ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැකිය."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"දේහ සංවේදකවලට (හෘද ස්පන්දන වේග මොනිටර වැනි) පිවිසීම"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"හෘද ස්පන්දන වේගය වැනි ඔබගේ ශාරීරික තත්ත්වය නිරීක්ෂණය කරන සංවේදක වලින් දත්ත ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"මෙම යෙදුමට ඔබගේ TV මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"මෙම යෙදුමට ඔබගේ දුරකථනය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"දින දර්ශන සිද්ධි එකතු කිරීම හෝ වෙනස් කිරීමක් සිදුකර හිමිකරුගේ දැනීමකින් තොරව අමුත්තන්ට ඊ-තැපෑලක් යවීම"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"මෙම යෙදුමට ඔබේ ටැබ්ලට් පරිගණකය මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"මෙම යෙදුමට ඔබේ TV මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"මෙම යෙදුමට ඔබේ Android TV උපාංගය මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"මෙම යෙදුමට ඔබේ දුරකථනය මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"අමතර ස්ථාන සැපයුම්කරු විධාන වෙත ප්‍රවේශ වීම"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ස්ථානය සපයන අමතර අණ වලට ප්‍රවේශය කිරීමට යෙදුමට අවසර දෙන්න. GPS ක්‍රියාවන් හෝ වෙනත් ස්ථාන මූලාශ්‍ර සමඟ මැදිහත් වීමට මෙයින් යෙදුමට ඉඩ ලැබේ."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"මෙම යෙදුම පෙරබිම තුළ ඇති විට පමණක් එයට ඔබේ නිශ්චිත ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය. මෙය බැටරි පරිභෝජනය වැඩි කළ හැකිය."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"ඉදිරියේ ඇති ආසන්න ස්ථානය (ජාලය පදනම්වූ) පමණක් ප්‍ර වේශ වන්න"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකි නමුත් යෙදුම ඉදිරියේ ඇති විට පමණී. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර ඔබේ ටැබ්ලටය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකි නමුත් යෙදුම ඉදිරියේ ඇති විට පමණී. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර ඔබේ TV එක මත ලබා ගත හැකිව තිබිය යුතුය."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකි නමුත් යෙදුම ඉදිරියේ ඇති විට පමණී. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර ඔබේ ඔබගේ Android TV උපාංගය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකි නමුත් යෙදුම ඉදිරියේ ඇති විට පමණී. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"පසුබිමේ ස්ථානය ප්‍රවේශ කිරීම"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"මෙය ආසන්න වශයෙන් හෝ නිශ්චිත ස්ථානයක ප්‍රවේශය ලබා දෙන්නේ නම් පසුබිම් ධාවන අතරතුරදී යෙදුමට ස්ථානය වෙත ප්‍රවේශය විය හැක."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"මෙම යෙදුමට ඔබේ ශාරීරික ක්‍රියාකාරකම හඳුනා ගැනීමට නොහැකිය"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"පින්තූර සහ වීඩියෝ ගන්න"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"මෙම යෙදුමට ඕනෑම වේලාවක කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"කම්පනය පාලනය කිරීම"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"දුරකථන අංක කියවන්න"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"උපාංගයේ දුරකථන අංක වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"රූපවාහිනිය නින්දට යාමෙන් නවත්වන්න"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"ඔබගේ Android TV උපාංගය නිදා ගැනීමෙන් වැළැක්වීම"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"දුරකථනය නින්දට යාමෙන් වළකන්න"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ටැබ්ලටය නින්දට යාමෙන් වැලැක්වීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"යෙදුමට රූපවාහිනිය නින්දට යාමට නැවැත්වීම අවසර දෙයි."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"යෙදුමට ඔබේ Android TV උපාංගය නින්දට යාමට වැළැක්වීමට ඉඩ දෙයි."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"දුරකථනය නින්දට යාමෙන් වැලැක්වීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"අධෝරක්ත සම්ප්‍රේෂණය කරන්න"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ටැබ්ලටයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"යෙදුමට රූපවාහිනියේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතා කිරීමට අවසර දෙයි."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"ඔබගේ Android TV උපාංගයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතා කිරීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"දුරකථනයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"වෝල්පේපරය සැකසීම"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"පද්ධති බිතුපත සැකසීමට යෙදුමට අවසර දෙන්න."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"පද්ධති බිතුපතේ ප්‍රමාණ ඉඟි සකස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"වේලා කලාපය සැකසීම"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"ටැබ්ලටයේ කාල කලාපය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"උපාංගයේ වේලා කලාපය වෙනස් කිරීමට උපාංගයට අවසර දෙන්න."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Android TV උපාංගයෙහි වේලා කලාපය වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"දුරකථනයේ වේලා කලාපය වෙනස් කිරීමට උපාංගයට අවසර දෙන්න."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"උපාංගයේ ඇති ගිණුම් සොයන්න"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ටැබ්ලටය විසින් දන්නා ගිණුම් ලැයිස්තුවක් ලබාගැනීමට යෙදුමට අවසර දෙන්න. ඔබ ස්ථාපනය කොට ඇති යෙදුම් විසින් සාදා ඇති ගිණුම් මීට ඇතුළත් වේ."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"රූපවාහිනිය විසින් දන්නා ගිණුම් ලැයිස්තුව ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. ඔබ ස්ථාපනය කළ යෙදුම් මඟින් සාදන ලද ඕනෑම ගිණුමක් මෙහි ඇතුළත් වේ."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"ඔබගේ Android TV උපාංගය දන්නා ගිණුම් ලැයිස්තුව ලබා ගැනීමට යෙදුමට ඉඩ දෙයි. ඔබ ස්ථාපනය කර ඇති යෙදුම් විසින් සාදන ලද ඕනෑම ගිණුම් මෙයට ඇතුළත් විය හැකිය."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"දුරකථනය විසින් දන්නා ගිණුම් ලැයිස්තුවක් ලබාගැනීමට යෙදුමට අවසර දෙන්න. ඔබ ස්ථාපනය කොට ඇති යෙදුම් විසින් සාදා ඇති ගිණුම් මීට ඇතුළත් වේ."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ජාල සම්බන්ධතාවයන් බැලීම"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"කුමන ජාල පවතින්නේ ද සහ සම්බන්ධිත ද ආදී ජාල සබඳතා ගැන තොරතුරු බැලීමට යෙදුමට අවසර දෙයි."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fi ප්‍රවේශ ස්ථානයන් වෙත සම්බන්ධ වීමට සහ විසන්ධි වීමට සහ, Wi-Fi ජාල සඳහා උපාංගයේ වින්‍යාසයට වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi බහුවිකාශන පිළිගැනීමට අවසර දෙන්න"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ඔබගේ ටැබ්ලටයට පමණක් නොව Wi-Fi ජාලයේ ඇති සියලුම උපාංගවලට යැවූ පැකැට්ටු බහු විකාශ ලිපින භාවිතයෙන් ලබාගැනීමට යෙදුමට අවසර දෙන්න. non-multicast ආකාරයට වඩා වැඩි බලයක් මෙහිදී භාවිතා වේ."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ඔබගේ රූපවාහිනිය පමණක් නොවේ, Wi-Fi ජාලය භාවිතා කරමින් මල්ටිකාස්ට් ලිපින මත සියළුම උපාංගය වෙත පැකට් ලබාගැනීමට යෙදුම් වෙත ඉඩ දෙන්න. එය මල්ටිකාස්ට්-නොවන වඩා එය බලය භාවිතා කරයි."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"ඔබගේ Android TV උපාංගය පමණක් නොව, Wi-Fi ජාලය භාවිතා කරමින් මල්ටිකාස්ට් ලිපින මත සියලු උපාංගය වෙත පැකට් ලබා ගැනීමට යෙදුමට ඉඩ දෙයි. එය මල්ටිකාස්ට්-නොවන ප්‍රකාරයට වඩා වැඩි බලයක් භාවිත කරයි."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ඔබගේ දුරකථනයට පමණක් නොව Wi-Fi ජාලයේ ඇති සියලුම යෙදුම්වලට යැවූ පැකැට්ටු බහුවාහක ලිපින භාවිතයෙන් ලබාගැනීමට යෙදුමට අවසර ලැබේ. බහුවාහක නැති ආකාරයට වඩා වැඩි බලයක් මෙහිදී භාවිතා වේ."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"බ්ලූටූත් සැකසීම් ප්‍රවේශය"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ස්ථානීය බ්ලූටූත් ටැබ්ලට්යක් සැකසීමට සහ වින්‍යාස කිරීමට සහ දුරස්ථ උපාංග සමග යුගළ කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"යෙදුමට පෙදෙසි බ්ලූටූත් රූපවාහිනිය වින්‍යාස කිරීමට සහ, දුරස්ථ උපාංග සෙවීමට හා ඒ සමග යුගල වීමට අවසර දෙයි."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"ඔබගේ Android TV උපාංගයේ බ්ලූටූත් වින්‍යාස කිරීමට, සහ දුරස්ථ උපාංග සොයා ගැනීමට සහ යුගල කිරීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"දුරකථනයේ පෙදෙසි බ්ලූටූත් වින්‍යාස කිරීමට, සහ දුරස්ථ උපාංග ගවේෂණයට සහ යුගල වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX වෙතට සම්බන්ධ කරන්න හෝ විසන්ධි කරන්න"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX සබල බව සහ සම්බන්ධිත ඕනෑම WiMAX ජාලයක තොරතුරු නිශ්චය කිරීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX තත්වය වෙනස් කිරීම"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ටැබ්ලටය WiMAX ජාල වෙත සම්බන්ධ කිරීමට සහ විසන්ධි කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"WiMAX ජාල වෙතින් රූපවාහිනිය සම්බන්ධ කරන්න සහ රූපවාහිනිය විසන්ධි කරන්න යෙදුමට ඉඩ දෙන්න."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"WiMAX ජාලවලට ඔබගේ Android TV උපාංගය සම්බන්ධ කිරීමට සහ එයින් ඔබගේ Android TV උපාංගය විසන්ධි කිරීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX ජාලයන්ට දුරකථනය සම්බන්ධ කිරීමට සහ විසන්ධි කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"බ්ලූටූත් උපාංග සමඟ යුගල කිරීම"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ටැබ්ලටයේ බ්ලූටූත් වින්‍යාසය බැලිමට, සැකසීමට සහ යුගල කළ උපාංග සමඟ සම්බන්ධතාවන් පිළිගැනීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"යෙදුමට රූපවාහිනියේ බ්ලූටූත් හි වින්‍යාස බැලීමට සහ යුගල කළ උපාංග සමග සම්බන්ධතා පිළිගැනීමට අවසර දෙයි."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"ඔබගේ Android TV උපාංගයේ බ්ලූටූත් හි වින්‍යාසකරණය බැලීමට, සහ යුගල කළ උපාංග සමඟ සම්බන්ධතා ඇති කර ගැනීමට සහ පිළිගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"දුරකථනයේ බ්ලූටූත් වින්‍යාසය දැකීමට, යුගල උපාංග සමඟ සම්බන්ධතාවන් සැකසීමට සහ භාරගැනීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"ආසන්න ක්ෂේත්‍ර සන්නිවේදන (NFC) ටැග්, පත්, සහ කියවන්නන් සමඟ සන්නිවේදනය කිරීමට යෙදුමට අවසර දෙන්න."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ ටැබ්ලටය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් ටැබ්ලටයේ සියලු දත්ත මකන්න."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"තීරය අගුළු අරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිර්ක්ෂණය කරන්න, සහ බොහෝ විටක් වැරදි මුරපද ටයිප් කළේ නම් රුපවාහිනීය අගුළු දමන්න හෝ සියළුම රුපවාහිනී දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ඔබේ Android TV උපාංගය අගුලු දමන්න නැතහොත් මෙම Android TV උපාංගයෙහි සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ දුරකථනය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් දුරකථනයේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ටැබ්ලටය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් TV අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ඔබේ Android TV අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් දුරකථනය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"තිර අගුල වෙනස් කරන්න"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"තිර අගුල වෙනස් කරන්න."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"තිරයට අගුළු වැටීම සිදුවන්නේ කෙසේද සහ කවදාද යන්න පාලනය කරන්න."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"සියලු දත්ත මකන්න"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම ටැබ්ලට් දත්ත මකා දමයි."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"අනතුරු ඇඟවීමකින් තොරව කර්මාන්ත ශාලා දත්ත නැවත සැකසීමක් කිරීමෙන් රූපවාහිනියේ දත්ත මකා දමයි."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"කර්මාන්ත ශාලා දත්ත යළි සැකසීමක් සිදු කිරීම මගින්, අනතුරු ඇඟවිමකින් තොරව ඔබේ Android TV දත්ත මකයි."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම දුරකථන දත්ත මකා දමයි."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"පරිශීලක දත්ත මකන්න"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"අනතුරු ඇඟවීමකින් තොරව මෙම ටැබ්ලටයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"අනතුරු ඇඟවීමකින් තොරව මෙම TV හි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"අනතුරු ඇඟවීමකින් තොරව මෙම Android TV උපාංගයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"අනතුරු ඇඟවීමකින් තොරව මෙම දුරකථනයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"උපාංග ගෝලීය නියුතුව සකස් කිරීම"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ප්‍රතිපත්තිය සක්‍රිය අතරතුර ගෝලීය ප්‍රොක්සි භාවිත කිරීමට උපාංගය සකසන්න. උපාංග හිමිකරුට පමණක් ගෝලීය ප්‍රොක්සි සැකසිය හැකිය."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"මුහුණ භාවිතයෙන් අඟුළු හැරීමේ උපරිම ප්‍රයන්තයන් ගණන ඉක්මවා ඇත"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM පත නැත"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ටැබ්ලටයේ SIM පත නොමැත."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"රූපවාහිනියේ SIM කාඩ්පතක් නොමැත."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"ඔබගේ Android TV උපාංගයේ SIM කාඩ්පතක් නොමැත."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"දුරකථනය තුළ SIM පත නැත."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM පතක් ඇතුල් කරන්න."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM පත නොමැත හෝ කියවිය නොහැක. SIM පතක් ඇතුලත් කරන්න."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"ඔබ මුරපදය වාර <xliff:g id="NUMBER_0">%1$d</xliff:g> ක් වැරදියට ටයිප්කොට ඇත. \n\nතත්පර <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් නැවත උත්සහ කරන්න."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"ඔබ PIN අංකය <xliff:g id="NUMBER_0">%1$d</xliff:g> වාරයක් වැරදියට ටයිප් කොට ඇත.\n\n තත්පර <xliff:g id="NUMBER_1">%2$d</xliff:g> ක් ඇතුළත නැවත උත්සාහ කරන්න."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් ඔබගේ අගුළු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%2$d</xliff:g> න් පසුව, ඔබගේ Google පුරනය වීම් භාවිතයෙන් ඔබගේ ටැබ්ලටය අගුළු හැරීමට ඔබගෙන් අසයි.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> පසුව නැවත උත්සහ කරන්න."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"ඔබ ඔබගේ අගුළු හැරීමේ මෝස්තරය <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට ඇඳ ඇත. තවත් අසාර්ථක උත්සාහ <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් පසුව, ඔබට Google පුරනය භාවිතයෙන් ඔබගේ රූපවාහිනිය අගුළු හැරීමට සිදු වනු ඇත.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> කින් පසුව නැවත උත්සාහ කරන්න."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"ඔබ ඔබගේ අගුලු හැරීමේ රටාව වාර <xliff:g id="NUMBER_0">%1$d</xliff:g>ක් වැරදියට ඇඳ ඇත. තවත් අසාර්ථක උත්සාහයන් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, ඔබගේ Google පිරීම භාවිතයෙන් ඔබගේ Android TV උපාංගය අගුලු හැරීමට ඔබෙන් ඉල්ලනු ඇත.\n\n නැවත තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g>කින් උත්සාහ කරන්න."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් ඔබගේ අගුළු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%2$d</xliff:g> න් පසුව, ඔබගේ Google පුරනය වීම භාවිතයෙන් ඔබගේ දුරකථනය අගුළු හැරීමට ඔබගෙන් අසනු ඇත.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> පසුව නැවත උත්සහ කරන්න."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"ඔබ ටැබ්ලටය අගුළු හැරීමට වැරදියට අවස්ථා <xliff:g id="NUMBER_0">%1$d</xliff:g> ක් උත්සාහ කර ඇත. අවස්ථා <xliff:g id="NUMBER_1">%2$d</xliff:g> ක් අසාර්ථකව උත්සහ කිරීමකින් පසුව, ටැබ්ලටය කර්මාන්ත ශාලා මුල් තත්වයට නැවත පත් වන අතර සියලු පරිශීලක දත්ත නැති වෙයි."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"ඔබ රූපවාහිනිය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදිව උත්සාහ කර ඇත. තවත් වැරදි උත්සාහ <xliff:g id="NUMBER_1">%2$d</xliff:g> කට පසුව, රූපවාහිනිය කර්මාන්තශාලා සුපුරුද්දට නැවත සකස් කෙරෙනු ඇති අතර, සියලුම පරිශීලක දත්ත නැති වී යනු ඇත."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"ඔබ දුරකථනය අගුලු හැරීමට වාර <xliff:g id="NUMBER_0">%1$d</xliff:g>කදී වැරදී ප්‍රයන්තයන් ගෙන තිබේ. තවත් අසාර්ථක ප්‍රයත්න <xliff:g id="NUMBER_1">%2$d</xliff:g>කට පසු, ඔබගේ Android TV උපාංගය කර්මාන්තශාලා පෙරනිමිය වෙත යළි සකසනු ඇති අතර සියලු පරිශීලක දත්ත අහිමි වනු ඇත."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"ඔබ දුරකථනය අගුළු ඇරීමට වාර <xliff:g id="NUMBER_0">%1$d</xliff:g> කදී වැරදී ප්‍රයත්නයන් ගෙන තිබේ. තවත් අසාර්ථක ප්‍රයත්න <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් පසුව, දුරකථනය කර්මාන්තශාලාවේ පෙරනිමියට යළි පිහිටුවන අතර සියලුම පරිශීලක දත්ත නැති වී යයි."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"ටැබ්ලටයේ අගුළු ඇරීමට ඔබ වැරදි ප්‍රයත්න <xliff:g id="NUMBER">%d</xliff:g> වාරයක් ගෙන ඇත. දැන් ටැබ්ලටය කර්මාන්තශාලා සුපුරුද්ද වෙත යළි පිහිටුවීම කෙරේ."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"ඔබ රූපවාහිනිය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදිව උත්සාහ කර ඇත. දැන් රූපවාහිනිය කර්මාන්තශාලා සුපුරුද්දට නැවත සකස් කෙරෙනු ඇත."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"ඔබ දුරකථනය අගුලු හැරීමට වාර <xliff:g id="NUMBER">%d</xliff:g>කදී වැරදී ප්‍රයන්තයන් ගෙන තිබේ. ඔබගේ Android TV උපාංගය දැන් කර්මාන්තශාලා පෙරනිමියට යළි සකසනු ඇත."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"ඔබ දුරකථනය අගුළු ඇරීමට වාර <xliff:g id="NUMBER">%d</xliff:g> කදී වැරදී ප්‍රයත්නයන් ගෙන තිබේ. දැන් දුරකථනය කර්මාන්තශාලා පෙරනිමියට පිහිටුවනු ලබයි."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"තත්පර <xliff:g id="NUMBER">%d</xliff:g> කින් නැවත උත්සාහ කරන්න."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"රටාව අමතකද?"</string>
@@ -940,7 +944,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"බ්‍රව්සරය නැරඹූ සියලු URL සහ සියලු බ්‍රව්සර පිටුසන් වල ඉතිහාසය කියවීමට යෙදුමට අවසර දෙන්න. සටහන: වෙබ් බ්‍රව්සර අවශ්‍යතා සමග තෙවෙනි පාර්ශව බ්‍රව්සර වලට හෝ වෙනත් යෙදුම්වලට මෙම අවසරය බල නොදෙයි."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"වෙබ් පිටුසන් සහ ඉතිහාසයට ලිවිම"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"ඔබගේ ටැබ්ලටයේ ගබඩා කර ඇති බ්‍රව්සරයේ ඉතිහාසය හෝ පිටුසන් වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. බ්‍රව්සර දත්ත මැකීමට හෝ වෙනස් කිරීමට මෙමඟින් යෙදුමට අවසර දෙයි. සටහන: වෙබ් ගවේෂණ හැකියාව සහිත තෙවෙනි පාර්ශව බ්‍රව්සර හෝ වෙනත් යෙදුම් වලින් මෙම අවසරයට බල නොකරයි."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"ඔබගේ රූපවාහිනියේ හි ගබඩා කර තිබෙන බ්‍රවුසරයේ ඉතිහාසය හෝ පිටුසන් වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. බ්‍රවුසර දත්ත මකන්න හෝ වෙනස් කිරීමට යෙදුම වෙත මෙය අවසර දෙන්න. සටහන: තෙවැනි-පාර්ශ්ව බ්‍රවුසර හෝ වෙබය බ්‍රවුස් කිරීමේ හැකියාවන් සමඟ වෙනත් යෙදුම් මඟින් මෙම අවසරය බල කරන්නේ නැත."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"ඔබගේ Android TV උපාංගයෙහි ගබඩා කර තිබෙන බ්‍රවුසරයේ ඉතිහාසය හෝ පිටුසන් වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි. මෙය බ්‍රවුසර දත්ත මැකීමට හෝ වෙනස් කිරීමට යෙදුම වෙත ඉඩ දිය හැකිය. සටහන: තෙවැනි-පාර්ශ්ව බ්‍රවුසර හෝ වෙබය බ්‍රවුස් කිරීමේ හැකියා සහිත වෙනත් යෙදුම් මඟින් මෙම අවසරය බලාත්මක නොකළ හැකිය."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ඔබගේ දුරකථනයේ ආචයනය කරන ලද බ්‍රව්සර ඉතිහාසය හෝ පිටුසන වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ බ්‍රව්සර දත්ත මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කරයි. සටහන: වෙබ් බ්‍රව්සර අවශ්‍යතාවය සමග තෙවෙනි පාර්ශව බ්‍රව්සර හෝ වෙනත් යෙදුම් විසින් මෙම අවසරය බල ගැන්විය හැක."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"සීනුවක් සැකසීම"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ස්ථාපනය කරන ලද සීනු ඔරලෝසු යෙදුමේ සීනුව සකස් කරන්නට යෙදුමට ඉඩ දෙන්න. ඇතැම් සීනු ඔරලෝසු යෙදුම් මෙම අංගය ක්‍රියාවට නංවා නොතිබීමට ඉඩ තිබේ."</string>
@@ -1251,7 +1255,6 @@
       <item quantity="other">විවෘත Wi-Fi ජාල තිබේ</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"විවෘත Wi-Fi ජාලය වෙත සම්බන්ධ වෙන්න"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"වාහක Wi-Fi ජාලයට සම්බන්ධ වන්න"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi-Fi ජාලයට සම්බන්ධ වෙමින්"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi-Fi ජාලයක් වෙත සම්බන්ධ විය"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi-Fi ජාලයක් වෙත සම්බන්ධ විය නොහැකි විය"</string>
@@ -1309,7 +1312,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"අවශ්‍ය PIN එක ටයිප් කරන්න:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ටැබ්ලටය <xliff:g id="DEVICE_NAME">%1$s</xliff:g> වෙත සම්බන්ධ වන අතරතුර එය Wi-Fi වලින් තාවකාලිකව විසන්ධි කෙරේ."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> වෙත රූපවාහිනීය සම්බන්ධ කළ විට Wi-Fi වෙතින් තාවකාලිකව එය විසන්ධි කරයි"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"ඔබගේ Android TV උපාංගය <xliff:g id="DEVICE_NAME">%1$s</xliff:g> වෙත සම්බන්ධ වී පවතින විට Wi-Fi වෙතින් එය තාවකාලිකව විසන්ධි වනු ඇත"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"දුරකථනය <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ට සම්බන්ධ වී පවතින විට Wi-Fi වලින් එය තාවකාලිකව විසන්ධි වෙයි."</string>
     <string name="select_character" msgid="3365550120617701745">"අකුර ඇතුළත් කරන්න"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS පණිවිඩ යවමින්"</string>
@@ -1652,13 +1655,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් ඔබගේ මුරපදය ඔබ වැරදියට ටයිප් කර ඇත. \n\nතත්පර <xliff:g id="NUMBER_1">%2$d</xliff:g> ට පසුව නැවත උත්සහ කරන්න."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ඔබ <xliff:g id="NUMBER_0">%1$d</xliff:g> වාරයක් අගුළු ඇරීමේ රටාව වැරදියට ඇඳ ඇත. \n\nතත්පර <xliff:g id="NUMBER_1">%2$d</xliff:g> ක් ඇතුළත නැවත උත්සාහ කරන්න."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ඔබ ටැබ්ලටය අගුළු හැරීමට වැරදියට අවස්ථා <xliff:g id="NUMBER_0">%1$d</xliff:g> ක් උත්සාහ කර ඇත. අවස්ථා <xliff:g id="NUMBER_1">%2$d</xliff:g> ක් අසාර්ථකව උත්සහ කිරීමකින් පසුව, කර්මාන්ත ශාලා මුල් තත්වයට නැවත පත් වන අතර සියලු පරිශීලක දත්ත නැති වෙයි."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"ඔබ රූපවාහිනිය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදිව උත්සාහ කර ඇත. තවත් වැරදි උත්සාහ <xliff:g id="NUMBER_1">%2$d</xliff:g> කට පසුව, රූපවාහිනිය කර්මාන්තශාලා සුපුරුද්දට නැවත සකස් කෙරෙනු ඇති අතර, සියලුම පරිශීලක දත්ත නැති වී යනු ඇත."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"ඔබ දුරකථනය අගුලු හැරීමට වාර <xliff:g id="NUMBER_0">%1$d</xliff:g>කදී වැරදී ප්‍රයන්තයන් ගෙන තිබේ. තවත් අසාර්ථක ප්‍රයත්න <xliff:g id="NUMBER_1">%2$d</xliff:g>කට පසු, ඔබගේ Android TV උපාංගය කර්මාන්තශාලා පෙරනිමිය වෙත යළි සකසනු ඇති අතර සියලු පරිශීලක දත්ත අහිමි වනු ඇත."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ඔබ දුරකථනය අගුළු ඇරීමට වාර <xliff:g id="NUMBER_0">%1$d</xliff:g> කදී වැරදී ප්‍රයත්නයන් ගෙන තිබේ. තවත් අසාර්ථක ප්‍රයත්න <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් පසුව, දුරකථනය කර්මාන්ත ශාලාවේ සුපුරුද්දට යළි පිහිටුවන අතර සියලුම පරිශීලක දත්ත නැති වී යයි."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ටැබ්ලටයේ අගුළු ඇරීමට ඔබ වැරදි ප්‍රයත්න <xliff:g id="NUMBER">%d</xliff:g> වාරයක් ගෙන ඇත. දැන් ටැබ්ලටය කර්මාන්ත ශාලා සුපුරුද්ද වෙත යළි පිහිටුවීම කෙරේ."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"ඔබ රූපවාහිනිය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදිව උත්සාහ කර ඇත. දැන් රූපවාහිනිය කර්මාන්තශාලා සුපුරුද්දට නැවත සකස් කෙරෙනු ඇත."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"ඔබ දුරකථනය අගුලු හැරීමට වාර <xliff:g id="NUMBER">%d</xliff:g>කදී වැරදී ප්‍රයන්තයන් ගෙන තිබේ. ඔබගේ Android TV උපාංගය දැන් කර්මාන්තශාලා පෙරනිමියට යළි සකසනු ඇත."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ඔබ දුරකථනය අගුළු ඇරීමට වාර <xliff:g id="NUMBER">%d</xliff:g> කදී වැරදී ප්‍රයන්තයන් ගෙන තිබේ. දැන් දුරකථනය කර්මාන්තශාලා සුපුරුද්දට පිහිටුවනු ලබයි."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ඔබ අගුළු ඇරිමේ රටාව <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් වැරදියට ඇඳ ඇත. තවත් අසාර්ථක උත්සාහ <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් පසුව, ඊ-තැපැල් ගිණුම භාවිතා කරමින් ඔබගේ ටැබ්ලටයේ අගුළු ඇරීමට ඔබට පවසනු ඇත.\n\n නැවත තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> කින් උත්සාහ කරන්න."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"ඔබ ඔබගේ අගුළු හැරීමේ මෝස්තරය <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට ඇඳ ඇත. තවත් අසාර්ථක උත්සාහ <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් පසුව, ඔබට ඊ-තැපැල් ගිණුමක් භාවිතයෙන් ඔබගේ රූපවාහිනිය අගුළු හැරීමට සිදු වනු ඇත.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> කින් පසුව නැවත උත්සාහ කරන්න."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් ඔබගේ අගුලු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, ඔබගේ ඉ-තැපැල් ලිපිනය භාවිතයෙන් ඔබගේ Android TV උපාංගය අගුලු හැරීමට ඔබගෙන් ඉල්ලනු ඇත.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g>කින් නැවත උත්සහ කරන්න."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් ඔබගේ අගුළු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%2$d</xliff:g> න් පසුව, ඔබගේ ඊ-තැපැල් ලිපිනය භාවිතයෙන් ඔබගේ දුරකථනය අගුළු හැරීමට ඔබගෙන් අසයි.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> න් පසුව නැවත උත්සහ කරන්න."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ඉවත් කරන්න"</string>
@@ -1999,6 +2002,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"පද්ධතිය"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"සැකසීම්"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"පොරොත්තු"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV උපාංගය ඉක්මනින් ක්‍රියා විරහිත වනු ඇත; එය දිගටම ක්‍රියාත්මක කර තැබීමට බොත්තමක් ඔබන්න."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"උපාංගය ඉක්මනින් ක්‍රියා විරහිත වනු ඇත; එය දිගටම ක්‍රියාත්මක කර තැබීමට ඔබන්න."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"කැමරාව"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"මයික්‍රෆෝනය"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ඔබගේ තිරය මත වෙනත් යෙදුම්වලට උඩින් සංදර්ශනය කරමින්"</string>

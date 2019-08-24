@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Umejaribu kufuta <xliff:g id="CONTENT_TYPE">%s</xliff:g> nyingi mno."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Hifadhi ya kompyuta kibao imejaa. Futa baadhi ya faili ili kupata nafasi."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Hifadhi ya saa imejaa. Futa baadhi ya faili ili uweze kupata nafasi."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Hifadhi ya runinga ni kamili. Futa baadhi ya faili ili upate nafasi."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Nafasi ya hifadhi ya kifaa chako cha Android TV imejaa. Futa baadhi ya faili ili upate nafasi."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Hifadhi ya simu imejaa. Futa baadhi ya faili ili uweze kupata nafasi."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Imesakinisha mamlaka ya cheti</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Kipengele cha kuchapisha kimezimwa na <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Mimi"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Chaguo za kompyuta ndogo"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Chaguo za runinga"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Chaguo za Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Machaguo ya simu"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Hali ya kimya"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandaopepe"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Inazima na kuwasha upya..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Inafunga..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Kompyuta kibao yako itazima."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Runinga yako itazimwa."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Kifaa chako cha Android TV kitazima."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Saa yako itajizima."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Simu yako itazima."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Unataka kuzima?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Za hivi karibuni"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Hakuna programu za hivi karibuni."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Chaguo za kompyuta ndogo"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Chaguo za runinga"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Chaguo za Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Chaguo za simu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Funga skrini"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Zima"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Inaruhusu programu kutuma ujumbe wa SMS. Hii inaweza ikasababisha malipo yasiyotarajiwa. Programu hasidi zinaweza kukugharimu pesa kwa kutuma ujumbe bila uthibitisho wako."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"soma SMS au MMS zako"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Programu hii inaweza kusoma ujumbe wa SMS (maandishi) wote uliohifadhiwa kwenye kompyuta yako kibao."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Programu hii inaweza kusoma ujumbe wa SMS (maandishi) wote uliohifadhiwa kwenye runinga yako."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Programu hii inaweza kusoma SMS (maandishi) zote ulizohifadhiwa kwenye kifaa chako cha Android TV."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Programu hii inaweza kusoma ujumbe wa SMS (maandishi) wote uliohifadhiwa kwenye simu yako."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"pokea ujumbe wa maandishi wa WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Inaruhusu programu kupokea na kuchakata ujumbe wa WAP. Idhini hii inajumuisha uwezo wa kuchunguza na kufuta ujumbe uliotumwa kwako bila ya kukuonyesha."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Programu hii inaweza kutumia data chini chini. Hali hii inaweza kuongeza matumizi ya data."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"Fanya programu kuendeshwa kila mara"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Inaruhusu programu kuendeleza vijisehemu vyake kwenye kumbukumbu. Hii inaweza kupunguza kumbukumbu inayopatikana katika programu nyingine ikipunguza kasi ya kompyuta ndogo."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Huruhusu programu kufanya vijisehemu vyake vidumu kwenye kumbukumbu. Hii inaweza kupunguza kumbukumbu inayopatikana katika programu nyingine ikipunguza kasi ya runinga."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Huruhusu programu ifanye vijisehemu vyake vidumu kwenye kumbukumbu. Hii inaweza kudhibiti hifadhi inayopatikana kwa ajili ya programu zingine hivyo kupunguza kasi ya kifaa chako cha Android TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Inaruhusu programu kuendelesha vijisehemu vyake kwenye kumbukumbu. Hii inaweza kupunguza kumbukumbu inayopatikana katika programu nyingine ikipunguza kasi ya simu."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"tumia huduma zinazoonekana kwenye skrini"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Huruhusu programu kutumia huduma zinazoonekana kwenye skrini."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Inaruhusu programu kurekebisha mipangilio ya mfumo wa data. Programu hasidi zinaweza kuvuruga usanidi wa mfumo wako."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"endesha wakati wa uwashaji"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Inaruhusu programu yenyewe kujianzisha baada ya mfumo kumaliza kuuanza upya. Hii inaweza kufanya ichukue muda mrefu kuanza kompyuta kibao na kuruhusu programu kupunguza kasi ya kompyuta kibao kijumla kwa kuendeshwa siku zote."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Huruhusu programu yenyewe ianzishwe pindi tu mfumo unapomaliza kuwashwa upya. Hii inaweza kuifanya ichukue muda mrefu kuanzisha runinga na kuruhusu programu kupunguza kasi ya kompyuta kibao ya jumla kwa kuendeshwa siku zote."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Huruhusu programu ijiwashe yenyewe mara tu mfumo unapowaka. Jambo hili linaweza kufanya kifaa chako cha Android TV kichukue muda mrefu kuwaka na kuruhusu programu ipunguze kasi ya jumla ya kifaa kwa kutumika kila wakati."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Inaruhusu programu kujianzisha yenyewe mfumo unapo maliza kuanza upya. Hatua hii inaweza kuchukua muda mrefu simu kuanza na kuruhusu programu kupunguza kasi ya simu kwa jumla kwa kuendeshwa polepole kila wakati."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"tuma tangazo la kulanata"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Matumizi zaidi yanaweza kufanya kompyuta kibao kufanya kazi polepole au kuifanya isiwe thabiti kwa kuisababisha itumie kumbukumbu kubwa zaidi."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Huruhusu programu kutuma matangazo ya kudumu, ambayo hubakia baada ya matangazo kuisha. Matumizi zaidi yanaweza kupunguza kasi ya runinga au ipoteze uthabiti kwa kusababisa itumie hifadhi kubwa mno."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Huruhusu programu itume matangazo yanayonata, ambayo hubaki baada ya matangazo kuisha. Huenda matumizi zaidi yakapunguza kasi ya kifaa chako cha Android TV au kukifanya kisiwe thabiti kwa kukifanya kitumie hifadhi kubwa zaidi."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Matumizi zaidi yanaweza kufanya simu kufanya kazi polepole au kuifanya isiwe thabiti kwa kuisababisha itumie kumbukumbu kubwa zaidi."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"kusoma anwani zako"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Inaruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye kompyuta kibao yako, ikiwa ni pamoja na mara ngapi umepiga simu, kutuma barua pepe au kuwasiliana kwa njia zingine na watu fulani. Idhini hii inaruhusu programu kuhifadhi data yako ya anwani, na programu hasidi zinaweza kushiriki data ya anwani bila ya kujua kwako."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Huruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye runinga yako, pamoja na marudio ya upigaji wako wa simu, utumaji wa barua pepe, au mawasiliano kwa njia nyingine na watu maalum unaowasiliana nao. Idhini hii huruhusu programu kuhifadhi data yako ya mawasiliano, na programu hasidi zinaweza kushiriki data ya mawasiliano bila wewe kujua."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Huruhusu programu isome data kuhusu anwani zako zilizohifadhiwa kwenye kifaa chako cha Android TV, ikiwa ni pamoja na mara ambazo umepiga simu, umetuma barua pepe au umewasiliana kwa njia zingine na watu mahususi. Idhini hii huruhusu programu kuhifadhi data yako ya anwani na huenda programu hasidi zikashiriki data ya anwani bila idhini yako."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Inaruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye simu yako, ikiwa ni pamoja na mara ngapi umepiga simu, kutuma barua pepe au kuwasiliana kwa njia zingine na watu fulani. Idhini hii inaruhusu programu kuhifadhi data yako ya anwani, na programu hasidi zinaweza kushiriki data ya anwani bila ya kujua kwako."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"kurekebisha anwani zako"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye kompyuta kibao yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Huruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye runinga yako, pamoja na marudio ya upigaji wako wa simu, utumaji wa barua pepe, au mawasiliano kwa njia nyingine na watu maalum unaowasiliana nao. Ruhusa hii huruhusu programu kufuta data ya anwani."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Huruhusu programu ibadilishe data kuhusu anwani zako zilizohifadhiwa kwenye kifaa chako cha Android TV, ikiwa ni pamoja na mara ambazo umepiga simu, umetuma barua pepe au kuwasiliana kwa njia nyingine na anwani mahususi. Idhini hii huruhusu programu ifute data ya anwani."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye simu yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"kusoma rekodi ya simu"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Programu hii inaweza kusoma rekodi yako ya simu zilizopigwa."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kuandika rekodi ya simu"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Huruhusu programu kurekebisha rajisi ya kompyuta kibao yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Huruhusu programu kurekebisha rajisi ya runinga yako, ikiwa ni pamoja na data ya simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Huruhusu programu irekebishe rekodi ya nambari za simu ya kifaa chako cha Android TV, ikiwa ni pamoja na data kuhusu simu zinazoingia na simu unazopiga. Huenda programu hasidi zikatumia ruhusa hii ili kufuta au kurekebisha rekodi yako ya nambari za simu."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Huruhusu programu kurekebisha rajisi ya simu yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"fikia vihisi vya mwili (kama vifuatiliaji vya mapigo ya moyo)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Huruhusu programu kufikia data kutoka vihisi vinavyofuatilia hali yako ya kimwili, kama vile mapigo ya moyo."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Soma matukio na maelezo ya kalenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako kibao na kushiriki au kuhifadhi data yako ya kalenda."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye runinga yako na kushiriki au kuhifadhi data yako ya kalenda."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kifaa chako cha Android TV na kushiriki au kuhifadhi data ya kalenda yako."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye simu yako na kushiriki au kuhifadhi data yako ya kalenda."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ongeza au rekebisha matukio ya kalenda na utume barua pepe kwa wageni bila ufahamu wa mmiliki"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye kompyuta yako kibao. Programu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye runinga yako. Programu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio ya kalenda kwenye kifaa chako cha Android TV. Programu hii inaweza kutuma ujumbe ambao huenda ukaonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki wake."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye simu yako. Programu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"fikia amri za ziada za mtoa huduma ya mahali"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Programu hii inaweza kupata mahali halisi ikiwa tu umeifungua kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia. Hatua hii inaweza kuongeza utumiaji wa betri."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"fikia eneo linalokadiriwa (kulingana na mtandao) wakati tu programu inatumika kwenye skrini"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu kibao yako ili programu iweze kuzitumia."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye TV yako ili programu iweze kuzitumia."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Programu hii inaweza kupata maelezo ya mahali ulipo kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika. Ni lazima huduma hizi za mahali ziwashwe na kupatikana kwenye kifaa chako cha Android TV ili programu iweze kuzitumia."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ifikie mahali inapotumika chinichini"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Kama ruhusa hii itatolewa, mbali na idhini ya kufikia mahali panapokadiriwa au mahali mahususi, programu inaweza kufikia mahali wakati inatumika chinichini."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Programu hii inaweza kutambua shughuli unazofanya."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Kupiga picha na kurekodi video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Programu hii inaweza kupiga picha na kurekodi video kwa kutumia kamera wakati wowote."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"Kudhibiti mtetemo"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Inaruhusu programu kudhibiti kitingishi."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"piga simu moja kwa moja kwa nambari za simu"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"kusoma nambari za simu"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Inaruhusu programu kufikia nambari za simu zilizo kwenye kifaa."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zuia kompyuta ndogo dhidi ya kulala"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"zuia runinga isiingie katika hali tuli"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"zuia kifaa chako cha Android TV kisiingie katika hali tuli"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"kuzuia simu isilale"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Inaruhusu programu kuzuia kompyuta kibao  kwenda kulala."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Huruhusu programu kuzuia runinga kuingia katika hali tuli"</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Huruhusu programu izuie kifaa chako cha Android TV kisiingie katika hali tuli."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Inaruhusu programu kuzuia simu isiende kulala."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"sambaza infrared"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Inaruhusu programu kutumia transmita ya infrared ya kompyuta kibao."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Huruhusu programu kutumia transimita ya miali isiyoonekana ya runinga."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Huruhusu programu itumie transimita ya miali isiyoonekana ya kifaa chako cha Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Inaruhusu programu kutumia transmita ya infrared ya simu."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"weka mandhari"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Inaruhusu programu kuweka mfumo wa mandhari."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Inaruhusu programu kuweka vidokezo vya ukubwa wa mandhari ya mfumo."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"weka saa za eneo"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Huruhusu programu kubadilisha saa za eneo katika kompyuta kibao."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Huruhusu programu kubadilisha saa za eneo katika runinga."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Huruhusu programu ibadilishe saa za eneo katika kifaa chako cha Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Huruhusu programu kubadilisha saa za eneo katika simu."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"kupata akaunti kwenye kifaa"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa kompyuta kibao. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Huruhusu programu kupata orodha ya akaunti zinazojulikana na runinga. Hii inaweza kujumuisha akaunti zozote zilizofunguliwa na programu ambazo umesakinisha."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Huruhusu programu ipate orodha ya akaunti zinazojulikana na kifaa chako cha Android TV. Huenda orodha hii ikajumuisha akaunti zozote zilizofunguliwa na programu ambazo umesakinisha."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa simu. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"kuona mitandao"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Huruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao iliyopo na iliyounganishwa."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Inaruhusu programu kuunganisha kwenye au kukata kutoka pointi za ufikivu wa Wi-Fi na kufanya mabadiliko kwenye usanidi wa kifaa cha mitandao ya Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ruhusu upokeaji wa Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Inaruhusu programu kupokea pakiti zilizotumwa katika vifaa vyote kwenye mtandao wa Wi-Fi kwa kutumia anwani za upeperushaji anuwai, sio tu kompyuta yako kibao. Inatumia nguvu zaidi kuliko mfumo wa upeperushaji usio anuwai."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Huruhusu programu kupokea vifurushi vilivyotumwa kwenye vifaa vyote katika mtandao wa Wi-Fi kwa kutumia anwani za matangazo mengi, siyo runinga yako tu. Inatumia nishati nyingi kuliko hali ya isiyotumia anwani za matangazo mengi."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Huruhusu programu ipokee vifurushi vilivyotumwa kwa vifaa vyote kwenye mtandao wa Wi-Fi kwa kutumia anwani anuwai za kutuma, siyo tu kifaa chako cha Android TV. Hutumia nishati zaidi kuliko hali ya kutuma isiyo anuwai."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Inaruhusu programu kupokea pakiti zilizotumwa katika vifaa vyote kwenye mtandao wa Wi-Fi kwa kutumia anwani za upeperushaji anuwai, sio tu simu yako. Inatumia nguvu zaidi kuliko mfumo wa upeperushaji usio anuwai."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"fikia mipangilio ya Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Inaruhusu programu kusanidi kompyuta kibao ya karibu ya Bluetooth na kutambua na kuoanisha na vifaa vya kudhibiti."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Huruhusu programu kusanidi Bluetooth TV, na kugundua na kuonisha na vifaa vya mbali."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Huruhusu programu iweke mipangilio ya Bluetooth kwenye kifaa chako cha Android TV na kugundua na kuoanisha na vifaa vya mbali."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Inaruhusu programu kusanidi simu ya karibu ya Bluetooth, na kutambua na kuoanisha na vifaa vya mbali."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"unganisha na uukate muunaganisho kutoka kwenye  WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Inaruhusu programu kuthibitisha ikiwa WiMAX imewezeshwa na taarifa kuhusu mitandao yoyote ya WiMAX ambayo imeunganishwa."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"badilisha hali ya WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Inaruhusu programu kuunganisha kompyuta kibao,  na kukata kompyuta kibao kutoka mitandao ya WiMAX."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Huruhusu programu kuunganisha runinga kwenye na kuondoa runinga kutoka mitandao ya WiMAX."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Huruhusu programu iunganishe na kutenganisha kifaa chako cha Android TV na mitandao ya WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Inaruhusu programu kuunganisha simu kwenye, na kukata simu kutoka mitandao ya WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"oanisha na vifaa vya Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Huruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Huruhusu programu kuona usanidi wa Bluetooth kwenye runinga, na kuomba na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Huruhusu programu iangalie mipangilio iliyowekwa ya Bluetooth kwenye kifaa chako cha Android TV na kufanya na kukubali miunganisho na vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Huruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Dhibiti urefu na maandishi yanayokubalika katika nenosiri la kufunga skrini na PIN."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Kuhesabu mara ambazo skrini inajaribu kufunguliwa"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Kufuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na kufunga kompyuta kibao au kufuta data yote iliyomo kama manenosiri mengi yasiyo sahihi yataingizwa."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayoandikwa wakati wa kufungua skrini, na funga runinga au ufute data yote ya runinga ikiwa manenosiri mengi mno yasiyosahihi yataandikwa."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini na ufunge kifaa chako cha Android TV au ufute data yake yote ikiwa mtumiaji ataweka manenosiri mengi mno yasiyo sahihi."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Kufuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na kufunga simu au kufuta data yote iliyomo kama manenosiri mengi sana yasiyo sahihi yataingizwa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge kompyuta kibao au ufute data yote ya mtumiaji huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayoingizwa wakati wa kufungua skrini, na ufunge televisheni au ufute data yote ya mtumiaji kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini na ufunge kifaa chako cha Android TV au ufute data yote ya mtumiaji huyu ikiwa ataweka manenosiri yasiyo sahihi mara nyingi mno."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge simu au ufute data yote ya mtumiaji  huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Kubadilisha mbinu ya kufunga skrini"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Kubadilisha mbinu ya kufunga skrini."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kudhibiti jinsi na wakati skrini inapofunga."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Kufuta data yote"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ambayo kompyuta ilitoka nayo kiwandani."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Futa data ya runinga bila onyo kwa kurejesha katika hali iliyotoka nayo kiwandani."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Futa data ya kifaa chako cha Android TV bila onyo kwa kurejesha data kiliyotoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Kufuta data ya simu bila ilani kwa kurejesha mipangilio iliyotoka nayo kiwandani."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Futa data yote ya mtumiaji"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Futa data ya mtumiaji huyu iliyo kwenye kompyuta kibao hii bila ilani."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Futa data ya mtumiaji huyu iliyo kwenye televisheni hii bila ilani."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Futa data ya mtumiaji huyu iliyo kwenye kifaa hiki cha Android TV bila ilani."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Futa data ya mtumiaji huyu iliyo kwenye simu hii bila ilani."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Weka seva mbadala ya ulimwengu kote ya kifaa"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Weka seva mbadala ya ulimwengu ya kifaa itakayotumika wakati sera imewashwa. Ni mmiliki wa kifaa pekee aneyeweza kuweka seva mbadala ya ulimwengu."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Umepitisha idadi ya juu ya mara ambazo unaweza kujaribu Kufungua kwa Uso"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Hakuna SIM kadi"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Hakuna SIM kadi katika kompyuta ndogo."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Hakuna SIM kadi katika runinga."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Hakuna SIM kadi kwenye kifaa chako cha Android TV."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Hakuna SIM kadi kwenye simu."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Weka SIM kadi."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM kadi haipatikani au haisomeki. Tafadhali weka SIM kadi."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Umekosea mara <xliff:g id="NUMBER_0">%1$d</xliff:g> katika kuingiza nenosiri lako. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Umekosea katika kuingiza PIN yako mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> bila kufaulu, utaulizwa kufungua kompyuta yako ndogo kwa kuingia kwa Google.\n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Umekosea kuchora mchoro wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio mengine <xliff:g id="NUMBER_1">%2$d</xliff:g>, utaombwa ufungue runinga yako ukitumia Google.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Umeweka mchoro usio sahihi wa kufungua skrini mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi bila mafanikio, utaombwa ufungue kifaa chako cha Android TV kwa kuingia kwenye akaunti yako ya Google.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> yasiyofaulu, utaulizwa kufungua simu kupitia kuingia Google.\n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Umejaribu kufungua kompyuta kibao kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> bila mafanikio, kompyuta ndogo itarejeshwa kwenye mipangilio iliyotoka nayo kiwandani na data yote iliyomo itafutwa."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi, runinga itarejeshwa katika hali iliyotoka nayo kiwandani na data yote ya watumiaji itafutwa."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Umejaribu kufungua kifaa chako cha Android TV kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi bila mafanikio, kifaa chako cha Android TV kitarejeshwa kwenye mipangilio chaguomsingi kiliyotoka nayo kiwandani na data yote ya mtumiaji itapotea."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> bila mafanikio, simu itarejeshwa kwenye mipangilio iliyotoka nayo kiwandani na data yote iliyomo itafutwa."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguomsingi."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa runinga itarejeshwa katika mipangilio iliyotoka nayo kiwandani."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Umejaribu kufungua kifaa chako cha Android TV kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa kifaa chako cha Android TV kitarejeshwa kwenye mipangilio chaguomsingi kiliyotoka nayo kiwandani."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguomsingi."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Jaribu tena kwa sekunde <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Umesahau mchoro?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Inaruhusu programu kusoma historia ya URL zote ambazo zimetembelewa na Kivinjari, na alamisho zote za Kivinjari. Kumbuka: idhini hii haiwezi kutekelezwa vivinjari vya vingine au programu zingine zenye uwezo wa kuvinjari."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"andika alamisho na historia ya wavuti"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Inaruhusu programu kurekebisha historia ya Kivinjari au alamisho zilizohifadhiwa kwenye kompyuta kibao yako. Hii inaruhusu programu kufuta au kurekebisha data ya Kivinjari. Kumbuka: huenda idhini hii isitekelezwe na kivinjari kingine au programu nyingine zenye uwezo wa kuvinjari wavuti."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Huruhusu programu kurekebisha historia ya Kivinjari au alamisho zilizohifadhiwa kwenye runinga yako. Hii inaweza kuruhusu programu kufuta au kurekebisha data ya Kivinjari. Kumbuka: idhini hii huenda isitekelezwe na vivinjari vingine au programu nyingine zenye uwezo wa kuvinjari."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Huruhusu programu ibadilishe historia ya Kivinjari au alamisho zilizohifadhiwa kwenye kifaa chako cha Android TV. Huenda hali hii ikairuhusu programu ifute au ibadilishe data ya Kivinjari. Kumbuka: huenda idhini hii isitekelezwe na vivinjari vingine au programu zingine zenye uwezo wa kuvinjari."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Inaruhusu programu kurekebisha historia ya Kivinjari au alamisho zilizohifadhiwa kwenye simu yako. Hii huenda ikaruhusu programu kufuta au kurekebisha data ya Kivinjari. Kumbuka: huenda idhini hii isitekelezwe na vivinjari vingine au programu nyingine zenye uwezo wa kuvinjari wavuti."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"weka kengele"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Inaruhusu programu kuweka kengele katika programu iliyosakinishwa ya kengele. Programu zingine za kengele zinawezakosa kutekeleza kipengee hiki."</string>
@@ -1194,7 +1198,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Kompyuta kibao inasasishwa…"</string>
     <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Kifaa kinasasishwa…"</string>
     <string name="android_start_title" product="default" msgid="4536778526365907780">"Simu inawaka…"</string>
-    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Inaanzisha Android..."</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Inawasha Android..."</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Kompyuta kibao inawaka…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"Kifaa kiwaka…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Inaboresha hifadhi."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Fungua mtandao wa Wi-Fi unaopatikana</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Unganisha kwenye mtandao wa Wi‑Fi unaotumiwa na mtu yeyote"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Unganisha kwenye mtandao wa mtoa huduma ya Wi‑Fi"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Inaunganisha kwenye mtandao wa Wi‑Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Imeunganisha kwenye mtandao wa Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Imeshindwa kuunganisha kwenye mtandao wa Wi‑Fi"</string>
@@ -1307,7 +1310,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Charaza PIN inayohitajika:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Kompyuta ndogo itaukata muunganisho kwa muda kutoka kwenye Wi-Fi inapokuwa imeunganishwa kwenye <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Runinga itaondolewa kwa muda kwenye Wi-Fi wakati imeunganishwa kwenye <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Kifaa chako cha Android TV kitatenganishwa na Wi-Fi kwa muda wakati kimeunganishwa kwenye <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Simu itaukata muunganisho kwa muda kutoka kwenye Wi-Fi inapokuwa imeunganishwa kwenye <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Ingiza kibambo"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Inatuma ujumbe wa SMS"</string>
@@ -1650,13 +1653,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Umechora ruwaza yako ya kufunga kwa makosa mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi yasiyofaulu, kompyuta ndogo itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani data yote ya mtumiaji itapotea."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio mengine <xliff:g id="NUMBER_1">%2$d</xliff:g>, runinga itarejeshwa katika hali iliyotoka nayo kiwandani na data yote ya watumiaji itafutwa."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Umejaribu kufungua kifaa chako cha Android TV kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi bila mafanikio, kifaa chako cha Android TV kitarejeshwa kwenye mipangilio chaguomsingi kiliyotoka nayo kiwandani na data yote ya mtumiaji itapotea."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi yasiyofaulu, simu itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani na data yote ya mtumiaji itapotea."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa kompyuta ndogo itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa runinga itarejeshwa katika hali iliyotoka nayo kiwandani."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Umejaribu kufungua kifaa chako cha Android TV kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa kifaa chako cha Android TV kitarejeshwa kwenye mipangilio chaguomsingi kiliyotoka nayo kiwandani."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa simu  itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Umekosea kuchora mchoro wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio mengine <xliff:g id="NUMBER_1">%2$d</xliff:g>, utaombwa ufungue runinga yako ukitumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Umeweka mchoro usio sahihi wa kufungua skrini mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi bila mafanikio, utaombwa ufungue kifaa chako cha Android TV kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ondoa"</string>
@@ -1997,6 +2000,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Mfumo"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Mipangilio"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Hali tuli"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Kifaa cha Android TV kitazima hivi karibuni; bonyeza kitufe ili kisizime."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Kifaa kitazima hivi karibuni; bonyeza ili kisizime."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Maikrofoni"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"inachomoza kwenye programu zingine katika skrini yako"</string>

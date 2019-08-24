@@ -176,7 +176,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Pārāk apjomīgs satura <xliff:g id="CONTENT_TYPE">%s</xliff:g> dzēšanas mēģinājums"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planšetdatora atmiņa ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Pulksteņa atmiņa ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizora krātuve ir pilna. Izdzēsiet dažus failus, lai atbrīvotu vietu."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV ierīces krātuve ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Tālruņa atmiņa ir pilna! Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="zero">Sertificēšanas iestāžu sertifikāti ir instalēti</item>
@@ -197,7 +197,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Drukāšanu atspējoja <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planšetdatora opcijas"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV opcijas"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV opcijas"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Tālruņa opcijas"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Klusuma režīms"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Ieslēgt bezvadu tīklu"</string>
@@ -215,7 +215,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Notiek restartēšana…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Notiek izslēgšana..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetdators tiks beidzēts."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televizors tiks izslēgts."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV ierīce tiks izslēgta."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Pulkstenis tiks izslēgts."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Tālrunis tiks izslēgts."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vai vēlaties izslēgt?"</string>
@@ -224,7 +224,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nesens"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Nav nesen izmantotu lietotņu."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Planšetdatora opcijas"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"TV opcijas"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV opcijas"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekrāna bloķētājs"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Strāvas padeve ir izslēgta."</string>
@@ -355,7 +355,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ļauj lietotnei sūtīt īsziņas. Tas var radīt neparedzētas izmaksas. Ļaunprātīgas lietotnes var radīt jums izmaksas, sūtot ziņojumus bez jūsu apstiprinājuma."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lasīt ziņojumus (SMS vai MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Šī lietotne var lasīt visas īsziņas, kas saglabātas planšetdatorā."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Šī lietotne var lasīt visas īsziņas, kas saglabātas televizorā."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Šī lietotne var lasīt visas īsziņas, kas ir saglabātas jūsu Android TV ierīcē."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Šī lietotne var lasīt visas īsziņas, kas saglabātas tālrunī."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"saņemt īsziņas (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ļauj lietotnei saņemt un apstrādāt WAP ziņojumus. Šī atļauja ietver iespēju pārraudzīt vai dzēst jums nosūtītos ziņojumus, neparādot tos jums."</string>
@@ -377,7 +377,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Šī lietotne var izmantot datus fonā. Tā var palielināt datu lietojuma apjomu."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"likt lietotnei vienmēr darboties"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ļauj lietotnei nodrošināt atsevišķu tās daļu nepārtrauktu atrašanos atmiņā. Tas var ierobežot pieejamo atmiņas daudzumu citām lietotnēm, tādējādi palēninot planšetdatora darbību."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ļauj lietotnei nodrošināt atsevišķu tās daļu nepārtrauktu atrašanos atmiņā. Tas var ierobežot pieejamo atmiņas daudzumu citām lietotnēm, tādējādi palēninot televizora darbību."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Ļauj lietotnei nodrošināt atsevišķu tās daļu nepārtrauktu atrašanos atmiņā. Tādējādi var tikt ierobežots citām lietotnēm pieejamais atmiņas daudzums, un Android TV ierīces darbība var palēnināties."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Ļauj lietotnei nodrošināt atsevišķu tās daļu nepārtrauktu atrašanos atmiņā. Tas var ierobežot pieejamo atmiņas daudzumu citām lietotnēm, tādējādi palēninot tālruņa darbību."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"Aktivizēt priekšplāna pakalpojumu"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Ļauj lietotnei izmantot priekšplāna pakalpojumus."</string>
@@ -387,35 +387,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Ļauj lietotnei modificēt sistēmas iestatījumu datus. Ļaunprātīgas lietotnes var uzlauzt sistēmas konfigurāciju."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"palaist līdz ar startēšanu"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Ļauj lietotnei tikt startētai, tiklīdz sistēma ir pabeigusi sāknēšanu. Šādi planšetdatora startēšana var notikt ilgāk un lietotne, ja tā darbojas nepārtraukti, var palēnināt planšetdatora vispārējo darbību."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Ļauj lietotnei sākt darbību uzreiz pēc sistēmas palaišanas. Tādējādi televizora ieslēgšanai var būt nepieciešams vairāk laika un lietotne var palēnināt televizora darbību, jo tā vienmēr darbosies."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Ļauj lietotnei tikt startētai, tiklīdz sistēma ir pabeigusi palaišanu. Tādējādi Android TV ierīces startēšana var notikt ilgāk, un lietotne, ja tā darbojas nepārtraukti, var palēnināt ierīces vispārējo darbību."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ļauj lietotnei tikt startētai, tiklīdz sistēma ir pabeigusi sāknēšanu. Šādi tālruņa startēšana var notikt ilgāk un lietotne, ja tā darbojas nepārtraukti, var palēnināt tālruņa vispārējo darbību."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sūtīt piesaistošu apraidi"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Pārmērīga izmantošana var palēnināt planšetdatora darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Pārmērīga izmantošana var palēnināt televizora darbību vai padarīt to nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Pārmērīga izmantošana var palēnināt Android TV ierīces darbību vai padarīt tās darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Pārmērīga izmantošana var palēnināt tālruņa darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"lasīt kontaktpersonu informāciju"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Ļauj lietotnei lasīt datus par jūsu planšetdatorā saglabātajām kontaktpersonām, tostarp to, cik bieži esat zvanījis, sazinājies pa e-pastu vai citādi sazinājies ar konkrētām personām. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, un ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus bez jūsu atļaujas."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Ļauj lietotnei lasīt datus par jūsu televizorā saglabātajām kontaktpersonām, tostarp to, cik bieži esat zvanījis, sazinājies pa e-pastu vai citādi sazinājies ar konkrētām personām. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, kā arī ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus bez jūsu atļaujas."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Ļauj lietotnei lasīt datus par Android TV ierīcē glabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, un ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus, jums nezinot."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Ļauj lietotnei lasīt datus par jūsu tālrunī saglabātajām kontaktpersonām, tostarp to, cik bieži esat zvanījis, sazinājies pa e-pastu vai citādi sazinājies ar konkrētām personām. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, un ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus bez jūsu atļaujas."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"mainīt kontaktpersonu informāciju"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Ļauj lietotnei mainīt datus par planšetdatorā saglabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotne var dzēst kontaktpersonu datus."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Ļauj lietotnei mainīt datus par televizorā saglabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotne var dzēst kontaktpersonu datus."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Ļauj lietotnei mainīt datus par Android TV ierīcē saglabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotnes var dzēst kontaktpersonu datus."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Ļauj lietotnei mainīt datus par tālrunī saglabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotne var dzēst kontaktpersonu datus."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"nolasīt zvanu žurnālu"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Šī lietotne var lasīt jūsu zvanu vēsturi."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"rakstīt zvanu žurnālā"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ļauj lietotnei pārveidot planšetdatora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu savu zvanu žurnālu."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ļauj lietotnei pārveidot televizora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu zvanu žurnālu."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Ļauj lietotnei pārveidot Android TV ierīces zvanu žurnālu, tostarp datus par ienākošajiem un izejošajiem zvaniem. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu zvanu žurnālu."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ļauj lietotnei pārveidot tālruņa zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu savu zvanu žurnālu."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"Piekļūt ķermeņa sensoriem (piemēram, sirdsdarbības monitoriem)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ļauj lietotnei piekļūt to sensoru datiem, kuri pārrauga jūsu fizisko stāvokli (piemēram, sirdsdarbības ātrumu)."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Lasīt kalendāra pasākumus un informāciju"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Šī lietotne var lasīt visus kalendāra pasākumus, kas saglabāti planšetdatorā, un kopīgot vai saglabāt jūsu kalendāra datus."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Šī lietotne var lasīt visus kalendāra pasākumus, kas saglabāti televizorā, un kopīgot vai saglabāt jūsu kalendāra datus."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Šī lietotne var lasīt visus kalendāra pasākumus, kas saglabāti Android TV ierīcē, un kopīgot vai saglabāt jūsu kalendāra datus."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Šī lietotne var lasīt visus kalendāra pasākumus, kas saglabāti tālrunī, un kopīgot vai saglabāt jūsu kalendāra datus."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"pievienot vai pārveidot kalendāra pasākumus un sūtīt e-pasta ziņojumus viesiem bez īpašnieku ziņas"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Šī lietotne var pievienot, noņemt vai mainīt kalendāra pasākumus jūsu planšetdatorā. Šī lietotne var sūtīt ziņojumus, ko šķietami sūtījuši kalendāru īpašnieki, vai mainīt pasākumus, neinformējot to īpašniekus."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Šī lietotne var pievienot, noņemt vai mainīt kalendāra pasākumus jūsu televizorā. Šī lietotne var sūtīt ziņojumus, ko šķietami sūtījuši kalendāru īpašnieki, vai mainīt pasākumus, neinformējot to īpašniekus."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Šī lietotne var pievienot, noņemt vai mainīt kalendāra pasākumus jūsu Android TV ierīcē. Šī lietotne var sūtīt ziņojumus, ko šķietami sūtījuši kalendāru īpašnieki, vai mainīt pasākumus, neinformējot to īpašniekus."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Šī lietotne var pievienot, noņemt vai mainīt kalendāra pasākumus jūsu tālrunī. Šī lietotne var sūtīt ziņojumus, ko šķietami sūtījuši kalendāru īpašnieki, vai mainīt pasākumus, neinformējot to īpašniekus."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"piekļūt atrašanās vietas nodrošinātāja papildu komandām"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ļauj lietotnei piekļūt papildu atrašanās vietas noteikšanas nodrošinātāju komandām. Tas var ļaut lietotnei traucēt GPS vai citu atrašanās vietas noteikšanas avotu darbību."</string>
@@ -423,7 +423,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Šī lietotne var iegūt precīzu jūsu atrašanās vietu, tikai darbojoties priekšplānā. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu tālrunī, lai lietotne varētu tos izmantot. Tādējādi var palielināties akumulatora jaudas patēriņš."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"piekļuve aptuvenai atrašanās vietai (pēc tīkla datiem), tikai darbojoties priekšplānā"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Kad šī lietotne darbojas priekšplānā, tā var noteikt jūsu atrašanās vietu, izmantojot tīkla resursus, piemēram, mobilo sakaru torņus un Wi-Fi tīklus. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu planšetdatorā, lai lietotne varētu tos izmantot."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Kad šī lietotne darbojas priekšplānā, tā var noteikt jūsu atrašanās vietu, izmantojot tīkla resursus, piemēram, mobilo sakaru torņus un Wi-Fi tīklus. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu televizorā, lai lietotne varētu tos izmantot."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Kad šī lietotne darbojas priekšplānā, tā var noteikt jūsu atrašanās vietu, izmantojot tīkla resursus, piemēram, mobilo sakaru torņus un Wi-Fi tīklus. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu Android TV ierīcē, lai lietotne varētu tos izmantot."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Kad šī lietotne darbojas priekšplānā, tā var noteikt jūsu atrašanās vietu, izmantojot tīkla resursus, piemēram, mobilo sakaru torņus un Wi-Fi tīklus. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu tālrunī, lai lietotne varētu tos izmantot."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"piekļūt atrašanās vietai fonā"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ja šī atļauja tiek piešķirta līdz ar piekļuvi aptuvenai vai precīzai atrašanās vietai, lietotne var piekļūt atrašanās vietai, darbojoties fonā."</string>
@@ -437,6 +437,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Šī lietotne var noteikt jūsu fiziskās aktivitātes."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"uzņemt attēlus un videoklipus"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Šī lietotne jebkurā brīdī var uzņemt attēlus un ierakstīt videoklipus, izmantojot kameru."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrolēt vibrosignālu"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ļauj lietotnei kontrolēt vibrosignālu."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"tieši zvanīt uz tālruņa numuriem"</string>
@@ -454,14 +458,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lasīt tālruņa numurus"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Ļauj lietotnei piekļūt ierīcē esošajiem tālruņa numuriem."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"novērst planšetdatora pāriešanu miega režīmā"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"novērst televizora pāreju miega režīmā"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"Android TV miega režīma ieslēgšanas liegšana"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"novērst tālruņa pāriešanu miega režīmā"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ļauj lietotnei novērst planšetdatora pāriešanu miega režīmā."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Ļauj lietotnei novērst televizora pāreju miega režīmā."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Ļauj lietotnei novērst Android TV ierīces pāriešanu miega režīmā."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Ļauj lietotnei novērst tālruņa pāriešanu miega režīmā."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"pārraidīt infrasarkano staru signālu"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Ļauj lietotnei izmantot planšetdatora infrasarkano staru signāla raidītāju."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Ļauj lietotnei izmantot televizora infrasarkano staru raidītāju."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Ļauj lietotnei izmantot Android TV ierīces infrasarkano staru signāla raidītāju."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Ļauj lietotnei izmantot tālruņa infrasarkano staru signāla raidītāju."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"iestatīt tapeti"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Ļauj lietotnei iestatīt sistēmas tapeti."</string>
@@ -469,11 +473,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Ļauj lietotnei iestatīt sistēmas tapetes izmēru norādes."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"iestatīt laika joslu"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Ļauj lietotnei mainīt planšetdatora laika joslu."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Ļauj lietotnei mainīt televizora laika joslu."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Ļauj lietotnei mainīt Android TV ierīces laika joslu."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Ļauj lietotnei mainīt tālruņa laika joslu."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"atrast kontus ierīcē"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Ļauj lietotnei iegūt planšetdatoram zināmo kontu sarakstu. Tas var ietvert jebkādus kontus, ko izveidojušas instalētās lietojumprogrammas."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Ļauj lietotnei iegūt televizorā saglabāto kontu sarakstu. Tas var ietvert jebkādus kontus, ko izveidojušas instalētās lietojumprogrammas."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Ļauj lietotnei iegūt Android TV ierīcei zināmo kontu sarakstu. Tas var ietvert jebkādus kontus, ko izveidojušas instalētās lietojumprogrammas."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Ļauj lietotnei iegūt tālrunim zināmo kontu sarakstu. Tas var ietvert jebkādus kontus, ko izveidojušas instalētās lietojumprogrammas."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"skatīt tīkla savienojumus"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Ļauj lietotnei skatīt informāciju par tīkla savienojumiem, piemēram, par to, kādi tīkli pastāv un ar kuriem tīkliem ir izveidots savienojums."</string>
@@ -489,21 +493,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ļauj lietotnei izveidot savienojumu ar Wi-Fi piekļuves punktiem un pārtraukt savienojumus ar tiem, kā arī veikt izmaiņas ierīces Wi-Fi tīklu konfigurācijā."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"atļaut Wi-Fi multiraides uztveršanu"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Ļauj lietotnei saņemt sūtījumus, kas sūtīti uz visām ierīcēm Wi-Fi tīklā, izmantojot multiraides adreses, nevis tikai jūsu planšetdatoru. Tādējādi tiek patērēts vairāk enerģijas nekā režīmā, kas nav multiraide."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Ļauj lietotnei saņemt sūtījumus, kas, izmantojot multiraides adreses, sūtīti uz visām ierīcēm Wi-Fi tīklā, nevis tikai uz jūsu televizoru. Multiraides režīmā tiek patērēts vairāk enerģijas nekā citos režīmos."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Ļauj lietotnei saņemt sūtījumus, kas sūtīti uz visām ierīcēm Wi-Fi tīklā, izmantojot multiraides adreses, nevis tikai jūsu Android TV ierīci. Tādējādi tiek patērēts vairāk enerģijas nekā režīmā, kas nav multiraide."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Ļauj lietotnei saņemt sūtījumus, kas sūtīti uz visām ierīcēm Wi-Fi tīklā, izmantojot multiraides adreses, nevis tikai jūsu tālruni. Tādējādi tiek patērēts vairāk enerģijas nekā režīmā, kas nav multiraide."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"piekļūt Bluetooth iestatījumiem"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ļauj lietotnei konfigurēt vietējo Bluetooth planšetdatoru, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Ļauj lietotnei konfigurēt vietējo Bluetooth televizoru, atklāt attālas ierīces un izveidot ar tām savienojumu pārī."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Ļauj lietotnei konfigurēt Bluetooth savienojumu jūsu Android TV ierīcē, kā arī noteikt attālas ierīces un savienot tās pārī."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ļauj lietotnei konfigurēt vietējo Bluetooth tālruni, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX savienojuma izveide un pārtraukšana"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ļauj lietotnei noteikt, vai WiMAX ir iespējots, un sniedz informāciju par visiem WiMAX tīkliem, ar kuriem ir izveidots savienojums."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX statusa mainīšana"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ļauj lietotnei izveidot un pārtraukt planšetdatora savienojumu ar WiMAX tīkliem."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Ļauj lietotnei pievienot televizoru WiMAX tīkliem un atvienot no tiem."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Ļauj lietotnei izveidot un pārtraukt Android TV ierīces savienojumu ar WiMAX tīkliem."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ļauj lietotnei izveidot un pārtraukt tālruņa savienojumu ar WiMAX tīkliem."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"savienot pārī ar Bluetooth ierīcēm"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Ļauj lietotnei skatīt Bluetooth konfigurāciju planšetdatorā, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Ļauj lietotnei skatīt Bluetooth konfigurāciju televizorā un izveidot un akceptēt savienojumus ar pārī savienotajām ierīcēm."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Ļauj lietotnei skatīt Bluetooth konfigurāciju Android TV ierīcē, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Ļauj lietotnei skatīt Bluetooth konfigurāciju tālrunī, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrolē tuvlauka saziņu"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ļauj lietotnei sazināties ar tuva darbības lauka sakaru (Near Field Communication — NFC) atzīmēm, kartēm un lasītājiem."</string>
@@ -660,10 +664,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē planšetdatoru vai dzēš visus planšetdatora datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt televizoru vai dzēst televizora datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt Android TV vai dzēst visus Android TV ierīces datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē tālruni vai dzēš visus tālruņa datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt planšetdatoru vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt televizoru vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt Android TV ierīci vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt tālruni vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Mainīt ekrāna bloķēšanas iestatījumus"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Maina ekrāna bloķēšanas iestatījumu."</string>
@@ -671,11 +675,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolē, kā un kad ekrāns tiek bloķēts."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Dzēst visus datus"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Dzēš planšetdatora datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Bez brīdinājuma dzēst televizora datus, veicot rūpnīcas datu atiestatīšanu."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Dzēst Android TV ierīces datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Dzēš tālruņa datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Dzēst lietotāja datus"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Bez brīdinājuma dzēst šī lietotāja datus no planšetdatora."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Bez brīdinājuma dzēst šī lietotāja datus no televizora."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Bez brīdinājuma dzēst šī lietotāja datus no Android TV ierīces."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Bez brīdinājuma dzēst šī lietotāja datus no tālruņa."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Iestatīt ierīces globālo starpniekserveri"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Iestatīt ierīces globālo starpniekserveri, kas jāizmanto, kad politika ir iespējota. Globālo starpniekserveri var iestatīt tikai ierīces īpašnieks."</string>
@@ -825,7 +829,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Ir pārsniegts maksimālais Autorizācijas pēc sejas mēģinājumu skaits."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nav SIM kartes"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planšetdatorā nav SIM kartes."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Televizorā nav SIM kartes."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Android TV ierīcē nav SIM kartes."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Tālrunī nav SIM kartes."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Ievietojiet SIM karti."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Nav SIM kartes, vai arī to nevar nolasīt. Ievietojiet SIM karti."</string>
@@ -848,13 +852,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Jūs esat ievadījis nepareizu paroli <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundēm."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Jūs esat ievadījis nepareizu PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundēm."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Atbloķēšanas kombinācija tika nepareizi uzzīmēta <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot pierakstīšanos Google kontā.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Grafiskā atslēga tika nepareizi norādīta <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es). Ja nepareizi norādīsiet to vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> reizi(-es), televizors būs jāatbloķē, pierakstoties Google kontā.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundes(-ēm)."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) Android TV ierīce būs jāatbloķē, pierakstoties Google tīklā.\n\n Mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Atbloķēšanas kombinācija tika nepareizi uzzīmēta <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot pierakstīšanos Google kontā.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Jūs nepareizi veicāt planšetdatora atbloķēšanu <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīga(-iem) mēģinājuma(-iem) planšetdatorā tiks atiestatīti rūpnīcas noklusējuma iestatījumi, un lietotāja dati tiks zaudēti."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt televizoru. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) televizorā tiks veikta rūpnīcas datu atiestatīšana un visi lietotāja dati tiks zaudēti."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt Android TV ierīci. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīga(-iem) mēģinājuma(-iem) Android TV ierīcē tiks atiestatīti rūpnīcas noklusējuma iestatījumi, un visi lietotāja dati tiks zaudēti."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīga(-iem) mēģinājuma(-iem) tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi, un lietotāja dati tiks zaudēti."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Jūs nepareizi veicāt planšetdatora atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Planšetdatorā tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt televizoru. Tagad tiks veikta rūpnīcas datu atiestatīšana."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt Android TV ierīci. Android TV ierīcē tagad tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER">%d</xliff:g> sekundes(-ēm)."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Vai aizmirsāt kombināciju?"</string>
@@ -941,7 +945,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Ļauj lietotnei lasīt visu pārlūkprogrammā apmeklēto URL vēsturi un visas pārlūkprogrammas grāmatzīmes. Piezīme: šo atļauju nevar piemērot trešās puses pārlūkprogrammas vai citas lietojumprogrammas ar tīmekļa pārlūkošanas iespējām."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"rakstīt tīmekļa grāmatzīmes un vēsturi"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Ļauj lietotnei mainīt planšetdatorā saglabāto pārlūkprogrammas vēsturi vai grāmatzīmes. Tas var ļaut lietotnei dzēst vai pārveidot pārlūkprogrammas datus. Piezīme: šo atļauju nevar piemērot trešo pušu pārlūkprogrammas vai citas lietojumprogrammas ar tīmekļa pārlūkošanas iespējām."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Ļauj lietotnei mainīt televizorā saglabāto pārlūkprogrammas vēsturi vai grāmatzīmes. Šādi lietotne var dzēst vai pārveidot pārlūkprogrammas datus. Piezīme: šo atļauju nevar piemērot trešo pušu pārlūkprogrammas vai citas lietojumprogrammas ar tīmekļa pārlūkošanas iespējām."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Ļauj lietotnei modificēt Android TV ierīcē saglabāto pārlūkprogrammas vēsturi vai grāmatzīmes. Lietotne to var izmantot, lai dzēstu vai modificētu pārlūkprogrammas datus. Piezīme. Šo atļauju nevar piemērot trešo pušu pārlūkprogrammas vai citas lietojumprogrammas ar tīmekļa pārlūkošanas iespējām."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ļauj lietotnei mainīt tālrunī saglabāto pārlūkprogrammas vēsturi vai grāmatzīmes. Tas var ļaut lietotnei dzēst vai pārveidot pārlūkprogrammas datus. Piezīme: šo atļauju nevar piemērot trešo pušu pārlūkprogrammas vai citas lietojumprogrammas ar tīmekļa pārlūkošanas iespējām."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"iestatīt modinātāju"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ļauj lietotnei iestatīt signālu instalētajā modinātājpulksteņa lietotnē. Dažās modinātājpulksteņu lietotnēs šo funkciju, iespējams, nevar ieviest."</string>
@@ -1271,7 +1275,6 @@
       <item quantity="other">Ir pieejami atvērti Wi-Fi tīkli</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Savienojuma izveide ar atvērtu Wi-Fi tīklu"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Savienojuma izveide ar mobilo sakaru operatora Wi‑Fi tīklu"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Savienojuma izveide ar Wi-Fi tīklu"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ir izveidots savienojums ar Wi-Fi tīklu"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Nevarēja izveidot savienojumu ar Wi‑Fi tīklu"</string>
@@ -1329,7 +1332,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ierakstiet pieprasīto PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Planšetdators tiks īslaicīgi atvienots no Wi-Fi tīkla, kamēr būs izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Televizors tiks īslaicīgi atvienots no Wi-Fi tīkla, kamēr ir izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV ierīce tiks īslaicīgi atvienota no Wi-Fi tīkla, kamēr ir izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Tālrunis tiks īslaicīgi atvienots no Wi-Fi tīkla, kamēr būs izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="select_character" msgid="3365550120617701745">"Ievietojiet rakstzīmi"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Īsziņu sūtīšana"</string>
@@ -1674,13 +1677,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jūs nepareizi ievadījāt paroli <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundēm."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundēm."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Jūs nepareizi veicāt planšetdatora atbloķēšanu <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem planšetdatorā tiks atiestatīti rūpnīcas noklusējuma iestatījumi un lietotāja dati tiks zaudēti."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt televizoru. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) televizorā tiks veikta rūpnīcas datu atiestatīšana un visi lietotāja dati tiks zaudēti."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt Android TV ierīci. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīga(-iem) mēģinājuma(-iem) Android TV ierīcē tiks atiestatīti rūpnīcas noklusējuma iestatījumi, un visi lietotāja dati tiks zaudēti."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi un lietotāja dati tiks zaudēti."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Jūs nepareizi veicāt planšetdatora atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Planšetdatorā tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt televizoru. Tagad tiks veikta rūpnīcas datu atiestatīšana."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt Android TV ierīci. Android TV ierīcē tagad tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Grafiskā atslēga tika nepareizi norādīta <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es). Ja nepareizi norādīsiet to vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> reizi(-es), televizors būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundes(-ēm)."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) Android TV ierīce būs jāatbloķē, izmantojot e-pasta kontu.\n\n Mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">"  — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Noņemt"</string>
@@ -2032,6 +2035,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Pieskarieties, lai uzzinātu, kas tiek bloķēts."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistēma"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Iestatījumi"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Gaidstāve"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV ierīce drīz izslēgsies. Nospiediet pogu, lai tā paliktu ieslēgta."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Ierīce drīz izslēgsies. Nospiediet, lai tā paliktu ieslēgta."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofons"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"rāda pāri citām lietotnēm jūsu ekrānā"</string>

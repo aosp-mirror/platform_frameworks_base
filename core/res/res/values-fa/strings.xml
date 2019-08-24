@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"تعداد <xliff:g id="CONTENT_TYPE">%s</xliff:g> برای حذف بیش از حد مجاز شد."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"‏حافظه رایانهٔ لوحی پر است! برخی از فایل‎ها را حذف کنید تا فضا آزاد شود."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"حافظه ساعت پر است. برای آزادسازی فضا، چند فایل را حذف کنید."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"فضای ذخیره‌سازی تلویزیون پر است. برای آزاد کردن فضا، برخی از فایل‌ها را حذف کنید."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"‏فضای ذخیره‌سازی دستگاه Android TV پر است. برخی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"حافظه تلفن پر است. بعضی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">مرجع صدور گواهی نصب شد</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> چاپ کردن را غیرفعال کرده است."</string>
     <string name="me" msgid="6545696007631404292">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"گزینه‌های رایانهٔ لوحی"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"گزینه‌های تلویزیون"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"‏گزینه‌های Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"گزینه‌های تلفن"</string>
     <string name="silent_mode" msgid="7167703389802618663">"حالت ساکت"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"روشن کردن بی سیم"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"در حال راه‌اندازی مجدد…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"درحال خاموش شدن…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"رایانهٔ لوحی شما خاموش می‌شود."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"تلویزیون شما خاموش خواهد شد."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"‏دستگاه Android TV شما خاموش خواهد شد."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"ساعت شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"‏آیا می‎خواهید تلفن خاموش شود؟"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"اخیر"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"‏برنامه‎های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"گزینه‌های رایانهٔ لوحی"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"گزینه‌های تلویزیون"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"‏گزینه‌های Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"گزینه‌های تلفن"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"قفل صفحه"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"خاموش کردن"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"به برنامه اجازه می‌دهد پیامک‌ها را ارسال کند. این باعث ایجاد هزینه‌های پیش‌بینی نشده می‌شود. برنامه‌های مخرب ممکن است با ارسال پیام بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"خواندن پیام‌های نوشتاری شما (پیامک یا فراپیام)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"این برنامه می‌تواند همه پیامک‌های ذخیره‌شده در رایانه لوحی شما را بخواند."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"این برنامه می‌تواند همه پیامک‌های ذخیره‌شده در تلویزیون‌ شما را بخواند."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"‏این برنامه می‌تواند همه پیامک‌های ذخیره‌شده در Android TV شما را بخواند."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"این برنامه می‌تواند همه پیامک‌های ذخیره‌شده در تلفن شما را بخواند."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"‏دریافت پیام‌های نوشتاری (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏به برنامه اجازه می‌دهد پیام‌های WAP را دریافت و پردازش کند. این مجوز می‌تواند پیام‌های ارسالی به شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"این برنامه می‌تواند در پس‌زمینه داده مصرف کند. ممکن است مصرف داده افزایش یابد."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"همیشه برنامه اجرا شود"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"به برنامه امکان می‌دهد قسمت‌هایی از خود را در حافظه دائمی کند. این کار حافظه موجود را برای سایر برنامه‌ها محدود کرده و باعث کندی رایانهٔ لوحی می‌شود."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"به برنامه اجازه می‌دهد تا بخش‌هایی از خودش را در حافظه پایدار کند. ممکن است حافظه در دسترس سایر برنامه‌ها را محدود کند که باعث کند شدن تلویزیون می‌شود."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"‏به برنامه امکان می‌دهد بخش‌هایی از خود را در حافظه دائمی کند. این کار می‌تواند حافظه دردسترس برای سایر برنامه‌ها را محدود کند و باعث کُند شدن عملکرد Android TV شود."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"به برنامه امکان می‌دهد قسمت‌هایی از خود را در حافظه دائمی کند. این کار حافظه موجود را برای سایر برنامه‌ها محدود کرده و باعث کندی تلفن می‌شود."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"اجرای سرویس پیش‌زمینه"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"به برنامه اجازه می‌دهد از سرویس‌های پیش‌زمینه استفاده کند."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‎های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"اجرا شدن در هنگام راه‌اندازی"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"‏به برنامه اجازه می‌دهد به‌محض اتمام راه‌اندازی سیستم، خود را راه‌اندازی کند. ممکن است این مجوز باعث شود دستگاه Android TV آهسته‌تر راه‌اندازی شود و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودن، سرعت کلی دستگاه را کاهش دهد."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ارسال پخش چسبنده"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"‏به برنامه اجازه می‎دهد تا پخش‌های ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال کند. استفاده بیش از حد این ویژگی ممکن است باعث مصرف بیش از حد حافظه و در نتیجه کندی یا ناپایداری رایانهٔ لوحی شود."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"به برنامه اجازه می‌دهد تا پخش برنامه‌های دلچسبی را ارسال کند که پس از اتمام پخش باقی می‌ماند. استفاده بیش از حد شاید باعث شود تلویزیون با استفاده بیش از اندازه از حافظه کند یا بی‌ثبات عمل کند."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"‏به برنامه اجازه می‌دهد همه‌فرستی‌های چسبان ارسال کند که پس از اتمام همه‌فرستی باقی می‌مانند. استفاده بیش‌ازحد از این مجوز می‌تواند باعث استفاده خیلی زیاد از حافظه شود که به کندی یا ناپایداری Android TV منجر می‌شود."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"‏به برنامه اجازه می‎دهد تا پخش‌های ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال کند. استفاده بیش از حد این ویژگی ممکن است باعث مصرف بیش از حد حافظه و در نتیجه کندی یا ناپایداری تلفن شود."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"خواندن مخاطبین شما"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در رایانهٔ لوحی شما را بخواند از جمله، تعداد دفعات تماس‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا به روش‌های دیگری به افراد خاصی ارتباط برقرار کرده‌اید. این با برنامه‌ها امکان می‌دهد داده‌های مخاطب شما را ذخیره کنند و برنامه‌های مخرب ممکن است داده‌های مخاطب را بدون اطلاع شما به اشتراک بگذارند."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلویزیون شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد تا داده‌های مخاطب را ذخیره کند و شاید برنامه‌های مخرب داده‌های مخاطب را بدون اطلاع شما به اشتراک بگذارند."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"‏به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره‌شده در دستگاه Android TV شما را بخواند، ازجمله تعداد دفعاتی که با افراد خاصی تماس گرفته‌اید، برایشان ایمیل ارسال کرده‌اید، یا به روش‌های دیگری با آن‌ها ارتباط برقرار کرده‌اید. این مجوز به برنامه‌ها اجازه می‌دهد داده‌های مخاطب شما را ذخیره کنند، و ممکن است برنامه‌های مخرب بدون اطلاع شما داده‌های مخاطب را هم‌رسانی کنند."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلفن شما را بخواند از جمله، تعداد دفعات تماس‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا به روش‌های دیگری با افراد خاصی ارتباط برقرار کرده‌اید. این به برنامه‌ها امکان می‌دهد داده‌های مخاطب شما را ذخیره کنند و برنامه‌های مخرب ممکن است داده‌های مخاطب را بدون اطلاع شما به اشتراک بگذارند."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"تغییر مخاطبین"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در رایانهٔ لوحی شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلویزیون شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"‏به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره‌شده در دستگاه Android TV شما را تغییر دهد، ازجمله تعداد دفعاتی که با مخاطبین خاصی تماس گرفته‌اید، برایشان ایمیل ارسال کرده‌اید، یا به روش‌های دیگری با آن‌ها ارتباط برقرار کرده‌اید. این مجوز به برنامه‌ها اجازه می‌دهد داده‌های مخاطب را حذف کنند."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلفن شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"خواندن گزارش تماس"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"این برنامه می‌تواند سابقه تماس شما را بخواند."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"نوشتن گزارش تماس"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"‏به برنامه اجازه می‌دهد گزارش‌های تماس رایانهٔ لوحی شما، از جمله داده‌هایی درباره تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"‏به برنامه اجازه می‌دهد گزارشات تماس تلویزیون شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب شاید از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"‏به برنامه اجازه می‌دهد گزارش‌های تماس در دستگاه Android TV را تغییر دهد، ازجمله داده‌های مربوط به تماس‎های ورودی و خروجی. برنامه‌های مخرب می‌توانند از این مجوز برای پاک کردن یا تغییر دادن گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"‏به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"دسترسی به حسگرهای بدن (مانند پایشگرهای ضربان قلب)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"به برنامه امکان می‌دهد به اطلاعات حسگرهایی که بر شرایط فیزیکی شما مانند ضربان قلبتان، نظارت دارند، دسترسی داشته باشد."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"خواندن رویدادها و جزئیات تقویم"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در رایانه لوحی شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در تلویزیون شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"‏این برنامه می‌تواند همه رویدادهای تقویم را که در Android TV شما ذخیره‌شده بخواند، و داده‌های تقویم شما را هم‌رسانی یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در تلفن شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"افزودن یا تغییر رویدادهای تقویم و ارسال ایمیل به مهمانان بدون دخالت مالک"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"این برنامه می‌تواند در رایانه لوحی شما رویدادهای تقویم اضافه کند، آن‌ها را حذف کند یا تغییر دهد. این برنامه می‌تواند پیام‌هایی ارسال کند که گویی از طرف مالکان تقویم هستند یا رویدادها را بدون اطلاع مالکان تغییر دهد."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"این برنامه می‌تواند در تلویزیون شما رویدادهای تقویم اضافه کند، آن‌ها را حذف کند یا تغییر دهد. این برنامه می‌تواند پیام‌هایی ارسال کند که گویی از طرف مالکان تقویم هستند یا رویدادها را بدون اطلاع مالکان تغییر دهد."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"‏این برنامه می‌تواند در دستگاه Android TV، رویداد تقویم اضافه کند، آن‌ها را پاک کند، یا تغییر دهد. این برنامه می‌تواند پیام‌هایی ارسال کند که گویی از طرف مالکان تقویم هستند، یا رویدادها را بدون اطلاع مالکان تغییر دهد."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"این برنامه می‌تواند در تلفن شما رویدادهای تقویم اضافه کند، آن‌ها را حذف کند یا تغییر دهد. این برنامه می‌تواند پیام‌هایی ارسال کند که گویی از طرف مالکان تقویم هستند یا رویدادها را بدون اطلاع مالکان تغییر دهد."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"دسترسی به فرمان‌های بیشتر ارائه دهنده مکان"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏به برنامه اجازه می‌دهد به دستورات ارائه‌دهنده مکان تکمیلی دسترسی داشته باشد. این کار ممکن است به برنامه امکان دهد با کارکرد GPS یا منابع دیگر مکان تداخل داشته باشد."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"این برنامه فقط زمانی می‌تواند موقعیت مکانی دقیق شما را دریافت کند که در پیش‌زمینه باشد. برای اینکه برنامه بتواند از خدمات مکان استفاده کند، این خدمات باید در تلفنتان روشن و دردسترس باشد. ممکن است با این کار مصرف باتری افزایش یابد."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"دسترسی به مکان تقریبی (مبتنی بر شبکه) فقط در پیش‌زمینه"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"‏این برنامه می‌تواند براساس منابع شبکه مانند دکل‌های مخابراتی و شبکه‌های Wi-Fi، مکانتان را تشخیص دهد، اما فقط درصورتی‌که برنامه در پیش‌زمینه باشد. این خدمات مکان باید روشن و در رایانه لوحی شما دردسترس باشند تا برنامه بتواند از آن‌ها استفاده کند."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"‏این برنامه می‌تواند براساس منابع شبکه مانند دکل‌های مخابراتی و شبکه‌های Wi-Fi، مکانتان را تشخیص دهد، اما فقط درصورتی‌که برنامه در پیش‌زمینه باشد. این خدمات مکان باید روشن و در تلویزیون شما دردسترس باشند تا برنامه بتواند از آن‌ها استفاده کند."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"‏این برنامه می‌تواند براساس منابع شبکه، مانند دکل‌های مخابراتی و شبکه‌های Wi-Fi، مکانتان را تشخیص دهد، اما فقط درصورتی‌که برنامه در پیش‌زمینه باشد. این خدمات مکان باید در دستگاه Android TV شما روشن و دردسترس باشد تا برنامه بتواند از آن‌ها استفاده کند."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"‏این برنامه می‌تواند براساس منابع شبکه مانند دکل‌های مخابراتی و شبکه‌های Wi-Fi، مکانتان را تشخیص دهد، اما فقط درصورتی‌که برنامه در پیش‌زمینه است. این خدمات مکان باید روشن و در تلفن شما دردسترس باشند تا برنامه بتواند از آن‌ها استفاده کند."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"دسترسی به مکان در پس‌زمینه"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"اگر این مجوز نیز برای دسترسی دقیق یا تقریبی به مکان داده شود، برنامه می‌تواند درحین اجرا در پس‌زمینه به مکان دسترسی پیدا کند."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"این برنامه نمی‌تواند فعالیت فیزیکی‌تان را تشخیص دهد."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"عکسبرداری و فیلمبرداری"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"این برنامه می‌تواند در هرزمانی با استفاده از دوربین عکس و فیلم بگیرد."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"کنترل لرزش"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"تماس مستقیم با شماره تلفن‌ها"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"خواندن شماره تلفن‌ها"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"به برنامه امکان می‌دهد به شماره تلفن‌های دستگاه دسترسی داشته باشد."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ممانعت از به خواب رفتن رایانهٔ لوحی"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"جلوگیری از به حالت خواب رفتن تلویزیون"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"‏مانع از خوابیدن دستگاه Android TV می‌شود"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ممانعت از به خواب رفتن تلفن"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"‏به برنامه اجازه می‎دهد تا از غیرفعال شدن رایانهٔ لوحی جلوگیری کند."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"به برنامه اجازه می‌دهد تا از به حالت خواب رفتن تلویزیون جلوگیری کند."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"‏به برنامه اجازه می‎دهد مانع از به‌خواب رفتن دستگاه Android TV شود."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"‏به برنامه اجازه می‎دهد تا از غیرفعال شدن تلفن جلوگیری کند."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"ارسال مادون قرمز"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"به برنامه اجازه می‌دهد تا از فرستنده مادون قرمز رایانه لوحی استفاده کند."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"به برنامه اجازه می‌دهد تا از فرستنده مادون‌قرمز تلویزیون استفاده کند."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"‏به برنامه اجازه می‌دهد از فرستنده فروسرخ دستگاه Android TV استفاده کند."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"به برنامه اجازه می‌دهد تا از فرستنده مادون قرمز تلفن استفاده کند."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"تنظیم کاغذدیواری"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"‏به برنامه اجازه می‎دهد تا کاغذدیواری سیستم را تنظیم کند."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"‏به برنامه اجازه می‎دهد تا نکات اندازه کاغذدیواری سیستم را تنظیم کند."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"تنظیم منطقهٔ زمانی"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"‏به برنامه اجازه می‎دهد تا منطقهٔ زمانی رایانهٔ لوحی را تغییر دهد."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"‏به برنامه اجازه می‎دهد منطقه زمانی تلویزیون را تغییر دهد."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"‏به برنامه اجازه می‌دهد منطقه زمانی دستگاه Android TV را تغییر دهد."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"‏به برنامه اجازه می‎دهد تا منطقهٔ زمانی تلفن را تغییر دهد."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"یافتن حساب‌ها در دستگاه"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"به برنامه اجازه می‌دهد به فهرست حساب‌های شناخته شده توسط رایانهٔ لوحی دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"به برنامه اجازه می‌دهد تا فهرست حساب‌هایی را دریافت کند که تلویزیون می‌شناسد. شاید شامل حساب‌هایی باشد که توسط برنامه‌هایی که نصب کرده‌اید، ایجاد شده باشد."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"‏به برنامه اجازه می‌دهد فهرستی از حساب‌هایی را که دستگاه Android TV شما می‌شناسد، دریافت کند. می‌تواند شامل حساب‌هایی شود که توسط برنامه‌هایی که نصب کرده‌اید، ایجاد شده است."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"به برنامه اجازه می‌دهد به فهرست حساب‌های شناخته شده توسط تلفن دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"مشاهدهٔ اتصالات شبکه"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"به برنامه امکان می‌دهد اطلاعات مربوط به اتصالات شبکه مانند شبکه‌های موجود و متصل را مشاهده کند."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"‏به برنامه اجازه می‎دهد تا به نقاط دسترسی Wi-Fi وصل شود و ارتباط خود را با آن‌ها قطع کند و تغییراتی را در پیکربندی دستگاه برای شبکه‎های Wi-Fi ایجاد کند."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"‏دریافت چندگانه Wi-Fi را مجاز می‌کند"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"‏به برنامه اجازه می‌دهد به دریافت بسته‌های ارسالی به همه دستگاه‌های موجود در شبکه Wi-Fi با استفاده از آدرس‌های پخش چندگانه و نه فقط به رایانهٔ لوحی شما بپردازند. این از توان مصرف بیشتری نسبت به حالت پخش غیرچندگانه استفاده می‌کند."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"‏به برنامه اجازه می‌دهد تا بسته‌هایی را دریافت کند که در شبکه Wi-Fi با استفاده از آدرس‌های چندبخشی نه تنها به تلویزیون شما، بلکه به همه دستگاهها ارسال می‌شود. این حالت نسبت به حالت غیر چندبخشی از انرژی بیشتری استفاده می‌کند."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"‏به برنامه اجازه می‌دهد با استفاده از نشانی‌های ارسال محتوای چندگانه، بسته‌های ارسالی به همه دستگاه‌های موجود در یک شبکه Wi-Fi ( و نه فقط دستگاه Android TV شما) را دریافت کند. این کار نسبت به حالت ارسال محتوای تکی (غیرچندگانه)، نیروی بیشتری مصرف می‌کند."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"‏به برنامه اجازه می‌دهد به دریافت بسته‌های ارسالی به همه دستگاه‌های موجود در شبکه Wi-Fi با استفاده از آدرس‌های پخش چندگانه و نه فقط به تلفن شما بپردازند. این از توان مصرف بیشتری نسبت به حالت پخش غیرچندگانه استفاده می‌کند."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"دسترسی به تنظیمات بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"‏به برنامه اجازه می‎دهد تا رایانهٔ لوحی بلوتوث محلی را پیکربندی کرده، دستگاه‌های راه دور را شناسایی کرده و با آن‌ها مرتبط‌سازی شود."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"به برنامه اجازه می‌دهد تا تلویزیون بلوتوث محلی را پیکربندی کند و دستگاه‌های ازراه‌دور را شناسایی کند و با آنها مرتبط شود."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"‏به برنامه اجازه می‌دهد بلوتوث را در دستگاه Android TV شما پیکربندی کند، و دستگاه‌های راه‌دور را شناسایی کند و با آن‌ها مرتبط شود."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها مرتبط‌سازی شود."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏اتصال و قطع اتصال از WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"به برنامه امکان می‌دهد فعال بودن وایمکس و اطلاعات مربوط به هر یک از شبکه‌های وایمکس متصل را مشخص کند."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"‏تغییر وضعیت WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"به برنامه امکان می‌دهد رایانهٔ لوحی را به شبکه‌های وایمکس متصل کرده یا اتصال آن را از این شبکه‌ها قطع کند."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏به برنامه اجازه می‌دهد تا تلویزیون را به شبکه‌های WiMAX وصل یا ارتباط آن را با این شبکه‌ها قطع کند."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"‏به برنامه اجازه می‌دهد دستگاه Android TV را به شبکه‌های WiMAX متصل کند یا اتصال آن را قطع کند."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏به برنامه امکان می‎دهد تا تلفن را به شبکه‌های وایمکس متصل کرده یا اتصال آنرا از این شبکه‌ها قطع کند."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"مرتبط‌سازی با دستگاه‌های بلوتوث"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در رایانهٔ لوحی را مشاهده کند و اتصال با دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"به برنامه اجازه می‌دهد تا پیکربندی بلوتوث را در تلویزیون مشاهده کند و اتصالات را با دستگاه‌های مرتبط‌شده ایجاد کند و بپذیرد."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"‏به برنامه اجازه می‌دهد پیکربندی بلوتوث را در دستگاه Android TV شما ببیند، و اتصالات با دستگاه‌های مرتبط‌شده را بپذیرد یا این اتصالات را برقرار کند."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در تلفن را مشاهده کند، و اتصالات دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏به برنامه اجازه می‎دهد تا با تگ‌های «ارتباط میدان نزدیک» (NFC)، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"پایش تلاش‌های باز کردن قفل صفحه"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و اگر دفعات زیادی گذرواژه نادرست وارد شود رایانهٔ لوحی را قفل می‌کند و همه داده‎های رایانهٔ لوحی را پاک می‌کند."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"بر تعداد گذرواژه‌های نادرست تایپ‌شده در زمان باز کردن قفل صفحه نظارت کنید و اگر تعدا زیادی گذرواژه‌های اشتباه تایپ شده است، تلویزیون را قفل کنید یا همه داده‌های تلویزیون را پاک کنید."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"‏بر تعداد گذرواژه‎های نادرستی که هنگام بازکردن قفل صفحه تایپ می‌شود، نظارت می‌کند، و اگر گذرواژه‌های نادرست دفعات زیادی تایپ شوند، Android TV را قفل می‌کند یا همه داده‎های آن را پاک می‌کند."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"‏تعداد گذرواژه‎های نادرست تایپ‌شده را هنگام بازکردن قفل صفحه کنترل می‎کند و اگر چندین بار گذرواژه‌های نادرست وارد شود، تلفن را قفل می‌کند یا همه داده‎های تلفن را پاک می‌کند."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، رایانه لوحی را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلویزیون را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"‏بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ می‌شود، نظارت می‌کند، و اگر گذرواژه‌های نادرست دفعات زیادی تایپ شوند، دستگاه Android TV را قفل یا همه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلفن را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"تغییر قفل صفحه"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"قفل صفحه را تغییر می‌دهد."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"نحوه و زمان قفل شدن صفحه را کنترل می‌کند."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"پاک کردن تمام داده‌ها"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"با انجام بازنشانی داده‌های کارخانه، داده‌های رایانهٔ لوحی بدون هشدار پاک می‌شود."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"داده‌های تلویزیون را بدون هشدار با انجام بازنشانی داده‌های کارخانه پاک کنید."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"‏داده‌های دستگاه Android TV شما، بدون نشان داده شدن هشدار و با انجام بازنشانی داده‌های کارخانه، پاک می‌شود."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"با انجام بازنشانی داده‌های کارخانه، داده‌های تلفن بدون هشدار پاک می‌شود."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"پاک کردن داده‌های کاربر"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"داده‌های این کاربر را در این رایانه لوحی بدون هشدار پاک می‌کند."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"داده‌های این کاربر را در این تلویزیون بدون هشدار پاک می‌کند."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"‏بدون نشان داده شدن هشدار، داده‌های این کاربر در این دستگاه Android TV پاک می‌شود."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"داده‌های این کاربر را در این تلفن بدون هشدار پاک می‌کند."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"تنظیم پروکسی جهانی دستگاه"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"پروکسی کلی دستگاه را برای استفاده هنگام فعال بودن این خط‌مشی تنظیم می‌کند. تنها مالک دستگاه می‌تواند پروکسی کلی را تنظیم کند."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"دفعات تلاش برای «بازگشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون رایانهٔ لوحی نیست."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"سیم‌کارتی در تلویزیون وجود ندارد."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"‏هیچ سیم‌کارتی در دستگاه Android TV شما قرار داده نشده است."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"سیم کارت درون تلفن نیست."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"سیم کارت را وارد کنید."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"سیم کارت موجود نیست یا قابل خواندن نیست. یک سیم کارت وارد کنید."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"گذرواژهٔ خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کرده‌اید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"‏پین را<xliff:g id="NUMBER_0">%1$d</xliff:g>  بار اشتباه تایپ کرده‎اید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که برای بازگشایی قفل رایانهٔ لوحی خود به Google وارد شوید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"‏الگوی بازگشایی را <xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست رسم کرده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، از شما خواسته خواهد شد تا با استفاده از ورود به سیستم Google، قفل تلویزیون‌تان را باز کنید.\n\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه، دوباره امتحان کنید."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> بار الگوی بازگشایی‌تان را اشتباه کشیده‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید،‌ از شما خواسته می‌شود با اطلاعات ورود به سیستم Google خود، قفل دستگاه Android TV را باز کنید.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دیگر دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏الگوی قفل‌گشایی را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر از شما خواسته می‎شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید.\n\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل رایانهٔ لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، رایانهٔ لوحی به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"<xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد و اطلاعات کاربر از دست خواهد رفت."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل Android TV خود داشته‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید، دستگاه Android TV شما به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد و همه داده‌های کاربر ازدست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از<xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"شما به اشتباه اقدام به باز کردن قفل <xliff:g id="NUMBER">%d</xliff:g> رایانهٔ لوحی کرده‌اید. رایانهٔ لوحی در حال حاضر به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"<xliff:g id="NUMBER">%d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. اکنون تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"‏<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل Android TV خود داشته‌اید. اکنون دستگاه Android TV شما به تنظیمات پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"به‌اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن دیگر به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"پس از <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"الگو را فراموش کرده‌اید؟"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"به برنامه اجازه می‌دهد سابقه نشانی‌های وب را که مرورگر بازدید کرده است و همه نشانک‌های مرورگر را بخواند. توجه: این مجوز توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نیست."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"نوشتن نشانک‌های وب و سابقه"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره‌شده در رایانهٔ لوحی شما را تغییر دهد. این ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف کند یا تغییر دهد. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"به برنامه اجازه می‌دهد تا سابقه یا نشانک‌های ذخیره شده مرورگر در تلویزیون شما را تغییر دهد. شاید به برنامه اجازه دهد تا داده‌های «مرورگر» را پاک کند یا تغییر دهد. توجه: این مجوز شاید توسط مرورگرهای شخص ثالث یا سایر برنامه‌ها با قابلیت‌های مرور وب اجرا شود."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"‏به برنامه اجازه می‎دهد سابقه مرورگر یا نشانک‎های ذخیره‌شده در دستگاه Android TV را تغییر دهد. ممکن است به برنامه اجازه دهد داده‌های مرورگر را پاک کند یا تغییر دهد. توجه: ممکن است این مجوز توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب اجرا نشود."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره‌شده در تلفن شما را تغییر دهد. این ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف کند یا تغییر دهد. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تنظیم زنگ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا زنگی را در برنامه ساعت زنگدار نصب‌شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="other">‏شبکه‌ Wi-Fi باز در دسترس</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"‏اتصال به شبکه Wi‑Fi باز"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"‏اتصال به شبکه Wi-Fi شرکت مخابراتی"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"‏درحال اتصال به شبکه Wi‑Fi..."</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏به شبکه Wi‑Fi متصل شد"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏به شبکه Wi-Fi متصل نشد"</string>
@@ -1307,7 +1310,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"پین لازم را تایپ کنید:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"پین:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"‏در حین اتصال به <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ارتباط این رایانه لوحی با Wi-Fi موقتاً قطع خواهد شد."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"‏در حالی که تلویزیون به <xliff:g id="DEVICE_NAME">%1$s</xliff:g> متصل است، ارتباط آن به صورت موقت از Wi-Fi قطع خواهد شد."</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"‏وقتی دستگاه Android TV به <xliff:g id="DEVICE_NAME">%1$s</xliff:g> متصل است، اتصال آن به Wi-Fi موقتاً قطع می‌شود"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"‏این گوشی به‌طور موقت از Wi-Fi قطع خواهد شد، در حالی که به <xliff:g id="DEVICE_NAME">%1$s</xliff:g> وصل است"</string>
     <string name="select_character" msgid="3365550120617701745">"درج نویسه"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"درحال ارسال پیامک‌ها"</string>
@@ -1650,13 +1653,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"گذرواژه خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیدید. \n\nلطفاً پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، رایانهٔ لوحی به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"<xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد و اطلاعات کاربر از دست خواهد رفت."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل Android TV خود داشته‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید، دستگاه Android TV شما به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد و همه داده‌های کاربر ازدست خواهد رفت."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. رایانه لوحی اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"<xliff:g id="NUMBER">%d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. اکنون تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"‏<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل Android TV خود داشته‌اید. اکنون دستگاه Android TV شما به تنظیمات پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"الگوی بازگشایی‌تان را <xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست رسم کرده‌اید. <xliff:g id="NUMBER_1">%2$d</xliff:g> پس از \n تلاش ناموفق دیگر، از شما خواسته می‌شود تا با استفاده از یک حساب ایمیل، قفل تلویزیون‌تان را باز کنید.\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> بار الگوی بازگشایی‌تان را اشتباه کشیده‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید، از شما خواسته می‌شود بااستفاده از حساب ایمیل خود، قفل دستگاه Android TV را باز کنید.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دیگر دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"حذف"</string>
@@ -1997,6 +2000,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"برای بررسی موارد مسدودشده ضربه بزنید."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"سیستم"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"تنظیمات"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"آماده‌به‌کار"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"‏دستگاه Android TV به‌زودی خاموش می‌شود، برای روشن نگه‌داشتن آن، دکمه‌ای را فشار دهید."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"دستگاه به‌زودی خاموش می‌شود، برای روشن نگه‌داشتن آن فشار دهید."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"دوربین"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"میکروفون"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"نمایش روی برنامه‌های دیگر در صفحه‌نمایش"</string>

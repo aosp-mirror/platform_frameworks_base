@@ -176,7 +176,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Превише покушаја брисања садржаја <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Меморија таблета је пуна! Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Меморија сата је пуна. Избришите неке датотеке да бисте ослободили простор."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Меморијски простор на ТВ-у је попуњен. Избришите неке датотеке да бисте ослободили простор."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Меморијски простор на Android TV уређају је пун. Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Меморија телефона је пуна! Избришите неке датотеке да бисте ослободили простор."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">Инсталирани су ауторитети за издавање сертификата</item>
@@ -197,7 +197,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Штампање је онемогућила апликација <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Ја"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Опције за таблет"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Опције за ТВ"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Опције Android TV-а"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Опције телефона"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Нечујни режим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Укључи бежични сигнал"</string>
@@ -215,7 +215,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Поново се покреће..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Искључивање…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблет ће се искључити."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ТВ ће се искључити."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV уређај ће се угасити."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Сат ће се угасити."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон ће се искључити."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Да ли желите да искључите телефон?"</string>
@@ -224,7 +224,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Недавно"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Нема недавних апликација."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Опције за таблет"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Опције за ТВ"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Опције Android TV-а"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Опције телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Закључај екран"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Искључи"</string>
@@ -355,7 +355,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Дозвољава апликацији да шаље SMS поруке. Ово може да доведе до неочекиваних трошкова. Злонамерне апликације могу да шаљу поруке без ваше потврде, што може да изазове трошкове."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"читање текстуалних порука (SMS или MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Ова апликација може да чита све SMS (текстуалне) поруке које се чувају на таблету."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Ова апликација може да чита све SMS (текстуалне) поруке које се чувају на ТВ-у."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Ова апликација може да чита све SMS (текстуалне) поруке које се чувају на Android TV уређају."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Ова апликација може да чита све SMS (текстуалне) поруке које се чувају на телефону."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"пријем текстуалних порука (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Дозвољава апликацији да прима и обрађује WAP поруке. Ова дозвола укључује могућност праћења или брисања порука које вам се шаљу, а које вам се не приказују."</string>
@@ -377,7 +377,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Ова апликација може да користи податке у позадини. То може да повећа потрошњу података."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"омогућавање непрекидне активности апликације"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Дозвољава апликацији да учини сопствене компоненте трајним у меморији. Ово може да ограничи меморију доступну другим апликацијама и успори таблет."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Дозвољава апликацији да неке своје делове трајно задржи у меморији. То може да ограничи меморију доступну другим апликацијама и успори ТВ."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Дозвољава апликацији да трајно задржи неке своје делове у меморији. Ово може да ограничи меморију доступну другим апликацијама и успори Android TV уређај."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Дозвољава апликацији да учини сопствене компоненте трајним у меморији. Ово може да ограничи меморију доступну другим апликацијама и успори телефон."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"покрени услугу у првом плану"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Дозвољава апликацији да користи услуге у првом плану."</string>
@@ -387,35 +387,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Дозвољава апликацији да мења податке о подешавању система. Злонамерне апликације могу да оштете конфигурацију система."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"покретање при покретању система"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Омогућава да се апликација покрене одмах након покретања система. То може да успори покретање таблета, при чему ова апликација може да успори функционисање целог таблета тиме што ће увек бити активна."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Дозвољава апликацији да се покрене чим се покрене систем. То може да успори покретање ТВ-а, при чему ова апликација може да успори функционисање целог таблета тиме што ће увек бити активна."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Дозвољава апликацији да се покрене одмах по укључивању система. То може да успори покретање Android TV уређаја и апликација може да успори функционисање уређаја у целини тако што ће увек бити активна."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Омогућава да се апликација покрене чим се систем покрене. То може да успори покретање телефона, при чему ова апликација може да успори функционисање целог телефона тиме што ће увек бити активна."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"слање пријемчивих емитовања"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Дозвољава апликацији да шаље пријемчива емитовања, која остају по завршетку емитовања. Прекомерна употреба може да успори или дестабилизује таблет тако што ће га приморати да троши превише меморије."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Дозвољава апликацији да шаље снимке емитовања, који остају и после краја емитовања. Прекомерна употреба може да успори ТВ или да му угрози стабилност јер користи превише меморије."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Дозвољава апликацији да шаље лепљива емитовања која остају по завршетку емитовања. Прекомерна употреба може да успори или дестабилизује Android TV уређај тако што ће га приморати да троши превише меморије."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Дозвољава апликацији да шаље пријемчива емитовања, која остају по завршетку емитовања. Прекомерна употреба може да успори или дестабилизује телефон тако што ће га приморати да троши превише меморије."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"читање контаката"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Дозвољава апликацији да чита податке о контактима ускладиштене на таблету, укључујући податке о томе колико често зовете одређене особе, шаљете им поруке е-поште или на други начин комуницирате са њима. Ова дозвола омогућава апликацијама да чувају податке о контактима, а злонамерне апликације могу да деле податке о контактима без вашег знања."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Дозвољава апликацији да чита податке о контактима које чувате на ТВ-у, укључујући колико често сте звали, слали имејлове или на друге начине комуницирали са одређеним особама. Ова дозвола омогућава апликацијама да чувају податке о контактима, а злонамерне апликације могу да деле ове податке без вашег знања."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Дозвољава апликацији да чита податке о контактима које чувате на Android TV уређају, укључујући учесталост позива, слања имејлова или других начина комуникације са одређеним појединцима. Ова дозвола омогућава апликацијама да чувају податке о контактима и злонамерне апликације могу да деле податке о контактима без вашег знања."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Дозвољава апликацији да чита податке о контактима ускладиштене на телефону, укључујући податке о томе колико често зовете одређене особе, шаљете им поруке е-поште или на други начин комуницирате са њима. Ова дозвола омогућава апликацијама да чувају податке о контактима, а злонамерне апликације могу да деле податке о контактима без вашег знања."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"измена контаката"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Дозвољава апликацији да мења податке о контактима ускладиштене на таблету, укључујући податке о томе колико често зовете одређене контакте, шаљете им поруке е-поште или на други начин комуницирате са њима. Ова дозвола омогућава апликацијама да бришу податке о контактима."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Дозвољава апликацији да мења податке о контактима које чувате на ТВ-у, укључујући колико често сте звали, слали имејлове или на друге начине комуницирали са одређеним контактима. Ова дозвола омогућава апликацијама да бришу податке о контактима."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Дозвољава апликацији да мења податке о контактима које чувате на Android TV уређају, укључујући учесталост позива, слања имејлова или других начина комуникације са одређеним контактима. Ова дозвола омогућава апликацијама да бришу податке о контактима."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Дозвољава апликацији да мења податке о контактима ускладиштене на телефону, укључујући податке о томе колико често зовете одређене контакте, шаљете им поруке е-поште или на други начин комуницирате са њима. Ова дозвола омогућава апликацијама да бришу податке о контактима."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"читање евиденције позива"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Ова апликација може да чита историју позива."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"писање евиденције позива"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Дозвољава апликацији да мења евиденцију позива на таблету, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе да би брисале или мењале евиденцију позива."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Дозвољава апликацији да мења евиденцију позива на ТВ-у, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе да би брисале или мењале евиденцију позива."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Дозвољава апликацији да мења евиденцију позива на Android TV уређају, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе за брисање или мењање евиденције позива."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Дозвољава апликацији да мења евиденцију позива на телефону, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе да би брисале или мењале евиденцију позива."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"приступ сензорима на телу (попут монитора за праћење пулса)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Дозвољава апликацији да приступа подацима са сензора који надгледају физичку кондицију, као што је број откуцаја срца."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Читање догађаја и података из календара"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Ова апликација може да чита све догађаје из календара које чувате на таблету, као и да дели или чува податке из календара."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Ова апликација може да чита све догађаје из календара које чувате на ТВ-у, као и да дели или чува податке из календара."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Ова апликација може да чита све догађаје из календара које чувате на Android TV уређају, као и да дели или чува податке из календара."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Ова апликација може да чита све догађаје из календара које чувате на телефону, као и да дели или чува податке из календара."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"додавање или измена календарских догађаја и слање порука е-поште гостима без знања власника"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Ова апликацији може да додаје, уклања или мења догађаје из календара на таблету. Ова апликација може да шаље поруке које изгледају као да их шаљу власници календара или да мења догађаје без знања власника."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Ова апликацији може да додаје, уклања или мења догађаје из календара на ТВ-у. Ова апликација може да шаље поруке које изгледају као да их шаљу власници календара или да мења догађаје без знања власника."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Ова апликација може да додаје, уклања или мења догађаје из календара на Android TV уређају. Ова апликација може да шаље поруке које изгледају као да их шаљу власници календара или да мења догађаје без знања власника."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ова апликацији може да додаје, уклања или мења догађаје из календара на телефону. Ова апликација може да шаље поруке које изгледају као да их шаљу власници календара или да мења догађаје без знања власника."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"приступ додатним командама добављача локације"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Омогућава апликацији да приступа додатним командама даваоца услуга локације. То може да омогући апликацији да утиче на рад GPS-а или других извора локације."</string>
@@ -423,7 +423,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ова апликација може да одреди вашу тачну локацију само када ради у првом плану. Ове услуге локације морају да буду укључене и доступне на телефону да би апликација могла да их користи. То може да повећа потрошњу батерије."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"приступ приближној локацији (утврђеној преко мреже) само у првом плану"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже, али само када апликација ради у првом плану. Ове услуге локације морају да буду укључене и доступне на таблету да би апликација могла да их користи"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже, али само када апликација ради у првом плану. Ове услуге локације морају да буду укључене и доступне на телевизору да би апликација могла да их користи."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже, али само када апликација ради у првом плану. Ове услуге локације морају да буду укључене и доступне на Android TV уређају да би апликација могла да их користи."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже, али само када апликација ради у првом плану. Ове услуге локације морају да буду укључене и доступне на телефону да би апликација могла да их користи."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"приступ локацији у позадини"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ако се поред приближног или прецизног приступа локација одобри и овај, апликација може да приступа локацији док је покренута у позадини."</string>
@@ -437,6 +437,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ова апликација може да препозна физичке активности."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимање фотографија и видео снимака"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ова апликација може да снима фотографије и видео снимке помоћу камере у било ком тренутку."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"контрола вибрације"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно позивање бројева телефона"</string>
@@ -454,14 +458,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"читање бројева телефона"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Дозвољава апликацији да приступа бројевима телефона на уређају."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречавање преласка таблета у стање спавања"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"спречавање ТВ-а да пређе у стање спавања"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"спречава Android TV уређај да пређе у стање спавања"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"спречавање преласка телефона у стање спавања"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дозвољава апликацији да спречи таблет да пређе у стање спавања."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Дозвољава апликацији да спречи ТВ да пређе у стање спавања."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Дозвољава апликацији да спречи Android TV уређај да пређе у стање спавања."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Дозвољава апликацији да спречи телефон да пређе у стање спавања."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"пренос инфрацрвених зрака"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Дозвољава апликацији да користи одашиљач инфрацрвених зрака таблета."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Дозвољава апликацији да користи одашиљач инфрацрвених зрака ТВ-а."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Дозвољава да апликација користи одашиљач инфрацрвених зрака на Android TV уређају."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Дозвољава апликацији да користи одашиљач инфрацрвених зрака телефона."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"подешавање позадине"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Дозвољава апликацији да поставља позадину система."</string>
@@ -469,11 +473,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дозвољава апликацији да подеси савете за системску величину позадине."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"подешавање временске зоне"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Дозвољава апликацији да промени временску зону таблета."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Дозвољава апликацији да промени временску зону ТВ-а."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Дозвољава апликацији да мења временску зону Android TV уређаја."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дозвољава апликацији да промени временску зону телефона."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"проналажење налога на уређају"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Дозвољава апликацији да преузима листу налога познатих таблету. Ово може да обухвата било које налоге које праве апликације које инсталирате."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Дозвољава апликацији да дође до листе налога познатих ТВ-у. Ту могу да спадају налози које су отвориле апликације које сте инсталирали."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Дозвољава апликацији да дође до листе налога познатих Android TV уређају. Ово може да обухвата све налоге које отварају апликације које сте инсталирали."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Дозвољава апликацији да преузима листу налога познатих телефону. Ово може да обухвата било које налоге које праве апликације које инсталирате."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"преглед мрежних веза"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Дозвољава апликацији да прегледа информације о мрежним везама као што су информације о томе које мреже постоје и које мреже су повезане."</string>
@@ -489,21 +493,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Дозвољава апликацији да се повезује са приступним тачкама за Wi-Fi и прекида везу са њима, као и да уноси промене у конфигурацију уређаја за Wi-Fi мреже."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"омогућавање пријема вишесмерног Wi-Fi саобраћаја"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на Wi-Fi мрежи помоћу вишесмерних адреса, а не само на таблет. Користи више напајања од режима једносмерног саобраћаја."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Дозвољава апликацији да прима пакете послате свим уређајима на Wi-Fi мрежи помоћу адреса за вишеструко пребацивање, не само ТВ-у. Користи више енергије него режим без вишеструког пребацивања."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на Wi-Fi мрежи помоћу вишесмерних адреса, а не само на Android TV уређај. Користи више енергије од режима без вишесмерног слања."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на Wi-Fi мрежи помоћу вишесмерних адреса, а не само на телефон. Користи више напајања од режима једносмерног саобраћаја."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"приступ Bluetooth подешавањима"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да открије даљинске уређаје и упари се са њима."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Дозвољава апликацији да конфигурише локални Bluetooth ТВ, као и да открива удаљене уређаје и упарује се са њима."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Дозвољава апликацији да конфигурише Bluetooth на Android TV уређају и да открије удаљене уређаје и упари се са њима."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозвољава апликацији да конфигурише локални Bluetooth телефон, као и да открије даљинске уређаје и упари се са њима."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"повезивање и прекид везе са WiMAX-ом"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Дозвољава апликацији да утврди да ли је WiMAX омогућен, као и информације о било којим повезаним WiMAX мрежама."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"промени WiMAX статуса"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Дозвољава апликацији да повезује таблет са WiMAX мрежама и прекида везе са њима."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Дозвољава апликацији да повезује ТВ са WiMAX мрежама и да раскида ту везу."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Дозвољава апликацији да повезује Android TV уређај са WiMAX мрежама и да прекида ту везу."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Дозвољава апликацији да повезује телефон са WiMAX мрежама и прекида везе са њима."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"упаривање са Bluetooth уређајима"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Дозвољава апликацији да прегледа конфигурацију Bluetooth-а на таблету, као и да успоставља и прихвата везе са упареним уређајима."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Дозвољава апликацији да види конфигурацију Bluetooth-а на ТВ-у, као и да успоставља и прихвата везе са упареним уређајима."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Дозвољава апликацији да прегледа конфигурацију Bluetooth-а на Android TV уређају и да успоставља и прихвата везе са упареним уређајима."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Дозвољава апликацији да прегледа конфигурацију Bluetooth-а на телефону, као и да успоставља и прихвата везе са упареним уређајима."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозвољава апликацији да комуницира са ознакама, картицама и читачима комуникације кратког домета (NFC)."</string>
@@ -660,10 +664,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролише дужину и знакове дозвољене у лозинкама и PIN-овима за закључавање екрана."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Надгледајте покушаје откључавања екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Прати број нетачно унетих лозинки приликом откључавања екрана и закључава таблет или брише податке са таблета ако је нетачна лозинка унета превише пута."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Надгледа број нетачних лозинки које унесете при откључавању екрана и закључава ТВ или брише све податке са њега ако се унесе превише нетачних лозинки."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке са Android TV уређаја ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Прати број нетачно унетих лозинки при откључавању екрана и закључава телефон или брише све податке са телефона ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава таблет или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава ТВ или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава телефон или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Промена закључавања екрана"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Промените закључавање екрана."</string>
@@ -671,11 +675,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролишите начин и време закључавања екрана."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Брисање свих података"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Брисање података на таблету без упозорења ресетовањем на фабричка подешавања."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Брише све податке са ТВ-а без упозорења ресетовањем на фабричка подешавања."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Брише податке Android TV уређаја без упозорења помоћу ресетовања на фабричка подешавања."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Избришите податке на телефону без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Обриши податке корисника"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Брише податке овог корисника на овом таблету без упозорења."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Брише податке овог корисника на овом ТВ-у без упозорења."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Брише податке овог корисника на овом Android TV уређају без упозорења."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Брише податке овог корисника на овом телефону без упозорења."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Подесите глобални прокси сервер уређаја"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Подешава глобални прокси уређаја који ће се користити док су смернице омогућене. Само власник уређаја може да подеси глобални прокси."</string>
@@ -825,7 +829,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Премашен је највећи дозвољени број покушаја Откључавања лицем"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Нема SIM картице"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"У таблету нема SIM картице."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"У ТВ-у нема SIM картице."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Нема SIM картице у Android TV уређају."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"У телефон није уметнута SIM картица."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Уметните SIM картицу."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM недостаје или не може да се прочита. Уметните SIM картицу."</string>
@@ -848,13 +852,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"<xliff:g id="NUMBER_0">%1$d</xliff:g> пута сте погрешно унели лозинку. \n\nПробајте поново за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунде/и."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"<xliff:g id="NUMBER_0">%1$d</xliff:g> пута сте погрешно унели PIN. \n\nПробајте поново за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунде/и."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"<xliff:g id="NUMBER_0">%1$d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%2$d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу података за пријављивање на Google.\n\n Пробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> секунде/и."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Неисправно сте нацртали шаблон за откључавање <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја од вас ће бити затражено да откључате ТВ помоћу података за пријављивање на Google.\n\n Пробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Нетачно сте нацртали шаблон за откључавање <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. Ако погрешно покушате још пута (<xliff:g id="NUMBER_1">%2$d</xliff:g>), затражићемо да откључате телефон помоћу Android TV уређаја.\n\n Пробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%1$d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%2$d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу података за пријављивање на Google.\n\n Пробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> секунде/и."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Неправилно сте покушали да откључате таблет <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%2$d</xliff:g>) таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја ТВ ће бити ресетован на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Број ваших неуспешних покушаја да откључате Android TV уређај: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Број преосталих неуспешних покушаја после којих ће се Android TV ресетовати на фабричка подешавања и сви подаци корисника ће бити изгубљени: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%2$d</xliff:g>) телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Неисправно сте покушали да откључате таблет <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. ТВ ће сада бити ресетован на подразумевана фабричка подешавања."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Број ваших неуспешних покушаја да откључате Android TV уређај: <xliff:g id="NUMBER">%d</xliff:g>. Android TV уређај ће се сада ресетовати на фабричка подешавања."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Пробајте поново за <xliff:g id="NUMBER">%d</xliff:g> секунде/и."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Заборавили сте шаблон?"</string>
@@ -941,7 +945,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Дозвољава апликацији да чита историју свих URL адреса које су посећене помоћу Прегледача, као и све обележиваче у Прегледачу. Напомена: Ова дозвола се можда на примењује на прегледаче треће стране и друге апликације са могућношћу веб прегледања."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"писање веб обележивача и историје"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Дозвољава апликацији да мења историју Прегледача или обележиваче ускладиштене на таблету. Ово може да омогући апликацији да брише или мења податке Прегледача. Напомена: Ова дозвола се можда на примењује на прегледаче треће стране и друге апликације са могућношћу веб прегледања."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Дозвољава апликацији да мења историју прегледача или обележиваче које чувате на ТВ-у. То може да дозволи апликацији да брише или мења податке прегледача. Напомена: Ова дозвола се можда не примењује на прегледаче треће стране и друге апликације са могућношћу прегледања веба."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Дозвољава апликацији да мења историју прегледача или обележиваче који се чувају на Android TV уређају. Ово може да омогући апликацији да брише или мења податке прегледача. Напомена: ова дозвола се можда не примењује на прегледаче треће стране ни друге апликације са могућностима веб-прегледања."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Дозвољава апликацији да мења историју Прегледача или обележиваче ускладиштене на телефону. Ово може да омогући апликацији да брише или мења податке Прегледача. Напомена: Ова дозвола се можда на примењује на прегледаче треће стране и друге апликације са могућношћу веб прегледања."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"подешавање аларма"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дозвољава апликацији да подеси аларм у инсталираној апликацији будилника. Неке апликације будилника можда не примењују ову функцију."</string>
@@ -1271,7 +1275,6 @@
       <item quantity="other">Отворене Wi-Fi мреже су доступне</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Повежите се са отвореном Wi‑Fi мрежом"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Повежите се на Wi-Fi мрежу мобилног оператера"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Повезује се са Wi-Fi мрежом..."</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Повезали сте се са Wi‑Fi мрежом"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Повезивање са Wi‑Fi мрежом није успело"</string>
@@ -1329,7 +1332,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Унесите потребни PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Таблет ће привремено прекинути везу са Wi-Fi-јем док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"ТВ ће привремено прекинути везу са Wi-Fi-јем док је повезан на <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV уређај ће привремено прекинути везу са Wi-Fi мрежом док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Телефон ће привремено прекинути везу са Wi-Fi-јем док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Уметање знака"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Слање SMS порука"</string>
@@ -1674,13 +1677,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте нетачну лозинку <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. \n\nПробајте поново за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунде/и."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. \n\nПробајте поново за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунде/и."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет нетачно <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја ТВ ће бити ресетован на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Број ваших неуспешних покушаја да откључате Android TV уређај: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Број преосталих неуспешних покушаја после којих ће се Android TV ресетовати на фабричка подешавања и сви подаци корисника ће бити изгубљени: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон нетачно <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Покушали сте да откључате таблет нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Покушали сте да откључате ТВ нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. ТВ ће сада бити ресетован на подразумевана фабричка подешавања."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Број ваших неуспешних покушаја да откључате Android TV уређај: <xliff:g id="NUMBER">%d</xliff:g>. Android TV уређај ће се сада ресетовати на фабричка подешавања."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Покушали сте да откључате телефон нетачно <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> секунде/и."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Неисправно сте нацртали шаблон за откључавање <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате ТВ помоћу налога е-поште.\n\n Пробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Нетачно сте нацртали шаблон за откључавање <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. Ако погрешно покушате још пута (<xliff:g id="NUMBER_1">%2$d</xliff:g>), затражићемо да откључате телефон помоћу Android TV уређаја.\n\n Пробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%1$d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПробајте поново за <xliff:g id="NUMBER_2">%3$d</xliff:g> секунде/и."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Уклони"</string>
@@ -2032,6 +2035,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Додирните да бисте проверили шта је блокирано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Подешавања"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Стање приправности"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV ће се ускоро искључити. Притисните дугме да би остао укључен."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Уређај ће се ускоро искључити. Притисните да би остао укључен."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"приказује се на екрану док користите друге апликације"</string>

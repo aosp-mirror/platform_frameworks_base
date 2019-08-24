@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Çok fazla sayıda <xliff:g id="CONTENT_TYPE">%s</xliff:g> içeriği silinmeye çalışıldı."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tabletin depolama alanı dolu! Yer açmak için bazı dosyaları silin."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Saat depolama alanınız dolu. Lütfen yer boşaltmak için bazı dosyaları silin."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"TV depolama alanı dolu. Boş alan açmak için bazı dosyaları silin."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV cihazının depolama alanı dolu. Yer açmak için bazı dosyaları silin."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefonun depolama alanı dolu! Yer açmak için bazı dosyaları silin."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Sertifika yetkilileri yüklendi</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Yazdırma işlemi <xliff:g id="OWNER_APP">%s</xliff:g> tarafından devre dışı bırakıldı."</string>
     <string name="me" msgid="6545696007631404292">"Ben"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet seçenekleri"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV seçenekleri"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV seçenekleri"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefon seçenekleri"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Sessiz mod"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Kablosuzu aç"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Yeniden başlatılıyor…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Kapanıyor…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tabletiniz kapanacak."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV\'niz kapatılacak."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV cihazınız kapanacak."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Saatiniz kapatılacak."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonunuz kapanacak."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Kapatmak istiyor musunuz?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"En Son Görevler"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Son uygulama yok"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet seçenekleri"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"TV seçenekleri"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV seçenekleri"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefon seçenekleri"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekran kilidi"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Kapat"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Uygulamaya SMS iletisi gönderme izni verir. Bu durum beklenmeyen ödemelere neden olabilir. Kötü amaçlı uygulamalar onayınız olmadan iletiler göndererek sizi zarara uğratabilir."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"kısa mesajlarımı (SMS veya MMS) oku"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Bu uygulama, tabletinizde kayıtlı tüm SMS mesajlarını (kısa mesajları) okuyabilir."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Bu uygulama, TV\'nizde kayıtlı tüm SMS mesajlarını (kısa mesajları) okuyabilir."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Bu uygulama, Android TV cihazınızda kayıtlı tüm SMS mesajlarını (kısa mesajları) okuyabilir."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Bu uygulama, telefonunuzda kayıtlı tüm SMS mesajlarını (kısa mesajları) okuyabilir."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"kısa mesajları (WAP) al"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Uygulamaya WAP mesajlarını alma ve işleme izni verir. Buna, size gönderilen mesajları takip edip size göstermeden silebilme izni de dahildir."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Bu uygulama, arka planda verileri kullanabilir. Bu durum veri kullanımını artırabilir."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"uygulamayı her zaman çalıştırma"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Uygulamaya kendisinin bir bölümünü bellekte kalıcı yapma izni verir. Bu izin, diğer uygulamaların kullanabileceği belleği sınırlandırarak tabletin yavaş çalışmasına neden olabilir."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Uygulamaya, kendi parçalarını bellekte kalıcı hale getirme izni verir. Bu, TV\'yi yavaşlatan diğer uygulamaların kullanabileceği bellek alanını sınırlayabilir."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Uygulamaya kendisinin bir bölümünü bellekte kalıcı yapma izni verir. Bu izin, diğer uygulamaların kullanabileceği belleği sınırlandırarak Android TV cihazınızın yavaş çalışmasına neden olabilir."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Uygulamaya kendisinin bir bölümünü bellekte kalıcı yapma izni verir. Bu izin, diğer uygulamaların kullanabileceği belleği sınırlandırarak telefonun yavaş çalışmasına neden olabilir."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"ön plan hizmetini çalıştırma"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Uygulamanın ön plan hizmetlerinden faydalanmasına izin verir."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Uygulamaya, sistem ayarı verilerini değiştirme izni verir. Kötü amaçlı uygulamalar sistem yapılandırmanızı bozabilir."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"başlangıçta çalıştırma"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Uygulamaya, kendisini sistem açılışı bittikten hemen sonra başlatma izni verir. Bu izin, tabletin başlaması için daha uzun süre geçmesine ve uygulamanın her zaman çalışarak tableti yavaşlatmasına neden olabilir."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Uygulamaya, sistem açılışı tamamlanır tamamlanmaz kendisini yeniden başlatma izni verir. Bu da TV\'nin açılmasının uzun sürmesine sebep olabilir ve uygulamanın sürekli çalışarak tableti genel olarak yavaşlatmasına olanak sağlar."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Uygulamaya, kendisini sistem açılışı bittikten hemen sonra başlatma izni verir. Bu izin, Android TV cihazınızın başlaması için daha uzun süre geçmesine ve uygulamanın her zaman çalışarak cihazı yavaşlatmasına neden olabilir."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Uygulamaya, kendisini sistem açılışı bittikten hemen sonra başlatma izni verir. Bu izin, telefonun başlatılması için daha uzun bir süre geçmesine ve uygulamanın her zaman çalışarak telefonu yavaşlatmasına neden olur."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sabit yayın gönderme"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Aşırı kullanılması çok fazla bellek harcanmasına neden olarak tableti yavaşlatabilir veya dengesiz hale getirebilir."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Uygulamaya, yayın sona erdikten sonra da kalan, ziyaretçi çeken yayınlar gönderme izni verir. Aşırı kullanım çok fazla bellek kullanılmasına yol açarak TV\'yi yavaşlatabilir ya da kararsız hale getirebilir."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Aşırı kullanılması çok fazla bellek harcanmasına neden olarak Android TV cihazınızı yavaşlatabilir veya dengesiz hale getirebilir."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Aşırı kullanılması çok fazla bellek harcanmasına neden olarak telefonunu yavaşlatabilir veya dengesiz hale getirebilir."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"kişilerinizi okuma"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Uygulamaya tabletinizde depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini haberiniz olmadan paylaşabilir."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Uygulamaya, belli kişileri arama, e-posta ile haberleşme veya başka yoldan iletişim kurma sıklığınız da dahil olmak üzere TV\'nizde kayıtlı kişiler ile ilgili verileri okuma izni verir. Bu izin, uygulamaların kişiler verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişiler verilerinizi bilginiz olmaksızın paylaşabilir."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Uygulamaya Android TV cihazınızda depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"kişilerinizi değiştirme"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Uygulamaya tabletinizde depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Uygulamaya, belirli kişileri arama, bu kişilerle e-posta aracılığıyla haberleşme veya başka yollardan iletişim kurma sıklığınız da dahil olmak üzere, TV\'nizde kayıtlı kişiler ile ilgili verileri değiştirme izni verir. Bu izin, uygulamaların kişi verilerinizi silmesine olanak sağlar."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Uygulamaya Android TV cihazınızda depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"çağrı günlüğünü oku"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Bu uygulama, çağrı geçmişinizi okuyabilir."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"çağrı günlüğüne yaz"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Uygulamaya tabletinizin çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Uygulamaya, tabletinizin çağrı kaydında (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı kaydınızı silebilir veya değiştirebilir."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Uygulamaya, Android TV cihazınızın çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Uygulamaya telefonunuzun çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"vücut sensörlerine erişme (nabız takip cihazları gibi)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Uygulamanın, nabzınız gibi fiziksel durumunuzu izleyen sensörlerin gönderdiği verilere erişmesine izin verir."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Takvim etkinlikleri ve ayrıntılarını okuma"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Bu uygulama, tabletinizde kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Bu uygulama, TV\'nizde kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Bu uygulama, Android TV cihazınızda kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Bu uygulama, telefonunuzda kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"sahibin bilgisi olmadan takvim etkinlikleri ekle veya mevcut etkinlikleri değiştir ve misafirlere e-posta gönder"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Bu uygulama, tabletinize takvim etkinlikleri ekleyebilir, mevcut etkinlikleri kaldırabilir ve değiştirebilir. Bu uygulama, takvim sahiplerinden gelmiş gibi görünen iletiler gönderebilir veya takvim sahiplerinin bilgisi olmadan etkinlikleri değiştirebilir."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Bu uygulama, TV\'nize takvim etkinlikleri ekleyebilir, mevcut etkinlikleri kaldırabilir ve değiştirebilir. Bu uygulama, takvim sahiplerinden gelmiş gibi görünen iletiler gönderebilir veya takvim sahiplerinin bilgisi olmadan etkinlikleri değiştirebilir."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Bu uygulama, Android TV cihazınıza takvim etkinlikleri ekleyebilir, mevcut etkinlikleri kaldırabilir ve değiştirebilir. Bu uygulama, takvim sahiplerinden gelmiş gibi görünen iletiler gönderebilir veya takvim sahiplerinin bilgisi olmadan etkinlikleri değiştirebilir."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Bu uygulama, telefonunuza takvim etkinlikleri ekleyebilir, mevcut etkinlikleri kaldırabilir ve değiştirebilir. Bu uygulama, takvim sahiplerinden gelmiş gibi görünen iletiler gönderebilir veya takvim sahiplerinin bilgisi olmadan etkinlikleri değiştirebilir."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ek konum sağlayıcı komutlarına eriş"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Uygulamanın, ekstra konum sağlayıcı komutlarına erişmesine izin verir. Bu izin, uygulamanın GPS veya diğer konum kaynaklarının çalışmasını kesmesine olanak sağlayabilir."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu uygulama yalnızca ön plandayken kesin konumunuzu alabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır. Bu, pil tüketimini artırabilir."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"yalnızca ön planda yaklaşık konuma (ağa dayalı) erişme"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için tabletinizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için TV\'nizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için Android TV cihazınızda bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"konum bilgisine arka planda eriş"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Bu izin, yaklaşık veya tam konum erişimine ek olarak verilirse uygulama, konum bilgisine arka planda çalışırken erişebilir."</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Bu uygulama fiziksel aktivitenizi algılayabilir."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"resim çekme ve görüntü kaydetme"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Bu uygulama, herhangi bir zamanda kamerayı kullanarak fotoğraf ve video çekebilir."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"titreşimi denetleme"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Uygulamaya, titreşimi denetleme izni verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
@@ -451,14 +455,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon numaralarını oku"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Uygulamaya, cihazınızın telefon numaralarına erişme izni verir."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tabletin uykuya geçmesini önle"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"TV\'nin uyku moduna geçmesini önleme"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"Android TV cihazınızın uyku moduna geçmesini önleme"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonun uykuya geçmesini önleme"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Uygulamaya, tabletin uykuya geçmesini önleme izni verir."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Uygulamaya, TV\'nin uyku moduna geçmesini önleme izni verir."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Uygulamaya, Android TV cihazınızın uyku moduna geçmesini önleme izni verir."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Uygulamaya, telefonun uykuya geçmesini önleme izni verir."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"kızı ötesi iletme"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Uygulamaya, tabletin kızıl ötesi vericisini kullanma izni verir."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Uygulamaya, TV\'nin kızılötesi vericisini kullanma izni verir."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Uygulamaya Android TV cihazınızın kızılötesi vericisini kullanma izni verir."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Uygulamaya, telefonunun kızıl ötesi vericisini kullanma izni verir."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"duvar kağıdını ayarla"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Uygulamaya, sistem duvar kağıdını ayarlama izni verir."</string>
@@ -466,11 +470,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Uygulamaya, sistem duvar kağıdı için boyut ipuçlarını ayarlama izni verir."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"saat dilimini ayarla"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Uygulamaya, tabletin saat dilimini değiştirme izni verir."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Uygulamaya, TV\'nin saat dilimini değiştirme izni verir."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Uygulamaya, Android TV cihazınızın saat dilimini değiştirme izni verir."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Uygulamaya, telefonun saat dilimini değiştirme izni verir."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"cihazdaki hesapları bulma"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Uygulamaya tablet tarafından bilinen hesapların listesini alma izni verir. Bu liste, yüklediğiniz uygulamalar tarafından oluşturulan tüm hesapları içerebilir."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Uygulamaya, TV tarafından bilinen hesapların listesini alma izni verir. Bu, yüklemiş olduğunuz uygulamalar tarafından oluşturulmuş hesapları da içerebilir."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Uygulamaya Android TV cihazınız tarafından bilinen hesapların listesini alma izni verir. Bu liste, yüklediğiniz uygulamalar tarafından oluşturulan tüm hesapları içerebilir."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Uygulamaya telefon tarafından bilinen hesapların listesini alma izni verir. Bu liste, yüklediğiniz uygulamalar tarafından oluşturulan tüm hesapları içerebilir."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ağ bağlantılarını görüntüleme"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Uygulamaya, hangi ağların bulunduğu ve hangilerinin bağlı olduğu gibi ağ bağlantılarıyla ilgili bilgileri görüntüleme izni verir."</string>
@@ -486,21 +490,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Uygulamaya, kablosuz erişim noktalarına bağlanıp bunlarla bağlantısını kesme ve Kablosuz ağlar için cihaz yapılandırmasında değişiklikler yapma izni verir."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Kablosuz Çoklu Yayın alımına izin ver"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Uygulamaya, çoklu yayın adreslerini kullanarak yalnızca tablete değil Kablosuz ağ üzerindeki tüm cihazlara gönderilen paketleri alma izni verir. Çoklu olmayan yayın moduna göre daha fazla güç tüketir."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Uygulamaya, sadece TV\'nize değil çoklu yayın adresleri kullanarak bir Kablosuz ağdaki tüm cihazlara gönderilmiş olan paketleri alma izni verir. Çoklu olmayan yayın modundan daha fazla güç kullanır."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Uygulamaya, çoklu yayın adreslerini kullanarak yalnızca Android TV cihazına değil Kablosuz ağ üzerindeki tüm cihazlara gönderilen paketleri alma izni verir. Çoklu olmayan yayın moduna göre daha fazla güç tüketir."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Uygulamaya, çoklu yayın adreslerini kullanarak yalnızca telefona değil Kablosuz ağ üzerindeki tüm cihazlara gönderilen paketleri alma izni verir. Çoklu olmayan yayın moduna göre daha fazla güç tüketir."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ayarlarına erişme"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Uygulamaya, yerel Bluetooth tabletini yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Uygulamaya, yerel Bluetooth TV\'yi yapılandırma, uzak cihazları bulma ve bu cihazlarla eşleme izni verir."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Uygulamaya, Android TV cihazınızdaki Bluetooth\'u yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Uygulamaya, yerel Bluetooth telefonunu yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX\'e bağlan veya WiMAX bağlantısını kes"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Uygulamaya, WiMAX\'in etkin olup olmadığını belirleme ve bağlı tüm WiMAX ağlarıyla ilgili bilgilere erişme izni verir."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX durumunu değiştir"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Uygulamaya, tableti WiMAX ağlarına bağlanma veya bağlantıyı kesme izni verir."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Uygulamaya TV\'yi WiMAX ağlarına bağlama ve TV\'nin WiMAX ağları ile bağlantısını kesme izni verir."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Uygulamaya, Android TV cihazını WiMAX ağlarına bağlanma veya bağlantıyı kesme izni verir."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Uygulamaya, telefonu WiMAX ağlarına bağlanma veya bağlantıyı kesme izni verir."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth cihazlarla eşle"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Uygulamaya, tabletteki Bluetooth yapılandırmasını görüntüleme, eşlenmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Uygulamaya TV\'nizde Bluetooth yapılandırmasını görüntüleme ve eşlenmiş cihazlarla bağlantı yapma ve bağlantı yapılmasını kabul etme izni verir."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Uygulamaya, Android TV cihazınızdaki Bluetooth yapılandırmasını görüntüleme, eşleştirilmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Uygulamaya, telefondaki Bluetooth yapılandırmasını görüntüleme, eşlenmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Yakın Alan İletişimini denetle"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Uygulamaya, Near Field Communication (NFC) etiketleri, kartlar ve okuyucular ile iletişim kurma izni verir."</string>
@@ -657,10 +661,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetleyin."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekran kilidini açma denemelerini izle"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Ekran kilidini açarken yapılan yanlış şifre girme denemelerini izle ve çok fazla sayıda yanlış şifre girme denemesi yapılmışsa tableti kilitle veya tabletteki tüm verileri sil."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip etme ve çok fazla sayıda hatalı şifre girildiğinde TV\'yi kilitleme veya TV\'nin tüm verilerini silme."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip etme ve çok fazla sayıda hatalı şifre girildiğinde Android TV cihazınızı kilitleme veya Android TV cihazınızın tüm verilerini silme."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Ekran kilidini açarken yapılan yanlış şifre girişi denemelerini izle ve çok sayıda yanlış şifre girişi denemesi yapılmışsa telefonu kilitle veya telefonun tüm verilerini sil."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde tableti kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde TV\'yi kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde Android TV cihazınızı kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde telefonu kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekran kilidini değiştirme"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ekran kilidini değiştirme."</string>
@@ -668,11 +672,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ekranın nasıl ve ne zaman kilitlendiğini denetleme."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri silme"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan silme."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Fabrika ayarlarına sıfırlama yoluyla TV\'nin verilerini uyarı vermeksizin silme."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek Android TV cihazınızdaki verileri uyarıda bulunmadan silme."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silme."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Kullanıcı verilerini sil"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Uyarı yapmadan bu kullanıcının bu tabletteki verilerini silin."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Uyarı yapmadan bu kullanıcının bu TV\'deki verilerini silin."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Uyarı yapmadan bu kullanıcının bu Android TV cihazındaki verilerini silme."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Uyarı yapmadan bu kullanıcının bu telefondaki verilerini silin."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Cihaz genelinde geçerli proxy\'i ayarla"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlayın. Genel proxy\'yi yalnızca cihaz sahibi ayarlayabilir."</string>
@@ -822,7 +826,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Yüz Tanıma Kilidi için maksimum deneme sayısı aşıldı"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM kart yok"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tablette SIM kart yok."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"TV\'de SIM kart yok."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Android TV cihazınızda SIM kart yok."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonda SIM kart yok."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM kartı takın."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM kart yok veya okunamıyor. Bir SIM kart takın."</string>
@@ -845,13 +849,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Şifrenizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış yazdınız. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN kodunuzu <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış girdiniz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız denemeden sonra, tabletinizi, Google oturum açma bilgilerinizi kullanarak açmanız istenir.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez hatalı bir şekilde çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız deneme daha yaparsanız TV\'nizin kilidini Google oturum açma bilgilerinizi kullanarak açmanız istenecektir.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız denemeden sonra, Android TV cihazınızın kilidini Google oturum açma bilgilerinizi kullanarak açmanız istenir.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız denemeden sonra telefonunuzu Google oturum açma bilgilerinizi kullanarak açmanız istenir.\n\n Lütfen <xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%2$d</xliff:g> defa daha başarısız deneme yapılırsa, tablet fabrika varsayılanına sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"TV\'nizin kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> kez hatalı bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız deneme daha yaparsanız TV\'niz fabrika ayalarına sıfırlanacak ve tüm kullanıcı verileri kaybolacaktır."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Android TV cihazınızın kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> kez hatalı bir şekilde açmayı denediniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> defa daha başarısız deneme yapılırsa Android TV cihazınız fabrika varsayılan ayarlarına sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefonun kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%2$d</xliff:g> defa daha başarısız deneme yapılırsa, telefon fabrika varsayılanına sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Tablet şimdi fabrika varsayılanına sıfırlanacak."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"TV\'nizin kilidini <xliff:g id="NUMBER">%d</xliff:g> kez hatalı bir şekilde açmaya çalıştınız. TV\'niz şimdi fabrika ayarlarına sıfırlanacaktır."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Android TV cihazınızın kilidini <xliff:g id="NUMBER">%d</xliff:g> kez hatalı bir şekilde açmayı denediniz. Android TV cihazınız şimdi fabrika varsayılanına sıfırlanacak."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Telefon şimdi fabrika varsayılanına sıfırlanacak."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Deseni unuttunuz mu?"</string>
@@ -938,7 +942,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Uygulamaya Tarayıcının ziyaret ettiği tüm URL\'lerin geçmişini ve tüm Tarayıcı yer işaretlerini okuma izni verir. Not: Bu izin, üçüncü taraf tarayıcılar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"web yer işaretlerine ve geçmişe yaz"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Uygulamaya Tarayıcı geçmişini ve tabletinizde depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Uygulamaya, TV\'nizde saklanan Tarayıcı geçmişini veya yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı verilerini silmesine veya değiştirmesine olanak sağlayabilir. Not: Bu iznin üçüncü taraf tarayıcılar veya web tarama özelliğine sahip diğer uygulamalar tarafından uygulanması zorunlu tutulamaz."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Uygulamaya, Android TV cihazınızda saklanan Tarayıcı geçmişini veya yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı verilerini silmesine veya değiştirmesine olanak sağlayabilir. Not: Bu iznin üçüncü taraf tarayıcılar veya web tarama özelliğine sahip diğer uygulamalar tarafından uygulanması zorunlu tutulamaz."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Uygulamaya Tarayıcı geçmişini ve telefonunuzda depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"alarm ayarla"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Uygulamaya, çalar saat uygulamasının alarmını ayarlama izni verir. Bazı çalar saat uygulamaları bu özelliği uygulayamayabilir."</string>
@@ -1249,7 +1253,6 @@
       <item quantity="one">Kullanılabilir Kablosuz ağı aç</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Açık kablosuz ağa bağlanın"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Operatöre ait kablosuz ağa bağlanın"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Kablosuz ağa bağlanıyor"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Kablosuz ağa bağlanıldı"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kablosuz ağa bağlanamadı"</string>
@@ -1307,7 +1310,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Gerekli PIN\'i yazın:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet <xliff:g id="DEVICE_NAME">%1$s</xliff:g> adlı cihaza bağlıyken Kablosuz ağ bağlantısı geçici olarak kesilecektir"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile bağlantıya sahipken TV\'nizin Kablosuz bağlantısı geçici olarak kesilecek."</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV cihazınız <xliff:g id="DEVICE_NAME">%1$s</xliff:g> adlı cihaza bağlıyken kablosuz ağ bağlantısı geçici olarak kesilecek"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefon <xliff:g id="DEVICE_NAME">%1$s</xliff:g> adlı cihaza bağlıyken Kablosuz ağ bağlantısı geçici olarak kesilecektir"</string>
     <string name="select_character" msgid="3365550120617701745">"Karakter ekle"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS iletileri gönderiliyor"</string>
@@ -1650,13 +1653,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Şifrenizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış yazdınız. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablet kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%2$d</xliff:g> defa daha başarısız deneme yapılırsa, tablet fabrika varsayılan değerine sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"TV\'nizin kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> kez hatalı bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız deneme daha yaparsanız TV\'niz fabrika ayalarına sıfırlanacak ve tüm kullanıcı verileri kaybolacaktır."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Android TV cihazınızın kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> kez hatalı bir şekilde açmayı denediniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> defa daha başarısız deneme yapılırsa Android TV cihazınız fabrika varsayılan ayarlarına sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Telefonun kilidini <xliff:g id="NUMBER_0">%1$d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. <xliff:g id="NUMBER_1">%2$d</xliff:g> defa daha başarısız deneme yapılırsa, telefon fabrika varsayılan değerine sıfırlanır ve tüm kullanıcı verileri kaybedilir."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tablet kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Tablet şimdi fabrika varsayılanına sıfırlanacak."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"TV\'nizin kilidini <xliff:g id="NUMBER">%d</xliff:g> kez hatalı bir şekilde açmaya çalıştınız. TV\'niz şimdi fabrika ayarlarına sıfırlanacaktır."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Android TV cihazınızın kilidini <xliff:g id="NUMBER">%d</xliff:g> kez hatalı bir şekilde açmayı denediniz. Android TV cihazınız şimdi fabrika varsayılanına sıfırlanacak."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Telefon şimdi fabrika varsayılanına sıfırlanacak."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız denemeden sonra, tabletinizi bir e-posta hesabı kullanarak açmanız istenir.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız deneme daha yaparsanız TV\'nizin kilidini bir e-posta hesabı kullanarak açmanız istenecektir.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> defa yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız denemeden sonra, Android TV cihazınızın kilidini bir e-posta hesabı kullanarak açmanız istenir.\n<xliff:g id="NUMBER_2">%3$d</xliff:g>\n saniye içinde tekrar deneyin."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız denemeden sonra telefonunuzu bir e-posta hesabı kullanarak açmanız istenir.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Kaldır"</string>
@@ -1997,6 +2000,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nelerin engellendiğini kontrol etmek için dokunun."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Ayarlar"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Beklemeye alınıyor"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV cihazı kısa süre içinde kapanacak; açık tutmak için bir düğmeye basın."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Cihaz kısa süre içinde kapanacak; açık tutmak için düğmeye basın."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ekranınızdaki diğer uygulamaların üzerinde görüntüleniyor"</string>
