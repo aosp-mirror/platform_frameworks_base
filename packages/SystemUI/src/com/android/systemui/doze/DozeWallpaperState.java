@@ -24,6 +24,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import java.io.PrintWriter;
@@ -38,18 +39,22 @@ public class DozeWallpaperState implements DozeMachine.Part {
 
     private final IWallpaperManager mWallpaperManagerService;
     private final DozeParameters mDozeParameters;
+    private final BiometricUnlockController mBiometricUnlockController;
     private boolean mIsAmbientMode;
 
-    public DozeWallpaperState(Context context) {
+    public DozeWallpaperState(Context context,
+            BiometricUnlockController biometricUnlockController) {
         this(IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE)),
+                biometricUnlockController,
                 DozeParameters.getInstance(context));
     }
 
     @VisibleForTesting
     DozeWallpaperState(IWallpaperManager wallpaperManagerService,
-            DozeParameters parameters) {
+            BiometricUnlockController biometricUnlockController, DozeParameters parameters) {
         mWallpaperManagerService = wallpaperManagerService;
+        mBiometricUnlockController = biometricUnlockController;
         mDozeParameters = parameters;
     }
 
@@ -76,7 +81,9 @@ public class DozeWallpaperState implements DozeMachine.Part {
         } else {
             boolean wakingUpFromPulse = oldState == DozeMachine.State.DOZE_PULSING
                     && newState == DozeMachine.State.FINISH;
-            animated = !mDozeParameters.getDisplayNeedsBlanking() || wakingUpFromPulse;
+            boolean fastDisplay = !mDozeParameters.getDisplayNeedsBlanking();
+            animated = (fastDisplay && !mBiometricUnlockController.unlockedByWakeAndUnlock())
+                    || wakingUpFromPulse;
         }
 
         if (isAmbientMode != mIsAmbientMode) {

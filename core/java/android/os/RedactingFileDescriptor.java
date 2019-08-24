@@ -35,7 +35,7 @@ import java.util.Arrays;
 
 /**
  * Variant of {@link FileDescriptor} that allows its creator to specify regions
- * that should be redacted (appearing as zeros to the reader).
+ * that should be redacted.
  *
  * @hide
  */
@@ -44,13 +44,16 @@ public class RedactingFileDescriptor {
     private static final boolean DEBUG = true;
 
     private volatile long[] mRedactRanges;
+    private volatile long[] mFreeOffsets;
 
     private FileDescriptor mInner = null;
     private ParcelFileDescriptor mOuter = null;
 
-    private RedactingFileDescriptor(Context context, File file, int mode, long[] redactRanges)
+    private RedactingFileDescriptor(
+            Context context, File file, int mode, long[] redactRanges, long[] freeOffsets)
             throws IOException {
         mRedactRanges = checkRangesArgument(redactRanges);
+        mFreeOffsets = freeOffsets;
 
         try {
             try {
@@ -88,13 +91,17 @@ public class RedactingFileDescriptor {
      *
      * @param file The underlying file to open.
      * @param mode The {@link ParcelFileDescriptor} mode to open with.
-     * @param redactRanges List of file offsets that should be redacted, stored
+     * @param redactRanges List of file ranges that should be redacted, stored
      *            as {@code [start1, end1, start2, end2, ...]}. Start values are
      *            inclusive and end values are exclusive.
+     * @param freePositions List of file offsets at which the four byte value 'free' should be
+     *            written instead of zeros within parts of the file covered by {@code redactRanges}.
+     *            Non-redacted bytes will not be modified even if covered by a 'free'. This is
+     *            useful for overwriting boxes in ISOBMFF files with padding data.
      */
     public static ParcelFileDescriptor open(Context context, File file, int mode,
-            long[] redactRanges) throws IOException {
-        return new RedactingFileDescriptor(context, file, mode, redactRanges).mOuter;
+            long[] redactRanges, long[] freePositions) throws IOException {
+        return new RedactingFileDescriptor(context, file, mode, redactRanges, freePositions).mOuter;
     }
 
     /**
@@ -168,6 +175,15 @@ public class RedactingFileDescriptor {
                 final long end = Math.min(offset + size, ranges[i + 1]);
                 for (long j = start; j < end; j++) {
                     data[(int) (j - offset)] = 0;
+                }
+                // Overwrite data at 'free' offsets within the redaction ranges.
+                for (long freeOffset : mFreeOffsets) {
+                    final long freeEnd = freeOffset + 4;
+                    final long redactFreeStart = Math.max(freeOffset, start);
+                    final long redactFreeEnd = Math.min(freeEnd, end);
+                    for (long j = redactFreeStart; j < redactFreeEnd; j++) {
+                        data[(int) (j - offset)] = (byte) "free".charAt((int) (j - freeOffset));
+                    }
                 }
             }
             return n;

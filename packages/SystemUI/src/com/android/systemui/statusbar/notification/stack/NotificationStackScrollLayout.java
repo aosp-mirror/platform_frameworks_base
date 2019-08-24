@@ -1355,7 +1355,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mIsClipped = clipped;
         }
 
-        if (!mAmbientPulseManager.hasNotifications() && mAmbientState.isFullyDark()) {
+        if (!mPulsing && mAmbientState.isFullyDark()) {
             setClipBounds(null);
         } else if (mAmbientState.isDarkAtAll()) {
             clipToOutline = true;
@@ -2516,12 +2516,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             return;
         }
-        int minTopPosition = 0;
+        int minTopPosition;
         NotificationSection lastSection = getLastVisibleSection();
         if (mStatusBarState != StatusBarState.KEYGUARD) {
             minTopPosition = (int) (mTopPadding + mStackTranslation);
         } else if (lastSection == null) {
             minTopPosition = mTopPadding;
+        } else {
+            // The first sections could be empty while there could still be elements in later
+            // sections. The position of these first few sections is determined by the position of
+            // the first visible section.
+            NotificationSection firstVisibleSection = getFirstVisibleSection();
+            firstVisibleSection.updateBounds(0 /* minTopPosition*/, 0 /* minBottomPosition */,
+                    false /* shiftPulsingWithFirst */);
+            minTopPosition = firstVisibleSection.getBounds().top;
         }
         boolean shiftPulsingWithFirst = mAmbientPulseManager.getAllEntries().count() <= 1;
         for (NotificationSection section : mSections) {
@@ -5161,6 +5169,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return;
         }
         mPulsing = pulsing;
+        updateClipping();
         mAmbientState.setPulsing(pulsing);
         mSwipeHelper.setPulsing(pulsing);
         updateNotificationAnimationStates();
@@ -5768,7 +5777,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             currentIndex++;
             boolean beforeSpeedBump;
             if (mHighPriorityBeforeSpeedBump) {
-                beforeSpeedBump = row.getEntry().isHighPriority();
+                beforeSpeedBump = row.getEntry().isTopBucket();
             } else {
                 beforeSpeedBump = !row.getEntry().ambient;
             }
@@ -5826,9 +5835,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             case ROWS_ALL:
                 return true;
             case ROWS_HIGH_PRIORITY:
-                return row.getEntry().isHighPriority();
+                return row.getEntry().isTopBucket();
             case ROWS_GENTLE:
-                return !row.getEntry().isHighPriority();
+                return !row.getEntry().isTopBucket();
             default:
                 throw new IllegalArgumentException("Unknown selection: " + selection);
         }

@@ -300,5 +300,5 @@ interface IWindowSession {
     /**
      * Called when the system gesture exclusion has changed.
      */
-    void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
+    oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 }

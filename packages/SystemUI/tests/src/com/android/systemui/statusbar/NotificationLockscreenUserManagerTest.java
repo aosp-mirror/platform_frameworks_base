@@ -38,7 +38,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -48,6 +47,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -166,7 +166,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1);
         when(mNotificationData.isHighPriority(any())).thenReturn(false);
 
-        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(mock(StatusBarNotification.class)));
+        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(mock(NotificationEntry.class)));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
         when(mNotificationData.isHighPriority(any())).thenReturn(false);
 
-        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(mock(StatusBarNotification.class)));
+        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(mock(NotificationEntry.class)));
     }
 
     private class TestNotificationLockscreenUserManager

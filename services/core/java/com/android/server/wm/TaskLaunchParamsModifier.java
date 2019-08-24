@@ -292,6 +292,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
     private int getPreferredLaunchDisplay(@Nullable TaskRecord task,
             @Nullable ActivityOptions options, ActivityRecord source, LaunchParams currentParams) {
+        if (!mSupervisor.mService.mSupportsMultiDisplay) {
+            return DEFAULT_DISPLAY;
+        }
+
         int displayId = INVALID_DISPLAY;
         final int optionLaunchId = options != null ? options.getLaunchDisplayId() : INVALID_DISPLAY;
         if (optionLaunchId != INVALID_DISPLAY) {

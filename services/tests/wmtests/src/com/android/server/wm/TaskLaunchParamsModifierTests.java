@@ -1225,6 +1225,22 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(startingBounds, adjustedBounds);
     }
 
+    @Test
+    public void testNoMultiDisplaySupports() {
+        final boolean orgValue = mService.mSupportsMultiDisplay;
+        final TestActivityDisplay display = createNewActivityDisplay(WINDOWING_MODE_FULLSCREEN);
+        mCurrent.mPreferredDisplayId = display.mDisplayId;
+
+        try {
+            mService.mSupportsMultiDisplay = false;
+            assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                    mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+            assertEquals(DEFAULT_DISPLAY, mResult.mPreferredDisplayId);
+        } finally {
+            mService.mSupportsMultiDisplay = orgValue;
+        }
+    }
+
     private TestActivityDisplay createNewActivityDisplay(int windowingMode) {
         final TestActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
         display.setWindowingMode(windowingMode);
