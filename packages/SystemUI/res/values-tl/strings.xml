@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Nasa ibaba ang mga notification na hindi masyadong mahalaga"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"I-tap ulit upang buksan"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Mag-swipe pataas para buksan"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Mag-swipe pataas para subukan ulit"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Ang device na ito ay pinamamahalaan ng iyong organisasyon"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Pinamamahalaan ng <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ang device na ito"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Mag-swipe mula sa icon para sa telepono"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Home upang mag-unpin."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Upang i-unpin ang screen na ito, pindutin nang matagal ang mga button na Bumalik at Overview"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Upang i-unpin ang screen na ito, pindutin nang matagal ang mga button na Bumalik at Home"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Para i-unpin ang screen na ito, mag-swipe pataas at pumindot nang matagal"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Nakuha ko"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Hindi, salamat na lang"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Na-pin ang screen"</string>

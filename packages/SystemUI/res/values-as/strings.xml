@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"কম জৰুৰী জাননীসমূহ তলত"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"খুলিবলৈ পুনৰাই টিপক"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"পুনৰ চেষ্টা কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"আপোনাৰ প্ৰতিষ্ঠানে এই ডিভাইচটো পৰিচালনা কৰে"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ৰ দ্বাৰা পৰিচালিত।"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ফ\'নৰ বাবে আইকনৰপৰা ছোৱাইপ কৰক"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'মত স্পৰ্শ কৰি সেঁচি ধৰক।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"এই স্ক্ৰীণখন আনপিন কৰিবলৈ পিছলৈ যাওক আৰু অৱলোকন বুটামত স্পৰ্শ কৰি হেঁচি ধৰক।"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"এই স্ক্ৰীণখন আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'ম বুটামত স্পৰ্শ কৰি হেঁচি ধৰক।"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"এই স্ক্রীণখন আনপিন কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"বুজি পালোঁ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"নালাগে, ধন্যবাদ"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"স্ক্ৰীণ পিন কৰা হ’ল"</string>
