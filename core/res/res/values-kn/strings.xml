@@ -1255,10 +1255,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳು"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳಿಗೆ ಸಂಪರ್ಕಿಸುವುದೇ?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"ಸೂಚಿಸಿದವರು: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ಹೌದು"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ಇಲ್ಲ"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ವೈ‑ಫೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಆಗುತ್ತದೆ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ನೀವು ಉಳಿಸಿದ ಅಧಿಕ ಗುಣಮಟ್ಟದ ನೆಟ್‌ವರ್ಕ್‌ ಸಮೀಪದಲ್ಲಿದ್ದಾಗ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ಮತ್ತೆ ಆನ್ ಮಾಡಲು ಹಿಂತಿರುಗಬೇಡಿ"</string>

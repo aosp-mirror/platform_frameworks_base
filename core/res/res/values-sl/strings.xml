@@ -1299,10 +1299,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dotaknite se, če si želite ogledati vsa omrežja"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Vzpostavi povezavo"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Vsa omrežja"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Želite vzpostaviti povezavo z omrežji Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Predlagala aplikacija <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Povezava Wi‑Fi se bo samodejno vklopila"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Ko ste v bližini zanesljivega shranjenega omrežja"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ne vklopi znova"</string>
