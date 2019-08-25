@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Apl ini dapat mengecam aktiviti fizikal anda."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Apl ini boleh mengambil gambar dan merakam video menggunakan kamera pada bila-bila masa."</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Benarkan aplikasi atau perkhidmatan mengakses kamera sistem untuk mengambil gambar dan video"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Apl sistem | terlindung ini boleh mengambil gambar dan merakam video menggunakan kamera sistem pada bila-bila masa. Apl juga perlu mempunyai kebenaran android.permission.CAMERA"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kawal getaran"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Membenarkan apl mengawal penggetar."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil terus nombor telefon"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ketik untuk melihat semua rangkaian"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Sambung"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua rangkaian"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Sambung ke rangkaian Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Dicadangkan oleh <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ya"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Tidak"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan dihidupkan secara automatik"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Apabila anda berada berdekatan dengan rangkaian disimpan yang berkualiti tinggi"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan hidupkan kembali"</string>

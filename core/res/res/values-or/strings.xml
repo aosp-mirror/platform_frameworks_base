@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"ଏହି ଆପ୍‍ଣ ଆପଣଙ୍କ ଶାରୀରିକ ଗତିବିଧିକୁ ଚିହ୍ନଟ କରିପାରେ"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ଫଟୋ ଓ ଭିଡିଓଗୁଡ଼ିକୁ ନିଅନ୍ତୁ"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"ଏହି ଆପ୍‍ ଯେକୌଣସି ସମୟରେ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଫଟୋ ଉଠାଇପାରେ ଏବଂ ଭିଡିଓ ରେକର୍ଡ କରିପାରେ।"</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"ଛବି ଏବଂ ଭିଡିଓଗୁଡ଼ିକୁ ନେବା ପାଇଁ ସିଷ୍ଟମ୍ କ୍ୟାମେରା‌ଗୁଡ଼ିକୁ କୌଣସି ଆପ୍ଲିକେସନ୍ କିମ୍ବା ସେବା ଆକ୍ସେସ୍ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"ଏହି ପ୍ରମୁଖ | ସିଷ୍ଟମ୍ ଆପ୍ ଯେକୌଣସି ସମୟରେ ଏକ ସିଷ୍ଟମ୍ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଛବିଗୁଡ଼ିକ ନେଇପାରେ ଏବଂ ଭିଡିଓଗୁଡ଼ିକ ରେକର୍ଡ କରିପାରେ। ଆପ୍ ମଧ୍ୟ android.permission.CAMERA ଅନୁମତି ଆବଶ୍ୟକ କରେ"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"କମ୍ପନ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ଆପ୍‍କୁ, ଭାଇବ୍ରେଟର୍‍ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ସିଧାସଳଖ ଫୋନ୍ ନମ୍ବରଗୁଡ଼ିକୁ କଲ୍ କରନ୍ତୁ"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ସମସ୍ତ ନେଟ୍‌ୱର୍କ ଦେଖିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"କନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ସମସ୍ତ ନେଟ୍‌ୱର୍କ"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"ୱାଇ-ଫାଇ ନେଟ୍‍ୱର୍କଗୁଡ଼ିକୁ ସଂଯୁକ୍ତ କରିବେ?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g>ଙ୍କ ଦ୍ୱାରା ପ୍ରସ୍ତାବିତ"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ହଁ"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ନାହିଁ"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ୱାଇ-ଫାଇ ସ୍ୱଚାଳିତ ଭାବେ ଅନ୍ ହେବ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ଆପଣ ଏକ ଉଚ୍ଚ-କ୍ୱାଲିଟୀ ବିଶିଷ୍ଟ ସେଭ୍‌ କରାଯାଇଥିବା ନେଟ୍‌ୱର୍କ ପାଖରେ ଥିବା ସମୟରେ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ପୁଣି ଅନ୍‍ କରନ୍ତୁ ନାହିଁ"</string>

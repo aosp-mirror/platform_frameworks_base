@@ -440,10 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ši programa gali atpažinti jūsų fizinę veiklą."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotografuoti ir filmuoti"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ši programa gali bet kada fotografuoti ir įrašyti vaizdo įrašų naudodama fotoaparatą."</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Suteikti programai arba paslaugai prieigą prie sistemos fotoaparatų, kad būtų galima daryti nuotraukas ir įrašyti vaizdo įrašus"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Ši privilegijuota | sistemos programa gali daryti nuotraukas ir įrašyti vaizdo įrašus naudodama sistemos fotoaparatą bet kuriuo metu. Programai taip pat būtinas leidimas „android.permission.CAMERA“"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"valdyti vibraciją"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Leidžiama programai valdyti vibravimą."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skambinti tiesiogiai telefono numeriais"</string>
@@ -1303,10 +1301,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Palieskite, jei norite matyti visus tinklus"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Prisijungti"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Visi tinklai"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Prisijungti prie „Wi-Fi“ tinklų?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Pasiūlė „<xliff:g id="NAME">%s</xliff:g>“"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Taip"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"„Wi‑Fi“ bus įjungtas automatiškai"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kai būsite netoli išsaugoto aukštos kokybės tinklo"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Neįjunkite vėl"</string>
