@@ -355,7 +355,6 @@ public class NotificationManagerService extends SystemService {
     private static final int REQUEST_CODE_TIMEOUT = 1;
     private static final String SCHEME_TIMEOUT = "timeout";
     private static final String EXTRA_KEY = "key";
-
     private IActivityManager mAm;
     private ActivityManager mActivityManager;
     private IPackageManager mPackageManager;
@@ -523,24 +522,21 @@ public class NotificationManagerService extends SystemService {
 
     }
 
-    protected void readDefaultApprovedServices(int userId) {
+
+    void loadDefaultApprovedServices(int userId) {
         String defaultListenerAccess = getContext().getResources().getString(
                 com.android.internal.R.string.config_defaultListenerAccessPackages);
         if (defaultListenerAccess != null) {
-            for (String whitelisted :
-                    defaultListenerAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR)) {
-                // Gather all notification listener components for candidate pkgs.
-                Set<ComponentName> approvedListeners =
-                        mListeners.queryPackageForServices(whitelisted,
+            String[] listeners =
+                    defaultListenerAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+            for (int i = 0; i < listeners.length; i++) {
+                ArraySet<ComponentName> approvedListeners =
+                        mListeners.queryPackageForServices(listeners[i],
                                 MATCH_DIRECT_BOOT_AWARE
                                         | MATCH_DIRECT_BOOT_UNAWARE, userId);
-                for (ComponentName cn : approvedListeners) {
-                    try {
-                        getBinderService().setNotificationListenerAccessGrantedForUser(cn,
-                                    userId, true);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
+                for (int k = 0; k < approvedListeners.size(); k++) {
+                    ComponentName cn = approvedListeners.valueAt(k);
+                    mListeners.addDefaultComponentOrPackage(cn.flattenToString());
                 }
             }
         }
@@ -548,44 +544,84 @@ public class NotificationManagerService extends SystemService {
         String defaultDndAccess = getContext().getResources().getString(
                 com.android.internal.R.string.config_defaultDndAccessPackages);
         if (defaultDndAccess != null) {
-            for (String whitelisted :
-                    defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR)) {
-                try {
-                    getBinderService().setNotificationPolicyAccessGranted(whitelisted, true);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+            String[] dnds = defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+            for (int i = 0; i < dnds.length; i++) {
+                mConditionProviders.addDefaultComponentOrPackage(dnds[i]);
             }
+        }
+
+
+        ArraySet<String> assistants = new ArraySet<>();
+        String deviceAssistant = DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE);
+        if (deviceAssistant != null) {
+            assistants.addAll(Arrays.asList(deviceAssistant.split(
+                    ManagedServices.ENABLED_SERVICES_SEPARATOR)));
+        }
+        assistants.addAll(Arrays.asList(getContext().getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent)
+                .split(ManagedServices.ENABLED_SERVICES_SEPARATOR)));
+        for (int i = 0; i < assistants.size(); i++) {
+            String cnString = assistants.valueAt(i);
+            mAssistants.addDefaultComponentOrPackage(cnString);
+        }
+    }
+
+    protected void allowDefaultApprovedServices(int userId) {
+
+        ArraySet<ComponentName> defaultListeners = mListeners.getDefaultComponents();
+        for (int i = 0; i < defaultListeners.size(); i++) {
+            ComponentName cn = defaultListeners.valueAt(i);
+            allowNotificationListener(userId, cn);
+        }
+
+        ArraySet<String> defaultDnds = mConditionProviders.getDefaultPackages();
+        for (int i = 0; i < defaultDnds.size(); i++) {
+            allowDndPackage(defaultDnds.valueAt(i));
         }
 
         setDefaultAssistantForUser(userId);
     }
 
     protected void setDefaultAssistantForUser(int userId) {
-        List<ComponentName> validAssistants = new ArrayList<>(
-                mAssistants.queryPackageForServices(
-                        null, MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId));
-
-        List<String> candidateStrs = new ArrayList<>();
-        candidateStrs.add(DeviceConfig.getProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE));
-        candidateStrs.add(getContext().getResources().getString(
-                com.android.internal.R.string.config_defaultAssistantAccessComponent));
-
-        for (String candidateStr : candidateStrs) {
-            if (TextUtils.isEmpty(candidateStr)) {
-                continue;
-            }
-            ComponentName candidate = ComponentName.unflattenFromString(candidateStr);
-            if (candidate != null && validAssistants.contains(candidate)) {
-                setNotificationAssistantAccessGrantedForUserInternal(candidate, userId, true);
-                Slog.d(TAG, String.format("Set default NAS to be %s in %d", candidateStr, userId));
-                return;
-            } else {
-                Slog.w(TAG, "Invalid default NAS config is found: " + candidateStr);
-            }
+        ArraySet<ComponentName> defaults = mAssistants.getDefaultComponents();
+        // We should have only one default assistant by default
+        // allowAssistant should execute once in practice
+        for (int i = 0; i < defaults.size(); i++) {
+            ComponentName cn = defaults.valueAt(i);
+            if (allowAssistant(userId, cn)) return;
         }
+    }
+
+    private void allowDndPackage(String packageName) {
+        try {
+            getBinderService().setNotificationPolicyAccessGranted(packageName, true);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void allowNotificationListener(int userId, ComponentName cn) {
+
+        try {
+            getBinderService().setNotificationListenerAccessGrantedForUser(cn,
+                        userId, true);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean allowAssistant(int userId, ComponentName candidate) {
+        Set<ComponentName> validAssistants =
+                mAssistants.queryPackageForServices(
+                        null,
+                        MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
+        if (candidate != null && validAssistants.contains(candidate)) {
+            setNotificationAssistantAccessGrantedForUserInternal(candidate, userId, true);
+            return true;
+        }
+        return false;
     }
 
     void readPolicyXml(InputStream stream, boolean forRestore, int userId)
@@ -653,7 +689,8 @@ public class NotificationManagerService extends SystemService {
             } catch (FileNotFoundException e) {
                 // No data yet
                 // Load default managed services approvals
-                readDefaultApprovedServices(USER_SYSTEM);
+                loadDefaultApprovedServices(USER_SYSTEM);
+                allowDefaultApprovedServices(USER_SYSTEM);
             } catch (IOException e) {
                 Log.wtf(TAG, "Unable to read notification policy", e);
             } catch (NumberFormatException e) {
@@ -1345,7 +1382,7 @@ public class NotificationManagerService extends SystemService {
                 if (userId != USER_NULL) {
                     mUserProfiles.updateCache(context);
                     if (!mUserProfiles.isManagedProfile(userId)) {
-                        readDefaultApprovedServices(userId);
+                        allowDefaultApprovedServices(userId);
                     }
                 }
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
@@ -1691,7 +1728,6 @@ public class NotificationManagerService extends SystemService {
 
         mPolicyFile = policyFile;
         loadPolicyFile();
-
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         if (mStatusBar != null) {
             mStatusBar.setNotificationDelegate(mNotificationDelegate);
@@ -2905,21 +2941,52 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void clearData(String packageName, int uid, boolean fromApp) throws RemoteException {
+            boolean packagesChanged = false;
             checkCallerIsSystem();
-
             // Cancel posted notifications
+            final int userId = UserHandle.getUserId(uid);
             cancelAllNotificationsInt(MY_UID, MY_PID, packageName, null, 0, 0, true,
                     UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
 
-            final String[] packages = new String[] {packageName};
-            final int[] uids = new int[] {uid};
-
-            // Listener & assistant
-            mListeners.onPackagesChanged(true, packages, uids);
-            mAssistants.onPackagesChanged(true, packages, uids);
-
             // Zen
-            mConditionProviders.onPackagesChanged(true, packages, uids);
+            packagesChanged |=
+                    mConditionProviders.resetPackage(packageName, userId);
+
+            // Listener
+            ArrayMap<Boolean, ArrayList<ComponentName>> changedListeners =
+                    mListeners.resetComponents(packageName, userId);
+            packagesChanged |= changedListeners.get(true).size() > 0
+                    || changedListeners.get(false).size() > 0;
+
+            // When a listener is enabled, we enable the dnd package as a secondary
+            for (int i = 0; i < changedListeners.get(true).size(); i++) {
+                mConditionProviders.setPackageOrComponentEnabled(
+                        changedListeners.get(true).get(i).getPackageName(),
+                        userId, false, true);
+            }
+
+            // Assistant
+            ArrayMap<Boolean, ArrayList<ComponentName>> changedAssistants =
+                    mAssistants.resetComponents(packageName, userId);
+            packagesChanged |= changedAssistants.get(true).size() > 0
+                    || changedAssistants.get(false).size() > 0;
+
+            // we want only one assistant enabled
+            for (int i = 1; i < changedAssistants.get(true).size(); i++) {
+                mAssistants.setPackageOrComponentEnabled(
+                        changedAssistants.get(true).get(i).flattenToString(),
+                        userId, true, false);
+            }
+
+            // When the default assistant is enabled, we enable the dnd package as a secondary
+            if (changedAssistants.get(true).size() > 0) {
+                //we want only one assistant active
+                mConditionProviders
+                        .setPackageOrComponentEnabled(
+                                changedAssistants.get(true).get(0).getPackageName(),
+                                userId, false, true);
+
+            }
 
             // Snoozing
             mSnoozeHelper.clearData(UserHandle.getUserId(uid), packageName);
@@ -2927,6 +2994,14 @@ public class NotificationManagerService extends SystemService {
             // Reset notification preferences
             if (!fromApp) {
                 mPreferencesHelper.clearData(packageName, uid);
+            }
+
+            if (packagesChanged) {
+                getContext().sendBroadcastAsUser(new Intent(
+                                ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                .setPackage(packageName)
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT),
+                        UserHandle.of(userId), null);
             }
 
             handleSavePolicyFile();

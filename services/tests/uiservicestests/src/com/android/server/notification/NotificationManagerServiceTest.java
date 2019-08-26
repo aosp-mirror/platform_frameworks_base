@@ -383,6 +383,15 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Setup managed services
         mListener = mListeners.new ManagedServiceInfo(
                 null, new ComponentName(PKG, "test_class"), mUid, true, null, 0);
+        ComponentName defaultComponent = ComponentName.unflattenFromString("config/device");
+        ArraySet<ComponentName> components = new ArraySet<>();
+        components.add(defaultComponent);
+        when(mListeners.getDefaultComponents()).thenReturn(components);
+        when(mConditionProviders.getDefaultPackages())
+                .thenReturn(new ArraySet<>(Arrays.asList("config")));
+        when(mAssistants.getDefaultComponents()).thenReturn(components);
+        when(mAssistants.queryPackageForServices(
+                anyString(), anyInt(), anyInt())).thenReturn(components);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
         ManagedServices.Config listenerConfig = new ManagedServices.Config();
         listenerConfig.xmlTag = NotificationListeners.TAG_ENABLED_NOTIFICATION_LISTENERS;
@@ -425,6 +434,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .getUiAutomation().dropShellPermissionIdentity();
     }
 
+    private ArrayMap<Boolean, ArrayList<ComponentName>> generateResetComponentValues() {
+        ArrayMap<Boolean, ArrayList<ComponentName>> changed = new ArrayMap<>();
+        changed.put(true, new ArrayList<>());
+        changed.put(false, new ArrayList<>());
+        return changed;
+    }
     private ApplicationInfo getApplicationInfo(String pkg, int uid) {
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = uid;
@@ -3180,6 +3195,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testBackup() throws Exception {
         int systemChecks = mService.countSystemChecks;
+        when(mListeners.queryPackageForServices(anyString(), anyInt(), anyInt()))
+                .thenReturn(new ArraySet<>());
         mBinderService.getBackupPayload(1);
         assertEquals(1, mService.countSystemChecks - systemChecks);
     }
@@ -4336,15 +4353,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void setDefaultAssistantForUser_fromConfigXml() {
         clearDeviceConfig();
         ComponentName xmlConfig = new ComponentName("config", "xml");
+        ArraySet<ComponentName> components = new ArraySet<>(Arrays.asList(xmlConfig));
         when(mResources
                 .getString(
                         com.android.internal.R.string.config_defaultAssistantAccessComponent))
                 .thenReturn(xmlConfig.flattenToString());
         when(mContext.getResources()).thenReturn(mResources);
-        when(mAssistants.queryPackageForServices(eq(null), anyInt(), eq(0)))
-                .thenReturn(Collections.singleton(xmlConfig));
+        when(mAssistants.queryPackageForServices(eq(null), anyInt(), anyInt()))
+                .thenReturn(components);
+        when(mAssistants.getDefaultComponents())
+                .thenReturn(components);
         mService.setNotificationAssistantAccessGrantedCallback(
                 mNotificationAssistantAccessGrantedCallback);
+
 
         mService.setDefaultAssistantForUser(0);
 
@@ -4361,8 +4382,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .getString(com.android.internal.R.string.config_defaultAssistantAccessComponent))
                 .thenReturn(xmlConfig.flattenToString());
         when(mContext.getResources()).thenReturn(mResources);
-        when(mAssistants.queryPackageForServices(eq(null), anyInt(), eq(0)))
+        when(mAssistants.queryPackageForServices(eq(null), anyInt(), anyInt()))
                 .thenReturn(new ArraySet<>(Arrays.asList(xmlConfig, deviceConfig)));
+        when(mAssistants.getDefaultComponents())
+                .thenReturn(new ArraySet<>(Arrays.asList(deviceConfig)));
         mService.setNotificationAssistantAccessGrantedCallback(
                 mNotificationAssistantAccessGrantedCallback);
 
@@ -4383,7 +4406,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mContext.getResources()).thenReturn(mResources);
         // Only xmlConfig is valid, deviceConfig is not.
         when(mAssistants.queryPackageForServices(eq(null), anyInt(), eq(0)))
-                .thenReturn(Collections.singleton(xmlConfig));
+                .thenReturn(new ArraySet<>(Collections.singleton(xmlConfig)));
+        when(mAssistants.getDefaultComponents())
+                .thenReturn(new ArraySet<>(Arrays.asList(xmlConfig, deviceConfig)));
         mService.setNotificationAssistantAccessGrantedCallback(
                 mNotificationAssistantAccessGrantedCallback);
 
@@ -4391,6 +4416,53 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mNotificationAssistantAccessGrantedCallback)
                 .onGranted(eq(xmlConfig), eq(0), eq(true));
+    }
+
+    @Test
+    public void clearMultipleDefaultAssistantPackagesShouldEnableOnlyOne() throws RemoteException {
+        ArrayMap<Boolean, ArrayList<ComponentName>> changedListeners =
+                generateResetComponentValues();
+        when(mListeners.resetComponents(anyString(), anyInt())).thenReturn(changedListeners);
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        ComponentName deviceConfig1 = new ComponentName("device", "config1");
+        ComponentName deviceConfig2 = new ComponentName("device", "config2");
+        changes.put(true, new ArrayList(Arrays.asList(deviceConfig1, deviceConfig2)));
+        changes.put(false, new ArrayList());
+        when(mAssistants.resetComponents(anyString(), anyInt())).thenReturn(changes);
+        mService.getBinderService().clearData("device", 0, false);
+        verify(mAssistants, times(1))
+                .setPackageOrComponentEnabled(
+                        eq("device/config2"),
+                        eq(0), eq(true), eq(false));
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                eq("device"), eq(0), eq(false), eq(true));
+    }
+
+    @Test
+    public void clearDefaultListenersPackageShouldEnableIt() throws RemoteException {
+        ArrayMap<Boolean, ArrayList<ComponentName>> changedAssistants =
+                generateResetComponentValues();
+        when(mAssistants.resetComponents(anyString(), anyInt())).thenReturn(changedAssistants);
+        ComponentName deviceConfig = new ComponentName("device", "config");
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        changes.put(true, new ArrayList(Arrays.asList(deviceConfig)));
+        changes.put(false, new ArrayList());
+        when(mListeners.resetComponents(anyString(), anyInt()))
+            .thenReturn(changes);
+        mService.getBinderService().clearData("device", 0, false);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                eq("device"), eq(0), eq(false), eq(true));
+    }
+
+    @Test
+    public void clearDefaultDnDPackageShouldEnableIt() throws RemoteException {
+        ComponentName deviceConfig = new ComponentName("device", "config");
+        ArrayMap<Boolean, ArrayList<ComponentName>> changed = generateResetComponentValues();
+        when(mAssistants.resetComponents(anyString(), anyInt())).thenReturn(changed);
+        when(mListeners.resetComponents(anyString(), anyInt())).thenReturn(changed);
+        mService.getBinderService().clearData("device", 0, false);
+        verify(mConditionProviders, times(1)).resetPackage(
+                        eq("device"), eq(0));
     }
 
     @Test

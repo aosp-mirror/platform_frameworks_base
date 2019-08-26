@@ -105,6 +105,7 @@ abstract public class ManagedServices {
     static final String ATT_USER_ID = "user";
     static final String ATT_IS_PRIMARY = "primary";
     static final String ATT_VERSION = "version";
+    static final String ATT_DEFAULTS = "defaults";
 
     static final int DB_VERSION = 1;
 
@@ -128,6 +129,10 @@ abstract public class ManagedServices {
      */
     private final ArrayList<Pair<ComponentName, Integer>> mServicesBound = new ArrayList<>();
     private final ArraySet<Pair<ComponentName, Integer>> mServicesRebinding = new ArraySet<>();
+    // we need these packages to be protected because classes that inherit from it need to see it
+    protected final Object mDefaultsLock = new Object();
+    protected final ArraySet<ComponentName> mDefaultComponents = new ArraySet<>();
+    protected final ArraySet<String> mDefaultPackages = new ArraySet<>();
 
     // lists the component names of all enabled (and therefore potentially connected)
     // app services for current profiles.
@@ -177,6 +182,112 @@ abstract public class ManagedServices {
             List<ManagedServiceInfo> services = new ArrayList<>(mServices);
             return services;
         }
+    }
+
+    protected void addDefaultComponentOrPackage(String packageOrComponent) {
+        if (packageOrComponent != null) {
+            synchronized (mDefaultsLock) {
+                ComponentName cn = ComponentName.unflattenFromString(packageOrComponent);
+                if (cn == null) {
+                    mDefaultPackages.add(packageOrComponent);
+                } else {
+                    mDefaultPackages.add(cn.getPackageName());
+                    mDefaultComponents.add(cn);
+                }
+            }
+        }
+    }
+
+    boolean isDefaultComponentOrPackage(String packageOrComponent) {
+        synchronized (mDefaultsLock) {
+            ComponentName cn = ComponentName.unflattenFromString(packageOrComponent);
+            if (cn == null) {
+                return mDefaultPackages.contains(packageOrComponent);
+            } else {
+                return mDefaultComponents.contains(cn);
+            }
+        }
+    }
+
+    ArraySet<ComponentName> getDefaultComponents() {
+        synchronized (mDefaultsLock) {
+            return new ArraySet<>(mDefaultComponents);
+        }
+    }
+
+    ArraySet<String> getDefaultPackages() {
+        synchronized (mDefaultsLock) {
+            return new ArraySet<>(mDefaultPackages);
+        }
+    }
+
+    /**
+     * When resetting a package, we need to enable default components that belong to that packages
+     * we also need to disable components that are not default to return the managed service state
+     * to when a new android device is first turned on for that package.
+     *
+     * @param packageName package to reset.
+     * @param userId the android user id
+     * @return a list of components that were permitted
+     */
+    @NonNull
+    ArrayMap<Boolean, ArrayList<ComponentName>> resetComponents(String packageName, int userId) {
+        // components that we want to enable
+        ArrayList<ComponentName> componentsToEnable =
+                new ArrayList<>(mDefaultComponents.size());
+
+        // components that were removed
+        ArrayList<ComponentName> disabledComponents =
+                new ArrayList<>(mDefaultComponents.size());
+
+        // all components that are enabled now
+        ArraySet<ComponentName> enabledComponents =
+                new ArraySet<>(getAllowedComponents(userId));
+
+        boolean changed = false;
+
+        synchronized (mDefaultsLock) {
+            // record all components that are enabled but should not be by default
+            for (int i = 0; i < mDefaultComponents.size() && enabledComponents.size() > 0; i++) {
+                ComponentName currentDefault = mDefaultComponents.valueAt(i);
+                if (packageName.equals(currentDefault.getPackageName())
+                        && !enabledComponents.contains(currentDefault)) {
+                    componentsToEnable.add(currentDefault);
+                }
+            }
+            synchronized (mApproved) {
+                final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(
+                        userId);
+                if (approvedByType != null) {
+                    final int M = approvedByType.size();
+                    for (int j = 0; j < M; j++) {
+                        final ArraySet<String> approved = approvedByType.valueAt(j);
+                        for (int i = 0; i < enabledComponents.size(); i++) {
+                            ComponentName currentComponent = enabledComponents.valueAt(i);
+                            if (packageName.equals(currentComponent.getPackageName())
+                                    && !mDefaultComponents.contains(currentComponent)) {
+                                if (approved.remove(currentComponent.flattenToString())) {
+                                    disabledComponents.add(currentComponent);
+                                    changed = true;
+                                }
+                            }
+                        }
+                        for (int i = 0; i < componentsToEnable.size(); i++) {
+                            ComponentName candidate = componentsToEnable.get(i);
+                            changed |= approved.add(candidate.flattenToString());
+                        }
+                    }
+
+                }
+            }
+        }
+        if (changed) rebindServices(false, USER_ALL);
+
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        changes.put(true, componentsToEnable);
+        changes.put(false, disabledComponents);
+
+        return changes;
     }
 
     protected int getBindFlags() {
@@ -310,10 +421,23 @@ abstract public class ManagedServices {
         }
     }
 
+    void writeDefaults(XmlSerializer out) throws IOException {
+        synchronized (mDefaultsLock) {
+            List<String> componentStrings = new ArrayList<>(mDefaultComponents.size());
+            for (int i = 0; i < mDefaultComponents.size(); i++) {
+                componentStrings.add(mDefaultComponents.valueAt(i).flattenToString());
+            }
+            String defaults = String.join(ENABLED_SERVICES_SEPARATOR, componentStrings);
+            out.attribute(null, ATT_DEFAULTS, defaults);
+        }
+    }
+
     public void writeXml(XmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, getConfig().xmlTag);
 
         out.attribute(null, ATT_VERSION, String.valueOf(DB_VERSION));
+
+        writeDefaults(out);
 
         if (forBackup) {
             trimApprovedListsAccordingToInstalledServices(userId);
@@ -378,6 +502,27 @@ abstract public class ManagedServices {
         loadAllowedComponentsFromSettings();
     }
 
+    void readDefaults(XmlPullParser parser) {
+        String defaultComponents = XmlUtils.readStringAttribute(parser, ATT_DEFAULTS);
+        if (defaultComponents == null) {
+            return;
+        }
+        String[] components = defaultComponents.split(ENABLED_SERVICES_SEPARATOR);
+        synchronized (mDefaultsLock) {
+            for (int i = 0; i < components.length; i++) {
+                if (!TextUtils.isEmpty(components[i])) {
+                    ComponentName cn = ComponentName.unflattenFromString(components[i]);
+                    if (cn != null) {
+                        mDefaultPackages.add(cn.getPackageName());
+                        mDefaultComponents.add(cn);
+                    } else {
+                        mDefaultPackages.add(components[i]);
+                    }
+                }
+            }
+        }
+    }
+
     public void readXml(
             XmlPullParser parser,
             TriPredicate<String, Integer, String> allowedManagedServicePackages,
@@ -386,6 +531,7 @@ abstract public class ManagedServices {
             throws XmlPullParserException, IOException {
         // read grants
         int type;
+        readDefaults(parser);
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             String tag = parser.getName();
             if (type == XmlPullParser.END_TAG
@@ -785,9 +931,9 @@ abstract public class ManagedServices {
         return queryPackageForServices(packageName, 0, userId);
     }
 
-    protected Set<ComponentName> queryPackageForServices(String packageName, int extraFlags,
+    protected ArraySet<ComponentName> queryPackageForServices(String packageName, int extraFlags,
             int userId) {
-        Set<ComponentName> installed = new ArraySet<>();
+        ArraySet<ComponentName> installed = new ArraySet<>();
         final PackageManager pm = mContext.getPackageManager();
         Intent queryIntent = new Intent(mConfig.serviceInterface);
         if (!TextUtils.isEmpty(packageName)) {

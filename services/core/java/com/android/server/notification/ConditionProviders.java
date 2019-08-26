@@ -38,6 +38,9 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,6 +81,39 @@ public class ConditionProviders extends ManagedServices {
 
     public Iterable<SystemConditionProviderService> getSystemProviders() {
         return mSystemConditionProviders;
+    }
+
+    @Override
+    protected ArrayMap<Boolean, ArrayList<ComponentName>>
+            resetComponents(String packageName, int userId) {
+        resetPackage(packageName, userId);
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        changes.put(true, new ArrayList<>(0));
+        changes.put(false, new ArrayList<>(0));
+        return changes;
+    }
+
+    /**
+     *  @return true if the passed package is enabled. false otherwise
+     */
+    boolean resetPackage(String packageName, int userId) {
+        boolean isAllowed = super.isPackageOrComponentAllowed(packageName, userId);
+        boolean isDefault = super.isDefaultComponentOrPackage(packageName);
+        if (!isAllowed && isDefault) {
+            setPackageOrComponentEnabled(packageName, userId, true, true);
+        }
+        if (isAllowed && !isDefault) {
+            setPackageOrComponentEnabled(packageName, userId, true, false);
+        }
+        return !isAllowed && isDefault;
+    }
+
+    @Override
+    void writeDefaults(XmlSerializer out) throws IOException {
+        synchronized (mDefaultsLock) {
+            String defaults = String.join(ENABLED_SERVICES_SEPARATOR, mDefaultPackages);
+            out.attribute(null, ATT_DEFAULTS, defaults);
+        }
     }
 
     @Override
