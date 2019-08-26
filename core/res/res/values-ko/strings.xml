@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"이 앱에서 내 신체 활동을 확인할 수 있습니다."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"이 앱은 언제든지 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다."</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"사진 및 동영상 촬영을 위해 애플리케이션 또는 서비스에서 시스템 카메라에 액세스하도록 허용"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"이 권한을 가진 시스템 앱은 언제든지 시스템 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다. 또한 앱에 android.permission.CAMERA 권한이 필요합니다."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"모든 네트워크를 보려면 탭하세요."</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"연결"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"모든 네트워크"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi 네트워크에 연결하시겠습니까?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g>에서 추천"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"예"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"아니요"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi가 자동으로 사용 설정됨"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"저장된 고품질 네트워크가 가까이 있는 경우"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"다시 사용 설정하지 않음"</string>

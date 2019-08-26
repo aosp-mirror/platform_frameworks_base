@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"এই এপটোৱে আপোনাৰ শাৰীৰিক কাৰ্যকলাপ চিনাক্ত কৰিব পাৰে।"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ফট\' তোলা আৰু ভিডিঅ\' ৰেকৰ্ড কৰা"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"এই এপে যিকোনো সময়তে কেমেৰা ব্যৱহাৰ কৰি ফট\' তুলিব আৰু ভিডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"ফট’ উঠাবলৈ আৰু ভিডিঅ’ ৰেকৰ্ড কৰিবলৈ এটা এপ্লিকেশ্বন অথবা সেৱাক ছিষ্টেম কেমেৰাসমূহ এক্সেছ কৰিবলৈ দিয়ক"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"এই বিশেষাধিকাৰ প্ৰাপ্ত | ছিষ্টেম এপ্‌টোৱে এটা ছিষ্টেম কেমেৰা ব্যৱহাৰ কৰি যিকোনো সময়তে ফট’ উঠাব পাৰে আৰু ভিডিঅ’ ৰেকৰ্ড কৰিব পাৰে। লগতে এপ্‌টোৰো android.permission.CAMERAৰ অনুমতি থকাটো প্ৰয়োজনীয়"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"কম্পন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ভাইব্ৰেটৰ নিয়ন্ত্ৰণ কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"পোনপটীয়াকৈ ফ\'ন নম্বৰলৈ কল কৰক"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"সকলো নেটৱৰ্ক চাবলৈ টিপক"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"সংযোগ কৰক"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"সকলো নেটৱৰ্ক"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"ৱাই-ফাই নেটৱৰ্কৰ সৈতে সংযোগ কৰিবনে?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g>এ প্ৰস্তাব দিয়া"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"হয়"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"নহয়"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ৱাই-ফাই স্বয়ংক্ৰিয়ভাৱে অন হ\'ব"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"যেতিয়া আপুনি ছেভ কৰি থোৱা উচ্চ মানৰ নেটৱৰ্কৰ কাষত থাকে"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"পুনৰাই অন নকৰিব"</string>

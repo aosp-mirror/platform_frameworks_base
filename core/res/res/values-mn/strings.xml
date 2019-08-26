@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Энэ апп таны биеийн дасгал хөдөлгөөнийг таних боломжтой."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"зураг авах болон видео бичих"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Энэ апп ямар ч үед камер ашиглан зураг авж, видео хийх боломжтой."</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Видео болон зураг авахын тулд апп эсвэл үйлчилгээнд хандахыг системийн камерт зөвшөөрөх"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Энэ хамгаалагдсан | системийн апп нь системийн камер ашиглан ямар ч үед зураг авж, видео бичих боломжтой. Аппыг ашиглахын тулд android.permission.CAMERA-н зөвшөөрөл мөн шаардлагатай"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"чичиргээг удирдах"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Апп нь чичиргээг удирдах боломжтой."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"утасны дугаарт шууд дуудлага хийх"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Бүх сүлжээг харахын тулд товшино уу"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Холбогдох"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Бүх сүлжээ"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi сүлжээнд холбогдох уу?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> санал болгосон"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Тийм"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Үгүй"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматаар асна"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Таныг хадгалсан, өндөр чанартай сүлжээний ойролцоо байх үед"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Буцааж асаахгүй"</string>

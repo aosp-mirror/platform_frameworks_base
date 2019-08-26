@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Esta app puede reconocer tu actividad física."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tomar fotografías y grabar videos"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Esta app puede tomar fotos y grabar videos con la cámara en cualquier momento."</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Permitir que una aplicación o un servicio accedan a las cámaras del sistema para tomar fotos y grabar videos"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Esta privilegiada | app del sistema puede tomar fotos y grabar videos con una cámara del sistema en cualquier momento. También se requiere que la app posea el permiso android.permission.CAMERA."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite que la aplicación controle la vibración."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"llamar directamente a números de teléfono"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Presiona para ver todas las redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectar"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas las redes"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"¿Quieres conectarte a redes Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Sugerido por <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sí"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Se activará la conexión Wi-Fi automáticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Cuando estés cerca de una red guardada de alta calidad"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"No volver a activar"</string>

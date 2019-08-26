@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ứng dụng này có thể nhận dạng hoạt động thể chất của bạn."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"chụp ảnh và quay video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ứng dụng này có thể chụp ảnh và quay video bằng máy ảnh bất cứ lúc nào."</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Cho phép một ứng dụng hoặc dịch vụ truy cập vào máy ảnh hệ thống để chụp ảnh và quay video"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Ứng dụng hệ thống/đặc quyền này có thể dùng máy ảnh hệ thống để chụp ảnh và quay video bất cứ lúc nào. Ngoài ra, ứng dụng này cũng cần có quyền android.permission.CAMERA"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"gọi trực tiếp số điện thoại"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Nhấn để xem tất cả các mạng"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kết nối"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tất cả các mạng"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Bạn muốn kết nối với mạng Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Do <xliff:g id="NAME">%s</xliff:g> đề xuất"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Có"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Không"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi sẽ tự động bật"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Khi bạn ở gần mạng đã lưu chất lượng cao"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Không bật lại"</string>

@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"ဤအက်ပ်က သင်၏ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားနိုင်ပါသည်။"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ဓါတ်ပုံနှင့်ဗွီဒီယိုရိုက်ခြင်း"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"ဤအက်ပ်သည် ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်ပါသည်။"</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"ဓာတ်ပုံနှင့် ဗီဒီယိုများရိုက်ရန်အတွက် စနစ်ကင်မရာများကို အက်ပ် သို့မဟုတ် ဝန်‌ဆောင်မှုအား အသုံးပြုခွင့်ပေးခြင်း"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"ခွင့်ပြုချက်ရှိသည့် | ဤစနစ်အက်ပ်သည် စနစ်ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်သည်။ အက်ပ်ကလည်း android.permission.CAMERA ခွင့်ပြုချက် ရှိရပါမည်"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"တုန်ခုန်မှုအား ထိန်းချုပ်ခြင်း"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"အက်ပ်အား တုန်ခါစက်ကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ဖုန်းနံပါတ်များကိုတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
@@ -1259,10 +1257,14 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ကွန်ရက်အားလုံးကို ကြည့်ရန် တို့ပါ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ချိတ်ဆက်ရန်"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ကွန်ရက်အားလုံး"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi‑Fi ကွန်ရက်များသို့ ချိတ်ဆက်လိုပါသလား။"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> က အကြံပြုထားသည်"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yes"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ကို အလိုအလျောက်​ ပြန်ဖွင့်ပေးလိမ့်ပါမည်"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"သိမ်းဆည်းထားသည့် အရည်အသွေးမြင့်ကွန်ရက်များအနီးသို့ ရောက်ရှိသည့်အခါ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ပြန်မဖွင့်ပါနှင့်"</string>
