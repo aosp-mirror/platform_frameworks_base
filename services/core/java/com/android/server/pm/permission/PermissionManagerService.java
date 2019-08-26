@@ -627,7 +627,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
                                 "Need " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
                                         + " to change policy flags");
-                    } else if (mPackageManagerInt.getTargetSdk(callingUid)
+                    } else if (mPackageManagerInt.getUidTargetSdkVersion(callingUid)
                             >= Build.VERSION_CODES.Q) {
                         throw new IllegalArgumentException(
                                 Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " needs "
@@ -1583,7 +1583,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // If permission review is enabled and this is a legacy app, mark the
             // permission as requiring a review as this is the initial state.
             final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
-            final int targetSdk = mPackageManagerInt.getTargetSdk(uid);
+            final int targetSdk = mPackageManagerInt.getUidTargetSdkVersion(uid);
             final int flags = (targetSdk < Build.VERSION_CODES.M && bp.isRuntime())
                     ? FLAG_PERMISSION_REVIEW_REQUIRED | FLAG_PERMISSION_REVOKE_ON_UPGRADE
                     : 0;
