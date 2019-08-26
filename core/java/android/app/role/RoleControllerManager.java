@@ -183,6 +183,9 @@ public class RoleControllerManager {
 
     /**
      * @see RoleControllerService#onIsApplicationQualifiedForRole(String, String)
+     *
+     * @deprecated Use {@link #isApplicationVisibleForRole(String, String, Executor, Consumer)}
+     *             instead.
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     public void isApplicationQualifiedForRole(@NonNull String roleName, @NonNull String packageName,
@@ -194,6 +197,21 @@ public class RoleControllerManager {
             return future;
         });
         propagateCallback(operation, "isApplicationQualifiedForRole", executor, callback);
+    }
+
+    /**
+     * @see RoleControllerService#onIsApplicationVisibleForRole(String, String)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public void isApplicationVisibleForRole(@NonNull String roleName, @NonNull String packageName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        AndroidFuture<Bundle> operation = mRemoteService.postAsync(service -> {
+            AndroidFuture<Bundle> future = new AndroidFuture<>();
+            service.isApplicationVisibleForRole(roleName, packageName,
+                    new RemoteCallback(future::complete));
+            return future;
+        });
+        propagateCallback(operation, "isApplicationVisibleForRole", executor, callback);
     }
 
     /**
