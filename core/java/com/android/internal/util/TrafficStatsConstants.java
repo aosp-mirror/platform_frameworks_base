@@ -40,4 +40,5 @@ public class TrafficStatsConstants {
     // {@link android.net.TrafficStats#TAG_NETWORK_STACK_IMPERSONATION_RANGE_START} and
     // {@link android.net.TrafficStats#TAG_NETWORK_STACK_IMPERSONATION_RANGE_END}.
     public static final int TAG_SYSTEM_PROBE = 0xFFFFFF81;
+    public static final int TAG_SYSTEM_DNS = 0xFFFFFF82;
 }
