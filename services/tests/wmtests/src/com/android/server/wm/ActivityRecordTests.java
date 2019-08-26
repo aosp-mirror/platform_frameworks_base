@@ -798,6 +798,32 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     /**
+     * Verify that when finishing the top focused activity on top display, the stack order will be
+     * changed by adjusting focus.
+     */
+    @Test
+    public void testFinishActivityIfPossible_adjustStackOrder() {
+        // Prepare the stacks with order (top to bottom): mStack, stack1, stack2.
+        final ActivityStack stack1 = new StackBuilder(mRootActivityContainer).build();
+        mStack.moveToFront("test");
+        // The stack2 is needed here for moving back to simulate the
+        // {@link ActivityDisplay#mPreferredTopFocusableStack} is cleared, so
+        // {@link ActivityDisplay#getFocusedStack} will rely on the order of focusable-and-visible
+        // stacks. Then when mActivity is finishing, its stack will be invisible (no running
+        // activities in the stack) that is the key condition to verify.
+        final ActivityStack stack2 = new StackBuilder(mRootActivityContainer).build();
+        stack2.moveToBack("test", stack2.getChildAt(0));
+
+        assertTrue(mStack.isTopStackOnDisplay());
+
+        mActivity.setState(RESUMED, "test");
+        mActivity.finishIfPossible(0 /* resultCode */, null /* resultData */, "test",
+                false /* oomAdj */, false /* pauseImmediately */);
+
+        assertTrue(stack1.isTopStackOnDisplay());
+    }
+
+    /**
      * Verify that resumed activity is paused due to finish request.
      */
     @Test
