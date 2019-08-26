@@ -4180,6 +4180,17 @@ public class UserManagerService extends IUserManager.Stub {
             }
             return userData == null ? null : userData.info;
         }
+
+        public @NonNull UserInfo[] getUserInfos() {
+            synchronized (mUsersLock) {
+                int userSize = mUsers.size();
+                UserInfo[] allInfos = new UserInfo[userSize];
+                for (int i = 0; i < userSize; i++) {
+                    allInfos[i] = mUsers.valueAt(i).info;
+                }
+                return allInfos;
+            }
+        }
     }
 
     /* Remove all the users except of the system one. */

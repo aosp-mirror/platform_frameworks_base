@@ -147,8 +147,7 @@ public final class ContentCaptureManagerService extends
             mRequestsHistory = null;
         }
 
-        final UserManager um = getContext().getSystemService(UserManager.class);
-        final List<UserInfo> users = um.getUsers();
+        final List<UserInfo> users = getSupportedUsers();
         for (int i = 0; i < users.size(); i++) {
             final int userId = users.get(i).id;
             final boolean disabled = !isEnabledBySettings(userId);
@@ -171,6 +170,11 @@ public final class ContentCaptureManagerService extends
     protected ContentCapturePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
         return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId);
+    }
+
+    @Override // from SystemService
+    public boolean isSupported(UserInfo userInfo) {
+        return userInfo.isFull() || userInfo.isManagedProfile();
     }
 
     @Override // from SystemService
@@ -336,8 +340,7 @@ public final class ContentCaptureManagerService extends
         if (verbose) {
             Slog.v(mTag, "setDisabledByDeviceConfig(): explicitlyEnabled=" + explicitlyEnabled);
         }
-        final UserManager um = getContext().getSystemService(UserManager.class);
-        final List<UserInfo> users = um.getUsers();
+        final List<UserInfo> users = getSupportedUsers();
 
         final boolean newDisabledValue;
 
