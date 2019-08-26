@@ -62,6 +62,11 @@ public interface BiometricDialog {
     @interface DialogSize {}
 
     /**
+     * Animation duration, e.g. small to medium dialog, icon translation, etc.
+     */
+    int ANIMATE_DURATION_MS = 150;
+
+    /**
      * Show the dialog.
      * @param wm
      */

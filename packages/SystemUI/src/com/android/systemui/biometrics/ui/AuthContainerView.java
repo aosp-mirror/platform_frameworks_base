@@ -51,12 +51,13 @@ public class AuthContainerView extends LinearLayout
     private static final int ANIMATION_DURATION_SHOW_MS = 250;
     private static final int ANIMATION_DURATION_AWAY_MS = 350; // ms
 
-    private final Config mConfig;
+    final Config mConfig;
     private final Handler mHandler = new Handler();
     private final IBinder mWindowToken = new Binder();
     private final WindowManager mWindowManager;
     private final AuthPanelController mPanelController;
     private final Interpolator mLinearOutSlowIn;
+    @VisibleForTesting final BiometricCallback mBiometricCallback;
 
     private final ViewGroup mContainerView;
     private final AuthBiometricView mBiometricView;
@@ -72,7 +73,7 @@ public class AuthContainerView extends LinearLayout
     private boolean mCompletedAnimatingIn;
     private boolean mPendingDismissDialog;
 
-    private static class Config {
+    static class Config {
         Context mContext;
         DialogViewCallback mCallback;
         Bundle mBiometricPromptBundle;
@@ -126,17 +127,31 @@ public class AuthContainerView extends LinearLayout
         }
     }
 
-    private final AuthBiometricView.Callback mBiometricCallback = action -> {
-        switch (action) {
-            case AuthBiometricView.Callback.ACTION_AUTHENTICATED:
-                animateAway(DialogViewCallback.DISMISSED_AUTHENTICATED);
-                break;
-            default:
-                Log.e(TAG, "Unhandled action: " + action);
+    @VisibleForTesting
+    final class BiometricCallback implements AuthBiometricView.Callback {
+        @Override
+        public void onAction(int action) {
+            switch (action) {
+                case AuthBiometricView.Callback.ACTION_AUTHENTICATED:
+                    animateAway(DialogViewCallback.DISMISSED_AUTHENTICATED);
+                    break;
+                case AuthBiometricView.Callback.ACTION_USER_CANCELED:
+                    animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+                    break;
+                case AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE:
+                    animateAway(DialogViewCallback.DISMISSED_BUTTON_NEGATIVE);
+                    break;
+                case AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN:
+                    mConfig.mCallback.onTryAgainPressed();
+                    break;
+                default:
+                    Log.e(TAG, "Unhandled action: " + action);
+            }
         }
-    };
+    }
 
-    private AuthContainerView(Config config) {
+    @VisibleForTesting
+    AuthContainerView(Config config) {
         super(config.mContext);
 
         mConfig = config;
@@ -146,6 +161,7 @@ public class AuthContainerView extends LinearLayout
         mTranslationY = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
+        mBiometricCallback = new BiometricCallback();
 
         final LayoutInflater factory = LayoutInflater.from(mContext);
         mContainerView = (ViewGroup) factory.inflate(
@@ -263,12 +279,12 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onAuthenticationFailed(String failureReason) {
-
+        mBiometricView.onAuthenticationFailed(failureReason);
     }
 
     @Override
     public void onHelp(String help) {
-
+        mBiometricView.onHelp(help);
     }
 
     @Override
@@ -291,7 +307,8 @@ public class AuthContainerView extends LinearLayout
         return mConfig.mOpPackageName;
     }
 
-    private void animateAway(int reason) {
+    @VisibleForTesting
+    void animateAway(int reason) {
         animateAway(true /* sendReason */, reason);
     }
 

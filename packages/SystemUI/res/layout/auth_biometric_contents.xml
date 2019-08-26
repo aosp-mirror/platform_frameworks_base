@@ -65,10 +65,10 @@
         android:textSize="12sp"
         android:gravity="center_horizontal"
         android:accessibilityLiveRegion="polite"
-        android:textColor="@color/biometric_dialog_gray"
-        android:text="ERROR"/>
+        android:textColor="@color/biometric_dialog_gray"/>
 
     <LinearLayout
+        android:id="@+id/button_bar"
         android:layout_width="match_parent"
         android:layout_height="72dip"
         android:paddingTop="24dp"
@@ -85,13 +85,12 @@
             android:layout_height="match_parent"
             style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
             android:gravity="center"
-            android:maxLines="2"
-            android:text="NEGATIVE"/>
+            android:maxLines="2"/>
         <Space android:id="@+id/middleSpacer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:visibility="visible" />
+            android:visibility="visible"/>
         <!-- Positive Button -->
         <Button android:id="@+id/button_positive"
             android:layout_width="wrap_content"

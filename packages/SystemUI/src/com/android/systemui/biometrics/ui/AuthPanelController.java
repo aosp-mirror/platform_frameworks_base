@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.ui;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Outline;
 import android.util.Log;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 
 import com.android.systemui.R;
+import com.android.systemui.biometrics.BiometricDialog;
 
 /**
  * Controls the back panel and its animations for the BiometricPrompt UI.
@@ -62,20 +64,31 @@ public class AuthPanelController extends ViewOutlineProvider {
         mContainerHeight = containerHeight;
     }
 
-    public void updateForContentDimensions(int contentWidth, int contentHeight) {
+    public void updateForContentDimensions(int contentWidth, int contentHeight, boolean animate) {
         if (DEBUG) {
-            Log.v(TAG, "Content Width: " + contentWidth + " Height: " + contentHeight);
+            Log.v(TAG, "Content Width: " + contentWidth
+                    + " Height: " + contentHeight
+                    + " Animate: " + animate);
         }
-
-        mContentWidth = contentWidth;
-        mContentHeight = contentHeight;
 
         if (mContainerWidth == 0 || mContainerHeight == 0) {
             Log.w(TAG, "Not done measuring yet");
             return;
         }
 
-        mPanelView.invalidateOutline();
+        if (animate) {
+            ValueAnimator heightAnimator = ValueAnimator.ofInt(mContentHeight, contentHeight);
+            heightAnimator.setDuration(BiometricDialog.ANIMATE_DURATION_MS);
+            heightAnimator.addUpdateListener((animation) -> {
+                mContentHeight = (int) animation.getAnimatedValue();
+                mPanelView.invalidateOutline();
+            });
+            heightAnimator.start();
+        } else {
+            mContentWidth = contentWidth;
+            mContentHeight = contentHeight;
+            mPanelView.invalidateOutline();
+        }
     }
 
     AuthPanelController(Context context, View panelView) {
