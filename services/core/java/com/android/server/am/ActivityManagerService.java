@@ -9055,7 +9055,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw e.rethrowAsRuntimeException();
                 }
             }
-            mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+            // On Automotive, at this point the system user has already been started and unlocked,
+            // and some of the tasks we do here have already been done. So skip those in that case.
+            final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+
+            if (bootingSystemUser) {
+                mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+            }
 
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
 
