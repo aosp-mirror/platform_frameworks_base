@@ -62,8 +62,9 @@ import java.io.IOException;
 /**
  * Displays image resources, for example {@link android.graphics.Bitmap}
  * or {@link android.graphics.drawable.Drawable} resources.
- * ImageView is also commonly used to {@link #setImageTintMode(PorterDuff.Mode)
- * apply tints to an image} and handle {@link #setScaleType(ScaleType) image scaling}.
+ * ImageView is also commonly used to
+ * <a href="#setImageTintMode(android.graphics.PorterDuff.Mode)">apply tints to an image</a> and
+ * handle <a href="#setScaleType(android.widget.ImageView.ScaleType)">image scaling</a>.
  *
  * <p>
  * The following XML snippet is a common example of using an ImageView to display an image resource:
@@ -76,7 +77,8 @@ import java.io.IOException;
  *     &lt;ImageView
  *         android:layout_width="wrap_content"
  *         android:layout_height="wrap_content"
- *         android:src="@mipmap/ic_launcher"
+ *         android:src="@drawable/my_image"
+ *         android:contentDescription="@string/my_image_description"
  *         /&gt;
  * &lt;/LinearLayout&gt;
  * </pre>
