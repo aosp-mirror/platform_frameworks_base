@@ -97,14 +97,17 @@ public class CachedBluetoothDeviceManager {
      * @return the newly created CachedBluetoothDevice object
      */
     public CachedBluetoothDevice addDevice(BluetoothDevice device) {
-        LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
-        CachedBluetoothDevice newDevice = new CachedBluetoothDevice(mContext, profileManager,
-                device);
-        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(newDevice);
+        CachedBluetoothDevice newDevice;
+        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
         synchronized (this) {
-            if (!mHearingAidDeviceManager.setSubDeviceIfNeeded(newDevice)) {
-                mCachedDevices.add(newDevice);
-                mBtManager.getEventManager().dispatchDeviceAdded(newDevice);
+            newDevice = findDevice(device);
+            if (newDevice == null) {
+                newDevice = new CachedBluetoothDevice(mContext, profileManager, device);
+                mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(newDevice);
+                if (!mHearingAidDeviceManager.setSubDeviceIfNeeded(newDevice)) {
+                    mCachedDevices.add(newDevice);
+                    mBtManager.getEventManager().dispatchDeviceAdded(newDevice);
+                }
             }
         }
 

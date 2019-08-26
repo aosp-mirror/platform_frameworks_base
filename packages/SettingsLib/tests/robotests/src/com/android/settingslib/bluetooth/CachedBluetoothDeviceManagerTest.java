@@ -191,6 +191,25 @@ public class CachedBluetoothDeviceManagerTest {
     }
 
     /**
+     * Test to verify addDevice(), the duplicated device should not added.
+     */
+    @Test
+    public void addDevice_addDuplicatedDevice_duplicateDeviceShouldNotAdded() {
+        final CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        assertThat(cachedDevice1).isNotNull();
+        final CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+        assertThat(cachedDevice2).isNotNull();
+        final CachedBluetoothDevice cachedDevice3 = mCachedDeviceManager.addDevice(mDevice2);
+        assertThat(cachedDevice3).isNotNull();
+        final CachedBluetoothDevice cachedDevice4 = mCachedDeviceManager.addDevice(mDevice2);
+        assertThat(cachedDevice4).isNotNull();
+
+        final Collection<CachedBluetoothDevice> devices =
+                mCachedDeviceManager.getCachedDevicesCopy();
+        assertThat(devices.size()).isEqualTo(2);
+    }
+
+    /**
      * Test to verify findDevice(), new device has the same HiSyncId.
      */
     @Test
