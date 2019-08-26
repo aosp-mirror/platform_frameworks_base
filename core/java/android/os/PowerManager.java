@@ -37,6 +37,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 /**
  * This class gives you control of the power state of the device.
@@ -831,7 +832,8 @@ public final class PowerManager {
     private final ArrayMap<OnThermalStatusChangedListener, IThermalStatusListener>
             mListenerMap = new ArrayMap<>();
 
-    IDeviceIdleController mIDeviceIdleController;
+    private static Function<String, Boolean> sIsIgnoringBatteryOptimizationsCallback =
+            (packageName) -> false;
 
     /**
      * {@hide}
@@ -1660,17 +1662,12 @@ public final class PowerManager {
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
      */
     public boolean isIgnoringBatteryOptimizations(String packageName) {
-        synchronized (this) {
-            if (mIDeviceIdleController == null) {
-                mIDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
-            }
-        }
-        try {
-            return mIDeviceIdleController.isPowerSaveWhitelistApp(packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return sIsIgnoringBatteryOptimizationsCallback.apply(packageName);
+    }
+
+    /** @hide */
+    public static void setIsIgnoringBatteryOptimizationsCallback(Function<String, Boolean> f) {
+        sIsIgnoringBatteryOptimizationsCallback = f;
     }
 
     /**

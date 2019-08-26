@@ -5,6 +5,7 @@ filegroup {
         "java/android/app/job/IJobCallback.aidl",
         "java/android/app/job/IJobScheduler.aidl",
         "java/android/app/job/IJobService.aidl",
+        "java/android/os/IDeviceIdleController.aidl",
     ],
     path: "java",
 }

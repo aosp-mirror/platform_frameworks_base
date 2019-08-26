@@ -19,6 +19,9 @@ package android.app;
 import android.content.Context;
 import android.os.DeviceIdleManager;
 import android.os.IDeviceIdleController;
+import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 /**
  * This class needs to be pre-loaded by zygote.  This is where the device idle manager wrapper
@@ -27,10 +30,25 @@ import android.os.IDeviceIdleController;
  * @hide
  */
 public class DeviceIdleFrameworkInitializer {
+    private static IDeviceIdleController sIDeviceIdleController;
+
     static {
         SystemServiceRegistry.registerCachedService(
                 Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
                 (context, b) -> new DeviceIdleManager(
                         context.getOuterContext(), IDeviceIdleController.Stub.asInterface(b)));
+        PowerManager.setIsIgnoringBatteryOptimizationsCallback((packageName) -> {
+            // No need for synchronization on sIDeviceIdleController; worst case
+            // we just initialize it twice.
+            if (sIDeviceIdleController == null) {
+                sIDeviceIdleController = IDeviceIdleController.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+            }
+            try {
+                return sIDeviceIdleController.isPowerSaveWhitelistApp(packageName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        });
     }
 }

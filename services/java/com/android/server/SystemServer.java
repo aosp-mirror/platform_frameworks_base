@@ -272,6 +272,8 @@ public final class SystemServer {
             "com.android.server.appprediction.AppPredictionManagerService";
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
             "com.android.server.contentsuggestions.ContentSuggestionsManagerService";
+    private static final String DEVICE_IDLE_CONTROLLER_CLASS =
+            "com.android.server.DeviceIdleController";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -1245,7 +1247,7 @@ public final class SystemServer {
             }
 
             t.traceBegin("StartDeviceIdleController");
-            mSystemServiceManager.startService(DeviceIdleController.class);
+            mSystemServiceManager.startService(DEVICE_IDLE_CONTROLLER_CLASS);
             t.traceEnd();
 
             // Always start the Device Policy Manager, so that the API is compatible with
