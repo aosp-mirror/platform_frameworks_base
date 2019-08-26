@@ -256,7 +256,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         StatusBarNotification oldNotification = childEntry.notification;
         StatusBarNotification newSbn = spy(childEntry.notification.clone());
         doReturn("other_group").when(newSbn).getGroupKey();
-        childEntry.notification = newSbn;
+        childEntry.setNotification(newSbn);
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
@@ -267,7 +267,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         NotificationEntry summaryEntry =
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
-                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47);
         when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
             .thenReturn(false);
         mHeadsUpManager.showNotification(summaryEntry);
@@ -277,8 +277,9 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         // Update that child to a summary.
         StatusBarNotification oldNotification = childEntry.notification;
-        childEntry.notification = mGroupTestHelper.createSummaryNotification(
-                Notification.GROUP_ALERT_SUMMARY).notification;
+        childEntry.setNotification(
+                mGroupTestHelper.createSummaryNotification(
+                        Notification.GROUP_ALERT_SUMMARY, 47).notification);
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));

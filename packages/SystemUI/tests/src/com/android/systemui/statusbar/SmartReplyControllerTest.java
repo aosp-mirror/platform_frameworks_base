@@ -97,7 +97,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
 
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, mNotification, new UserHandle(ActivityManager.getCurrentUser()), null, 0);
-        mEntry = new NotificationEntry(mSbn);
+        mEntry = NotificationEntry.buildForTest(mSbn);
     }
 
     @Test

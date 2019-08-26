@@ -121,7 +121,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
-        NotificationEntry laterEntry = new NotificationEntry(createNewNotification(1));
+        NotificationEntry laterEntry = NotificationEntry.buildForTest(createNewNotification(1));
         laterEntry.setRow(mRow);
         mHeadsUpManager.showNotification(mEntry);
         mHeadsUpManager.showNotification(laterEntry);

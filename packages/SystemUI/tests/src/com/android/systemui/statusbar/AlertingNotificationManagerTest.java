@@ -129,7 +129,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     public void setUp() {
         mTestHandler = Handler.createAsync(Looper.myLooper());
         mSbn = createNewNotification(0 /* id */);
-        mEntry = new NotificationEntry(mSbn);
+        mEntry = NotificationEntry.buildForTest(mSbn);
         mEntry.setRow(mRow);
 
         mAlertingNotificationManager = createAlertingNotificationManager();
@@ -180,7 +180,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     public void testReleaseAllImmediately() {
         for (int i = 0; i < TEST_NUM_NOTIFICATIONS; i++) {
             StatusBarNotification sbn = createNewNotification(i);
-            NotificationEntry entry = new NotificationEntry(sbn);
+            NotificationEntry entry = NotificationEntry.buildForTest(sbn);
             entry.setRow(mRow);
             mAlertingNotificationManager.showNotification(entry);
         }

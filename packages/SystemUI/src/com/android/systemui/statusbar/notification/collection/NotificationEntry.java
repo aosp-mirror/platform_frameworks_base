@@ -38,7 +38,7 @@ import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -88,6 +88,8 @@ public final class NotificationEntry {
     private static final int COLOR_INVALID = 1;
     public final String key;
     public StatusBarNotification notification;
+    private Ranking mRanking;
+
     public NotificationChannel channel;
     public long lastAudiblyAlertedMs;
     public boolean noisy;
@@ -103,7 +105,7 @@ public final class NotificationEntry {
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
     public List<SnoozeCriterion> snoozeCriteria;
-    public int userSentiment = NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+    public int userSentiment = Ranking.USER_SENTIMENT_NEUTRAL;
     /** Smart Actions provided by the NotificationAssistantService. */
     @NonNull
     public List<Notification.Action> systemGeneratedSmartActions = Collections.emptyList();
@@ -181,21 +183,80 @@ public final class NotificationEntry {
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
 
-    public NotificationEntry(StatusBarNotification n) {
-        this(n, null);
+    public NotificationEntry(
+            StatusBarNotification sbn,
+            @NonNull Ranking ranking) {
+        this(sbn, ranking, false);
     }
 
-    public NotificationEntry(
-            StatusBarNotification n,
-            @Nullable NotificationListenerService.Ranking ranking) {
-        this.key = n.getKey();
-        this.notification = n;
+    private NotificationEntry(
+            StatusBarNotification sbn,
+            Ranking ranking,
+            boolean isTest) {
+        this.key = sbn.getKey();
+        this.notification = sbn;
+
+        // TODO: Update tests to no longer need to pass null ranking
         if (ranking != null) {
-            populateFromRanking(ranking);
+            setRanking(ranking);
+        } else if (!isTest) {
+            throw new IllegalArgumentException("Ranking cannot be null");
         }
     }
 
-    public void populateFromRanking(@NonNull NotificationListenerService.Ranking ranking) {
+    /**
+     * Method for old tests that build NotificationEntries with a ranking.
+     *
+     * @deprecated New tests should pass a ranking object as well.
+     */
+    @VisibleForTesting
+    @Deprecated
+    public static NotificationEntry buildForTest(StatusBarNotification sbn) {
+        // TODO START here this will NPE on all tests
+        return new NotificationEntry(sbn, null, true);
+    }
+
+    /** The key for this notification. Guaranteed to be immutable and unique */
+    public String key() {
+        return key;
+    }
+
+    /**
+     * The StatusBarNotification that represents one half of a NotificationEntry (the other half
+     * being the Ranking). This object is swapped out whenever a notification is updated.
+     */
+    public StatusBarNotification sbn() {
+        return notification;
+    }
+
+    /**
+     * Should only be called by NotificationEntryManager and friends.
+     * TODO: Make this package-private
+     */
+    public void setNotification(StatusBarNotification sbn) {
+        if (!sbn.getKey().equals(key)) {
+            throw new IllegalArgumentException("New key " + sbn.getKey()
+                    + " doesn't match existing key " + key);
+        }
+        notification = sbn;
+    }
+
+    /**
+     * The Ranking that represents one half of a NotificationEntry (the other half being the
+     * StatusBarNotification). This object is swapped out whenever a the ranking is updated (which
+     * generally occurs whenever anything changes in the notification list).
+     */
+    public Ranking ranking() {
+        return mRanking;
+    }
+
+    /**
+     * Should only be called by NotificationEntryManager and friends.
+     * TODO: Make this package-private
+     */
+    public void setRanking(@NonNull Ranking ranking) {
+        mRanking = ranking;
+
         channel = ranking.getChannel();
         lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
         importance = ranking.getImportance();

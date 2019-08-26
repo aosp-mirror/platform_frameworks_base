@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.os.Bundle;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -59,7 +60,18 @@ public class NotificationEntryTest extends SysuiTestCase {
         mExtras = new Bundle();
         mNotif.extras = mExtras;
 
-        mEntry = new NotificationEntry(mStatusBarNotification);
+        mEntry = NotificationEntry.buildForTest(mStatusBarNotification);
+    }
+
+    @Test
+    public void testInitialization() {
+        final Ranking ranking = new Ranking();
+
+        final NotificationEntry entry = new NotificationEntry(mStatusBarNotification, ranking);
+
+        assertEquals("key", entry.key());
+        assertEquals(mStatusBarNotification, entry.sbn());
+        assertEquals(ranking, entry.ranking());
     }
 
     @Test

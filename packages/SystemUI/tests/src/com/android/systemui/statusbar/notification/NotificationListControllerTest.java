@@ -234,7 +234,7 @@ public class NotificationListControllerTest extends SysuiTestCase {
                         new UserHandle(ActivityManager.getCurrentUser()),
                         null,
                         0);
-        return new NotificationEntry(notification);
+        return NotificationEntry.buildForTest(notification);
     }
 
     private static final String TEST_PACKAGE_NAME = "test";

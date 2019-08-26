@@ -50,7 +50,6 @@ import com.android.systemui.statusbar.notification.row.NotificationContentInflat
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
  * A helper class to create {@link ExpandableNotificationRow} (for both individual and group
@@ -307,7 +306,7 @@ public class NotificationTestHelper {
                 userHandle,
                 null /* overrideGroupKey */,
                 System.currentTimeMillis());
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.setRow(row);
         entry.createIcons(mContext, sbn);
         entry.channel = new NotificationChannel(
