@@ -48,6 +48,13 @@ message JobSchedulerServiceDumpProto {
 
     repeated int32 started_users = 2;
 
+    message JobRestriction {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional .android.app.job.StopReasonEnum reason = 1;
+        optional bool is_restricting = 2;
+    }
+
     message RegisteredJob {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -56,20 +63,22 @@ message JobSchedulerServiceDumpProto {
 
         optional bool is_job_ready_to_be_executed = 10;
         // A job is ready to be executed if:
-        // is_job_ready && are_users_started && !is_job_thermal_constrained && !is_job_pending &&
+        // is_job_ready && are_users_started && !is_job_restricted && !is_job_pending &&
         // !is_job_currently_active && !is_uid_backing_up &&
         // is_component_usable.
         optional bool is_job_ready = 3;
         optional bool are_users_started = 4;
-        optional bool is_job_thermal_constrained = 11;
+        optional bool is_job_restricted = 11;
         optional bool is_job_pending = 5;
         optional bool is_job_currently_active = 6;
         optional bool is_uid_backing_up = 7;
         optional bool is_component_usable = 8;
 
+        repeated JobRestriction restrictions = 12;
+
         reserved 9; // last_run_heartbeat
 
-        // Next tag: 12
+        // Next tag: 13
     }
     repeated RegisteredJob registered_jobs = 3;
 
