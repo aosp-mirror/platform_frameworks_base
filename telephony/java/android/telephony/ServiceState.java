@@ -1323,6 +1323,7 @@ public class ServiceState implements Parcelable {
             DataSpecificRegistrationInfo dsri = nri.getDataSpecificInfo();
             if (dsri != null) {
                 dsri.setIsUsingCarrierAggregation(ca);
+                addNetworkRegistrationInfo(nri);
             }
         }
     }
