@@ -149,6 +149,8 @@ public class PasspointConfigurationTest {
         PasspointConfiguration config = new PasspointConfiguration();
         config.setUpdateIdentifier(1234);
         config.setHomeSp(createHomeSp());
+        config.setAaaServerTrustedNames(
+                new String[] {"trusted.fqdn.com", "another-trusted.fqdn.com"});
         config.setCredential(createCredential());
         config.setPolicy(createPolicy());
         config.setSubscriptionUpdate(createSubscriptionUpdate());
@@ -284,6 +286,19 @@ public class PasspointConfigurationTest {
     }
 
     /**
+     * Verify parcel read/write for a configuration that doesn't contain AAA server trusted names
+     * list.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void verifyParcelWithoutAaaServerTrustedNames() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.setAaaServerTrustedNames(null);
+        verifyParcel(config);
+    }
+
+    /**
      * Verify that a default/empty configuration is invalid.
      *
      * @throws Exception
@@ -380,6 +395,21 @@ public class PasspointConfigurationTest {
 
         assertTrue(config.validate());
         assertFalse(config.validateForR2());
+    }
+
+    /**
+     * Verify that a configuration without AAA server trusted names is valid for R1 and R2,
+     * since AAA server trusted names are optional for R1 and R2.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithoutAaaServerTrustedNames() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.setAaaServerTrustedNames(null);
+
+        assertTrue(config.validate());
+        assertTrue(config.validateForR2());
     }
 
     /**
