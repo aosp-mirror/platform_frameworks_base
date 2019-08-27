@@ -77,11 +77,11 @@ public abstract class AuthBiometricView extends LinearLayout {
      * Authenticated, dialog animating away soon.
      */
     protected static final int STATE_AUTHENTICATED = 6;
-
+    
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATE_IDLE, STATE_AUTHENTICATING_ANIMATING_IN, STATE_AUTHENTICATING, STATE_HELP,
             STATE_ERROR, STATE_PENDING_CONFIRMATION, STATE_AUTHENTICATED})
-    @interface State {}
+    @interface BiometricState {}
 
     /**
      * Callback to the parent when a user action has occurred.
@@ -116,8 +116,24 @@ public abstract class AuthBiometricView extends LinearLayout {
             return mBiometricView.findViewById(R.id.button_try_again);
         }
 
+        public TextView getTitleView() {
+            return mBiometricView.findViewById(R.id.title);
+        }
+
+        public TextView getSubtitleView() {
+            return mBiometricView.findViewById(R.id.subtitle);
+        }
+
+        public TextView getDescriptionView() {
+            return mBiometricView.findViewById(R.id.description);
+        }
+
         public TextView getErrorView() {
             return mBiometricView.findViewById(R.id.error);
+        }
+
+        public ImageView getIconView() {
+            return mBiometricView.findViewById(R.id.biometric_icon);
         }
     }
 
@@ -145,7 +161,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private int mMediumWidth;
 
     private Callback mCallback;
-    protected @State int mState;
+    protected @BiometricState int mState;
 
     private float mIconOriginalY;
 
@@ -177,6 +193,17 @@ public abstract class AuthBiometricView extends LinearLayout {
     private final Runnable mResetHelpRunnable = () -> {
         updateState(STATE_AUTHENTICATING);
         handleResetAfterHelp();
+    };
+
+    private final OnClickListener mBackgroundClickListener = (view) -> {
+        if (mState == STATE_AUTHENTICATED) {
+            Log.w(TAG, "Ignoring background click after authenticated");
+            return;
+        } else if (mSize == BiometricDialog.SIZE_SMALL) {
+            Log.w(TAG, "Ignoring background click during small dialog");
+            return;
+        }
+        mCallback.onAction(Callback.ACTION_USER_CANCELED);
     };
 
     public AuthBiometricView(Context context) {
@@ -212,11 +239,16 @@ public abstract class AuthBiometricView extends LinearLayout {
         mCallback = callback;
     }
 
+    public void setBackgroundView(View backgroundView) {
+        backgroundView.setOnClickListener(mBackgroundClickListener);
+    }
+
     public void setRequireConfirmation(boolean requireConfirmation) {
         mRequireConfirmation = requireConfirmation;
     }
 
-    private void updateSize(@BiometricDialog.DialogSize int newSize) {
+    @VisibleForTesting
+    void updateSize(@BiometricDialog.DialogSize int newSize) {
         Log.v(TAG, "Current: " + mSize + " New: " + newSize);
         if (newSize == BiometricDialog.SIZE_SMALL) {
             mTitleView.setVisibility(View.GONE);
@@ -307,7 +339,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         }
     }
 
-    public void updateState(@State int newState) {
+    public void updateState(@BiometricState int newState) {
         Log.v(TAG, "newState: " + newState);
         switch (newState) {
             case STATE_AUTHENTICATING_ANIMATING_IN:
@@ -413,11 +445,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     @VisibleForTesting
     void initializeViews() {
-        mTitleView = findViewById(R.id.title);
-        mSubtitleView = findViewById(R.id.subtitle);
-        mDescriptionView = findViewById(R.id.description);
-        mIconView = findViewById(R.id.biometric_icon);
-
+        mTitleView = mInjector.getTitleView();
+        mSubtitleView = mInjector.getSubtitleView();
+        mDescriptionView = mInjector.getDescriptionView();
+        mIconView = mInjector.getIconView();
         mErrorView = mInjector.getErrorView();
         mNegativeButton = mInjector.getNegativeButton();
         mPositiveButton = mInjector.getPositiveButton();

@@ -17,7 +17,6 @@
 package com.android.systemui.biometrics.ui;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -30,10 +29,12 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.BiometricDialog;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,10 +48,16 @@ import org.mockito.MockitoAnnotations;
 public class AuthBiometricViewTest extends SysuiTestCase {
 
     @Mock private AuthBiometricView.Callback mCallback;
+    @Mock private AuthPanelController mPanelController;
+
     @Mock private Button mNegativeButton;
     @Mock private Button mPositiveButton;
     @Mock private Button mTryAgainButton;
+    @Mock private TextView mTitleView;
+    @Mock private TextView mSubtitleView;
+    @Mock private TextView mDescriptionView;
     @Mock private TextView mErrorView;
+    @Mock private ImageView mIconView;
 
     TestableBiometricView mBiometricView;
 
@@ -154,6 +161,39 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         assertEquals(AuthBiometricView.STATE_AUTHENTICATING, mBiometricView.mState);
     }
 
+    @Test
+    public void testBackgroundClicked_sendsActionUserCanceled() {
+        initDialog(mContext, mCallback, new MockInjector());
+
+        View view = new View(mContext);
+        mBiometricView.setBackgroundView(view);
+        view.performClick();
+        verify(mCallback).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
+    }
+
+    @Test
+    public void testBackgroundClicked_afterAuthenticated_neverSendsUserCanceled() {
+        initDialog(mContext, mCallback, new MockInjector());
+
+        View view = new View(mContext);
+        mBiometricView.setBackgroundView(view);
+        mBiometricView.onAuthenticationSucceeded();
+        view.performClick();
+        verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
+    }
+
+    @Test
+    public void testBackgroundClicked_whenSmallDialog_neverSendsUserCanceled() {
+        initDialog(mContext, mCallback, new MockInjector());
+        mBiometricView.setPanelController(mPanelController);
+        mBiometricView.updateSize(BiometricDialog.SIZE_SMALL);
+
+        View view = new View(mContext);
+        mBiometricView.setBackgroundView(view);
+        view.performClick();
+        verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
+    }
+
     private void initDialog(Context context, AuthBiometricView.Callback callback,
             MockInjector injector) {
         mBiometricView = new TestableBiometricView(context, null, injector);
@@ -161,7 +201,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         mBiometricView.initializeViews();
     }
 
-    class MockInjector extends AuthBiometricView.Injector {
+    private class MockInjector extends AuthBiometricView.Injector {
         @Override
         public Button getNegativeButton() {
             return mNegativeButton;
@@ -178,12 +218,32 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         }
 
         @Override
+        public TextView getTitleView() {
+            return mTitleView;
+        }
+
+        @Override
+        public TextView getSubtitleView() {
+            return mSubtitleView;
+        }
+
+        @Override
+        public TextView getDescriptionView() {
+            return mDescriptionView;
+        }
+
+        @Override
         public TextView getErrorView() {
             return mErrorView;
         }
+
+        @Override
+        public ImageView getIconView() {
+            return mIconView;
+        }
     }
 
-    public class TestableBiometricView extends AuthBiometricView {
+    private class TestableBiometricView extends AuthBiometricView {
         TestableBiometricView(Context context, AttributeSet attrs,
                 Injector injector) {
             super(context, attrs, injector);

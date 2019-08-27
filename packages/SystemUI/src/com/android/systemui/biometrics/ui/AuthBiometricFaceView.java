@@ -45,7 +45,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         TextView mTextView;
         Handler mHandler;
         boolean mLastPulseLightToDark; // false = dark to light, true = light to dark
-        @State int mState;
+        @BiometricState int mState;
 
         IconController(Context context, ImageView iconView, TextView textView) {
             mContext = context;
@@ -170,7 +170,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     }
 
     @Override
-    public void updateState(@State int newState) {
+    public void updateState(@BiometricState int newState) {
         mIconController.updateState(mState, newState);
 
         if (newState == STATE_AUTHENTICATING_ANIMATING_IN ||

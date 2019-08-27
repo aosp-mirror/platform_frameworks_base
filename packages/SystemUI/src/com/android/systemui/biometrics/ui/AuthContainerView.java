@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.ui;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Binder;
@@ -41,6 +42,9 @@ import com.android.systemui.biometrics.BiometricDialog;
 import com.android.systemui.biometrics.DialogViewCallback;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Top level container/controller for the BiometricPrompt UI.
  */
@@ -51,8 +55,19 @@ public class AuthContainerView extends LinearLayout
     private static final int ANIMATION_DURATION_SHOW_MS = 250;
     private static final int ANIMATION_DURATION_AWAY_MS = 350; // ms
 
+    private static final int STATE_UNKNOWN = 0;
+    private static final int STATE_ANIMATING_IN = 1;
+    private static final int STATE_PENDING_DISMISS = 2;
+    private static final int STATE_SHOWING = 3;
+    private static final int STATE_ANIMATING_OUT = 4;
+    private static final int STATE_GONE = 5;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATE_UNKNOWN, STATE_ANIMATING_IN, STATE_PENDING_DISMISS, STATE_SHOWING,
+            STATE_ANIMATING_OUT, STATE_GONE})
+    @interface ContainerState {}
+
     final Config mConfig;
-    private final Handler mHandler = new Handler();
     private final IBinder mWindowToken = new Binder();
     private final WindowManager mWindowManager;
     private final AuthPanelController mPanelController;
@@ -70,8 +85,7 @@ public class AuthContainerView extends LinearLayout
 
     @VisibleForTesting final WakefulnessLifecycle mWakefulnessLifecycle;
 
-    private boolean mCompletedAnimatingIn;
-    private boolean mPendingDismissDialog;
+    private @ContainerState int mContainerState = STATE_UNKNOWN;
 
     static class Config {
         Context mContext;
@@ -170,6 +184,7 @@ public class AuthContainerView extends LinearLayout
         // TODO: Depends on modality
         mBiometricView = (AuthBiometricFaceView)
                 factory.inflate(R.layout.auth_biometric_face_view, null, false);
+
         mBackgroundView = mContainerView.findViewById(R.id.background);
 
         mPanelView = mContainerView.findViewById(R.id.panel);
@@ -179,6 +194,7 @@ public class AuthContainerView extends LinearLayout
         mBiometricView.setPanelController(mPanelController);
         mBiometricView.setBiometricPromptBundle(config.mBiometricPromptBundle);
         mBiometricView.setCallback(mBiometricCallback);
+        mBiometricView.setBackgroundView(mBackgroundView);
 
         mScrollView = mContainerView.findViewById(R.id.scrollview);
         mScrollView.addView(mBiometricView);
@@ -210,8 +226,9 @@ public class AuthContainerView extends LinearLayout
         mWakefulnessLifecycle.addObserver(this);
 
         if (mConfig.mSkipIntro) {
-            mCompletedAnimatingIn = true;
+            mContainerState = STATE_SHOWING;
         } else {
+            mContainerState = STATE_ANIMATING_IN;
             // The background panel and content are different views since we need to be able to
             // animate them separately in other places.
             mPanelView.setY(mTranslationY);
@@ -313,11 +330,17 @@ public class AuthContainerView extends LinearLayout
     }
 
     private void animateAway(boolean sendReason, @DialogViewCallback.DismissedReason int reason) {
-        if (!mCompletedAnimatingIn) {
+        if (mContainerState == STATE_ANIMATING_IN) {
             Log.w(TAG, "startDismiss(): waiting for onDialogAnimatedIn");
-            mPendingDismissDialog = true;
+            mContainerState = STATE_PENDING_DISMISS;
             return;
         }
+
+        if (mContainerState == STATE_ANIMATING_OUT) {
+            Log.w(TAG, "Already dismissing, sendReason: " + sendReason + " reason: " + reason);
+            return;
+        }
+        mContainerState = STATE_ANIMATING_OUT;
 
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
@@ -351,13 +374,12 @@ public class AuthContainerView extends LinearLayout
     }
 
     private void onDialogAnimatedIn() {
-        mCompletedAnimatingIn = true;
-        if (mPendingDismissDialog) {
+        if (mContainerState == STATE_PENDING_DISMISS) {
             Log.d(TAG, "onDialogAnimatedIn(): mPendingDismissDialog=true, dismissing now");
             animateAway(false /* sendReason */, 0);
-            mPendingDismissDialog = false;
             return;
         }
+        mContainerState = STATE_SHOWING;
         mBiometricView.onDialogAnimatedIn();
     }
 
