@@ -125,6 +125,11 @@ public class Bmgr {
             return;
         }
 
+        if ("autorestore".equals(op)) {
+            doAutoRestore(userId);
+            return;
+        }
+
         if ("enabled".equals(op)) {
             doEnabled(userId);
             return;
@@ -211,6 +216,26 @@ public class Bmgr {
         }
 
         return true;
+    }
+
+    private void doAutoRestore(int userId) {
+        String arg = nextArg();
+        if (arg == null) {
+            showUsage();
+            return;
+        }
+
+        try {
+            boolean enable = Boolean.parseBoolean(arg);
+            mBmgr.setAutoRestore(enable);
+            System.out.println(
+                    "Auto restore is now "
+                            + (enable ? "enabled" : "disabled")
+                            + " for user "
+                            + userId);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
     }
 
     private String activatedToString(boolean activated) {
@@ -918,6 +943,7 @@ public class Bmgr {
         System.err.println("       bmgr init TRANSPORT...");
         System.err.println("       bmgr activate BOOL");
         System.err.println("       bmgr activated");
+        System.err.println("       bmgr autorestore BOOL");
         System.err.println("");
         System.err.println("The '--user' option specifies the user on which the operation is run.");
         System.err.println("It must be the first argument before the operation.");
@@ -992,6 +1018,9 @@ public class Bmgr {
         System.err.println("");
         System.err.println("The 'activated' command reports the current activated/deactivated");
         System.err.println("state of the backup mechanism.");
+        System.err.println("");
+        System.err.println("The 'autorestore' command enables or disables automatic restore when");
+        System.err.println("a new package is installed.");
     }
 
     private static class BackupMonitor extends IBackupManagerMonitor.Stub {
