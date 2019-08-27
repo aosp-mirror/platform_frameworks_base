@@ -106,6 +106,11 @@ class InsetsSourceProvider {
             @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
         if (mWin != null) {
             mWin.setInsetProvider(null);
+            // The window may be animating such that we can hand out the leash to the control
+            // target. Revoke the leash by cancelling the animation to correct the state.
+            // TODO: Ideally, we should wait for the animation to finish so previous window can
+            // animate-out as new one animates-in.
+            mWin.cancelAnimation();
         }
         mWin = win;
         mFrameProvider = frameProvider;
