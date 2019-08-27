@@ -48,7 +48,8 @@ import java.util.Map;
 /**
  * Application class for SystemUI.
  */
-public class SystemUIApplication extends Application implements SysUiServiceProvider {
+public class SystemUIApplication extends Application implements SysUiServiceProvider,
+        SystemUIAppComponentFactory.ContextProvider {
 
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
@@ -60,7 +61,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     private boolean mServicesStarted;
     private boolean mBootCompleted;
     private final Map<Class<?>, Object> mComponents = new HashMap<>();
-    private ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
 
     @Override
     public void onCreate() {
@@ -290,11 +291,10 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         return mServices;
     }
 
-    void setContextAvailableCallback(ContextAvailableCallback callback) {
+    @Override
+    public void setContextAvailableCallback(
+            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
         mContextAvailableCallback = callback;
     }
 
-    interface ContextAvailableCallback {
-        void onContextAvailable(Context context);
-    }
 }

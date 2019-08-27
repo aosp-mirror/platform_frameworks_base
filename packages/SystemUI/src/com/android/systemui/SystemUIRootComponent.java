@@ -16,6 +16,8 @@
 
 package com.android.systemui;
 
+import android.content.ContentProvider;
+
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 
 import com.android.systemui.fragments.FragmentService;
@@ -76,7 +78,12 @@ public interface SystemUIRootComponent {
     boolean allowNotificationLongPressName();
 
     /**
-     * Injects into the supplied argument.
+     * Member injection into the supplied argument.
      */
     void inject(SystemUIAppComponentFactory factory);
+
+    /**
+     * Member injection into the supplied argument.
+     */
+    void inject(ContentProvider contentProvider);
 }

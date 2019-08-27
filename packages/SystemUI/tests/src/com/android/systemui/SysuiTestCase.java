@@ -55,12 +55,13 @@ public abstract class SysuiTestCase {
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
-    public TestableDependency mDependency = new TestableDependency(mContext);
+    public TestableDependency mDependency;
     private Instrumentation mRealInstrumentation;
 
     @Before
     public void SysuiSetup() throws Exception {
         SystemUIFactory.createFromConfig(mContext);
+        mDependency = new TestableDependency(mContext);
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
@@ -82,6 +83,7 @@ public abstract class SysuiTestCase {
                 InstrumentationRegistry.getArguments());
         // Reset the assert's main looper.
         Assert.sMainLooper = Looper.getMainLooper();
+        SystemUIFactory.cleanup();
     }
 
     protected LeakCheck getLeakCheck() {

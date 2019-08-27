@@ -16,6 +16,8 @@
 
 package com.android.systemui;
 
+import android.app.Service;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -25,21 +27,26 @@ import javax.inject.Provider;
  * Used during Service and Activity instantiation to make them injectable.
  */
 public class ContextComponentResolver implements ContextComponentHelper {
-    private final Map<Class<?>, Provider<Object>> mCreators;
+    private final Map<Class<?>, Provider<Service>> mServiceCreators;
 
     @Inject
-    ContextComponentResolver(Map<Class<?>, Provider<Object>> creators) {
-        mCreators = creators;
+    ContextComponentResolver(
+            Map<Class<?>, Provider<Service>> serviceCreators) {
+        mServiceCreators = serviceCreators;
     }
 
     /**
-     * Looks up the class name to see if Dagger has an instance of it.
+     * Looks up the Service class name to see if Dagger has an instance of it.
      */
     @Override
-    public <T> T resolve(String className) {
-        for (Map.Entry<Class<?>, Provider<Object>> p : mCreators.entrySet()) {
+    public Service resolveService(String className) {
+        return resolve(className, mServiceCreators);
+    }
+
+    private <T> T resolve(String className, Map<Class<?>, Provider<T>> creators) {
+        for (Map.Entry<Class<?>, Provider<T>> p : creators.entrySet()) {
             if (p.getKey().getName().equals(className)) {
-                return (T) p.getValue().get();
+                return p.getValue().get();
             }
         }
 

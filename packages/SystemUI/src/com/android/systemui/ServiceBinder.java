@@ -16,6 +16,8 @@
 
 package com.android.systemui;
 
+import android.app.Service;
+
 import com.android.systemui.doze.DozeService;
 
 import dagger.Binds;
@@ -36,6 +38,5 @@ public abstract class ServiceBinder {
     @Binds
     @IntoMap
     @ClassKey(DozeService.class)
-    public abstract Object bindDozeService(DozeService service);
-
+    public abstract Service bindDozeService(DozeService service);
 }

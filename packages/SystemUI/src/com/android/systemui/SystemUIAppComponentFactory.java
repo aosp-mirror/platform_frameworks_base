@@ -18,16 +18,25 @@ package com.android.systemui;
 
 import android.app.Application;
 import android.app.Service;
+import android.content.ContentProvider;
+import android.content.Context;
 import android.content.Intent;
 
-import androidx.core.app.CoreComponentFactory;
+import androidx.annotation.NonNull;
+import androidx.core.app.AppComponentFactory;
 
 import javax.inject.Inject;
 
 /**
  * Implementation of AppComponentFactory that injects into constructors.
+ *
+ * This class sets up dependency injection when creating our application.
+ *
+ * Services support dependency injection into their constructors.
+ *
+ * ContentProviders support injection into member variables - _not_ constructors.
  */
-public class SystemUIAppComponentFactory extends CoreComponentFactory {
+public class SystemUIAppComponentFactory extends AppComponentFactory {
 
     @Inject
     public ContextComponentHelper mComponentHelper;
@@ -36,12 +45,14 @@ public class SystemUIAppComponentFactory extends CoreComponentFactory {
         super();
     }
 
+    @NonNull
     @Override
-    public Application instantiateApplication(ClassLoader cl, String className)
+    public Application instantiateApplicationCompat(
+            @NonNull ClassLoader cl, @NonNull String className)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        Application app = super.instantiateApplication(cl, className);
-        if (app instanceof SystemUIApplication) {
-            ((SystemUIApplication) app).setContextAvailableCallback(
+        Application app = super.instantiateApplicationCompat(cl, className);
+        if (app instanceof ContextProvider) {
+            ((ContextProvider) app).setContextAvailableCallback(
                     context -> {
                         SystemUIFactory.createFromConfig(context);
                         SystemUIFactory.getInstance().getRootComponent().inject(
@@ -53,24 +64,43 @@ public class SystemUIAppComponentFactory extends CoreComponentFactory {
         return app;
     }
 
+    @NonNull
     @Override
-    public Service instantiateService(ClassLoader cl, String className, Intent intent)
+    public ContentProvider instantiateProviderCompat(
+            @NonNull ClassLoader cl, @NonNull String className)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        Service service = mComponentHelper.resolve(className);
-        if (service != null) {
-            return checkCompatWrapper(service);
+
+        ContentProvider contentProvider = super.instantiateProviderCompat(cl, className);
+        if (contentProvider instanceof ContextProvider) {
+            ((ContextProvider) contentProvider).setContextAvailableCallback(
+                    context -> {
+                        SystemUIFactory.createFromConfig(context);
+                        SystemUIFactory.getInstance().getRootComponent().inject(
+                                contentProvider);
+                    }
+            );
         }
-        return super.instantiateService(cl, className, intent);
+
+        return contentProvider;
     }
 
-    static <T> T checkCompatWrapper(T obj) {
-        if (obj instanceof CompatWrapped) {
-            T wrapper = (T) ((CompatWrapped) obj).getWrapper();
-            if (wrapper != null) {
-                return wrapper;
-            }
+    @NonNull
+    @Override
+    public Service instantiateServiceCompat(
+            @NonNull ClassLoader cl, @NonNull String className, Intent intent)
+            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        Service service = mComponentHelper.resolveService(className);
+        if (service != null) {
+            return service;
         }
+        return super.instantiateServiceCompat(cl, className, intent);
+    }
 
-        return obj;
+    interface ContextAvailableCallback {
+        void onContextAvailable(Context context);
+    }
+
+    interface ContextProvider {
+        void setContextAvailableCallback(ContextAvailableCallback callback);
     }
 }
