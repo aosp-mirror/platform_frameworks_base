@@ -1033,12 +1033,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
     /** @hide */
     public final void setTransportLoggingEnabled(boolean enabled) {
-        if (mTransport != null) {
-            if (enabled) {
-                mTransport.mInterface = new LoggingContentInterface(getClass().getSimpleName(), this);
-            } else {
-                mTransport.mInterface = this;
-            }
+        if (mTransport == null) {
+            return;
+        }
+        if (enabled) {
+            mTransport.mInterface = new LoggingContentInterface(getClass().getSimpleName(), this);
+        } else {
+            mTransport.mInterface = this;
         }
     }
 
