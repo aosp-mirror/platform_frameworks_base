@@ -7719,11 +7719,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManager.registerInputChannel(inputChannel, null /* generate new token */);
 
-        // Prevent the java finalizer from breaking the input channel. But we won't
-        // do any further management so we just release the java ref and let the
-        // InputDispatcher hold the last ref.
-        inputChannel.release();
-
         InputWindowHandle h = new InputWindowHandle(null, null, displayId);
         h.token = inputChannel.getToken();
         h.name = name;
@@ -7746,5 +7741,10 @@ public class WindowManagerService extends IWindowManager.Stub
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(surface, h);
         t.apply();
+
+        // Prevent the java finalizer from breaking the input channel. But we won't
+        // do any further management so we just release the java ref and let the
+        // InputDispatcher hold the last ref.
+        inputChannel.release();
     }
 }
