@@ -505,6 +505,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
+        if (callingUid != Process.SYSTEM_UID) {
+            // Only system_server can use INSTALL_DISABLE_VERIFICATION.
+            params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
+        }
+
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
         if (params.isStaged || isApex) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, TAG);
