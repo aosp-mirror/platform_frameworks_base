@@ -4021,8 +4021,8 @@ public final class Telephony {
         public static final String DEFAULT_SORT_ORDER = DELIVERY_TIME + " DESC";
 
         /**
-         * The Epoch Unix timestamp when the device received the message.
-         * <P>Type: INTEGER</P>
+         * The timestamp in millisecond of when the device received the message.
+         * <P>Type: BIGINT</P>
          */
         public static final String RECEIVED_TIME = "received_time";
 
@@ -4091,6 +4091,33 @@ public final class Telephony {
                 CMAS_SEVERITY,
                 CMAS_URGENCY,
                 CMAS_CERTAINTY
+        };
+
+        /**
+         * Query columns for instantiating {@link android.telephony.SmsCbMessage} objects.
+         */
+        public static final String[] QUERY_COLUMNS_FWK = {
+                _ID,
+                GEOGRAPHICAL_SCOPE,
+                PLMN,
+                LAC,
+                CID,
+                SERIAL_NUMBER,
+                SERVICE_CATEGORY,
+                LANGUAGE_CODE,
+                MESSAGE_BODY,
+                MESSAGE_FORMAT,
+                MESSAGE_PRIORITY,
+                ETWS_WARNING_TYPE,
+                CMAS_MESSAGE_CLASS,
+                CMAS_CATEGORY,
+                CMAS_RESPONSE_TYPE,
+                CMAS_SEVERITY,
+                CMAS_URGENCY,
+                CMAS_CERTAINTY,
+                RECEIVED_TIME,
+                MESSAGE_BROADCASTED,
+                GEOMETRIES
         };
     }
 
