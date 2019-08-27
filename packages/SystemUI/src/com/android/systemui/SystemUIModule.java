@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.util.AsyncSensorManager;
@@ -46,5 +47,12 @@ public abstract class SystemUIModule {
             return null;
         }
         return new KeyguardLiftController(context, statusBarStateController, asyncSensorManager);
+    }
+
+
+    @Singleton
+    @Provides
+    static SysUiState provideSysUiState() {
+        return new SysUiState();
     }
 }

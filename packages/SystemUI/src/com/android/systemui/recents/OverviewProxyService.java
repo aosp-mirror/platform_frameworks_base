@@ -17,7 +17,6 @@
 package com.android.systemui.recents;
 
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
@@ -58,12 +57,12 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
@@ -101,6 +100,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
+    private SysUiState mSysUiState;
     private final Handler mHandler;
     private final NavigationBarController mNavBarController;
     private final StatusBarWindowController mStatusBarWinController;
@@ -114,7 +114,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
-    private @SystemUiStateFlags int mSysUiStateFlags;
     private boolean mBound;
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
@@ -464,7 +463,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     @Inject
     public OverviewProxyService(Context context, DeviceProvisionedController provisionController,
             NavigationBarController navBarController, NavigationModeController navModeController,
-            StatusBarWindowController statusBarWinController) {
+            StatusBarWindowController statusBarWinController,
+            SysUiState sysUiState) {
         mContext = context;
         mHandler = new Handler();
         mNavBarController = navBarController;
@@ -478,6 +478,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources());
         mSupportsRoundedCornersOnWindows = ScreenDecorationsUtils
                 .supportsRoundedCornersOnWindows(mContext.getResources());
+        mSysUiState = sysUiState;
+        mSysUiState.addCallback(this::notifySystemUiStateFlags);
 
         // Assumes device always starts with back button until launcher tells it that it does not
         mNavBarButtonAlpha = 1.0f;
@@ -512,36 +514,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    public void setSystemUiStateFlag(int flag, boolean enabled, int displayId) {
-        if (displayId != DEFAULT_DISPLAY) {
-            // Ignore non-default displays for now
-            return;
-        }
-
-        int newState = mSysUiStateFlags;
-        if (enabled) {
-            newState |= flag;
-        } else {
-            newState &= ~flag;
-        }
-        if (mSysUiStateFlags != newState) {
-            mSysUiStateFlags = newState;
-            notifySystemUiStateChanged(mSysUiStateFlags);
-            notifySystemUiStateFlags(mSysUiStateFlags);
-        }
-    }
-
-    public int getSystemUiStateFlags() {
-        return mSysUiStateFlags;
-    }
-
     private void updateSystemUiStateFlags() {
         final NavigationBarFragment navBarFragment =
                 mNavBarController.getDefaultNavigationBarFragment();
         final NavigationBarView navBarView =
                 mNavBarController.getNavigationBarView(mContext.getDisplayId());
 
-        mSysUiStateFlags = 0;
         if (navBarFragment != null) {
             navBarFragment.updateSystemUiStateFlags(-1);
         }
@@ -552,7 +530,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         if (mStatusBarWinController != null) {
             mStatusBarWinController.notifyStateChangedCallbacks();
         }
-        notifySystemUiStateFlags(mSysUiStateFlags);
     }
 
     private void notifySystemUiStateFlags(int flags) {
@@ -568,11 +545,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
             boolean bouncerShowing) {
         int displayId = mContext.getDisplayId();
-        setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
-                keyguardShowing && !keyguardOccluded, displayId);
-        setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
-                keyguardShowing && keyguardOccluded, displayId);
-        setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing, displayId);
+
+        mSysUiState.setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
+                        keyguardShowing && !keyguardOccluded)
+                .setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
+                        keyguardShowing && keyguardOccluded)
+                .setFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing)
+                .commitUpdate(displayId);
     }
 
     /**
@@ -665,7 +644,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mConnectionCallbacks.add(listener);
         listener.onConnectionChanged(mOverviewProxy != null);
         listener.onNavBarButtonAlphaChanged(mNavBarButtonAlpha, false);
-        listener.onSystemUiStateChanged(mSysUiStateFlags);
     }
 
     @Override
@@ -736,12 +714,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    private void notifySystemUiStateChanged(int sysuiStateFlags) {
-        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onSystemUiStateChanged(sysuiStateFlags);
-        }
-    }
-
     private void notifyStartAssistant(Bundle bundle) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).startAssistant(bundle);
@@ -782,12 +754,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         pw.print("  quickStepIntent="); pw.println(mQuickStepIntent);
         pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
-        pw.print("  mSysUiStateFlags="); pw.println(mSysUiStateFlags);
-        pw.println("    " + QuickStepContract.getSystemUiStateString(mSysUiStateFlags));
-        pw.print("    backGestureDisabled=");
-        pw.println(QuickStepContract.isBackGestureDisabled(mSysUiStateFlags));
-        pw.print("    assistantGestureDisabled=");
-        pw.println(QuickStepContract.isAssistantGestureDisabled(mSysUiStateFlags));
+        mSysUiState.dump(fd, pw, args);
         pw.print(" mInputFocusTransferStarted="); pw.println(mInputFocusTransferStarted);
     }
 

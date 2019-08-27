@@ -24,6 +24,8 @@ import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +58,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
@@ -82,6 +85,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     private OverviewProxyService mOverviewProxyService =
             mDependency.injectMockDependency(OverviewProxyService.class);
     private CommandQueue mCommandQueue;
+    private SysUiState mMockSysUiState;
+
     private AccessibilityManagerWrapper mAccessibilityWrapper =
             new AccessibilityManagerWrapper(mContext) {
                 Tracker mTracker = mLeakCheck.getTracker("accessibility_manager");
@@ -156,6 +161,9 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
 
         mDependency.injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
         mDependency.injectTestDependency(AccessibilityManagerWrapper.class, mAccessibilityWrapper);
+
+        mMockSysUiState = mock(SysUiState.class);
+        when(mMockSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mMockSysUiState);
     }
 
     @Test
@@ -217,7 +225,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mock(AssistManager.class),
                 mOverviewProxyService,
                 mock(NavigationModeController.class),
-                mock(StatusBarStateController.class));
+                mock(StatusBarStateController.class),
+                mMockSysUiState);
     }
 
     private class HostCallbacksForExternalDisplay extends
