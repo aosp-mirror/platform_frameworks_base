@@ -129,7 +129,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         public CameraLooper(int cameraId) {
             mCameraId = cameraId;
 
-            mThread = new Thread(this);
+            mThread = new Thread(this, "LegacyCameraLooper");
             mThread.start();
         }
 
