@@ -217,6 +217,9 @@ public class PhoneNumberUtils {
         }
 
         String scheme = uri.getScheme();
+        if (scheme == null) {
+            return null;
+        }
 
         if (scheme.equals("tel") || scheme.equals("sip")) {
             return uri.getSchemeSpecificPart();
