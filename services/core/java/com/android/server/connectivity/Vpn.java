@@ -58,7 +58,6 @@ import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.VpnService;
@@ -114,7 +113,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -902,38 +900,6 @@ public class Vpn {
     }
 
     /**
-     * Analyzes the passed LinkedProperties to figure out whether it routes to most of the IP space.
-     *
-     * This returns true if the passed LinkedProperties contains routes to either most of the IPv4
-     * space or to most of the IPv6 address space, where "most" is defined by the value of the
-     * MOST_IPV{4,6}_ADDRESSES_COUNT constants : if more than this number of addresses are matched
-     * by any of the routes, then it's decided that most of the space is routed.
-     * @hide
-     */
-    @VisibleForTesting
-    static boolean providesRoutesToMostDestinations(LinkProperties lp) {
-        final List<RouteInfo> routes = lp.getAllRoutes();
-        if (routes.size() > MAX_ROUTES_TO_EVALUATE) return true;
-        final Comparator<IpPrefix> prefixLengthComparator = IpPrefix.lengthComparator();
-        TreeSet<IpPrefix> ipv4Prefixes = new TreeSet<>(prefixLengthComparator);
-        TreeSet<IpPrefix> ipv6Prefixes = new TreeSet<>(prefixLengthComparator);
-        for (final RouteInfo route : routes) {
-            if (route.getType() == RouteInfo.RTN_UNREACHABLE) continue;
-            IpPrefix destination = route.getDestination();
-            if (destination.isIPv4()) {
-                ipv4Prefixes.add(destination);
-            } else {
-                ipv6Prefixes.add(destination);
-            }
-        }
-        if (NetworkUtils.routedIPv4AddressCount(ipv4Prefixes) > MOST_IPV4_ADDRESSES_COUNT) {
-            return true;
-        }
-        return NetworkUtils.routedIPv6AddressCount(ipv6Prefixes)
-                .compareTo(MOST_IPV6_ADDRESSES_COUNT) >= 0;
-    }
-
-    /**
      * Attempt to perform a seamless handover of VPNs by only updating LinkProperties without
      * registering a new NetworkAgent. This is not always possible if the new VPN configuration
      * has certain changes, in which case this method would just return {@code false}.
@@ -1079,7 +1045,8 @@ public class Vpn {
             // TEMP use the old jni calls until there is support for netd address setting
             StringBuilder builder = new StringBuilder();
             for (LinkAddress address : config.addresses) {
-                builder.append(" " + address);
+                builder.append(" ");
+                builder.append(address);
             }
             if (jniSetAddresses(interfaze, builder.toString()) < 1) {
                 throw new IllegalArgumentException("At least one address must be specified");
@@ -1163,7 +1130,7 @@ public class Vpn {
 
     // Note: Return type guarantees results are deduped and sorted, which callers require.
     private SortedSet<Integer> getAppsUids(List<String> packageNames, int userHandle) {
-        SortedSet<Integer> uids = new TreeSet<Integer>();
+        SortedSet<Integer> uids = new TreeSet<>();
         for (String app : packageNames) {
             int uid = getAppUid(app, userHandle);
             if (uid != -1) uids.add(uid);
@@ -1266,7 +1233,7 @@ public class Vpn {
         // UidRange#createForUser returns the entire range of UIDs available to a macro-user.
         // This is something like 0-99999 ; {@see UserHandle#PER_USER_RANGE}
         final UidRange userRange = UidRange.createForUser(userHandle);
-        final List<UidRange> ranges = new ArrayList<UidRange>();
+        final List<UidRange> ranges = new ArrayList<>();
         for (UidRange range : existingRanges) {
             if (userRange.containsRange(range)) {
                 ranges.add(range);
@@ -1765,7 +1732,7 @@ public class Vpn {
             byte[] value = keyStore.get(Credentials.USER_CERTIFICATE + profile.ipsecServerCert);
             serverCert = (value == null) ? null : new String(value, StandardCharsets.UTF_8);
         }
-        if (privateKey == null || userCert == null || caCert == null || serverCert == null) {
+        if (userCert == null || caCert == null || serverCert == null) {
             throw new IllegalStateException("Cannot load credentials");
         }
 
@@ -1884,7 +1851,7 @@ public class Vpn {
      * Return the information of the current ongoing legacy VPN.
      * Callers are responsible for checking permissions if needed.
      */
-    public synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
+    private synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
         if (mLegacyVpnRunner == null) return null;
 
         final LegacyVpnInfo info = new LegacyVpnInfo();
@@ -2038,7 +2005,6 @@ public class Vpn {
 
         private void bringup() {
             // Catch all exceptions so we can clean up a few things.
-            boolean initFinished = false;
             try {
                 // Initialize the timer.
                 mBringupStartTime = SystemClock.elapsedRealtime();
@@ -2057,7 +2023,6 @@ public class Vpn {
                     throw new IllegalStateException("Cannot delete the state");
                 }
                 new File("/data/misc/vpn/abort").delete();
-                initFinished = true;
 
                 // Check if we need to restart any of the daemons.
                 boolean restart = false;
