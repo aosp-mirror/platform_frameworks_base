@@ -635,7 +635,7 @@ public abstract class AccessibilityService extends Service {
      * Gets the root node in the currently active window if this service
      * can retrieve window content. The active window is the one that the user
      * is currently touching or the window with input focus, if the user is not
-     * touching any window.
+     * touching any window. It could be from any logical display.
      * <p>
      * The currently active window is defined as the window that most recently fired one
      * of the following events:
