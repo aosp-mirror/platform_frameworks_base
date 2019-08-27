@@ -150,12 +150,38 @@ message Predicate {
   }
 }
 
+message StateMap {
+  message StateGroup {
+    optional int64 group_id = 1;
+
+    repeated int32 value = 2;
+  }
+
+  repeated StateGroup group = 1;
+}
+
+message State {
+  optional int64 id = 1;
+
+  optional int32 atom_id = 2;
+
+  optional StateMap map = 3;
+}
+
 message MetricConditionLink {
   optional int64 condition = 1;
 
   optional FieldMatcher fields_in_what = 2;
 
   optional FieldMatcher fields_in_condition = 3;
+}
+
+message MetricStateLink {
+  optional int64 state = 1;
+
+  optional FieldMatcher fields_in_what = 2;
+
+  optional FieldMatcher fields_in_state = 3;
 }
 
 message FieldFilter {
@@ -182,11 +208,15 @@ message CountMetric {
 
   optional FieldMatcher dimensions_in_what = 4;
 
-  optional FieldMatcher dimensions_in_condition = 7 [deprecated = true];
+  repeated int64 slice_by_state = 8;
 
   optional TimeUnit bucket = 5;
 
   repeated MetricConditionLink links = 6;
+
+  repeated MetricStateLink state_link = 9;
+
+  optional FieldMatcher dimensions_in_condition = 7 [deprecated = true];
 }
 
 message DurationMetric {
@@ -437,6 +467,8 @@ message StatsdConfig {
   optional bool installer_in_metric_report = 19;
 
   optional bool persist_locally = 20 [default = false];
+
+  repeated State state = 21;
 
   // Field number 1000 is reserved for later use.
   reserved 1000;

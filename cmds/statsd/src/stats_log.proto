@@ -41,6 +41,15 @@ message DimensionsValueTuple {
   repeated DimensionsValue dimensions_value = 1;
 }
 
+message StateValue {
+  optional int32 atom_id = 1;
+
+  oneof contents {
+    int64 group_id = 2;
+    int32 value = 3;
+  }
+}
+
 message EventMetricData {
   optional int64 elapsed_timestamp_nanos = 1;
 
@@ -66,11 +75,13 @@ message CountBucketInfo {
 message CountMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
+  repeated StateValue slice_by_state = 6;
 
   repeated CountBucketInfo bucket_info = 3;
 
   repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
 
   repeated DimensionsValue dimension_leaf_values_in_condition = 5 [deprecated = true];
 }
