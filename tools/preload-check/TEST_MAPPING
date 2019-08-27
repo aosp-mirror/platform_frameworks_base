@@ -1,7 +1,12 @@
 {
   "presubmit": [
     {
-      "name": "PreloadCheck"
+      "name": "PreloadCheck",
+      "options": [
+        {
+          "exclude-filter": "com.android.preload.check.PreloadCheck#testBlackList"
+        }
+      ]
     }
   ]
 }
