@@ -26,6 +26,14 @@
                     "include-filter": "com.android.server.appop"
                 }
             ]
+        },
+	{
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-filter": "android.view.textclassifier.TextClassifierTest#testSuggetsConversationActions_deduplicate"
+                }
+            ]
         }
     ],
     "postsubmit": [
