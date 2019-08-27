@@ -2155,6 +2155,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (allNewUsers && !update) {
                 notifyPackageAdded(packageName, res.uid);
+            } else {
+                notifyPackageChanged(packageName, res.uid);
             }
 
             // Log current value of "unknown sources" setting
@@ -13762,6 +13764,22 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public void notifyPackageChanged(String packageName, int uid) {
+        final PackageListObserver[] observers;
+        synchronized (mPackages) {
+            if (mPackageListObservers.size() == 0) {
+                return;
+            }
+            final PackageListObserver[] observerArray =
+                    new PackageListObserver[mPackageListObservers.size()];
+            observers = mPackageListObservers.toArray(observerArray);
+        }
+        for (int i = observers.length - 1; i >= 0; --i) {
+            observers[i].onPackageChanged(packageName, uid);
+        }
+    }
+
+    @Override
     public void notifyPackageRemoved(String packageName, int uid) {
         final PackageListObserver[] observers;
         synchronized (mPackages) {
@@ -24987,5 +25005,6 @@ interface PackageSender {
     void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
         boolean includeStopped, int appId, int[] userIds, int[] instantUserIds);
     void notifyPackageAdded(String packageName, int uid);
+    void notifyPackageChanged(String packageName, int uid);
     void notifyPackageRemoved(String packageName, int uid);
 }
