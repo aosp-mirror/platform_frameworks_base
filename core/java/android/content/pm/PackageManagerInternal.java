@@ -191,11 +191,13 @@ public abstract class PackageManagerInternal {
      * suspended application.
      *
      * @param suspendedPackage The package that has been suspended.
+     * @param suspendingPackage
      * @param userId The user for which to check.
      * @return A {@link SuspendDialogInfo} object describing the dialog to be shown.
      */
     @Nullable
-    public abstract SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage, int userId);
+    public abstract SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage,
+            String suspendingPackage, int userId);
 
     /**
      * Gets any distraction flags set via

@@ -2414,14 +2414,11 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public Bundle getSuspendedPackageAppExtras() {
-        final PersistableBundle extras;
         try {
-            extras = mPM.getSuspendedPackageAppExtras(mContext.getOpPackageName(),
-                    getUserId());
+            return mPM.getSuspendedPackageAppExtras(mContext.getOpPackageName(), getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return extras != null ? new Bundle(extras.deepCopy()) : null;
     }
 
     @Override

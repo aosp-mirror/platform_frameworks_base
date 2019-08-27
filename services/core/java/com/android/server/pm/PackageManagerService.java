@@ -372,7 +372,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -12665,14 +12664,10 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
-            boolean suspended, PersistableBundle launcherExtras) {
+            boolean suspended) {
         final Bundle extras = new Bundle(3);
         extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
         extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        if (launcherExtras != null) {
-            extras.putBundle(Intent.EXTRA_LAUNCHER_EXTRAS,
-                    new Bundle(launcherExtras.deepCopy()));
-        }
         sendPackageBroadcast(
                 suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                         : Intent.ACTION_PACKAGES_UNSUSPENDED,
@@ -12937,8 +12932,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ownerUid == callingUid) {
                 return;
             }
-            throw new UnsupportedOperationException("Cannot suspend/unsuspend packages. User "
-                    + userId + " has an active DO or PO");
         }
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
@@ -12946,6 +12939,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final int packageUid = getPackageUid(callingPackage, 0, userId);
         final boolean allowedPackageUid = packageUid == callingUid;
+        // TODO(b/139383163): remove special casing for shell and enforce INTERACT_ACROSS_USERS_FULL
         final boolean allowedShell = callingUid == SHELL_UID
                 && UserHandle.isSameApp(packageUid, callingUid);
 
@@ -12996,20 +12990,27 @@ public class PackageManagerService extends IPackageManager.Stub
                 unactionedPackages.add(packageName);
                 continue;
             }
+            boolean packageUnsuspended;
             synchronized (mLock) {
-                pkgSetting.setSuspended(suspended, callingPackage, dialogInfo, appExtras,
-                        launcherExtras, userId);
+                if (suspended) {
+                    pkgSetting.addOrUpdateSuspension(callingPackage, dialogInfo, appExtras,
+                            launcherExtras, userId);
+                } else {
+                    pkgSetting.removeSuspension(callingPackage, userId);
+                }
+                packageUnsuspended = !suspended && !pkgSetting.getSuspended(userId);
             }
-            changedPackagesList.add(packageName);
-            changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+            if (suspended || packageUnsuspended) {
+                changedPackagesList.add(packageName);
+                changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+            }
         }
 
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendPackagesSuspendedForUser(
-                    changedPackages, changedUids.toArray(), userId, suspended, launcherExtras);
-            sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, appExtras, userId);
+            sendPackagesSuspendedForUser(changedPackages, changedUids.toArray(), userId, suspended);
+            sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, userId);
             synchronized (mLock) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
@@ -13018,38 +13019,40 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId) {
+    public Bundle getSuspendedPackageAppExtras(String packageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         if (getPackageUid(packageName, 0, userId) != callingUid) {
             throw new SecurityException("Calling package " + packageName
                     + " does not belong to calling uid " + callingUid);
         }
+        return getSuspendedPackageAppExtrasInternal(packageName, userId);
+    }
+
+    private Bundle getSuspendedPackageAppExtrasInternal(String packageName, int userId) {
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
+            if (ps == null) {
                 throw new IllegalArgumentException("Unknown target package: " + packageName);
             }
-            final PackageUserState packageUserState = ps.readUserState(userId);
-            if (packageUserState.suspended) {
-                return packageUserState.suspendedAppExtras;
+            final PackageUserState pus = ps.readUserState(userId);
+            final Bundle allExtras = new Bundle();
+            if (pus.suspended) {
+                for (int i = 0; i < pus.suspendParams.size(); i++) {
+                    final PackageUserState.SuspendParams params = pus.suspendParams.valueAt(i);
+                    if (params != null && params.appExtras != null) {
+                        allExtras.putAll(params.appExtras);
+                    }
+                }
             }
-            return null;
+            return (allExtras.size() > 0) ? allExtras : null;
         }
     }
 
     private void sendMyPackageSuspendedOrUnsuspended(String[] affectedPackages, boolean suspended,
-            PersistableBundle appExtras, int userId) {
-        final String action;
-        final Bundle intentExtras = new Bundle();
-        if (suspended) {
-            action = Intent.ACTION_MY_PACKAGE_SUSPENDED;
-            if (appExtras != null) {
-                final Bundle bundledAppExtras = new Bundle(appExtras.deepCopy());
-                intentExtras.putBundle(Intent.EXTRA_SUSPENDED_PACKAGE_EXTRAS, bundledAppExtras);
-            }
-        } else {
-            action = Intent.ACTION_MY_PACKAGE_UNSUSPENDED;
-        }
+            int userId) {
+        final String action = suspended
+                ? Intent.ACTION_MY_PACKAGE_SUSPENDED
+                : Intent.ACTION_MY_PACKAGE_UNSUSPENDED;
         mHandler.post(() -> {
             try {
                 final IActivityManager am = ActivityManager.getService();
@@ -13060,6 +13063,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 final int[] targetUserIds = new int[] {userId};
                 for (String packageName : affectedPackages) {
+                    final Bundle appExtras = suspended
+                            ? getSuspendedPackageAppExtrasInternal(packageName, userId)
+                            : null;
+                    final Bundle intentExtras;
+                    if (appExtras != null) {
+                        intentExtras = new Bundle(1);
+                        intentExtras.putBundle(Intent.EXTRA_SUSPENDED_PACKAGE_EXTRAS, appExtras);
+                    } else {
+                        intentExtras = null;
+                    }
                     doSendBroadcast(am, action, null, intentExtras,
                             Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, packageName, null,
                             targetUserIds, false);
@@ -13092,57 +13105,32 @@ public class PackageManagerService extends IPackageManager.Stub
      * <p><b>Should not be used on a frequent code path</b> as it flushes state to disk
      * synchronously
      *
-     * @param packageName The package holding {@link Manifest.permission#SUSPEND_APPS} permission
-     * @param affectedUser The user for which the changes are taking place.
+     * @param suspendingPackage The suspending package
+     * @param userId The user for which the changes are taking place.
      */
-    void unsuspendForSuspendingPackage(final String packageName, int affectedUser) {
-        final int[] userIds = (affectedUser == UserHandle.USER_ALL) ? mUserManager.getUserIds()
-                : new int[] {affectedUser};
-        for (int userId : userIds) {
-            unsuspendForSuspendingPackages(packageName::equals, userId);
-        }
-    }
-
-    /**
-     * Immediately unsuspends any packages in the given users not suspended by the platform or root.
-     * To be called when a profile owner or a device owner is added.
-     *
-     * <p><b>Should not be used on a frequent code path</b> as it flushes state to disk
-     * synchronously
-     *
-     * @param userIds The users for which to unsuspend packages
-     */
-    void unsuspendForNonSystemSuspendingPackages(ArraySet<Integer> userIds) {
-        final int sz = userIds.size();
-        for (int i = 0; i < sz; i++) {
-            unsuspendForSuspendingPackages(
-                    (suspendingPackage) -> !PLATFORM_PACKAGE_NAME.equals(suspendingPackage),
-                    userIds.valueAt(i));
-        }
-    }
-
-    private void unsuspendForSuspendingPackages(Predicate<String> packagePredicate, int userId) {
-        final List<String> affectedPackages = new ArrayList<>();
-        final IntArray affectedUids = new IntArray();
+    private void unsuspendForSuspendingPackage(String suspendingPackage, int userId) {
+        final List<String> unsuspendedPackages = new ArrayList<>();
+        final IntArray unsuspendedUids = new IntArray();
         synchronized (mLock) {
             for (PackageSetting ps : mSettings.mPackages.values()) {
                 final PackageUserState pus = ps.readUserState(userId);
-                if (pus.suspended && packagePredicate.test(pus.suspendingPackage)) {
-                    ps.setSuspended(false, null, null, null, null, userId);
-                    affectedPackages.add(ps.name);
-                    affectedUids.add(UserHandle.getUid(userId, ps.getAppId()));
+                if (pus.suspended) {
+                    ps.removeSuspension(suspendingPackage, userId);
+                    if (!ps.getSuspended(userId)) {
+                        unsuspendedPackages.add(ps.name);
+                        unsuspendedUids.add(UserHandle.getUid(userId, ps.getAppId()));
+                    }
                 }
             }
         }
-        if (!affectedPackages.isEmpty()) {
-            final String[] packageArray = affectedPackages.toArray(
-                    new String[affectedPackages.size()]);
-            sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
-            sendPackagesSuspendedForUser(
-                    packageArray, affectedUids.toArray(), userId, false, null);
-            // Write package restrictions immediately to avoid an inconsistent state.
-            mSettings.writePackageRestrictionsLPr(userId);
+        if (!unsuspendedPackages.isEmpty()) {
+            final String[] packageArray = unsuspendedPackages.toArray(
+                    new String[unsuspendedPackages.size()]);
+            sendMyPackageSuspendedOrUnsuspended(packageArray, false, userId);
+            sendPackagesSuspendedForUser(packageArray, unsuspendedUids.toArray(), userId, false);
         }
+        // Write package restrictions immediately to avoid an inconsistent state.
+        mSettings.writePackageRestrictionsLPr(userId);
     }
 
     @Override
@@ -18712,10 +18700,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /*hidden*/,
                     0 /*distractionFlags*/,
                     false /*suspended*/,
-                    null /*suspendingPackage*/,
-                    null /*dialogInfo*/,
-                    null /*suspendedAppExtras*/,
-                    null /*suspendedLauncherExtras*/,
+                    null /*suspendParams*/,
                     false /*instantApp*/,
                     false /*virtualPreload*/,
                     null /*lastDisableAppCaller*/,
@@ -23217,11 +23202,21 @@ public class PackageManagerService extends IPackageManager.Stub
         public Bundle getSuspendedPackageLauncherExtras(String packageName, int userId) {
             synchronized (mLock) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
-                PersistableBundle launcherExtras = null;
+                final Bundle allExtras = new Bundle();
                 if (ps != null) {
-                    launcherExtras = ps.readUserState(userId).suspendedLauncherExtras;
+                    final PackageUserState pus = ps.readUserState(userId);
+                    if (pus.suspended) {
+                        for (int i = 0; i < pus.suspendParams.size(); i++) {
+                            final PackageUserState.SuspendParams params =
+                                    pus.suspendParams.valueAt(i);
+                            if (params != null && params.launcherExtras != null) {
+                                allExtras.putAll(params.launcherExtras);
+                            }
+                        }
+                    }
+
                 }
-                return (launcherExtras != null) ? new Bundle(launcherExtras.deepCopy()) : null;
+                return (allExtras.size() > 0) ? allExtras : null;
             }
         }
 
@@ -23237,16 +23232,38 @@ public class PackageManagerService extends IPackageManager.Stub
         public String getSuspendingPackage(String suspendedPackage, int userId) {
             synchronized (mLock) {
                 final PackageSetting ps = mSettings.mPackages.get(suspendedPackage);
-                return (ps != null) ? ps.readUserState(userId).suspendingPackage : null;
+                if (ps != null) {
+                    final PackageUserState pus = ps.readUserState(userId);
+                    if (pus.suspended) {
+                        String suspendingPackage = null;
+                        for (int i = 0; i < pus.suspendParams.size(); i++) {
+                            suspendingPackage = pus.suspendParams.keyAt(i);
+                            if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
+                                return suspendingPackage;
+                            }
+                        }
+                        return suspendingPackage;
+                    }
+                }
+                return null;
             }
         }
 
         @Override
-        public SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage, int userId) {
+        public SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage,
+                String suspendingPackage, int userId) {
             synchronized (mLock) {
                 final PackageSetting ps = mSettings.mPackages.get(suspendedPackage);
-                return (ps != null) ? ps.readUserState(userId).dialogInfo : null;
+                if (ps != null) {
+                    final PackageUserState pus = ps.readUserState(userId);
+                    if (pus.suspended) {
+                        final PackageUserState.SuspendParams suspendParams =
+                                pus.suspendParams.get(suspendingPackage);
+                        return (suspendParams != null) ? suspendParams.dialogInfo : null;
+                    }
+                }
             }
+            return null;
         }
 
         @Override
@@ -23323,7 +23340,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     usersWithPoOrDo.add(profileOwnerPackages.keyAt(i));
                 }
             }
-            unsuspendForNonSystemSuspendingPackages(usersWithPoOrDo);
         }
 
         @Override

@@ -248,7 +248,11 @@ public class LauncherApps {
          *                      system, {@code null} otherwise.
          * @see PackageManager#isPackageSuspended()
          * @see #getSuspendedPackageLauncherExtras(String, UserHandle)
+         * @deprecated {@code launcherExtras} should be obtained by using
+         * {@link #getSuspendedPackageLauncherExtras(String, UserHandle)}. For all other cases,
+         * {@link #onPackagesSuspended(String[], UserHandle)} should be used.
          */
+        @Deprecated
         public void onPackagesSuspended(String[] packageNames, UserHandle user,
                 @Nullable Bundle launcherExtras) {
             onPackagesSuspended(packageNames, user);
