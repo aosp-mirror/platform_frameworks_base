@@ -2023,6 +2023,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     pkgList.add(packageName);
                     sendResourcesChangedBroadcast(true, true, pkgList, uidArray, null);
                 }
+            } else if (!ArrayUtils.isEmpty(res.libraryConsumers)) { // if static shared lib
+                for (int i = 0; i < res.libraryConsumers.size(); i++) {
+                    PackageParser.Package pkg = res.libraryConsumers.get(i);
+                    // send broadcast that all consumers of the static shared library have changed
+                    sendPackageChangedBroadcast(pkg.packageName, false /*killFlag*/,
+                            new ArrayList<>(Collections.singletonList(pkg.packageName)),
+                            pkg.applicationInfo.uid);
+                }
             }
 
             // Work that needs to happen on first install within each user
@@ -12193,6 +12201,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
+        if (reconciledPkg.installResult != null) {
+            reconciledPkg.installResult.libraryConsumers = clientLibPkgs;
+        }
 
         if ((scanFlags & SCAN_BOOTING) != 0) {
             // No apps can run during boot scan, so they don't need to be frozen
@@ -16046,6 +16057,8 @@ public class PackageManagerService extends IPackageManager.Stub
         String installerPackageName;
         PackageRemovedInfo removedInfo;
         ArrayMap<String, PackageInstalledInfo> addedChildPackages;
+        // The set of packages consuming this shared library or null if no consumers exist.
+        ArrayList<PackageParser.Package> libraryConsumers;
 
         public void setError(int code, String msg) {
             setReturnCode(code);
