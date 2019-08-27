@@ -51,14 +51,12 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IDeviceIdleController;
-import android.os.IMaintenanceActivityListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -448,7 +446,6 @@ public class DeviceIdleController extends SystemService
                                                        // down.
     private boolean mJobsActive;
     private boolean mAlarmsActive;
-    private boolean mReportedMaintenanceActivity;
 
     /* Factor to apply to INACTIVE_TIMEOUT and IDLE_AFTER_INACTIVE_TIMEOUT in order to enter
      * STATE_IDLE faster or slower. Don't apply this to SENSING_TIMEOUT or LOCATING_TIMEOUT because:
@@ -462,9 +459,6 @@ public class DeviceIdleController extends SystemService
     private int mActiveReason;
 
     public final AtomicFile mConfigFile;
-
-    private final RemoteCallbackList<IMaintenanceActivityListener> mMaintenanceActivityListeners =
-            new RemoteCallbackList<IMaintenanceActivityListener>();
 
     /**
      * Package names the system has white-listed to opt out of power save restrictions,
@@ -1309,7 +1303,6 @@ public class DeviceIdleController extends SystemService
     private static final int MSG_REPORT_IDLE_OFF = 4;
     private static final int MSG_REPORT_ACTIVE = 5;
     private static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
-    private static final int MSG_REPORT_MAINTENANCE_ACTIVITY = 7;
     private static final int MSG_FINISH_IDLE_OP = 8;
     private static final int MSG_REPORT_TEMP_APP_WHITELIST_CHANGED = 9;
     private static final int MSG_SEND_CONSTRAINT_MONITORING = 10;
@@ -1409,22 +1402,6 @@ public class DeviceIdleController extends SystemService
                     // TODO: What is keeping the device awake at this point? Does it need to be?
                     int appId = msg.arg1;
                     checkTempAppWhitelistTimeout(appId);
-                } break;
-                case MSG_REPORT_MAINTENANCE_ACTIVITY: {
-                    // TODO: What is keeping the device awake at this point? Does it need to be?
-                    boolean active = (msg.arg1 == 1);
-                    final int size = mMaintenanceActivityListeners.beginBroadcast();
-                    try {
-                        for (int i = 0; i < size; i++) {
-                            try {
-                                mMaintenanceActivityListeners.getBroadcastItem(i)
-                                        .onMaintenanceActivityChanged(active);
-                            } catch (RemoteException ignored) {
-                            }
-                        }
-                    } finally {
-                        mMaintenanceActivityListeners.finishBroadcast();
-                    }
                 } break;
                 case MSG_FINISH_IDLE_OP: {
                     // mActiveIdleWakeLock is held at this point
@@ -1592,16 +1569,6 @@ public class DeviceIdleController extends SystemService
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-        }
-
-        @Override public boolean registerMaintenanceActivityListener(
-                IMaintenanceActivityListener listener) {
-            return DeviceIdleController.this.registerMaintenanceActivityListener(listener);
-        }
-
-        @Override public void unregisterMaintenanceActivityListener(
-                IMaintenanceActivityListener listener) {
-            DeviceIdleController.this.unregisterMaintenanceActivityListener(listener);
         }
 
         @Override public int setPreIdleTimeoutMode(int mode) {
@@ -3131,7 +3098,6 @@ public class DeviceIdleController extends SystemService
     void setJobsActive(boolean active) {
         synchronized (this) {
             mJobsActive = active;
-            reportMaintenanceActivityIfNeededLocked();
             if (!active) {
                 exitMaintenanceEarlyIfNeededLocked();
             }
@@ -3144,19 +3110,6 @@ public class DeviceIdleController extends SystemService
             if (!active) {
                 exitMaintenanceEarlyIfNeededLocked();
             }
-        }
-    }
-
-    boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener) {
-        synchronized (this) {
-            mMaintenanceActivityListeners.register(listener);
-            return mReportedMaintenanceActivity;
-        }
-    }
-
-    void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener) {
-        synchronized (this) {
-            mMaintenanceActivityListeners.unregister(listener);
         }
     }
 
@@ -3279,17 +3232,6 @@ public class DeviceIdleController extends SystemService
         synchronized (this) {
             mIdleStartTime = idleStartTime;
         }
-    }
-
-    void reportMaintenanceActivityIfNeededLocked() {
-        boolean active = mJobsActive;
-        if (active == mReportedMaintenanceActivity) {
-            return;
-        }
-        mReportedMaintenanceActivity = active;
-        Message msg = mHandler.obtainMessage(MSG_REPORT_MAINTENANCE_ACTIVITY,
-                mReportedMaintenanceActivity ? 1 : 0, 0);
-        mHandler.sendMessage(msg);
     }
 
     @VisibleForTesting

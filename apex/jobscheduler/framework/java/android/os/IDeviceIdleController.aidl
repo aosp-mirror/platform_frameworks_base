@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.os.IMaintenanceActivityListener;
 import android.os.UserHandle;
 
 /** @hide */
@@ -44,8 +43,6 @@ interface IDeviceIdleController {
     long addPowerSaveTempWhitelistAppForMms(String name, int userId, String reason);
     long addPowerSaveTempWhitelistAppForSms(String name, int userId, String reason);
     void exitIdle(String reason);
-    boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener);
-    void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener);
     int setPreIdleTimeoutMode(int Mode);
     void resetPreIdleTimeoutMode();
 }
