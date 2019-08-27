@@ -1,0 +1,28 @@
+java_binary_host {
+    name: "protologtool",
+    manifest: "manifest.txt",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    static_libs: [
+        "javaparser",
+        "windowmanager-log-proto",
+        "jsonlib",
+    ],
+}
+
+java_test_host {
+    name: "protologtool-tests",
+    test_suites: ["general-tests"],
+    srcs: [
+        "src/**/*.kt",
+        "tests/**/*.kt",
+    ],
+    static_libs: [
+        "javaparser",
+        "windowmanager-log-proto",
+        "jsonlib",
+        "junit",
+        "mockito",
+    ],
+}
