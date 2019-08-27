@@ -339,6 +339,8 @@ cc_library_static {
     cppflags: ["-Wno-conversion-null"],
 
     srcs: [
+        "android/graphics/apex/android_region.cpp",
+
         "android_graphics_Canvas.cpp",
         "android_graphics_ColorSpace.cpp",
         "android_graphics_drawable_AnimatedVectorDrawable.cpp",

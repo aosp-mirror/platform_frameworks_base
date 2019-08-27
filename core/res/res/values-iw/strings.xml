@@ -177,7 +177,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"נעשה ניסיון למחוק יותר מדי <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"שטח האחסון של הטאבלט מלא. מחק קבצים כדי לפנות מקום."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"שטח האחסון של השעון מלא. מחק כמה קבצים כדי לפנות שטח."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"האחסון בטלוויזיה מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"‏האחסון של מכשיר ה-Android TV מלא. יש למחוק חלק מהקבצים כדי לפנות שטח."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"שטח האחסון של הטלפון מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="two">רשויות אישורים הותקנו</item>
@@ -199,7 +199,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"ההדפסה הושבתה על ידי <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"אני"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"אפשרויות טאבלט"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"אפשרויות טלוויזיה"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"‏אפשרויות Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"אפשרויות טלפון"</string>
     <string name="silent_mode" msgid="7167703389802618663">"מצב שקט"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"הפעל חיבור אלחוטי"</string>
@@ -217,7 +217,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"מאתחל…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"מכבה..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"הטאבלט שלך יכבה."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"הטלוויזיה שלך תיכבה."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"‏מכשיר ה-Android TV יכבה."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"השעון יכבה."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"הטלפון שלך יכובה."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"האם ברצונך לבצע כיבוי?"</string>
@@ -226,7 +226,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"נוצרו לאחרונה"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"אין אפליקציות אחרונות"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טאבלט"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"אפשרויות טלוויזיה"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"‏אפשרויות Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"אפשרויות טלפון"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"נעילת מסך"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
@@ -358,7 +358,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏מאפשר לאפליקציה לשלוח הודעות SMS. הדבר עשוי לגרום לחיובים בלתי צפויים. אפליקציות זדוניות עלולות לגרום לעלויות על ידי שליחת הודעות ללא אישורך."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏קריאת הודעות הטקסט שלך (SMS או MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"‏אפליקציה זו יכולה לקרוא את כל הודעות הטקסט (SMS) המאוחסנות בטאבלט."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"‏אפליקציה זו יכולה לקרוא את כל הודעות הטקסט (SMS) המאוחסנות בטלוויזיה."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"‏אפליקציה זו יכולה לקרוא את כל הודעות הטקסט (SMS) המאוחסנות במכשיר ה-Android TV."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"‏אפליקציה זו יכולה לקרוא את כל הודעות הטקסט (SMS) המאוחסנות בטלפון."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"‏קבלת הודעות טקסט (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏מאפשר לאפליקציה לקבל ולעבד הודעות WAP. אישור זה כולל את היכולת לעקוב אחר הודעות שנשלחו אליך ולמחוק אותן מבלי להציג לך אותן."</string>
@@ -380,7 +380,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"האפליקציה הזו יכולה להשתמש בנתונים ברקע. ייתכן שצריכת הנתונים תעלה במצב זה."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"הגדרת האפליקציה לפעול תמיד"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"מאפשר לאפליקציה להפוך חלקים ממנו לקבועים בזיכרון. פעולה זו עשויה להגביל את הזיכרון הזמין לאפליקציות אחרים ולהאט את פעולת הטאבלט."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"מאפשרת לאפליקציה ליצור חלקים ממנה השמורים בזיכרון באופן עקבי. הדבר עלול להגביל את הזיכרון הזמין לאפליקציות אחרות וכתוצאה מכך להאט את פעולת הטלוויזיה."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"‏מאפשרת לאפליקציה לאחסן חלקים שלה בזיכרון באופן קבוע. פעולה זו עשויה להגביל את הזיכרון הזמין לאפליקציות אחרות ולהאט את הפעולה של מכשיר ה-Android TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"מאפשר לאפליקציה להפוך חלקים ממנו לקבועים בזיכרון. פעולה זו עשויה להגביל את הזיכרון הזמין לאפליקציות אחרים ולהאט את פעולת הטלפון."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"הרצת שירות קדמה"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"הרשאה זו מאפשרת לאפליקציה לעשות שימוש בשירותים בקדמה."</string>
@@ -390,35 +390,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"מאפשר לאפליקציה לשנות את נתוני הגדרות המערכת. אפליקציות זדוניות עלולות לשבש את תצורת המערכת שלך."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"הפעלה בעת אתחול"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"מאפשר לאפליקציה להפעיל את עצמו מיד עם סיום תהליך האתחול של המערכת. משום כך הפעלת הטאבלט עשויה להתארך והאפליקציה עלולה להאט את הפעילות הכללית של הטאבלט, בשל פעילותה התמידית."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"מאפשרת לאפליקציה להפעיל את עצמה מיד לאחר סיום ההפעלה של המערכת. כתוצאה מכך הפעלת הטלוויזיה עשויה להימשך זמן רב יותר, והאפליקציה עשויה להאט את הטלוויזיה כשהיא פועלת תמיד."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"‏מאפשרת לאפליקציה להפעיל את עצמה ברגע שהמערכת מסיימת את ההפעלה. פעולה זו עשויה להאריך את הזמן שדרוש כדי להפעיל את מכשיר ה-Android TV, והיא מאפשרת לאפליקציה להאט את המכשיר כולו כי האפליקציה רצה כל הזמן."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"מאפשר לאפליקציה להפעיל את עצמו מיד עם השלמת תהליך האתחול של המערכת. משום כך הפעלת הטלפון עשויה להתארך והאפליקציה עלולה להאט את הפעילות הכללית של הטלפון, בשל פעילותה התמידית."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"שלח שידור דביק"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"מאפשר לאפליקציה לשלוח שידורים דביקים, אשר נותרים לאחר סיום השידור. אפליקציות זדוניות עלולות להאט את פעילות הטאבלט או להפוך אותה לבלתי יציבה על ידי אילוץ המכשיר להשתמש ביותר מדי זיכרון."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"מאפשרת לאפליקציה לשלוח שידורים דביקים, שנשארים לאחר סיומם. שימוש מוגזם עלול לגרום להאטת הטלוויזיה או לפעולה לא יציבה שלה, וכתוצאה מכך לנצל זיכרון רב מדי."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"‏מאפשרת לאפליקציה לשלוח שידורים \"דביקים\" (sticky), שנותרים לאחר שהשידור מסתיים. בעקבות שימוש מופרז באפשרות זו, שיעור ניצול הזיכרון יהיה גבוה מדי ומכשיר ה-Android TV עלול לפעול בצורה איטית או בלתי יציבה."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"מאפשר לאפליקציה לשלוח שידורים דביקים, אשר נותרים לאחר סיום השידור. אפליקציות זדוניות עלולות להאט את פעילות הטלפון או להפוך אותה לבלתי יציבה על ידי אילוץ המכשיר להשתמש ביותר מדי זיכרון."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"קריאת אנשי הקשר שלך"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"מאפשר לאפליקציה לקרוא נתונים לגבי אנשי הקשר שלך המאוחסנים בטאבלט, כולל את התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשים ספציפיים. אישור זה מתיר לאפליקציות לשמור את נתוני אנשי הקשר שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני אנשי קשר ללא ידיעתך."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"מאפשרת לאפליקציה לקרוא נתונים על אנשי הקשר השמורים בטלוויזיה, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. הרשאה זו מאפשרת לאפליקציות לשמור נתונים של אנשי הקשר שלך, ואפליקציות זדוניות עלולות לשתף נתונים של אנשי קשר ללא ידיעתך."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"‏מאפשרת לאפליקציה לקרוא נתונים על אנשי הקשר השמורים במכשיר ה-Android TV, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. הרשאה זו מאפשרת לאפליקציות לשמור נתונים של אנשי הקשר שלך, ואפליקציות זדוניות עלולות לשתף נתונים של אנשי קשר ללא ידיעתך."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"מאפשר לאפליקציה לקרוא נתונים לגבי אנשי הקשר שלך המאוחסנים בטלפון, כולל את התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשים ספציפיים. אישור זה מתיר לאפליקציות לשמור את נתוני אנשי הקשר שלך. כמו כן, אפליקציות זדוניות עשויות לשתף נתוני אנשי קשר ללא ידיעתך."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"שינוי אנשי הקשר שלך"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"מאפשר לאפליקציה לשנות את הנתונים לגבי אנשי הקשר שלך המאוחסנים בטאבלט, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. אישור זה מתיר לאפליקציות למחוק נתוני אנשי קשר."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"מאפשרת לאפליקציה לשנות נתונים לגבי אנשי הקשר שלך השמורים בטלוויזיה, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. הרשאה זו מאפשרת לאפליקציות למחוק נתונים של אנשי קשר."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"‏מאפשרת לאפליקציה לשנות נתונים לגבי אנשי הקשר שלך השמורים במכשיר Android TV, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. הרשאה זו מאפשרת לאפליקציות למחוק נתונים של אנשי קשר."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"מאפשר לאפליקציה לשנות את הנתונים לגבי אנשי הקשר שלך המאוחסנים בטלפון, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. אישור זה מתיר לאפליקציות למחוק נתוני אנשי קשר."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"קריאת יומן שיחות"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"אפליקציה זו יכולה לקרוא את היסטוריית השיחות שלך."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"כתיבת יומן שיחות"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"מאפשר לאפליקציה לשנות את יומן השיחות של הטאבלט, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"מאפשרת לאפליקציה לשנות את יומן השיחות של הטלוויזיה, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות להשתמש בהרשאה זו כדי למחוק או לשנות את יומן השיחות שלך."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"‏מאפשרת לאפליקציה לשנות את יומן השיחות של מכשיר ה-Android TV, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות להשתמש בכך כדי למחוק או לשנות את יומן השיחות."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"מאפשר לאפליקציה לשנות את יומן השיחות של הטלפון, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"גישה אל חיישני גוף (כמו מוניטורים לקצב לב)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"מאפשר לאפליקציה לגשת אל נתוני חיישנים העוקבים אחר מצבך הגופני, כמו קצב הלב."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"קריאה של אירועי יומן ופרטיהם"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"אפליקציה זו יכולה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, ולשתף או לשמור את נתוני היומן."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"אפליקציה זו יכולה לקרוא את כל אירועי היומן המאוחסנים בטלוויזיה, ולשתף או לשמור את נתוני היומן."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"‏אפליקציה זו יכולה לקרוא את כל אירועי היומן המאוחסנים במכשיר ה-Android TV, ולשתף או לשמור את נתוני היומן."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"אפליקציה זו יכולה לקרוא את כל אירועי היומן המאוחסנים בטלפון, ולשתף או לשמור את נתוני היומן."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי יומן ושליחת אימייל לאורחים ללא ידיעת הבעלים"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטאבלט. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטלוויזיה. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"‏אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן במכשיר ה-Android TV. האפליקציה יכולה לשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים ולשנות אירועים בלי להודיע על כך לבעליהם."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטלפון. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
@@ -426,7 +426,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"אפליקציה זו יכולה לזהות את המיקום המדויק שלך רק כאשר היא פועלת בחזית. כדי שהאפליקציה תוכל להשתמש בשירותי המיקום, עליהם להיות מופעלים וזמינים בטלפון. ייתכן שפעולה זו תגביר את צריכת הסוללה."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"קבלת גישה למיקום המשוער (מבוסס-רשת) רק במצב פעיל"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi, אבל רק כשהאפליקציה במצב פעיל. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטאבלט כדי שהאפליקציה תוכל להשתמש בהם."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi, אבל רק כשהאפליקציה במצב פעיל. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלוויזיה כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi, אבל רק כשהאפליקציה במצב פעיל. שירותי מיקום אלה חייבים להיות מופעלים וזמינים במכשיר ה-Android TV כדי שהאפליקציה תוכל להשתמש בהם."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi, אבל רק כשהאפליקציה במצב פעיל. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלפון כדי שהאפליקציה תוכל להשתמש בהם."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"גישה למיקום ברקע"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"אם מתקבל אישור, בנוסף לגישה למיקום משוער או מדויק, תהיה לאפליקציה גישה למיקום גם כשהיא פועלת ברקע."</string>
@@ -440,6 +440,10 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"האפליקציה מזהה את הפעילות הגופנית שלך."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"צלם תמונות וסרטונים"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"אפליקציה זו יכולה להשתמש במצלמה כדי לצלם תמונות ולהקליט סרטונים בכל עת."</string>
+    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
+    <skip />
+    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"שליטה ברטט"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"מאפשר לאפליקציה לשלוט ברטט."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"התקשר ישירות למספרי טלפון"</string>
@@ -457,14 +461,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"גישה למספרי הטלפון"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"מתירה לאפליקציה גישה למספרי הטלפון במכשיר."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"מנע מהטאבלט לעבור למצב שינה"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"מניעת מעבר למצב שינה בטלוויזיה"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"‏מונעת ממכשיר ה-Android TV להיכנס למצב שינה"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"מניעת מעבר הטלפון למצב שינה"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"מאפשר לאפליקציה למנוע מהטאבלט לעבור למצב שינה."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"מאפשרת לאפליקציה למנוע מהטלוויזיה לעבור למצב שינה."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"‏מאפשרת לאפליקציה למנוע ממכשיר ה-Android TV לעבור למצב שינה."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"מאפשר לאפליקציה למנוע מהטלפון לעבור למצב שינה."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"שידור באינפרה-אדום"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"מאפשרת לאפליקציה להשתמש במשדר האינפרה-אדום של הטאבלט."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"מאפשרת לאפליקציה להשתמש במשדר האינפא-האדום של הטלוויזיה."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"‏מאפשרת לאפליקציה להשתמש במשדר האינפרה-אדום של מכשיר ה-Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"מאפשרת לאפליקציה להשתמש במשדר האינפרא-אדום של הטלפון."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"הגדרת טפט"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"מאפשר לאפליקציה להגדיר את טפט המערכת."</string>
@@ -472,11 +476,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"מאפשר לאפליקציה להגדיר את סמני הגודל של טפט המערכת."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"הגדר אזור זמן"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"מאפשר לאפליקציה לשנות את אזור הזמן של הטאבלט."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"מאפשרת לאפליקציה לשנות את אזור הזמן של הטלוויזיה."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"‏מאפשרת לאפליקציה לשנות את אזור הזמן של מכשיר ה-Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"מאפשר לאפליקציה לשנות את אזור הזמן של הטלפון."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"חיפוש חשבונות במכשיר"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"מאפשר לאפליקציה לקבל רשימה של חשבונות המוכרים לטאבלט. הדבר עשוי לכלול חשבונות שנוצרו על ידי אפליקציות שהתקנת."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"מאפשרת לאפליקציה לקבל את רשימת החשבונות הידועים לטלוויזיה. הרשימה עשויה לכלול חשבונות שנוצרו על ידי אפליקציות שהתקנת."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"‏מאפשרת לאפליקציה לקבל את רשימת החשבונות המוכרים למכשיר ה-Android TV. הפרטים עשויים לכלול חשבונות שנוצרו על ידי אפליקציות שהתקנת."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"מאפשר לאפליקציה לקבל רשימה של חשבונות המוכרים לטלפון. הדבר עשוי לכלול חשבונות שנוצרו על ידי אפליקציות שהתקנת."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"הצג חיבורי רשת"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"מאפשר לאפליקציה להציג מידע לגבי חיבורי רשת, למשל, אילו רשתות קיימות ומחוברות."</string>
@@ -492,21 +496,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"‏מאפשר לאפליקציה להתחבר לנקודות גישת Wi-Fi ולהתנתק מהן, וכן לבצע שינויים בתצורת המכשיר עבור רשתות Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"‏אפשר קבלת שידורים מרובים ב-Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"‏מאפשר לאפליקציה לקבל חבילות שנשלחו לכל המכשירים ברשת Wi-Fi באמצעות כתובות שידור לקבוצה, ולא רק בטאבלט שלך. צריכת החשמל גבוהה יותר מאשר במצב שאינו שידור לקבוצה."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"‏מאפשרת לאפליקציה לקבל חבילות מידע הנשלחות לכל המכשירים ברשת Wi-Fi, באמצעות כתובות שידור מרובב, ולא רק לטלוויזיה שלך. הרשאה זו מנצלת כמות חשמל רבה יותר ממצב שאינו שידור מרובב."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"‏מאפשרת לאפליקציה לקבל חבילות שנשלחו לכל המכשירים ברשת Wi-Fi באמצעות כתובות מולטיקאסט, ולא רק למכשיר ה-Android TV. צריכת החשמל תהיה גבוהה יותר מאשר במצב שאינו מולטיקאסט."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"‏מאפשר לאפליקציה לקבל חבילות שנשלחו לכל המכשירים ברשת Wi-Fi באמצעות כתובות שידור לקבוצה, ולא רק בטלפון שלך. צריכת החשמל גבוהה יותר מאשר במצב שאינו שידור לקבוצה."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"‏גישה להגדרות Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"‏מאפשר לאפליקציה להגדיר את תצורתו של הטאבלט המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"‏מאפשרת לאפליקציה להגדיר Bluetooth מקומי של הטלוויזיה, וכן לבצע זיהוי והתאמה עם מכשירים מרוחקים."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"‏מאפשרת לאפליקציה להגדיר Bluetooth במכשיר ה-Android TV, ולגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏מאפשר לאפליקציה להגדיר את תצורתו של הטלפון המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏התחברות והתנתקות מ-WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"‏מאפשר לאפליקציה לדעת האם WiNMAX מופעל, כמו גם לקבל מידע האם רשתות WiNMAX כלשהן מחוברות."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"‏שנה את מצב WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏מאפשר לאפליקציה לחבר את הטאבלט לרשתות WiMAX ולהתנתק מהן."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏מאפשרת לאפליקציה לחבר את הטלוויזיה לרשתות WiMAX ולנתק את החיבור שלה מהן."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"‏מאפשרת לאפליקציה לחבר את מכשיר ה-Android TV לרשתות WiMAX ולהתנתק מהן."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏מאפשר לאפליקציה לחבר את הטלפון לרשתות WiMAX ולהתנתק מהן."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"‏התאמה למכשירי Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"‏מאפשר לאפליקציה להציג את תצורת ה-Bluetooth בטאבלט, וכן ליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"‏מאפשרת לאפליקציה להציג את התצורה של Bluetooth בטלוויזיה, וכן לבצע ולאשר חיבורים עם מכשירים מותאמים."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"‏מאפשרת לאפליקציה להציג את הגדרת ה-Bluetooth במכשיר ה-Android TV, וליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"‏מאפשר לאפליקציה להציג את תצורת ה-Bluetooth בטלפון, וכן ליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"‏שלוט ב-Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"מאפשר לאפליקציה נהל תקשורת עם תגים, כרטיסים וקוראים מסוג \'תקשורת מטווח קצר\'."</string>
@@ -663,10 +667,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי הגישה של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ניהול מעקב אחר מספר הסיסמאות השגויות שמוקלדות בעת ביטול נעילת המסך, וביצוע נעילה של הטאבלט, או מחיקה של כל נתוני הטאבלט, אם מוקלדות יותר מדי סיסמאות שגויות."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת נעילת המסך, ונעילת הטלוויזיה או מחיקה של כל נתוני הטלוויזיה אם הוזנו סיסמאות שגויות רבות מדי."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"‏מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילה של מכשיר ה-Android TV או מחיקה של כל נתוני מכשיר ה-Android TV אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ניהול מעקב אחר מספר הסיסמאות השגויות שהוקלדו בעת ביטול נעילה המסך, וביצוע נעילה של הטלפון או מחיקה של כל נתוני הטלפון אם הוקלדו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטאבלט או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטלוויזיה או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"‏מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילה של מכשיר ה-Android TV או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטלפון או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"שינוי נעילת המסך"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"שינוי של נעילת המסך."</string>
@@ -674,11 +678,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"שליטה באופן ובתזמון של נעילת המסך."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"מחיקת כל הנתונים"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"מחק את נתוני הטאבלט ללא אזהרה על ידי ביצוע איפוס נתוני יצרן."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"מחיקה של נתוני הטלוויזיה ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"‏מחיקה ללא אזהרה של נתוני מכשיר ה-Android TV באמצעות איפוס לנתוני היצרן."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"מחיקה של נתוני הטלפון, ללא אזהרה, על ידי ביצוע איפוס נתוני יצרן."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"מחיקת נתוני משתמש"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"מחיקה ללא אזהרה של נתוני המשתמש הזה בטאבלט הזה."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"מחיקה ללא אזהרה של נתוני המשתמש הזה בטלוויזיה הזו."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"‏מחיקה ללא אזהרה של נתוני המשתמש הזה במכשיר ה-Android TV הזה."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"מחיקה ללא אזהרה של נתוני המשתמש הזה בטלפון הזה."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"‏הגדר את שרת ה-Proxy הכללי של המכשיר"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"‏הגדרה של שרת ה-proxy הגלובלי שבו ייעשה שימוש כשהמדיניות פועלת. רק הבעלים של המכשיר יכול להגדיר את שרת ה-proxy הגלובלי."</string>
@@ -828,7 +832,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"חרגת ממספר הניסיונות המרבי של זיהוי פנים"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"‏אין כרטיס SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"‏אין כרטיס SIM בטאבלט."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"‏אין כרטיס SIM בטלוויזיה."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"‏אין כרטיס SIM במכשיר ה-Android TV."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"‏אין כרטיס SIM בטלפון."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"‏הכנס כרטיס SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"‏כרטיס ה-SIM חסר או שלא ניתן לקרוא אותו. הכנס כרטיס SIM."</string>
@@ -851,13 +855,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"הקלדת קוד גישה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"‏שרטטת באופן שגוי את קו ביטול הנעילה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות פרטי הכניסה שלך ל-Google.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"‏שרטטת את קו ביטול הנעילה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים באופן שגוי. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלוויזיה באמצעות כניסה לחשבון Google שלך.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"‏שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את הנעילה של מכשיר ה-Android TV באמצעות כניסה לחשבון Google שלך.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות פרטי הכניסה שלך ל-Google‏.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"ביצעת <xliff:g id="NUMBER_0">%1$d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, הטאבלט יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"ניסית לבטל את נעילת הטלוויזיה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים באופן שגוי. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, הטלוויזיה תאופס לנתוני היצרן וכתוצאה מכך כל נתוני המשתמש יאבדו."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"‏ניסית לבטל בצורה שגויה את הנעילה של מכשיר ה-Android TV <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, מכשיר ה-Android TV יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"ביצעת <xliff:g id="NUMBER_0">%1$d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, הטלפון יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. הטאבלט יעבור כעת איפוס לברירת המחדל של היצרן."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"ניסית לבטל את נעילת הטלוויזיה <xliff:g id="NUMBER">%d</xliff:g> פעמים באופן שגוי. הטלוויזיה תאופס כעת לנתוני היצרן."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"‏ניסית לבטל בצורה שגויה את הנעילה של מכשיר ה-Android TV <xliff:g id="NUMBER">%d</xliff:g> פעמים. מכשיר ה-Android TV יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"נסה שוב בעוד <xliff:g id="NUMBER">%d</xliff:g> שניות."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"שכחת את הקו?"</string>
@@ -944,7 +948,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"‏מאפשר לאפליקציה לקרוא את ההיסטוריה של כל כתובות האתרים שבהן הדפדפן ביקר, ואת כל ה-Bookmarks של הדפדפן. שים לב: דפדפני צד שלישי או אפליקציות אחרות עם יכולות לדפדוף באינטרנט אינם יכולים לאכוף אישור זה."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"כתיבת סימניות והיסטוריית אינטרנט"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"‏מאפשר לאפליקציה לשנות את ההיסטוריה או ה-Bookmarks של הדפדפן המאוחסנים בטאבלט. הדבר עשוי לאפשר לאפליקציה למחוק או לשנות נתוני דפדפן. שים לב: אישור זה אינו ניתן לאכיפה על ידי דפדפני צד שלישי או אפליקציות אחרות בעלות יכולות גלישה באינטרנט."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"מאפשרת לאפליקציה לשנות את הסימניות או היסטוריית הדפדפן השמורות בטלוויזיה. הרשאה זו מאפשרת לאפליקציה למחוק או לשנות נתוני דפדפן. שים לב: ייתכן שלא ניתן לאכוף הרשאה זו על ידי דפדפנים של צד שלישי או אפליקציות אחרות עם יכולות גלישה באינטרנט."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"‏מאפשרת לאפליקציה לשנות את הסימניות או את היסטוריית הדפדפן השמורות במכשיר ה-Android TV. הרשאה זו עשויה לאפשר לאפליקציה למחוק או לשנות נתוני דפדפן. הערה: ייתכן שההרשאה לא תיושם על ידי דפדפנים של צד שלישי או על ידי אפליקציות אחרות עם יכולות גלישה באינטרנט."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"‏מאפשר לאפליקציה לשנות את ההיסטוריה או ה-Bookmarks של הדפדפן המאוחסנים בטלפון. הדבר עשוי לאפשר לאפליקציה למחוק או לשנות נתוני דפדפן. שים לב: אישור זה אינו ניתן לאכיפה על ידי דפדפני צד שלישי או אפליקציות אחרות בעלות יכולות גלישה באינטרנט."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"הגדרת התראה"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"מאפשר לאפליקציה להגדיר התראה באפליקציה מותקנת של שעון מעורר. אפליקציות מסוימות של שעון מעורר אינן מיישמות תכונה זו."</string>
@@ -1293,17 +1297,20 @@
       <item quantity="one">‏יש רשת Wi-Fi פתוחה וזמינה</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"‏התחברות לרשת Wi‑Fi פתוחה"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"‏התחברות לרשת Wi‑Fi של ספק"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"‏התחברות לרשת Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏מחובר לרשת Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏לא ניתן היה להתחבר לרשת Wi-Fi"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"יש להקיש כדי לראות את כל הרשתות"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"התחבר"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"כל הרשתות"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"‏להתחבר לרשתות Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"הוצע על-ידי <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"כן"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"לא"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏ה-Wi-Fi יופעל אוטומטית"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"כשתימצאו בקרבת רשת באיכות גבוהה ששמרתם"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"אל תפעיל שוב"</string>
@@ -1351,7 +1358,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"הקלד את קוד הגישה הנדרש."</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"קוד גישה:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"‏הטאבלט יתנתק מרשת ה-Wi-Fi באופן זמני בשעה שהוא מחובר אל <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"‏הטלוויזיה תנותק באופן זמני מה-Wi-Fi בזמן שהיא מתחברת אל <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"‏מכשיר ה-Android TV יתנתק מרשת ה-Wi-Fi באופן זמני בשעה שהוא מחובר אל <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"‏הטלפון יתנתק מרשת ה-Wi-Fi באופן זמני בשעה שהוא מחובר אל <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"הוסף תו"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"‏שולח הודעות SMS"</string>
@@ -1698,13 +1705,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ביצעת <xliff:g id="NUMBER_0">%1$d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, הטאבלט יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"ניסית לבטל את נעילת הטלוויזיה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים באופן שגוי. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, הטלוויזיה תאופס לנתוני היצרן וכתוצאה מכך כל נתוני המשתמש יאבדו."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"‏ניסית לבטל בצורה שגויה את הנעילה של מכשיר ה-Android TV <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, מכשיר ה-Android TV יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ביצעת <xliff:g id="NUMBER_0">%1$d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, הטלפון יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. הטאבלט יעבור כעת איפוס לברירת המחדל של היצרן."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"ניסית לבטל את נעילת הטלוויזיה <xliff:g id="NUMBER">%d</xliff:g> פעמים באופן שגוי. הטלוויזיה תאופס כעת לנתוני היצרן."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"‏ניסית לבטל בצורה שגויה את הנעילה של מכשיר ה-Android TV <xliff:g id="NUMBER">%d</xliff:g> פעמים. מכשיר ה-Android TV יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"שרטטת את קו ביטול הנעילה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים באופן שגוי. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלוויזיה באמצעות חשבון אימייל.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"‏שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את הנעילה של מכשיר ה-Android TV באמצעות חשבון אימייל.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"הסר"</string>
@@ -2067,6 +2074,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"יש להקיש כדי לבדוק מה חסום."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"מערכת"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"הגדרות"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"המתנה"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"‏מכשיר Android TV ייכבה בקרוב. יש ללחוץ על לחצן כלשהו כדי שהוא ימשיך לפעול."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"המכשיר ייכבה בקרוב, יש ללחוץ כדי שהוא ימשיך לפעול."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"מצלמה"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"מיקרופון"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"תצוגה מעל אפליקציות אחרות במסך"</string>

@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"ਬਹੁਤ ਸਾਰੀਆਂ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਗਈ।"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ਟੈਬਲੈੱਟ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ਘੜੀ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"ਟੀਵੀ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV ਡੀਵਾਈਸ ਸਟੋਰੇਜ ਭਰੀ ਹੋਈ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ਫ਼ੋਨ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਿਟੀਆਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਗਈਆਂ</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਿੰਟ ਕਰਨਾ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="me" msgid="6545696007631404292">"ਮੈਂ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ਟੈਬਲੈੱਟ ਵਿਕਲਪ"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV ਚੋਣਾਂ"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV ਦੇ ਵਿਕਲਪ"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ਫ਼ੋਨ ਚੋਣਾਂ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"ਸਾਈਲੈਂਟ ਮੋਡ"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"ਵਾਇਰਲੈਸ ਚਾਲੂ ਕਰੋ"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"ਰੀਸਟਾਰਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"ਬੰਦ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਬੰਦ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ਤੁਹਾਡਾ TV ਬੰਦ ਕੀਤਾ ਜਾਏਗਾ।"</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ ਜਲਦ ਬੰਦ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"ਤੁਹਾਡੀ ਘੜੀ ਬੰਦ ਕੀਤੀ ਜਾਏਗੀ।"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਬੰਦ ਕੀਤਾ ਜਾਏਗਾ।"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ਕੀ ਤੁਸੀਂ ਬੰਦ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"ਹਾਲੀਆ"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ਕੋਈ ਹਾਲੀਆ ਐਪਸ ਨਹੀਂ।"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ਟੈਬਲੈੱਟ ਵਿਕਲਪ"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"TV ਚੋਣਾਂ"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV ਦੇ ਵਿਕਲਪ"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ਫ਼ੋਨ ਚੋਣਾਂ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ਸਕ੍ਰੀਨ ਲਾਕ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ਫ਼ੋਨ ਬੰਦ ਕਰੋ"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ਐਪ ਨੂੰ SMS ਸੁਨੇਹੇ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦੇ ਸਿੱਟੇ ਵਜੋਂ ਅਕਲਪਿਤ ਖਰਚੇ ਪੈ ਸਕਦੇ ਹਨ। ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਕੇ ਤੁਹਾਨੂੰ ਖਰਚੇ ਪਾ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ਤੁਹਾਡੇ ਲਿਖਤ ਸੁਨੇਹੇ (SMS ਜਾਂ MMS) ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ SMS (ਲਿਖਤ) ਸੁਨੇਹਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ SMS (ਲਿਖਤ) ਸੁਨੇਹਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"ਇਹ ਐਪ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ SMS (ਲਿਖਤ) ਸੁਨੇਹਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ SMS (ਲਿਖਤ) ਸੁਨੇਹਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ਟੈਕਸਟ ਸੁਨੇਹੇ (WAP) ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ਐਪ ਨੂੰ WAP ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਇਜਾਜ਼ਤ ਵਿੱਚ ਸ਼ਾਮਲ ਹੈ ਐਪ ਦੀ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਤੇ ਭੇਜੇ ਗਏ ਸੁਨੇਹਿਆਂ ਨੂੰ ਤੁਹਾਨੂੰ ਦਿਖਾਏ ਬਿਨਾਂ ਨਿਰੀਖਣ ਕਰਨ ਅਤੇ ਮਿਟਾਉਣ ਦੀ ਸਮਰੱਥਾ।"</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"ਇਹ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦੀ ਹੈ। ਇਸ ਨਾਲ ਡਾਟਾ ਵਰਤੋਂ ਵਧ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ਐਪ ਨੂੰ ਹਮੇਸ਼ਾਂ ਚਲਾਏ ਰੱਖੋ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਟੈਬਲੈੱਟ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਾਂ ਲਈ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ TV ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਸ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"ਐਪ ਨੂੰ ਮੈਮੋਰੀ ਵਿੱਚ ਇਸਦੇ ਕੁਝ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦਿੰਦੀ ਹੈ। ਇਹ ਹੋਰ ਐਪਾਂ ਲਈ ਉਪਲਬਧ ਮੈਮੋਰੀ ਨੂੰ ਸੀਮਤ ਕਰ ਸਕਦੀ ਹੈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ ਧੀਮਾ ਹੋ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਫ਼ੋਨ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਾਂ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਚਲਾਓ"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"ਐਪ ਨੂੰ ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦਿਓ।"</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਦੇ ਸੈਟਿੰਗਾਂ ਡਾਟਾ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੇ ਸਿਸਟਮ ਦੀ ਸੰਰੂਪਣ ਨੂੰ ਕਰਪਟ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ਚਾਲੂ ਹੋਣ ਤੇ ਚਲਾਓ"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਦੇ ਬੂਟਿੰਗ ਖਤਮ ਕਰਨ ਦੇ ਤੁਰੰਤ ਬਾਅਦ ਖੁਦ ਚਾਲੂ ਹੋਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਨਾਲ ਟੈਬਲੈੱਟ ਨੂੰ ਚਾਲੂ ਹੋਣ ਵਿੱਚ ਥੋੜ੍ਹਾ ਵੱਧ ਸਮਾਂ ਲੱਗ ਸਕਦਾ ਹੈ ਅਤੇ ਇਹ ਐਪ ਨੂੰ ਹਮੇਸ਼ਾਂ ਚਲਾ ਕੇ ਸਮੁੱਚੇ ਟੈਬਲੈੱਟ ਨੂੰ ਹੌਲਾ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਦੇ ਬੂਟਿੰਗ ਖਤਮ ਕਰਨ ਦੇ ਤੁਰੰਤ ਬਾਅਦ ਖੁਦ ਚਾਲੂ ਹੋਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਨਾਲ TV ਨੂੰ ਚਾਲੂ ਹੋਣ ਵਿੱਚ ਥੋੜ੍ਹਾ ਵੱਧ ਸਮਾਂ ਲੱਗ ਸਕਦਾ ਹੈ ਅਤੇ ਇਹ ਐਪ ਨੂੰ ਹਮੇਸ਼ਾਂ ਚਲਾ ਕੇ ਸਮੁੱਚੇ ਟੈਬਲੈੱਟ ਨੂੰ ਹੌਲਾ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਵੱਲੋਂ ਬੂਟਿੰਗ ਖਤਮ ਕਰਨ ਦੇ ਤੁਰੰਤ ਬਾਅਦ ਖੁਦ ਚਾਲੂ ਹੋਣ ਦਿੰਦੀ ਹੈ। ਇਸ ਨਾਲ ਡੀਵਾਈਸ ਨੂੰ ਚਾਲੂ ਹੋਣ ਵਿੱਚ ਥੋੜ੍ਹਾ ਵੱਧ ਸਮਾਂ ਲੱਗ ਸਕਦਾ ਹੈ ਅਤੇ ਇਹ ਐਪ ਨੂੰ ਹਮੇਸ਼ਾਂ ਚਲਦੇ ਰੱਖ ਕੇ ਸਮੁੱਚੇ ਡੀਵਾਈਸ ਨੂੰ ਧੀਮਾ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਦੇ ਬੂਟਿੰਗ ਖਤਮ ਕਰਨ ਦੇ ਤੁਰੰਤ ਬਾਅਦ ਖੁਦ ਚਾਲੂ ਹੋਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਨਾਲ ਫ਼ੋਨ ਨੂੰ ਚਾਲੂ ਹੋਣ ਵਿੱਚ ਥੋੜ੍ਹਾ ਵੱਧ ਸਮਾਂ ਲੱਗ ਸਕਦਾ ਹੈ ਅਤੇ ਇਹ ਐਪ ਨੂੰ ਹਮੇਸ਼ਾਂ ਚਲਾ ਕੇ ਸਮੁੱਚੇ ਫ਼ੋਨ ਨੂੰ ਹੌਲਾ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ਸਟਿਕੀ ਪ੍ਰਸਾਰਨ ਭੇਜੋ"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ਐਪ ਨੂੰ ਸਟਿਕੀ ਪ੍ਰਸਾਰਨ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜੋ ਪ੍ਰਸਾਰਨ ਦੇ ਖਤਮ ਹੋਣ ਤੋਂ ਬਾਅਦ ਰਹਿੰਦੇ ਹਨ। ਵਾਧੂ ਵਰਤੋਂ ਟੈਬਲੈੱਟ ਨੂੰ ਹੌਲੀ ਜਾਂ ਬਹੁਤ ਜ਼ਿਆਦਾ ਮੈਮਰੀ ਵਰਤ ਕੇ ਇਸਨੂੰ ਅਸਥਿਰ ਬਣਾ ਸਕਦੀ ਹੈ।"</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"ਐਪ ਨੂੰ ਸਟਿਕੀ ਪ੍ਰਸਾਰਨ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜੋ ਪ੍ਰਸਾਰਨ ਦੇ ਖ਼ਤਮ ਹੋਣ ਤੋਂ ਬਾਅਦ ਰਹਿੰਦੇ ਹਨ। ਵਾਧੂ ਵਰਤੋਂ TV ਨੂੰ ਹੌਲੀ ਜਾਂ ਬਹੁਤ ਜ਼ਿਆਦਾ ਮੈਮਰੀ ਵਰਤ ਕੇ ਇਸਨੂੰ ਅਸਥਿਰ ਬਣਾ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"ਐਪ ਨੂੰ ਸਟਿੱਕੀ ਪ੍ਰਸਾਰਨ ਭੇਜਣ ਦਿੰਦੀ ਹੈ, ਜੋ ਪ੍ਰਸਾਰਨ ਦੇ ਖਤਮ ਹੋਣ ਤੋਂ ਬਾਅਦ ਵੀ ਰਹਿੰਦੇ ਹਨ। ਹੱਦੋਂ ਵੱਧ ਵਰਤੋਂ ਇਸ ਵੱਲੋਂ ਬਹੁਤ ਜ਼ਿਆਦਾ ਮੈਮੋਰੀ ਵਰਤੇ ਜਾਣ ਦਾ ਕਾਰਨ ਬਣਕੇ ਡੀਵਾਈਸ ਨੂੰ ਧੀਮਾ ਜਾਂ ਅਸਥਿਰ ਬਣਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ਐਪ ਨੂੰ ਸਟਿਕੀ ਪ੍ਰਸਾਰਨ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜੋ ਪ੍ਰਸਾਰਨ ਦੇ ਖਤਮ ਹੋਣ ਤੋਂ ਬਾਅਦ ਰਹਿੰਦੇ ਹਨ। ਵਾਧੂ ਵਰਤੋਂ ਫ਼ੋਨ ਨੂੰ ਹੌਲੀ ਜਾਂ ਬਹੁਤ ਜ਼ਿਆਦਾ ਮੈਮਰੀ ਵਰਤ ਕੇ ਇਸਨੂੰ ਅਸਥਿਰ ਬਣਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"ਆਪਣੇ ਸੰਪਰਕ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਰੱਖਿਅਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ ਅਤੇ ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਸੰਪਰਕ ਡਾਟਾ ਸਾਂਝਾ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਰੱਖਿਅਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ ਅਤੇ ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਸੰਪਰਕ ਡਾਟਾ ਸਾਂਝਾ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ, ਇਸ ਵਿੱਚ ਸ਼ਾਮਲ ਹੈ ਕਿ ਤੁਸੀਂ ਵਿਅਕਤੀ ਵਿਸ਼ੇਸ਼ਾਂ ਨਾਲ ਕਿਸ ਬਾਰੰਬਾਰਤਾ ਨਾਲ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਰੱਖਿਅਤ ਕਰਨ ਦਿੰਦੀ ਹੈ ਅਤੇ ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਸੰਪਰਕ ਡਾਟਾ ਸਾਂਝਾ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਰੱਖਿਅਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ ਅਤੇ ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਸੰਪਰਕ ਡਾਟਾ ਸਾਂਝਾ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ਆਪਣੇ ਸੰਪਰਕ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਟੈਬਲੈੱਟ ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖ਼ਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਸੰਪਰਕ ਡਾਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੀਵੀ ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖ਼ਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਸੰਪਰਕ ਡਾਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਸੋਧਣ ਦਿੰਦੀ ਹੈ, ਇਸ ਵਿੱਚ ਉਹ ਬਾਰੰਬਾਰਤਾ ਵੀ ਸ਼ਾਮਲ ਹੈ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਵਿਸ਼ੇਸ਼ ਸੰਪਰਕਾਂ ਨੂੰ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਸੰਪਰਕ ਡਾਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖ਼ਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ਕਾਲ ਲੌਗ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"ਇਹ ਐਪ ਤੁਹਾਡਾ ਕਾਲ ਇਤਿਹਾਸ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ਕਾਲ ਲੌਗ ਲਿਖੋ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਸਮੇਤ। ਖਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੀਵੀ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਸਮੇਤ। ਖਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਕਾਲ ਲੌਗ ਸੋਧਣ ਦਿੰਦੀ ਹੈ, ਇਸ ਵਿੱਚ ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਕਾਲ ਲੌਗ ਡਾਟਾ ਮਿਟਾ ਜਾਂ ਸੋਧ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਸਮੇਤ। ਖਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"ਸਰੀਰ ਸੰਵੇਦਕਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਜਿਵੇਂ ਦਿਲ ਦੀ ਧੜਕਣ ਦੇ ਨਿਰੀਖਕ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ਐਪ ਨੂੰ ਉਹਨਾਂ ਸੰਵੇਦਕਾਂ ਦੇ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜੋ ਤੁਹਾਡੀ ਸਰੀਰਕ ਸਥਿਤੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੇ ਹਨ, ਜਿਵੇਂ ਤੁਹਾਡੇ ਦਿਲ ਦੀ ਧੜਕਣ।"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਅਤੇ ਵੇਰਵਿਆਂ ਨੂੰ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"ਇਹ ਐਪ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ਕੈਲੰਡਰ ਇਵੈਂਟ ਸ਼ਾਮਲ ਕਰੋ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ ਅਤੇ ਮਾਲਕ ਦੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਮਹਿਮਾਨਾਂ ਨੂੰ ਈਮੇਲ ਭੇਜੋ"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰ ਸਕਦੀ ਹੈ, ਹਟਾ ਸਕਦੀ ਹੈ, ਜਾਂ ਬਦਲ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਉਹਨਾਂ ਸੁਨੇਹਿਆਂ ਨੂੰ ਭੇਜ ਸਕਦੀ ਹੈ ਜੋ ਕਿ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪ ਸਕਦੇ ਹਨ, ਜਾਂ ਉਹਨਾਂ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਸੂਚਿਤ ਕੀਤੇ ਬਿਨਾਂ ਇਵੈਂਟਾਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰ ਸਕਦੀ ਹੈ, ਹਟਾ ਸਕਦੀ ਹੈ, ਜਾਂ ਬਦਲ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਉਹਨਾਂ ਸੁਨੇਹਿਆਂ ਨੂੰ ਭੇਜ ਸਕਦੀ ਹੈ ਜੋ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪ ਸਕਦੇ ਹਨ, ਜਾਂ ਉਹਨਾਂ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਸੂਚਿਤ ਕੀਤੇ ਬਿਨਾਂ ਇਵੈਂਟਾਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"ਇਹ ਐਪ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਕੈਲੰਡਰ ਇਵੈਂਟ ਸ਼ਾਮਲ ਕਰ ਸਕਦੀ ਹੈ, ਹਟਾ ਸਕਦੀ ਹੈ, ਜਾਂ ਬਦਲ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਉਹਨਾਂ ਸੁਨੇਹਿਆਂ ਨੂੰ ਭੇਜ ਸਕਦੀ ਹੈ ਜੋ ਕਿ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪ ਸਕਦੇ ਹਨ, ਜਾਂ ਉਹਨਾਂ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਸੂਚਿਤ ਕੀਤੇ ਬਿਨਾਂ ਇਵੈਂਟਾਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰ ਸਕਦੀ ਹੈ, ਹਟਾ ਸਕਦੀ ਹੈ, ਜਾਂ ਬਦਲ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਉਹਨਾਂ ਸੁਨੇਹਿਆਂ ਨੂੰ ਭੇਜ ਸਕਦੀ ਹੈ ਜੋ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪ ਸਕਦੇ ਹਨ, ਜਾਂ ਉਹਨਾਂ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਸੂਚਿਤ ਕੀਤੇ ਬਿਨਾਂ ਇਵੈਂਟਾਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ਵਾਧੂ ਟਿਕਾਣਾ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ਐਪ ਨੂੰ ਵਾਧੂ ਟਿਕਾਣਾ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ GPS ਜਾਂ ਹੋਰ ਟਿਕਾਣਾ ਸਰੋਤਾਂ ਦੇ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ਇਹ ਐਪ ਫੋਰਗ੍ਰਾਉਂਡ ਵਿੱਚ ਹੋਣ \'ਤੇ ਹੀ ਤੁਹਾਡਾ ਸਟੀਕ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ। ਇਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਖਪਤ ਵਧ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"ਸਿਰਫ਼ ਫੋਰਗ੍ਰਾਊਂਡ ਵਿੱਚ ਅਨੁਮਾਨਿਤ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰੋ (ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਸਿਰਫ਼ ਐਪ ਦੇ ਫੋਰਗ੍ਰਾਊਂਡ ਹੋਣ \'ਤੇ ਹੀ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੀ ਟੈਬਲੈੱਟ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਸਿਰਫ਼ ਐਪ ਦੇ ਫੋਰਗ੍ਰਾਊਂਡ ਹੋਣ \'ਤੇ ਹੀ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਸਿਰਫ਼ ਐਪ ਦੇ ਫੋਰਗ੍ਰਾਊਂਡ ਹੋਣ \'ਤੇ ਹੀ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ Android TV ਟੀਵੀ ਡੀਵਾਈਸ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਸਿਰਫ਼ ਐਪ ਦੇ ਫੋਰਗ੍ਰਾਊਂਡ ਹੋਣ \'ਤੇ ਹੀ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ਐਪ ਨੂੰ ਵਧੀਕ ਤੌਰ \'ਤੇ ਅਨੁਮਾਨਿਤ ਜਾਂ ਸਟੀਕ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਦੇਣ \'ਤੇ ਇਹ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ ਵੇਲੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"ਇਹ ਐਪ ਤੁਹਾਡੀ ਸਰੀਰਕ ਸਰਗਰਮੀ ਨੂੰ ਪਛਾਣ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ਤਸਵੀਰਾਂ ਅਤੇ ਵੀਡੀਓ ਬਣਾਓ"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"ਇਹ ਐਪ ਕਿਸੇ ਵੀ ਸਮੇਂ ਕੈਮਰੇ ਨੂੰ ਵਰਤ ਕੇ ਤਸਵੀਰਾਂ ਖਿੱਚ ਸਕਦੀ ਹੈ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"ਸਿਸਟਮ ਕੈਮਰੇ ਨੂੰ ਤਸਵੀਰਾਂ ਅਤੇ ਵੀਡੀਓ ਬਣਾਉਣ ਲਈ ਐਪਲੀਕੇਸ਼ਨ ਜਾਂ ਸੇਵਾ ਤੱਕ ਪਹੁੰਚ ਦਿਓ"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"ਇਹ ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰ ਸਿਸਟਮ ਐਪ ਕਿਸੇ ਵੇਲੇ ਵੀ ਸਿਸਟਮ ਕੈਮਰੇ ਨੂੰ ਵਰਤ ਕੇ ਤਸਵੀਰਾਂ ਖਿੱਚ ਸਕਦੀ ਹੈ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਨੂੰ ਵੀ android.permission.CAMERA ਇਜਾਜ਼ਤ ਦੀ ਲੋੜ ਹੈ।"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ਵਾਈਬ੍ਰੇਸ਼ਨ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ਐਪ ਨੂੰ ਵਾਈਬ੍ਰੇਟਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ਫ਼ੋਨ ਨੰਬਰਾਂ ਤੇ ਸਿੱਧੇ ਕਾਲ ਕਰੋ"</string>
@@ -451,14 +453,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ਫ਼ੋਨ ਨੰਬਰ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ ਦੇ ਫ਼ੋਨ ਨੰਬਰਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ਟੈਬਲੈੱਟ ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕੋ"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"TV ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਸਲੀਪ ਮੋਡ ਵਿੱਚ ਜਾਣ ਤੋਂ ਰੋਕੋੇ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ਫ਼ੋਨ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ਐਪ ਨੂੰ ਟੈਬਲੈੱਟ ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"ਐਪ ਨੂੰ TV ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਸਲੀਪ ਮੋਡ \'ਤੇ ਜਾਣ ਤੋਂ ਰੋਕਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ਐਪ ਨੂੰ ਫ਼ੋਨ ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"ਇੰਫ੍ਰਾਰੈਡ ਟ੍ਰਾਂਸਮਿਟ ਕਰੋ"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ਐਪ ਨੂੰ ਟੈਬਲੈੱਟ ਦਾ ਇੰਫਰਾਰੈਡ ਟ੍ਰਾਂਸਮੀਟਰ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"ਐਪ ਨੂੰ TV ਦਾ ਇੰਫਰਾਰੈਡ ਟ੍ਰਾਂਸਮੀਟਰ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਇਨਫ੍ਰਾਰੈੱਡ ਟ੍ਰਾਂਸਮੀਟਰ ਵਰਤਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ਐਪ ਨੂੰ ਫ਼ੋਨ ਦਾ ਇੰਫਰਾਰੈਡ ਟ੍ਰਾਂਸਮੀਟਰ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ਵਾਲਪੇਪਰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਵਾਲਪੇਪਰ ਸੈਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
@@ -466,11 +468,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਵਾਲਪੇਪਰ ਆਕਾਰ ਸੰਕੇਤ ਸੈਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"ਸਮਾਂ ਜ਼ੋਨ ਸੈੱਟ ਕਰੋ"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"ਐਪ ਨੂੰ ਟੈਬਲੈੱਟ ਦਾ ਸਮਾਂ ਜ਼ੋਨ ਬਦਲਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"ਐਪ ਨੂੰ TV ਦਾ ਸਮਾਂ ਜ਼ੋਨ ਬਦਲਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਸਮਾਂ ਜ਼ੋਨ ਬਦਲਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"ਐਪ ਨੂੰ ਫ਼ੋਨ ਦਾ ਸਮਾਂ ਜ਼ੋਨ ਬਦਲਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"ਡੀਵਾਈਸ ਤੇ ਖਾਤੇ ਲੱਭੋ"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ਐਪ ਨੂੰ ਟੈਬਲੈੱਟ ਵੱਲੋਂ ਗਿਆਤ ਖਾਤਿਆਂ ਦੀ ਸੂਚੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਵਿੱਚ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਦੁਆਰਾ ਬਣਾਏ ਗਏ ਕੋਈ ਵੀ ਖਾਤੇ ਸ਼ਾਮਲ ਹੋ ਸਕਦੇ ਹਨ।"</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"ਐਪ ਨੂੰ TV ਵੱਲੋਂ ਗਿਆਤ ਖਾਤਿਆਂ ਦੀ ਸੂਚੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਵਿੱਚ ਤੁਹਾਡੇ ਵੱਲੋਂ ਇੰਸਟੌਲ ਕੀਤੀਆਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਬਣਾਏ ਗਏ ਕੋਈ ਵੀ ਖਾਤੇ ਸ਼ਾਮਲ ਹੋ ਸਕਦੇ ਹਨ।"</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਵੱਲੋਂ ਗਿਆਤ ਖਾਤਿਆਂ ਦੀ ਸੂਚੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦੀ ਹੈ। ਇਸ ਵਿੱਚ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਬਣਾਏ ਗਏ ਕੋਈ ਵੀ ਖਾਤੇ ਸ਼ਾਮਲ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ਐਪ ਨੂੰ ਫ਼ੋਨ ਵੱਲੋਂ ਗਿਆਤ ਖਾਤਿਆਂ ਦੀ ਸੂਚੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਵਿੱਚ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਬਣਾਏ ਗਏ ਕੋਈ ਵੀ ਖਾਤੇ ਸ਼ਾਮਲ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨ ਦੇਖੋ"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ਐਪ ਨੂੰ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨਾਂ ਬਾਰੇ ਜਾਣਕਾਰੀ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਕਿਹੜੇ ਨੈੱਟਵਰਕ ਮੌਜੂਦ ਹਨ ਅਤੇ ਕਨੈਕਟ ਕੀਤੇ ਹੋਏ ਹਨ।"</string>
@@ -486,21 +488,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ਐਪ ਨੂੰ ਵਾਈ-ਫਾਈ ਪਹੁੰਚ ਬਿੰਦੂਆਂ ਤੇ ਕਨੈਕਟ ਅਤੇ ਇਹਨਾਂ ਤੋਂ ਡਿਸਕਨੈਕਟ ਕਰਨ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈਟਵਰਕਾਂ ਲਈ ਡੀਵਾਈਸ ਸੰਰੂਪਣ ਵਿੱਚ ਬਦਲਾਵ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ਵਾਈ-ਫਾਈ ਮਲਟੀਕਾਸਟ ਰਿਸੈਪਸ਼ਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ ਵਰਤਦੇ ਹੋਏ ਇੱਕ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੀਆਂ ਡੀਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਕੇਵਲ ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਨਹੀਂ। ਇਹ ਗੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ ਵਰਤਦੇ ਹੋਏ ਇੱਕ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੇ ਡੀਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਸਿਰਫ਼ ਤੁਹਾਡਾ ਟੀਵੀ ਨਹੀਂ। ਇਹ ਗ਼ੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ ਵਰਤਦੇ ਹੋਏ ਇੱਕ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ \'ਤੇ ਸਾਰੀਆਂ ਡੀਵਾਈਸਾਂ \'ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦੀ ਹੈ, ਨਾ ਕਿ ਸਿਰਫ਼ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ। ਇਹ ਗੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦੀ ਹੈ।"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ, ਵਰਤਦੇ ਹੋਏ ਇੱਕ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੇ ਡੀਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਸਿਰਫ਼ ਤੁਹਾਡਾ ਫ਼ੋਨ ਨਹੀਂ। ਇਹ ਗੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ਬਲੂਟੁੱਥ ਸੈਟਿੰਗਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ਐਪ ਨੂੰ ਸਥਾਨਕ ਬਲੂਟੁੱਥ ਟੈਬਲੈੱਟ ਸੰਰੂਪਣ ਕਰਨ ਅਤੇ ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨੂੰ ਖੋਜਣ ਅਤੇ ਉਹਨਾਂ ਨਾਲ ਜੋੜਾਬੱਧ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ਐਪ ਨੂੰ ਸਥਾਨਕ Bluetooth ਟੀਵੀ ਦੀ ਰੂਪ-ਰੇਖਾ ਬਦਲਣ ਅਤੇ ਰਿਮੋਟ ਡਿਵਾਈਸਾਂ ਨੂੰ ਖੋਜਣ ਅਤੇ ਉਹਨਾਂ ਨਾਲ ਪੇਅਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਬਲੂਟੁੱਥ ਦਾ ਸੰਰੂਪਣ ਕਰਨ, ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਦੀ ਖੋਜ ਕਰਨ ਅਤੇ ਇਹਨਾਂ ਨਾਲ ਜੋੜਾਬੱਧ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ਐਪ ਨੂੰ ਸਥਾਨਕ ਬਲੂਟੁੱਥ ਫ਼ੋਨ ਦੀ ਰੂਪ-ਰੇਖਾ ਬਦਲਣ ਅਤੇ ਰਿਮੋਟ ਡਿਵਾਈਸਾਂ ਨੂੰ ਖੋਜਣ ਅਤੇ ਉਹਨਾਂ ਨਾਲ ਪੇਅਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX ਤੋਂ ਕਨੈਕਟ ਅਤੇ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ਐਪ ਨੂੰ ਇਹ ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਕਿ WiMAX ਸਮਰਥਿਤ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਕਿਸੇ ਵੀ  WiMAX ਨੈਟਵਰਕਾਂ ਬਾਰੇ ਜਾਣਕਾਰੀ ਜੋ ਕਨੈਕਟ ਕੀਤੇ ਹੋਏ ਹਨ।"</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX ਸਥਿਤੀ ਬਦਲੋ"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ਐਪ ਨੂੰ ਟੈਬਲੈੱਟ ਨੂੰ ਕਨੈਕਟ ਕਰਨ ਅਤੇ WiMAX ਨੈਟਵਰਕਾਂ ਤੋਂ ਟੈਬਲੈੱਟ ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"ਐਪ ਨੂੰ TV ਨੂੰ ਕਨੈਕਟ ਕਰਨ ਅਤੇ WiMAX ਨੈਟਵਰਕਾਂ ਤੋਂ TV ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"ਐਪ ਨੂੰ WiMAX ਨੈੱਟਵਰਕਾਂ ਤੋਂ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਕਨੈਕਟ ਅਤੇ ਡਿਸਕਨੈਕਟ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ਐਪ ਨੂੰ ਫ਼ੋਨ ਨੂੰ ਕਨੈਕਟ ਕਰਨ ਅਤੇ WiMAX ਨੈੱਟਵਰਕਾਂ ਤੋਂ ਫ਼ੋਨ ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth ਡਿਵਾਈਸਾਂ ਨਾਲ ਪੇਅਰ ਕਰੋ"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ਐਪ ਨੂੰ ਟੈਬਲੈੱਟ ਤੇ ਬਲੂਟੁੱਥ ਦਾ ਸੰਰੂਪਣ ਦੇਖਣ, ਜੋੜਾਬੱਧ ਕੀਤੇ ਡੀਵਾਈਸਾਂ ਨਾਲ ਕਨੈਕਸ਼ਨ ਬਣਾਉਣ ਅਤੇ ਸਵੀਕਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"ਐਪ ਨੂੰ ਟੀਵੀ ਤੇ Bluetooth ਦੀ ਸੰਰੂਪਣ ਦੇਖਣ, ਜੋੜਾਬੱਧ ਕੀਤੇ ਡਿਵਾਈਸਾਂ ਨਾਲ ਕਨੈਕਸ਼ਨ ਬਣਾਉਣ ਅਤੇ ਸਵੀਕਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਬਲੂਟੁੱਥ ਦਾ ਸੰਰੂਪਣ ਦੇਖਣ, ਜੋੜਾਬੱਧ ਕੀਤੇ ਡੀਵਾਈਸਾਂ ਨਾਲ ਕਨੈਕਸ਼ਨ ਬਣਾਉਣ ਅਤੇ ਸਵੀਕਾਰ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ਐਪ ਨੂੰ ਬਲੂਟੁੱਥ ਤੇ ਬਲੂਟੁੱਥ ਦਾ ਸੰਰੂਪਣ ਦੇਖਣ, ਜੋੜਾਬੱਧ ਕੀਤੇ ਡੀਵਾਈਸਾਂ ਨਾਲ ਕਨੈਕਸ਼ਨ ਬਣਾਉਣ ਅਤੇ ਸਵੀਕਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
@@ -657,10 +659,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ਸਕ੍ਰੀਨ ਲਾਕ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਿੰਨ ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ  ਲਾਕ  ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ  ਲਾਕ  ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ।"</string>
@@ -668,11 +670,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ਸਕ੍ਰੀਨ ਦਾ ਕਿਵੇਂ ਅਤੇ ਕਦੋਂ ਲਾਕ ਹੋਣਾ ਕੰਟਰੋਲ ਕਰੋ।"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੈਬਲੈੱਟ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੀਵੀ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ਉਪਭੋਗਤਾ  ਡਾਟਾ  ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ ਟੈਬਲੈੱਟ ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ TV ਤੇ ਮੌਜੂਦ ਇਸ ਉਪਭੋਗਤਾ ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ Android TV ਡੀਵਾਈਸ \'ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ ਫ਼ੋਨ ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ਡੀਵਾਈਸ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ਜਦੋਂ ਨੀਤੀ ਚਾਲੂ ਹੋਵੇ ਤਾਂ ਵਰਤੇ ਜਾਣ ਲਈ ਡੀਵਾਈਸ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈੱਟ ਕਰੋ। ਕੇਵਲ ਡੀਵਾਈਸ ਮਾਲਕ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈੱਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
@@ -822,7 +824,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ਅਧਿਕਤਮ ਚਿਹਰਾ ਅਣਲਾਕ ਕੋਸ਼ਿਸ਼ਾਂ ਵਧੀਆਂ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ਕੋਈ ਸਿਮ ਕਾਰਡ ਨਹੀਂ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ਟੈਬਲੈੱਟ ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਨਹੀਂ ਹੈ।"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"TV ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਨਹੀਂ।"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਮੌਜੂਦ ਨਹੀਂ।"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ਫ਼ੋਨ ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਮੌਜੂਦ ਨਹੀਂ।"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ਇੱਕ SIM ਕਾਰਡ ਪਾਓ।"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM ਕਾਰਡ ਲੁਪਤ ਹੈ ਜਾਂ ਪੜ੍ਹਨਯੋਗ ਨਹੀਂ ਹੈ। ਇੱਕ SIM ਕਾਰਡ ਪਾਓ।"</string>
@@ -845,13 +847,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਪਾਸਵਰਡ ਗਲਤ ਢੰਗ ਨਾਲ ਟਾਈਪ ਕੀਤਾ ਹੈ।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"ਤੁਸੀਂ ਆਪਣਾ ਪਿੰਨ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟਾਈਪ ਕੀਤਾ ਹੈ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਆਪਣਾ Google ਸਾਈਨ-ਇਨ ਵਰਤਦੇ ਹੋਏ ਆਪਣੀ ਟੈਬਲੈੱਟ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ। \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਆਪਣਾ Google ਸਾਈਨ-ਇਨ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ ਟੀਵੀ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਉਲੀਕਿਆ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਆਪਣਾ Google ਸਾਈਨ-ਇਨ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ Android TV ਡੀਵਾਈਸ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਵੇਗਾ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਆਪਣਾ Google ਸਾਈਨਇਨ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ ਫ਼ੋਨ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੈਬਲੈੱਟ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਵੱਧ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਟੈਬਲੈੱਟ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਨਸ਼ਟ ਹੋ ਜਾਵੇਗਾ।"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੀਵੀ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਵੱਧ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਟੀਵੀ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਨਸ਼ਟ ਹੋ ਜਾਏਗਾ।"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ \'ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਗੁਆਚ ਜਾਵੇਗਾ।"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਫ਼ੋਨ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਵੱਧ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਫ਼ੋਨ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਨਸ਼ਟ ਹੋ ਜਾਏਗਾ।"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੈਬਲੈੱਟ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। ਹੁਣ ਟੈਬਲੈੱਟ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ।"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੀਵੀ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। ਹੁਣ ਟੀਵੀ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ।"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਹੈ। ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ ਹੁਣ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ \'ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ।"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਫ਼ੋਨ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। ਹੁਣ ਫ਼ੋਨ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ।"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"ਕੀ ਪੈਟਰਨ ਭੁੱਲ ਗਏ?"</string>
@@ -938,7 +940,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ਐਪ ਨੂੰ ਸਾਰੇ URL ਜਿਨ੍ਹਾਂ ਤੇ ਬ੍ਰਾਊਜ਼ਰ ਨੇ ਵਿਜਿਟ ਕੀਤਾ ਹੈ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਸਾਰੇ ਬੁੱਕਮਾਰਕਾਂ, ਦਾ ਇਤਿਹਾਸ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"ਵੈੱਬ ਬੁੱਕਮਾਰਕ ਅਤੇ ਇਤਿਹਾਸ ਲਿਖੋ"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਸਾਫ਼ ਕਰਨ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਇਜਾਜ਼ਤ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਟੀਵੀ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਜਾਂ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਵਿੱਚ ਸੋਧ ਕਰਨ ਦਿੰਦੀ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੋਧ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦੀ ਹੈ। ਨੋਟ ਕਰੋ: ਇਹ ਇਜਾਜ਼ਤ ਤੀਜੀ-ਧਿਰ ਦੇ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਤਾਵਾਂ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਤਾਵਂ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ਇੱਕ ਅਲਾਰਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ਐਪ ਨੂੰ ਇੱਕ ਇੰਸਟੌਲ ਕੀਤੀ ਅਲਾਰਮ ਘੜੀ ਐਪ ਵਿੱਚ ਇੱਕ ਅਲਾਰਮ ਸੈਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਕੁਝ ਅਲਾਰਮ ਘੜੀ ਐਪਲ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਲਾਗੂ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ।"</string>
@@ -1249,17 +1251,20 @@
       <item quantity="other">ਉਪਲਬਧ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਖੋਲ੍ਹੋ</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"ਖੁੱਲ੍ਹੇ ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੋਵੋ"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"ਕੈਰੀਅਰ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ਸਾਰੇ ਨੈੱਟਵਰਕਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ਸਾਰੇ ਨੈੱਟਵਰਕ"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"ਕੀ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ ਨਾਲ ਕਨੈਕਟ ਕਰਨਾ ਹੈ?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> ਵਲੋਂ ਸੁਝਾਇਆ ਗਿਆ"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ਹਾਂ"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ਨਹੀਂ"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ਵਾਈ‑ਫਾਈ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਚੱਲ ਪਵੇਗਾ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਰੱਖਿਅਤ ਕੀਤੇ ਉੱਚ-ਗੁਣਵੱਤਾ ਵਾਲੇ ਨੈੱਟਵਰਕ ਦੇ ਨੇੜੇ ਹੋਵੋ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ਵਾਪਸ ਚਾਲੂ ਨਾ ਕਰੋ"</string>
@@ -1308,7 +1313,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"ਲੋੜੀਂਦਾ ਪਿੰਨ ਟਾਈਪ ਕਰੋ:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ਪਿੰਨ:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ਟੈਬਲੈੱਟ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਵਾਈ-ਫਾਈ ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਵੇਗਾ"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"TV <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਵਾਈ-ਫਾਈ ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗਾ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ \'ਤੇ ਵਾਈ-ਫਾਈ ਤੋਂ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਵੇਗਾ"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ਫ਼ੋਨ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਵਾਈ-ਫਾਈ ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗਾ"</string>
     <string name="select_character" msgid="3365550120617701745">"ਅੱਖਰ ਦਾਖਲ ਕਰੋ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS ਸੁਨੇਹੇ ਭੇਜ ਰਿਹਾ ਹੈ"</string>
@@ -1345,7 +1350,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"ਕੋਈ ਅਨੁਮਤੀਆਂ ਲੁੜੀਂਦੀਆਂ ਨਹੀਂ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ਇਸ ਨਾਲ ਤੁਹਾਨੂੰ ਖਰਚਾ ਪੈ ਸਕਦਾ ਹੈ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ਠੀਕ"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB ਰਾਹੀਂ ਇਸ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"ਇਹ ਡੀਵਾਈਸ USB ਰਾਹੀਂ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"ਕਨੈਕਟ ਕੀਤਾ ਡੀਵਾਈਸ USB ਰਾਹੀਂ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ਫ਼ਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਚਾਲੂ ਹੈ"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB ਰਾਹੀਂ PTP ਚਾਲੂ ਹੈ"</string>
@@ -1651,13 +1656,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਪਾਸਵਰਡ ਗਲਤ ਢੰਗ ਨਾਲ ਟਾਈਪ ਕੀਤਾ ਹੈ।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਉਲੀਕਿਆ ਹੈ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੈਬਲੈੱਟ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਵੱਧ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਟੈਬਲੈੱਟ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਨਸ਼ਟ ਹੋ ਜਾਵੇਗਾ।"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੀਵੀ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਵੱਧ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਟੀਵੀ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਨਸ਼ਟ ਹੋ ਜਾਏਗਾ।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ \'ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਗੁਆਚ ਜਾਵੇਗਾ।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਫ਼ੋਨ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਵੱਧ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਫ਼ੋਨ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ ਅਤੇ ਸਾਰਾ ਵਰਤੋਂਕਾਰ ਡਾਟਾ ਨਸ਼ਟ ਹੋ ਜਾਏਗਾ।"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੈਬਲੈੱਟ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। ਹੁਣ ਟੈਬਲੈੱਟ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ।"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟੀਵੀ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। ਹੁਣ ਟੀਵੀ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਹੈ। ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ ਹੁਣ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ \'ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਵੇਗਾ।"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ਤੁਸੀਂ <xliff:g id="NUMBER">%d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਫ਼ੋਨ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ। ਹੁਣ ਫ਼ੋਨ ਫੈਕਟਰੀ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੇ ਰੀਸੈੱਟ ਹੋ ਜਾਏਗਾ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਉਲੀਕਿਆ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਇੱਕ ਈਮੇਲ ਖਾਤਾ ਵਰਤਦੇ ਹੋਏ ਆਪਣੇ ਟੈਬਲੈੱਟ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਵੇਗਾ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਇੱਕ ਈਮੇਲ ਖਾਤਾ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ ਟੀਵੀ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਉਲੀਕਿਆ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਕੋਈ ਈਮੇਲ ਖਾਤਾ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ Android TV ਡੀਵਾਈਸ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਵੇਗਾ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਇੱਕ ਈਮੇਲ ਖਾਤਾ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ ਫ਼ੋਨ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ਹਟਾਓ"</string>
@@ -1998,6 +2003,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ਟੈਪ ਕਰਕੇ ਦੋਖੋ ਕਿ ਕਿਹੜੀਆਂ ਚੀਜ਼ਾਂ ਬਲਾਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ਸਿਸਟਮ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ਸੈਟਿੰਗਾਂ"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"ਸਟੈਂਡਬਾਈ"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV ਡੀਵਾਈਸ ਜਲਦ ਹੀ ਬੰਦ ਹੋ ਜਾਵੇਗਾ; ਇਸਨੂੰ ਚਾਲੂ ਰੱਖਣ ਲਈ ਕੋਈ ਬਟਨ ਦਬਾਓ।"</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"ਡੀਵਾਈਸ ਜਲਦ ਹੀ ਬੰਦ ਹੋ ਜਾਵੇਗਾ, ਇਸਨੂੰ ਚਾਲੂ ਰੱਖਣ ਲਈ ਦਬਾਓ।"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ਕੈਮਰਾ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>

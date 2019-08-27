@@ -362,8 +362,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (!permissionGranted) {
                 return null;
             }
+            // TODO [Multi-Display] (b/134891479) :
+            // using correct display Id to replace DEFAULT_DISPLAY.
             List<AccessibilityWindowInfo> internalWindowList =
-                    mA11yWindowManager.getWindowListLocked();
+                    mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
             if (internalWindowList == null) {
                 return null;
             }
@@ -1309,23 +1311,25 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      */
     private void ensureWindowsAvailableTimed() {
         synchronized (mLock) {
-            if (mA11yWindowManager.getWindowListLocked() != null) {
+            // TODO [Multi-Display] (b/134891479) :
+            // using correct display Id to replace DEFAULT_DISPLAY.
+            if (mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY) != null) {
                 return;
             }
             // If we have no registered callback, update the state we
             // we may have to register one but it didn't happen yet.
-            if (!mA11yWindowManager.isTrackingWindowsLocked()) {
+            if (!mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY)) {
                 // Invokes client change to make sure tracking window enabled.
                 mSystemSupport.onClientChangeLocked(false);
             }
             // We have no windows but do not care about them, done.
-            if (!mA11yWindowManager.isTrackingWindowsLocked()) {
+            if (!mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY)) {
                 return;
             }
 
             // Wait for the windows with a timeout.
             final long startMillis = SystemClock.uptimeMillis();
-            while (mA11yWindowManager.getWindowListLocked() == null) {
+            while (mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY) == null) {
                 final long elapsedMillis = SystemClock.uptimeMillis() - startMillis;
                 final long remainMillis = WAIT_WINDOWS_TIMEOUT_MILLIS - elapsedMillis;
                 if (remainMillis <= 0) {

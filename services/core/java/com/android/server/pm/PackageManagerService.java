@@ -18130,10 +18130,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * Tries to delete system package.
      */
     private void deleteSystemPackageLIF(DeletePackageAction action, PackageSetting deletedPs,
-            int[] allUserHandles, int flags, PackageRemovedInfo outInfo, boolean writeSettings)
+            int[] allUserHandles, int flags, @Nullable PackageRemovedInfo outInfo,
+            boolean writeSettings)
             throws SystemDeleteException {
-        final boolean applyUserRestrictions
-                = (allUserHandles != null) && (outInfo.origUsers != null);
+        final boolean applyUserRestrictions =
+                (allUserHandles != null) && outInfo != null && (outInfo.origUsers != null);
         final PackageParser.Package deletedPkg = deletedPs.pkg;
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
@@ -18154,19 +18155,21 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        // Delete the updated package
-        outInfo.isRemovedPackageSystemUpdate = true;
-        if (outInfo.removedChildPackages != null) {
-            final int childCount = (deletedPs.childPackageNames != null)
-                    ? deletedPs.childPackageNames.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                String childPackageName = deletedPs.childPackageNames.get(i);
-                if (disabledPs.childPackageNames != null && disabledPs.childPackageNames
-                        .contains(childPackageName)) {
-                    PackageRemovedInfo childInfo = outInfo.removedChildPackages.get(
-                            childPackageName);
-                    if (childInfo != null) {
-                        childInfo.isRemovedPackageSystemUpdate = true;
+        if (outInfo != null) {
+            // Delete the updated package
+            outInfo.isRemovedPackageSystemUpdate = true;
+            if (outInfo.removedChildPackages != null) {
+                final int childCount = (deletedPs.childPackageNames != null)
+                        ? deletedPs.childPackageNames.size() : 0;
+                for (int i = 0; i < childCount; i++) {
+                    String childPackageName = deletedPs.childPackageNames.get(i);
+                    if (disabledPs.childPackageNames != null && disabledPs.childPackageNames
+                            .contains(childPackageName)) {
+                        PackageRemovedInfo childInfo = outInfo.removedChildPackages.get(
+                                childPackageName);
+                        if (childInfo != null) {
+                            childInfo.isRemovedPackageSystemUpdate = true;
+                        }
                     }
                 }
             }
@@ -18199,7 +18202,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
         try {
             installPackageFromSystemLIF(disabledPs.codePathString, allUserHandles,
-                    outInfo.origUsers, deletedPs.getPermissionsState(), writeSettings);
+                    outInfo == null ? null : outInfo.origUsers, deletedPs.getPermissionsState(),
+                    writeSettings);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPkg.packageName + ": "
                     + e.getMessage());
@@ -23732,38 +23736,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int userId : userIds) {
                     mSettings.writeRuntimePermissionsForUserLPr(userId, !async);
                 }
-            }
-        }
-
-        @Override
-        public int getTargetSdk(int uid) {
-            int userId = UserHandle.getUserId(uid);
-
-            synchronized (mLock) {
-                final Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
-                if (obj instanceof PackageSetting) {
-                    final PackageSetting ps = (PackageSetting) obj;
-                    if (!ps.getInstalled(userId)) {
-                        return 0;
-                    }
-                    return ps.pkg.applicationInfo.targetSdkVersion;
-                } else if (obj instanceof SharedUserSetting) {
-                    int maxTargetSdk = 0;
-                    final SharedUserSetting sus = (SharedUserSetting) obj;
-                    final int numPkgs = sus.packages.size();
-                    for (int i = 0; i < numPkgs; i++) {
-                        final PackageSetting ps = sus.packages.valueAt(i);
-                        if (!ps.getInstalled(userId)) {
-                            continue;
-                        }
-                        if (ps.pkg.applicationInfo.targetSdkVersion < maxTargetSdk) {
-                            continue;
-                        }
-                        maxTargetSdk = ps.pkg.applicationInfo.targetSdkVersion;
-                    }
-                    return maxTargetSdk;
-                }
-                return 0;
             }
         }
 

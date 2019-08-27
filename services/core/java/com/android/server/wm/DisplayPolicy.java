@@ -3790,6 +3790,20 @@ public class DisplayPolicy {
         mPointerLocationView = null;
     }
 
+    /**
+     * Check if the window could be excluded from checking if the display has content.
+     *
+     * @param w WindowState to check if should be excluded.
+     * @return True if the window type is PointerLocation which is excluded.
+     */
+    boolean isWindowExcludedFromContent(WindowState w) {
+        if (w != null && mPointerLocationView != null) {
+            return w.mClient == mPointerLocationView.getWindowToken();
+        }
+
+        return false;
+    }
+
     @VisibleForTesting
     static boolean isOverlappingWithNavBar(WindowState targetWindow, WindowState navBarWindow) {
         if (navBarWindow == null || !navBarWindow.isVisibleLw()

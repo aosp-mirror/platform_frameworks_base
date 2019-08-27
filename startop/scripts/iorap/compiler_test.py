@@ -70,9 +70,9 @@ def test_compiler_main(tmpdir):
   # 10ms duration
   expected = os.path.join(DIR,
                           'test_fixtures/compiler/test_result_with_duration.TraceFile.pb')
-  assert_compile_result(output, expected, '--duration', '10')
+  assert_compile_result(output, expected, '--duration', '10000')
 
   # 30ms duration
   expected = os.path.join(DIR,
                           'test_fixtures/compiler/test_result_without_duration.TraceFile.pb')
-  assert_compile_result(output, expected, '--duration', '30')
+  assert_compile_result(output, expected, '--duration', '30000')

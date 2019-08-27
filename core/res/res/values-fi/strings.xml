@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Poistopyyntö sisälsi liian paljon sisältöä (<xliff:g id="CONTENT_TYPE">%s</xliff:g>)."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet-laitteen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Kellon tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Television tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV ‑laitteen laitetallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puhelimen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Varmenteen myöntäjiä on asennettu.</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> on poistanut tulostuksen käytöstä."</string>
     <string name="me" msgid="6545696007631404292">"Minä"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet-laitteen asetukset"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Televisioasetukset"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV ‑vaihtoehdot"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Puhelimen asetukset"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Äänetön tila"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Ota langaton yhteys käyttöön"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Käynnistetään uudelleen…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Suljetaan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet-laitteesi sammutetaan."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Televisio sammutetaan."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV ‑laite sammuu."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Kello sammutetaan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Puhelin suljetaan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Haluatko sammuttaa?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Viimeisimmät"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Ei viimeaikaisia sovelluksia"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet-laitteen asetukset"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"Televisioasetukset"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV ‑vaihtoehdot"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Puhelimen asetukset"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Näytön lukitus"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Katkaise virta"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Antaa sovelluksen lähettää tekstiviestejä. Tästä voi aiheutua odottamattomia kuluja. Haitalliset sovellukset voivat aiheuttaa kuluja lähettämällä viestejä ilman lupaasi."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lue tekstiviestejä (teksti tai multimedia)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Tämä sovellus voi lukea kaikkia tabletillesi tallennettuja tekstiviestejä."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Tämä sovellus voi lukea kaikkia TV:llesi tallennettuja tekstiviestejä."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"Tämä sovellus voi lukea kaikki Android TV ‑laitteeseen tallennetut tekstiviestit."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Tämä sovellus voi lukea kaikkia puhelimellesi tallennettuja tekstiviestejä."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"vastaanota tekstiviestejä (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Tämä sovellus voi käyttää dataa taustalla. Tämä saattaa lisätä datankulutusta."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sovelluksen asettaminen aina käynnissä olevaksi"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa tablet-laitteen toimintaa."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Antaa sovelluksen lisätä omia osiaan pysyvästi muistiin. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa television toimintaa."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa Android TV ‑laitteen toimintaa."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa puhelimen toimintaa."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"suorita etualan palvelu"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Sallii sovelluksen käyttää etualan palveluja"</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Antaa sovelluksen muokata järjestelmän asetustietoja. Haitalliset sovellukset voivat vahingoittaa järjestelmän määritystä."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"suorita laitteen käynnistyessä"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää tablet-laitteen käynnistysaikaa ja hidastaa sen yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää television käynnistysaikaa ja hidastaa television yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää Android TV ‑laitteen käynnistysaikaa ja hidastaa sen yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää puhelimen käynnistysaikaa ja hidastaa puhelimen yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"lähetä tärkeä lähetys"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka säilyvät lähetyksen päätyttyä. Liiallinen käyttö voi tehdä tablet-laitteesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Antaa sovelluksen lähettää lähetyksiä, jotka jäävät voimaan lähetyksen päätyttyä. Ominaisuuden liiallinen käyttö voi saada television toimimaan hitaammin tai epävakaammin liiallisen muistinkäytön myötä."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka säilyvät lähetyksen päätyttyä. Liiallinen käyttö voi tehdä Android TV ‑laitteesta hitaan tai epävakaan lisäämällä sen muistinkäyttöä liikaa."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka säilyvät lähetyksen päätyttyä. Liiallinen käyttö voi tehdä puhelimesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"lue yhteystietoja"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Antaa sovelluksen lukea tablet-laitteeseesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Antaa sovelluksen lukea televisioosi tallennettuja kontaktitietoja sekä tarkastella sitä, kuinka usein olet soitellut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Antaa sovelluksen lukea Android TV ‑laitteeseen tallennettuja kontaktitietoja sekä nähdä, kuinka usein olet soitellut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Antaa sovelluksen lukea puhelimeesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"muokkaa yhteystietoja"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Antaa sovelluksen muokata tablet-laitteeseesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Antaa sovelluksen muokata televisioosi tallennettuja kontaktitietoja sekä tarkastella sitä, kuinka usein olet soitellut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Antaa sovelluksen muokata Android TV ‑laitteeseen tallennettujen kontaktiesi dataa sekä nähdä, kuinka usein olet soitellut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Antaa sovelluksen muokata puhelimeesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lue puhelulokia"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Tämä sovellus voi lukea puheluhistoriaasi."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kirjoita puhelulokiin"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Antaa sovelluksen muokata television puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Antaa sovelluksen muokata Android TV ‑laitteen puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat tyhjentää puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"käyttää kehon antureita (kuten sykemittareita)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Antaa sovelluksen käyttää kehosi tilaa seuraavien anturien tietoja, esimerkiksi sykettä."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Lue kalenterin tapahtumia ja tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Tämä sovellus voi lukea kaikkia tabletille tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Tämä sovellus voi lukea kaikkia TV:lle tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"Tämä sovellus voi lukea kaikkia Android TV ‑laitteeseen tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Tämä sovellus voi lukea kaikkia puhelimelle tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"lisää tai muokkaa kalenteritapahtumia ja lähetä sähköpostia vieraille ilman omistajien lupaa"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Tämä sovellus voi lisätä, poistaa tai muuttaa tabletin kalenteritapahtumia. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajilta, tai muuttaa kalenteritapahtumia ilmoittamatta omistajille."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Tämä sovellus voi lisätä, poistaa tai muuttaa TV:n kalenteritapahtumia. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajilta, tai muuttaa kalenteritapahtumia ilmoittamatta omistajille."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"Tämä sovellus voi lisätä, poistaa tai muuttaa Android TV ‑laitteen kalenteritapahtumia. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajilta, tai muuttaa kalenteritapahtumia ilmoittamatta omistajille."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Tämä sovellus voi lisätä, poistaa tai muuttaa puhelimen kalenteritapahtumia. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajilta, tai muuttaa kalenteritapahtumia ilmoittamatta omistajille."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"käytä lisää sijainnintarjoajakomentoja"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Antaa sovelluksen käyttää ylimääräisiä sijaintipalvelukomentoja. Sovellus saattaa tällöin häiritä GPS:n tai muiden sijaintilähteiden toimintaa."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Tämä sovellus saa tarkat sijaintitietosi käyttöönsä vain etualalla. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä puhelimellasi, jotta sovellus voi käyttää niitä. Tämä voi lisätä akun kulutusta."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"käyttää karkeaa verkkoon perustuvaa sijaintia vain etualalla"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella vain jos sovellus on etualalla. Näiden sijaintipalveluiden tulee olla päällä ja käytettävissä tabletilla, jotta sovellus voi käyttää niitä."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella vain jos sovellus on etualalla. Näiden sijaintipalveluiden tulee olla päällä ja käytettävissä televisiossa, jotta sovellus voi käyttää niitä."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella vain jos sovellus on etualalla. Näiden sijaintipalveluiden tulee olla päällä ja käytettävissä Android TV ‑laitteessa, jotta sovellus voi käyttää niitä."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella vain jos sovellus on etualalla. Näiden sijaintipalveluiden tulee olla päällä ja käytettävissä puhelimessa, jotta sovellus voi käyttää niitä."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"käytä sijaintia taustalla"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jos tämä myönnetään karkean tai tarkan sijainnin käyttöoikeuden lisäksi, sovellus voi käyttää sijaintia toimiessaan taustalla."</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Sovellus voi tunnistaa liikkumisesi."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ota kuvia ja videoita"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Tämä sovellus voi ottaa kameralla kuvia ja videoita koska tahansa."</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Salli sovellukselle tai palvelulle pääsy järjestelmän kameroihin, jotta se voi ottaa kuvia ja nauhoittaa videoita"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Tämä käyttöoikeuden saanut | järjestelmäsovellus voi ottaa järjestelmän kameralla kuvia ja videoita koska tahansa. Sovelluksella on oltava myös android.permission.CAMERA-käyttöoikeus"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"hallitse värinää"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Antaa sovelluksen hallita värinää."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"soittaa puhelinnumeroihin suoraan"</string>
@@ -451,14 +453,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lukea puhelinnumeroita"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Anna sovelluksen käyttää laitteella olevia puhelinnumeroita."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"estä tablet-laitetta menemästä virransäästötilaan"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"Estä television siirtyminen virransäästötilaan"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"estää Android TV ‑laitetta siirtymästä virransäästötilaan"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"estä puhelinta menemästä virransäästötilaan"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Antaa sovelluksen estää tablet-laitetta siirtymästä virransäästötilaan."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Antaa sovelluksen estää televisiota siirtymästä virransäästötilaan."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Antaa sovelluksen estää Android TV ‑laitetta siirtymästä virransäästötilaan."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Antaa sovelluksen estää puhelinta siirtymästä virransäästötilaan."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"infrapunalähetys"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Antaa sovelluksen käyttää tablet-laitteen infrapunalähetintä."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Antaa sovelluksen käyttää television infrapunalähetintä."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Antaa sovelluksen käyttää Android TV ‑laitteen infrapunalähetintä."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Antaa sovelluksen käyttää puhelimen infrapunalähetintä."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"aseta taustakuva"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Antaa sovelluksen asettaa laitteen taustakuvan."</string>
@@ -466,11 +468,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Antaa sovelluksen asettaa laitteen taustakuvakoon vinkkejä."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"asettaa aikavyöhykkeen"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Antaa sovelluksen muuttaa tablet-laitteen aikavyöhykettä."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Antaa sovelluksen muuttaa television aikavyöhykettä."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Antaa sovelluksen muuttaa Android TV ‑laitteen aikavyöhykettä."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Antaa sovelluksen muuttaa puhelimen aikavyöhykettä."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"etsi tilejä laitteelta"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Antaa sovelluksen tarkastella tablet-laitteeseen tallennettuja tilejä. Näihin voivat kuulua myös asentamiesi sovelluksien luomat tilit."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Antaa sovelluksen tarkastella televisioon tallennettuja tilejä. Niihin voivat kuulua myös asentamiesi sovellusten luomat tilit."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Antaa sovelluksen noutaa Android TV ‑laitteen tuntemien tilien listan. Tileihin voi kuulua myös asennettujen sovellusten luomia tilejä."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Antaa sovelluksen tarkastella puhelimeen tallennettuja tilejä. Näihin voivat kuulua myös asentamiesi sovelluksien luomat tilit."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"tarkastele verkkoyhteyksiä"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Antaa sovelluksen tarkastella verkkoyhteyksiä koskevia tietoja, kuten mitä verkkoja on olemassa ja mihin on muodostettu yhteys."</string>
@@ -486,21 +488,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Antaa sovelluksen yhdistää Wi-Fi-tukiasemiin tai katkaista yhteyden sekä tehdä muutoksia määritettyihin Wi-Fi-verkkoihin."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"anna ottaa vastaan Wi-Fi-ryhmälähetyksiä"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain tablet-laitteellesi, Wi-Fi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Antaa sovelluksen vastaanottaa paketteja, jotka on lähetetty television lisäksi kaikille laitteille Wi-Fi-verkon kautta monilähetystilassa. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain Android TV ‑laitteeseen, Wi-Fi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain puhelimellesi, Wi-Fi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"käytä Bluetooth-asetuksia"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Antaa sovelluksen määrittää paikallisen Bluetooth-tabletin asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Antaa sovelluksen määrittää television Bluetooth-asetukset, etsiä laitteita ja muodostaa laitepareja."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Antaa sovelluksen määrittää Android TV ‑laitteen Bluetoothin sekä tunnistaa etälaitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Antaa sovelluksen määrittää paikallisen Bluetooth-puhelimen asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"muodosta yhteys WiMAXiin ja katkaise yhteys"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Antaa sovelluksen määrittää, onko WiMAX käytössä, sekä saada selville tietoja WiMAX-verkoista, joihin on muodostettu yhteys."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Antaa sovelluksen muodostaa tablet-laitteella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Antaa sovelluksen muodostaa ja katkaista yhteyden television ja WiMAX-verkkojen välillä."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Antaa sovelluksen muodostaa Android TV ‑laitteella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Antaa sovelluksen muodostaa puhelimella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"muodosta laitepari Bluetooth-laitteiden kanssa"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Antaa sovelluksen tarkastella tablet-laitteen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Antaa sovelluksen tarkastella television Bluetooth-määritystä sekä muodostaa ja hyväksyä laiteparien yhteyksiä."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Antaa sovelluksen nähdä Android TV ‑laitteen Bluetooth-asetukset sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Antaa sovelluksen tarkastella puhelimen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"hallitse Near Field Communication -tunnistusta"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tagien, -korttien ja -lukijoiden kanssa."</string>
@@ -657,10 +659,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoida ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Tarkkailla näytön avaamisyrityksiä"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa sekä lukitsee tablet-laitteen tai poistaa sen tiedot, jos salasana syötetään väärin liian monta kertaa."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Valvo väärien salasanojen määrää poistettaessa näytön lukitusta ja lukitse televisio tai poista television kaikki tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse Android TV ‑laite tai poista kaikki Android TV ‑laitteen tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa ja lukitsee puhelimen tai poistaa sen kaikki tiedot, jos väärä salasana syötetään liian monta kertaa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse tabletti tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse televisio tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse Android TV ‑laite tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse puhelin tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Muuttaa näytön lukituksen"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuttaa näytön lukituksen."</string>
@@ -668,11 +670,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoida, milloin ja miten näyttö lukittuu."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Pyyhkiä kaikki tiedot"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Palauta tehdasasetukset ja poista television tiedot ilman varoitusta."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Tyhjentää Android TV ‑laitteen tiedot ilman varoitusta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Tyhjentää puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Pyyhi käyttäjän tiedot"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Pyyhi tämän käyttäjän tiedot tabletista ilman varoitusta."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Pyyhi tämän käyttäjän tiedot televisiosta ilman varoitusta."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Tyhjentää tämän käyttäjän tiedot Android TV ‑laitteesta ilman varoitusta."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Pyyhi tämän käyttäjän tiedot puhelimesta ilman varoitusta."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Aseta laitteen yleinen välityspalvelin"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Aseta laitteen yleinen välityspalvelin käyttöön, kun käytäntö on käytössä. Vain laitteen omistaja voi asettaa yleisen välityspalvelimen."</string>
@@ -822,7 +824,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Face Unlock -yrityksiä tehty suurin sallittu määrä."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ei SIM-korttia"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tablet-laitteessa ei ole SIM-korttia."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Televisiossa ei ole SIM-korttia."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Android TV ‑laitteessa ei ole SIM-korttia."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Puhelimessa ei ole SIM-korttia."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Aseta SIM-kortti."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-korttia ei löydy tai ei voi lukea. Kytke SIM-kortti."</string>
@@ -845,13 +847,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus Google-sisäänkirjautumisen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään poistamaan television lukitus Google-käyttäjätunnuksen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"Olet piirtänyt lukituksen avauskuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään avaamaan Android TV ‑laitteen lukitus Google-kirjautumisen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus Google-sisäänkirjautumisen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> epäonnistunutta yritystä, tablet-laitteeseen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Television lukituksen poistaminen on epäonnistunut <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos se epäonnistuu vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, television tehdasasetukset palautetaan ja käyttäjätiedot poistetaan."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Android TV ‑laitteen avaus on epäonnistunut <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos se epäonnistuu vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, Android TV ‑laitteen tehdasasetukset palautetaan ja kaikki käyttäjätiedot poistetaan."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> epäonnistunutta yritystä, puhelimeen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Laitteeseen palautetaan nyt tehdasasetukset."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Television lukituksen poistaminen on epäonnistunut <xliff:g id="NUMBER">%d</xliff:g> kertaa. Television tehdasasetukset palautetaan."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Android TV ‑laitteen avaus on epäonnistunut <xliff:g id="NUMBER">%d</xliff:g> kertaa. Android TV palautetaan nyt tehdasasetuksiin."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Puhelimeen palautetaan nyt tehdasasetukset."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Yritä uudelleen <xliff:g id="NUMBER">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Unohditko mallin?"</string>
@@ -938,7 +940,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Antaa sovelluksen lukea selaimen käyttämien URL-osoitteiden historiaa sekä selaimen kirjanmerkkejä. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"kirjoita verkon kirjanmerkkejä ja historiaa"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Antaa sovelluksen muokata selaimen historiaa ja tablet-laitteeseen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Antaa sovelluksen muokata selaimen historiaa ja televisioon tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Antaa sovelluksen muokata selaimen historiaa ja Android TV ‑laitteeseen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huom. Kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät voi ottaa tätä asetusta käyttöön."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Antaa sovelluksen muokata selaimen historiaa ja puhelimeen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"aseta herätys"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Antaa sovelluksen asettaa hälytyksen sisäiseen herätyskellosovellukseen. Jotkin herätyskellosovellukset eivät välttämättä käytä tätä ominaisuutta."</string>
@@ -1249,17 +1251,20 @@
       <item quantity="one">Avoin Wi-Fi-verkko käytettävissä</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Yhdistä avoimeen Wi‑Fi-verkkoon"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Yhdistä operaattorin Wi-Fi-verkkoon"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Yhdistetään Wi-Fi-verkkoon"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Yhdistetty Wi-Fi-verkkoon"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi-verkkoon yhdistäminen epäonnistui"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Napauta, niin näet kaikki verkot."</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Yhdistä"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Kaikki verkot"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Yhdistetäänkö Wi-Fi-verkkoihin?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Ehdottaja: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Kyllä"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ei"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi käynnistyy automaattisesti"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kun olet lähellä laadukasta tallennettua verkkoa"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Älä käynnistä uudelleen"</string>
@@ -1307,7 +1312,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Kirjoita pyydetty PIN-koodi:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-koodi:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet-laitteen yhteys Wi-Fi-verkkoon katkaistaan väliaikaisesti tabletin ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Television Wi-Fi-yhteys katkeaa tilapäisesti, kun siihen on yhdistetty <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV ‑laitteen Wi-Fi-yhteys katkeaa tilapäisesti, kun siihen on yhdistetty <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Puhelimen yhteys Wi-Fi-verkkoon katkaistaan väliaikaisesti puhelimen ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Lisää merkki"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Tekstiviestien lähettäminen"</string>
@@ -1650,13 +1655,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> epäonnistunutta yritystä, tablet-laitteeseen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Television lukituksen poistaminen on epäonnistunut <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos se epäonnistuu vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, television tehdasasetukset palautetaan ja käyttäjätiedot poistetaan."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Android TV ‑laitteen avaus on epäonnistunut <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos se epäonnistuu vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, Android TV ‑laitteen tehdasasetukset palautetaan ja kaikki käyttäjätiedot poistetaan."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> epäonnistunutta yritystä, puhelimeen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Laitteeseen palautetaan nyt tehdasasetukset."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Television lukituksen poistaminen on epäonnistunut <xliff:g id="NUMBER">%d</xliff:g> kertaa. Television tehdasasetukset palautetaan."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Android TV ‑laitteen avaus on epäonnistunut <xliff:g id="NUMBER">%d</xliff:g> kertaa. Android TV palautetaan nyt tehdasasetuksiin."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Puhelimeen palautetaan nyt tehdasasetukset."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään avaamaan television lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"Piirsit lukituksen avauskuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään avaamaan Android TV ‑laitteen lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Poista"</string>
@@ -1997,6 +2002,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Napauta niin näet, mitä on estetty."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Järjestelmä"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Asetukset"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Säästötila"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV ‑laite sammuu pian. Pidä se päällä painamalla painiketta."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Laite sammuu pian. Pidä se päällä painamalla."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofoni"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"näkyy näytöllä muiden sovellusten päällä"</string>

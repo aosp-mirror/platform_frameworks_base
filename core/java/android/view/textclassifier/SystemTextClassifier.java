@@ -309,7 +309,7 @@ public final class SystemTextClassifier implements TextClassifier {
         }
 
         public void onFailure() {
-            Log.e(LOG_TAG, "Request failed.", null);
+            Log.e(LOG_TAG, "Request failed at " + mName, null);
             mLatch.countDown();
         }
 

@@ -18,6 +18,7 @@ package com.android.mediaroutertest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -42,10 +43,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -96,6 +95,7 @@ public class MediaRouterManagerTest {
         mPackageName = mContext.getPackageName();
     }
 
+    //TODO: Move to a seperate file
     @Test
     public void testMediaRoute2Info() {
         MediaRoute2Info routeInfo1 = new MediaRoute2Info.Builder("id", "name")
@@ -159,7 +159,7 @@ public class MediaRouterManagerTest {
         mRouter.unregisterCallback(mockRouterCallback);
 
         verify(mockCallback, timeout(TIMEOUT_MS))
-                .onRouteListChanged(argThat(routes -> routes.size() > 0));
+                .onRoutesChanged(argThat(routes -> routes.size() > 0));
 
         Map<String, MediaRoute2Info> routes =
                 createRouteMap(mManager.getAvailableRoutes(mPackageName));
@@ -170,40 +170,48 @@ public class MediaRouterManagerTest {
         mManager.unregisterCallback(mockCallback);
     }
 
+    /**
+     * Tests if we get proper routes for application that has special control category.
+     */
     @Test
-    public void onRouteSelectedTest() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
+    public void testGetRoutes() throws Exception {
+        MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
 
+        mRouter.setControlCategories(CONTROL_CATEGORIES_SPECIAL);
+        mRouter.registerCallback(mExecutor, mockCallback);
+        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+                .onRoutesChanged(argThat(routes -> routes.size() > 0));
+        Map<String, MediaRoute2Info> routes = createRouteMap(mRouter.getRoutes());
+        Assert.assertEquals(1, routes.size());
+        Assert.assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
+
+        mRouter.unregisterCallback(mockCallback);
+    }
+
+    @Test
+    public void testOnRouteSelected() throws Exception {
         MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
-        mRouter.registerCallback(mExecutor, mockRouterCallback);
-
-        MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
-            MediaRoute2Info mSelectedRoute = null;
-
-            @Override
-            public void onRouteAdded(MediaRoute2Info routeInfo) {
-                if (mSelectedRoute == null) {
-                    mSelectedRoute = routeInfo;
-                    mManager.selectRoute(mPackageName, mSelectedRoute);
-                }
-            }
-
-            @Override
-            public void onRouteSelected(String packageName, MediaRoute2Info route) {
-                if (TextUtils.equals(packageName, mPackageName)
-                        && mSelectedRoute != null
-                        && route != null
-                        && TextUtils.equals(route.getId(), mSelectedRoute.getId())) {
-                    latch.countDown();
-                }
-            }
-        };
+        MediaRouter2Manager.Callback managerCallback = mock(MediaRouter2Manager.Callback.class);
 
         mManager.registerCallback(mExecutor, managerCallback);
+        mRouter.setControlCategories(CONTROL_CATEGORIES_ALL);
+        mRouter.registerCallback(mExecutor, mockRouterCallback);
 
-        Assert.assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        verify(managerCallback, timeout(TIMEOUT_MS))
+                .onRoutesChanged(argThat(routes -> routes.size() > 0));
+
+        Map<String, MediaRoute2Info> routes =
+                createRouteMap(mManager.getAvailableRoutes(mPackageName));
+
+        MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
+        mManager.selectRoute(mPackageName, routeToSelect);
+
+        assertNotNull(routeToSelect);
+        verify(managerCallback, timeout(TIMEOUT_MS))
+                .onRouteAdded(argThat(route -> route.equals(routeToSelect)));
 
         mManager.unregisterCallback(managerCallback);
+        mRouter.unregisterCallback(mockRouterCallback);
     }
 
     /**
@@ -219,7 +227,7 @@ public class MediaRouterManagerTest {
         mRouter.registerCallback(mExecutor, routerCallback);
 
         verify(managerCallback, timeout(TIMEOUT_MS))
-                .onRouteListChanged(argThat(routes -> routes.size() > 0));
+                .onRoutesChanged(argThat(routes -> routes.size() > 0));
 
         Map<String, MediaRoute2Info> routes =
                 createRouteMap(mManager.getAvailableRoutes(mPackageName));
@@ -244,7 +252,8 @@ public class MediaRouterManagerTest {
         mManager.unregisterCallback(managerCallback);
     }
 
-    Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {
+    // Helper for getting routes easily
+    static Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {
         Map<String, MediaRoute2Info> routeMap = new HashMap<>();
         for (MediaRoute2Info route : routes) {
             routeMap.put(route.getId(), route);

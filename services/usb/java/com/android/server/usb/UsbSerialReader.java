@@ -39,7 +39,7 @@ import com.android.internal.util.ArrayUtils;
 class UsbSerialReader extends IUsbSerialReader.Stub {
     private final @Nullable String mSerialNumber;
     private final @NonNull Context mContext;
-    private final @NonNull UsbSettingsManager mSettingsManager;
+    private final @NonNull UsbPermissionManager mPermissionManager;
 
     private Object mDevice;
 
@@ -51,10 +51,10 @@ class UsbSerialReader extends IUsbSerialReader.Stub {
      * @param settingsManager The USB settings manager
      * @param serialNumber The serial number that might be read
      */
-    UsbSerialReader(@NonNull Context context, @NonNull UsbSettingsManager settingsManager,
+    UsbSerialReader(@NonNull Context context, @NonNull UsbPermissionManager permissionManager,
             @Nullable String serialNumber) {
         mContext = context;
-        mSettingsManager = settingsManager;
+        mPermissionManager = permissionManager;
         mSerialNumber = serialNumber;
     }
 
@@ -89,13 +89,14 @@ class UsbSerialReader extends IUsbSerialReader.Stub {
                 if (packageTargetSdkVersion >= Build.VERSION_CODES.Q) {
                     if (mContext.checkPermission(android.Manifest.permission.MANAGE_USB, pid, uid)
                             == PackageManager.PERMISSION_DENIED) {
-                        UsbUserSettingsManager settings = mSettingsManager.getSettingsForUser(
-                                UserHandle.getUserId(uid));
 
+                        int userId = UserHandle.getUserId(uid);
                         if (mDevice instanceof UsbDevice) {
-                            settings.checkPermission((UsbDevice) mDevice, packageName, uid);
+                            mPermissionManager.getPermissionsForUser(userId)
+                                    .checkPermission((UsbDevice) mDevice, packageName, uid);
                         } else {
-                            settings.checkPermission((UsbAccessory) mDevice, uid);
+                            mPermissionManager.getPermissionsForUser(userId)
+                                    .checkPermission((UsbAccessory) mDevice, uid);
                         }
                     }
                 }

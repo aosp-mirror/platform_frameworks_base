@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"พยายามลบ <xliff:g id="CONTENT_TYPE">%s</xliff:g> หลายรายการเกินไป"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ที่จัดเก็บข้อมูลของแท็บเล็ตเต็ม ลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ที่เก็บข้อมูลนาฬิกาเต็ม โปรดลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"พื้นที่เก็บข้อมูลในทีวีเต็ม โปรดลบบางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"พื้นที่เก็บข้อมูลของอุปกรณ์ Android TV เต็มแล้ว โปรดลบบางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ที่เก็บข้อมูลโทรศัพท์เต็ม ลบบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">ติดตั้งใบรับรอง CA แล้ว</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> ปิดใช้การพิมพ์แล้ว"</string>
     <string name="me" msgid="6545696007631404292">"ฉัน"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ตัวเลือกของแท็บเล็ต"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"ตัวเลือกทีวี"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"ตัวเลือกของ Android TV"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ตัวเลือกโทรศัพท์"</string>
     <string name="silent_mode" msgid="7167703389802618663">"โหมดปิดเสียง"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"เปิดระบบไร้สาย"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"กำลังรีสตาร์ท…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิด..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ทีวีของคุณจะปิด"</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"อุปกรณ์ Android TV จะปิดเครื่อง"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"นาฬิกาจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"โทรศัพท์ของคุณจะปิดเครื่อง"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"คุณต้องการปิดการทำงานหรือไม่"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"เมื่อเร็วๆ นี้"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ไม่มีแอปพลิเคชันล่าสุด"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ตัวเลือกของแท็บเล็ต"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"ตัวเลือกทีวี"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"ตัวเลือกของ Android TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ตัวเลือกโทรศัพท์"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ล็อกหน้าจอ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ปิดเครื่อง"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"อนุญาตให้แอปพลิเคชันส่งข้อความ SMS ซึ่งอาจทำให้มีการเรียกเก็บเงินที่ไม่คาดคิด แอปพลิเคชันที่เป็นอันตรายอาจทำให้คุณเสียค่าใช้จ่ายด้วยการส่งข้อความโดยไม่รอการยืนยันจากคุณ"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"อ่านข้อความของคุณ (SMS หรือ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"แอปนี้สามารถอ่านข้อความ SMS (ที่เป็นตัวหนังสือ) ที่จัดเก็บไว้ในแท็บเล็ต"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"แอปนี้สามารถอ่านข้อความ SMS (ที่เป็นตัวหนังสือ) ที่จัดเก็บไว้ในทีวี"</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"แอปนี้อ่านข้อความ SMS (ที่เป็นตัวหนังสือ) ที่จัดเก็บไว้ในอุปกรณ์ Android TV ได้"</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"แอปนี้สามารถอ่านข้อความ SMS (ที่เป็นตัวหนังสือ) ที่จัดเก็บไว้ในโทรศัพท์"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"รับข้อความ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ WAP การอนุญาตนี้รวมถึงความสามารถในการตรวจสอบหรือลบข้อความที่ส่งมาให้คุณโดยไม่ต้องแสดงให้คุณเห็น"</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"แอปนี้สามารถใช้เน็ตในพื้นหลัง ซึ่งอาจเพิ่มปริมาณการใช้อินเทอร์เน็ต"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ทำให้แอปพลิเคชันทำงานเสมอ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"อนุญาตให้แอปทำให้บางส่วนของแอปนั้นอยู่ในหน่วยความจำเสมอ ซึ่งอาจจำกัดพื้นที่หน่วยความจำสำหรับแอปอื่นและทำให้ทีวีช้าลง"</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"อนุญาตให้แอปทำให้ส่วนต่างๆ ของแอปคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่จะให้แอปอื่นๆ ใช้งานและทำให้อุปกรณ์ Android TV ทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้โทรศัพท์ทำงานช้าลง"</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"เรียกใช้บริการที่ใช้งานอยู่"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ใช้งานอยู่"</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"อนุญาตให้แอปพลิเคชันแก้ไขข้อมูลการตั้งค่าของระบบ แอปพลิเคชันที่เป็นอันตรายอาจทำให้การกำหนดค่าระบบของคุณเสียหาย"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ทำงานเมื่อเริ่มต้น"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"อนุญาตให้แอปพลิเคชันเริ่มต้นตัวเองทันทีที่ระบบบูตเสร็จสิ้น ซึ่งจะทำให้การเริ่มต้นแท็บเล็ตใช้เวลานานกว่าปกติและแอปพลิเคชันจะทำให้การทำงานของแท็บเล็ตโดยรวมช้าลงด้วยการทำงานอยู่ตลอดเวลา"</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"อนุญาตให้แอปเริ่มต้นทำงานทันทีที่เปิดเครื่องเสร็จ ซึ่งอาจทำให้ใช้เวลามากขึ้นในการเปิดทีวี และแอปอาจทำให้การทำงานโดยรวมของแท็บเล็ตช้าลงเพราะแอปทำงานตลอดเวลา"</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"อนุญาตให้แอปเริ่มต้นเองทันทีที่อุปกรณ์เปิดเครื่องเสร็จสิ้น ซึ่งจะทำให้การเริ่มต้นอุปกรณ์ Android TV ใช้เวลานานกว่าปกติและแอปจะทำให้การทำงานโดยรวมของอุปกรณ์ช้าลงด้วยการทำงานอยู่ตลอดเวลา"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"อนุญาตให้แอปพลิเคชันเริ่มต้นตัวเองทันทีที่ระบบบูตเสร็จสิ้น ซึ่งจะทำให้การเริ่มต้นโทรศัพท์ใช้เวลานานกว่าปกติและแอปพลิเคชันจะทำให้การทำงานของโทรศัพท์โดยรวมช้าลงด้วยการทำงานอยู่ตลอดเวลา"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ส่งการกระจายข้อมูลที่ติดหนึบ"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"อนุญาตให้แอปพลิเคชันส่งการกระจายข้อมูลที่ติดหนึบ ซึ่งจะยังคงอยู่หลังจากการกระจายข้อมูลจบไปแล้ว การใช้งานมากเกินไปอาจทำให้แท็บเล็ตทำงานช้าลงหรือไม่เสถียรโดยการใช้หน่วยความจำมากเกินไป"</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"อนุญาตให้แอปส่งการออกอากาศติดหนึบ ซึ่งเหลืออยู่หลังจากจบการออกอากาศ การใช้มากเกินไปอาจทำให้ทีวีช้าหรือไม่เสถียร เนื่องจากใช้หน่วยความจำมากเกินไป"</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"อนุญาตให้แอปส่งการแพร่ภาพแบบติดหนึบ ซึ่งจะยังคงอยู่หลังจากการแพร่ภาพจบไปแล้ว การใช้งานมากเกินไปอาจทำให้อุปกรณ์ Android TV ทำงานช้าลงหรือไม่เสถียรเนื่องจากมีการใช้หน่วยความจำมากเกิน"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"อนุญาตให้แอปพลิเคชันส่งการกระจายข้อมูลที่ติดหนึบ ซึ่งจะยังคงอยู่หลังจากการกระจายข้อมูลจบไปแล้ว การใช้งานมากเกินไปอาจทำให้โทรศัพท์ทำงานช้าลงหรือไม่เสถียรโดยการใช้หน่วยความจำมากเกินไป"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"อ่านผู้ติดต่อของคุณ"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"อนุญาตให้แอปพลิเคชันอ่านข้อมูลผู้ติดต่อที่จัดเก็บไว้ในแท็บเล็ต ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกข้อมูลผู้ติดต่อของคุณ และแอปพลิเคชันที่เป็นอันตรายอาจแชร์ข้อมูลผู้ติดต่อโดยไม่แจ้งให้คุณทราบ"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"อนุญาตให้แอปอ่านข้อมูลเกี่ยวกับรายชื่อติดต่อที่เก็บไว้ในทีวี รวมถึงความถี่ของการโทร การส่งอีเมล หรือการสื่อสารรูปแบบอื่นๆ กับคนใดคนหนึ่ง สิทธิ์นี้อนุญาตให้แอปบันทึกข้อมูลรายชื่อติดต่อ และแอปที่เป็นอันตรายอาจแชร์ข้อมูลรายชื่อติดต่อโดยที่คุณไม่รู้"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"อนุญาตให้แอปอ่านข้อมูลเกี่ยวกับรายชื่อติดต่อที่จัดเก็บไว้ในอุปกรณ์ Android TV รวมถึงความถี่ที่คุณโทรหา ส่งอีเมล หรือสื่อสารในรูปแบบอื่นกับรายชื่อติดต่อแต่ละคน สิทธิ์นี้ทำให้แอปบันทึกข้อมูลรายชื่อติดต่อได้และแอปที่เป็นอันตรายอาจแชร์ข้อมูลรายชื่อติดต่อโดยไม่แจ้งให้คุณทราบ"</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"อนุญาตให้แอปพลิเคชันอ่านข้อมูลผู้ติดต่อที่จัดเก็บไว้ในโทรศัพท์ ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกข้อมูลผู้ติดต่อของคุณ และแอปพลิเคชันที่เป็นอันตรายอาจแชร์ข้อมูลผู้ติดต่อโดยไม่แจ้งให้คุณทราบ"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"แก้ไขผู้ติดต่อของคุณ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงข้อมูลผู้ติดต่อที่จัดเก็บไว้ในแท็บเล็ต ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถลบข้อมูลผู้ติดต่อได้"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"อนุญาตให้แอปแก้ไขข้อมูลเกี่ยวกับรายชื่อติดต่อที่เก็บไว้ในทีวี รวมถึงความถี่ในการโทร การส่งอีเมล หรือการสื่อสารแบบอื่นกับรายชื่อติดต่อคนใดคนหนึ่ง สิทธิ์นี้ทำให้แอปสามารถลบข้อมูลรายชื่อติดต่อได้"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"อนุญาตให้แอปแก้ไขข้อมูลเกี่ยวกับรายชื่อติดต่อที่จัดเก็บไว้ในอุปกรณ์ Android TV รวมถึงความถี่ที่คุณโทรหา ส่งอีเมล หรือสื่อสารในรูปแบบอื่นกับรายชื่อติดต่อแต่ละคน สิทธิ์นี้ทำให้แอปลบข้อมูลรายชื่อติดต่อได้"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงข้อมูลผู้ติดต่อที่จัดเก็บไว้ในโทรศัพท์ ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถลบข้อมูลผู้ติดต่อได้"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"อ่านประวัติการโทร"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"แอปนี้สามารถอ่านประวัติการโทรของคุณได้"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"เขียนประวัติการโทร"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"อนุญาตให้แอปแก้ไขประวัติการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"อนุญาตให้แอปแก้ไขประวัติการโทรของทีวี รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขประวัติการโทรได้"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"อนุญาตให้แอปแก้ไขประวัติการโทรจากอุปกรณ์ Android TV รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและสายโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขประวัติการโทรได้"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"อนุญาตให้แอปแก้ไขประวัติการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"เข้าถึงเซ็นเซอร์ร่างกาย (เช่น ตัววัดอัตราการเต้นของหัวใจ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"อนุญาตให้แอปเข้าถึงข้อมูลจากเซ็นเซอร์ที่ตรวจสอบสภาพทางกายภาพ เช่น อัตราการเต้นของหัวใจ"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในแท็บเล็ต รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในทีวี รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"แอปนี้อ่านกิจกรรมทั้งหมดในปฏิทินที่จัดเก็บไว้ในอุปกรณ์ Android TV ได้ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ด้วย"</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในโทรศัพท์ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"เพิ่มหรือแก้ไขกิจกรรมบนปฏิทินและส่งอีเมลให้ผู้เข้าร่วมโดยที่เจ้าของไม่ทราบ"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"แอปนี้สามารถเพิ่ม นำออก หรือเปลี่ยนกิจกรรมในปฏิทินบนแท็บเล็ตของคุณ แอปนี้สามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยไม่แจ้งให้เจ้าของทราบ"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"แอปนี้สามารถเพิ่ม นำออก หรือเปลี่ยนกิจกรรมในปฏิทินบนทีวีของคุณ แอปนี้สามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยไม่แจ้งให้เจ้าของทราบ"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"แอปนี้เพิ่ม นำออก หรือเปลี่ยนแปลงกิจกรรมในปฏิทินของอุปกรณ์ Android TV ได้ ตลอดจนส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมได้โดยไม่แจ้งให้เจ้าของทราบ"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"แอปนี้สามารถเพิ่ม นำออก หรือเปลี่ยนกิจกรรมในปฏิทินบนโทรศัพท์ของคุณ แอปนี้สามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยไม่แจ้งให้เจ้าของทราบ"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"เข้าถึงคำสั่งของโปรแกรมแจ้งตำแหน่งพิเศษ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"อนุญาตให้แอปเข้าถึงคำสั่งของผู้ให้บริการตำแหน่งเพิ่มเติม ซึ่งอาจทำให้แอปสามารถแทรกแซงการทำงานของ GPS หรือต้นทางของตำแหน่งอื่นๆ ได้"</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"แอปนี้รับตำแหน่งที่แม่นยำของคุณได้เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ ซึ่งอาจทำให้มีการใช้แบตเตอรี่มากขึ้น"</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"เข้าถึงตำแหน่งโดยประมาณ (อิงตามเครือข่าย) เมื่อทำงานอยู่เบื้องหน้าเท่านั้น"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"แอปนี้รับตำแหน่งของคุณโดยอิงตามแหล่งที่มาของเครือข่าย เช่น เสาส่งสัญญาณมือถือและเครือข่าย Wi-Fi เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในแท็บเล็ตของคุณ"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"แอปนี้รับตำแหน่งของคุณโดยอิงตามแหล่งที่มาของเครือข่าย เช่น เสาส่งสัญญาณมือถือและเครือข่าย Wi-Fi เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในทีวีของคุณ"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"แอปนี้รับตำแหน่งของคุณได้โดยอิงตามแหล่งที่มาของเครือข่าย เช่น เสาส่งสัญญาณมือถือและเครือข่าย Wi-Fi เมื่อแอปทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดใช้งานและบริการพร้อมใช้งานในอุปกรณ์ Android TV ของคุณ"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"แอปนี้รับตำแหน่งของคุณโดยอิงตามแหล่งที่มาของเครือข่าย เช่น เสาส่งสัญญาณมือถือและเครือข่าย Wi-Fi เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"เข้าถึงตำแหน่งในเบื้องหลัง"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"หากได้รับสิทธิ์นี้เพิ่มจากการเข้าถึงตำแหน่งโดยประมาณหรือตำแหน่งที่แม่นยำ แอปจะมีสิทธิ์เข้าถึงตำแหน่งระหว่างที่ทำงานในเบื้องหลังได้"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"แอปนี้จดจำกิจกรรมการเคลื่อนไหวร่างกายของคุณได้"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"แอปนี้สามารถถ่ายภาพและวิดีโอด้วยกล้องได้ทุกเมื่อ"</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องของระบบเพื่อถ่ายภาพและวิดีโอ"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"แอปของระบบ | ที่ได้รับสิทธิ์นี้จะถ่ายภาพและบันทึกวิดีโอโดยใช้กล้องของระบบได้ทุกเมื่อ แอปต้องมีสิทธิ์ android.permission.CAMERA ด้วย"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"อนุญาตให้แอปพลิเคชันควบคุมการสั่นเตือน"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"โทรติดต่อหมายเลขโทรศัพท์โดยตรง"</string>
@@ -451,14 +453,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"อ่านหมายเลขโทรศัพท์"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"อนุญาตให้แอปเข้าถึงหมายเลขโทรศัพท์ของอุปกรณ์นี้"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ป้องกันไม่ให้ทีวีเข้าสู่โหมดสลีป"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"ป้องกันไม่ให้อุปกรณ์ Android TV เข้าสู่โหมดสลีป"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ป้องกันไม่ให้โทรศัพท์เข้าโหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"อนุญาตให้แอปป้องกันไม่ให้ทีวีเข้าสู่โหมดสลีป"</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"อนุญาตให้แอปป้องกันไม่ให้อุปกรณ์ Android TV เข้าสู่โหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้โทรศัพท์เข้าสู่โหมดสลีป"</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"ส่งสัญญาณอินฟราเรด"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"อนุญาตให้แอปใช้ตัวส่งสัญญาณอินฟราเรดของแท็บเล็ต"</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"อนุญาตให้แอปใช้ตัวส่งอินฟราเรดของทีวี"</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"อนุญาตให้แอปใช้ตัวส่งอินฟราเรดของอุปกรณ์ Android TV"</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"อนุญาตให้แอปใช้ตัวส่งสัญญาณอินฟราเรดของโทรศัพท์"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ตั้งค่าวอลเปเปอร์"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"อนุญาตให้แอปพลิเคชันตั้งค่าวอลเปเปอร์ระบบ"</string>
@@ -466,11 +468,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"อนุญาตให้แอปพลิเคชันตั้งค่าคำแนะนำขนาดวอลเปเปอร์ของระบบ"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"ตั้งค่าเขตเวลา"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงเขตเวลาของแท็บเล็ต"</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"อนุญาตให้แอปเปลี่ยนแปลงเขตเวลาของทีวี"</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"อนุญาตให้แอปเปลี่ยนเขตเวลาของอุปกรณ์ Android TV"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงเขตเวลาของโทรศัพท์"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"ค้นหาบัญชีในอุปกรณ์"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"อนุญาตให้แอปพลิเคชันรับรายการบัญชีที่แท็บเล็ตรู้จัก ซึ่งอาจรวมถึงบัญชีใดๆ ก็ตามที่แอปพลิเคชันซึ่งคุณติดตั้งไว้ได้สร้างขึ้น"</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"อนุญาตให้แอปรับรายการบัญชีที่ทีวีรู้จัก ซึ่งอาจรวมถึงบัญชีใดๆ ก็ตามที่แอปพลิเคชันที่คุณติดตั้งได้สร้างไว้"</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"อนุญาตให้แอปรับรายการบัญชีที่อุปกรณ์ Android TV รู้จัก ซึ่งอาจรวมถึงบัญชีใดๆ ก็ตามซึ่งแอปที่คุณติดตั้งไว้ได้สร้างขึ้น"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"อนุญาตให้แอปพลิเคชันรับรายการบัญชีที่โทรศัพท์รู้จัก ซึ่งอาจรวมถึงบัญชีใดๆ ก็ตามที่แอปพลิเคชันซึ่งคุณติดตั้งไว้ได้สร้างขึ้น"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ดูการเชื่อมต่อเครือข่าย"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"อนุญาตให้แอปพลิเคชันดูข้อมูลเกี่ยวกับการเชื่อมต่อเครือข่าย เช่น มีเครือข่ายใดอยู่บ้าง และมีการเชื่อมต่อเครือข่ายใด"</string>
@@ -486,21 +488,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและหยุดเชื่อมต่อจากจุดเข้าใช้งาน WiFi และเปลี่ยนแปลงการกำหนดค่าอุปกรณ์ำสำหรับเครือข่าย WiFi"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"อนุญาตให้รับมัลติแคสต์ผ่าน WiFi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"อนุญาตให้แอปพลิเคชันรับแพ็คเก็ตที่ส่งไปยังทุกอุปกรณ์บนเครือข่าย WiFi โดยใช้ที่อยู่มัลติแคสต์ ไม่ใช่เพียงแท็บเล็ตของคุณเท่านั้น ซึ่งจะใช้พลังงานมากกว่าในโหมดที่ไม่ใช่มัลติแคสต์"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"อนุญาตให้แอปรับแพ็กเก็ตที่ส่งไปยังอุปกรณ์ทั้งหมดบนเครือข่าย Wi-Fi โดยใช้ที่อยู่การส่งหลายรายการ ไม่ใช่เฉพาะทีวีของคุณ แอปจะใช้แบตเตอรี่มากกว่าโหมดที่ไม่ใช่การส่งหลายรายการ"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"อนุญาตให้แอปรับแพ็กเก็ตที่ส่งไปยังอุปกรณ์ทั้งหมดในเครือข่าย Wi-Fi โดยใช้ที่อยู่มัลติแคสต์ ไม่ใช่เพียงอุปกรณ์ Android TV ของคุณเท่านั้น ซึ่งจะใช้พลังงานมากกว่าในโหมดที่ไม่ใช่มัลติแคสต์"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"อนุญาตให้แอปพลิเคชันรับแพ็คเก็ตที่ส่งไปยังทุกอุปกรณ์บนเครือข่าย WiFi โดยใช้ที่อยู่มัลติแคสต์ ไม่ใช่เพียงโทรศัพท์ของคุณเท่านั้น ซึ่งจะใช้พลังงานมากกว่าในโหมดที่ไม่ใช่มัลติแคสต์"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"เข้าถึงการตั้งค่าบลูทูธ"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"อนุญาตให้แอปพลิเคชันกำหนดค่าแท็บเล็ตบลูทูธในตัวเครื่อง รวมทั้งค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"อนุญาตให้แอปกำหนดค่าทีวีบลูทูธในพื้นที่ รวมทั้งค้นหาและจับคู่กับอุปกรณ์ระยะไกล"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"อนุญาตให้แอปกำหนดค่าบลูทูธในอุปกรณ์ Android TV ตลอดจนค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"อนุญาตให้แอปพลิเคชันกำหนดค่าโทรศัพท์บลูทูธในตัวเครื่อง ตลอดจนค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"เชื่อมต่อและเลิกเชื่อมต่อจาก WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"อนุญาตให้แอปพลิเคชันตรวจสอบว่า WiMAX เปิดใช้งานอยู่หรือไม่และข้อมูลเกี่ยวกับเครือข่าย WiMAX ใดๆ ที่เชื่อมต่ออยู่"</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"เปลี่ยนสถานะของ WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อแท็บเล็ตกับเครือข่าย WiMAX"</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"อนุญาตให้แอปเชื่อมต่อทีวีและยกเลิกการเชื่อมต่อทีวีจากเครือข่าย WiMAX"</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"อนุญาตให้แอปเชื่อมต่ออุปกรณ์ Android TV และยกเลิกการเชื่อมต่ออุปกรณ์ Android TV กับเครือข่าย WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อโทรศัพท์กับเครือข่าย WiMAX"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"จับคู่กับอุปกรณ์บลูทูธ"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าบลูทูธของแท็บเล็ต ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"อนุญาตให้แอปดูการกำหนดค่าบลูทูธบนทีวี สร้างและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"อนุญาตให้แอปดูการกำหนดค่าบลูทูธในอุปกรณ์ Android TV ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าบลูทูธของโทรศัพท์ ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ควบคุม Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
@@ -657,10 +659,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ตรวจสอบจำนวนของรหัสผ่านที่พิมพ์ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดในแท็บเล็ตถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ตรวจสอบจำนวนรหัสผ่านที่ไม่ถูกต้องที่คุณพิมพ์เวลาปลดล็อกหน้าจอ และล็อกทีวีหรือลบข้อมูลของทีวีทั้งหมด หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยครั้งเกินไป"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"ตรวจสอบรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกอุปกรณ์ Android TV หรือลบข้อมูลทั้งหมดของอุปกรณ์ Android TV หากมีการพิมพ์รหัสผ่านไม่ถูกต้องหลายครั้งเกินไป"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ตรวจสอบจำนวนการพิมพ์รหัสผ่านที่ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดในโทรศัพท์ถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกทีวีหรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกอุปกรณ์ Android TV หรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องหลายครั้งเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"เปลี่ยนการล็อกหน้าจอ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"เปลี่ยนการล็อกหน้าจอ"</string>
@@ -668,11 +670,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ควบคุมว่าหน้าจอจะล็อกอย่างไรและเมื่อใด"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ลบข้อมูลทั้งหมด"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ลบข้อมูลของทีวีโดยไม่ต้องมีคำเตือนโดยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"ลบข้อมูลของอุปกรณ์ Android TV โดยไม่มีการเตือนด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลโทรศัพท์โดยไม่มีการเตือน ด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ลบข้อมูลผู้ใช้"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ลบข้อมูลของผู้ใช้นี้ในแท็บเล็ตเครื่องนี้โดยไม่มีการเตือน"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ลบข้อมูลของผู้ใช้นี้ในทีวีเครื่องนี้โดยไม่มีการเตือน"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"ลบข้อมูลของผู้ใช้นี้ในอุปกรณ์ Android TV เครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"ลบข้อมูลของผู้ใช้นี้ในโทรศัพท์เครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะที่เปิดใช้นโยบายอยู่ เฉพาะเจ้าของอุปกรณ์เท่านั้นที่สามารถตั้งค่าพร็อกซีส่วนกลาง"</string>
@@ -822,7 +824,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"มีความพยายามที่จะใช้ Face Unlock เกินขีดจำกัด"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ไม่มีซิมการ์ด"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ไม่มีซิมการ์ดในแท็บเล็ต"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"ไม่มีซิมการ์ดในทีวี"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"ไม่มีซิมการ์ดในอุปกรณ์ Android TV"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ไม่มีซิมการ์ดในโทรศัพท์"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ใส่ซิมการ์ด"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"ไม่มีซิมการ์ดหรือไม่สามารถอ่านได้ โปรดใส่ซิมการ์ด"</string>
@@ -845,13 +847,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว\n\nลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว\n\nลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้การลงชื่อเข้าใช้ Google\n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากวาดไม่ถูกต้องอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกทีวีโดยการลงชื่อเช้าใช้ Google\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกอุปกรณ์ Android TV โดยใช้การลงชื่อเข้าใช้ Google\n\n ลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้การลงชื่อเข้าใช้ Google\n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้องแล้ว <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากการพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลทั้งหมดของผู้ใช้จะหายไป"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"คุณพยายามปลดล็อกทีวีอย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากปลดล็อกไม่ถูกต้องอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ทีวีจะรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน และข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"คุณปลดล็อกอุปกรณ์ Android TV ไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะรีเซ็ตอุปกรณ์ Android TV เป็นค่าเริ่มต้นและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้องแล้ว <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากการพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลทั้งหมดของผู้ใช้จะหายไป"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้องแล้ว <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ขณะนี้แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"คุณได้พยายามปลดล็อกทีวีอย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ตอนนี้ทีวีจะรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"คุณปลดล็อกอุปกรณ์ Android TV ไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ขณะนี้ระบบจะรีเซ็ตอุปกรณ์ Android TV เป็นค่าเริ่มต้น"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้องแล้ว <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ขณะนี้โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"ลองใหม่อีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"ลืมรูปแบบหรือ"</string>
@@ -938,7 +940,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"อนุญาตให้แอปพลิเคชันอ่านประวัติของ URL ทั้งหมดที่เบราว์เซอร์เคยไป และบุ๊กมาร์กทั้งหมดของเบราว์เซอร์ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"เขียนบุ๊กมาร์กและประวัติเว็บ"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในแท็บเล็ต ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"อนุญาตให้แอปแก้ไขประวัติของเบราว์เซอร์หรือบุ๊กมาร์กที่เก็บไว้ในทีวี ซึ่งอาจอนุญาตให้แอปลบหรือแก้ไขข้อมูลเบราว์เซอร์ หมายเหตุ: สิทธิ์นี้ไม่สามารถใช้ได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นที่สามารถท่องเว็บได้"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"อนุญาตให้แอปแก้ไขประวัติการเข้าชมหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในอุปกรณ์ Android TV ซึ่งอาจทำให้แอปลบหรือแก้ไขข้อมูลเบราว์เซอร์ได้ หมายเหตุ: สิทธิ์นี้อาจบังคับใช้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการท่องเว็บไม่ได้"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ตั้งปลุก"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้ฟีเจอร์นี้"</string>
@@ -1249,17 +1251,20 @@
       <item quantity="one">มี 1 เครือข่าย Wi-Fi สาธารณะที่ใช้งานได้</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"เชื่อมต่อเครือข่าย Wi‑Fi แบบเปิด"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"เชื่อมต่อเครือข่าย Wi‑Fi ของผู้ให้บริการ"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"กำลังเชื่อมต่อกับเครือข่าย Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"เชื่อมต่อเครือข่าย Wi-Fi แล้ว"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ไม่สามารถเชื่อมต่อเครือข่าย Wi‑Fi"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"แตะเพื่อดูเครือข่ายทั้งหมด"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"เชื่อมต่อ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"เครือข่ายทั้งหมด"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"เชื่อมต่อเครือข่าย Wi-Fi ไหม"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"แนะนำโดย <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ใช่"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ไม่"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi จะเปิดโดยอัตโนมัติ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"เมื่อคุณอยู่ใกล้เครือข่ายคุณภาพสูงที่บันทึกไว้"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ไม่ต้องเปิดอีกครั้ง"</string>
@@ -1307,7 +1312,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"พิมพ์ PIN ที่ต้องการ:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"แท็บเล็ตนี้จะยกเลิกการเชื่อมต่อกับ WiFi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"ทีวีจะยกเลิกการเชื่อมต่อกับ Wi-Fi ชั่วคราวระหว่างที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"อุปกรณ์ Android TV จะยกเลิกการเชื่อมต่อ Wi-Fi ชั่วคราวระหว่างที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"โทรศัพท์จะยกเลิกการเชื่อมต่อกับ WiFi ชั่วคราวในขณะที่เชื่อมต่อกับ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"ใส่อักขระ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"กำลังส่งข้อความ SMS"</string>
@@ -1650,13 +1655,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากพยายามแล้วไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"คุณพยายามปลดล็อกทีวีอย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากปลดล็อกไม่ถูกต้องอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ทีวีจะรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน และข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"คุณปลดล็อกอุปกรณ์ Android TV ไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะรีเซ็ตอุปกรณ์ Android TV เป็นค่าเริ่มต้นและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากพยายามแล้วไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้งแล้ว ขณะนี้แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"คุณได้พยายามปลดล็อกทีวีอย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ตอนนี้ทีวีจะรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"คุณปลดล็อกอุปกรณ์ Android TV ไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ขณะนี้ระบบจะรีเซ็ตอุปกรณ์ Android TV เป็นค่าเริ่มต้น"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้งแล้ว ขณะนี้โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากวาดไม่ถูกต้องอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกทีวีด้วยบัญชีอีเมล\n\n ลองอีกครั้งใน <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกอุปกรณ์ Android TV โดยใช้บัญชีอีเมล\n\n ลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ลบ"</string>
@@ -1997,6 +2002,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ระบบ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"การตั้งค่า"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"สแตนด์บาย"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"อุปกรณ์ Android TV จะปิดเครื่องในอีกไม่ช้า กดปุ่มเพื่อเปิดอุปกรณ์ต่อไป"</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"อุปกรณ์จะปิดเครื่องในอีกไม่ช้า กดเพื่อเปิดอุปกรณ์ต่อไป"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"กล้อง"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ไมโครโฟน"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"แสดงทับแอปอื่นๆ บนหน้าจอ"</string>

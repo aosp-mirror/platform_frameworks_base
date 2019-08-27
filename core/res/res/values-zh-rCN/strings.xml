@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"尝试删除的<xliff:g id="CONTENT_TYPE">%s</xliff:g>数量太多。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"平板电脑存储空间已满。请删除一些文件以腾出空间。"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"手表存储空间已满。请删除一些文件以腾出空间。"</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"电视存储空间已满。请删除一些文件以腾出空间。"</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV 设备的存储空间已满。请删除一些文件以腾出空间。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"手机存储空间已满。请删除一些文件以腾出空间。"</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">已安装证书授权中心</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"“<xliff:g id="OWNER_APP">%s</xliff:g>”已停用打印功能。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板电脑选项"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"电视选项"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV 选项"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"手机选项"</string>
     <string name="silent_mode" msgid="7167703389802618663">"静音模式"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"打开无线电"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"正在重新启动…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"您的电视即将关闭。"</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"您的 Android TV 设备将关闭。"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"您的手表即将关机。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"您的手机将会关机。"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"您要关机吗？"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"近期任务"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"最近没有运行任何应用"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"平板电脑选项"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"电视选项"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV 选项"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"手机选项"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"屏幕锁定"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"关机"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允许该应用发送短信。此权限可能会导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"读取短信"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"此应用可读取您平板电脑上存储的所有短信。"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"此应用可读取您电视上存储的所有短信。"</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"此应用可读取您 Android TV 设备上存储的所有短信。"</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"此应用可读取您手机上存储的所有短信。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收讯息 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允许该应用接收和处理 WAP 消息。此权限包括监视发送给您的消息或删除发送给您的消息而不向您显示的功能。"</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"此应用可在后台使用数据，这样可能会增加流量消耗。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"让应用始终运行"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允许该应用在内存中持续保留其自身的某些组件。这会限制其他应用可用的内存，从而减缓平板电脑运行速度。"</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"允许应用在内存中持续保留其自身的部分组件。此权限可能会限制其他应用可用的内存，从而减缓电视运行速度。"</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"允许应用让自身的部分内容持续保留在内存中。此权限可能会限制其他应用可使用的内存，从而导致 Android TV 设备的运行速度变慢。"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"允许该应用在内存中持续保留其自身的某些组件。这会限制其他应用可用的内存，从而减缓手机运行速度。"</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"运行前台服务"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"允许该应用使用前台服务。"</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"允许应用修改系统的设置数据。恶意应用可能会破坏您的系统配置。"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"开机启动"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"允许应用在系统完成引导后立即自动启动。这样可能会延长平板电脑的启动时间，并允许应用始终运行，从而导致平板电脑总体运行速度减慢。"</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"允许应用在系统启动完毕后立即自行启动。此权限可能会延长电视的启动时间，而且会因为系统一直运行该应用而导致电视的整体运行速度变慢。"</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"允许应用在系统完成引导后立即自行启动。这样可能会延长 Android TV 设备的启动时间，并会因一直运行该应用而导致设备的整体运行速度变慢。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"允许应用在系统完成引导后立即自动启动。这样可能会延长手机的启动时间，并允许应用始终运行，从而导致手机总体运行速度减慢。"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"发送持久广播"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"允许该应用发送持久广播消息，此类消息在广播结束后仍会保留。过度使用可能会导致平板电脑使用过多内存，从而降低其速度或稳定性。"</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"允许应用发送持久广播消息，此类消息在广播结束后仍会保留。过度使用可能会导致电视使用过多内存，从而降低其速度或稳定性。"</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"允许应用发送置顶广播，这类广播在广播结束后仍会继续存在。过度使用这项功能可能会导致 Android TV 设备使用过多内存，从而降低其运行速度或稳定性。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"允许该应用发送持久广播消息，此类消息在广播结束后仍会保留。过度使用可能会导致手机使用过多内存，从而降低其速度或稳定性。"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"读取联系人"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"允许该应用读取您平板电脑上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定个人通信的频率。此权限可让应用保存您的联系人数据，而恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"允许应用读取您的电视上存储的联系人相关数据，包括您与特定联系人通话、发送电子邮件或通过其他方式进行通信的频率。此权限可让应用保存您的联系人数据，而且恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"允许应用读取您的 Android TV 设备上存储的联系人相关数据，包括您与特定用户通话、发送电子邮件或通过其他方式进行通信的频率。此权限可让应用保存您的联系人数据，而恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"允许该应用读取您手机上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定个人通信的频率。此权限可让应用保存您的联系人数据，而恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"修改您的通讯录"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"允许该应用修改您平板电脑上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定联系人通信的频率。此权限可让应用删除联系人数据。"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"允许应用修改您的电视上存储的联系人相关数据，包括您与特定联系人通话、发送电子邮件或通过其他方式进行通信的频率。此权限可让应用删除联系人数据。"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"允许应用修改您 Android TV 设备上存储的联系人相关数据，包括您与特定联系人通话、发送电子邮件或通过其他方式进行通信的频率。此权限可让应用删除联系人数据。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"允许该应用修改您手机上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定联系人通信的频率。此权限可让应用删除联系人数据。"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"读取通话记录"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"此应用可读取您的通话记录。"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"新建/修改/删除通话记录"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允许该应用修改平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允许应用修改电视的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"允许应用修改您的 Android TV 设备的通话记录，包括关于来电和去电的数据。恶意应用可能会借此清空或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允许该应用修改手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"访问身体传感器（如心率监测器）"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允许该应用存取监测您身体状况的传感器所收集的数据，例如您的心率。"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"读取日历活动和详情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"此应用可读取您平板电脑上存储的所有日历活动，并分享或保存您的日历数据。"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"此应用可读取您电视上存储的所有日历活动，并分享或保存您的日历数据。"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"此应用可读取您的 Android TV 设备上存储的所有日历活动，以及分享或保存您的日历数据。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"此应用可读取您手机上存储的所有日历活动，并分享或保存您的日历数据。"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"添加或修改日历活动，并在所有者不知情的情况下向邀请对象发送电子邮件"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"此应用可在平板电脑上添加、移除或更改日历活动。此应用可能会以日历所有者的身份发送消息，或在不通知所有者的情况下更改活动。"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"此应用可在电视上添加、移除或更改日历活动。此应用可能会以日历所有者的身份发送消息，或在不通知所有者的情况下更改活动。"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"此应用可在您的 Android TV 设备上添加、移除或更改日历活动。此应用可能会以日历所有者的身份发送消息，或在不通知所有者的情况下更改活动。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"此应用可在手机上添加、移除或更改日历活动。此应用可能会以日历所有者的身份发送消息，或在不通知所有者的情况下更改活动。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"获取额外的位置信息提供程序命令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允许该应用使用其他的位置信息提供程序命令。此权限使该应用可以干扰GPS或其他位置信息源的运作。"</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"此应用只有在前台运行时才能获取您的精确位置信息。您的手机必须支持并开启这些位置信息服务，此应用才能使用这些服务。这可能会增加耗电量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"只能在前台获取大概位置（基于网络）"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"此应用只能在前台根据网络来源（例如手机信号塔和 WLAN 网络）获取您的位置信息。您的平板电脑必须支持并开启这些位置信息服务，此应用才能使用这些服务。"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"此应用只能在前台根据网络来源（例如手机信号塔和 WLAN 网络）获取您的位置信息。您的电视必须支持并开启这些位置信息服务，此应用才能使用这些服务。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"只要这个应用在前台运行，就可以根据网络来源（例如手机信号塔和 WLAN 网络）获取您的位置信息。您的 Android TV 设备必须支持并开启这些位置信息服务，此应用才能使用这些服务。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"此应用只能在前台根据网络来源（例如手机信号塔和 WLAN 网络）获取您的位置信息。您的手机必须支持并开启这些位置信息服务，此应用才能使用这些服务。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"在后台使用位置信息"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"如果另外授予大致位置信息或精确位置信息访问权限，该应用便可在后台运行时使用位置信息。"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此应用可以识别您的身体活动。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"此应用可随时使用相机拍摄照片和录制视频。"</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"要拍照或录制视频，请允许应用或服务访问系统相机"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"获取访问权限后，这个系统应用就随时可以使用系统相机拍照及录制视频。另外，应用还需要获取 android.permission.CAMERA 权限"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"允许应用控制振动器。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"拨打电话"</string>
@@ -451,14 +453,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"读取电话号码"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"允许该应用访问设备上的电话号码。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"阻止平板电脑进入休眠状态"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"阻止电视进入休眠状态"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"阻止 Android TV 设备进入休眠状态"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手机休眠"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"允许应用阻止平板电脑进入休眠状态。"</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"允许应用阻止电视进入休眠状态。"</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"允许应用阻止 Android TV 设备进入休眠状态。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"允许应用阻止手机进入休眠状态。"</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"发射红外线"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"允许应用使用平板电脑的红外线发射器。"</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"允许应用使用电视的红外线发射器。"</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"允许应用使用 Android TV 设备的红外线发射器。"</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"允许应用使用手机的红外线发射器。"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"设置壁纸"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"允许应用设置系统壁纸。"</string>
@@ -466,11 +468,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"允许应用设置有关系统壁纸大小的提示。"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"设置时区"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"允许应用更改平板电脑的时区。"</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"允许应用更改电视的时区。"</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"允许应用更改 Android TV 设备的时区。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"允许应用更改手机的时区。"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"查找设备上的帐号"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"允许该应用获取平板电脑已知的帐号列表，其中可能包括由已安装的应用创建的所有帐号。"</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"允许应用获取电视已知的帐号列表，其中可能包括由已安装的应用创建的所有帐号。"</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"允许应用获取 Android TV 设备已知的帐号列表，其中可能包括您已安装的应用所创建的任何帐号。"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"允许该应用获取手机已知的帐号列表，其中可能包括由已安装的应用创建的所有帐号。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"查看网络连接"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"允许该应用查看网络连接的相关信息，例如存在和连接的网络。"</string>
@@ -486,21 +488,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"允许该应用与WLAN接入点建立和断开连接，以及更改WLAN网络的设备配置。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允许接收WLAN多播"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允许该应用使用多播地址接收发送到WLAN网络上所有设备（而不仅仅是您的平板电脑）的数据包。该操作的耗电量比非多播模式要大。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"允许应用使用多播地址接收发送到 WLAN 网络中所有设备（而不仅仅是您的电视）的数据包。该操作的耗电量比非多播模式要大。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"允许应用使用多播地址接收发送到 WLAN 网络上所有设备（而不仅仅是您的 Android TV 设备）的数据包。这会比非多播模式耗用更多电量。"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"允许该应用使用多播地址接收发送到WLAN网络上所有设备（而不仅仅是您的手机）的数据包。该操作的耗电量比非多播模式要大。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"访问蓝牙设置"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允许应用配置本地蓝牙平板电脑，并允许其查找远程设备且与之配对。"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"允许应用配置本地蓝牙电视，并允许其查找远程设备且与之配对。"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"允许应用配置 Android TV 设备上的蓝牙，以及发现远程设备并与其配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允许应用配置本地蓝牙手机，并允许其查找远程设备且与之配对。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"建立或中断 WiMAX 网络连接"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"允许该应用确定是否启用了 WiMAX 以及连接的任何 WiMAX 网络的相关信息。"</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"更改 WiMAX 状态"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"允许该应用建立和断开平板电脑与 WiMAX 网络之间的连接。"</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"允许应用建立和断开电视与 WiMAX 网络之间的连接。"</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"允许应用建立和断开 Android TV 设备与 WiMAX 网络之间的连接。"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"允许该应用建立和断开手机与 WiMAX 网络之间的连接。"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"与蓝牙设备配对"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"允许该应用查看平板电脑上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"允许应用查看电视上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"允许应用查看 Android TV 设备上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"允许该应用查看手机上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"控制近距离通信"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"允许应用与近距离无线通信(NFC)标签、卡和读取器通信。"</string>
@@ -657,10 +659,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"监控屏幕解锁尝试次数"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定平板电脑或清除其所有数据。"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定电视或清除电视上的所有数据。"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"监控用户在解锁屏幕时输错密码的次数；如果用户输错密码的次数超出上限，系统就会锁定 Android TV 设备或清空 Android TV 设备上的所有数据。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定手机或清除其所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定平板电脑或清空此用户的所有数据。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定电视或清空此用户的所有数据。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"监控用户在解锁屏幕时输错密码的次数；如果用户输错密码的次数超出上限，系统就会锁定 Android TV 设备或清空该用户的所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定手机或清空此用户的所有数据。"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"更改锁屏方式"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"更改锁屏方式。"</string>
@@ -668,11 +670,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"控制屏幕锁定的方式和时间。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有数据"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"恢复出厂设置时，系统会在不发出警告的情况下清除平板电脑上的数据。"</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"恢复出厂设置时，不发出警告就直接清除电视上的数据。"</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"不事先发出警告就以恢复出厂设置的方式清空 Android TV 设备中的数据。"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"恢复出厂设置时，系统会在不发出警告的情况下清除手机上的数据。"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"清空用户数据"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"清空此用户在这台平板电脑上的数据，而不事先发出警告。"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"清空此用户在这台电视上的数据，而不事先发出警告。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"不事先发出警告就清空此用户在这台 Android TV 设备上的数据。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"清空此用户在这部手机上的数据，而不事先发出警告。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"设置设备全局代理"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"设置在规范启用时要使用的设备全局代理。只有设备所有者才能设置全局代理。"</string>
@@ -822,7 +824,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超过“人脸解锁”尝试次数上限"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"没有 SIM 卡"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有SIM卡。"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"电视中没有 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"您的 Android TV 设备中没有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"手机中无SIM卡"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"请插入SIM卡"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM卡缺失或无法读取。请插入SIM卡。"</string>
@@ -845,13 +847,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"您已经<xliff:g id="NUMBER_0">%1$d</xliff:g>次输错了PIN码。\n\n请在<xliff:g id="NUMBER_1">%2$d</xliff:g>秒后重试。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的 Google 登录信息解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的 Google 登录信息解锁电视。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"您已画错解锁图案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您登录 Google 帐号来解锁 Android TV 设备。\n\n 请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的 Google 登录信息解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁平板电脑。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，平板电脑将恢复为出厂默认设置，所有用户数据都会丢失。"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁电视。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，电视将恢复为出厂默认设置，所有用户数据都会丢失。"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"您尝试解锁 Android TV 设备失败的次数已达 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，您的 Android TV 设备就会恢复出厂设置，而且所有用户数据都会丢失。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，手机将恢复为出厂默认设置，所有用户数据都会丢失。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"您已经<xliff:g id="NUMBER">%d</xliff:g>次错误地尝试解锁平板电脑。平板电脑现在将恢复为出厂默认设置。"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁电视。电视现在将恢复为出厂默认设置。"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"您尝试解锁 Android TV 设备失败的次数已达 <xliff:g id="NUMBER">%d</xliff:g> 次。您的 Android TV 设备现在将恢复出厂设置。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"您已经<xliff:g id="NUMBER">%d</xliff:g>次错误地尝试解锁手机。手机现在将恢复为出厂默认设置。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g>秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘记了图案？"</string>
@@ -938,7 +940,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"允许该应用读取浏览器访问过的所有网址记录以及浏览器的所有书签。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"写入网络书签和历史记录"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"允许该应用修改您平板电脑上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"允许应用修改您的电视上存储的浏览器历史记录或书签。此权限可让应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"允许应用修改 Android TV 设备上存储的浏览器历史记录或书签。此权限可让该应用清空或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"设置闹钟"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
@@ -1249,17 +1251,20 @@
       <item quantity="one">有可用的开放 WLAN 网络</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"连接到开放的 WLAN 网络"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"连接到运营商 WLAN 网络"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"正在连接到 WLAN 网络"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"已连接到 WLAN 网络"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"无法连接到 WLAN 网络"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"点按即可查看所有网络"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"连接"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"所有网络"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"要连接到 WLAN 网络吗？"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"由<xliff:g id="NAME">%s</xliff:g>推荐"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"是"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"否"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WLAN 将自动开启"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"当您位于已保存的高品质网络信号范围内时"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"不要重新开启"</string>
@@ -1307,7 +1312,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"输入所需的PIN码："</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN 码："</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板电脑连接到“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”时会暂时断开与WLAN的连接"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"电视连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与 WLAN 的连接"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"当 Android TV 设备连接到 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 时，它会暂时断开 WLAN 连接"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手机连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与WLAN的连接。"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字符"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"正在发送短信"</string>
@@ -1650,13 +1655,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁平板电脑。如果再尝试  <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，平板电脑将恢复为出厂默认设置，所有用户数据都会丢失。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁电视。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，电视将恢复为出厂默认设置，所有用户数据都会丢失。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"您尝试解锁 Android TV 设备失败的次数已达 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，您的 Android TV 设备就会恢复出厂设置，而且所有用户数据都会丢失。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，手机将恢复为出厂默认设置，所有用户数据都会丢失。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"您已经<xliff:g id="NUMBER">%d</xliff:g>次错误地尝试解锁平板电脑。平板电脑现在将恢复为出厂默认设置。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁电视。电视现在将恢复为出厂默认设置。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"您尝试解锁 Android TV 设备失败的次数已达 <xliff:g id="NUMBER">%d</xliff:g> 次。您的 Android TV 设备现在将恢复出厂设置。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您已经<xliff:g id="NUMBER">%d</xliff:g>次错误地尝试解锁手机。手机现在将恢复为出厂默认设置。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用电子邮件帐号解锁电视。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"您已画错解锁图案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用电子邮件帐号解锁 Android TV 设备。\n\n 请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
@@ -1997,6 +2002,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"点按即可查看屏蔽内容。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"系统"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"设置"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"待机"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV 设备即将关闭；按一下相应的按钮即可让设备保持开启状态。"</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"设备即将关闭；按一下即可让设备保持开启状态。"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"相机"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"麦克风"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"显示在屏幕上其他应用的上层"</string>

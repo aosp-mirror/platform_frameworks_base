@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.graphics.Rect.copyOrNull;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -1028,9 +1029,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         if (componentRestriction == ACTIVITY_RESTRICTION_PERMISSION
                 || actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
             if (resultRecord != null) {
-                resultStack.sendActivityResultLocked(-1,
-                        resultRecord, resultWho, requestCode,
-                        Activity.RESULT_CANCELED, null);
+                resultRecord.sendResult(INVALID_UID, resultWho, requestCode,
+                        Activity.RESULT_CANCELED, null /* data */);
             }
             final String msg;
             if (actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
@@ -1349,7 +1349,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     // TODO(b/137329632): Wait for idle of the right activity, not just any.
                     r.destroyIfPossible("activityIdleInternalLocked");
                 } else {
-                    stack.stopActivityLocked(r);
+                    r.stopIfPossible();
                 }
             }
         }
@@ -1360,7 +1360,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             r = finishes.get(i);
             final ActivityStack stack = r.getActivityStack();
             if (stack != null) {
-                activityRemoved |= stack.destroyActivityLocked(r, true, "finish-idle");
+                activityRemoved |= r.destroyImmediately(true /* removeFromApp */, "finish-idle");
             }
         }
 

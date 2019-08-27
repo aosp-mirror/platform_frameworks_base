@@ -52,9 +52,12 @@ public abstract class WindowManagerInternal {
          * Called when the windows for accessibility changed.
          *
          * @param forceSend Send the windows for accessibility even if they haven't changed.
+         * @param topFocusedDisplayId The display Id which has the top focused window.
+         * @param topFocusedWindowToken The window token of top focused window.
          * @param windows The windows for accessibility.
          */
-        void onWindowsForAccessibilityChanged(boolean forceSend, List<WindowInfo> windows);
+        void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
+                IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
     }
 
     /**

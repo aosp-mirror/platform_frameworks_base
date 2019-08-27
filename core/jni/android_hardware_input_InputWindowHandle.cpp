@@ -22,7 +22,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
 
-#include <android/graphics/Region.h>
+#include <android/graphics/region.h>
 #include <gui/SurfaceControl.h>
 #include <ui/Region.h>
 
@@ -128,10 +128,9 @@ bool NativeInputWindowHandle::updateInfo() {
     jobject regionObj = env->GetObjectField(obj,
             gInputWindowHandleClassInfo.touchableRegion);
     if (regionObj) {
-        SkRegion* region = android_graphics_Region_getSkRegion(env, regionObj);
-        for (SkRegion::Iterator it(*region); !it.done(); it.next()) {
-            const SkIRect& rect = it.rect();
-            mInfo.addTouchableRegion(Rect(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom));
+        for (graphics::RegionIterator it(env, regionObj); !it.isDone(); it.next()) {
+            ARect rect = it.getRect();
+            mInfo.addTouchableRegion(Rect(rect.left, rect.top, rect.right, rect.bottom));
         }
         env->DeleteLocalRef(regionObj);
     }

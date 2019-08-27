@@ -1342,7 +1342,6 @@ class UserController implements Handler.Callback {
     }
 
     boolean switchUser(final int targetUserId) {
-        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "switchUser");
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
         int currentUserId = getCurrentUserId();
         UserInfo targetUserInfo = getUserInfo(targetUserId);
@@ -1745,13 +1744,24 @@ class UserController implements Handler.Callback {
     }
 
     void sendBootCompleted(IIntentReceiver resultTo) {
+        final boolean systemUserFinishedBooting;
+
         // Get a copy of mStartedUsers to use outside of lock
         SparseArray<UserState> startedUsers;
         synchronized (mLock) {
+            systemUserFinishedBooting = mCurrentUserId != UserHandle.USER_SYSTEM;
             startedUsers = mStartedUsers.clone();
         }
         for (int i = 0; i < startedUsers.size(); i++) {
             UserState uss = startedUsers.valueAt(i);
+            if (systemUserFinishedBooting && uss.mHandle.isSystem()) {
+                // Automotive will re-start system user as background, which in turn will call
+                // finishUserboot(). Hence, we need to check it here to avoid calling it twice.
+                // TODO(b/138956267): this workdound shouldn't be necessary once we move the
+                // headless-user start logic to UserManager-land
+                Slog.d(TAG, "sendBootCompleted(): skipping on non-current system user");
+                continue;
+            }
             finishUserBoot(uss, resultTo);
         }
     }
@@ -2180,7 +2190,7 @@ class UserController implements Handler.Callback {
                         BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                         Integer.toString(msg.arg1), msg.arg1);
 
-                mInjector.getSystemServiceManager().switchUser(msg.arg1);
+                mInjector.getSystemServiceManager().switchUser(msg.arg2, msg.arg1);
                 break;
             case FOREGROUND_PROFILE_CHANGED_MSG:
                 dispatchForegroundProfileChanged(msg.arg1);

@@ -3033,6 +3033,20 @@ public final class Telephony {
              * <P>Type: INTEGER</P>
              */
             public static final String CHARSET = "charset";
+
+            /**
+             * Generates a Addr {@link Uri} for message, used to perform Addr table operation
+             * for mms.
+             *
+             * @param messageId the messageId used to generate Addr {@link Uri} dynamically
+             * @return the addrUri used to perform Addr table operation for mms
+             */
+            @NonNull
+            public static Uri getAddrUriForMessage(@NonNull String messageId) {
+                Uri addrUri = Mms.CONTENT_URI.buildUpon()
+                        .appendPath(String.valueOf(messageId)).appendPath("addr").build();
+                return addrUri;
+            }
         }
 
         /**
@@ -3051,11 +3065,16 @@ public final class Telephony {
             }
 
             /**
+             * The name of part table.
+             */
+            private static final String TABLE_PART = "part";
+
+            /**
              * The {@code content://} style URL for this table. Can be appended with a part ID to
              * address individual parts.
              */
             @NonNull
-            public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, "part");
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, TABLE_PART);
 
             /**
              * The identifier of the message which this part belongs to.
@@ -3134,6 +3153,21 @@ public final class Telephony {
              * <P>Type: TEXT</P>
              */
             public static final String TEXT = "text";
+
+            /**
+             * Generates a Part {@link Uri} for message, used to perform Part table operation
+             * for mms.
+             *
+             * @param messageId the messageId used to generate Part {@link Uri} dynamically
+             * @return the partUri used to perform Part table operation for mms
+             */
+            @NonNull
+            public static Uri getPartUriForMessage(@NonNull String messageId) {
+                Uri partUri = Mms.CONTENT_URI.buildUpon()
+                        .appendPath(String.valueOf(messageId)).appendPath(
+                                TABLE_PART).build();
+                return partUri;
+            }
         }
 
         /**
@@ -4058,6 +4092,53 @@ public final class Telephony {
         public static final String DEFAULT_SORT_ORDER = DELIVERY_TIME + " DESC";
 
         /**
+         * The timestamp in millisecond of when the device received the message.
+         * <P>Type: BIGINT</P>
+         */
+        public static final String RECEIVED_TIME = "received_time";
+
+        /**
+         * Indicates that whether the message has been broadcasted to the application.
+         * <P>Type: BOOLEAN</P>
+         */
+        public static final String MESSAGE_BROADCASTED = "message_broadcasted";
+
+        /**
+         * The Warning Area Coordinates Elements. This element is used for geo-fencing purpose.
+         *
+         * The geometry and its coordinates are separated vertical bar, the first item is the
+         * geometry type and the remaining items are the parameter of this geometry.
+         *
+         * Only circle and polygon are supported. The coordinates are represented in Horizontal
+         * coordinates format.
+         *
+         * Coordinate encoding:
+         * "latitude, longitude"
+         * where -90.00000 <= latitude <= 90.00000 and -180.00000 <= longitude <= 180.00000
+         *
+         * Polygon encoding:
+         * "polygon|lat1,lng1|lat2,lng2|...|latn,lngn"
+         * lat1,lng1 ... latn,lngn are the vertices coordinate of the polygon.
+         *
+         * Circle encoding:
+         * "circle|lat,lng|radius".
+         * lat,lng is the center of the circle. The unit of circle's radius is meter.
+         *
+         * Example:
+         * "circle|0,0|100" mean a circle which center located at (0,0) and its radius is 100 meter.
+         * "polygon|0,1.5|0,1|1,1|1,0" mean a polygon has vertices (0,1.5),(0,1),(1,1),(1,0).
+         *
+         * There could be more than one geometry store in this field, they are separated by a
+         * semicolon.
+         *
+         * Example:
+         * "circle|0,0|100;polygon|0,0|0,1.5|1,1|1,0;circle|100.123,100|200.123"
+         *
+         * <P>Type: TEXT</P>
+         */
+        public static final String GEOMETRIES = "geometries";
+
+        /**
          * Query columns for instantiating {@link android.telephony.CellBroadcastMessage} objects.
          */
         public static final String[] QUERY_COLUMNS = {
@@ -4081,6 +4162,33 @@ public final class Telephony {
                 CMAS_SEVERITY,
                 CMAS_URGENCY,
                 CMAS_CERTAINTY
+        };
+
+        /**
+         * Query columns for instantiating {@link android.telephony.SmsCbMessage} objects.
+         */
+        public static final String[] QUERY_COLUMNS_FWK = {
+                _ID,
+                GEOGRAPHICAL_SCOPE,
+                PLMN,
+                LAC,
+                CID,
+                SERIAL_NUMBER,
+                SERVICE_CATEGORY,
+                LANGUAGE_CODE,
+                MESSAGE_BODY,
+                MESSAGE_FORMAT,
+                MESSAGE_PRIORITY,
+                ETWS_WARNING_TYPE,
+                CMAS_MESSAGE_CLASS,
+                CMAS_CATEGORY,
+                CMAS_RESPONSE_TYPE,
+                CMAS_SEVERITY,
+                CMAS_URGENCY,
+                CMAS_CERTAINTY,
+                RECEIVED_TIME,
+                MESSAGE_BROADCASTED,
+                GEOMETRIES
         };
     }
 

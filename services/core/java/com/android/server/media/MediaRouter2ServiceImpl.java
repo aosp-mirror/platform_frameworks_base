@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -72,21 +73,20 @@ class MediaRouter2ServiceImpl {
         mContext = context;
     }
 
-    public void registerClientAsUser(@NonNull IMediaRouter2Client client,
-            @NonNull String packageName, int userId) {
+    public void registerClient(@NonNull IMediaRouter2Client client,
+            @NonNull String packageName) {
         Objects.requireNonNull(client, "client must not be null");
 
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
-        final int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
-                false /*allowAll*/, true /*requireFull*/, "registerClientAsUser", packageName);
+        final int userId = UserHandle.getUserId(uid);
         final boolean trusted = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
                 == PackageManager.PERMISSION_GRANTED;
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                registerClientLocked(client, uid, pid, packageName, resolvedUserId, trusted);
+                registerClientLocked(client, uid, pid, packageName, userId, trusted);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -106,20 +106,20 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void registerManagerAsUser(@NonNull IMediaRouter2Manager manager,
-            @NonNull String packageName, int userId) {
+    public void registerManager(@NonNull IMediaRouter2Manager manager,
+            @NonNull String packageName) {
         Objects.requireNonNull(manager, "manager must not be null");
         //TODO: should check permission
         final boolean trusted = true;
 
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
-        final int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
-                false /*allowAll*/, true /*requireFull*/, "registerManagerAsUser", packageName);
+        final int userId = UserHandle.getUserId(uid);
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                registerManagerLocked(manager, uid, pid, packageName, resolvedUserId, trusted);
+                registerManagerLocked(manager, uid, pid, packageName, userId, trusted);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -254,6 +254,10 @@ class MediaRouter2ServiceImpl {
 
             userRecord.mClientRecords.add(clientRecord);
             mAllClientRecords.put(binder, clientRecord);
+
+            userRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::notifyProviderInfosUpdatedToClient,
+                            userRecord.mHandler, client));
         }
     }
 
@@ -341,9 +345,9 @@ class MediaRouter2ServiceImpl {
             userRecord.mManagerRecords.add(managerRecord);
             mAllManagerRecords.put(binder, managerRecord);
 
-            //TODO: remove this when it's unnecessary
-            // Sends published routes to newly added manager.
-            userRecord.mHandler.scheduleUpdateManagerState();
+            userRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::notifyProviderInfosUpdatedToManager,
+                            userRecord.mHandler, manager));
 
             final int count = userRecord.mClientRecords.size();
             for (int i = 0; i < count; i++) {
@@ -504,14 +508,14 @@ class MediaRouter2ServiceImpl {
         private final WeakReference<MediaRouter2ServiceImpl> mServiceRef;
         private final UserRecord mUserRecord;
         private final MediaRoute2ProviderWatcher mWatcher;
-        private final ArrayList<IMediaRouter2Manager> mTempManagers = new ArrayList<>();
 
         //TODO: Make this thread-safe.
         private final ArrayList<MediaRoute2ProviderProxy> mMediaProviders =
                 new ArrayList<>();
+        private List<MediaRoute2ProviderInfo> mProviderInfos;
 
         private boolean mRunning;
-        private boolean mManagerStateUpdateScheduled;
+        private boolean mProviderInfosUpdateScheduled;
 
         UserHandler(MediaRouter2ServiceImpl service, UserRecord userRecord) {
             super(Looper.getMainLooper(), null, true);
@@ -553,14 +557,14 @@ class MediaRouter2ServiceImpl {
         }
 
         private void updateProvider(MediaRoute2ProviderProxy provider) {
-            scheduleUpdateManagerState();
+            scheduleUpdateProviderInfos();
         }
 
         private void selectRoute(ClientRecord clientRecord, MediaRoute2Info route) {
             if (route != null) {
                 MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
                 if (provider == null) {
-                    Log.w(TAG, "Ignoring to select route of unknown provider " + route);
+                    Slog.w(TAG, "Ignoring to select route of unknown provider " + route);
                 } else {
                     provider.selectRoute(clientRecord.mPackageName, route.getId());
                 }
@@ -571,7 +575,7 @@ class MediaRouter2ServiceImpl {
             if (route != null) {
                 MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
                 if (provider == null) {
-                    Log.w(TAG, "Ignoring to unselect route of unknown provider " + route);
+                    Slog.w(TAG, "Ignoring to unselect route of unknown provider " + route);
                 } else {
                     provider.unselectRoute(clientRecord.mPackageName, route.getId());
                 }
@@ -585,49 +589,71 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void scheduleUpdateManagerState() {
-            if (!mManagerStateUpdateScheduled) {
-                mManagerStateUpdateScheduled = true;
-                sendMessage(PooledLambda.obtainMessage(UserHandler::updateManagerState, this));
+        private void scheduleUpdateProviderInfos() {
+            if (!mProviderInfosUpdateScheduled) {
+                mProviderInfosUpdateScheduled = true;
+                sendMessage(PooledLambda.obtainMessage(UserHandler::updateProviderInfos, this));
             }
         }
 
-        private void updateManagerState() {
-            mManagerStateUpdateScheduled = false;
+        private void updateProviderInfos() {
+            mProviderInfosUpdateScheduled = false;
 
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
                 return;
             }
-            //TODO: Consider using a member variable (like mTempManagers).
+            final List<IMediaRouter2Manager> managers = new ArrayList<>();
+            final List<IMediaRouter2Client> clients = new ArrayList<>();
             final List<MediaRoute2ProviderInfo> providers = new ArrayList<>();
             for (MediaRoute2ProviderProxy mediaProvider : mMediaProviders) {
                 final MediaRoute2ProviderInfo providerInfo =
                         mediaProvider.getProviderInfo();
                 if (providerInfo == null || !providerInfo.isValid()) {
-                    Log.w(TAG, "Ignoring invalid provider info : " + providerInfo);
+                    Slog.w(TAG, "Ignoring invalid provider info : " + providerInfo);
                 } else {
                     providers.add(providerInfo);
                 }
             }
+            mProviderInfos = providers;
 
+            synchronized (service.mLock) {
+                for (ManagerRecord managerRecord : mUserRecord.mManagerRecords) {
+                    managers.add(managerRecord.mManager);
+                }
+                for (ClientRecord clientRecord : mUserRecord.mClientRecords) {
+                    clients.add(clientRecord.mClient);
+                }
+            }
+            for (IMediaRouter2Manager manager : managers) {
+                notifyProviderInfosUpdatedToManager(manager);
+            }
+            for (IMediaRouter2Client client : clients) {
+                notifyProviderInfosUpdatedToClient(client);
+            }
+        }
+
+        private void notifyProviderInfosUpdatedToClient(IMediaRouter2Client client) {
+            if (mProviderInfos == null) {
+                scheduleUpdateProviderInfos();
+                return;
+            }
             try {
-                synchronized (service.mLock) {
-                    final int count = mUserRecord.mManagerRecords.size();
-                    for (int i = 0; i < count; i++) {
-                        mTempManagers.add(mUserRecord.mManagerRecords.get(i).mManager);
-                    }
-                }
-                for (IMediaRouter2Manager tempManager : mTempManagers) {
-                    try {
-                        tempManager.notifyProviderInfosUpdated(providers);
-                    } catch (RemoteException ex) {
-                        Slog.w(TAG, "Failed to update manager state. Manager probably died.", ex);
-                    }
-                }
-            } finally {
-                // Clear the list in preparation for the next time.
-                mTempManagers.clear();
+                client.notifyProviderInfosUpdated(mProviderInfos);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify provider infos updated. Client probably died.");
+            }
+        }
+
+        private void notifyProviderInfosUpdatedToManager(IMediaRouter2Manager manager) {
+            if (mProviderInfos == null) {
+                scheduleUpdateProviderInfos();
+                return;
+            }
+            try {
+                manager.notifyProviderInfosUpdated(mProviderInfos);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify provider infos updated. Manager probably died.");
             }
         }
 

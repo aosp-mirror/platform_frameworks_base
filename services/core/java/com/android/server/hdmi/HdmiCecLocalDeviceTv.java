@@ -832,7 +832,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mService.setSystemAudioActivated(on);
                 mService.announceSystemAudioModeChange(on);
             }
-            startArcAction(on);
+            if (on && !mArcEstablished) {
+                startArcAction(true);
+            } else if (!on) {
+                startArcAction(false);
+            }
         }
     }
 

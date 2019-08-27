@@ -778,14 +778,6 @@ public abstract class PackageManagerInternal {
     public abstract void writePermissionSettings(@NonNull @UserIdInt int[] userIds, boolean async);
 
     /**
-     * Returns the target SDK for the given UID. Will return {@code 0} if there is no
-     * package associated with the UID or if the package has not been installed for
-     * the user. Will return the highest target SDK if the UID references packages with
-     * a shared user id.
-     */
-    public abstract int getTargetSdk(int uid);
-
-    /**
      * Returns {@code true} if the caller is the installer of record for the given package.
      * Otherwise, {@code false}.
      */

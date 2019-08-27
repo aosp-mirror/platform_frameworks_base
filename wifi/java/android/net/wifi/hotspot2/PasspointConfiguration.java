@@ -16,6 +16,7 @@
 
 package android.net.wifi.hotspot2;
 
+import android.annotation.Nullable;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
@@ -76,6 +77,29 @@ public final class PasspointConfiguration implements Parcelable {
      * @return Home SP information
      */
     public HomeSp getHomeSp() { return mHomeSp; }
+
+    /**
+     * Configurations under AAAServerTrustedNames subtree.
+     */
+    private String[] mAaaServerTrustedNames = null;
+    /**
+     * Set the AAA server trusted names information.
+     *
+     * @param aaaServerTrustedNames The AAA server trusted names information to set to
+     * @hide
+     */
+    public void setAaaServerTrustedNames(@Nullable String[] aaaServerTrustedNames) {
+        mAaaServerTrustedNames = aaaServerTrustedNames;
+    }
+    /**
+     * Get the AAA server trusted names information.
+     *
+     * @return AAA server trusted names information
+     * @hide
+     */
+    public @Nullable String[] getAaaServerTrustedNames() {
+        return mAaaServerTrustedNames;
+    }
 
     /**
      * Configurations under Credential subtree.
@@ -409,6 +433,7 @@ public final class PasspointConfiguration implements Parcelable {
         mUsageLimitTimeLimitInMinutes = source.mUsageLimitTimeLimitInMinutes;
         mUsageLimitUsageTimePeriodInMinutes = source.mUsageLimitUsageTimePeriodInMinutes;
         mServiceFriendlyNames = source.mServiceFriendlyNames;
+        mAaaServerTrustedNames = source.mAaaServerTrustedNames;
     }
 
     @Override
@@ -432,6 +457,7 @@ public final class PasspointConfiguration implements Parcelable {
         dest.writeLong(mUsageLimitStartTimeInMillis);
         dest.writeLong(mUsageLimitDataLimit);
         dest.writeLong(mUsageLimitTimeLimitInMinutes);
+        dest.writeStringArray(mAaaServerTrustedNames);
         Bundle bundle = new Bundle();
         bundle.putSerializable("serviceFriendlyNames",
                 (HashMap<String, String>) mServiceFriendlyNames);
@@ -448,6 +474,8 @@ public final class PasspointConfiguration implements Parcelable {
         }
         PasspointConfiguration that = (PasspointConfiguration) thatObject;
         return (mHomeSp == null ? that.mHomeSp == null : mHomeSp.equals(that.mHomeSp))
+                && (mAaaServerTrustedNames == null ? that.mAaaServerTrustedNames == null
+                : Arrays.equals(mAaaServerTrustedNames, that.mAaaServerTrustedNames))
                 && (mCredential == null ? that.mCredential == null
                 : mCredential.equals(that.mCredential))
                 && (mPolicy == null ? that.mPolicy == null : mPolicy.equals(that.mPolicy))
@@ -516,6 +544,10 @@ public final class PasspointConfiguration implements Parcelable {
         if (mTrustRootCertList != null) {
             builder.append("TrustRootCertServers: ").append(mTrustRootCertList.keySet())
                     .append("\n");
+        }
+        if (mAaaServerTrustedNames != null) {
+            builder.append("AAAServerTrustedNames: ")
+                    .append(String.join(";", mAaaServerTrustedNames)).append("\n");
         }
         if (mServiceFriendlyNames != null) {
             builder.append("ServiceFriendlyNames: ").append(mServiceFriendlyNames);
@@ -619,6 +651,7 @@ public final class PasspointConfiguration implements Parcelable {
                 config.setUsageLimitStartTimeInMillis(in.readLong());
                 config.setUsageLimitDataLimit(in.readLong());
                 config.setUsageLimitTimeLimitInMinutes(in.readLong());
+                config.setAaaServerTrustedNames(in.createStringArray());
                 Bundle bundle = in.readBundle();
                 Map<String, String> friendlyNamesMap = (HashMap) bundle.getSerializable(
                         "serviceFriendlyNames");

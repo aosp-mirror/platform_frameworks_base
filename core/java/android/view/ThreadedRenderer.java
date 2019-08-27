@@ -230,7 +230,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
         sTrimForeground = true;
     }
 
-    private static Boolean sSupportsOpenGL;
 
     /**
      * Indicates whether threaded rendering is available under any form for
@@ -240,24 +239,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
      *         false otherwise
      */
     public static boolean isAvailable() {
-        if (sSupportsOpenGL != null) {
-            return sSupportsOpenGL.booleanValue();
-        }
-        if (SystemProperties.getInt("ro.kernel.qemu", 0) == 0) {
-            // Device is not an emulator.
-            sSupportsOpenGL = true;
-            return true;
-        }
-        int qemu_gles = SystemProperties.getInt("qemu.gles", -1);
-        if (qemu_gles == -1) {
-            // In this case, the value of the qemu.gles property is not ready
-            // because the SurfaceFlinger service may not start at this point.
-            return false;
-        }
-        // In the emulator this property will be set > 0 when OpenGL ES 2.0 is
-        // enabled, 0 otherwise. On old emulator versions it will be undefined.
-        sSupportsOpenGL = qemu_gles > 0;
-        return sSupportsOpenGL.booleanValue();
+        return true;
     }
 
     /**

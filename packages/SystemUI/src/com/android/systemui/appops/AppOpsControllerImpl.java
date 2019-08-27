@@ -50,7 +50,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class AppOpsControllerImpl implements AppOpsController,
-        AppOpsManager.OnOpActiveChangedListener,
+        AppOpsManager.OnOpActiveChangedInternalListener,
         AppOpsManager.OnOpNotedListener, Dumpable {
 
     private static final long NOTED_OP_TIME_DELAY_MS = 5000;

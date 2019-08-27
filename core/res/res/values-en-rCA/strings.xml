@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Attempted to delete too many <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet storage is full. Delete some files to free space."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Watch storage is full. Delete some files to free up space."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"TV storage is full. Delete some files to free space."</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV device storage is full. Delete some files to free up space."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Phone storage is full. Delete some files to free space."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Certificate authorities installed</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"Printing disabled by <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Me"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet options"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV options"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV options"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Phone options"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Silent mode"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Turn on wireless"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Restarting…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Shutting down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Your tablet will shut down."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Your TV will shut down."</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Your Android TV device will shut down."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Your watch will shut down."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Your phone will shut down."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Do you want to shut down?"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"No recent apps"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet options"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"TV options"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV options"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Phone options"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Screen lock"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Power off"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Allows the app to send SMS messages. This may result in unexpected charges. Malicious apps may cost you money by sending messages without your confirmation."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"read your text messages (SMS or MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"This app can read all SMS (text) messages stored on your tablet."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"This app can read all SMS (text) messages stored on your TV."</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"This app can read all SMS (text) messages stored on your Android TV device."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"This app can read all SMS (text) messages stored on your phone."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"receive text messages (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Allows the app to receive and process WAP messages. This permission includes the ability to monitor or delete messages sent to you without showing them to you."</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"This app can use data in the background. This may increase data usage."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"make app always run"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Allows the app to make parts of itself persistent in memory. This can limit the memory available to other apps, slowing down the tablet."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Allows the app to make parts of itself persistent in memory. This can limit memory available to other apps slowing down the TV."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"Allows the app to make parts of itself persistent in memory. This can limit the memory available to other apps slowing down your Android TV device."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Allows the app to make parts of itself persistent in memory. This can limit the memory available to other apps, slowing down the phone."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"run foreground service"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Allows the app to make use of foreground services."</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Allows the app to modify the system\'s settings data. Malicious apps may corrupt your system\'s configuration."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"run at startup"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Allows the app to have itself started as soon as the system has finished booting. This can make it take longer to start the tablet and allow the app to slow down the overall tablet by always running."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Allows the app to have itself started as soon as the system has finished booting. This can make it take longer to start the TV and allow the app to slow down the overall tablet by always running."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"Allows the app to have itself started as soon as the system has finished booting. This can make it take longer to start your Android TV device and allow the app to slow down the overall device by always running."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Allows the app to have itself started as soon as the system has finished booting. This can make it take longer to start the phone and allow the app to slow down the overall phone by always running."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"send sticky broadcast"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Excessive use may make the tablet slow or unstable by causing it to use too much memory."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Excessive use may make the TV slow or unstable by causing it to use too much memory."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Excessive use may make your Android TV device slow or unstable by causing it to use too much memory."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Excessive use may make the phone slow or unstable by causing it to use too much memory."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"read your contacts"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Allows the app to read data about your contacts stored on your tablet, including the frequency with which you\'ve called, emailed or communicated in other ways with specific individuals. This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Allows the app to read data about your contacts stored on your TV, including the frequency with which you\'ve called, emailed or communicated in other ways with specific individuals. This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Allows the app to read data about your contacts stored on your Android TV device, including the frequency with which you\'ve called, emailed or communicated in other ways with specific individuals. This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Allows the app to read data about your contacts stored on your phone, including the frequency with which you\'ve called, emailed or communicated in other ways with specific individuals. This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"modify your contacts"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Allows the app to modify the data about your contacts stored on your tablet, including the frequency with which you\'ve called, emailed or communicated in other ways with specific contacts. This permission allows apps to delete contact data."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Allows the app to modify the data about your contacts stored on your TV, including the frequency with which you\'ve called, emailed or communicated in other ways with specific contacts. This permission allows apps to delete contact data."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Allows the app to modify the data about your contacts stored on your Android TV device, including the frequency with which you\'ve called, emailed or communicated in other ways with specific contacts. This permission allows apps to delete contact data."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Allows the app to modify the data about your contacts stored on your phone, including the frequency with which you\'ve called, emailed or communicated in other ways with specific contacts. This permission allows apps to delete contact data."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"read call log"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"This app can read your call history."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"write call log"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Allows the app to modify your tablet\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Allows the app to modify your TV\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Allows the app to modify your Android TV device\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to delete or modify your call log."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Allows the app to modify your phone\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"access body sensors (like heart rate monitors)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Allows the app to access data from sensors that monitor your physical condition, such as your heart rate."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"This app can read all calendar events stored on your TV and share or save your calendar data."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"This app can read all calendar events stored on your Android TV device and share or save your calendar data."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"This app can read all calendar events stored on your phone and share or save your calendar data."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"add or modify calendar events and send emails to guests without owners\' knowledge"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"This app can add, remove or change calendar events on your tablet. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"This app can add, remove or change calendar events on your TV. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"This app can add, remove or change calendar events on your Android TV device. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"This app can add, remove or change calendar events on your phone. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"access extra location provider commands"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Allows the app to access extra location provider commands. This may allow the app to interfere with the operation of the GPS or other location sources."</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"This app can get your exact location only when it is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"access approximate location (network-based) only in the foreground"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"This app can get your location based on network sources such as phone masts and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your tablet for the app to be able to use them."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"This app can get your location based on network sources such as phone masts and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your TV for the app to be able to use them."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"This app can get your location based on network sources such as phone masts and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your Android TV device for the app to be able to use them."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"This app can get your location based on network sources such as phone masts and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"access location in the background"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"If this is granted additionally to the approximate or precise location access, the app can access the location while running in the background."</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"This app can recognise your physical activity."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"take pictures and videos"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"This app can take pictures and record videos using the camera at any time."</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Grant an application or service access to system cameras to take pictures and videos"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"This privileged | system app can take pictures and record videos using a system camera at any time. Requires the android.permission.CAMERA permission to be held by the app as well"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"control vibration"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Allows the app to control the vibrator."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"directly call phone numbers"</string>
@@ -451,14 +453,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"read phone numbers"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Allows the app to access the phone numbers of the device."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"prevent tablet from sleeping"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"prevent TV from sleeping"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"prevent your Android TV device from sleeping"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"prevent phone from sleeping"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Allows the app to prevent the tablet from going to sleep."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Allows the app to prevent the TV from going to sleep."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Allows the app to prevent your Android TV device from going to sleep."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Allows the app to prevent the phone from going to sleep."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"transmit infrared"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Allows the app to use the tablet\'s infrared transmitter."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Allows the app to use the TV\'s infrared transmitter."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Allows the app to use your Android TV device\'s infrared transmitter."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Allows the app to use the phone\'s infrared transmitter."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"set wallpaper"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Allows the app to set the system wallpaper."</string>
@@ -466,11 +468,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Allows the app to set the system wallpaper size hints."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"set time zone"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Allows the app to change the tablet\'s time zone."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Allows the app to change the TV\'s time zone."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Allows the app to change your Android TV device\'s time zone."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Allows the app to change the phone\'s time zone."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"find accounts on the device"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Allows the app to get the list of accounts known by the tablet. This may include any accounts created by applications that you have installed."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Allows the app to get the list of accounts known by the TV. This may include any accounts created by applications that you have installed."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Allows the app to get the list of accounts known by your Android TV device. This may include any accounts created by applications that you have installed."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Allows the app to get the list of accounts known by the phone. This may include any accounts created by applications that you have installed."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"view network connections"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Allows the app to view information about network connections such as which networks exist and are connected."</string>
@@ -486,21 +488,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Allows the app to connect to and disconnect from Wi-Fi access points and to make changes to device configuration for Wi-Fi networks."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"allow Wi-Fi Multicast reception"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your tablet. It uses more power than the non-multicast mode."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your TV. It uses more power than the non-multicast mode."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your Android TV device. It uses more power than the non-multicast mode."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Allows the app to receive packets sent to all devices on a Wi-Fi network using multicast addresses, not just your phone. It uses more power than the non-multicast mode."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Access Bluetooth settings"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Allows the app to configure the local Bluetooth tablet and to discover and pair with remote devices."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Allows the app to configure the local Bluetooth TV, and to discover and pair with remote devices."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Allows the app to configure Bluetooth on your Android TV device and to discover and pair with remote devices."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Allows the app to configure the local Bluetooth phone and to discover and pair with remote devices."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"connect and disconnect from WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Allows the app to determine whether WiMAX is enabled and information about any WiMAX networks that are connected."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"change WiMAX state"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Allows the app to connect the tablet to and disconnect the tablet from WiMAX networks."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Allows the app to connect the TV to and disconnect the TV from WiMAX networks."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Allows the app to connect your Android TV device to and disconnect your Android TV device from WiMAX networks."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Allows the app to connect the phone to and disconnect the phone from WiMAX networks."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Pair with Bluetooth devices"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Allows the app to view the configuration of Bluetooth on the tablet and to make and accept connections with paired devices."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Allows the app to view the configuration of Bluetooth on the TV, and to make and accept connections with paired devices."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Allows the app to view the configuration of Bluetooth on your Android TV device and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Allows the app to view the configuration of the Bluetooth on the phone and to make and accept connections with paired devices."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"control Near-Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Allows the app to communicate with Near Field Communication (NFC) tags, cards and readers."</string>
@@ -657,10 +659,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Control the length and the characters allowed in screen lock passwords and PINs."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitor screen unlock attempts"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the tablet or erase all the tablet\'s data if too many incorrect passwords are typed."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the TV or erase all the TV\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock your Android TV device or delete all of your Android TV device\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the phone or erase all the phone\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the tablet or erase all this user\'s data if too many incorrect passwords are typed."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the TV or erase all this user\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock your Android TV device or delete all of this user\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the phone or erase all this user\'s data if too many incorrect passwords are typed."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Change the screen lock"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Change the screen lock."</string>
@@ -668,11 +670,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Control how and when the screen locks."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Delete all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Erase the TV\'s data without warning by performing a factory data reset."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"Delete your Android TV device\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Erase the phone\'s data without warning by performing a factory data reset."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Erase user data"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Erase this user\'s data on this tablet without warning."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Erase this user\'s data on this TV without warning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"Delete this user\'s data on this Android TV device without warning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Erase this user\'s data on this phone without warning."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Set the device global proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Set the device global proxy to be used while policy is enabled. Only the device owner can set the global proxy."</string>
@@ -822,7 +824,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximum Face Unlock attempts exceeded"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"No SIM card"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No SIM card in tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"No SIM card in TV."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"No SIM card in your Android TV device."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"No SIM card in phone."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insert a SIM card."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"The SIM card is missing or not readable. Insert a SIM card."</string>
@@ -845,13 +847,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"You have incorrectly typed your password <xliff:g id="NUMBER_0">%1$d</xliff:g> times. \n\nTry again in <xliff:g id="NUMBER_1">%2$d</xliff:g> seconds."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"You have incorrectly typed your PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> times. \n\nTry again in <xliff:g id="NUMBER_1">%2$d</xliff:g> seconds."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your tablet using your Google sign-in.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your TV using your Google signin.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"You have drawn your unlock pattern incorrectly <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your Android TV device using your Google sign-in.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"You have drawn your unlock pattern incorrectly <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using your Google sign-in.\n\n Please try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"You have incorrectly attempted to unlock the tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, the tablet will be reset to factory default and all user data will be lost."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"You have incorrectly attempted to unlock the TV <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, the TV will be reset to factory default and all user data will be lost."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"You have incorrectly attempted to unlock your Android TV device <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, your Android TV device will be reset to factory default and all user data will be lost."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, the phone will be reset to factory default and all user data will be lost."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"You have incorrectly attempted to unlock the tablet <xliff:g id="NUMBER">%d</xliff:g> times. The tablet will now be reset to factory default."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"You have incorrectly attempted to unlock the TV <xliff:g id="NUMBER">%d</xliff:g> times. The TV will now be reset to factory default."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"You have incorrectly attempted to unlock your Android TV device <xliff:g id="NUMBER">%d</xliff:g> times. Your Android TV device will now be reset to factory default."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER">%d</xliff:g> times. The phone will now be reset to factory default."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Try again in <xliff:g id="NUMBER">%d</xliff:g> seconds."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Forgotten pattern?"</string>
@@ -938,7 +940,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Allows the app to read the history of all URLs that the Browser has visited, and all of the Browser\'s bookmarks. Note: this permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"write web bookmarks and history"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Allows the app to modify the Browser\'s history or bookmarks stored on your tablet. This may allow the app to delete or modify Browser data. Note: this permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Allows the app to modify the Browser\'s history or bookmarks stored on your TV. This may allow the app to erase or modify Browser data. Note: This permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Allows the app to modify the browser\'s history or bookmarks stored on your Android TV device. This may allow the app to delete or modify browser data. Note: This permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Allows the app to modify the Browser\'s history or bookmarks stored on your phone. This may allow the app to delete or modify Browser data. Note: this permission may not be enforced by third-party browsers or other applications with web browsing capabilities."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"set an alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Allows the app to set an alarm in an installed alarm clock app. Some alarm clock apps may not implement this feature."</string>
@@ -1249,17 +1251,16 @@
       <item quantity="one">Open Wi-Fi network available</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Connect to open Wi‑Fi network"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Connect to operator Wi‑Fi network"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Connecting to Wi‑Fi network"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Connected to Wi‑Fi network"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Could not connect to Wi‑Fi network"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap to see all networks"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connect"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"All networks"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Connect to Wi‑Fi networks?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Suggested by <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yes"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Allow suggested Wi‑Fi networks?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> suggested networks. Device may connect automatically."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Allow"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"No, thanks"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi will turn on automatically"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"When you\'re near a high‑quality saved network"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Don\'t turn back on"</string>
@@ -1307,7 +1308,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Type the required PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"The tablet will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"The TV will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Your Android TV device will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"The phone will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Insert character"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sending SMS messages"</string>
@@ -1650,13 +1651,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"You have incorrectly typed your password <xliff:g id="NUMBER_0">%1$d</xliff:g> times. \n\nTry again in <xliff:g id="NUMBER_1">%2$d</xliff:g> seconds."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. \n\nTry again in <xliff:g id="NUMBER_1">%2$d</xliff:g> seconds."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"You have incorrectly attempted to unlock the tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, the tablet will be reset to factory default and all user data will be lost."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"You have incorrectly attempted to unlock the TV <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, the TV will be reset to factory default and all user data will be lost."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"You have incorrectly attempted to unlock your Android TV device <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, your Android TV device will be reset to factory default and all user data will be lost."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, the phone will be reset to factory default and all user data will be lost."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"You have incorrectly attempted to unlock the tablet <xliff:g id="NUMBER">%d</xliff:g> times. The tablet will now be reset to factory default."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"You have incorrectly attempted to unlock the TV <xliff:g id="NUMBER">%d</xliff:g> times. The TV will now be reset to factory default."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"You have incorrectly attempted to unlock your Android TV device <xliff:g id="NUMBER">%d</xliff:g> times. Your Android TV device will now be reset to factory default."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER">%d</xliff:g> times. The phone will now be reset to factory default."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your tablet using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your TV using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"You have drawn your unlock pattern incorrectly <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your Android TV device using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remove"</string>
@@ -1997,6 +1998,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tap to check what\'s blocked."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Settings"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"Standby"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"The Android TV device will soon turn off; press a button to keep it on."</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"The device will soon turn off; press to keep it on."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Camera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Microphone"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"displaying over other apps on your screen"</string>

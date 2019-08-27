@@ -48,17 +48,8 @@ public:
 
     void isConditionMet(const ConditionKey& conditionParameters,
                         const std::vector<sp<ConditionTracker>>& allConditions,
-                        const vector<Matcher>& dimensionFields,
-                        const bool isSubOutputDimensionFields,
                         const bool isPartialLink,
-                        std::vector<ConditionState>& conditionCache,
-                        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const override;
-
-    ConditionState getMetConditionDimension(
-            const std::vector<sp<ConditionTracker>>& allConditions,
-            const vector<Matcher>& dimensionFields,
-            const bool isSubOutputDimensionFields,
-            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const override;
+                        std::vector<ConditionState>& conditionCache) const override;
 
     virtual const std::set<HashableDimensionKey>* getChangedToTrueDimensions(
             const std::vector<sp<ConditionTracker>>& allConditions) const {

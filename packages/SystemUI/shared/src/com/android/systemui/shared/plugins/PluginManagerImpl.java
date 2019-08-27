@@ -33,7 +33,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -235,8 +234,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             String pkg = data.getEncodedSchemeSpecificPart();
             ComponentName componentName = ComponentName.unflattenFromString(pkg);
             if (mOneShotPackages.contains(pkg)) {
-                int icon = mContext.getResources().getIdentifier("tuner", "drawable",
-                        mContext.getPackageName());
+                int icon = Resources.getSystem().getIdentifier(
+                        "stat_sys_warning", "drawable", "android");
                 int color = Resources.getSystem().getIdentifier(
                         "system_notification_accent_color", "color", "android");
                 String label = pkg;
@@ -260,8 +259,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                             Uri.parse("package://" + pkg));
                 PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
                 nb.addAction(new Action.Builder(null, "Restart SysUI", pi).build());
-                mContext.getSystemService(NotificationManager.class).notifyAsUser(pkg,
-                        SystemMessage.NOTE_PLUGIN, nb.build(), UserHandle.ALL);
+                mContext.getSystemService(NotificationManager.class)
+                        .notify(SystemMessage.NOTE_PLUGIN, nb.build());
             }
             if (clearClassLoader(pkg)) {
                 if (Build.IS_ENG) {

@@ -136,6 +136,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_DEX_BOOT = "dex_boot";
 
     /**
+     * Namespace for display manager related features. The names to access the properties in this
+     * namespace should be defined in {@link android.hardware.display.DisplayManager}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_DISPLAY_MANAGER = "display_manager";
+
+    /**
      * Namespace for all Game Driver features.
      *
      * @hide

@@ -421,7 +421,6 @@ public class TextClock extends TextView {
 
     /**
      * Update the displayed time if necessary and invalidate the view.
-     * @hide
      */
     public void refresh() {
         onTimeChanged();

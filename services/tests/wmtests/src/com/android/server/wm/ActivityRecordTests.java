@@ -43,6 +43,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REQUESTED;
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
@@ -1047,8 +1048,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         assertEquals(DESTROYING, mActivity.getState());
         assertTrue(mActivity.finishing);
-        verify(mStack).destroyActivityLocked(eq(mActivity), eq(true) /* removeFromApp */,
-                anyString());
+        verify(mActivity).destroyImmediately(eq(true) /* removeFromApp */, anyString());
     }
 
     /**
@@ -1072,10 +1072,138 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Verify that the activity was not actually destroyed, but waits for next one to come up
         // instead.
-        verify(mStack, never()).destroyActivityLocked(eq(mActivity), eq(true) /* removeFromApp */,
-                anyString());
+        verify(mActivity, never()).destroyImmediately(eq(true) /* removeFromApp */, anyString());
         assertEquals(FINISHING, mActivity.getState());
         assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
+    }
+
+    /**
+     * Test that the activity will be moved to destroying state and the message to destroy will be
+     * sent to the client.
+     */
+    @Test
+    public void testDestroyImmediately_hadApp_finishing() {
+        mActivity.finishing = true;
+        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+
+        assertEquals(DESTROYING, mActivity.getState());
+    }
+
+    /**
+     * Test that the activity will be moved to destroyed state immediately if it was not marked as
+     * finishing before {@link ActivityRecord#destroyImmediately(boolean, String)}.
+     */
+    @Test
+    public void testDestroyImmediately_hadApp_notFinishing() {
+        mActivity.finishing = false;
+        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+
+        assertEquals(DESTROYED, mActivity.getState());
+    }
+
+    /**
+     * Test that an activity with no process attached and that is marked as finishing will be
+     * removed from task when {@link ActivityRecord#destroyImmediately(boolean, String)} is called.
+     */
+    @Test
+    public void testDestroyImmediately_noApp_finishing() {
+        mActivity.app = null;
+        mActivity.finishing = true;
+        final TaskRecord task = mActivity.getTaskRecord();
+
+        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+
+        assertEquals(DESTROYED, mActivity.getState());
+        assertNull(mActivity.getTaskRecord());
+        assertEquals(0, task.getChildCount());
+    }
+
+    /**
+     * Test that an activity with no process attached and that is not marked as finishing will be
+     * marked as DESTROYED but not removed from task.
+     */
+    @Test
+    public void testDestroyImmediately_noApp_notFinishing() {
+        mActivity.app = null;
+        mActivity.finishing = false;
+        final TaskRecord task = mActivity.getTaskRecord();
+
+        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+
+        assertEquals(DESTROYED, mActivity.getState());
+        assertEquals(task, mActivity.getTaskRecord());
+        assertEquals(1, task.getChildCount());
+    }
+
+    /**
+     * Test that an activity will not be destroyed if it is marked as non-destroyable.
+     */
+    @Test
+    public void testSafelyDestroy_nonDestroyable() {
+        doReturn(false).when(mActivity).isDestroyable();
+
+        mActivity.safelyDestroy("test");
+
+        verify(mActivity, never()).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+    }
+
+    /**
+     * Test that an activity will not be destroyed if it is marked as non-destroyable.
+     */
+    @Test
+    public void testSafelyDestroy_destroyable() {
+        doReturn(true).when(mActivity).isDestroyable();
+
+        mActivity.safelyDestroy("test");
+
+        verify(mActivity).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+    }
+
+    @Test
+    public void testRemoveFromHistory() {
+        final ActivityStack stack = mActivity.getActivityStack();
+        final TaskRecord task = mActivity.getTaskRecord();
+
+        mActivity.removeFromHistory("test");
+
+        assertEquals(DESTROYED, mActivity.getState());
+        assertNull(mActivity.app);
+        assertNull(mActivity.getTaskRecord());
+        assertEquals(0, task.getChildCount());
+        assertNull(task.getStack());
+        assertEquals(0, stack.getChildCount());
+    }
+
+    /**
+     * Test that it's not allowed to call {@link ActivityRecord#destroyed(String)} if activity is
+     * not in destroying or destroyed state.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testDestroyed_notDestroying() {
+        mActivity.setState(STOPPED, "test");
+        mActivity.destroyed("test");
+    }
+
+    /**
+     * Test that {@link ActivityRecord#destroyed(String)} can be called if an activity is destroying
+     */
+    @Test
+    public void testDestroyed_destroying() {
+        mActivity.setState(DESTROYING, "test");
+        mActivity.destroyed("test");
+
+        verify(mActivity).removeFromHistory(anyString());
+    }
+
+    /**
+     * Test that {@link ActivityRecord#destroyed(String)} can be called if an activity is destroyed.
+     */
+    @Test
+    public void testDestroyed_destroyed() {
+        mActivity.setState(DESTROYED, "test");
+        mActivity.destroyed("test");
+
+        verify(mActivity).removeFromHistory(anyString());
     }
 
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */

@@ -17,6 +17,7 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -29,6 +30,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes.AttributeUsage;
 import android.os.Binder;
@@ -1095,21 +1097,27 @@ public class AppOpsManager {
             "android:sms_financial_transactions";
 
     /** @hide Read media of audio type. */
+    @SystemApi @TestApi
     public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     /** @hide Write media of audio type. */
+    @SystemApi @TestApi
     public static final String OPSTR_WRITE_MEDIA_AUDIO = "android:write_media_audio";
     /** @hide Read media of video type. */
+    @SystemApi @TestApi
     public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     /** @hide Write media of video type. */
+    @SystemApi @TestApi
     public static final String OPSTR_WRITE_MEDIA_VIDEO = "android:write_media_video";
     /** @hide Read media of image type. */
+    @SystemApi @TestApi
     public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     /** @hide Write media of image type. */
+    @SystemApi @TestApi
     public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
     /** @hide Has a legacy (non-isolated) view of storage. */
-    @TestApi
-    @SystemApi
+    @SystemApi @TestApi
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+
     /** @hide Interact with accessibility. */
     @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
@@ -4281,20 +4289,17 @@ public class AppOpsManager {
 
     /**
      * Callback for notification of changes to operation active state.
-     *
-     * @hide
      */
-    @TestApi
     public interface OnOpActiveChangedListener {
         /**
          * Called when the active state of an app op changes.
          *
-         * @param code The op code.
-         * @param uid The UID performing the operation.
+         * @param op The operation that changed.
          * @param packageName The package performing the operation.
          * @param active Whether the operation became active or inactive.
          */
-        void onOpActiveChanged(int code, int uid, String packageName, boolean active);
+        void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
+                boolean active);
     }
 
     /**
@@ -4322,6 +4327,16 @@ public class AppOpsManager {
     public static class OnOpChangedInternalListener implements OnOpChangedListener {
         public void onOpChanged(String op, String packageName) { }
         public void onOpChanged(int op, String packageName) { }
+    }
+
+    /**
+     * Callback for notification of changes to operation state.
+     * This allows you to see the raw op codes instead of strings.
+     * @hide
+     */
+    public interface OnOpActiveChangedInternalListener extends OnOpActiveChangedListener {
+        default void onOpActiveChanged(String op, int uid, String packageName, boolean active) { }
+        default void onOpActiveChanged(int op, int uid, String packageName, boolean active) { }
     }
 
     AppOpsManager(Context context, IAppOpsService service) {
@@ -4779,6 +4794,17 @@ public class AppOpsManager {
         }
     }
 
+    /** {@hide} */
+    @Deprecated
+    public void startWatchingActive(@NonNull int[] ops,
+            @NonNull OnOpActiveChangedListener callback) {
+        final String[] strOps = new String[ops.length];
+        for (int i = 0; i < ops.length; i++) {
+            strOps[i] = opToPublicName(ops[i]);
+        }
+        startWatchingActive(strOps, mContext.getMainExecutor(), callback);
+    }
+
     /**
      * Start watching for changes to the active state of app ops. An app op may be
      * long running and it has a clear start and stop delimiters. If an op is being
@@ -4786,26 +4812,25 @@ public class AppOpsManager {
      * watched ops for a registered callback you need to unregister and register it
      * again.
      *
-     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
+     * <p> If you don't hold the {@code android.Manifest.permission#WATCH_APPOPS} permission
      * you can watch changes only for your UID.
      *
-     * @param ops The ops to watch.
+     * @param ops The operations to watch.
      * @param callback Where to report changes.
      *
-     * @see #isOperationActive(int, int, String)
-     * @see #stopWatchingActive(OnOpActiveChangedListener)
+     * @see #isOperationActive
+     * @see #stopWatchingActive
      * @see #startOp(int, int, String)
      * @see #finishOp(int, int, String)
-     *
-     * @hide
      */
-    @TestApi
     // TODO: Uncomment below annotation once b/73559440 is fixed
     // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
-    public void startWatchingActive(@NonNull int[] ops,
+    public void startWatchingActive(@NonNull String[] ops,
+            @CallbackExecutor @NonNull Executor executor,
             @NonNull OnOpActiveChangedListener callback) {
-        Preconditions.checkNotNull(ops, "ops cannot be null");
-        Preconditions.checkNotNull(callback, "callback cannot be null");
+        Objects.requireNonNull(ops);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
         IAppOpsActiveCallback cb;
         synchronized (mActiveWatchers) {
             cb = mActiveWatchers.get(callback);
@@ -4815,13 +4840,25 @@ public class AppOpsManager {
             cb = new IAppOpsActiveCallback.Stub() {
                 @Override
                 public void opActiveChanged(int op, int uid, String packageName, boolean active) {
-                    callback.onOpActiveChanged(op, uid, packageName, active);
+                    executor.execute(() -> {
+                        if (callback instanceof OnOpActiveChangedInternalListener) {
+                            ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
+                                    uid, packageName, active);
+                        }
+                        if (sOpToString[op] != null) {
+                            callback.onOpActiveChanged(sOpToString[op], uid, packageName, active);
+                        }
+                    });
                 }
             };
             mActiveWatchers.put(callback, cb);
         }
+        final int[] rawOps = new int[ops.length];
+        for (int i = 0; i < ops.length; i++) {
+            rawOps[i] = strOpToOp(ops[i]);
+        }
         try {
-            mService.startWatchingActive(ops, cb);
+            mService.startWatchingActive(rawOps, cb);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4832,14 +4869,11 @@ public class AppOpsManager {
      * long running and it has a clear start and stop delimiters. Unregistering a
      * non-registered callback has no effect.
      *
-     * @see #isOperationActive#(int, int, String)
-     * @see #startWatchingActive(int[], OnOpActiveChangedListener)
+     * @see #isOperationActive
+     * @see #startWatchingActive
      * @see #startOp(int, int, String)
      * @see #finishOp(int, int, String)
-     *
-     * @hide
      */
-    @TestApi
     public void stopWatchingActive(@NonNull OnOpActiveChangedListener callback) {
         synchronized (mActiveWatchers) {
             final IAppOpsActiveCallback cb = mActiveWatchers.remove(callback);
@@ -5446,6 +5480,19 @@ public class AppOpsManager {
     /** @hide */
     public void finishOp(int op) {
         finishOp(op, Process.myUid(), mContext.getOpPackageName());
+    }
+
+    /**
+     * Checks whether the given op for a package is active.
+     * <p>
+     * If you don't hold the {@code android.Manifest.permission#WATCH_APPOPS}
+     * permission you can query only for your UID.
+     *
+     * @see #finishOp(int)
+     * @see #startOp(int)
+     */
+    public boolean isOpActive(@NonNull String op, int uid, @NonNull String packageName) {
+        return isOperationActive(strOpToOp(op), uid, packageName);
     }
 
     /**

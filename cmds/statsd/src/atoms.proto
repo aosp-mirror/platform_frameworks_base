@@ -297,6 +297,7 @@ message Atom {
         MediametricsMediadrmReported mediametrics_mediadrm_reported = 198;
         MediametricsNuPlayerReported mediametrics_nuplayer_reported = 199;
         MediametricsRecorderReported mediametrics_recorder_reported = 200;
+        MediametricsDrmManagerReported mediametrics_drmmanager_reported = 201;
         CarPowerStateChanged car_power_state_changed = 203;
         GarageModeInfo garage_mode_info = 204;
         TestAtomReported test_atom_reported = 205 [(log_from_module) = "cts"];
@@ -6201,6 +6202,41 @@ message MediametricsNuPlayerReported {
     optional int64 media_apex_version = 4;
 
     optional android.stats.mediametrics.NuPlayerData nuplayer_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track Legacy DRM usage
+ * Logged from
+ *   frameworks/av/drm/drmserver/DrmManager.cpp
+ */
+message MediametricsDrmManagerReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    enum Method {
+        METHOD_NOT_FOUND       = -1;
+        GET_CONSTRAINTS        =  0;
+        GET_METADATA           =  1;
+        CAN_HANDLE             =  2;
+        PROCESS_DRM_INFO       =  3;
+        ACQUIRE_DRM_INFO       =  4;
+        SAVE_RIGHTS            =  5;
+        GET_ORIGINAL_MIME_TYPE =  6;
+        GET_DRM_OBJECT_TYPE    =  7;
+        CHECK_RIGHTS_STATUS    =  8;
+        REMOVE_RIGHTS          =  9;
+        REMOVE_ALL_RIGHTS      = 10;
+        OPEN_CONVERT_SESSION   = 11;
+        OPEN_DECRYPT_SESSION   = 12;
+    }
+
+    // plugin_id+description inform which Legacy DRM plugins are still in use on device
+    optional string plugin_id = 5;
+    optional string description = 6;
+    optional Method method = 7;
+    optional string mime_types = 8;
 }
 
 /**

@@ -182,7 +182,7 @@ message CountMetric {
 
   optional FieldMatcher dimensions_in_what = 4;
 
-  optional FieldMatcher dimensions_in_condition = 7;
+  optional FieldMatcher dimensions_in_condition = 7 [deprecated = true];
 
   optional TimeUnit bucket = 5;
 
@@ -207,7 +207,7 @@ message DurationMetric {
 
   optional FieldMatcher dimensions_in_what = 6;
 
-  optional FieldMatcher dimensions_in_condition = 8;
+  optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
 
   optional TimeUnit bucket = 7;
 }
@@ -225,7 +225,7 @@ message GaugeMetric {
 
   optional FieldMatcher dimensions_in_what = 5;
 
-  optional FieldMatcher dimensions_in_condition = 8;
+  optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
 
   optional TimeUnit bucket = 6;
 
@@ -259,7 +259,7 @@ message ValueMetric {
 
   optional FieldMatcher dimensions_in_what = 5;
 
-  optional FieldMatcher dimensions_in_condition = 9;
+  optional FieldMatcher dimensions_in_condition = 9 [deprecated = true];
 
   optional TimeUnit bucket = 6;
 

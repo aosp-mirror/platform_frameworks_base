@@ -38,7 +38,6 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
-import android.compat.IPlatformCompat;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -73,6 +72,8 @@ import android.view.WindowManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
+
+import com.android.internal.compat.IPlatformCompat;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -4190,6 +4191,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
+    @TestApi
     public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
 
     /**

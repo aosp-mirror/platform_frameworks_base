@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"削除する <xliff:g id="CONTENT_TYPE">%s</xliff:g> が多すぎます。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"タブレットのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ウォッチのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"テレビのストレージに空き容量がありません。ファイルを削除して空き領域を確保してください。"</string>
+    <string name="low_memory" product="tv" msgid="7600147336326298290">"Android TV デバイスのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"デバイスのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">認証局がインストールされました</item>
@@ -195,7 +195,7 @@
     <string name="printing_disabled_by" msgid="8936832919072486965">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"タブレットオプション"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"テレビのオプション"</string>
+    <string name="power_dialog" product="tv" msgid="8004982661834719355">"Android TV のオプション"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"携帯電話オプション"</string>
     <string name="silent_mode" msgid="7167703389802618663">"マナーモード"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"ワイヤレス接続をONにする"</string>
@@ -213,7 +213,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"再起動しています…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"テレビの電源をOFFにします。"</string>
+    <string name="shutdown_confirm" product="tv" msgid="8488918603589647368">"Android TV デバイスをシャットダウンします。"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"ウォッチの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"シャットダウンしますか？"</string>
@@ -222,7 +222,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"新着"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"最近使ったアプリはありません。"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"タブレットオプション"</string>
-    <string name="global_actions" product="tv" msgid="7240386462508182976">"テレビのオプション"</string>
+    <string name="global_actions" product="tv" msgid="9091480417912345975">"Android TV のオプション"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"携帯電話オプション"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"画面ロック"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"電源を切る"</string>
@@ -300,8 +300,8 @@
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活動"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"運動データにアクセス"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"身体活動にアクセス"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"身体活動へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"テキストメッセージ（SMSまたはMMS）の読み取り"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"このアプリは、お使いのタブレットに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"このアプリは、お使いのテレビに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
+    <string name="permdesc_readSms" product="tv" msgid="9106832390302749856">"このアプリは、Android TV デバイスに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"このアプリは、お使いのスマートフォンに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"テキストメッセージ（WAP）の受信"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAPメッセージの受信と処理をアプリに許可します。これにより、アプリがデバイスに届いたメッセージを表示することなく監視または削除できるようになります。"</string>
@@ -374,7 +374,7 @@
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"このアプリにバックグラウンドでのデータ使用を許可します。許可するとデータ使用量が増える場合があります。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"アプリの常時実行"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、タブレットの動作が遅くなることがあります。"</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、テレビの動作が遅くなることがあります。"</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="47072473951071734">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、Android TV デバイスの動作が遅くなることがあります。"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、モバイル デバイスの動作が遅くなることがあります。"</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"フォアグラウンド サービスの実行"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"フォアグラウンド サービスの使用をアプリに許可します。"</string>
@@ -384,35 +384,35 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"システムの設定データの変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、システムの設定が破損する恐れがあります。"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"起動時の実行"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、タブレットの起動時間が長くなったり、アプリが常に実行されるためにタブレット全体の動作が遅くなったりする可能性があります。"</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、テレビの起動時間が長くなったり、アプリが常に実行されるためにテレビ全体の動作が遅くなったりする可能性があります。"</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="6725487837446317527">"システムの起動の直後に自動的に起動することをアプリに許可します。これにより、Android TV デバイスの起動時間が長くなったり、アプリが常に実行されるためにデバイス全体の動作が遅くなったりすることがあります。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、モバイル デバイスの起動時間が長くなったり、アプリが常に実行されるためにモバイル デバイス全体の動作が遅くなったりする可能性があります。"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"stickyブロードキャストの配信"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてタブレットの動作が遅くなったり不安定になったりする恐れがあります。"</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてテレビの動作が遅くなったり不安定になったりする恐れがあります。"</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="5029460344724532288">"配信が終了してもメモリに残る sticky ブロードキャストの配信をアプリに許可します。この許可を使用しすぎると、メモリの使用量が増えて Android TV デバイスの動作が遅くなったり不安定になったりすることがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてモバイル デバイスの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"連絡先の読み取り"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"テレビに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="3890061004911027912">"Android TV デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"モバイル デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"連絡先の変更"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"テレビに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="307929337692573341">"Android TV デバイスに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"モバイルデバイスに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"通話履歴の読み取り"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"このアプリは通話履歴を読み取ることができます。"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"通話履歴の書き込み"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"タブレットの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"テレビの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="7939219462637746280">"Android TV デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"モバイル デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"ボディーセンサー（心拍数モニターなど）へのアクセス"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"心拍数など、身体状態を監視するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"カレンダーの予定と詳細を読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"このアプリは、お使いのタブレットに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"このアプリは、お使いのテレビに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="1066881547471014386">"このアプリは、Android TV デバイスに保存されているカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"このアプリは、お使いのスマートフォンに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"カレンダーの予定の変更や追加を行う、所有者に通知せずにゲストにメールを送信する場合がある"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"このアプリは、お使いのタブレットでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"このアプリは、お使いのテレビでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="3127658465046261646">"このアプリは、Android TV デバイスでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"このアプリは、お使いのスマートフォンでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
@@ -420,7 +420,7 @@
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"このアプリは、フォアグラウンド状態でのみユーザーの正確な位置情報を取得できます。この位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"フォアグラウンドでのみ（ネットワークに基づく）おおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="8109788578615250690">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、Android TV デバイスでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"バックグラウンドでの位置情報へのアクセス"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"これが、おおよその位置情報または正確な位置情報へのアクセスの追加権限の場合、アプリはバックグラウンドでの実行中も位置情報にアクセスできます。"</string>
@@ -430,10 +430,12 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"このアプリは、いつでもマイクを使用して録音できます。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIMへのコマンド送信"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
-    <string name="permlab_activityRecognition" msgid="3634590230567608356">"運動の認識"</string>
-    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"このアプリで運動が認識されるようにします。"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"身体活動の認識"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"このアプリで身体活動が認識されるようにします。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"権限を付与されたこのシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"電話番号発信"</string>
@@ -451,14 +453,14 @@
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"電話番号の読み取り"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"デバイスの電話番号へのアクセスをアプリに許可します。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"テレビのスリープを無効化"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2861011879203144533">"Android TV デバイスのスリープの無効化"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"デバイスのスリープを無効にする"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"タブレットのスリープを無効にすることをアプリに許可します。"</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"テレビのスリープを無効にすることをアプリに許可します。"</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="7198875852034040387">"Android TV デバイスのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"モバイル デバイスのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"赤外線の送信"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"タブレットの赤外線送信機能の使用をアプリに許可します。"</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"テレビの赤外線送信機能の使用をアプリに許可します。"</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"Android TV デバイスの赤外線送信機能の使用をアプリに許可します。"</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"携帯電話の赤外線送信機能の使用をアプリに許可します。"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"壁紙の設定"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"システムの壁紙を設定することをアプリに許可します。"</string>
@@ -466,11 +468,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"システムの壁紙サイズのヒントを設定することをアプリに許可します。"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"タイムゾーンの設定"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"タブレットのタイムゾーンの変更をアプリに許可します。"</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"テレビのタイムゾーンの変更をアプリに許可します。"</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="8957160816851601080">"Android TV デバイスのタイムゾーンの変更をアプリに許可します。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"モバイル デバイスのタイムゾーンの変更をアプリに許可します。"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"このデバイス上のアカウントの検索"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"タブレットで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"テレビで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="1394648459318596337">"Android TV デバイスの認識済みアカウントのリストを取得することをアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"モバイル デバイスで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ネットワーク接続の表示"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"存在するネットワークや接続しているネットワークなど、ネットワーク接続に関する情報を表示することをアプリに許可します。"</string>
@@ -486,21 +488,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fiアクセスポイントへの接続/切断、Wi-Fiネットワークのデバイス設定の変更をアプリに許可します。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fiマルチキャストの受信を許可する"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"マルチキャストアドレスを使用して、このタブレットだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"マルチキャストアドレスを使用して、このテレビだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"マルチキャスト アドレスを使用して、この Android TV デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"マルチキャストアドレスを使用して、このモバイル デバイスだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ローカルのBluetoothタブレットを設定することと、リモートデバイスを検出してペアに設定することをアプリに許可します。"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ローカルのBluetoothテレビを設定することと、リモートデバイスを検出してペア設定することをアプリに許可します。"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Android TV デバイスで Bluetooth を設定することと、リモート デバイスを検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ローカルのBluetoothモバイル デバイスを設定することと、リモートデバイスを検出してペアに設定することをアプリに許可します。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXへの接続と切断"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAXがONになっているかどうかを識別し、接続されているWiMAXネットワークの情報を表示することをアプリに許可します。"</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX状態の変更"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"タブレットのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"テレビのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="4518633298024146973">"Android TV デバイスの WiMAX ネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"モバイル デバイスのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetoothデバイスのペアの設定"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"タブレットのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"テレビのBluetooth設定を表示すること、ペア設定したデバイスに接続すること、ペア設定したデバイスからの接続を受け入れることをアプリに許可します。"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="55662070067295183">"Android TV デバイスの Bluetooth 設定の表示と、ペア設定されたデバイスへの接続の確立、またはペア設定されたデバイスからの接続の受け入れをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"モバイルデバイスのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFCの管理"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"NFCタグ、カード、リーダーとの通信をアプリに許可します。"</string>
@@ -657,10 +659,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"画面ロック解除試行の監視"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"画面のロック解除に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はテレビをロックするかテレビのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2967881110061678281">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はテレビをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="1973059398191378275">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"画面ロックの変更"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"画面ロックを変更します。"</string>
@@ -668,11 +670,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"画面をロックする方法とタイミングを制御します。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"すべてのデータを消去"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"警告せずにデータの初期化を実行してタブレット内のデータを消去します。"</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"警告せずにデータの初期化を実行してテレビ内のデータを消去します。"</string>
+    <string name="policydesc_wipeData" product="tv" msgid="6798045945611386438">"警告せずに出荷時設定へのリセットを実行して Android TV デバイスのデータを消去します。"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"警告せずにデータの初期化を実行してデバイス内のデータを消去します。"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ユーザーデータの消去"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"このタブレットのこのユーザーのデータを警告なく消去します。"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"このテレビのこのユーザーのデータを警告なく消去します。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="6293292319060246784">"この Android TV デバイスでこのユーザーのデータを警告なく消去します。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"このスマートフォンのこのユーザーのデータを警告なく消去します。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"デバイスのグローバルプロキシを設定"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ポリシーが有効になっている場合はデバイスのグローバルプロキシが使用されるように設定します。グローバルプロキシを設定できるのはデバイスの所有者だけです。"</string>
@@ -822,7 +824,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"顔認証の最大試行回数を超えました"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"タブレット内にSIMカードがありません。"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"テレビにSIMカードが挿入されていません。"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3360993527792167595">"Android TV デバイスに SIM カードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIMカードを挿入してください。"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIMカードが見つからないか読み取れません。SIMカードを挿入してください。"</string>
@@ -845,13 +847,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"正しくないパスワードを<xliff:g id="NUMBER_0">%1$d</xliff:g>回入力しました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"正しくないPINを<xliff:g id="NUMBER_0">%1$d</xliff:g>回入力しました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、タブレットのロック解除にGoogleへのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、テレビのロック解除にGoogleへのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="3297696598748772945">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、Android TV デバイスのロック解除に Google へのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイルデバイスのロック解除にGoogleへのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"タブレットのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、タブレットは工場出荷状態にリセットされ、ユーザーのデータはすべて失われます。"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"テレビのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、テレビは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2489251890135468426">"Android TV デバイスのロック解除に <xliff:g id="NUMBER_0">%1$d</xliff:g> 回失敗しました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回失敗すると、Android TV デバイスは出荷時設定にリセットされ、ユーザーデータはすべて失われます。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"デバイスのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、デバイスは工場出荷状態にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットを工場出荷状態にリセットします。"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"テレビのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。テレビは出荷時設定にリセットされます。"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3027235047425118642">"Android TV デバイスのロック解除に <xliff:g id="NUMBER">%d</xliff:g> 回失敗しました。Android TV デバイスは出荷時設定にリセットされます。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"デバイスのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。デバイスを工場出荷状態にリセットします。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g>秒後にやり直してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"パターンを忘れた場合"</string>
@@ -938,7 +940,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ブラウザからアクセスしたすべてのURLの履歴とブラウザのすべてのブックマークの読み取りをアプリに許可します。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"ウェブのブックマークと履歴の書き込み"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"タブレットに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"テレビに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="6340829212433680418">"Android TV デバイスに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティ ブラウザまたはウェブ ブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"モバイル デバイスに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"アラームの設定"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"インストール済みアラームアプリのアラームを設定することをアプリに許可します。この機能が実装されていないアラームアプリもあります。"</string>
@@ -1249,17 +1251,20 @@
       <item quantity="one">Wi-Fiオープンネットワークが利用できます</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Wi-Fi オープン ネットワークに接続"</string>
-    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"携帯通信会社の Wi‑Fi ネットワークに接続"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi-Fi ネットワークに接続中"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi-Fi ネットワークに接続しました"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ネットワークに接続できませんでした"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"すべてのネットワークを表示するにはタップします"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"接続"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"すべてのネットワーク"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi ネットワークに接続しますか？"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> によるおすすめ"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"はい"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"いいえ"</string>
+    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
+    <skip />
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi は自動的にオンになります"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"高品質の保存済みネットワークの検出時"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"再度オンにしない"</string>
@@ -1307,7 +1312,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"必要なPINを入力してください:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"タブレットが<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に接続されている間は一時的にWi-Fi接続が切断されます"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"テレビが<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に接続されている間は一時的にWi-Fi接続が切断されます"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV デバイスが <xliff:g id="DEVICE_NAME">%1$s</xliff:g> に接続されている間は一時的に Wi-Fi 接続が解除されます"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"モバイル デバイスが<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に接続されている間は一時的にWi-Fi接続が解除されます。"</string>
     <string name="select_character" msgid="3365550120617701745">"文字を挿入"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMSメッセージの送信中"</string>
@@ -1356,7 +1361,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"タップして USB デバッグを無効にしてください"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB デバッグを無効にするにはここをタップしてください"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USBデバッグを無効にする場合に選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
@@ -1650,13 +1655,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"パスワードの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"タブレットのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、タブレットは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"テレビのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、テレビは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7160074727871617579">"Android TV デバイスのロック解除に <xliff:g id="NUMBER_0">%1$d</xliff:g> 回失敗しました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回失敗すると、Android TV デバイスは出荷時設定にリセットされ、ユーザーデータはすべて失われます。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"モバイル デバイスのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、デバイスは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットは出荷時設定にリセットされます。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"テレビのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。テレビは出荷時設定にリセットされます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4819357800079667914">"Android TV デバイスのロック解除に <xliff:g id="NUMBER">%d</xliff:g> 回失敗しました。Android TV デバイスは出荷時設定にリセットされます。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"モバイル デバイスのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。デバイスは出荷時設定にリセットされます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、テレビのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="837616660576302861">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、Android TV デバイスのロック解除にメール アカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイルデバイスのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
@@ -1997,6 +2002,9 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"タップしてブロック対象をご確認ください。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"システム"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"設定"</string>
+    <string name="standby_warning_title" msgid="9221585425153642453">"スタンバイ"</string>
+    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV デバイスはまもなく OFF になります。ON 状態を維持するには、ボタンを押してください。"</string>
+    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"このデバイスはまもなく OFF になります。ON 状態を維持するには、ボタンを押してください。"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"カメラ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"マイク"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"画面の他のアプリの上に重ねて表示"</string>

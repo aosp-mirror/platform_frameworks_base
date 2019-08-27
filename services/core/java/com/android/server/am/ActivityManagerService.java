@@ -9154,20 +9154,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 t.traceEnd();
             }
-            t.traceBegin("startHomeOnAllDisplays");
-            mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
-            t.traceEnd();
+            // Automotive will re-start system user as background (so its unlocked), then start a
+            // full user as foreground. Hence, we need to skip some steps that would otherwise be
+            // done twice.
+            // TODO(b/138956267): this workdound shouldn't be necessary once we move the
+            // headless-user start logic to UserManager-land
+            final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+
+            if (bootingSystemUser) {
+                t.traceBegin("startHomeOnAllDisplays");
+                mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+                t.traceEnd();
+            }
 
             t.traceBegin("showSystemReadyErrorDialogs");
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
             t.traceEnd();
 
-            // Some systems - like automotive - will explicitly unlock system user then switch
-            // to a secondary user. Hence, we don't want to send duplicate broadcasts for the
-            // system user here.
-            boolean sendSystemUserBroadcasts = currentUserId == UserHandle.USER_SYSTEM;
 
-            if (sendSystemUserBroadcasts) {
+            if (bootingSystemUser) {
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
@@ -9208,7 +9213,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             t.traceEnd();
 
-            if (sendSystemUserBroadcasts) {
+            if (bootingSystemUser) {
                 t.traceBegin("sendUserSwitchBroadcasts");
                 mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
                 t.traceEnd();

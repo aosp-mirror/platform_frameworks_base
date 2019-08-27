@@ -23,6 +23,7 @@ import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.util.Slog;
 
@@ -41,7 +42,15 @@ import java.util.ArrayList;
  */
 public class SystemServiceManager {
     private static final String TAG = "SystemServiceManager";
+    private static final boolean DEBUG = false;
     private static final int SERVICE_CALL_WARN_TIME_MS = 50;
+
+    // Constants used on onUser(...)
+    private static final String START = "Start";
+    private static final String UNLOCK = "Unlock";
+    private static final String SWITCH = "Switch";
+    private static final String STOP = "Stop";
+    private static final String CLEANUP = "Cleanup";
 
     private static File sSystemDir;
     private final Context mContext;
@@ -90,7 +99,6 @@ public class SystemServiceManager {
      * @return The service instance, never null.
      * @throws RuntimeException if the service fails to start.
      */
-    @SuppressWarnings("unchecked")
     public <T extends SystemService> T startService(Class<T> serviceClass) {
         try {
             final String name = serviceClass.getName();
@@ -212,64 +220,104 @@ public class SystemServiceManager {
      * Starts the given user.
      */
     public void startUser(final @NonNull TimingsTraceAndSlog t, final @UserIdInt int userHandle) {
-        onUser(t, "Start", userHandle, (s, u) -> s.onStartUser(u));
+        onUser(t, START, userHandle);
     }
 
     /**
      * Unlocks the given user.
      */
     public void unlockUser(final @UserIdInt int userHandle) {
-        onUser("Unlock", userHandle, (s, u) -> s.onUnlockUser(u));
+        onUser(UNLOCK, userHandle);
     }
 
     /**
      * Switches to the given user.
      */
-    public void switchUser(final @UserIdInt int userHandle) {
-        onUser("Switch", userHandle, (s, u) -> s.onSwitchUser(u));
+    public void switchUser(final @UserIdInt int from, final @UserIdInt int to) {
+        onUser(TimingsTraceAndSlog.newAsyncLog(), SWITCH, to, from);
     }
 
     /**
      * Stops the given user.
      */
     public void stopUser(final @UserIdInt int userHandle) {
-        onUser("Stop", userHandle, (s, u) -> s.onStopUser(u));
+        onUser(STOP, userHandle);
     }
 
     /**
      * Cleans up the given user.
      */
     public void cleanupUser(final @UserIdInt int userHandle) {
-        onUser("Cleanup", userHandle, (s, u) -> s.onCleanupUser(u));
+        onUser(CLEANUP, userHandle);
     }
 
-    private interface ServiceVisitor {
-        void visit(@NonNull SystemService service, @NonNull UserInfo userInfo);
-    }
-
-    private void onUser(@NonNull String onWhat, @UserIdInt int userHandle,
-            @NonNull ServiceVisitor visitor) {
-        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, userHandle, visitor);
+    private void onUser(@NonNull String onWhat, @UserIdInt int userHandle) {
+        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, userHandle);
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
-            @UserIdInt int userHandle, @NonNull ServiceVisitor visitor) {
-        t.traceBegin("ssm." + onWhat + "User-" + userHandle);
-        Slog.i(TAG, "Calling on" + onWhat + "User u" + userHandle);
-        final UserInfo userInfo = getUserInfo(userHandle);
+            @UserIdInt int userHandle) {
+        onUser(t, onWhat, userHandle, UserHandle.USER_NULL);
+    }
+
+    private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
+            @UserIdInt int curUserId, @UserIdInt int prevUserId) {
+        t.traceBegin("ssm." + onWhat + "User-" + curUserId);
+        Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId);
+        final UserInfo curUserInfo = getUserInfo(curUserId);
+        final UserInfo prevUserInfo = prevUserId == UserHandle.USER_NULL ? null
+                : getUserInfo(prevUserId);
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
             final String serviceName = service.getClass().getName();
-            t.traceBegin("ssm.on" + onWhat + "User-" + userHandle + " " + serviceName);
+            boolean supported = service.isSupported(curUserInfo);
+
+            // Must check if either curUser or prevUser is supported (for example, if switching from
+            // unsupported to supported, we still need to notify the services)
+            if (!supported && prevUserInfo != null) {
+                supported = service.isSupported(prevUserInfo);
+            }
+
+            if (!supported) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Skipping " + onWhat + "User-" + curUserId + " on service "
+                            + serviceName + " because it's not supported (curUser: "
+                            + curUserInfo + ", prevUser:" + prevUserInfo + ")");
+                } else {
+                    Slog.i(TAG,  "Skipping " + onWhat + "User-" + curUserId + " on "
+                            + serviceName);
+                }
+                continue;
+            }
+            t.traceBegin("ssm.on" + onWhat + "User-" + curUserId + " " + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
-                visitor.visit(service, userInfo);
+                switch (onWhat) {
+                    case SWITCH:
+                        service.onSwitchUser(prevUserInfo, curUserInfo);
+                        break;
+                    case START:
+                        service.onStartUser(curUserInfo);
+                        break;
+                    case UNLOCK:
+                        service.onUnlockUser(curUserInfo);
+                        break;
+                    case STOP:
+                        service.onStopUser(curUserInfo);
+                        break;
+                    case CLEANUP:
+                        service.onCleanupUser(curUserInfo);
+                        break;
+                    default:
+                        throw new IllegalArgumentException(onWhat + " what?");
+                }
             } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting " + onWhat + " of user " + userHandle
+                Slog.wtf(TAG, "Failure reporting " + onWhat + " of user " + curUserInfo
                         + " to service " + serviceName, ex);
             }
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "on" + onWhat + "User ");
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
+                    "on" + onWhat + "User-" + curUserId);
             t.traceEnd(); // what on service
         }
         t.traceEnd(); // main entry

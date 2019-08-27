@@ -200,6 +200,7 @@ android.app.ContentProviderHolder
 android.app.ContextImpl$1
 android.app.ContextImpl$ApplicationContentResolver
 android.app.ContextImpl
+android.app.DeviceIdleFrameworkInitializer
 android.app.DexLoadReporter
 android.app.Dialog$ListenersHandler
 android.app.Dialog

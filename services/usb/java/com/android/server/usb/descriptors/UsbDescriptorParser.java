@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 public final class UsbDescriptorParser {
     private static final String TAG = "UsbDescriptorParser";
-    private static final boolean DEBUG = false;
+    public static final boolean DEBUG = false;
 
     private final String mDeviceAddr;
 
@@ -115,6 +115,8 @@ public final class UsbDescriptorParser {
         int length = stream.getUnsignedByte();
         byte type = stream.getByte();
 
+        UsbDescriptor.logDescriptorName(type, length);
+
         UsbDescriptor descriptor = null;
         switch (type) {
             /*
@@ -174,14 +176,56 @@ public final class UsbDescriptorParser {
                 break;
 
             /*
-             * Audio Class Specific
+             * Various Class Specific
              */
-            case UsbDescriptor.DESCRIPTORTYPE_AUDIO_INTERFACE:
-                descriptor = UsbACInterface.allocDescriptor(this, stream, length, type);
+            case UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_INTERFACE:
+                if (mCurInterfaceDescriptor != null) {
+                    switch (mCurInterfaceDescriptor.getUsbClass()) {
+                        case UsbDescriptor.CLASSID_AUDIO:
+                            descriptor = UsbACInterface.allocDescriptor(this, stream, length, type);
+                            break;
+
+                        case UsbDescriptor.CLASSID_VIDEO:
+                            Log.d(TAG, "  UsbDescriptor.CLASSID_VIDEO subType:0x"
+                                    + Integer.toHexString(stream.getByte()));
+                            descriptor = UsbVCInterface.allocDescriptor(this, stream, length, type);
+                            break;
+
+                        case UsbDescriptor.CLASSID_AUDIOVIDEO:
+                            Log.d(TAG, "  UsbDescriptor.CLASSID_AUDIOVIDEO subType:0x"
+                                    + Integer.toHexString(stream.getByte()));
+                            break;
+
+                        default:
+                            Log.d(TAG, "  Unparsed Class-specific Interface:0x"
+                                    + Integer.toHexString(mCurInterfaceDescriptor.getUsbClass()));
+                            break;
+                    }
+                }
                 break;
 
-            case UsbDescriptor.DESCRIPTORTYPE_AUDIO_ENDPOINT:
-                descriptor = UsbACEndpoint.allocDescriptor(this, length, type);
+            case UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_ENDPOINT:
+                if (mCurInterfaceDescriptor != null) {
+                    switch (mCurInterfaceDescriptor.getUsbClass()) {
+                        case UsbDescriptor.CLASSID_AUDIO:
+                            descriptor = UsbACEndpoint.allocDescriptor(this, length, type);
+                            break;
+                        case UsbDescriptor.CLASSID_VIDEO:
+                            Log.d(TAG, "UsbDescriptor.CLASSID_VIDEO subType:0x"
+                                    + Integer.toHexString(stream.getByte()));
+                            descriptor = UsbVCEndpoint.allocDescriptor(this, length, type);
+                            break;
+
+                        case UsbDescriptor.CLASSID_AUDIOVIDEO:
+                            Log.d(TAG, "UsbDescriptor.CLASSID_AUDIOVIDEO subType:0x"
+                                    + Integer.toHexString(stream.getByte()));
+                            break;
+                        default:
+                            Log.d(TAG, "  Unparsed Class-specific Endpoint:0x"
+                                    + Integer.toHexString(mCurInterfaceDescriptor.getUsbClass()));
+                            break;
+                    }
+                }
                 break;
 
             default:
@@ -190,8 +234,6 @@ public final class UsbDescriptorParser {
 
         if (descriptor == null) {
             // Unknown Descriptor
-            Log.i(TAG, "Unknown Descriptor len: " + length + " type:0x"
-                    + Integer.toHexString(type));
             descriptor = new UsbUnknown(length, type);
         }
 
@@ -210,10 +252,6 @@ public final class UsbDescriptorParser {
      * @hide
      */
     public void parseDescriptors(byte[] descriptors) {
-        if (DEBUG) {
-            Log.d(TAG, "parseDescriptors() - start");
-        }
-
         ByteStream stream = new ByteStream(descriptors);
         while (stream.available() > 0) {
             UsbDescriptor descriptor = null;
@@ -325,8 +363,8 @@ public final class UsbDescriptorParser {
     public ArrayList<UsbDescriptor> getACInterfaceDescriptors(byte subtype, int subclass) {
         ArrayList<UsbDescriptor> list = new ArrayList<UsbDescriptor>();
         for (UsbDescriptor descriptor : mDescriptors) {
-            if (descriptor.getType() == UsbDescriptor.DESCRIPTORTYPE_AUDIO_INTERFACE) {
-                // ensure that this isn't an unrecognized DESCRIPTORTYPE_AUDIO_INTERFACE
+            if (descriptor.getType() == UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_INTERFACE) {
+                // ensure that this isn't an unrecognized DESCRIPTORTYPE_CLASSSPECIFIC_INTERFACE
                 if (descriptor instanceof UsbACInterface) {
                     UsbACInterface acDescriptor = (UsbACInterface) descriptor;
                     if (acDescriptor.getSubtype() == subtype
@@ -334,8 +372,8 @@ public final class UsbDescriptorParser {
                         list.add(descriptor);
                     }
                 } else {
-                    Log.w(TAG, "Unrecognized Audio Interface l: " + descriptor.getLength()
-                            + " t:0x" + Integer.toHexString(descriptor.getType()));
+                    Log.w(TAG, "Unrecognized Audio Interface len: " + descriptor.getLength()
+                            + " type:0x" + Integer.toHexString(descriptor.getType()));
                 }
             }
         }

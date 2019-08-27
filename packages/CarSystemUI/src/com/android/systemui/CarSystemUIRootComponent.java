@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_GRAPHICS_REGION_H_
-#define _ANDROID_GRAPHICS_REGION_H_
+package com.android.systemui;
 
-#include "jni.h"
-#include "SkRegion.h"
+import javax.inject.Singleton;
 
-namespace android {
+import dagger.Component;
 
-/* Gets the underlying SkRegion from a Region object. */
-extern SkRegion* android_graphics_Region_getSkRegion(JNIEnv* env, jobject regionObj);
+@Singleton
+@Component(
+        modules = {
+                DependencyProvider.class,
+                DependencyBinder.class,
+                ServiceBinder.class,
+                SystemUIFactory.ContextHolder.class,
+                SystemUIModule.class,
+                CarSystemUIModule.class
+        })
+interface CarSystemUIRootComponent extends SystemUIRootComponent {
 
-} // namespace android
-
-#endif // _ANDROID_GRAPHICS_REGION_H_
+}

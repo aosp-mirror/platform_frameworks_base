@@ -31,6 +31,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.DeviceIdleInternal;
 
+// TODO: Should we part of the apex, or the platform??
+
 /**
  * Track whether there are any active Bluetooth devices connected.
  */

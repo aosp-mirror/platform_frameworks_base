@@ -353,6 +353,9 @@ package android.app {
     field public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
     field public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
     field public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
+    field public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
+    field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
+    field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     field public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
     field public static final String OPSTR_REQUEST_DELETE_PACKAGES = "android:request_delete_packages";
     field public static final String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
@@ -368,6 +371,9 @@ package android.app {
     field public static final String OPSTR_WIFI_SCAN = "android:wifi_scan";
     field public static final String OPSTR_WRITE_CLIPBOARD = "android:write_clipboard";
     field public static final String OPSTR_WRITE_ICC_SMS = "android:write_icc_sms";
+    field public static final String OPSTR_WRITE_MEDIA_AUDIO = "android:write_media_audio";
+    field public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
+    field public static final String OPSTR_WRITE_MEDIA_VIDEO = "android:write_media_video";
     field public static final String OPSTR_WRITE_SMS = "android:write_sms";
     field public static final String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
     field public static final int OP_FLAGS_ALL = 31; // 0x1f
@@ -5852,6 +5858,7 @@ package android.provider {
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field public static final String NAMESPACE_DEX_BOOT = "dex_boot";
+    field public static final String NAMESPACE_DISPLAY_MANAGER = "display_manager";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
