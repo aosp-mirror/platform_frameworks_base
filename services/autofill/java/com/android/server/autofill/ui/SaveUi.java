@@ -197,8 +197,20 @@ final class SaveUi {
         if ((type & SaveInfo.SAVE_DATA_TYPE_ADDRESS) != 0) {
             types.add(context.getString(R.string.autofill_save_type_address));
         }
-        if ((type & SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD) != 0) {
+
+        // fallback to generic card type if set multiple types
+        final int cardTypeMask = SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD
+                        | SaveInfo.SAVE_DATA_TYPE_DEBIT_CARD
+                        | SaveInfo.SAVE_DATA_TYPE_PAYMENT_CARD;
+        final int count = Integer.bitCount(type & cardTypeMask);
+        if (count > 1 || (type & SaveInfo.SAVE_DATA_TYPE_GENERIC_CARD) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_generic_card));
+        } else if ((type & SaveInfo.SAVE_DATA_TYPE_PAYMENT_CARD) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_payment_card));
+        } else if ((type & SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD) != 0) {
             types.add(context.getString(R.string.autofill_save_type_credit_card));
+        } else if ((type & SaveInfo.SAVE_DATA_TYPE_DEBIT_CARD) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_debit_card));
         }
         if ((type & SaveInfo.SAVE_DATA_TYPE_USERNAME) != 0) {
             types.add(context.getString(R.string.autofill_save_type_username));
@@ -269,7 +281,9 @@ final class SaveUi {
         noButton.setOnClickListener((v) -> mListener.onCancel(info.getNegativeActionListener()));
 
         final TextView yesButton = view.findViewById(R.id.autofill_save_yes);
-        if (isUpdate) {
+        if (info.getPositiveActionStyle() == SaveInfo.POSITIVE_BUTTON_STYLE_CONTINUE) {
+            yesButton.setText(R.string.autofill_continue_yes);
+        } else if (isUpdate) {
             yesButton.setText(R.string.autofill_update_yes);
         }
         yesButton.setOnClickListener((v) -> mListener.onSave());
