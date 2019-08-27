@@ -4533,6 +4533,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void wakeUpFromPowerKey(long eventTime) {
         wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey,
                 PowerManager.WAKE_REASON_POWER_BUTTON, "android.policy:POWER");
+
+        // Turn on the connected TV and switch HDMI input if we're a HDMI playback device.
+        final HdmiControl hdmiControl = getHdmiControl();
+        if (hdmiControl != null) {
+            hdmiControl.turnOnTv();
+        }
     }
 
     private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode, @WakeReason int reason,
