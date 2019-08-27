@@ -829,6 +829,17 @@ public class ActivityOptions {
         return exit;
     }
 
+    /**
+     * Needed for virtual devices because they can be slow enough that the 1 second timeout
+     * triggers when it doesn't on normal devices.
+     *
+     * @hide
+     */
+    @TestApi
+    public static void setExitTransitionTimeout(long timeoutMillis) {
+        ExitTransitionCoordinator.sMaxWaitMillis = timeoutMillis;
+    }
+
     /** @hide */
     static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             ExitTransitionCoordinator exitCoordinator, ArrayList<String> sharedElementNames,
