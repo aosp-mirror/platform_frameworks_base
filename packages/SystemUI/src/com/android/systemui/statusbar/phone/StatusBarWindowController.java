@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 
 import android.app.ActivityManager;
@@ -370,12 +371,14 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
         if (mHasTopUi != mHasTopUiChanged) {
-            try {
-                mActivityManager.setHasTopUi(mHasTopUiChanged);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to call setHasTopUi", e);
-            }
-            mHasTopUi = mHasTopUiChanged;
+            whitelistIpcs(() -> {
+                try {
+                    mActivityManager.setHasTopUi(mHasTopUiChanged);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to call setHasTopUi", e);
+                }
+                mHasTopUi = mHasTopUiChanged;
+            });
         }
         notifyStateChangedCallbacks();
     }

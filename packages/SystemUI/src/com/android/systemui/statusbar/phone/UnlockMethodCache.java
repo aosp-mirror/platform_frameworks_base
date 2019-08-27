@@ -27,6 +27,7 @@ import android.os.Trace;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.DejankUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -133,15 +134,20 @@ public class UnlockMethodCache {
             mTrusted = trusted;
             mTrustManaged = trustManaged;
             mFaceAuthEnabled = faceAuthEnabled;
+            Trace.endSection();
             notifyListeners();
+        } else {
+            Trace.endSection();
         }
-        Trace.endSection();
     }
 
     private void notifyListeners() {
+        String tag = "UnlockMethodCache#notifyListeners";
+        DejankUtils.startDetectingBlockingIpcs(tag);
         for (OnUnlockMethodChangedListener listener : mListeners) {
             listener.onUnlockMethodStateChanged();
         }
+        DejankUtils.stopDetectingBlockingIpcs(tag);
     }
 
     public void dump(PrintWriter pw) {

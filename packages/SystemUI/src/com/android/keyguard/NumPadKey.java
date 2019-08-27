@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.PowerManager;
@@ -90,7 +92,9 @@ public class NumPadKey extends ViewGroup {
         setOnClickListener(mListener);
         setOnHoverListener(new LiftToActivateListener(context));
 
-        mEnableHaptics = new LockPatternUtils(context).isTactileFeedbackEnabled();
+        // TODO(b/140043085)
+        mEnableHaptics = whitelistIpcs(() ->
+                new LockPatternUtils(context).isTactileFeedbackEnabled());
 
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(

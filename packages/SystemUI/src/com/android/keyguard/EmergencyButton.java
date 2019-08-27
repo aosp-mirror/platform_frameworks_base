@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.content.Context;
@@ -132,7 +134,7 @@ public class EmergencyButton extends Button {
                 return false;
             }
         });
-        updateEmergencyCallButton();
+        whitelistIpcs(this::updateEmergencyCallButton);
     }
 
     @Override

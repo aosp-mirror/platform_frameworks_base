@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.telephony.SubscriptionManager;
@@ -67,7 +69,9 @@ public class KeyguardSecurityModel {
             return SecurityMode.SimPin;
         }
 
-        final int security = mLockPatternUtils.getActivePasswordQuality(userId);
+        // TODO(b/140034863)
+        final int security = whitelistIpcs(() ->
+                mLockPatternUtils.getActivePasswordQuality(userId));
         switch (security) {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

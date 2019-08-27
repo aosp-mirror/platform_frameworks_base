@@ -16,6 +16,8 @@
 
 package com.android.systemui.assist;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -368,8 +370,9 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         long currentTimestamp = SystemClock.uptimeMillis();
         mLearningTimeElapsed += currentTimestamp - mLastLearningTimestamp;
         mLastLearningTimestamp = currentTimestamp;
-        Settings.Secure.putLong(
-                mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, mLearningTimeElapsed);
+        // TODO(b/140034473)
+        whitelistIpcs(() -> Settings.Secure.putLong(
+                mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, mLearningTimeElapsed));
 
         mIsLearned =
                 mLearningCount >= getLearningCount() || mLearningTimeElapsed >= getLearningTimeMs();

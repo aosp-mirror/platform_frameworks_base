@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
@@ -76,7 +77,6 @@ import com.android.systemui.plugins.IntentButtonProvider;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton.IconState;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
-import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
@@ -365,9 +365,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
      * Resolves the intent to launch the camera application.
      */
     public ResolveInfo resolveCameraIntent() {
-        return mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
-                PackageManager.MATCH_DEFAULT_ONLY,
-                KeyguardUpdateMonitor.getCurrentUser());
+        // TODO(b/140057230)
+        return whitelistIpcs(() ->
+                mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
+                    PackageManager.MATCH_DEFAULT_ONLY,
+                    KeyguardUpdateMonitor.getCurrentUser()));
     }
 
     private void updateCameraVisibility() {
@@ -820,7 +822,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
             boolean canSkipBouncer = updateMonitor.getUserCanSkipBouncer(
                     KeyguardUpdateMonitor.getCurrentUser());
-            boolean secure = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
+            // TODO(b/140057230)
+            boolean secure = whitelistIpcs(() ->
+                    mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser()));
             return (secure && !canSkipBouncer) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
         }
     }

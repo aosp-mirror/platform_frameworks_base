@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import android.content.Context;
@@ -468,12 +469,15 @@ public class KeyguardBouncer {
      * notifications on Keyguard, like SIM PIN/PUK.
      */
     public boolean needsFullscreenBouncer() {
-        ensureView();
-        if (mKeyguardView != null) {
-            SecurityMode mode = mKeyguardView.getSecurityMode();
-            return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
-        }
-        return false;
+        // TODO(b/140059518)
+        return whitelistIpcs(() -> {
+            ensureView();
+            if (mKeyguardView != null) {
+                SecurityMode mode = mKeyguardView.getSecurityMode();
+                return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
+            }
+            return false;
+        });
     }
 
     /**
