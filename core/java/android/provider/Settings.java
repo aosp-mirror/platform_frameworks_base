@@ -3477,6 +3477,14 @@ public final class Settings {
         };
 
         /**
+         * The user selected min refresh rate in frames per second.
+         *
+         * If this isn't set, 0 will be used.
+         * @hide
+         */
+        public static final String MIN_REFRESH_RATE = "min_refresh_rate";
+
+        /**
          * The user selected peak refresh rate in frames per second.
          *
          * If this isn't set, the system falls back to a device specific default.
