@@ -3206,6 +3206,7 @@ public class WifiManager {
 
         private final CloseGuard mCloseGuard = CloseGuard.get();
         private final WifiConfiguration mConfig;
+        private boolean mClosed = false;
 
         /** @hide */
         @VisibleForTesting
@@ -3221,8 +3222,13 @@ public class WifiManager {
         @Override
         public void close() {
             try {
-                stopLocalOnlyHotspot();
-                mCloseGuard.close();
+                synchronized (mLock) {
+                    if (!mClosed) {
+                        mClosed = true;
+                        stopLocalOnlyHotspot();
+                        mCloseGuard.close();
+                    }
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to stop Local Only Hotspot.");
             }
