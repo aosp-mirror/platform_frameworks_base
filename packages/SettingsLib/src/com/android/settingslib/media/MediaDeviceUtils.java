@@ -32,6 +32,9 @@ public class MediaDeviceUtils {
      * @return CachedBluetoothDevice address
      */
     public static String getId(CachedBluetoothDevice cachedDevice) {
+        if (cachedDevice.isHearingAidDevice()) {
+            return Long.toString(cachedDevice.getHiSyncId());
+        }
         return cachedDevice.getAddress();
     }
 

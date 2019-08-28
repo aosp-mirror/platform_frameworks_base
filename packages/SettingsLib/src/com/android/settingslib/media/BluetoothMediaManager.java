@@ -126,10 +126,13 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
             return;
         }
 
-        final List<Long> devicesHiSyncIds = new ArrayList<>();
         final List<BluetoothDevice> devices = hapProfile.getConnectableDevices();
-
         for (BluetoothDevice device : devices) {
+            // Only add master HearingAid device, ignore sub
+            if (mCachedBluetoothDeviceManager.isSubDevice(device)) {
+                Log.w(TAG, "Sub hearingAid device: " + device.getName());
+                continue;
+            }
             final CachedBluetoothDevice cachedDevice =
                     mCachedBluetoothDeviceManager.findDevice(device);
 
@@ -142,13 +145,8 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
                     + ", is connected : " + cachedDevice.isConnected()
                     + ", is preferred : " + hapProfile.isPreferred(device));
 
-            final long hiSyncId = hapProfile.getHiSyncId(device);
-
-            // device with same hiSyncId should not be shown in the UI.
-            // So do not add it into connectedDevices.
-            if (!devicesHiSyncIds.contains(hiSyncId) && hapProfile.isPreferred(device)
+            if (hapProfile.isPreferred(device)
                     && BluetoothDevice.BOND_BONDED == cachedDevice.getBondState()) {
-                devicesHiSyncIds.add(hiSyncId);
                 addMediaDevice(cachedDevice);
             }
         }
@@ -284,9 +282,8 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
                 + activeDevice + ", profile : " + bluetoothProfile);
 
         if (BluetoothProfile.HEARING_AID == bluetoothProfile) {
-            if (activeDevice != null) {
-                dispatchConnectedDeviceChanged(MediaDeviceUtils.getId(activeDevice));
-            }
+            dispatchConnectedDeviceChanged(activeDevice == null
+                    ? PhoneMediaDevice.ID : MediaDeviceUtils.getId(activeDevice));
         } else if (BluetoothProfile.A2DP == bluetoothProfile) {
             // When active device change to Hearing Aid,
             // BluetoothEventManager also send onActiveDeviceChanged() to notify that active device
@@ -304,12 +301,16 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     private MediaDevice findActiveHearingAidDevice() {
         final HearingAidProfile hearingAidProfile = mProfileManager.getHearingAidProfile();
 
-        if (hearingAidProfile != null) {
-            final List<BluetoothDevice> activeDevices = hearingAidProfile.getActiveDevices();
-            for (BluetoothDevice btDevice : activeDevices) {
-                if (btDevice != null) {
-                    return findMediaDevice(MediaDeviceUtils.getId(btDevice));
-                }
+        if (hearingAidProfile == null) {
+            Log.e(TAG, "findActiveHearingAidDevice: hearingAidProfile == null");
+            return null;
+        }
+        final List<BluetoothDevice> activeDevices = hearingAidProfile.getActiveDevices();
+        for (BluetoothDevice btDevice : activeDevices) {
+            final MediaDevice mediaDevice =
+                    findMediaDevice(Long.toString(hearingAidProfile.getHiSyncId(btDevice)));
+            if (mediaDevice != null) {
+                return mediaDevice;
             }
         }
         return null;
