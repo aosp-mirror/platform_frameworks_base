@@ -5723,8 +5723,7 @@ public class AudioService extends IAudioService.Stub
                         UserManager.DISALLOW_RECORD_AUDIO, false, userId);
             } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                if (state == BluetoothAdapter.STATE_OFF ||
-                        state == BluetoothAdapter.STATE_TURNING_OFF) {
+                if (state == BluetoothAdapter.STATE_OFF) {
                     mDeviceBroker.disconnectAllBluetoothProfiles();
                 }
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
