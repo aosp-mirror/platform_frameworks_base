@@ -652,7 +652,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mForceSeamlesslyRotate || requested) {
             mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo());
             mPendingSeamlessRotate.unrotate(transaction, this);
-            mWmService.markForSeamlessRotation(this, true);
+            getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
+                    true /* seamlesslyRotated */);
         }
     }
 
@@ -661,7 +662,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mPendingSeamlessRotate.finish(this, timeout);
             mFinishSeamlessRotateFrameNumber = getFrameNumber();
             mPendingSeamlessRotate = null;
-            mWmService.markForSeamlessRotation(this, false);
+            getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
+                    false /* seamlesslyRotated */);
         }
     }
 
@@ -2086,7 +2088,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // So just update orientation if needed.
             if (wasVisible) {
                 final DisplayContent displayContent = getDisplayContent();
-                if (displayContent.updateOrientationFromAppTokens()) {
+                if (displayContent.updateOrientation()) {
                     displayContent.sendNewConfiguration();
                 }
             }

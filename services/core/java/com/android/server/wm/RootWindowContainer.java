@@ -925,8 +925,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     boolean updateRotationUnchecked() {
         boolean changed = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final DisplayContent displayContent = mChildren.get(i);
-            if (displayContent.updateRotationAndSendNewConfigIfNeeded()) {
+            if (mChildren.get(i).getDisplayRotation().updateRotationAndSendNewConfigIfChanged()) {
                 changed = true;
             }
         }

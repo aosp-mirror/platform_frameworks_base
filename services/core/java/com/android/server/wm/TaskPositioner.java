@@ -304,7 +304,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         if (DEBUG_ORIENTATION) {
             Slog.d(TAG, "Pausing rotation during re-position");
         }
-        mDisplayContent.pauseRotationLocked();
+        mDisplayContent.getDisplayRotation().pause();
 
         // Notify InputMonitor to take mDragWindowHandle.
         mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
@@ -347,7 +347,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         if (DEBUG_ORIENTATION) {
             Slog.d(TAG, "Resuming rotation after re-position");
         }
-        mDisplayContent.resumeRotationLocked();
+        mDisplayContent.getDisplayRotation().resume();
         mDisplayContent = null;
         mClientCallback.unlinkToDeath(this, 0 /* flags */);
     }

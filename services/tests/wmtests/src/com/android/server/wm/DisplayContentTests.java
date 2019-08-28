@@ -445,7 +445,7 @@ public class DisplayContentTests extends WindowTestsBase {
                     .computeSafeInsets(200, 400).getDisplayCutout();
 
             dc.mInitialDisplayCutout = cutout;
-            dc.setRotation(Surface.ROTATION_0);
+            dc.getDisplayRotation().setRotation(Surface.ROTATION_0);
             dc.computeScreenConfiguration(new Configuration()); // recomputes dc.mDisplayInfo.
 
             assertEquals(cutout, dc.getDisplayInfo().displayCutout);
@@ -476,7 +476,7 @@ public class DisplayContentTests extends WindowTestsBase {
                     .computeSafeInsets(displayWidth, displayHeight).getDisplayCutout();
 
             dc.mInitialDisplayCutout = cutout;
-            dc.setRotation(Surface.ROTATION_90);
+            dc.getDisplayRotation().setRotation(Surface.ROTATION_90);
             dc.computeScreenConfiguration(new Configuration()); // recomputes dc.mDisplayInfo.
 
             // ----o----------      -------------
@@ -608,18 +608,18 @@ public class DisplayContentTests extends WindowTestsBase {
         portraitDisplay.mInitialDisplayHeight = 2000;
         portraitDisplay.mInitialDisplayWidth = 1000;
 
-        portraitDisplay.setRotation(Surface.ROTATION_0);
+        portraitDisplay.getDisplayRotation().setRotation(Surface.ROTATION_0);
         assertFalse(isOptionsPanelAtRight(portraitDisplay.getDisplayId()));
-        portraitDisplay.setRotation(Surface.ROTATION_90);
+        portraitDisplay.getDisplayRotation().setRotation(Surface.ROTATION_90);
         assertTrue(isOptionsPanelAtRight(portraitDisplay.getDisplayId()));
 
         final DisplayContent landscapeDisplay = createNewDisplay();
         landscapeDisplay.mInitialDisplayHeight = 1000;
         landscapeDisplay.mInitialDisplayWidth = 2000;
 
-        landscapeDisplay.setRotation(Surface.ROTATION_0);
+        landscapeDisplay.getDisplayRotation().setRotation(Surface.ROTATION_0);
         assertTrue(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
-        landscapeDisplay.setRotation(Surface.ROTATION_90);
+        landscapeDisplay.getDisplayRotation().setRotation(Surface.ROTATION_90);
         assertFalse(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
     }
 
