@@ -124,6 +124,10 @@ class AssetManager2 {
   // This may be nullptr if the APK represented by `cookie` has no resource table.
   const DynamicRefTable* GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
 
+  // Returns a string representation of the overlayable API of a package.
+  bool GetOverlayablesToString(const android::StringPiece& package_name,
+                               std::string* out) const;
+
   const std::unordered_map<std::string, std::string>*
     GetOverlayableMapForPackage(uint32_t package_id) const;
 
@@ -308,7 +312,7 @@ class AssetManager2 {
   const ResolvedBag* GetBag(uint32_t resid, std::vector<uint32_t>& child_resids);
 
   // Retrieve the assigned package id of the package if loaded into this AssetManager
-  uint8_t GetAssignedPackageId(const LoadedPackage* package);
+  uint8_t GetAssignedPackageId(const LoadedPackage* package) const;
 
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.

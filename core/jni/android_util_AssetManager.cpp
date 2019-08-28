@@ -352,7 +352,7 @@ static Guarded<AssetManager2>& AssetManagerFromLong(jlong ptr) {
 }
 
 static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
-                                        jstring package_name) {
+                                       jstring package_name) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
   const ScopedUtfChars package_name_utf8(env, package_name);
   CHECK(package_name_utf8.c_str() != nullptr);
@@ -395,6 +395,21 @@ static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   }
 
   return array_map;
+}
+
+static jstring NativeGetOverlayablesToString(JNIEnv* env, jclass /*clazz*/, jlong ptr,
+                                             jstring package_name) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  const ScopedUtfChars package_name_utf8(env, package_name);
+  CHECK(package_name_utf8.c_str() != nullptr);
+  const std::string std_package_name(package_name_utf8.c_str());
+
+  std::string result;
+  if (!assetmanager->GetOverlayablesToString(std_package_name, &result)) {
+    return nullptr;
+  }
+
+  return env->NewStringUTF(result.c_str());
 }
 
 #ifdef __ANDROID__ // Layoutlib does not support parcel
@@ -1608,6 +1623,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
      (void*)NativeCreateIdmapsForStaticOverlaysTargetingAndroid},
     {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",
      (void*)NativeGetOverlayableMap},
+    {"nativeGetOverlayablesToString", "(JLjava/lang/String;)Ljava/lang/String;",
+     (void*)NativeGetOverlayablesToString},
 
     // Global management/debug methods.
     {"getGlobalAssetCount", "()I", (void*)NativeGetGlobalAssetCount},
