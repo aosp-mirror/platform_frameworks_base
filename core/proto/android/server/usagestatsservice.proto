@@ -114,6 +114,4 @@ message IntervalStatsProto {
   repeated UsageStats packages = 20;
   repeated Configuration configurations = 21;
   repeated Event event_log = 22;
-
-  repeated Event pending_events = 23; // TODO: move to usagestatsservice_v2.proto
 }

@@ -42,8 +42,11 @@ import android.app.usage.EventStats;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.proto.ProtoInputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -64,6 +67,8 @@ public class IntervalStats {
     public final EventTracker keyguardShownTracker = new EventTracker();
     public final EventTracker keyguardHiddenTracker = new EventTracker();
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
+    /** @hide */
+    public final SparseArray<UsageStats> packageStatsObfuscated = new SparseArray<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
     public final EventList events = new EventList();
@@ -435,5 +440,183 @@ public class IntervalStats {
           Optional upgrade code here.
         */
         majorVersion = CURRENT_MAJOR_VERSION;
+    }
+
+    /**
+     * Parses all of the tokens to strings in the obfuscated usage stats data. This includes
+     * deobfuscating each of the package tokens and chooser actions and categories.
+     */
+    private void deobfuscateUsageStats(PackagesTokenData packagesTokenData) {
+        final int usageStatsSize = packageStatsObfuscated.size();
+        for (int statsIndex = 0; statsIndex < usageStatsSize; statsIndex++) {
+            final int packageToken = packageStatsObfuscated.keyAt(statsIndex);
+            final UsageStats usageStats = packageStatsObfuscated.valueAt(statsIndex);
+            usageStats.mPackageName = packagesTokenData.getString(packageToken,
+                    PackagesTokenData.PACKAGE_NAME_INDEX);
+
+            // Update chooser counts
+            final int chooserActionsSize = usageStats.mChooserCountsObfuscated.size();
+            for (int actionIndex = 0; actionIndex < chooserActionsSize; actionIndex++) {
+                final ArrayMap<String, Integer> categoryCountsMap = new ArrayMap<>();
+                final int actionToken = usageStats.mChooserCountsObfuscated.keyAt(actionIndex);
+                final String action = packagesTokenData.getString(packageToken, actionToken);
+                final SparseIntArray categoryCounts =
+                        usageStats.mChooserCountsObfuscated.valueAt(actionIndex);
+                final int categoriesSize = categoryCounts.size();
+                for (int categoryIndex = 0; categoryIndex < categoriesSize; categoryIndex++) {
+                    final int categoryToken = categoryCounts.keyAt(categoryIndex);
+                    final String category = packagesTokenData.getString(packageToken,
+                            categoryToken);
+                    categoryCountsMap.put(category, categoryCounts.valueAt(categoryIndex));
+                }
+                usageStats.mChooserCounts.put(action, categoryCountsMap);
+            }
+            packageStats.put(usageStats.mPackageName, usageStats);
+        }
+    }
+
+    /**
+     * Parses all of the tokens to strings in the obfuscated events data. This includes
+     * deobfuscating the package token, along with any class, task root package/class tokens, and
+     * shortcut or notification channel tokens.
+     */
+    private void deobfuscateEvents(PackagesTokenData packagesTokenData) {
+        final int eventsSize = this.events.size();
+        for (int i = 0; i < eventsSize; i++) {
+            final Event event = this.events.get(i);
+            final int packageToken = event.mPackageToken;
+            event.mPackage = packagesTokenData.getString(packageToken,
+                    PackagesTokenData.PACKAGE_NAME_INDEX);
+            if (event.mClassToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                event.mClass = packagesTokenData.getString(packageToken, event.mClassToken);
+            }
+            if (event.mTaskRootPackageToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                event.mTaskRootPackage = packagesTokenData.getString(packageToken,
+                        event.mTaskRootPackageToken);
+            }
+            if (event.mTaskRootClassToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                event.mTaskRootClass = packagesTokenData.getString(packageToken,
+                        event.mTaskRootClassToken);
+            }
+            switch (event.mEventType) {
+                case CONFIGURATION_CHANGE:
+                    if (event.mConfiguration == null) {
+                        event.mConfiguration = new Configuration();
+                    }
+                    break;
+                case SHORTCUT_INVOCATION:
+                    event.mShortcutId = packagesTokenData.getString(packageToken,
+                            event.mShortcutIdToken);
+                    break;
+                case NOTIFICATION_INTERRUPTION:
+                    event.mNotificationChannelId = packagesTokenData.getString(packageToken,
+                            event.mNotificationChannelIdToken);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Parses the obfuscated tokenized data held in this interval stats object.
+     *
+     * @hide
+     */
+    public void deobfuscateData(PackagesTokenData packagesTokenData) {
+        deobfuscateUsageStats(packagesTokenData);
+        deobfuscateEvents(packagesTokenData);
+    }
+
+    /**
+     * Obfuscates certain strings within each package stats such as the package name, and the
+     * chooser actions and categories.
+     */
+    private void obfuscateUsageStatsData(PackagesTokenData packagesTokenData) {
+        final int usageStatsSize = packageStats.size();
+        for (int statsIndex = 0; statsIndex < usageStatsSize; statsIndex++) {
+            final String packageName = packageStats.keyAt(statsIndex);
+            final UsageStats usageStats = packageStats.valueAt(statsIndex);
+            if (usageStats == null) {
+                continue;
+            }
+
+            final int packageToken = packagesTokenData.getPackageTokenOrAdd(packageName);
+            usageStats.mPackageToken = packageToken;
+            // Update chooser counts.
+            final int chooserActionsSize = usageStats.mChooserCounts.size();
+            for (int actionIndex = 0; actionIndex < chooserActionsSize; actionIndex++) {
+                final String action = usageStats.mChooserCounts.keyAt(actionIndex);
+                final ArrayMap<String, Integer> categoriesMap =
+                        usageStats.mChooserCounts.valueAt(actionIndex);
+                if (categoriesMap == null) {
+                    continue;
+                }
+
+                final SparseIntArray categoryCounts = new SparseIntArray();
+                final int categoriesSize = categoriesMap.size();
+                for (int categoryIndex = 0; categoryIndex < categoriesSize; categoryIndex++) {
+                    String category = categoriesMap.keyAt(categoryIndex);
+                    int categoryToken = packagesTokenData.getTokenOrAdd(packageToken, packageName,
+                            category);
+                    categoryCounts.put(categoryToken, categoriesMap.valueAt(categoryIndex));
+                }
+                int actionToken = packagesTokenData.getTokenOrAdd(packageToken, packageName,
+                        action);
+                usageStats.mChooserCountsObfuscated.put(actionToken, categoryCounts);
+            }
+            packageStatsObfuscated.put(packageToken, usageStats);
+        }
+    }
+
+    /**
+     * Obfuscates certain strings within an event such as the package name, the class name,
+     * task root package and class names, and shortcut and notification channel ids.
+     */
+    private void obfuscateEventsData(PackagesTokenData packagesTokenData) {
+        final int eventSize = events.size();
+        for (int i = 0; i < eventSize; i++) {
+            final Event event = events.get(i);
+            if (event == null) {
+                continue;
+            }
+
+            final int packageToken = packagesTokenData.getPackageTokenOrAdd(event.mPackage);
+            event.mPackageToken = packageToken;
+            if (!TextUtils.isEmpty(event.mClass)) {
+                event.mClassToken = packagesTokenData.getTokenOrAdd(packageToken,
+                        event.mPackage, event.mClass);
+            }
+            if (!TextUtils.isEmpty(event.mTaskRootPackage)) {
+                event.mTaskRootPackageToken = packagesTokenData.getTokenOrAdd(packageToken,
+                        event.mPackage, event.mTaskRootPackage);
+            }
+            if (!TextUtils.isEmpty(event.mTaskRootClass)) {
+                event.mTaskRootClassToken = packagesTokenData.getTokenOrAdd(packageToken,
+                        event.mPackage, event.mTaskRootClass);
+            }
+            switch (event.mEventType) {
+                case SHORTCUT_INVOCATION:
+                    if (!TextUtils.isEmpty(event.mShortcutId)) {
+                        event.mShortcutIdToken = packagesTokenData.getTokenOrAdd(packageToken,
+                                event.mPackage, event.mShortcutId);
+                    }
+                    break;
+                case NOTIFICATION_INTERRUPTION:
+                    if (!TextUtils.isEmpty(event.mNotificationChannelId)) {
+                        event.mNotificationChannelIdToken = packagesTokenData.getTokenOrAdd(
+                                packageToken, event.mPackage, event.mNotificationChannelId);
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Obfuscates the data in this instance of interval stats.
+     *
+     * @hide
+     */
+    public void obfuscateData(PackagesTokenData packagesTokenData) {
+        obfuscateUsageStatsData(packagesTokenData);
+        obfuscateEventsData(packagesTokenData);
     }
 }

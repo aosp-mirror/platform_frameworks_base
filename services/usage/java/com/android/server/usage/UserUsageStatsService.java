@@ -524,6 +524,8 @@ class UserUsageStatsService {
         if (mStatsChanged) {
             Slog.i(TAG, mLogPrefix + "Flushing usage stats to disk");
             try {
+                mDatabase.obfuscateCurrentStats(mCurrentStats);
+                mDatabase.writeMappingsLocked();
                 for (int i = 0; i < mCurrentStats.length; i++) {
                     mDatabase.putUsageStats(i, mCurrentStats[i]);
                 }
@@ -698,6 +700,10 @@ class UserUsageStatsService {
 
     void dumpDatabaseInfo(IndentingPrintWriter ipw) {
         mDatabase.dump(ipw, false);
+    }
+
+    void dumpMappings(IndentingPrintWriter ipw) {
+        mDatabase.dumpMappings(ipw);
     }
 
     void dumpFile(IndentingPrintWriter ipw, String[] args) {

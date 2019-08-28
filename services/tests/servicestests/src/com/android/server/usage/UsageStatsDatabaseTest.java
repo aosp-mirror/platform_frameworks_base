@@ -48,7 +48,7 @@ import java.util.Locale;
 @SmallTest
 public class UsageStatsDatabaseTest {
 
-    private static final int MAX_TESTED_VERSION = 4;
+    private static final int MAX_TESTED_VERSION = 5;
     protected Context mContext;
     private UsageStatsDatabase mUsageStatsDatabase;
     private File mTestDir;
@@ -259,6 +259,24 @@ public class UsageStatsDatabaseTest {
 
     void compareUsageEvent(Event e1, Event e2, int debugId, int minVersion) {
         switch (minVersion) {
+            case 5: // test fields added in version 5
+                assertEquals(e1.mPackageToken, e2.mPackageToken, "Usage event " + debugId);
+                assertEquals(e1.mClassToken, e2.mClassToken, "Usage event " + debugId);
+                assertEquals(e1.mTaskRootPackageToken, e2.mTaskRootPackageToken,
+                        "Usage event " + debugId);
+                assertEquals(e1.mTaskRootClassToken, e2.mTaskRootClassToken,
+                        "Usage event " + debugId);
+                switch (e1.mEventType) {
+                    case Event.SHORTCUT_INVOCATION:
+                        assertEquals(e1.mShortcutIdToken, e2.mShortcutIdToken,
+                                "Usage event " + debugId);
+                        break;
+                    case Event.NOTIFICATION_INTERRUPTION:
+                        assertEquals(e1.mNotificationChannelIdToken, e2.mNotificationChannelIdToken,
+                                "Usage event " + debugId);
+                        break;
+                }
+                // fallthrough
             case 4: // test fields added in version 4
                 assertEquals(e1.mInstanceId, e2.mInstanceId, "Usage event " + debugId);
                 assertEquals(e1.mTaskRootPackage, e2.mTaskRootPackage, "Usage event " + debugId);
@@ -372,6 +390,9 @@ public class UsageStatsDatabaseTest {
         UsageStatsDatabase prevDB = new UsageStatsDatabase(mTestDir, oldVersion);
         prevDB.init(1);
         prevDB.putUsageStats(interval, mIntervalStats);
+        if (oldVersion >= 5) {
+            prevDB.writeMappingsLocked();
+        }
 
         // Simulate an upgrade to a new version and read from the disk
         UsageStatsDatabase newDB = new UsageStatsDatabase(mTestDir, newVersion);
@@ -438,6 +459,28 @@ public class UsageStatsDatabaseTest {
         runVersionChangeTest(3, 4, UsageStatsManager.INTERVAL_YEARLY);
     }
 
+    /**
+     * Test the version upgrade from 4 to 5
+     */
+    @Test
+    public void testVersionUpgradeFrom4to5() throws IOException {
+        runVersionChangeTest(4, 5, UsageStatsManager.INTERVAL_DAILY);
+        runVersionChangeTest(4, 5, UsageStatsManager.INTERVAL_WEEKLY);
+        runVersionChangeTest(4, 5, UsageStatsManager.INTERVAL_MONTHLY);
+        runVersionChangeTest(4, 5, UsageStatsManager.INTERVAL_YEARLY);
+    }
+
+    /**
+     * Test the version upgrade from 3 to 5
+     */
+    @Test
+    public void testVersionUpgradeFrom3to5() throws IOException {
+        runVersionChangeTest(3, 5, UsageStatsManager.INTERVAL_DAILY);
+        runVersionChangeTest(3, 5, UsageStatsManager.INTERVAL_WEEKLY);
+        runVersionChangeTest(3, 5, UsageStatsManager.INTERVAL_MONTHLY);
+        runVersionChangeTest(3, 5, UsageStatsManager.INTERVAL_YEARLY);
+    }
+
 
     /**
      * Test the version upgrade from 3 to 4
@@ -491,5 +534,31 @@ public class UsageStatsDatabaseTest {
             // The lowest numbered file:
             assertEquals(extra, files.keyAt(0));
         }
+    }
+
+    private void compareObfuscatedData(int interval) throws IOException {
+        // Write IntervalStats to disk
+        UsageStatsDatabase prevDB = new UsageStatsDatabase(mTestDir, 5);
+        prevDB.init(1);
+        prevDB.putUsageStats(interval, mIntervalStats);
+        prevDB.writeMappingsLocked();
+
+        // Read IntervalStats from disk into a new db
+        UsageStatsDatabase newDB = new UsageStatsDatabase(mTestDir, 5);
+        newDB.init(mEndTime);
+        List<IntervalStats> stats = newDB.queryUsageStats(interval, 0, mEndTime,
+                mIntervalStatsVerifier);
+
+        assertEquals(1, stats.size());
+        // The written and read IntervalStats should match
+        compareIntervalStats(mIntervalStats, stats.get(0), 5);
+    }
+
+    @Test
+    public void testObfuscation() throws IOException {
+        compareObfuscatedData(UsageStatsManager.INTERVAL_DAILY);
+        compareObfuscatedData(UsageStatsManager.INTERVAL_WEEKLY);
+        compareObfuscatedData(UsageStatsManager.INTERVAL_MONTHLY);
+        compareObfuscatedData(UsageStatsManager.INTERVAL_YEARLY);
     }
 }

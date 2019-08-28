@@ -620,7 +620,7 @@ public class UsageStatsService extends SystemService implements
             final AtomicFile af = new AtomicFile(pendingEventsFiles[i]);
             try {
                 try (FileInputStream in = af.openRead()) {
-                    UsageStatsProto.readPendingEvents(in, pendingEvents);
+                    UsageStatsProtoV2.readPendingEvents(in, pendingEvents);
                 }
             } catch (IOException e) {
                 // Even if one file read fails, exit here to keep all events in order on disk -
@@ -650,7 +650,7 @@ public class UsageStatsService extends SystemService implements
         FileOutputStream fos = null;
         try {
             fos = af.startWrite();
-            UsageStatsProto.writePendingEvents(fos, pendingEvents);
+            UsageStatsProtoV2.writePendingEvents(fos, pendingEvents);
             af.finishWrite(fos);
             fos = null;
             pendingEvents.clear();
@@ -1033,21 +1033,13 @@ public class UsageStatsService extends SystemService implements
                                 ipw.decreaseIndent();
                             }
                         } else {
-                            final int user;
-                            try {
-                                user = Integer.valueOf(args[i + 1]);
-                            } catch (NumberFormatException nfe) {
-                                ipw.println("invalid user specified.");
-                                return;
+                            final int user = parseUserIdFromArgs(args, i, ipw);
+                            if (user != UserHandle.USER_NULL) {
+                                final String[] remainingArgs = Arrays.copyOfRange(
+                                        args, i + 2, args.length);
+                                // dump everything for the specified user
+                                mUserState.get(user).dumpFile(ipw, remainingArgs);
                             }
-                            if (mUserState.indexOfKey(user) < 0) {
-                                ipw.println("the specified user does not exist.");
-                                return;
-                            }
-                            final String[] remainingArgs = Arrays.copyOfRange(
-                                    args, i + 2, args.length);
-                            // dump everything for the specified user
-                            mUserState.get(user).dumpFile(ipw, remainingArgs);
                         }
                         return;
                     } else if ("database-info".equals(arg)) {
@@ -1062,19 +1054,11 @@ public class UsageStatsService extends SystemService implements
                                 ipw.decreaseIndent();
                             }
                         } else {
-                            final int user;
-                            try {
-                                user = Integer.valueOf(args[i + 1]);
-                            } catch (NumberFormatException nfe) {
-                                ipw.println("invalid user specified.");
-                                return;
+                            final int user = parseUserIdFromArgs(args, i, ipw);
+                            if (user != UserHandle.USER_NULL) {
+                                // dump info only for the specified user
+                                mUserState.get(user).dumpDatabaseInfo(ipw);
                             }
-                            if (mUserState.indexOfKey(user) < 0) {
-                                ipw.println("the specified user does not exist.");
-                                return;
-                            }
-                            // dump info only for the specified user
-                            mUserState.get(user).dumpDatabaseInfo(ipw);
                         }
                         return;
                     } else if ("appstandby".equals(arg)) {
@@ -1082,15 +1066,18 @@ public class UsageStatsService extends SystemService implements
                         return;
                     } else if ("stats-directory".equals(arg)) {
                         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-                        final int userId;
-                        try {
-                            userId = Integer.valueOf(args[i + 1]);
-                        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                            ipw.println("invalid user specified.");
-                            return;
+                        final int userId = parseUserIdFromArgs(args, i, ipw);
+                        if (userId != UserHandle.USER_NULL) {
+                            ipw.println(new File(Environment.getDataSystemCeDirectory(userId),
+                                    "usagestats").getAbsolutePath());
                         }
-                        ipw.println(new File(Environment.getDataSystemCeDirectory(userId),
-                                "usagestats").getAbsolutePath());
+                        return;
+                    } else if ("mappings".equals(arg)) {
+                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                        final int userId = parseUserIdFromArgs(args, i, ipw);
+                        if (userId != UserHandle.USER_NULL) {
+                            mUserState.get(userId).dumpMappings(ipw);
+                        }
                         return;
                     } else if (arg != null && !arg.startsWith("-")) {
                         // Anything else that doesn't start with '-' is a pkg to filter
@@ -1127,6 +1114,21 @@ public class UsageStatsService extends SystemService implements
 
             mAppTimeLimit.dump(null, pw);
         }
+    }
+
+    private int parseUserIdFromArgs(String[] args, int index, IndentingPrintWriter ipw) {
+        final int userId;
+        try {
+            userId = Integer.valueOf(args[index + 1]);
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            ipw.println("invalid user specified.");
+            return UserHandle.USER_NULL;
+        }
+        if (mUserState.indexOfKey(userId) < 0) {
+            ipw.println("the specified user does not exist.");
+            return UserHandle.USER_NULL;
+        }
+        return userId;
     }
 
     class H extends Handler {
