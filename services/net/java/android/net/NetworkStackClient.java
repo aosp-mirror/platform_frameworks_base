@@ -191,7 +191,7 @@ public class NetworkStackClient {
         log("Network stack service start requested");
     }
 
-   /**
+    /**
      * Log a message in the local log.
      */
     private void log(@NonNull String message) {
@@ -302,5 +302,4 @@ public class NetworkStackClient {
         pw.println();
         pw.println("pendingNetStackRequests length: " + requestsQueueLength);
     }
-
 }
