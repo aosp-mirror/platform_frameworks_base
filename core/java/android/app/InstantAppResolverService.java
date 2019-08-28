@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.InstantAppRequestInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
@@ -59,8 +60,9 @@ public abstract class InstantAppResolverService extends Service {
      * Called to retrieve resolve info for instant applications immediately.
      *
      * @param digestPrefix The hash prefix of the instant app's domain.
-     * @deprecated Should implement {@link #onGetInstantAppResolveInfo(Intent, int[], UserHandle,
-     *             String, InstantAppResolutionCallback)}.
+     *
+     * @deprecated Should implement {@link #onGetInstantAppResolveInfo(InstantAppRequestInfo,
+     *             InstantAppResolutionCallback)}
      */
     @Deprecated
     public void onGetInstantAppResolveInfo(@Nullable int[] digestPrefix, @NonNull String token,
@@ -73,8 +75,9 @@ public abstract class InstantAppResolverService extends Service {
      * sources.
      *
      * @param digestPrefix The hash prefix of the instant app's domain.
-     * @deprecated Should implement {@link #onGetInstantAppIntentFilter(Intent, int[], UserHandle,
-     *             String, InstantAppResolutionCallback)}.
+     *
+     * @deprecated Should implement {@link #onGetInstantAppIntentFilter(InstantAppRequestInfo,
+     *             InstantAppResolutionCallback)}
      */
     @Deprecated
     public void onGetInstantAppIntentFilter(@Nullable int[] digestPrefix, @NonNull String token,
@@ -103,8 +106,8 @@ public abstract class InstantAppResolverService extends Service {
      *
      * @see InstantAppResolveInfo
      *
-     * @deprecated Should implement {@link #onGetInstantAppResolveInfo(Intent, int[], UserHandle,
-     *             String, InstantAppResolutionCallback)}.
+     * @deprecated Should implement {@link #onGetInstantAppResolveInfo(InstantAppRequestInfo,
+     *             InstantAppResolutionCallback)}
      */
     @Deprecated
     public void onGetInstantAppResolveInfo(@NonNull Intent sanitizedIntent,
@@ -134,8 +137,8 @@ public abstract class InstantAppResolverService extends Service {
      *              {@link Intent#EXTRA_INSTANT_APP_TOKEN}.
      * @param callback The {@link InstantAppResolutionCallback} to provide results to.
      *
-     * @deprecated Should implement {@link #onGetInstantAppIntentFilter(Intent, int[], UserHandle,
-     *             String, InstantAppResolutionCallback)}.
+     * @deprecated Should implement {@link #onGetInstantAppIntentFilter(InstantAppRequestInfo,
+     *             InstantAppResolutionCallback)}
      */
     @Deprecated
     public void onGetInstantAppIntentFilter(@NonNull Intent sanitizedIntent,
@@ -170,7 +173,11 @@ public abstract class InstantAppResolverService extends Service {
      * @param callback The {@link InstantAppResolutionCallback} to provide results to.
      *
      * @see InstantAppResolveInfo
+     *
+     * @deprecated Should implement {@link #onGetInstantAppResolveInfo(InstantAppRequestInfo,
+     *             InstantAppResolutionCallback
      */
+    @Deprecated
     public void onGetInstantAppResolveInfo(@NonNull Intent sanitizedIntent,
             @Nullable int[] hostDigestPrefix, @NonNull UserHandle userHandle,
             @NonNull String token, @NonNull InstantAppResolutionCallback callback) {
@@ -193,12 +200,51 @@ public abstract class InstantAppResolverService extends Service {
      *              Intent, int[], UserHandle, String, InstantAppResolutionCallback)} and provided
      *              to the currently visible installer via {@link Intent#EXTRA_INSTANT_APP_TOKEN}.
      * @param callback The {@link InstantAppResolutionCallback} to provide results to.
+     *
+     * @deprecated Should implement {@link #onGetInstantAppIntentFilter(InstantAppRequestInfo,
+     *             InstantAppResolutionCallback)}
      */
+    @Deprecated
     public void onGetInstantAppIntentFilter(@NonNull Intent sanitizedIntent,
             @Nullable int[] hostDigestPrefix, @NonNull UserHandle userHandle,
             @NonNull String token, @NonNull InstantAppResolutionCallback callback) {
         // If not overridden, forward to the old method.
         onGetInstantAppIntentFilter(sanitizedIntent, hostDigestPrefix, token, callback);
+    }
+
+    /**
+     * Called to retrieve resolve info for instant applications immediately. The response will be
+     * ignored if not provided within a reasonable time. {@link InstantAppResolveInfo}s provided
+     * in response to this method may be partial to request a second phase of resolution which will
+     * result in a subsequent call to {@link #onGetInstantAppIntentFilter(InstantAppRequestInfo,
+     * InstantAppResolutionCallback)}
+     *
+     * @param request The parameters for this resolution request
+     * @param callback The {@link InstantAppResolutionCallback} to provide results to.
+     *
+     * @see InstantAppResolveInfo
+     */
+    public void onGetInstantAppResolveInfo(@NonNull InstantAppRequestInfo request,
+            @NonNull InstantAppResolutionCallback callback) {
+        // If not overridden, forward to the old method.
+        onGetInstantAppResolveInfo(request.intent, request.hostDigestPrefix, request.userHandle,
+                request.token, callback);
+    }
+
+    /**
+     * Called to retrieve intent filters for potentially matching instant applications. Unlike
+     * {@link #onGetInstantAppResolveInfo(InstantAppRequestInfo, InstantAppResolutionCallback)},
+     * the response may take as long as necessary to respond. All {@link InstantAppResolveInfo}s
+     * provided in response to this method must be completely populated.
+     *
+     * @param request The parameters for this resolution request
+     * @param callback The {@link InstantAppResolutionCallback} to provide results to.
+     */
+    public void onGetInstantAppIntentFilter(@NonNull InstantAppRequestInfo request,
+            @NonNull InstantAppResolutionCallback callback) {
+        // If not overridden, forward to the old method.
+        onGetInstantAppIntentFilter(request.intent, request.hostDigestPrefix, request.userHandle,
+                request.token, callback);
     }
 
     /**
@@ -218,35 +264,29 @@ public abstract class InstantAppResolverService extends Service {
     public final IBinder onBind(Intent intent) {
         return new IInstantAppResolver.Stub() {
             @Override
-            public void getInstantAppResolveInfoList(Intent sanitizedIntent, int[] digestPrefix,
-                    int userId, String token, int sequence, IRemoteCallback callback) {
+            public void getInstantAppResolveInfoList(InstantAppRequestInfo request, int sequence,
+                    IRemoteCallback callback) {
                 if (DEBUG_INSTANT) {
-                    Slog.v(TAG, "[" + token + "] Phase1 called; posting");
+                    Slog.v(TAG, "[" + request.token + "] Phase1 called; posting");
                 }
                 final SomeArgs args = SomeArgs.obtain();
-                args.arg1 = callback;
-                args.arg2 = digestPrefix;
-                args.arg3 = userId;
-                args.arg4 = token;
-                args.arg5 = sanitizedIntent;
-                mHandler.obtainMessage(ServiceHandler.MSG_GET_INSTANT_APP_RESOLVE_INFO,
-                        sequence, 0, args).sendToTarget();
+                args.arg1 = request;
+                args.arg2 = callback;
+                mHandler.obtainMessage(ServiceHandler.MSG_GET_INSTANT_APP_RESOLVE_INFO, sequence,
+                        0, args).sendToTarget();
             }
 
             @Override
-            public void getInstantAppIntentFilterList(Intent sanitizedIntent,
-                    int[] digestPrefix, int userId, String token, IRemoteCallback callback) {
+            public void getInstantAppIntentFilterList(InstantAppRequestInfo request,
+                    IRemoteCallback callback) {
                 if (DEBUG_INSTANT) {
-                    Slog.v(TAG, "[" + token + "] Phase2 called; posting");
+                    Slog.v(TAG, "[" + request.token + "] Phase2 called; posting");
                 }
                 final SomeArgs args = SomeArgs.obtain();
-                args.arg1 = callback;
-                args.arg2 = digestPrefix;
-                args.arg3 = userId;
-                args.arg4 = token;
-                args.arg5 = sanitizedIntent;
-                mHandler.obtainMessage(ServiceHandler.MSG_GET_INSTANT_APP_INTENT_FILTER,
-                        args).sendToTarget();
+                args.arg1 = request;
+                args.arg2 = callback;
+                mHandler.obtainMessage(ServiceHandler.MSG_GET_INSTANT_APP_INTENT_FILTER, args)
+                        .sendToTarget();
             }
         };
     }
@@ -287,36 +327,33 @@ public abstract class InstantAppResolverService extends Service {
             switch (action) {
                 case MSG_GET_INSTANT_APP_RESOLVE_INFO: {
                     final SomeArgs args = (SomeArgs) message.obj;
-                    final IRemoteCallback callback = (IRemoteCallback) args.arg1;
-                    final int[] digestPrefix = (int[]) args.arg2;
-                    final int userId = (int) args.arg3;
-                    final String token = (String) args.arg4;
-                    final Intent intent = (Intent) args.arg5;
+                    final InstantAppRequestInfo request = (InstantAppRequestInfo) args.arg1;
+                    final IRemoteCallback callback = (IRemoteCallback) args.arg2;
+                    args.recycle();
                     final int sequence = message.arg1;
                     if (DEBUG_INSTANT) {
-                        Slog.d(TAG, "[" + token + "] Phase1 request;"
-                                + " prefix: " + Arrays.toString(digestPrefix)
-                                + ", userId: " + userId);
+                        Slog.d(TAG, "[" + request.token + "] Phase1 request;"
+                                + " prefix: " + Arrays.toString(request.hostDigestPrefix)
+                                + ", userId: " + request.userHandle.getIdentifier());
                     }
-                    onGetInstantAppResolveInfo(intent, digestPrefix, UserHandle.of(userId), token,
+                    onGetInstantAppResolveInfo(request,
                             new InstantAppResolutionCallback(sequence, callback));
                 } break;
 
                 case MSG_GET_INSTANT_APP_INTENT_FILTER: {
                     final SomeArgs args = (SomeArgs) message.obj;
-                    final IRemoteCallback callback = (IRemoteCallback) args.arg1;
-                    final int[] digestPrefix = (int[]) args.arg2;
-                    final int userId = (int) args.arg3;
-                    final String token = (String) args.arg4;
-                    final Intent intent = (Intent) args.arg5;
+                    final InstantAppRequestInfo request = (InstantAppRequestInfo) args.arg1;
+                    final IRemoteCallback callback = (IRemoteCallback) args.arg2;
+                    args.recycle();
                     if (DEBUG_INSTANT) {
-                        Slog.d(TAG, "[" + token + "] Phase2 request;"
-                                + " prefix: " + Arrays.toString(digestPrefix)
-                                + ", userId: " + userId);
+                        Slog.d(TAG, "[" + request.token + "] Phase2 request;"
+                                + " prefix: " + Arrays.toString(request.hostDigestPrefix)
+                                + ", userId: " + request.userHandle.getIdentifier());
                     }
-                    onGetInstantAppIntentFilter(intent, digestPrefix, UserHandle.of(userId), token,
+                    onGetInstantAppIntentFilter(request,
                             new InstantAppResolutionCallback(-1 /*sequence*/, callback));
-                } break;
+                }
+                break;
 
                 default: {
                     throw new IllegalArgumentException("Unknown message: " + action);

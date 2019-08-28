@@ -46,17 +46,21 @@ public final class AuxiliaryResolveInfo {
     public final Intent failureIntent;
     /** The matching filters for this resolve info. */
     public final List<AuxiliaryFilter> filters;
+    /** Stored {@link InstantAppRequest#hostDigestPrefixSecure} to prevent re-generation */
+    public final int[] hostDigestPrefixSecure;
 
     /** Create a response for installing an instant application. */
     public AuxiliaryResolveInfo(@NonNull String token,
             boolean needsPhase2,
             @Nullable Intent failureIntent,
-            @Nullable List<AuxiliaryFilter> filters) {
+            @Nullable List<AuxiliaryFilter> filters,
+            @Nullable int[] hostDigestPrefix) {
         this.token = token;
         this.needsPhaseTwo = needsPhase2;
         this.failureIntent = failureIntent;
         this.filters = filters;
         this.installFailureActivity = null;
+        this.hostDigestPrefixSecure = hostDigestPrefix;
     }
 
     /** Create a response for installing a split on demand. */
@@ -69,6 +73,7 @@ public final class AuxiliaryResolveInfo {
         this.token = null;
         this.needsPhaseTwo = false;
         this.failureIntent = failureIntent;
+        this.hostDigestPrefixSecure = null;
     }
 
     /** Create a response for installing a split on demand. */

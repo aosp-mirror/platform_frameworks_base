@@ -154,6 +154,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
+import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
@@ -363,6 +364,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -6048,10 +6050,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
             Intent origIntent, String resolvedType, String callingPackage,
-            Bundle verificationBundle, int userId) {
+            boolean isRequesterInstantApp, Bundle verificationBundle, int userId) {
         final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
                 new InstantAppRequest(responseObj, origIntent, resolvedType,
-                        callingPackage, userId, verificationBundle, false /*resolveForStart*/));
+                        callingPackage, isRequesterInstantApp, userId, verificationBundle,
+                        false /*resolveForStart*/, responseObj.hostDigestPrefixSecure,
+                        responseObj.token));
         mHandler.sendMessage(msg);
     }
 
@@ -6668,8 +6672,10 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         if (addInstant) {
-            result = maybeAddInstantAppInstaller(
-                    result, intent, resolvedType, flags, userId, resolveForStart);
+            String callingPkgName = getInstantAppPackageName(filterCallingUid);
+            boolean isRequesterInstantApp = isInstantApp(callingPkgName, userId);
+            result = maybeAddInstantAppInstaller(result, intent, resolvedType, flags, userId,
+                    resolveForStart, isRequesterInstantApp);
         }
         if (sortResult) {
             Collections.sort(result, RESOLVE_PRIORITY_SORTER);
@@ -6680,7 +6686,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
-            String resolvedType, int flags, int userId, boolean resolveForStart) {
+            String resolvedType, int flags, int userId, boolean resolveForStart,
+            boolean isRequesterInstantApp) {
         // first, check to see if we've got an instant app already installed
         final boolean alreadyResolvedLocally = (flags & PackageManager.MATCH_INSTANT) != 0;
         ResolveInfo localInstantApp = null;
@@ -6728,10 +6735,13 @@ public class PackageManagerService extends IPackageManager.Stub
             if (localInstantApp == null) {
                 // we don't have an instant app locally, resolve externally
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
+                String token = UUID.randomUUID().toString();
+                InstantAppDigest digest = InstantAppResolver.parseDigest(intent);
                 final InstantAppRequest requestObject = new InstantAppRequest(
                         null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                        null /*callingPackage*/, userId, null /*verificationBundle*/,
-                        resolveForStart);
+                        null /*callingPackage*/, isRequesterInstantApp,
+                        userId, null /*verificationBundle*/, resolveForStart,
+                        digest.getDigestPrefixSecure(), token);
                 auxiliaryResponse = InstantAppResolver.doInstantAppResolutionPhaseOne(
                         mInstantAppResolverConnection, requestObject);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -23167,10 +23177,10 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
                 Intent origIntent, String resolvedType, String callingPackage,
-                Bundle verificationBundle, int userId) {
+                boolean isRequesterInstantApp, Bundle verificationBundle, int userId) {
             PackageManagerService.this.requestInstantAppResolutionPhaseTwo(
-                    responseObj, origIntent, resolvedType, callingPackage, verificationBundle,
-                    userId);
+                    responseObj, origIntent, resolvedType, callingPackage, isRequesterInstantApp,
+                    verificationBundle, userId);
         }
 
         @Override
