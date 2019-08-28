@@ -2094,9 +2094,6 @@ class ActivityStack extends ConfigurationContainer {
                 final ArrayList<ActivityRecord> activities = task.mActivities;
                 for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                     final ActivityRecord r = activities.get(activityNdx);
-                    if (r.finishing) {
-                        continue;
-                    }
                     final boolean isTop = r == top;
                     if (aboveTop && !isTop) {
                         continue;
@@ -2112,6 +2109,9 @@ class ActivityStack extends ConfigurationContainer {
                                 behindFullscreenActivity, r);
                     }
                     if (reallyVisible) {
+                        if (r.finishing) {
+                            continue;
+                        }
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
                                 + " finishing=" + r.finishing + " state=" + r.getState());
                         // First: if this is not the current activity being started, make
