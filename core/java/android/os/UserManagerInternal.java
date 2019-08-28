@@ -15,6 +15,7 @@
  */
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
@@ -231,4 +232,9 @@ public abstract class UserManagerInternal {
      * found.
      */
     public abstract @Nullable UserInfo getUserInfo(@UserIdInt int userId);
+
+    /**
+     * Gets all {@link UserInfo UserInfos}.
+     */
+    public abstract @NonNull UserInfo[] getUserInfos();
 }

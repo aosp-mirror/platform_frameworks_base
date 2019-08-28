@@ -48,6 +48,7 @@ import com.android.server.SystemService;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -167,6 +168,12 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     private SparseArray<String> mUpdatingPackageNames;
 
     /**
+     * Lazy-loadable reference to {@link UserManagerInternal}.
+     */
+    @Nullable
+    private UserManagerInternal mUm;
+
+    /**
      * Default constructor.
      *
      * <p>When using this constructor, the {@link AbstractPerUserSystemService} is removed from
@@ -222,9 +229,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         } else {
             mDisabledByUserRestriction = new SparseBooleanArray();
             // Hookup with UserManager to disable service when necessary.
-            final UserManager um = context.getSystemService(UserManager.class);
-            final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-            final List<UserInfo> users = um.getUsers();
+            final UserManagerInternal umi = getUserManagerInternal();
+            final List<UserInfo> users = getSupportedUsers();
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;
                 final boolean disabled = umi.getUserRestriction(userId, disallowProperty);
@@ -649,6 +655,36 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
+     * Gets a cached reference to {@link UserManagerInternal}.
+     */
+    @NonNull
+    protected UserManagerInternal getUserManagerInternal() {
+        if (mUm == null) {
+            if (verbose) Slog.v(mTag, "lazy-loading UserManagerInternal");
+            mUm = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUm;
+    }
+
+    /**
+     * Gets a list of all supported users (i.e., those that pass the {@link #isSupported(UserInfo)}
+     * check).
+     */
+    @NonNull
+    protected List<UserInfo> getSupportedUsers() {
+        final UserInfo[] allUsers = getUserManagerInternal().getUserInfos();
+        final int size = allUsers.length;
+        final List<UserInfo> supportedUsers = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            final UserInfo userInfo = allUsers[i];
+            if (isSupported(userInfo)) {
+                supportedUsers.add(userInfo);
+            }
+        }
+        return supportedUsers;
+    }
+
+    /**
      * Asserts that the given package name is owned by the UID making this call.
      *
      * @throws SecurityException when it's not...
@@ -684,8 +720,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             if (mServiceNameResolver != null) {
                 pw.print(prefix); pw.print("Name resolver: ");
                 mServiceNameResolver.dumpShort(pw); pw.println();
-                final UserManager um = getContext().getSystemService(UserManager.class);
-                final List<UserInfo> users = um.getUsers();
+                final List<UserInfo> users = getSupportedUsers();
                 for (int i = 0; i < users.size(); i++) {
                     final int userId = users.get(i).id;
                     pw.print(prefix2); pw.print(userId); pw.print(": ");

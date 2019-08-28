@@ -212,8 +212,7 @@ public final class AutofillManagerService
                 (u, s, t) -> onAugmentedServiceNameChanged(u, s, t));
 
         if (mSupportedSmartSuggestionModes != AutofillManager.FLAG_SMART_SUGGESTION_OFF) {
-            final UserManager um = getContext().getSystemService(UserManager.class);
-            final List<UserInfo> users = um.getUsers();
+            final List<UserInfo> users = getSupportedUsers();
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;
                 // Must eager load the services so they bind to the augmented autofill service
@@ -322,6 +321,11 @@ public final class AutofillManagerService
     public void onStart() {
         publishBinderService(AUTOFILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
         publishLocalService(AutofillManagerInternal.class, mLocalService);
+    }
+
+    @Override // from SystemService
+    public boolean isSupported(UserInfo userInfo) {
+        return userInfo.isFull() || userInfo.isManagedProfile();
     }
 
     @Override // from SystemService
