@@ -1150,7 +1150,8 @@ package android.app.role {
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @WorkerThread public abstract boolean onClearRoleHolders(@NonNull String, int);
     method @WorkerThread public abstract boolean onGrantDefaultRoles();
-    method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
+    method @Deprecated public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
+    method public boolean onIsApplicationVisibleForRole(@NonNull String, @NonNull String);
     method public abstract boolean onIsRoleVisible(@NonNull String);
     method @WorkerThread public abstract boolean onRemoveRoleHolder(@NonNull String, @NonNull String, int);
     field public static final String SERVICE_INTERFACE = "android.app.role.RoleControllerService";

@@ -153,6 +153,20 @@ public abstract class RoleControllerService extends Service {
             }
 
             @Override
+            public void isApplicationVisibleForRole(String roleName, String packageName,
+                    RemoteCallback callback) {
+                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
+
+                Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+                Preconditions.checkStringNotEmpty(packageName,
+                        "packageName cannot be null or empty");
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                boolean visible = onIsApplicationVisibleForRole(roleName, packageName);
+                callback.sendResult(visible ? Bundle.EMPTY : null);
+            }
+
+            @Override
             public void isRoleVisible(String roleName, RemoteCallback callback) {
                 enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
 
@@ -256,9 +270,24 @@ public abstract class RoleControllerService extends Service {
      * @param packageName package name of the application to check for
      *
      * @return whether the application is qualified for the role
+     *
+     * @deprecated Implement {@link #onIsApplicationVisibleForRole(String, String)} instead.
      */
     public abstract boolean onIsApplicationQualifiedForRole(@NonNull String roleName,
             @NonNull String packageName);
+
+    /**
+     * Check whether an application is visible for a role.
+     *
+     * @param roleName name of the role to check for
+     * @param packageName package name of the application to check for
+     *
+     * @return whether the application is visible for the role
+     */
+    public boolean onIsApplicationVisibleForRole(@NonNull String roleName,
+            @NonNull String packageName) {
+        return onIsApplicationQualifiedForRole(roleName, packageName);
+    }
 
     /**
      * Check whether a role should be visible to user.
