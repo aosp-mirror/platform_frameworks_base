@@ -1217,7 +1217,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mPropertiesChangedListener = properties -> {
             synchronized (mGlobalLock) {
                 final int exclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
-                        properties.getInt(KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
+                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                                KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
                 final boolean excludedByPreQSticky = DeviceConfig.getBoolean(
                         DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                         KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
