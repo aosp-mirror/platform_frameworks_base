@@ -3007,6 +3007,16 @@
         string that's stored in 8-bit unpacked format) characters.-->
     <bool translatable="false" name="config_sms_decode_gsm_8bit_data">false</bool>
 
+    <!-- Configures encoding type to parse the User Data of an SMS for reserved TP-DCS value.
+         Refer to SmsConstants.java
+         ENCODING_UNKNOWN = 0;
+         ENCODING_7BIT = 1;
+         ENCODING_8BIT = 2;
+         ENCODING_16BIT = 3;
+         ENCODING_KSC5601 = 4;
+         -->
+    <integer name="default_reserved_data_coding_scheme">2</integer>
+
     <!-- If EMS is not supported, framework breaks down EMS into single segment SMS
          and adds page info " x/y". This config is used to set which carrier doesn't
          support EMS and whether page info should be added at the beginning or the end.
