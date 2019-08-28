@@ -773,6 +773,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public int computeOomAdjFromActivities(int minTaskLayer, ComputeOomAdjCallback callback) {
+        // Since there could be more than one activities in a process record, we don't need to
+        // compute the OomAdj with each of them, just need to find out the activity with the
+        // "best" state, the order would be visible, pausing, stopping...
+        ActivityStack.ActivityState best = DESTROYED;
+        boolean finishing = true;
+        boolean visible = false;
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             final int activitiesSize = mActivities.size();
             for (int j = 0; j < activitiesSize; j++) {
@@ -788,7 +794,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     }
                 }
                 if (r.visible) {
-                    callback.onVisibleActivity();
                     final TaskRecord task = r.getTaskRecord();
                     if (task != null && minTaskLayer > 0) {
                         final int layer = task.mLayerRank;
@@ -796,15 +801,31 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                             minTaskLayer = layer;
                         }
                     }
-                    break;
-                } else if (r.isState(PAUSING, PAUSED)) {
-                    callback.onPausedActivity();
-                } else if (r.isState(STOPPING)) {
-                    callback.onStoppingActivity(r.finishing);
+                    visible = true;
+                    // continue the loop, in case there are multiple visible activities in
+                    // this process, we'd find out the one with the minimal layer, thus it'll
+                    // get a higher adj score.
                 } else {
-                    callback.onOtherActivity();
+                    if (best != PAUSING && best != PAUSED) {
+                        if (r.isState(PAUSING, PAUSED)) {
+                            best = PAUSING;
+                        } else if (r.isState(STOPPING)) {
+                            best = STOPPING;
+                            // Not "finishing" if any of activity isn't finishing.
+                            finishing &= r.finishing;
+                        }
+                    }
                 }
             }
+        }
+        if (visible) {
+            callback.onVisibleActivity();
+        } else if (best == PAUSING) {
+            callback.onPausedActivity();
+        } else if (best == STOPPING) {
+            callback.onStoppingActivity(finishing);
+        } else {
+            callback.onOtherActivity();
         }
 
         return minTaskLayer;

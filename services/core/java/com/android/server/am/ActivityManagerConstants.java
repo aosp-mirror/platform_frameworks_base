@@ -282,6 +282,19 @@ final class ActivityManagerConstants extends ContentObserver {
     // memory trimming.
     public int CUR_TRIM_CACHED_PROCESSES;
 
+    @SuppressWarnings("unused")
+    private static final int OOMADJ_UPDATE_POLICY_SLOW = 0;
+    private static final int OOMADJ_UPDATE_POLICY_QUICK = 1;
+    private static final int DEFAULT_OOMADJ_UPDATE_POLICY = OOMADJ_UPDATE_POLICY_QUICK;
+
+    private static final String KEY_OOMADJ_UPDATE_POLICY = "oomadj_update_policy";
+
+    // Indicate if the oom adjuster should take the quick path to update the oom adj scores,
+    // in which no futher actions will be performed if there are no significant adj/proc state
+    // changes for the specific process; otherwise, use the traditonal slow path which would
+    // keep updating all processes in the LRU list.
+    public boolean OOMADJ_UPDATE_QUICK = DEFAULT_OOMADJ_UPDATE_POLICY == OOMADJ_UPDATE_POLICY_QUICK;
+
     private static final long MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES = 100 * 1024; // 100 KB
 
     private final boolean mSystemServerAutomaticHeapDumpEnabled;
@@ -315,6 +328,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
                                 updateBackgroundActivityStarts();
+                                break;
+                            case KEY_OOMADJ_UPDATE_POLICY:
+                                updateOomAdjUpdatePolicy();
                                 break;
                             default:
                                 break;
@@ -354,6 +370,7 @@ final class ActivityManagerConstants extends ContentObserver {
         updateMaxCachedProcesses();
         updateActivityStartsLoggingEnabled();
         updateBackgroundActivityStarts();
+        updateOomAdjUpdatePolicy();
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -472,6 +489,14 @@ final class ActivityManagerConstants extends ContentObserver {
                 /*defaultValue*/ false);
     }
 
+    private void updateOomAdjUpdatePolicy() {
+        OOMADJ_UPDATE_QUICK = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_OOMADJ_UPDATE_POLICY,
+                /* defaultValue */ DEFAULT_OOMADJ_UPDATE_POLICY)
+                == OOMADJ_UPDATE_POLICY_QUICK;
+    }
+
     private void updateEnableAutomaticSystemServerHeapDumps() {
         if (!mSystemServerAutomaticHeapDumpEnabled) {
             Slog.wtf(TAG,
@@ -587,5 +612,6 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  CUR_MAX_EMPTY_PROCESSES="); pw.println(CUR_MAX_EMPTY_PROCESSES);
         pw.print("  CUR_TRIM_EMPTY_PROCESSES="); pw.println(CUR_TRIM_EMPTY_PROCESSES);
         pw.print("  CUR_TRIM_CACHED_PROCESSES="); pw.println(CUR_TRIM_CACHED_PROCESSES);
+        pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
     }
 }
