@@ -934,6 +934,11 @@ doc_defaults {
     create_stubs: false,
 }
 
+doc_defaults {
+    name: "framework-dokka-docs-default",
+    create_stubs: false,
+}
+
 stubs_defaults {
     name: "metalava-api-stubs-default",
     srcs: [
@@ -1106,7 +1111,7 @@ droiddoc {
 }
 
 droiddoc {
-    name: "ds-docs",
+    name: "ds-docs-java",
     defaults: ["framework-docs-default"],
     srcs: [
         ":framework-doc-stubs",
@@ -1133,6 +1138,58 @@ droiddoc {
         " -samplegroup Views " +
         " -samplegroup Wearable -devsite -samplesdir development/samples/browseable ",
 }
+
+droiddoc {
+    name: "ds-docs-kt",
+    defaults: ["framework-dokka-docs-default"],
+    srcs: [
+        ":framework-doc-stubs",
+    ],
+    args: "-noJdkLink -links https://kotlinlang.org/api/latest/jvm/stdlib/^external/dokka/package-list " +
+    "-noStdlibLink",
+    proofread_file: "ds-dokka-proofread.txt",
+    dokka_enabled: true,
+}
+
+java_genrule {
+    name: "ds-docs",
+    tools: [
+        "zip2zip",
+        "merge_zips",
+    ],
+    srcs: [
+        ":ds-docs-java{.docs.zip}",
+        ":ds-docs-kt{.docs.zip}",
+    ],
+    out: ["ds-docs.zip"],
+    dist: {
+        targets: ["docs"],
+    },
+    cmd: "$(location zip2zip) -i $(location :ds-docs-kt{.docs.zip}) -o $(genDir)/ds-docs-kt-moved.zip **/*:en/reference/kotlin && " +
+         "$(location merge_zips) $(out) $(location :ds-docs-java{.docs.zip}) $(genDir)/ds-docs-kt-moved.zip",
+}
+
+java_genrule {
+    name: "ds-docs-switched",
+    tools: [
+        "switcher4",
+        "soong_zip",
+    ],
+    srcs: [
+        ":ds-docs-java{.docs.zip}",
+        ":ds-docs-kt{.docs.zip}",
+    ],
+    out: ["ds-docs-switched.zip"],
+    dist: {
+        targets: ["docs"],
+    },
+    cmd: "unzip $(location :ds-docs-java{.docs.zip}) -d $(genDir) && " +
+         "unzip $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
+         "SWITCHER=$$(cd $$(dirname $(location switcher4)) && pwd)/$$(basename $(location switcher4)) && " +
+         "(cd $(genDir)/en/reference && $$SWITCHER --work platform) && " +
+         "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)",
+}
+
 
 droiddoc {
     name: "ds-static-docs",
