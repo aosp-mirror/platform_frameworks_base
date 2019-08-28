@@ -2812,7 +2812,7 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    public void onProvideContentCaptureStructure(ViewStructure structure, int flags) {
+    public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
         mProvider.getViewDelegate().onProvideContentCaptureStructure(structure, flags);
     }
 

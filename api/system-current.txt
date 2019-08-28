@@ -1207,7 +1207,7 @@ package android.app.usage {
 
   public static final class UsageEvents.Event {
     method public int getInstanceId();
-    method public String getNotificationChannelId();
+    method @Nullable public String getNotificationChannelId();
     method @Nullable public String getTaskRootClassName();
     method @Nullable public String getTaskRootPackageName();
     method public boolean isInstantApp();

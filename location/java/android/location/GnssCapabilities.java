@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 
 /**
@@ -164,6 +165,7 @@ public final class GnssCapabilities {
         return hasCapability(MEASUREMENT_CORRECTIONS_REFLECTING_PLANE);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("GnssCapabilities: ( ");

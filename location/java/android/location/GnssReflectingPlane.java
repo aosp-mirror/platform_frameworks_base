@@ -107,6 +107,7 @@ public final class GnssReflectingPlane implements Parcelable {
                 }
             };
 
+    @NonNull
     @Override
     public String toString() {
         final String format = "   %-29s = %s\n";

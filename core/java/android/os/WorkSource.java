@@ -1,5 +1,6 @@
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -205,7 +206,7 @@ public class WorkSource implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof WorkSource) {
             WorkSource other = (WorkSource) o;
 
@@ -989,6 +990,7 @@ public class WorkSource implements Parcelable {
             mTags = tags;
         }
 
+        @NonNull
         @Override
         public String toString() {
             StringBuilder result = new StringBuilder("WorkChain{");
@@ -1015,7 +1017,7 @@ public class WorkSource implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o instanceof WorkChain) {
                 WorkChain other = (WorkChain) o;
 
