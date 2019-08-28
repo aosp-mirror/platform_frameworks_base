@@ -11,7 +11,7 @@ android_app {
     ],
     static_libs: [
         "junit",
-        "SettingsLib",
+        "SettingsLibDisplayDensityUtils",
     ],
     platform_apis: true,
     certificate: "platform",
@@ -30,7 +30,7 @@ android_test {
     ],
     static_libs: [
         "androidx.test.rules",
-        "SettingsLib",
+        "SettingsLibDisplayDensityUtils",
     ],
     libs: [
         "android.test.base",
