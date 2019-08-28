@@ -98,6 +98,10 @@ class WindowTestsBase {
     @Rule
     public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
 
+    @WindowTestRunner.MethodWrapperRule
+    public final WindowManagerGlobalLockRule mLockRule =
+            new WindowManagerGlobalLockRule(mSystemServicesTestRule);
+
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
@@ -205,7 +209,7 @@ class WindowTestsBase {
      * Waits until the main handler for WM has processed all messages.
      */
     void waitUntilHandlersIdle() {
-        mSystemServicesTestRule.waitUntilWindowManagerHandlersIdle();
+        mLockRule.waitUntilHandlersIdle();
     }
 
     private WindowToken createWindowToken(

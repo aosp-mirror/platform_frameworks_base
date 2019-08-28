@@ -78,6 +78,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.LinkedList;
 
@@ -89,6 +90,7 @@ import java.util.LinkedList;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowStateTests extends WindowTestsBase {
     private static int sPreviousNewInsetsMode;
 
@@ -111,11 +113,8 @@ public class WindowStateTests extends WindowTestsBase {
         // TODO: Let the insets source with new mode keep the visibility control, and remove this
         // setup code. Now mTopFullscreenOpaqueWindowState will take back the control of insets
         // visibility.
-        // Hold the lock to protect the mock from accesssing by other threads.
-        synchronized (mWm.mGlobalLock) {
-            spyOn(mDisplayContent);
-            doNothing().when(mDisplayContent).layoutAndAssignWindowLayersIfNeeded();
-        }
+        spyOn(mDisplayContent);
+        doNothing().when(mDisplayContent).layoutAndAssignWindowLayersIfNeeded();
     }
 
     @Test
@@ -527,27 +526,25 @@ public class WindowStateTests extends WindowTestsBase {
         final float OFFSET_SUM =
                 PARENT_WINDOW_OFFSET + DISPLAY_IN_PARENT_WINDOW_OFFSET + WINDOW_OFFSET;
 
-        synchronized (mWm.mGlobalLock) {
-            final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
+        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
 
-            final DisplayContent dc = createNewDisplay();
-            win0.getFrameLw().offsetTo(PARENT_WINDOW_OFFSET, 0);
-            dc.reparentDisplayContent(win0, win0.getSurfaceControl());
-            dc.updateLocation(win0, DISPLAY_IN_PARENT_WINDOW_OFFSET, 0);
+        final DisplayContent dc = createNewDisplay();
+        win0.getFrameLw().offsetTo(PARENT_WINDOW_OFFSET, 0);
+        dc.reparentDisplayContent(win0, win0.getSurfaceControl());
+        dc.updateLocation(win0, DISPLAY_IN_PARENT_WINDOW_OFFSET, 0);
 
-            final float[] values = new float[9];
-            final Matrix matrix = new Matrix();
-            final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
-            final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
-            win1.mHasSurface = true;
-            win1.mSurfaceControl = mock(SurfaceControl.class);
-            win1.getFrameLw().offsetTo(WINDOW_OFFSET, 0);
-            win1.updateSurfacePosition(t);
-            win1.getTransformationMatrix(values, matrix);
+        final float[] values = new float[9];
+        final Matrix matrix = new Matrix();
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
+        win1.mHasSurface = true;
+        win1.mSurfaceControl = mock(SurfaceControl.class);
+        win1.getFrameLw().offsetTo(WINDOW_OFFSET, 0);
+        win1.updateSurfacePosition(t);
+        win1.getTransformationMatrix(values, matrix);
 
-            matrix.getValues(values);
-            assertEquals(OFFSET_SUM, values[Matrix.MTRANS_X], 0f);
-            assertEquals(0f, values[Matrix.MTRANS_Y], 0f);
-        }
+        matrix.getValues(values);
+        assertEquals(OFFSET_SUM, values[Matrix.MTRANS_X], 0f);
+        assertEquals(0f, values[Matrix.MTRANS_Y], 0f);
     }
 }
