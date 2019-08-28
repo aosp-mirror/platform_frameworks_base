@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -98,13 +99,13 @@ public final class BrightnessCorrection implements Parcelable {
      *
      * @return A string representation.
      */
+    @NonNull
     public String toString() {
         return mImplementation.toString();
     }
 
-
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }

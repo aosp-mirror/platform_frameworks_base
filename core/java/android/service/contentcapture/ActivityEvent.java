@@ -111,6 +111,7 @@ public final class ActivityEvent implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return new StringBuilder("ActivityEvent[").append(mComponentName.toShortString())

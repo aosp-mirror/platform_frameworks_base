@@ -161,6 +161,7 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         dest.writeInt(mLocationMode);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

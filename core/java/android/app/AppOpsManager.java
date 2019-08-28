@@ -3192,7 +3192,7 @@ public class AppOpsManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -3223,6 +3223,7 @@ public class AppOpsManager {
             return result;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return getClass().getSimpleName() + "[from:"
@@ -3458,7 +3459,7 @@ public class AppOpsManager {
         };
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -3690,7 +3691,7 @@ public class AppOpsManager {
         };
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -4044,7 +4045,7 @@ public class AppOpsManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
