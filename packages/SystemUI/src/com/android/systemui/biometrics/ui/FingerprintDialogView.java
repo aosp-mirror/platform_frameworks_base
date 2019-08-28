@@ -80,6 +80,11 @@ public class FingerprintDialogView extends BiometricDialogView {
         }
     }
 
+    @Override
+    protected boolean supportsSmallDialog() {
+        return false;
+    }
+
     protected boolean shouldAnimateForTransition(int oldState, int newState) {
         if (newState == STATE_ERROR) {
             return true;
