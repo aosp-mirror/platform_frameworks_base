@@ -68,6 +68,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsOnboarding;
@@ -92,6 +93,7 @@ public class NavigationBarView extends FrameLayout implements
     final static boolean ALTERNATE_CAR_MODE_UI = false;
     private final RegionSamplingHelper mRegionSamplingHelper;
     private final int mNavColorSampleMargin;
+    private final SysUiState mSysUiFlagContainer;
 
     View mCurrentView = null;
     private View mVertical;
@@ -266,6 +268,7 @@ public class NavigationBarView extends FrameLayout implements
         mNavBarMode = Dependency.get(NavigationModeController.class).addListener(this);
         boolean isGesturalMode = isGesturalMode(mNavBarMode);
 
+        mSysUiFlagContainer = Dependency.get(SysUiState.class);
         // Set up the context group of buttons
         mContextualButtonGroup = new ContextualButtonGroup(R.id.menu_container);
         final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
@@ -307,11 +310,10 @@ public class NavigationBarView extends FrameLayout implements
         mButtonDispatchers.put(R.id.menu_container, mContextualButtonGroup);
         mDeadZone = new DeadZone(this);
 
-        mNavColorSampleMargin =
-                getResources()
+        mNavColorSampleMargin = getResources()
                         .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
-
-        mEdgeBackGestureHandler = new EdgeBackGestureHandler(context, mOverviewProxyService);
+        mEdgeBackGestureHandler =
+                new EdgeBackGestureHandler(context, mOverviewProxyService, mSysUiFlagContainer);
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
@@ -745,23 +747,26 @@ public class NavigationBarView extends FrameLayout implements
 
     public void updateDisabledSystemUiStateFlags() {
         int displayId = mContext.getDisplayId();
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SCREEN_PINNING,
-                ActivityManagerWrapper.getInstance().isScreenPinningActive(), displayId);
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_OVERVIEW_DISABLED,
-                (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0, displayId);
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_HOME_DISABLED,
-                (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0, displayId);
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SEARCH_DISABLED,
-                (mDisabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0, displayId);
+
+        mSysUiFlagContainer.setFlag(SYSUI_STATE_SCREEN_PINNING,
+                        ActivityManagerWrapper.getInstance().isScreenPinningActive())
+                .setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
+                        (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0)
+                .setFlag(SYSUI_STATE_HOME_DISABLED,
+                        (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0)
+                .setFlag(SYSUI_STATE_SEARCH_DISABLED,
+                        (mDisabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0)
+                .commitUpdate(displayId);
     }
 
     public void updatePanelSystemUiStateFlags() {
         int displayId = mContext.getDisplayId();
         if (mPanelView != null) {
-            mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
-                    mPanelView.isFullyExpanded() && !mPanelView.isInSettings(), displayId);
-            mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
-                    mPanelView.isInSettings(), displayId);
+            mSysUiFlagContainer.setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
+                    mPanelView.isFullyExpanded() && !mPanelView.isInSettings())
+                    .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
+                            mPanelView.isInSettings())
+                    .commitUpdate(displayId);
         }
     }
 

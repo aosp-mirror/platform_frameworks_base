@@ -42,7 +42,6 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * editor {@link #mFocusedEditor} if {@link #isServedEditorRendered} is {@code true}.
      */
     private boolean mShowOnNextImeRender;
-    private boolean mHasWindowFocus;
 
     public ImeInsetsSourceConsumer(
             InsetsState state, Supplier<Transaction> transactionSupplier,
@@ -68,23 +67,18 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     public void applyImeVisibility(boolean setVisible) {
-        if (!mHasWindowFocus) {
-            // App window doesn't have focus, any visibility changes would be no-op.
-            return;
-        }
-
         mController.applyImeVisibility(setVisible);
     }
 
     @Override
     public void onWindowFocusGained() {
-        mHasWindowFocus = true;
+        super.onWindowFocusGained();
         getImm().registerImeConsumer(this);
     }
 
     @Override
     public void onWindowFocusLost() {
-        mHasWindowFocus = false;
+        super.onWindowFocusLost();
         getImm().unregisterImeConsumer(this);
     }
 

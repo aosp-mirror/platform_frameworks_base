@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
@@ -164,7 +165,9 @@ public class QuickQSPanel extends QSPanel {
     };
 
     public static int getNumQuickTiles(Context context) {
-        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, mDefaultMaxTiles);
+        // TODO(b/140052679)
+        return whitelistIpcs(() ->
+                Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, mDefaultMaxTiles));
     }
 
     void setDisabledByPolicy(boolean disabled) {

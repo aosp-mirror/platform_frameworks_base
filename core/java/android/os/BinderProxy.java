@@ -496,7 +496,7 @@ public final class BinderProxy implements IBinder {
 
         if (transactListener != null) {
             final int origWorkSourceUid = Binder.getCallingWorkSourceUid();
-            session = transactListener.onTransactStarted(this, code);
+            session = transactListener.onTransactStarted(this, code, flags);
 
             // Allow the listener to update the work source uid. We need to update the request
             // header if the uid is updated.

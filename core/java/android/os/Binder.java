@@ -645,6 +645,17 @@ public class Binder implements IBinder {
          * Called before onTransact.
          *
          * @return an object that will be passed back to #onTransactEnded (or null).
+         * @hide
+         */
+        @Nullable
+        default Object onTransactStarted(@NonNull IBinder binder, int transactionCode, int flags) {
+            return onTransactStarted(binder, transactionCode);
+        }
+
+        /**
+         * Called before onTransact.
+         *
+         * @return an object that will be passed back to #onTransactEnded (or null).
          */
         @Nullable
         Object onTransactStarted(@NonNull IBinder binder, int transactionCode);

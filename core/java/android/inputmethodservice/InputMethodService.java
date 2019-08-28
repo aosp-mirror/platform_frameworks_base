@@ -19,6 +19,7 @@ package android.inputmethodservice;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -62,6 +63,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
@@ -595,12 +597,12 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
             final boolean wasVisible = mIsPreRendered
                     ? mDecorViewVisible && mWindowVisible : isInputViewShown();
+            applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */);
             if (mIsPreRendered) {
                 if (DEBUG) {
                     Log.v(TAG, "Making IME window invisible");
                 }
                 setImeWindowStatus(IME_ACTIVE | IME_INVISIBLE, mBackDisposition);
-                applyVisibilityInInsetsConsumer(false /* setVisible */);
                 onPreRenderedWindowVisibilityChanged(false /* setVisible */);
             } else {
                 mShowInputFlags = 0;
@@ -632,11 +634,11 @@ public class InputMethodService extends AbstractInputMethodService {
                     if (DEBUG) {
                         Log.v(TAG, "Making IME window visible");
                     }
-                    applyVisibilityInInsetsConsumer(true /* setVisible */);
                     onPreRenderedWindowVisibilityChanged(true /* setVisible */);
                 } else {
                     showWindow(true);
                 }
+                applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */);
             }
             // If user uses hard keyboard, IME button should always be shown.
             setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
@@ -1974,14 +1976,18 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * Apply the IME visibility in {@link android.view.ImeInsetsSourceConsumer} when
-     * pre-rendering is enabled.
+     * {@link ViewRootImpl.sNewInsetsMode} is enabled.
      * @param setVisible {@code true} to make it visible, false to hide it.
      */
-    private void applyVisibilityInInsetsConsumer(boolean setVisible) {
-        if (!mIsPreRendered) {
+    private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible) {
+        if (!isVisibilityAppliedUsingInsetsConsumer()) {
             return;
         }
         mPrivOps.applyImeVisibility(setVisible);
+    }
+
+    private boolean isVisibilityAppliedUsingInsetsConsumer() {
+        return ViewRootImpl.sNewInsetsMode > NEW_INSETS_MODE_NONE;
     }
 
     private void finishViews(boolean finishingInput) {
@@ -2007,7 +2013,11 @@ public class InputMethodService extends AbstractInputMethodService {
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
-            mWindow.hide();
+            // When insets API is enabled, it is responsible for client and server side
+            // visibility of IME window.
+            if (!isVisibilityAppliedUsingInsetsConsumer()) {
+                mWindow.hide();
+            }
             mDecorViewVisible = false;
             onWindowHidden();
             mDecorViewWasVisible = false;

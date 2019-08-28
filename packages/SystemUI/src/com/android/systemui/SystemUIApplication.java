@@ -74,7 +74,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         // the theme set there.
         setTheme(R.style.Theme_SystemUI);
 
-
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);

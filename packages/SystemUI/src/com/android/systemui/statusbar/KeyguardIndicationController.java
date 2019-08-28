@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.admin.DevicePolicyManager;
@@ -234,7 +236,8 @@ public class KeyguardIndicationController implements StateListener,
             return;
         }
 
-        if (!mDozing && mDevicePolicyManager.isDeviceManaged()) {
+        // TODO(b/140053632)
+        if (!mDozing && whitelistIpcs(mDevicePolicyManager::isDeviceManaged)) {
             final CharSequence organizationName =
                     mDevicePolicyManager.getDeviceOwnerOrganizationName();
             if (organizationName != null) {
@@ -381,7 +384,8 @@ public class KeyguardIndicationController implements StateListener,
             int userId = KeyguardUpdateMonitor.getCurrentUser();
             String trustGrantedIndication = getTrustGrantedIndication();
             String trustManagedIndication = getTrustManagedIndication();
-            if (!mUserManager.isUserUnlocked(userId)) {
+            // TODO(b/140053632)
+            if (!whitelistIpcs(() -> mUserManager.isUserUnlocked(userId))) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
                 mTextView.setTextColor(mInitialTextColorState);
             } else if (!TextUtils.isEmpty(mTransientIndication)) {

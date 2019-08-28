@@ -17,6 +17,8 @@ package com.android.systemui.statusbar;
 
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -323,8 +325,9 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private boolean hideSilentNotificationsOnLockscreen() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1) == 0;
+        // TODO(b/140058091)
+        return whitelistIpcs(() -> Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1) == 0);
     }
 
     private void setShowLockscreenNotifications(boolean show) {
@@ -515,8 +518,9 @@ public class NotificationLockscreenUserManagerImpl implements
         for (int i = currentProfiles.size() - 1; i >= 0; i--) {
             final int userId = currentProfiles.valueAt(i).id;
             boolean isProfilePublic = devicePublic;
-            boolean needsSeparateChallenge = mLockPatternUtils.isSeparateProfileChallengeEnabled(
-                    userId);
+            // TODO(b/140058091)
+            boolean needsSeparateChallenge = whitelistIpcs(() ->
+                    mLockPatternUtils.isSeparateProfileChallengeEnabled(userId));
             if (!devicePublic && userId != getCurrentUserId()
                     && needsSeparateChallenge && isSecure(userId)) {
                 // Keyguard.isDeviceLocked is updated asynchronously, assume that all profiles

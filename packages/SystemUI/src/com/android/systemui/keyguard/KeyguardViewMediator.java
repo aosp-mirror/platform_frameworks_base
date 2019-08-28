@@ -25,6 +25,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -643,26 +644,29 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public int getBouncerPromptReason() {
-            int currentUser = ActivityManager.getCurrentUser();
-            boolean trust = mTrustManager.isTrustUsuallyManaged(currentUser);
-            boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
-            boolean any = trust || biometrics;
-            KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
-                    mUpdateMonitor.getStrongAuthTracker();
-            int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
+            // TODO(b/140053364)
+            return whitelistIpcs(() -> {
+                int currentUser = ActivityManager.getCurrentUser();
+                boolean trust = mTrustManager.isTrustUsuallyManaged(currentUser);
+                boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
+                boolean any = trust || biometrics;
+                KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                        mUpdateMonitor.getStrongAuthTracker();
+                int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
 
-            if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
-                return KeyguardSecurityView.PROMPT_REASON_RESTART;
-            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
-                return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
-            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
-                return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
-            } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
-                return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
-            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
-                return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
-            }
-            return KeyguardSecurityView.PROMPT_REASON_NONE;
+                if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
+                    return KeyguardSecurityView.PROMPT_REASON_RESTART;
+                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
+                    return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
+                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
+                    return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
+                } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
+                    return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
+                    return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
+                }
+                return KeyguardSecurityView.PROMPT_REASON_NONE;
+            });
         }
 
         @Override
@@ -2172,18 +2176,21 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void notifyDefaultDisplayCallbacks(boolean showing) {
-        int size = mKeyguardStateCallbacks.size();
-        for (int i = size - 1; i >= 0; i--) {
-            IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
-            try {
-                callback.onShowingStateChanged(showing);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to call onShowingStateChanged", e);
-                if (e instanceof DeadObjectException) {
-                    mKeyguardStateCallbacks.remove(callback);
+        // TODO(b/140053364)
+        whitelistIpcs(() -> {
+            int size = mKeyguardStateCallbacks.size();
+            for (int i = size - 1; i >= 0; i--) {
+                IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
+                try {
+                    callback.onShowingStateChanged(showing);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onShowingStateChanged", e);
+                    if (e instanceof DeadObjectException) {
+                        mKeyguardStateCallbacks.remove(callback);
+                    }
                 }
             }
-        }
+        });
         updateInputRestrictedLocked();
         mUiOffloadThread.submit(() -> {
             mTrustManager.reportKeyguardShowingChanged();

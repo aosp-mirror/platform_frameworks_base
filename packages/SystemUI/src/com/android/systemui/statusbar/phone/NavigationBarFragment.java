@@ -91,6 +91,7 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
@@ -134,6 +135,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private final AccessibilityManagerWrapper mAccessibilityManagerWrapper;
     protected final AssistManager mAssistManager;
+    private SysUiState mSysUiFlagsContainer;
     private final MetricsLogger mMetricsLogger;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final StatusBarStateController mStatusBarStateController;
@@ -245,12 +247,14 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             DeviceProvisionedController deviceProvisionedController, MetricsLogger metricsLogger,
             AssistManager assistManager, OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            SysUiState sysUiFlagsContainer) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
         mMetricsLogger = metricsLogger;
         mAssistManager = assistManager;
+        mSysUiFlagsContainer = sysUiFlagsContainer;
         mAssistantAvailable = mAssistManager.getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         mOverviewProxyService = overviewProxyService;
         mNavBarMode = navigationModeController.addListener(this);
@@ -884,12 +888,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE,
-                clickable, mDisplayId);
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE,
-                longClickable, mDisplayId);
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NAV_BAR_HIDDEN,
-                !isNavBarWindowVisible(), mDisplayId);
+
+        mSysUiFlagsContainer.setFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable)
+                .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
+                .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isNavBarWindowVisible())
+                .commitUpdate(mDisplayId);
     }
 
     /**

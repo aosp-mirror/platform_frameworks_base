@@ -145,6 +145,7 @@ public class InsetsControllerTest {
         InsetsSourceControl ime = controls[2];
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mController.getSourceConsumer(TYPE_IME).onWindowFocusGained();
             // since there is no focused view, forcefully make IME visible.
             mController.applyImeVisibility(true /* setVisible */);
             mController.show(Type.all());
@@ -160,6 +161,7 @@ public class InsetsControllerTest {
             assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
             assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+            mController.getSourceConsumer(TYPE_IME).onWindowFocusLost();
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
@@ -172,12 +174,14 @@ public class InsetsControllerTest {
         controls[0] = ime;
         mController.onControlsChanged(controls);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mController.getSourceConsumer(TYPE_IME).onWindowFocusGained();
             mController.applyImeVisibility(true);
             mController.cancelExistingAnimation();
             assertTrue(mController.getSourceConsumer(ime.getType()).isVisible());
             mController.applyImeVisibility(false);
             mController.cancelExistingAnimation();
             assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+            mController.getSourceConsumer(TYPE_IME).onWindowFocusLost();
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }

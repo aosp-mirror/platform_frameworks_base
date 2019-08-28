@@ -158,7 +158,7 @@ void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
         functorDrawable = mDisplayList->allocateDrawable<GLFunctorDrawable>(functor, asSkCanvas());
     }
     mDisplayList->mChildFunctors.push_back(functorDrawable);
-    drawDrawable(functorDrawable);
+    mRecorder.drawWebView(functorDrawable);
 #endif
 }
 

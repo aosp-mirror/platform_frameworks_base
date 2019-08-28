@@ -296,7 +296,8 @@ public class InsetsController implements WindowInsetsController {
         final ArraySet<Integer> internalTypes = mState.toInternalType(types);
         final SparseArray<InsetsSourceConsumer> consumers = new SparseArray<>();
 
-        Pair<Integer, Boolean> typesReadyPair = collectConsumers(fromIme, internalTypes, consumers);
+        Pair<Integer, Boolean> typesReadyPair = collectConsumers(
+                fromIme, internalTypes, consumers, listener);
         int typesReady = typesReadyPair.first;
         boolean isReady = typesReadyPair.second;
         if (!isReady) {
@@ -324,13 +325,16 @@ public class InsetsController implements WindowInsetsController {
      * @return Pair of (types ready to animate, is ready to animate).
      */
     private Pair<Integer, Boolean> collectConsumers(boolean fromIme,
-            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceConsumer> consumers) {
+            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceConsumer> consumers,
+            WindowInsetsAnimationControlListener listener) {
         int typesReady = 0;
         boolean isReady = true;
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
-            if (consumer.getControl() != null) {
-                if (!consumer.isVisible()) {
+            // Double check for IME that IME target window has focus.
+            if (consumer.getType() != TYPE_IME || consumer.hasWindowFocus()) {
+                boolean setVisible = !consumer.isVisible();
+                if (setVisible) {
                     // Show request
                     switch(consumer.requestShow(fromIme)) {
                         case ShowResult.SHOW_IMMEDIATELY:
@@ -357,8 +361,11 @@ public class InsetsController implements WindowInsetsController {
                 }
                 consumers.put(consumer.getType(), consumer);
             } else {
-                // TODO: Let calling app know it's not possible, or wait
-                // TODO: Remove it from types
+                // window doesnt have focus, no-op.
+                isReady = false;
+                // TODO: Let the calling app know that window has lost focus and
+                //       show()/hide()/controlWindowInsetsAnimation requests will be ignored.
+                typesReady &= ~InsetsState.toPublicType(consumer.getType());
             }
         }
         return new Pair<>(typesReady, isReady);
@@ -533,7 +540,10 @@ public class InsetsController implements WindowInsetsController {
 
             @Override
             public void onCancelled() {
-                mAnimator.cancel();
+                // Animator can be null when it is cancelled before onReady() completes.
+                if (mAnimator != null) {
+                    mAnimator.cancel();
+                }
             }
 
             private void onAnimationFinish() {

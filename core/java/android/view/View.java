@@ -14403,6 +14403,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
+        updateSystemGestureExclusionRects();
     }
 
     /**

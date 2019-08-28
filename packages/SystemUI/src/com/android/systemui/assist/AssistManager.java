@@ -1,5 +1,7 @@
 package com.android.systemui.assist;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -374,7 +376,8 @@ public class AssistManager implements ConfigurationChangedReceiver {
     }
 
     public boolean canVoiceAssistBeLaunchedFromKeyguard() {
-        return mAssistUtils.activeServiceSupportsLaunchFromKeyguard();
+        // TODO(b/140051519)
+        return whitelistIpcs(() -> mAssistUtils.activeServiceSupportsLaunchFromKeyguard());
     }
 
     public ComponentName getVoiceInteractorComponentName() {
@@ -442,7 +445,8 @@ public class AssistManager implements ConfigurationChangedReceiver {
     }
 
     public void onLockscreenShown() {
-        mAssistUtils.onLockscreenShown();
+        // TODO(b/140052478)
+        whitelistIpcs(mAssistUtils::onLockscreenShown);
     }
 
     public long getAssistHandleShowAndGoRemainingDurationMs() {

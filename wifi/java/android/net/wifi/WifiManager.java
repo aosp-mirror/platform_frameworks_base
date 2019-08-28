@@ -634,10 +634,19 @@ public class WifiManager {
      */
     public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"IFACE_IP_MODE_"}, value = {
+            IFACE_IP_MODE_UNSPECIFIED,
+            IFACE_IP_MODE_CONFIGURATION_ERROR,
+            IFACE_IP_MODE_TETHERED,
+            IFACE_IP_MODE_LOCAL_ONLY})
+    public @interface IfaceIpMode {}
+
     /**
      * Interface IP mode unspecified.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
@@ -646,7 +655,7 @@ public class WifiManager {
     /**
      * Interface IP mode for configuration error.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
@@ -655,7 +664,7 @@ public class WifiManager {
     /**
      * Interface IP mode for tethering.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
@@ -664,7 +673,7 @@ public class WifiManager {
     /**
      * Interface IP mode for Local Only Hotspot.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
@@ -2670,9 +2679,9 @@ public class WifiManager {
     /**
      * Call allowing ConnectivityService to update WifiService with interface mode changes.
      *
-     * The possible modes include: {@link IFACE_IP_MODE_TETHERED},
-     *                             {@link IFACE_IP_MODE_LOCAL_ONLY},
-     *                             {@link IFACE_IP_MODE_CONFIGURATION_ERROR}
+     * The possible modes include: {@link #IFACE_IP_MODE_TETHERED},
+     *                             {@link #IFACE_IP_MODE_LOCAL_ONLY},
+     *                             {@link #IFACE_IP_MODE_CONFIGURATION_ERROR}
      *
      * @param ifaceName String name of the updated interface
      * @param mode int representing the new mode
@@ -3397,6 +3406,7 @@ public class WifiManager {
 
         private final CloseGuard mCloseGuard = CloseGuard.get();
         private final WifiConfiguration mConfig;
+        private boolean mClosed = false;
 
         /** @hide */
         @VisibleForTesting
@@ -3412,8 +3422,13 @@ public class WifiManager {
         @Override
         public void close() {
             try {
-                stopLocalOnlyHotspot();
-                mCloseGuard.close();
+                synchronized (mLock) {
+                    if (!mClosed) {
+                        mClosed = true;
+                        stopLocalOnlyHotspot();
+                        mCloseGuard.close();
+                    }
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to stop Local Only Hotspot.");
             }
