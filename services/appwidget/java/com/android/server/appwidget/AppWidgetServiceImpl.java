@@ -19,6 +19,7 @@ package com.android.server.appwidget;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.UserIdInt;
@@ -856,13 +857,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             ArrayList<PendingHostUpdate> outUpdates = new ArrayList<>(N);
             LongSparseArray<PendingHostUpdate> updatesMap = new LongSparseArray<>();
             for (int i = 0; i < N; i++) {
-                if (host.getPendingUpdatesForId(appWidgetIds[i], updatesMap)) {
-                    // We key the updates based on request id, so that the values are sorted in the
-                    // order they were received.
-                    int M = updatesMap.size();
-                    for (int j = 0; j < M; j++) {
-                        outUpdates.add(updatesMap.valueAt(j));
-                    }
+                updatesMap.clear();
+                host.getPendingUpdatesForId(appWidgetIds[i], updatesMap);
+                // We key the updates based on request id, so that the values are sorted in the
+                // order they were received.
+                int m = updatesMap.size();
+                for (int j = 0; j < m; j++) {
+                    outUpdates.add(updatesMap.valueAt(j));
                 }
             }
             // Reset the update counter once all the updates have been calculated
@@ -2102,6 +2103,40 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    private void scheduleNotifyAppWidgetRemovedLocked(Widget widget) {
+        long requestId = UPDATE_COUNTER.incrementAndGet();
+        if (widget != null) {
+            widget.updateSequenceNos.clear();
+        }
+        if (widget == null || widget.provider == null || widget.provider.zombie
+                || widget.host.callbacks == null || widget.host.zombie) {
+            return;
+        }
+
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = widget.host;
+        args.arg2 = widget.host.callbacks;
+        args.arg3 = requestId;
+        args.argi1 = widget.appWidgetId;
+
+        mCallbackHandler.obtainMessage(
+            CallbackHandler.MSG_NOTIFY_APP_WIDGET_REMOVED,
+            args).sendToTarget();
+    }
+
+    private void handleNotifyAppWidgetRemoved(Host host, IAppWidgetHost callbacks, int appWidgetId,
+            long requestId) {
+        try {
+            callbacks.appWidgetRemoved(appWidgetId);
+            host.lastWidgetUpdateSequenceNo = requestId;
+        } catch (RemoteException re) {
+            synchronized (mLock) {
+                Slog.e(TAG, "Widget host dead: " + host.id, re);
+                host.callbacks = null;
+            }
+        }
+    }
+
     private void scheduleNotifyGroupHostsForProvidersChangedLocked(int userId) {
         final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
 
@@ -2870,8 +2905,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      */
     void removeWidgetLocked(Widget widget) {
         mWidgets.remove(widget);
-
         onWidgetRemovedLocked(widget);
+        scheduleNotifyAppWidgetRemovedLocked(widget);
     }
 
     private void onWidgetRemovedLocked(Widget widget) {
@@ -3587,6 +3622,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public static final int MSG_NOTIFY_PROVIDER_CHANGED = 2;
         public static final int MSG_NOTIFY_PROVIDERS_CHANGED = 3;
         public static final int MSG_NOTIFY_VIEW_DATA_CHANGED = 4;
+        public static final int MSG_NOTIFY_APP_WIDGET_REMOVED = 5;
 
         public CallbackHandler(Looper looper) {
             super(looper, null, false);
@@ -3617,6 +3653,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     args.recycle();
 
                     handleNotifyProviderChanged(host, callbacks, appWidgetId, info, requestId);
+                } break;
+
+                case MSG_NOTIFY_APP_WIDGET_REMOVED: {
+                    SomeArgs args = (SomeArgs) message.obj;
+                    Host host = (Host) args.arg1;
+                    IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
+                    long requestId = (Long) args.arg3;
+                    final int appWidgetId = args.argi1;
+                    args.recycle();
+                    handleNotifyAppWidgetRemoved(host, callbacks, appWidgetId, requestId);
                 } break;
 
                 case MSG_NOTIFY_PROVIDERS_CHANGED: {
@@ -4017,14 +4063,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         /**
          * Adds all pending updates in {@param outUpdates} keys by the update time.
          */
-        public boolean getPendingUpdatesForId(int appWidgetId,
+        public void getPendingUpdatesForId(int appWidgetId,
                 LongSparseArray<PendingHostUpdate> outUpdates) {
             long updateSequenceNo = lastWidgetUpdateSequenceNo;
             int N = widgets.size();
             for (int i = 0; i < N; i++) {
                 Widget widget = widgets.get(i);
                 if (widget.appWidgetId == appWidgetId) {
-                    outUpdates.clear();
                     for (int j = widget.updateSequenceNos.size() - 1; j >= 0; j--) {
                         long requestId = widget.updateSequenceNos.valueAt(j);
                         if (requestId <= updateSequenceNo) {
@@ -4046,10 +4091,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         }
                         outUpdates.put(requestId, update);
                     }
-                    return true;
+                    return;
                 }
             }
-            return false;
+            outUpdates.put(lastWidgetUpdateSequenceNo,
+                    PendingHostUpdate.appWidgetRemoved(appWidgetId));
         }
 
         @Override
