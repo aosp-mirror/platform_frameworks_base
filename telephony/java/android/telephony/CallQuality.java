@@ -17,6 +17,8 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -252,6 +254,7 @@ public final class CallQuality implements Parcelable {
     }
 
     // Parcelable things
+    @NonNull
     @Override
     public String toString() {
         return "CallQuality: {downlinkCallQualityLevel=" + mDownlinkCallQualityLevel
@@ -285,7 +288,7 @@ public final class CallQuality implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == null || !(o instanceof CallQuality) || hashCode() != o.hashCode()) {
             return false;
         }

@@ -15,6 +15,7 @@
  */
 package android.service.notification;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Notification;
@@ -162,6 +163,7 @@ public final class Adjustment implements Parcelable {
         dest.writeInt(mUser);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Adjustment{"

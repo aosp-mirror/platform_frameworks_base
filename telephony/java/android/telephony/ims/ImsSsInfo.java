@@ -254,6 +254,7 @@ public final class ImsSsInfo implements Parcelable {
         out.writeInt(mClirOutgoingState);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return super.toString() + ", Status: " + ((mStatus == 0) ? "disabled" : "enabled")

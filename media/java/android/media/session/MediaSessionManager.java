@@ -41,7 +41,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.media.MediaBrowserService;
 import android.service.notification.NotificationListenerService;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -882,7 +881,7 @@ public final class MediaSessionManager {
          * @return {@code true} if equals, {@code false} otherwise
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (!(obj instanceof RemoteUserInfo)) {
                 return false;
             }

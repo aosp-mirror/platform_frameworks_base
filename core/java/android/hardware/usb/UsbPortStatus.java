@@ -16,6 +16,7 @@
 
 package android.hardware.usb;
 
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -107,6 +108,7 @@ public final class UsbPortStatus implements Parcelable {
         return mSupportedRoleCombinations;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "UsbPortStatus{connected=" + isConnected()
@@ -131,7 +133,7 @@ public final class UsbPortStatus implements Parcelable {
         dest.writeInt(mSupportedRoleCombinations);
     }
 
-    public static final Parcelable.Creator<UsbPortStatus> CREATOR =
+    public static final @NonNull Parcelable.Creator<UsbPortStatus> CREATOR =
             new Parcelable.Creator<UsbPortStatus>() {
         @Override
         public UsbPortStatus createFromParcel(Parcel in) {

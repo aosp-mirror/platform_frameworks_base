@@ -534,7 +534,7 @@ public final class ImsCallProfile implements Parcelable {
         mMediaProfile = profile.mMediaProfile;
     }
 
-
+    @NonNull
     @Override
     public String toString() {
         return "{ serviceType=" + mServiceType

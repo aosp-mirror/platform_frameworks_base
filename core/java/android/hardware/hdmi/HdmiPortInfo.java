@@ -15,6 +15,8 @@
  */
 package android.hardware.hdmi;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -162,6 +164,7 @@ public final class HdmiPortInfo implements Parcelable {
         dest.writeInt(mMhlSupported ? 1 : 0);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
@@ -174,7 +177,7 @@ public final class HdmiPortInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof HdmiPortInfo)) {
             return false;
         }

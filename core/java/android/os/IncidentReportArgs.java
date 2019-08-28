@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -110,6 +111,7 @@ public final class IncidentReportArgs implements Parcelable {
     /**
      * Print this report as a string.
      */
+    @NonNull
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Incident(");

@@ -18,6 +18,7 @@ package android.content.om;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -310,7 +311,7 @@ public final class OverlayInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -342,6 +343,7 @@ public final class OverlayInfo implements Parcelable {
         return true;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "OverlayInfo { overlay=" + packageName + ", target=" + targetPackageName + ", state="

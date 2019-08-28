@@ -16,6 +16,7 @@
 
 package android.hardware.location;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -131,6 +132,7 @@ public class NanoAppFilter implements Parcelable {
                 (versionsMatch(mVersionRestrictionMask, mAppVersion, info.getAppVersion()));
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "nanoAppId: 0x" + Long.toHexString(mAppId)

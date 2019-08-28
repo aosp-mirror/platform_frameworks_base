@@ -140,6 +140,7 @@ public class GpsMeasurementsEvent implements Parcelable {
         parcel.writeTypedArray(measurementsArray, flags);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("[ GpsMeasurementsEvent:\n\n");
