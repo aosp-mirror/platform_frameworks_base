@@ -1935,7 +1935,10 @@ final class ActivityRecord extends ConfigurationContainer {
      * HistoryRecord.
      * Normally the server-side record will be removed when the client reports back after
      * destruction. If, however, at this point there is no client process attached, the record will
-     * removed immediately.
+     * be removed immediately.
+     *
+     * @return {@code true} if activity was immediately removed from history, {@code false}
+     * otherwise.
      */
     boolean destroyImmediately(boolean removeFromApp, String reason) {
         if (DEBUG_SWITCH || DEBUG_CLEANUP) {
@@ -3429,8 +3432,8 @@ final class ActivityRecord extends ConfigurationContainer {
             return false;
         }
         final ActivityStack stack = getActivityStack();
-        if (stack == null || this == stack.getResumedActivity() || this == stack.mPausingActivity
-                || !mHaveState || !stopped) {
+        if (isState(RESUMED) || stack == null || this == stack.mPausingActivity || !mHaveState
+                || !stopped) {
             // We're not ready for this kind of thing.
             return false;
         }
