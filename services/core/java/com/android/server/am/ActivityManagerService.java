@@ -6115,10 +6115,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    public void grantEphemeralAccessLocked(int userId, Intent intent,
-            int targetAppId, int ephemeralAppId) {
+    public void grantImplicitAccess(int userId, Intent intent, int callingAppId, int targetAppId) {
         getPackageManagerInternalLocked().
-                grantEphemeralAccess(userId, intent, targetAppId, ephemeralAppId);
+                grantImplicitAccess(userId, intent, callingAppId, targetAppId);
     }
 
     /**
@@ -7088,9 +7087,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             checkTime(startTime, "getContentProviderImpl: done!");
 
-            grantEphemeralAccessLocked(userId, null /*intent*/,
-                    UserHandle.getAppId(cpi.applicationInfo.uid),
-                    UserHandle.getAppId(Binder.getCallingUid()));
+            grantImplicitAccess(userId, null /*intent*/,
+                    UserHandle.getAppId(Binder.getCallingUid()),
+                    UserHandle.getAppId(cpi.applicationInfo.uid)
+            );
         }
 
         // Wait for the provider to be published...

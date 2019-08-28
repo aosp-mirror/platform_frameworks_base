@@ -401,7 +401,7 @@ class InstantAppRegistry {
 
     @GuardedBy("mService.mLock")
     public void grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
-            int targetAppId, int instantAppId) {
+            int instantAppId, int targetAppId) {
         if (mInstalledInstantAppUids == null) {
             return;     // no instant apps installed; no need to grant
         }
