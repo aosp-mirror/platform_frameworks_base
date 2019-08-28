@@ -82,8 +82,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     private FragmentController mControllerExternalDisplay;
 
     private SysuiTestableContext mSysuiTestableContextExternal;
-    private OverviewProxyService mOverviewProxyService =
-            mDependency.injectMockDependency(OverviewProxyService.class);
+    private OverviewProxyService mOverviewProxyService;
     private CommandQueue mCommandQueue;
     private SysUiState mMockSysUiState;
 
@@ -115,6 +114,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     public void setupFragment() throws Exception {
         setupSysuiDependency();
         createRootView();
+        mOverviewProxyService =
+                mDependency.injectMockDependency(OverviewProxyService.class);
         TestableLooper.get(this).runWithLooper(() -> {
             mHandler = new Handler();
 
