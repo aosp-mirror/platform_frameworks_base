@@ -28,4 +28,14 @@
     <!-- Do not set the system language as value of EF LI/EF PL -->
     <bool name="config_use_sim_language_file">false</bool>
 
+    <!-- Configures encoding type to parse the User Data of an SMS for reserved TP-DCS value.
+         Refer to SmsConstants.java
+         ENCODING_UNKNOWN = 0;
+         ENCODING_7BIT = 1;
+         ENCODING_8BIT = 2;
+         ENCODING_16BIT = 3;
+         ENCODING_KSC5601 = 4;
+         -->
+    <integer name="default_reserved_data_coding_scheme">4</integer>
+
 </resources>
