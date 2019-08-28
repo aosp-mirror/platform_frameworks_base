@@ -20,9 +20,11 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -124,6 +126,7 @@ public class DragDropControllerTests extends WindowTestsBase {
         mDisplayContent = spy(mDisplayContent);
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
+        when(mWm.mInputManager.transferTouchFocus(any(), any())).thenReturn(true);
 
         synchronized (mWm.mGlobalLock) {
             mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
@@ -177,6 +180,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 
+            assertTrue(mWm.mInputManager.transferTouchFocus(null, null));
             mToken = mTarget.performDrag(
                     new SurfaceSession(), 0, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0,
                     data);
