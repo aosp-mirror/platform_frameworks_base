@@ -384,8 +384,7 @@ public class KeyguardIndicationController implements StateListener,
             int userId = KeyguardUpdateMonitor.getCurrentUser();
             String trustGrantedIndication = getTrustGrantedIndication();
             String trustManagedIndication = getTrustManagedIndication();
-            // TODO(b/140053632)
-            if (!whitelistIpcs(() -> mUserManager.isUserUnlocked(userId))) {
+            if (!mKeyguardUpdateMonitor.isUserUnlocked(userId)) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
                 mTextView.setTextColor(mInitialTextColorState);
             } else if (!TextUtils.isEmpty(mTransientIndication)) {
@@ -754,6 +753,13 @@ public class KeyguardIndicationController implements StateListener,
         public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
             super.onBiometricAuthenticated(userId, biometricSourceType);
             mHandler.sendEmptyMessage(MSG_HIDE_TRANSIENT);
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            if (mVisible) {
+                updateIndication(false);
+            }
         }
 
         @Override
