@@ -16,6 +16,7 @@
 
 #include "RecordingCanvas.h"
 
+#include "pipeline/skia/FunctorDrawable.h"
 #include "VectorDrawable.h"
 
 #include "SkAndroidFrameworkUtils.h"
@@ -496,6 +497,16 @@ struct DrawVectorDrawable final : Op {
     SkPaint paint;
     BitmapPalette palette;
 };
+struct DrawWebView final : Op {
+    static const auto kType = Type::DrawWebView;
+    DrawWebView(skiapipeline::FunctorDrawable* drawable) : drawable(sk_ref_sp(drawable)) {}
+    sk_sp<skiapipeline::FunctorDrawable> drawable;
+    // We can't invoke SkDrawable::draw directly, because VkFunctorDrawable expects
+    // SkDrawable::onSnapGpuDrawHandler callback instead of SkDrawable::onDraw.
+    // SkCanvas::drawDrawable/SkGpuDevice::drawDrawable has the logic to invoke
+    // onSnapGpuDrawHandler.
+    void draw(SkCanvas* c, const SkMatrix&) const { c->drawDrawable(drawable.get()); }
+};
 }
 
 template <typename T, typename... Args>
@@ -679,6 +690,9 @@ void DisplayListData::drawShadowRec(const SkPath& path, const SkDrawShadowRec& r
 }
 void DisplayListData::drawVectorDrawable(VectorDrawableRoot* tree) {
     this->push<DrawVectorDrawable>(0, tree);
+}
+void DisplayListData::drawWebView(skiapipeline::FunctorDrawable* drawable) {
+    this->push<DrawWebView>(0, drawable);
 }
 
 typedef void (*draw_fn)(const void*, SkCanvas*, const SkMatrix&);
@@ -984,6 +998,10 @@ void RecordingCanvas::onDrawShadowRec(const SkPath& path, const SkDrawShadowRec&
 
 void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     fDL->drawVectorDrawable(tree);
+}
+
+void RecordingCanvas::drawWebView(skiapipeline::FunctorDrawable* drawable) {
+    fDL->drawWebView(drawable);
 }
 
 }  // namespace uirenderer
