@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 
 import com.android.systemui.R;
-import com.android.systemui.biometrics.BiometricDialog;
+import com.android.systemui.biometrics.AuthDialog;
 
 /**
  * Controls the back panel and its animations for the BiometricPrompt UI.
@@ -78,7 +78,7 @@ public class AuthPanelController extends ViewOutlineProvider {
 
         if (animate) {
             ValueAnimator heightAnimator = ValueAnimator.ofInt(mContentHeight, contentHeight);
-            heightAnimator.setDuration(BiometricDialog.ANIMATE_DURATION_MS);
+            heightAnimator.setDuration(AuthDialog.ANIMATE_DURATION_MS);
             heightAnimator.addUpdateListener((animation) -> {
                 mContentHeight = (int) animation.getAnimatedValue();
                 mPanelView.invalidateOutline();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import android.annotation.IntDef;
 import android.content.Context;
@@ -38,8 +38,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.biometrics.BiometricDialog;
-import com.android.systemui.biometrics.DialogViewCallback;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.lang.annotation.Retention;
@@ -49,7 +47,7 @@ import java.lang.annotation.RetentionPolicy;
  * Top level container/controller for the BiometricPrompt UI.
  */
 public class AuthContainerView extends LinearLayout
-        implements BiometricDialog, WakefulnessLifecycle.Observer {
+        implements AuthDialog, WakefulnessLifecycle.Observer {
 
     private static final String TAG = "BiometricPrompt/AuthContainerView";
     private static final int ANIMATION_DURATION_SHOW_MS = 250;
@@ -89,7 +87,7 @@ public class AuthContainerView extends LinearLayout
 
     static class Config {
         Context mContext;
-        DialogViewCallback mCallback;
+        AuthDialogCallback mCallback;
         Bundle mBiometricPromptBundle;
         boolean mRequireConfirmation;
         int mUserId;
@@ -106,7 +104,7 @@ public class AuthContainerView extends LinearLayout
             mConfig.mContext = context;
         }
 
-        public Builder setCallback(DialogViewCallback callback) {
+        public Builder setCallback(AuthDialogCallback callback) {
             mConfig.mCallback = callback;
             return this;
         }
@@ -147,13 +145,13 @@ public class AuthContainerView extends LinearLayout
         public void onAction(int action) {
             switch (action) {
                 case AuthBiometricView.Callback.ACTION_AUTHENTICATED:
-                    animateAway(DialogViewCallback.DISMISSED_AUTHENTICATED);
+                    animateAway(AuthDialogCallback.DISMISSED_AUTHENTICATED);
                     break;
                 case AuthBiometricView.Callback.ACTION_USER_CANCELED:
-                    animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+                    animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
                     break;
                 case AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE:
-                    animateAway(DialogViewCallback.DISMISSED_BUTTON_NEGATIVE);
+                    animateAway(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE);
                     break;
                 case AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN:
                     mConfig.mCallback.onTryAgainPressed();
@@ -205,7 +203,7 @@ public class AuthContainerView extends LinearLayout
                 return false;
             }
             if (event.getAction() == KeyEvent.ACTION_UP) {
-                animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+                animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
             }
             return true;
         });
@@ -267,7 +265,7 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onStartedGoingToSleep() {
-        animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+        animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
     }
 
     @Override
@@ -329,7 +327,7 @@ public class AuthContainerView extends LinearLayout
         animateAway(true /* sendReason */, reason);
     }
 
-    private void animateAway(boolean sendReason, @DialogViewCallback.DismissedReason int reason) {
+    private void animateAway(boolean sendReason, @AuthDialogCallback.DismissedReason int reason) {
         if (mContainerState == STATE_ANIMATING_IN) {
             Log.w(TAG, "startDismiss(): waiting for onDialogAnimatedIn");
             mContainerState = STATE_PENDING_DISMISS;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,7 +37,6 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.biometrics.BiometricDialog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -145,7 +144,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private AuthPanelController mPanelController;
     private Bundle mBundle;
     private boolean mRequireConfirmation;
-    @BiometricDialog.DialogSize int mSize = BiometricDialog.SIZE_UNKNOWN;
+    @AuthDialog.DialogSize int mSize = AuthDialog.SIZE_UNKNOWN;
 
     private TextView mTitleView;
     private TextView mSubtitleView;
@@ -165,7 +164,6 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     private float mIconOriginalY;
 
-    protected boolean mDialogAnimatedIn;
     protected boolean mDialogSizeAnimating;
 
     /**
@@ -199,7 +197,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         if (mState == STATE_AUTHENTICATED) {
             Log.w(TAG, "Ignoring background click after authenticated");
             return;
-        } else if (mSize == BiometricDialog.SIZE_SMALL) {
+        } else if (mSize == AuthDialog.SIZE_SMALL) {
             Log.w(TAG, "Ignoring background click during small dialog");
             return;
         }
@@ -248,9 +246,9 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     @VisibleForTesting
-    void updateSize(@BiometricDialog.DialogSize int newSize) {
+    void updateSize(@AuthDialog.DialogSize int newSize) {
         Log.v(TAG, "Current: " + mSize + " New: " + newSize);
-        if (newSize == BiometricDialog.SIZE_SMALL) {
+        if (newSize == AuthDialog.SIZE_SMALL) {
             mTitleView.setVisibility(View.GONE);
             mSubtitleView.setVisibility(View.GONE);
             mDescriptionView.setVisibility(View.GONE);
@@ -266,7 +264,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                     false /* animate */);
 
             mSize = newSize;
-        } else if (mSize == BiometricDialog.SIZE_SMALL && newSize == BiometricDialog.SIZE_MEDIUM) {
+        } else if (mSize == AuthDialog.SIZE_SMALL && newSize == AuthDialog.SIZE_MEDIUM) {
             if (mDialogSizeAnimating) {
                 return;
             }
@@ -281,7 +279,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
             // Animate the text
             final ValueAnimator opacityAnimator = ValueAnimator.ofFloat(0, 1);
-            opacityAnimator.setDuration(BiometricDialog.ANIMATE_DURATION_MS);
+            opacityAnimator.setDuration(AuthDialog.ANIMATE_DURATION_MS);
             opacityAnimator.addUpdateListener((animation) -> {
                 final float opacity = (float) animation.getAnimatedValue();
 
@@ -300,7 +298,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
             // Choreograph together
             final AnimatorSet as = new AnimatorSet();
-            as.setDuration(BiometricDialog.ANIMATE_DURATION_MS);
+            as.setDuration(AuthDialog.ANIMATE_DURATION_MS);
             as.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -330,7 +328,7 @@ public abstract class AuthBiometricView extends LinearLayout {
             // Animate the panel
             mPanelController.updateForContentDimensions(mMediumWidth, mMediumHeight,
                     true /* animate */);
-        } else if (newSize == BiometricDialog.SIZE_MEDIUM) {
+        } else if (newSize == AuthDialog.SIZE_MEDIUM) {
             mPanelController.updateForContentDimensions(mMediumWidth, mMediumHeight,
                     false /* animate */);
             mSize = newSize;
@@ -352,7 +350,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 break;
 
             case STATE_AUTHENTICATED:
-                if (mSize != BiometricDialog.SIZE_SMALL) {
+                if (mSize != AuthDialog.SIZE_SMALL) {
                     mPositiveButton.setVisibility(View.GONE);
                     mNegativeButton.setVisibility(View.GONE);
                     mErrorView.setVisibility(View.INVISIBLE);
@@ -372,8 +370,8 @@ public abstract class AuthBiometricView extends LinearLayout {
                 break;
 
             case STATE_ERROR:
-                if (mSize == BiometricDialog.SIZE_SMALL) {
-                    updateSize(BiometricDialog.SIZE_MEDIUM);
+                if (mSize == AuthDialog.SIZE_SMALL) {
+                    updateSize(AuthDialog.SIZE_MEDIUM);
                 }
                 break;
 
@@ -404,7 +402,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     public void onHelp(String help) {
-        if (mSize != BiometricDialog.SIZE_MEDIUM) {
+        if (mSize != AuthDialog.SIZE_MEDIUM) {
             return;
         }
         showTemporaryMessage(help, mResetHelpRunnable);
@@ -528,8 +526,8 @@ public abstract class AuthBiometricView extends LinearLayout {
         // only care about the initial icon position.
         if (mIconOriginalY == 0) {
             mIconOriginalY = mIconView.getY();
-            updateSize(mRequireConfirmation ? BiometricDialog.SIZE_MEDIUM
-                    : BiometricDialog.SIZE_SMALL);
+            updateSize(mRequireConfirmation ? AuthDialog.SIZE_MEDIUM
+                    : AuthDialog.SIZE_SMALL);
         }
     }
 }

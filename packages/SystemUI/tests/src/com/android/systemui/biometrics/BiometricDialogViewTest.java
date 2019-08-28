@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
@@ -32,12 +32,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.biometrics.DialogViewCallback;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import org.junit.Before;
@@ -62,7 +59,7 @@ public class BiometricDialogViewTest extends SysuiTestCase {
 
     TestableContext mTestableContext;
     @Mock
-    private DialogViewCallback mCallback;
+    private AuthDialogCallback mCallback;
     @Mock
     private UserManager mUserManager;
     @Mock
@@ -176,7 +173,7 @@ public class BiometricDialogViewTest extends SysuiTestCase {
         assertEquals(View.VISIBLE, mFaceDialogView.mTryAgainButton.getVisibility());
     }
 
-    private FaceDialogView buildFaceDialogView(Context context, DialogViewCallback callback,
+    private FaceDialogView buildFaceDialogView(Context context, AuthDialogCallback callback,
             boolean requireConfirmation) {
         return (FaceDialogView) new BiometricDialogView.Builder(context)
                 .setCallback(callback)

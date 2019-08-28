@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,7 +34,6 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.biometrics.BiometricDialog;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -186,7 +185,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     public void testBackgroundClicked_whenSmallDialog_neverSendsUserCanceled() {
         initDialog(mContext, mCallback, new MockInjector());
         mBiometricView.setPanelController(mPanelController);
-        mBiometricView.updateSize(BiometricDialog.SIZE_SMALL);
+        mBiometricView.updateSize(AuthDialog.SIZE_SMALL);
 
         View view = new View(mContext);
         mBiometricView.setBackgroundView(view);

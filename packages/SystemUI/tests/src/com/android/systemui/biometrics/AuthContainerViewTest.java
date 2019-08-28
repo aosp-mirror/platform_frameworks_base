@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -24,7 +24,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.biometrics.DialogViewCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +38,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     private TestableAuthContainer mAuthContainer;
 
-    private @Mock DialogViewCallback mDialogViewCallback;
+    private @Mock AuthDialogCallback mCallback;
 
     @Before
     public void setup() {
@@ -47,7 +46,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
         AuthContainerView.Config config = new AuthContainerView.Config();
         config.mContext = mContext;
-        config.mCallback = mDialogViewCallback;
+        config.mCallback = mCallback;
         mAuthContainer = new TestableAuthContainer(config);
     }
 
@@ -55,28 +54,28 @@ public class AuthContainerViewTest extends SysuiTestCase {
     public void testActionAuthenticated_sendsDismissedAuthenticated() {
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_AUTHENTICATED);
-        verify(mDialogViewCallback).onDismissed(eq(DialogViewCallback.DISMISSED_AUTHENTICATED));
+        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_AUTHENTICATED));
     }
 
     @Test
     public void testActionUserCanceled_sendsDismissedUserCanceled() {
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_USER_CANCELED);
-        verify(mDialogViewCallback).onDismissed(eq(DialogViewCallback.DISMISSED_USER_CANCELED));
+        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_USER_CANCELED));
     }
 
     @Test
     public void testActionButtonNegative_sendsDismissedButtonNegative() {
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE);
-        verify(mDialogViewCallback).onDismissed(eq(DialogViewCallback.DISMISSED_BUTTON_NEGATIVE));
+        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE));
     }
 
     @Test
     public void testActionTryAgain_sendsTryAgain() {
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN);
-        verify(mDialogViewCallback).onTryAgainPressed();
+        verify(mCallback).onTryAgainPressed();
     }
 
     private class TestableAuthContainer extends AuthContainerView {

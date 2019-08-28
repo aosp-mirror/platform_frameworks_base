@@ -21,15 +21,13 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.view.WindowManager;
 
-import com.android.systemui.biometrics.ui.BiometricDialogView;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface for the biometric dialog UI.
  */
-public interface BiometricDialog {
+public interface AuthDialog {
 
     // TODO: Clean up save/restore state
     String[] KEYS_TO_BACKUP = {

@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.graphics.drawable.Animatable2;
@@ -30,7 +30,6 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.biometrics.BiometricDialog;
 
 public class AuthBiometricFaceView extends AuthBiometricView {
 
@@ -174,7 +173,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         mIconController.updateState(mState, newState);
 
         if (newState == STATE_AUTHENTICATING_ANIMATING_IN ||
-                (newState == STATE_AUTHENTICATING && mSize == BiometricDialog.SIZE_MEDIUM)) {
+                (newState == STATE_AUTHENTICATING && mSize == AuthDialog.SIZE_MEDIUM)) {
             resetErrorView(mContext, mErrorView);
         }
 
@@ -184,7 +183,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
 
     @Override
     public void onAuthenticationFailed(String failureReason) {
-        if (mSize == BiometricDialog.SIZE_MEDIUM) {
+        if (mSize == AuthDialog.SIZE_MEDIUM) {
             mTryAgainButton.setVisibility(View.VISIBLE);
             mPositiveButton.setVisibility(View.GONE);
         }
