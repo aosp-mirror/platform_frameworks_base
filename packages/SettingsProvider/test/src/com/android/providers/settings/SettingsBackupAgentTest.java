@@ -64,8 +64,10 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     private TestFriendlySettingsBackupAgent mAgentUnderTest;
     private Context mContext;
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         mContext = new ContextWithMockContentResolver(getContext());
 
         mAgentUnderTest = new TestFriendlySettingsBackupAgent();
