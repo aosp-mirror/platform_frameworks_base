@@ -2735,17 +2735,6 @@ public final class PowerManagerService extends SystemService
         if (mScreenBrightnessBoostInProgress) {
             return true;
         }
-
-        // Because summoning the sandman is asyncronous, there is a time-gap where
-        // we release the display suspend blocker before the dream service acquires
-        // their own wakelock.  Within this gap, we can end up suspending before
-        // dream service has a chance to start.  To avoid this, we check if we want
-        // to doze and the sandman is scheduled and if so, keep the display on until
-        // that has passed.
-        if (mWakefulness == WAKEFULNESS_DOZING && mSandmanScheduled) {
-            return true;
-        }
-
         // Let the system suspend if the screen is off or dozing.
         return false;
     }
