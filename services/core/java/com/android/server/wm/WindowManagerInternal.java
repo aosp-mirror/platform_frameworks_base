@@ -160,9 +160,8 @@ public abstract class WindowManagerInternal {
         default boolean registerInputChannel(
                 DragState state, Display display, InputManagerService service,
                 InputChannel source) {
-            state.mTransferTouchFromToken = source.getToken();
             state.register(display);
-            return true;
+            return service.transferTouchFocus(source, state.getInputChannel());
         }
 
         /**
