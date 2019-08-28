@@ -1003,11 +1003,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void startTethering(String[] dhcpRange) {
+        startTetheringWithConfiguration(true, dhcpRange);
+    }
+
+    @Override
+    public void startTetheringWithConfiguration(boolean usingLegacyDnsProxy, String[] dhcpRange) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         // an odd number of addrs will fail
-
         try {
-            mNetdService.tetherStart(dhcpRange);
+            mNetdService.tetherStartWithConfiguration(usingLegacyDnsProxy, dhcpRange);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }

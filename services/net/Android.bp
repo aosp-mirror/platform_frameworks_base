@@ -67,7 +67,7 @@ java_library_static {
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",
         "ipmemorystore-client",
-        "netd_aidl_interface-V2-java",
+        "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-V3-java",
     ],
 }
