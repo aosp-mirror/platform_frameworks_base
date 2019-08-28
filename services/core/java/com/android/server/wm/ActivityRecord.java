@@ -2918,7 +2918,7 @@ final class ActivityRecord extends ConfigurationContainer {
         return false;
     }
 
-    boolean handleAlreadyVisible() {
+    void handleAlreadyVisible() {
         stopFreezingScreenLocked(false);
         try {
             if (returningOptions != null) {
@@ -2926,7 +2926,6 @@ final class ActivityRecord extends ConfigurationContainer {
             }
         } catch(RemoteException e) {
         }
-        return mState == RESUMED;
     }
 
     static void activityResumedLocked(IBinder token) {

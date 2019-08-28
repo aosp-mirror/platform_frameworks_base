@@ -2088,7 +2088,7 @@ class ActivityStack extends ConfigurationContainer {
             boolean aboveTop = top != null;
             final boolean stackShouldBeVisible = shouldBeVisible(starting);
             boolean behindFullscreenActivity = !stackShouldBeVisible;
-            boolean resumeNextActivity = isFocusable() && isInStackLocked(starting) == null;
+            final boolean resumeTopActivity = isFocusable() && isInStackLocked(starting) == null;
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -2122,15 +2122,8 @@ class ActivityStack extends ConfigurationContainer {
                         }
 
                         if (!r.attachedToProcess()) {
-                            if (makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
-                                    resumeNextActivity, r)) {
-                                if (activityNdx >= activities.size()) {
-                                    // Record may be removed if its process needs to restart.
-                                    activityNdx = activities.size() - 1;
-                                } else {
-                                    resumeNextActivity = false;
-                                }
-                            }
+                            makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
+                                    resumeTopActivity && isTop, r);
                         } else if (r.visible) {
                             // If this activity is already visible, then there is nothing to do here.
                             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
@@ -2140,10 +2133,7 @@ class ActivityStack extends ConfigurationContainer {
                                 r.makeClientVisible();
                             }
 
-                            if (r.handleAlreadyVisible()) {
-                                resumeNextActivity = false;
-                            }
-
+                            r.handleAlreadyVisible();
                             if (notifyClients) {
                                 r.makeActiveIfNeeded(starting);
                             }

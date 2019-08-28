@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -1120,6 +1121,22 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityRecord newR = new ActivityBuilder(mService).build();
         final ActivityRecord result = mStack.resetTaskIfNeededLocked(taskTop, newR);
         assertThat(result).isEqualTo(taskTop);
+    }
+
+    @Test
+    public void testNonTopVisibleActivityNotResume() {
+        final ActivityRecord nonTopVisibleActivity =
+                new ActivityBuilder(mService).setTask(mTask).build();
+        new ActivityBuilder(mService).setTask(mTask).build();
+        doReturn(false).when(nonTopVisibleActivity).attachedToProcess();
+        doReturn(true).when(nonTopVisibleActivity).shouldBeVisibleIgnoringKeyguard(anyBoolean());
+        doNothing().when(mSupervisor).startSpecificActivityLocked(any(), anyBoolean(),
+                anyBoolean());
+
+        mStack.ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */);
+        verify(mSupervisor).startSpecificActivityLocked(any(), eq(false) /* andResume */,
+                anyBoolean());
     }
 
     private void verifyShouldSleepActivities(boolean focusedStack,
