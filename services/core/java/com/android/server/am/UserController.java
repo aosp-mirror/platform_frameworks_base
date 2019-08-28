@@ -1755,9 +1755,10 @@ class UserController implements Handler.Callback {
         for (int i = 0; i < startedUsers.size(); i++) {
             UserState uss = startedUsers.valueAt(i);
             if (systemUserFinishedBooting && uss.mHandle.isSystem()) {
-                // Automotive will re-start system user as background, which in turn will call
-                // finishUserboot(). Hence, we need to check it here to avoid calling it twice.
-                // TODO(b/138956267): this workdound shouldn't be necessary once we move the
+                // On Automotive, at this point the system user has already been started and
+                // unlocked, and some of the tasks we do here have already been done. So skip those
+                // in that case.
+                // TODO(b/132262830): this workdound shouldn't be necessary once we move the
                 // headless-user start logic to UserManager-land
                 Slog.d(TAG, "sendBootCompleted(): skipping on non-current system user");
                 continue;

@@ -9154,10 +9154,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 t.traceEnd();
             }
-            // Automotive will re-start system user as background (so its unlocked), then start a
-            // full user as foreground. Hence, we need to skip some steps that would otherwise be
-            // done twice.
-            // TODO(b/138956267): this workdound shouldn't be necessary once we move the
+
+            // On Automotive, at this point the system user has already been started and unlocked,
+            // and some of the tasks we do here have already been done. So skip those in that case.
+            // TODO(b/132262830): this workdound shouldn't be necessary once we move the
             // headless-user start logic to UserManager-land
             final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
 
