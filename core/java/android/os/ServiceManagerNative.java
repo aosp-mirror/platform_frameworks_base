@@ -76,6 +76,16 @@ class ServiceManagerProxy implements IServiceManager {
         return mServiceManager.listServices(dumpPriority);
     }
 
+    public void registerForNotifications(String name, IServiceCallback cb)
+            throws RemoteException {
+        throw new RemoteException();
+    }
+
+    public void unregisterForNotifications(String name, IServiceCallback cb)
+            throws RemoteException {
+        throw new RemoteException();
+    }
+
     /**
      * Same as mServiceManager but used by apps.
      *
