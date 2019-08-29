@@ -25,6 +25,8 @@ import android.graphics.Point;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.systemui.util.DeviceConfigProxy;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,25 +50,25 @@ class ZigZagClassifier extends FalsingClassifier {
     private final float mMaxXSecondaryDeviance;
     private final float mMaxYSecondaryDeviance;
 
-    ZigZagClassifier(FalsingDataProvider dataProvider) {
+    ZigZagClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 
-        mMaxXPrimaryDeviance = DeviceConfig.getFloat(
+        mMaxXPrimaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_X_PRIMARY_DEVIANCE,
                 MAX_X_PRIMARY_DEVIANCE);
 
-        mMaxYPrimaryDeviance = DeviceConfig.getFloat(
+        mMaxYPrimaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE,
                 MAX_Y_PRIMARY_DEVIANCE);
 
-        mMaxXSecondaryDeviance = DeviceConfig.getFloat(
+        mMaxXSecondaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_X_SECONDARY_DEVIANCE,
                 MAX_X_SECONDARY_DEVIANCE);
 
-        mMaxYSecondaryDeviance = DeviceConfig.getFloat(
+        mMaxYSecondaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE,
                 MAX_Y_SECONDARY_DEVIANCE);

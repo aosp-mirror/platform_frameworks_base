@@ -33,6 +33,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -88,7 +89,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     public BrightLineFalsingManager(
             FalsingDataProvider falsingDataProvider,
             SensorManager sensorManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DeviceConfigProxy deviceConfigProxy) {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDataProvider = falsingDataProvider;
         mSensorManager = sensorManager;
@@ -96,15 +98,16 @@ public class BrightLineFalsingManager implements FalsingManager {
 
         mMetricsLogger = new MetricsLogger();
         mClassifiers = new ArrayList<>();
-        DistanceClassifier distanceClassifier = new DistanceClassifier(mDataProvider);
-        ProximityClassifier proximityClassifier = new ProximityClassifier(distanceClassifier,
-                mDataProvider);
+        DistanceClassifier distanceClassifier =
+                new DistanceClassifier(mDataProvider, deviceConfigProxy);
+        ProximityClassifier proximityClassifier =
+                new ProximityClassifier(distanceClassifier, mDataProvider, deviceConfigProxy);
         mClassifiers.add(new PointerCountClassifier(mDataProvider));
         mClassifiers.add(new TypeClassifier(mDataProvider));
-        mClassifiers.add(new DiagonalClassifier(mDataProvider));
+        mClassifiers.add(new DiagonalClassifier(mDataProvider, deviceConfigProxy));
         mClassifiers.add(distanceClassifier);
         mClassifiers.add(proximityClassifier);
-        mClassifiers.add(new ZigZagClassifier(mDataProvider));
+        mClassifiers.add(new ZigZagClassifier(mDataProvider, deviceConfigProxy));
     }
 
     private void registerSensors() {
