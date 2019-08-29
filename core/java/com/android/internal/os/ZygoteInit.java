@@ -91,11 +91,6 @@ public class ZygoteInit {
     private static final int LOG_BOOT_PROGRESS_PRELOAD_START = 3020;
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
 
-    /**
-     * when preloading, GC after allocating this many bytes
-     */
-    private static final int PRELOAD_GC_THRESHOLD = 50000;
-
     private static final String ABI_LIST_ARG = "--abi-list=";
 
     // TODO (chriswailes): Re-name this --zygote-socket-name= and then add a
@@ -280,11 +275,6 @@ public class ZygoteInit {
             droppedPriviliges = true;
         }
 
-        // Alter the target heap utilization.  With explicit GCs this
-        // is not likely to have any effect.
-        float defaultUtilization = runtime.getTargetHeapUtilization();
-        runtime.setTargetHeapUtilization(0.8f);
-
         try {
             BufferedReader br =
                     new BufferedReader(new InputStreamReader(is), Zygote.SOCKET_BUFFER_SIZE);
@@ -300,9 +290,6 @@ public class ZygoteInit {
 
                 Trace.traceBegin(Trace.TRACE_TAG_DALVIK, line);
                 try {
-                    if (false) {
-                        Log.v(TAG, "Preloading " + line + "...");
-                    }
                     // Load and explicitly initialize the given class. Use
                     // Class.forName(String, boolean, ClassLoader) to avoid repeated stack lookups
                     // (to derive the caller's class-loader). Use true to force initialization, and
@@ -333,8 +320,6 @@ public class ZygoteInit {
             Log.e(TAG, "Error reading " + PRELOADED_CLASSES + ".", e);
         } finally {
             IoUtils.closeQuietly(is);
-            // Restore default.
-            runtime.setTargetHeapUtilization(defaultUtilization);
 
             // Fill in dex caches with classes, fields, and methods brought in by preloading.
             Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadDexCaches");
