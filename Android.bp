@@ -241,7 +241,6 @@ java_defaults {
 java_library {
     name: "framework-internal-utils",
     static_libs: [
-        "mimemap",
         "apex_aidl_interface-java",
         "suspend_control_aidl_interface-java",
         "framework-protos",
