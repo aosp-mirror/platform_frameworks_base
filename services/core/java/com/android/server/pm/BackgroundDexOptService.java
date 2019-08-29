@@ -34,6 +34,8 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.StatsLog;
@@ -84,6 +86,12 @@ public class BackgroundDexOptService extends JobService {
 
     // Used for calculating space threshold for downgrading unused apps.
     private static final int LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE = 2;
+    private static final int DEFAULT_INACTIVE_APP_THRESHOLD_DAYS = 10;
+
+    private static final String DOWNGRADE_UNUSED_APPS_ENABLED = "downgrade_unused_apps_enabled";
+    private static final String INACTIVE_APP_THRESHOLD_DAYS = "inactive_app_threshold_days";
+    private static final String LOW_STORAGE_MULTIPLIER_FOR_DOWNGRADE =
+            "low_storage_threshold_multiplier_for_downgrade";
 
     /**
      * Set of failed packages remembered across job runs.
@@ -103,8 +111,6 @@ public class BackgroundDexOptService extends JobService {
     private final AtomicBoolean mExitPostBootUpdate = new AtomicBoolean(false);
 
     private final File mDataDir = Environment.getDataDirectory();
-    private static final long mDowngradeUnusedAppsThresholdInMillis =
-            getDowngradeUnusedAppsThresholdInMillis();
 
     public static void schedule(Context context) {
         if (isBackgroundDexoptDisabled()) {
@@ -346,14 +352,14 @@ public class BackgroundDexOptService extends JobService {
             // Only downgrade apps when space is low on device.
             // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
             // up disk before user hits the actual lowStorageThreshold.
-            final long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE
+            final long lowStorageThresholdForDowngrade = getLowThresholdMultiplierForDowngrade()
                     * lowStorageThreshold;
             boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
             Log.d(TAG, "Should Downgrade " + shouldDowngrade);
             if (shouldDowngrade) {
                 Set<String> unusedPackages =
-                        pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
-                Log.d(TAG, "Unsused Packages " +  String.join(",", unusedPackages));
+                        pm.getUnusedPackages(getDowngradeUnusedAppsThresholdInMillis());
+                Log.d(TAG, "Unused Packages " +  String.join(",", unusedPackages));
 
                 if (!unusedPackages.isEmpty()) {
                     for (String pkg : unusedPackages) {
@@ -362,11 +368,8 @@ public class BackgroundDexOptService extends JobService {
                             // Should be aborted by the scheduler.
                             return abortCode;
                         }
-                        if (downgradePackage(pm, pkg, /*isForPrimaryDex*/ true)) {
+                        if (downgradePackage(pm, pkg)) {
                             updatedPackages.add(pkg);
-                        }
-                        if (supportSecondaryDex) {
-                            downgradePackage(pm, pkg, /*isForPrimaryDex*/ false);
                         }
                     }
 
@@ -415,39 +418,45 @@ public class BackgroundDexOptService extends JobService {
      * Try to downgrade the package to a smaller compilation filter.
      * eg. if the package is in speed-profile the package will be downgraded to verify.
      * @param pm PackageManagerService
-     * @param pkg The package to be downgraded.
-     * @param isForPrimaryDex. Apps can have several dex file, primary and secondary.
-     * @return true if the package was downgraded.
+     * @param pkg The package to be downgraded
+     * @return true if the package was downgraded
      */
-    private boolean downgradePackage(PackageManagerService pm, String pkg,
-            boolean isForPrimaryDex) {
+    private boolean downgradePackage(PackageManagerService pm, String pkg) {
         Log.d(TAG, "Downgrading " + pkg);
-        boolean dex_opt_performed = false;
+        boolean downgradedPrimary = false;
         int reason = PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE;
         int dexoptFlags = DexoptOptions.DEXOPT_BOOT_COMPLETE
                 | DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB
                 | DexoptOptions.DEXOPT_DOWNGRADE;
+
         long package_size_before = getPackageSize(pm, pkg);
-
-        if (isForPrimaryDex) {
-            // This applies for system apps or if packages location is not a directory, i.e.
-            // monolithic install.
-            if (!pm.canHaveOatDir(pkg)) {
-                // For apps that don't have the oat directory, instead of downgrading,
-                // remove their compiler artifacts from dalvik cache.
-                pm.deleteOatArtifactsOfPackage(pkg);
-            } else {
-                dex_opt_performed = performDexOptPrimary(pm, pkg, reason, dexoptFlags);
-            }
+        // An aggressive downgrade deletes the oat files.
+        boolean aggressive = false;
+        // This applies for system apps or if packages location is not a directory, i.e.
+        // monolithic install.
+        if (!pm.canHaveOatDir(pkg)) {
+            // For apps that don't have the oat directory, instead of downgrading,
+            // remove their compiler artifacts from dalvik cache.
+            pm.deleteOatArtifactsOfPackage(pkg);
+            aggressive = true;
+            downgradedPrimary = true;
         } else {
-            dex_opt_performed = performDexOptSecondary(pm, pkg, reason, dexoptFlags);
+            downgradedPrimary = performDexOptPrimary(pm, pkg, reason, dexoptFlags);
+
+            if (supportSecondaryDex()) {
+                performDexOptSecondary(pm, pkg, reason, dexoptFlags);
+            }
         }
 
-        if (dex_opt_performed) {
+        // This metric aims to log the storage savings when downgrading.
+        // The way disk size is measured using getPackageSize only looks at the primary apks.
+        // Any logs that are due to secondary dex files will show 0% size reduction and pollute
+        // the metrics.
+        if (downgradedPrimary) {
             StatsLog.write(StatsLog.APP_DOWNGRADED, pkg, package_size_before,
-                    getPackageSize(pm, pkg), /*aggressive=*/ false);
+                    getPackageSize(pm, pkg), aggressive);
         }
-        return dex_opt_performed;
+        return downgradedPrimary;
     }
 
     private boolean supportSecondaryDex() {
@@ -471,7 +480,7 @@ public class BackgroundDexOptService extends JobService {
      * concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
      * @param pm An instance of PackageManagerService
      * @param pkg The package to be downgraded.
-     * @param isForPrimaryDex. Apps can have several dex file, primary and secondary.
+     * @param isForPrimaryDex Apps can have several dex file, primary and secondary.
      * @return true if the package was downgraded.
      */
     private boolean optimizePackage(PackageManagerService pm, String pkg,
@@ -588,12 +597,6 @@ public class BackgroundDexOptService extends JobService {
         // the checks above. This check is not "live" - the value is determined by a background
         // restart with a period of ~1 minute.
         PackageManagerService pm = (PackageManagerService)ServiceManager.getService("package");
-        if (pm.isStorageLow()) {
-            if (DEBUG_DEXOPT) {
-                Log.i(TAG, "Low storage, skipping this run");
-            }
-            return false;
-        }
 
         final ArraySet<String> pkgs = pm.getOptimizablePackages();
         if (pkgs.isEmpty()) {
@@ -643,17 +646,77 @@ public class BackgroundDexOptService extends JobService {
     }
 
     private static long getDowngradeUnusedAppsThresholdInMillis() {
+        long defaultValue = Long.MAX_VALUE;
+        if (isDowngradeFeatureEnabled()) {
+            return getInactiveAppsThresholdMillis();
+        }
         final String sysPropKey = "pm.dexopt.downgrade_after_inactive_days";
         String sysPropValue = SystemProperties.get(sysPropKey);
         if (sysPropValue == null || sysPropValue.isEmpty()) {
             Log.w(TAG, "SysProp " + sysPropKey + " not set");
-            return Long.MAX_VALUE;
+            return defaultValue;
         }
-        return TimeUnit.DAYS.toMillis(Long.parseLong(sysPropValue));
+        try {
+            return TimeUnit.DAYS.toMillis(Long.parseLong(sysPropValue));
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Couldn't parse long for pm.dexopt.downgrade_after_inactive_days: "
+                    + sysPropValue + ". Returning default value instead.");
+            return defaultValue;
+        }
     }
 
     private static boolean isBackgroundDexoptDisabled() {
         return SystemProperties.getBoolean("pm.dexopt.disable_bg_dexopt" /* key */,
                 false /* default */);
+    }
+
+    private static boolean isDowngradeFeatureEnabled() {
+        // DeviceConfig enables the control of on device features via remotely configurable flags,
+        // compared to SystemProperties which is only a way of sharing info system-widely, but are
+        // not configurable on the server-side.
+        String downgradeUnusedAppsEnabledFlag =
+                DeviceConfig.getProperty(
+                        DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                        DOWNGRADE_UNUSED_APPS_ENABLED);
+        return !TextUtils.isEmpty(downgradeUnusedAppsEnabledFlag)
+                && Boolean.parseBoolean(downgradeUnusedAppsEnabledFlag);
+    }
+
+    private static long getInactiveAppsThresholdMillis() {
+        long defaultValue = TimeUnit.DAYS.toMillis(DEFAULT_INACTIVE_APP_THRESHOLD_DAYS);
+        String inactiveAppThresholdDaysFlag =
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                        INACTIVE_APP_THRESHOLD_DAYS);
+        if (!TextUtils.isEmpty(inactiveAppThresholdDaysFlag)) {
+            try {
+                return TimeUnit.DAYS.toMillis(Long.parseLong(inactiveAppThresholdDaysFlag));
+            } catch (NumberFormatException e) {
+                Log.w(TAG, "Couldn't parse long for " + INACTIVE_APP_THRESHOLD_DAYS + " flag: "
+                        + inactiveAppThresholdDaysFlag + ". Returning default value instead.");
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    private static int getLowThresholdMultiplierForDowngrade() {
+        int defaultValue = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE;
+        if (isDowngradeFeatureEnabled()) {
+            String lowStorageThresholdMultiplierFlag =
+                    DeviceConfig.getProperty(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                            LOW_STORAGE_MULTIPLIER_FOR_DOWNGRADE);
+            if (!TextUtils.isEmpty(lowStorageThresholdMultiplierFlag)) {
+                try {
+                    return Integer.parseInt(lowStorageThresholdMultiplierFlag);
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, "Couldn't parse long for "
+                            + LOW_STORAGE_MULTIPLIER_FOR_DOWNGRADE + " flag: "
+                            + lowStorageThresholdMultiplierFlag
+                            + ". Returning default value instead.");
+                    return defaultValue;
+                }
+            }
+        }
+        return defaultValue;
     }
 }
