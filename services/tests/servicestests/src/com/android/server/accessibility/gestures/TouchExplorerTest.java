@@ -16,15 +16,18 @@
 
 package com.android.server.accessibility.gestures;
 
+import static com.android.server.accessibility.gestures.TouchState.STATE_CLEAR;
+import static com.android.server.accessibility.gestures.TouchState.STATE_DELEGATING;
+import static com.android.server.accessibility.gestures.TouchState.STATE_DRAGGING;
+import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_EXPLORING;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.SystemClock;
 import android.testing.DexmakerShareClassLoaderRule;
-import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 
@@ -45,10 +48,6 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class TouchExplorerTest {
-
-    public static final int STATE_TOUCH_EXPLORING = 0x00000001;
-    public static final int STATE_DRAGGING = 0x00000002;
-    public static final int STATE_DELEGATING = 0x00000004;
 
     private static final int FLAG_1FINGER = 0x8000;
     private static final int FLAG_2FINGERS = 0x0100;
@@ -112,7 +111,7 @@ public class TouchExplorerTest {
 
     @Test
     public void testTwoFingersMove_shouldDelegatingAndInjectActionDownPointerDown() {
-        goFromStateIdleTo(STATE_MOVING_2FINGERS);
+        goFromStateClearTo(STATE_MOVING_2FINGERS);
 
         assertState(STATE_DELEGATING);
         assertCapturedEvents(
@@ -123,7 +122,7 @@ public class TouchExplorerTest {
 
     @Test
     public void testTwoFingersDrag_shouldDraggingAndActionDown() {
-        goFromStateIdleTo(STATE_DRAGGING_2FINGERS);
+        goFromStateClearTo(STATE_DRAGGING_2FINGERS);
 
         assertState(STATE_DRAGGING);
         assertCapturedEvents(MotionEvent.ACTION_DOWN);
@@ -133,7 +132,7 @@ public class TouchExplorerTest {
     @Test
     public void testTwoFingersNotDrag_shouldDelegatingAndActionUpDownPointerDown() {
         // only from dragging state, and withMoveHistory no dragging
-        goFromStateIdleTo(STATE_PINCH_2FINGERS);
+        goFromStateClearTo(STATE_PINCH_2FINGERS);
 
         assertState(STATE_DELEGATING);
         assertCapturedEvents(
@@ -146,7 +145,7 @@ public class TouchExplorerTest {
 
     @Test
     public void testThreeFingersMove_shouldDelegatingAnd3ActionPointerDown() {
-        goFromStateIdleTo(STATE_MOVING_3FINGERS);
+        goFromStateClearTo(STATE_MOVING_3FINGERS);
 
         assertState(STATE_DELEGATING);
         assertCapturedEvents(
@@ -165,52 +164,47 @@ public class TouchExplorerTest {
         return new PointF(x, y);
     }
 
-    private static String stateToString(int state) {
-        return DebugUtils.valueToString(TouchExplorerTest.class, "STATE_", state);
-    }
-
-    private void goFromStateIdleTo(int state) {
+    private void goFromStateClearTo(int state) {
         try {
             switch (state) {
-                case STATE_TOUCH_EXPLORING: {
+                case STATE_CLEAR: {
                     mTouchExplorer.onDestroy();
                 }
                 break;
                 case STATE_TOUCH_EXPLORING_1FINGER: {
-                    goFromStateIdleTo(STATE_TOUCH_EXPLORING);
                     send(downEvent());
                 }
                 break;
                 case STATE_TOUCH_EXPLORING_2FINGER: {
-                    goFromStateIdleTo(STATE_TOUCH_EXPLORING_1FINGER);
+                    goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
                     send(pointerDownEvent());
                 }
                 break;
                 case STATE_TOUCH_EXPLORING_3FINGER: {
-                    goFromStateIdleTo(STATE_TOUCH_EXPLORING_2FINGER);
+                    goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
                     send(thirdPointerDownEvent());
                 }
                 break;
                 case STATE_MOVING_2FINGERS: {
-                    goFromStateIdleTo(STATE_TOUCH_EXPLORING_2FINGER);
+                    goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
                     moveEachPointers(mLastEvent, p(10, 0), p(5, 10));
                     send(mLastEvent);
                 }
                 break;
                 case STATE_DRAGGING_2FINGERS: {
-                    goFromStateIdleTo(STATE_TOUCH_EXPLORING_2FINGER);
+                    goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
                     moveEachPointers(mLastEvent, p(10, 0), p(10, 0));
                     send(mLastEvent);
                 }
                 break;
                 case STATE_PINCH_2FINGERS: {
-                    goFromStateIdleTo(STATE_DRAGGING_2FINGERS);
+                    goFromStateClearTo(STATE_DRAGGING_2FINGERS);
                     moveEachPointers(mLastEvent, p(10, 0), p(-10, 1));
                     send(mLastEvent);
                 }
                 break;
                 case STATE_MOVING_3FINGERS: {
-                    goFromStateIdleTo(STATE_TOUCH_EXPLORING_3FINGER);
+                    goFromStateClearTo(STATE_TOUCH_EXPLORING_3FINGER);
                     moveEachPointers(mLastEvent, p(1, 0), p(1, 0), p(1, 0));
                     send(mLastEvent);
                 }
@@ -219,7 +213,8 @@ public class TouchExplorerTest {
                     throw new IllegalArgumentException("Illegal state: " + state);
             }
         } catch (Throwable t) {
-            throw new RuntimeException("Failed to go to state " + stateToString(state), t);
+            throw new RuntimeException("Failed to go to state "
+            + TouchState.getStateSymbolicName(state), t);
         }
     }
 
@@ -234,9 +229,9 @@ public class TouchExplorerTest {
     }
 
     private void assertState(int expect) {
-        final String expectState = "STATE_" + stateToString(expect);
-        assertTrue(String.format("Expect state: %s, but: %s", expectState, mTouchExplorer),
-                mTouchExplorer.toString().contains(expectState));
+        assertEquals(
+                TouchState.getStateSymbolicName(expect),
+                TouchState.getStateSymbolicName(mTouchExplorer.getState().getState()));
     }
 
     private void assertCapturedEvents(int... actionsInOrder) {
