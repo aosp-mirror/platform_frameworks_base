@@ -16,7 +16,6 @@
 
 package android.net.wifi;
 
-import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -28,8 +27,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -99,45 +96,9 @@ public class WifiInfo implements Parcelable {
     private int mRssi;
 
     /**
-     * Wi-Fi unknown standard
-     */
-    public static final int WIFI_STANDARD_UNKNOWN = 0;
-
-    /**
-     * Wi-Fi 802.11a/b/g
-     */
-    public static final int WIFI_STANDARD_LEGACY = 1;
-
-    /**
-     * Wi-Fi 802.11n
-     */
-    public static final int WIFI_STANDARD_11N = 4;
-
-    /**
-     * Wi-Fi 802.11ac
-     */
-    public static final int WIFI_STANDARD_11AC = 5;
-
-    /**
-     * Wi-Fi 802.11ax
-     */
-    public static final int WIFI_STANDARD_11AX = 6;
-
-    /** @hide */
-    @IntDef(prefix = { "WIFI_STANDARD_" }, value = {
-            WIFI_STANDARD_UNKNOWN,
-            WIFI_STANDARD_LEGACY,
-            WIFI_STANDARD_11N,
-            WIFI_STANDARD_11AC,
-            WIFI_STANDARD_11AX
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface WifiStandard{}
-
-    /**
      * Wi-Fi standard for the connection
      */
-    private @WifiStandard int mWifiStandard;
+    private @ScanResult.WifiStandard int mWifiStandard;
 
     /**
      * The unit in which links speeds are expressed.
@@ -422,7 +383,7 @@ public class WifiInfo implements Parcelable {
      * Sets the Wi-Fi standard
      * @hide
      */
-    public void setWifiStandard(@WifiStandard int wifiStandard) {
+    public void setWifiStandard(@ScanResult.WifiStandard int wifiStandard) {
         mWifiStandard = wifiStandard;
     }
 
@@ -430,7 +391,7 @@ public class WifiInfo implements Parcelable {
      * Get connection Wi-Fi standard
      * @return the connection Wi-Fi standard
      */
-    public @WifiStandard int getWifiStandard() {
+    public @ScanResult.WifiStandard int getWifiStandard() {
         return mWifiStandard;
     }
 
