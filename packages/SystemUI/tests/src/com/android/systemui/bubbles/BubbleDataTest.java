@@ -878,7 +878,7 @@ public class BubbleDataTest extends SysuiTestCase {
         when(sbn.getNotification()).thenReturn(notification);
 
         // NotificationEntry -> StatusBarNotification -> Notification -> BubbleMetadata
-        return new NotificationEntry(sbn);
+        return NotificationEntry.buildForTest(sbn);
     }
 
     private void setCurrentTime(long time) {

@@ -88,7 +88,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
 
         when(mNotification.getAllowSystemGeneratedContextualActions()).thenReturn(true);
         when(mStatusBarNotification.getNotification()).thenReturn(mNotification);
-        mEntry = new NotificationEntry(mStatusBarNotification);
+        mEntry = NotificationEntry.buildForTest(mStatusBarNotification);
         when(mSmartReplyConstants.isEnabled()).thenReturn(true);
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
 

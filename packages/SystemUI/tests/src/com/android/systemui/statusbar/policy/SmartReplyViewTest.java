@@ -140,7 +140,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         StatusBarNotification sbn = mock(StatusBarNotification.class);
         when(sbn.getNotification()).thenReturn(mNotification);
         when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
-        mEntry = new NotificationEntry(sbn);
+        mEntry = NotificationEntry.buildForTest(sbn);
 
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
     }

@@ -62,7 +62,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
 
         mVisualStabilityManager.setUpWithPresenter(mock(NotificationPresenter.class));
         mVisualStabilityManager.setVisibilityLocationProvider(mLocationProvider);
-        mEntry = new NotificationEntry(mock(StatusBarNotification.class));
+        mEntry = NotificationEntry.buildForTest(mock(StatusBarNotification.class));
         mEntry.setRow(mRow);
 
         when(mRow.getEntry()).thenReturn(mEntry);

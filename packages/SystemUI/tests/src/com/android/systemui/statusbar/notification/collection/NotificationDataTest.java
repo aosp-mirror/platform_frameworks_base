@@ -233,7 +233,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
         Notification n = mMockStatusBarNotification.getNotification();
         n.flags = Notification.FLAG_FOREGROUND_SERVICE;
-        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
+        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
         entry.setRow(mRow);
         mNotificationData.add(entry);
         Bundle override = new Bundle();
@@ -252,7 +252,7 @@ public class NotificationDataTest extends SysuiTestCase {
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
         n = nb.build();
         when(mMockStatusBarNotification.getNotification()).thenReturn(n);
-        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
+        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
         entry.setRow(mRow);
         mNotificationData.add(entry);
         Bundle override = new Bundle();
@@ -266,7 +266,7 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testIsExemptFromDndVisualSuppression_system() {
         initStatusBarNotification(false);
-        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
+        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
         entry.setRow(mRow);
         entry.mIsSystemNotification = true;
         mNotificationData.add(entry);
@@ -281,7 +281,7 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testIsNotExemptFromDndVisualSuppression_hiddenCategories() {
         initStatusBarNotification(false);
-        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
+        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
         entry.setRow(mRow);
         entry.mIsSystemNotification = true;
         Bundle override = new Bundle();
@@ -369,7 +369,7 @@ public class NotificationDataTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
                 notification, mContext.getUser(), "", 0);
 
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.setHasSentReply();
 
         assertTrue(entry.isLastMessageFromReply());
@@ -474,7 +474,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 .build();
         StatusBarNotification aSbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
                 aN, mContext.getUser(), "", 0);
-        NotificationEntry a = new NotificationEntry(aSbn);
+        NotificationEntry a = NotificationEntry.buildForTest(aSbn);
         a.setRow(mock(ExpandableNotificationRow.class));
         a.setIsHighPriority(false);
 
@@ -488,7 +488,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 .build();
         StatusBarNotification bSbn = new StatusBarNotification("pkg2", "pkg2", 0, "tag", 0, 0,
                 bN, mContext.getUser(), "", 0);
-        NotificationEntry b = new NotificationEntry(bSbn);
+        NotificationEntry b = NotificationEntry.buildForTest(bSbn);
         b.setIsHighPriority(true);
         b.setRow(mock(ExpandableNotificationRow.class));
 
@@ -509,7 +509,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 .build();
         StatusBarNotification aSbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
                 aN, mContext.getUser(), "", 0);
-        NotificationEntry a = new NotificationEntry(aSbn);
+        NotificationEntry a = NotificationEntry.buildForTest(aSbn);
         a.setRow(mock(ExpandableNotificationRow.class));
         a.setIsHighPriority(false);
 
@@ -523,7 +523,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 .build();
         StatusBarNotification bSbn = new StatusBarNotification("pkg2", "pkg2", 0, "tag", 0, 0,
                 bN, mContext.getUser(), "", 0);
-        NotificationEntry b = new NotificationEntry(bSbn);
+        NotificationEntry b = NotificationEntry.buildForTest(bSbn);
         b.setRow(mock(ExpandableNotificationRow.class));
         b.setIsHighPriority(false);
 
@@ -556,7 +556,7 @@ public class NotificationDataTest extends SysuiTestCase {
         override.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_DEFAULT);
         mNotificationData.rankingOverrides.put(sbn.getKey(), override);
 
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.setRow(mRow);
         mNotificationData.add(entry);
 
@@ -583,7 +583,7 @@ public class NotificationDataTest extends SysuiTestCase {
         override.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_LOW);
         mNotificationData.rankingOverrides.put(sbn.getKey(), override);
 
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.setRow(mRow);
 
         mNotificationData.add(entry);

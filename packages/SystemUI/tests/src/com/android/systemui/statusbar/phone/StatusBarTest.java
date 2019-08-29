@@ -418,7 +418,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
@@ -439,7 +439,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
@@ -456,7 +456,7 @@ public class StatusBarTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
         entry.importance = IMPORTANCE_HIGH;
 
@@ -474,7 +474,7 @@ public class StatusBarTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));

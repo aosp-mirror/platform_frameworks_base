@@ -60,7 +60,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mRow = mock(ExpandableNotificationRow.class);
-        NotificationEntry entry = new NotificationEntry(
+        NotificationEntry entry = NotificationEntry.buildForTest(
                 mock(StatusBarNotification.class));
         entry.channel = mock(NotificationChannel.class);
         when(mRow.getEntry()).thenReturn(entry);

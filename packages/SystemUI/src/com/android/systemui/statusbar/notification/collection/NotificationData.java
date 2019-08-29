@@ -213,7 +213,7 @@ public class NotificationData {
             StatusBarNotification notification) {
         updateRanking(ranking);
         final StatusBarNotification oldNotification = entry.notification;
-        entry.notification = notification;
+        entry.setNotification(notification);
         mGroupManager.onEntryUpdated(entry, oldNotification);
     }
 
@@ -325,14 +325,6 @@ public class NotificationData {
         return NotificationManager.IMPORTANCE_UNSPECIFIED;
     }
 
-    public String getOverrideGroupKey(String key) {
-        if (mRankingMap != null) {
-            getRanking(key, mTmpRanking);
-            return mTmpRanking.getOverrideGroupKey();
-        }
-        return null;
-    }
-
     public List<SnoozeCriterion> getSnoozeCriteria(String key) {
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);
@@ -365,23 +357,25 @@ public class NotificationData {
         return false;
     }
 
-    private void updateRankingAndSort(RankingMap ranking) {
-        if (ranking != null) {
-            mRankingMap = ranking;
+    private void updateRankingAndSort(RankingMap rankingMap) {
+        if (rankingMap != null) {
+            mRankingMap = rankingMap;
             synchronized (mEntries) {
                 final int len = mEntries.size();
                 for (int i = 0; i < len; i++) {
                     NotificationEntry entry = mEntries.valueAt(i);
-                    if (!getRanking(entry.key, mTmpRanking)) {
+                    Ranking newRanking = new Ranking();
+                    if (!getRanking(entry.key, newRanking)) {
                         continue;
                     }
+                    entry.setRanking(newRanking);
+
                     final StatusBarNotification oldSbn = entry.notification.cloneLight();
-                    final String overrideGroupKey = getOverrideGroupKey(entry.key);
+                    final String overrideGroupKey = newRanking.getOverrideGroupKey();
                     if (!Objects.equals(oldSbn.getOverrideGroupKey(), overrideGroupKey)) {
                         entry.notification.setOverrideGroupKey(overrideGroupKey);
                         mGroupManager.onEntryUpdated(entry, oldSbn);
                     }
-                    entry.populateFromRanking(mTmpRanking);
                     entry.setIsHighPriority(isHighPriority(entry.notification));
                 }
             }

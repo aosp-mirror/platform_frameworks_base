@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyH
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import com.google.android.collect.Sets;
@@ -81,7 +80,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 Handler.createAsync(Looper.myLooper()));
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
-        mEntry = new NotificationEntry(mSbn);
+        mEntry = NotificationEntry.buildForTest(mSbn);
         mEntry.setRow(mRow);
 
         mRemoteInputManager.setUpWithPresenterForTest(mCallback,
@@ -176,7 +175,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         // Setup a notification entry with 1 remote input.
         StatusBarNotification newSbn =
                 mRemoteInputManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
-        NotificationEntry entry = new NotificationEntry(newSbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(newSbn);
 
         // Try rebuilding to add another reply.
         newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(entry, "Reply 2", true);
