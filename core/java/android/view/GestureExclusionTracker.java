@@ -44,7 +44,7 @@ class GestureExclusionTracker {
         while (i.hasNext()) {
             final GestureExclusionViewInfo info = i.next();
             final View v = info.getView();
-            if (v == null || !v.isAttachedToWindow() || !v.isShown()) {
+            if (v == null || !v.isAttachedToWindow() || !v.isAggregatedVisible()) {
                 mGestureExclusionViewsChanged = true;
                 i.remove();
                 continue;
@@ -123,7 +123,7 @@ class GestureExclusionTracker {
         public int update() {
             final View excludedView = getView();
             if (excludedView == null || !excludedView.isAttachedToWindow()
-                    || !excludedView.isShown()) return GONE;
+                    || !excludedView.isAggregatedVisible()) return GONE;
             final List<Rect> localRects = excludedView.getSystemGestureExclusionRects();
             final List<Rect> newRects = new ArrayList<>(localRects.size());
             for (Rect src : localRects) {
