@@ -2868,7 +2868,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runCompat(PrintWriter pw) {
+    private void killPackage(String packageName, PrintWriter pw) throws RemoteException {
+        int uid = mPm.getPackageUid(packageName, 0, mUserId);
+        if (uid < 0) {
+            // uid is negative if the package wasn't found.
+            pw.println("Didn't find package " + packageName + " on device.");
+        } else {
+            pw.println("Killing package " + packageName + " (UID " + uid + ").");
+            final long origId = Binder.clearCallingIdentity();
+            mInterface.killUid(UserHandle.getAppId(uid),
+                    UserHandle.USER_ALL, "killPackage");
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private int runCompat(PrintWriter pw) throws RemoteException {
         final CompatConfig config = CompatConfig.get();
         String toggleValue = getNextArgRequired();
         long changeId;
@@ -2882,13 +2896,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("Unknown or invalid change: '" + changeIdString + "'.");
         }
         String packageName = getNextArgRequired();
-        switch(toggleValue) {
+        switch (toggleValue) {
             case "enable":
                 if (!config.addOverride(changeId, packageName, true)) {
                     pw.println("Warning! Change " + changeId + " is not known yet. Enabling it"
                             + " could have no effect.");
                 }
                 pw.println("Enabled change " + changeId + " for " + packageName + ".");
+                killPackage(packageName, pw);
                 return 0;
             case "disable":
                 if (!config.addOverride(changeId, packageName, false)) {
@@ -2896,11 +2911,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
                             + " could have no effect.");
                 }
                 pw.println("Disabled change " + changeId + " for " + packageName + ".");
+                killPackage(packageName, pw);
                 return 0;
             case "reset":
                 if (config.removeOverride(changeId, packageName)) {
                     pw.println("Reset change " + changeId + " for " + packageName
                             + " to default value.");
+                    killPackage(packageName, pw);
                 } else {
                     pw.println("No override exists for changeId " + changeId + ".");
                 }
@@ -3219,6 +3236,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Write all pending state to storage.");
             pw.println("  compat enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
             pw.println("      Toggles a change either by id or by name for <PACKAGE_NAME>.");
+            pw.println("      It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }
