@@ -45,6 +45,17 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "CtsAppTestCases",
+      "options": [
+        {
+          "exclude-filter": "android.app.cts.ServiceTest#testAppZygoteServices"
+        },
+        {
+          "exclude-filter": "android.app.cts.SystemFeaturesTest#testLocationFeatures"
+        }
+      ]
     }
   ],
   "postsubmit": [

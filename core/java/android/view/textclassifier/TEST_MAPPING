@@ -10,6 +10,14 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "exclude-filter": "android.view.textclassifier.TextClassifierTest#testSuggetsConversationActions_deduplicate"
+        }
+      ]
     }
   ]
 }
