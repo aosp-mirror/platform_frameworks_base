@@ -636,7 +636,7 @@ class RootActivityContainer extends ConfigurationContainer
         final DisplayContent displayContent = mRootWindowContainer.getDisplayContent(displayId);
         Configuration config = null;
         if (displayContent != null) {
-            config = displayContent.updateOrientationFromAppTokens(
+            config = displayContent.updateOrientation(
                     getDisplayOverrideConfiguration(displayId),
                     starting != null && starting.mayFreezeScreenLocked(starting.app)
                             ? starting.appToken : null,

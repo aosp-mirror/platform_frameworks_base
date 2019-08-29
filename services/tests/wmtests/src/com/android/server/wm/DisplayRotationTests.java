@@ -24,6 +24,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atMost;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
@@ -55,6 +56,7 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.view.Surface;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -582,6 +584,33 @@ public class DisplayRotationTests {
 
         assertEquals(Surface.ROTATION_90, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
+    }
+
+    @Test
+    public void testShouldRotateSeamlessly() throws Exception {
+        mBuilder.build();
+
+        final WindowState win = mock(WindowState.class);
+        win.mAppToken = mock(AppWindowToken.class);
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
+        attrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+
+        doReturn(attrs).when(win).getAttrs();
+        doReturn(true).when(mMockDisplayPolicy).navigationBarCanMove();
+        doReturn(win).when(mMockDisplayPolicy).getTopFullscreenOpaqueWindow();
+        mMockDisplayContent.mCurrentFocus = win;
+        mTarget.mUpsideDownRotation = Surface.ROTATION_180;
+
+        doReturn(true).when(win.mAppToken).matchParentBounds();
+        // The focused fullscreen opaque window without override bounds should be able to be
+        // rotated seamlessly.
+        assertTrue(mTarget.shouldRotateSeamlessly(
+                Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));
+
+        doReturn(false).when(win.mAppToken).matchParentBounds();
+        // No seamless rotation if the window may be positioned with offset after rotation.
+        assertFalse(mTarget.shouldRotateSeamlessly(
+                Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));
     }
 
     // ========================

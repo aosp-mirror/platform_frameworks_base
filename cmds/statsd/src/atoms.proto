@@ -337,7 +337,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10062
+    // Next: 10064
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -401,6 +401,8 @@ message Atom {
         CoolingDevice cooling_device = 10059;
         AppOps app_ops = 10060;
         ProcessSystemIonHeapSize process_system_ion_heap_size = 10061;
+        SurfaceflingerStatsGlobalInfo surfaceflinger_stats_global_info = 10062;
+        SurfaceflingerStatsLayerInfo surfaceflinger_stats_layer_info = 10063;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -7086,4 +7088,78 @@ message UpdateEngineSuccessfulUpdateReported {
 
     // The number of reboot of the device during a successful update.
     optional int32 reboot_count = 7;
+}
+
+/**
+ * Global display pipeline metrics reported by SurfaceFlinger.
+ * Pulled from:
+ *    frameworks/native/services/surfaceflinger/TimeStats/TimeStats.cpp
+ */
+message SurfaceflingerStatsGlobalInfo {
+    // Total number of frames presented during the tracing period
+    optional int64 total_frames = 1;
+    // Total number of frames missed
+    optional int64 missed_frames = 2;
+    // Total number of frames that fell back to client composition
+    optional int64 client_composition_frames = 3;
+    // Total time the display was turned on
+    optional int64 display_on_millis = 4;
+    // Total time that was spent performing animations.
+    // This is derived from the present-to-present layer histogram
+    optional int64 animation_millis = 5;
+}
+
+/**
+ * Per-layer display pipeline metrics reported by SurfaceFlinger.
+ * The number of layers uploaded will be restricted due to size limitations.
+ * Pulled from:
+ *    frameworks/native/services/surfaceflinger/TimeStats/TimeStats.cpp
+ */
+message SurfaceflingerStatsLayerInfo {
+    // The layer for this set of metrics
+    // For now we can infer that the package name is included in the layer
+    // name.
+    optional string layer_name = 1;
+    // Total number of frames presented
+    optional int64 total_frames = 2;
+    // Total number of dropped frames while latching a buffer for this layer.
+    optional int64 dropped_frames = 3;
+    // Set of timings measured between successive presentation timestamps.
+    optional FrameTimingHistogram present_to_present = 4
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Set of timings measured from when an app queued a buffer for
+    // presentation, until the buffer was actually presented to the
+    // display.
+    optional FrameTimingHistogram post_to_present = 5
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Set of timings measured from when a buffer is ready to be presented,
+    // until the buffer was actually presented to the display.
+    optional FrameTimingHistogram acquire_to_present = 6
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Set of timings measured from when a buffer was latched by
+    // SurfaceFlinger, until the buffer was presented to the display
+    optional FrameTimingHistogram latch_to_present = 7
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Set of timings measured from the desired presentation to the actual
+    // presentation time
+    optional FrameTimingHistogram desired_to_present = 8
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Set of timings measured from when an app queued a buffer for
+    // presentation, until the buffer was ready to be presented.
+    optional FrameTimingHistogram post_to_acquire = 9
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Histogram of frame counts bucketed by time in milliseconds.
+ * Because of size limitations, we hard-cap the number of buckets, with
+ * buckets for corresponding to larger milliseconds being less precise.
+ */
+message FrameTimingHistogram {
+    // Timings in milliseconds that describes a set of histogram buckets
+    repeated int32 time_millis_buckets = 1;
+    // Number of frames that match to each time_millis, i.e. the bucket
+    // contents
+    // It's required that len(time_millis) == len(frame_count)
+    repeated int64 frame_counts = 2;
 }

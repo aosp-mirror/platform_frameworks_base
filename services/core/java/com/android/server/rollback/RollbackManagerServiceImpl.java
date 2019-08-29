@@ -282,15 +282,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     rollbacks.add(rollback.info);
                 }
             }
-
-            // Also return new rollbacks for which the PackageRollbackInfo is complete.
-            for (NewRollback newRollback : mNewRollbacks) {
-                if (newRollback.rollback.info.getPackages().size()
-                        == newRollback.packageSessionIds.length
-                        && !newRollback.isCancelled) {
-                    rollbacks.add(newRollback.rollback.info);
-                }
-            }
             return new ParceledListSlice<>(rollbacks);
         }
     }

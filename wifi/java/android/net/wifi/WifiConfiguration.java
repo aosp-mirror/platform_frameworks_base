@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageManager;
@@ -508,6 +509,12 @@ public class WifiConfiguration implements Parcelable {
      * string otherwise.
      */
     public String preSharedKey;
+
+    /**
+     * Optional SAE Password Id for use with WPA3-SAE. It is an ASCII string.
+     * @hide
+     */
+    public @Nullable String saePasswordId;
 
     /**
      * Four WEP keys. For each of the four values, provide either an ASCII
@@ -2004,6 +2011,9 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append('*');
         }
 
+        sbuf.append('\n').append(" SAE Password Id: ");
+        sbuf.append(this.saePasswordId);
+
         sbuf.append("\nEnterprise config:\n");
         sbuf.append(enterpriseConfig);
 
@@ -2372,6 +2382,7 @@ public class WifiConfiguration implements Parcelable {
             providerFriendlyName = source.providerFriendlyName;
             isHomeProviderNetwork = source.isHomeProviderNetwork;
             preSharedKey = source.preSharedKey;
+            saePasswordId = source.saePasswordId;
 
             mNetworkSelectionStatus.copy(source.getNetworkSelectionStatus());
             apBand = source.apBand;
@@ -2462,6 +2473,7 @@ public class WifiConfiguration implements Parcelable {
             dest.writeLong(roamingConsortiumId);
         }
         dest.writeString(preSharedKey);
+        dest.writeString(saePasswordId);
         for (String wepKey : wepKeys) {
             dest.writeString(wepKey);
         }
@@ -2537,6 +2549,7 @@ public class WifiConfiguration implements Parcelable {
                     config.roamingConsortiumIds[i] = in.readLong();
                 }
                 config.preSharedKey = in.readString();
+                config.saePasswordId = in.readString();
                 for (int i = 0; i < config.wepKeys.length; i++) {
                     config.wepKeys[i] = in.readString();
                 }
@@ -2608,6 +2621,7 @@ public class WifiConfiguration implements Parcelable {
         out.writeInt(apBand);
         out.writeInt(apChannel);
         BackupUtils.writeString(out, preSharedKey);
+        BackupUtils.writeString(out, saePasswordId);
         out.writeInt(getAuthType());
         out.writeBoolean(hiddenSSID);
         return baos.toByteArray();
@@ -2631,6 +2645,7 @@ public class WifiConfiguration implements Parcelable {
         config.apBand = in.readInt();
         config.apChannel = in.readInt();
         config.preSharedKey = BackupUtils.readString(in);
+        config.saePasswordId = BackupUtils.readString(in);
         config.allowedKeyManagement.set(in.readInt());
         if (version >= 3) {
             config.hiddenSSID = in.readBoolean();

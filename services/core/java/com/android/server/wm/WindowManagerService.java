@@ -141,7 +141,6 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -666,19 +665,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
-
-    /**
-     * A count of the windows which are 'seamlessly rotated', e.g. a surface
-     * at an old orientation is being transformed. We freeze orientation updates
-     * while any windows are seamlessly rotated, so we need to track when this
-     * hits zero so we can apply deferred orientation updates.
-     */
-    private int mSeamlessRotationCount = 0;
-    /**
-     * True in the interval from starting seamless rotation until the last rotated
-     * window draws in the new orientation.
-     */
-    private boolean mRotatingSeamlessly = false;
 
     private final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
@@ -1247,7 +1233,6 @@ public class WindowManagerService extends IWindowManager.Stub
             return res;
         }
 
-        boolean reportNewConfig = false;
         WindowState parentWindow = null;
         long origId;
         final int callingUid = Binder.getCallingUid();
@@ -1623,11 +1608,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addWindow: New client "
                     + client.asBinder() + ": window=" + win + " Callers=" + Debug.getCallers(5));
 
-            if (win.isVisibleOrAdding() && displayContent.updateOrientationFromAppTokens()) {
-                reportNewConfig = true;
-            }
-
-            if (reportNewConfig) {
+            if (win.isVisibleOrAdding() && displayContent.updateOrientation()) {
                 displayContent.sendNewConfiguration();
             }
         }
@@ -1791,11 +1772,11 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "postWindowRemoveCleanupLocked: " + win);
         mWindowMap.remove(win.mClient.asBinder());
 
-        markForSeamlessRotation(win, false);
+        final DisplayContent dc = win.getDisplayContent();
+        dc.getDisplayRotation().markForSeamlessRotation(win, false /* seamlesslyRotated */);
 
         win.resetAppOpsState();
 
-        final DisplayContent dc = win.getDisplayContent();
         if (dc.mCurrentFocus == null) {
             dc.mWinRemovedSinceNullFocus.add(win);
         }
@@ -2241,9 +2222,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.mUnknownAppVisibilityController.notifyRelayouted(win.mAppToken);
             }
 
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
-                    "relayoutWindow: updateOrientationFromAppTokens");
-            configChanged = displayContent.updateOrientationFromAppTokens();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: updateOrientation");
+            configChanged = displayContent.updateOrientation();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
             if (toBeDisplayed && win.mIsWallpaper) {
@@ -4859,7 +4839,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 case SEAMLESS_ROTATION_TIMEOUT: {
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
                     synchronized (mGlobalLock) {
-                        displayContent.onSeamlessRotationTimeout();
+                        displayContent.getDisplayRotation().onSeamlessRotationTimeout();
                     }
                     break;
                 }
@@ -5321,7 +5301,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void startFreezingDisplayLocked(int exitAnim, int enterAnim,
             DisplayContent displayContent) {
-        if (mDisplayFrozen || mRotatingSeamlessly) {
+        if (mDisplayFrozen || displayContent.getDisplayRotation().isRotatingSeamlessly()) {
             return;
         }
 
@@ -5430,8 +5410,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.i(TAG_WM, "**** Dismissing screen rotation animation");
             DisplayInfo displayInfo = displayContent.getDisplayInfo();
             // Get rotation animation again, with new top window
-            if (!displayContent.getDisplayPolicy()
-                    .validateRotationAnimationLw(mExitAnimId, mEnterAnimId, false)) {
+            if (!displayContent.getDisplayRotation().validateRotationAnimation(
+                    mExitAnimId, mEnterAnimId, false /* forceDefault */)) {
                 mExitAnimId = mEnterAnimId = 0;
             }
             if (screenRotationAnimation.dismiss(mTransaction, MAX_ANIMATION_DURATION,
@@ -5458,7 +5438,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to avoid inconsistent states.  However, something interesting
         // could have actually changed during that time so re-evaluate it
         // now to catch that.
-        configChanged = displayContent != null && displayContent.updateOrientationFromAppTokens();
+        configChanged = displayContent != null && displayContent.updateOrientation();
 
         // A little kludge: a lot could have happened while the
         // display was frozen, so now that we are coming back we
@@ -6984,26 +6964,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.requestUserActivityNotification();
     }
 
-    void markForSeamlessRotation(WindowState w, boolean seamlesslyRotated) {
-        if (seamlesslyRotated == w.mSeamlesslyRotated || w.mForceSeamlesslyRotate) {
-            return;
-        }
-        w.mSeamlesslyRotated = seamlesslyRotated;
-        if (seamlesslyRotated) {
-            mSeamlessRotationCount++;
-        } else {
-            mSeamlessRotationCount--;
-        }
-        if (mSeamlessRotationCount == 0) {
-            if (DEBUG_ORIENTATION) {
-                Slog.i(TAG, "Performing post-rotate rotation after seamless rotation");
-            }
-            finishSeamlessRotation();
-
-            w.getDisplayContent().updateRotationAndSendNewConfigIfNeeded();
-        }
-    }
-
     private final class LocalService extends WindowManagerInternal {
         @Override
         public void requestTraversalFromDisplayManager() {
@@ -7529,22 +7489,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SurfaceControl.Builder makeSurfaceBuilder(SurfaceSession s) {
         return mSurfaceBuilderFactory.make(s);
-    }
-
-    void startSeamlessRotation() {
-        // We are careful to reset this in case a window was removed before it finished
-        // seamless rotation.
-        mSeamlessRotationCount = 0;
-
-        mRotatingSeamlessly = true;
-    }
-
-    boolean isRotatingSeamlessly() {
-        return mRotatingSeamlessly;
-    }
-
-    void finishSeamlessRotation() {
-        mRotatingSeamlessly = false;
     }
 
     /**

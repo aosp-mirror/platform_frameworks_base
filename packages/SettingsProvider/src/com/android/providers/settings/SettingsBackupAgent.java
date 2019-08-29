@@ -45,7 +45,7 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.settingslib.display.DisplayDensityUtils;
+import com.android.settingslib.display.DisplayDensityConfiguration;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -1035,7 +1035,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         if (previousDensity == null || previousDensity != newDensity) {
             // From nothing to something is a change.
-            DisplayDensityUtils.setForcedDisplayDensity(Display.DEFAULT_DISPLAY, newDensity);
+            DisplayDensityConfiguration.setForcedDisplayDensity(
+                    Display.DEFAULT_DISPLAY, newDensity);
         }
     }
 

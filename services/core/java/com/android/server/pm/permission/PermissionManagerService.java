@@ -1232,7 +1232,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return;
         }
 
-        final int uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
+        final int uid = UserHandle.getUid(userId,
+                UserHandle.getAppId(pkg.applicationInfo.uid));
 
         final PackageSetting ps = (PackageSetting) pkg.mExtras;
         final PermissionsState permissionsState = ps.getPermissionsState();
@@ -1432,7 +1433,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (callback != null) {
-            callback.onPermissionRevoked(pkg.applicationInfo.uid, userId);
+            callback.onPermissionRevoked(UserHandle.getUid(userId,
+                    UserHandle.getAppId(pkg.applicationInfo.uid)), userId);
         }
 
         if (bp.isRuntime()) {

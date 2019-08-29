@@ -30,6 +30,7 @@ import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -866,7 +867,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.setState(PAUSED, "test");
         mActivity.finishIfPossible("test", false /* oomAdj */);
 
-        verify(mActivity).setVisibility(eq(false));
+        verify(mActivity, atLeast(1)).setVisibility(eq(false));
         verify(mActivity.getDisplay().mDisplayContent)
                 .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
         verify(mActivity.getDisplay().mDisplayContent).executeAppTransition();

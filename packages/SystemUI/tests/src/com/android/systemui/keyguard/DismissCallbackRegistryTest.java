@@ -38,12 +38,13 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class DismissCallbackRegistryTest extends SysuiTestCase {
 
-    private final DismissCallbackRegistry mDismissCallbackRegistry = new DismissCallbackRegistry();
+    private DismissCallbackRegistry mDismissCallbackRegistry;
     private @Mock IKeyguardDismissCallback mMockCallback;
     private @Mock IKeyguardDismissCallback mMockCallback2;
 
     @Before
     public void setUp() throws Exception {
+        mDismissCallbackRegistry =  new DismissCallbackRegistry();
         MockitoAnnotations.initMocks(this);
     }
 

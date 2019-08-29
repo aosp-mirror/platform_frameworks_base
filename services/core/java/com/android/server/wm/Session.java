@@ -40,6 +40,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.DisplayCutout;
@@ -57,9 +58,7 @@ import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -75,9 +74,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     SurfaceSession mSurfaceSession;
     private int mNumWindow = 0;
     // Set of visible application overlay window surfaces connected to this session.
-    private final Set<WindowSurfaceController> mAppOverlaySurfaces = new HashSet<>();
+    private final ArraySet<WindowSurfaceController> mAppOverlaySurfaces = new ArraySet<>();
     // Set of visible alert window surfaces connected to this session.
-    private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
+    private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
     final boolean mCanHideNonSystemOverlayWindows;
@@ -609,8 +608,15 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return mStringName;
     }
 
-    boolean hasAlertWindowSurfaces() {
-        return !mAlertWindowSurfaces.isEmpty();
+    /** @return {@code true} if there is an alert window surface on the given display. */
+    boolean hasAlertWindowSurfaces(DisplayContent displayContent) {
+        for (int i = mAlertWindowSurfaces.size() - 1; i >= 0; i--) {
+            final WindowSurfaceController surfaceController = mAlertWindowSurfaces.valueAt(i);
+            if (surfaceController.mAnimator.mWin.getDisplayContent() == displayContent) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void blessInputSurface(int displayId, SurfaceControl surface,

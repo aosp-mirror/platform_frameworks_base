@@ -514,7 +514,6 @@ public class BiometricService extends SystemService {
         }
 
         public boolean getFaceEnabledForApps(int userId) {
-            Slog.e(TAG, "getFaceEnabledForApps: " + userId, new Exception());
             if (!mFaceEnabledForApps.containsKey(userId)) {
                 onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED, userId);
             }

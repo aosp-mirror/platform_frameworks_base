@@ -24,13 +24,13 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -70,6 +70,10 @@ public class SystemUIFactory {
     }
 
     public static void createFromConfig(Context context) {
+        if (mFactory != null) {
+            return;
+        }
+
         final String clsName = context.getString(R.string.config_systemUIFactoryComponent);
         if (clsName == null || clsName.length() == 0) {
             throw new RuntimeException("No SystemUIFactory component configured");
@@ -84,6 +88,11 @@ public class SystemUIFactory {
             Log.w(TAG, "Error creating SystemUIFactory component: " + clsName, t);
             throw new RuntimeException(t);
         }
+    }
+
+    @VisibleForTesting
+    static void cleanup() {
+        mFactory = null;
     }
 
     public SystemUIFactory() {}

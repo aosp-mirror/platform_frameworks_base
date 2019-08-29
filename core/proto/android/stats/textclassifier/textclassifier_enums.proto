@@ -60,6 +60,8 @@ enum EventType {
     MANUAL_REPLY = 19;
     // TextClassifier generated some actions
     ACTIONS_GENERATED = 20;
+    // Some text links were generated
+    LINKS_GENERATED = 21;
 }
 
 enum WidgetType {
