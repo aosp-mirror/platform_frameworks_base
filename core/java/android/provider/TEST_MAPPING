@@ -7,6 +7,14 @@
                     "include-annotation": "android.platform.test.annotations.Presubmit"
                 }
             ]
+        },
+        {
+            "name": "SettingsProviderTest",
+            "options": [
+                {
+                    "include-annotation": "android.platform.test.annotations.Presubmit"
+                }
+            ]
         }
     ]
 }
