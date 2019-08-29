@@ -36,6 +36,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -44,6 +45,9 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -101,6 +105,9 @@ public class CameraServiceProxy extends SystemService
     private static final IBinder nfcInterfaceToken = new Binder();
 
     private final boolean mNotifyNfc;
+
+    private ScheduledThreadPoolExecutor mLogWriterService = new ScheduledThreadPoolExecutor(
+            /*corePoolSize*/ 1);
 
     /**
      * Structure to track camera usage
@@ -204,6 +211,9 @@ public class CameraServiceProxy extends SystemService
 
         mNotifyNfc = SystemProperties.getInt(NFC_NOTIFICATION_PROP, 0) > 0;
         if (DEBUG) Slog.v(TAG, "Notify NFC behavior is " + (mNotifyNfc ? "active" : "disabled"));
+        // Don't keep any extra logging threads if not needed
+        mLogWriterService.setKeepAliveTime(1, TimeUnit.SECONDS);
+        mLogWriterService.allowCoreThreadTimeOut(true);
     }
 
     @Override
@@ -279,6 +289,51 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
+    private class EventWriterTask implements Runnable {
+        private ArrayList<CameraUsageEvent> mEventList;
+        private static final long WRITER_SLEEP_MS = 100;
+
+        public EventWriterTask(ArrayList<CameraUsageEvent> eventList) {
+            mEventList = eventList;
+        }
+
+        @Override
+        public void run() {
+            if (mEventList != null) {
+                for (CameraUsageEvent event : mEventList) {
+                    logCameraUsageEvent(event);
+                    try {
+                        Thread.sleep(WRITER_SLEEP_MS);
+                    } catch (InterruptedException e) {}
+                }
+                mEventList.clear();
+            }
+        }
+
+        /**
+         * Write camera usage events to stats log.
+         * Package-private
+         */
+        private void logCameraUsageEvent(CameraUsageEvent e) {
+            int facing = StatsLog.CAMERA_ACTION_EVENT__FACING__UNKNOWN;
+            switch(e.mCameraFacing) {
+                case ICameraServiceProxy.CAMERA_FACING_BACK:
+                    facing = StatsLog.CAMERA_ACTION_EVENT__FACING__BACK;
+                    break;
+                case ICameraServiceProxy.CAMERA_FACING_FRONT:
+                    facing = StatsLog.CAMERA_ACTION_EVENT__FACING__FRONT;
+                    break;
+                case ICameraServiceProxy.CAMERA_FACING_EXTERNAL:
+                    facing = StatsLog.CAMERA_ACTION_EVENT__FACING__EXTERNAL;
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown camera facing: " + e.mCameraFacing);
+            }
+            StatsLog.write(StatsLog.CAMERA_ACTION_EVENT, e.getDuration(), e.mAPILevel,
+                    e.mClientName, facing);
+        }
+    }
+
     /**
      * Dump camera usage events to log.
      * Package-private
@@ -315,6 +370,10 @@ public class CameraServiceProxy extends SystemService
                         .setPackageName(e.mClientName);
                 mLogger.write(l);
             }
+
+            mLogWriterService.execute(new EventWriterTask(
+                        new ArrayList<CameraUsageEvent>(mCameraUsageHistory)));
+
             mCameraUsageHistory.clear();
         }
         final long ident = Binder.clearCallingIdentity();

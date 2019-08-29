@@ -334,6 +334,7 @@ message Atom {
         BackGesture back_gesture_reported_reported = 224;
         UpdateEngineUpdateAttemptReported update_engine_update_attempt_reported = 225;
         UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
+        CameraActionEvent camera_action_event = 227;
     }
 
     // Pulled events will start at field 10000.
@@ -7163,4 +7164,30 @@ message FrameTimingHistogram {
     // contents
     // It's required that len(time_millis) == len(frame_count)
     repeated int64 frame_counts = 2;
+}
+
+
+/**
+ * Information about camera facing and API level usage.
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/camera/CameraServiceProxy.java
+ */
+message CameraActionEvent {
+    // Camera session duration
+    optional int64 duration = 1;
+
+    // Camera API level used
+    optional int32 api_level = 2;
+
+    // Name of client package
+    optional string package_name = 3;
+
+    // Camera facing
+    enum Facing {
+        UNKNOWN = 0;
+        BACK = 1;
+        FRONT = 2;
+        EXTERNAL = 3;
+    }
+    optional Facing facing = 4;
 }
