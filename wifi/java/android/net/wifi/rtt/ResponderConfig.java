@@ -16,6 +16,8 @@
 
 package android.net.wifi.rtt;
 
+import static android.net.wifi.ScanResult.InformationElement.EID_EXTENSION_PRESENT;
+import static android.net.wifi.ScanResult.InformationElement.EID_EXT_HE_CAPABILITIES;
 import static android.net.wifi.ScanResult.InformationElement.EID_HT_CAPABILITIES;
 import static android.net.wifi.ScanResult.InformationElement.EID_VHT_CAPABILITIES;
 
@@ -106,7 +108,7 @@ public final class ResponderConfig implements Parcelable {
     public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4;
 
     /** @hide */
-    @IntDef({PREAMBLE_LEGACY, PREAMBLE_HT, PREAMBLE_VHT})
+    @IntDef({PREAMBLE_LEGACY, PREAMBLE_HT, PREAMBLE_VHT, PREAMBLE_HE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PreambleType {
     }
@@ -126,6 +128,10 @@ public final class ResponderConfig implements Parcelable {
      */
     public static final int PREAMBLE_VHT = 2;
 
+    /**
+     * Preamble type: HE.
+     */
+    public static final int PREAMBLE_HE = 3;
 
     /**
      * The MAC address of the Responder. Will be null if a Wi-Fi Aware peer identifier (the
@@ -307,14 +313,21 @@ public final class ResponderConfig implements Parcelable {
         if (scanResult.informationElements != null && scanResult.informationElements.length != 0) {
             boolean htCapabilitiesPresent = false;
             boolean vhtCapabilitiesPresent = false;
+            boolean heCapabilitiesPresent = false;
+
             for (ScanResult.InformationElement ie : scanResult.informationElements) {
                 if (ie.id == EID_HT_CAPABILITIES) {
                     htCapabilitiesPresent = true;
                 } else if (ie.id == EID_VHT_CAPABILITIES) {
                     vhtCapabilitiesPresent = true;
+                } else if (ie.id == EID_EXTENSION_PRESENT && ie.idExt == EID_EXT_HE_CAPABILITIES) {
+                    heCapabilitiesPresent = true;
                 }
             }
-            if (vhtCapabilitiesPresent) {
+
+            if (heCapabilitiesPresent) {
+                preamble = PREAMBLE_HE;
+            } else if (vhtCapabilitiesPresent) {
                 preamble = PREAMBLE_VHT;
             } else if (htCapabilitiesPresent) {
                 preamble = PREAMBLE_HT;
