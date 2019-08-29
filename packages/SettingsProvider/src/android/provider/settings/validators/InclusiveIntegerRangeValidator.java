@@ -23,11 +23,11 @@ import android.annotation.Nullable;
  *
  * @hide
  */
-public final class InclusiveIntegerRangeValidator implements Validator {
+final class InclusiveIntegerRangeValidator implements Validator {
     private final int mMin;
     private final int mMax;
 
-    public InclusiveIntegerRangeValidator(int min, int max) {
+    InclusiveIntegerRangeValidator(int min, int max) {
         mMin = min;
         mMax = max;
     }

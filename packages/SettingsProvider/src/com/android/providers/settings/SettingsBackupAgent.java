@@ -34,6 +34,12 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.settings.backup.GlobalSettings;
+import android.provider.settings.backup.SecureSettings;
+import android.provider.settings.backup.SystemSettings;
+import android.provider.settings.validators.GlobalSettingsValidators;
+import android.provider.settings.validators.SecureSettingsValidators;
+import android.provider.settings.validators.SystemSettingsValidators;
 import android.provider.settings.validators.Validator;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -542,7 +548,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, PROJECTION, null,
                 null, null);
         try {
-            return extractRelevantValues(cursor, Settings.System.SETTINGS_TO_BACKUP);
+            return extractRelevantValues(cursor, SystemSettings.SETTINGS_TO_BACKUP);
         } finally {
             cursor.close();
         }
@@ -552,7 +558,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Cursor cursor = getContentResolver().query(Settings.Secure.CONTENT_URI, PROJECTION, null,
                 null, null);
         try {
-            return extractRelevantValues(cursor, Settings.Secure.SETTINGS_TO_BACKUP);
+            return extractRelevantValues(cursor, SecureSettings.SETTINGS_TO_BACKUP);
         } finally {
             cursor.close();
         }
@@ -562,7 +568,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Cursor cursor = getContentResolver().query(Settings.Global.CONTENT_URI, PROJECTION, null,
                 null, null);
         try {
-            return extractRelevantValues(cursor, Settings.Global.SETTINGS_TO_BACKUP);
+            return extractRelevantValues(cursor, GlobalSettings.SETTINGS_TO_BACKUP);
         } finally {
             cursor.close();
         }
@@ -633,18 +639,18 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         final String[] whitelist;
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
-            whitelist = ArrayUtils.concatElements(String.class, Settings.Secure.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, SecureSettings.SETTINGS_TO_BACKUP,
                     Settings.Secure.LEGACY_RESTORE_SETTINGS,
                     Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
-            validators = Settings.Secure.VALIDATORS;
+            validators = SecureSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
-            whitelist = ArrayUtils.concatElements(String.class, Settings.System.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, SystemSettings.SETTINGS_TO_BACKUP,
                     Settings.System.LEGACY_RESTORE_SETTINGS);
-            validators = Settings.System.VALIDATORS;
+            validators = SystemSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
-            whitelist = ArrayUtils.concatElements(String.class, Settings.Global.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, GlobalSettings.SETTINGS_TO_BACKUP,
                     Settings.Global.LEGACY_RESTORE_SETTINGS);
-            validators = Settings.Global.VALIDATORS;
+            validators = GlobalSettingsValidators.VALIDATORS;
         } else {
             throw new IllegalArgumentException("Unknown URI: " + contentUri);
         }

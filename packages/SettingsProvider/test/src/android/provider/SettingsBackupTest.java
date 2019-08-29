@@ -18,15 +18,16 @@ package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import static junit.framework.Assert.assertTrue;
 
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import android.platform.test.annotations.Presubmit;
+import android.provider.settings.backup.GlobalSettings;
+import android.provider.settings.backup.SecureSettings;
+import android.provider.settings.backup.SystemSettings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -727,45 +728,43 @@ public class SettingsBackupTest {
     public void systemSettingsBackedUpOrBlacklisted() {
         checkSettingsBackedUpOrBlacklisted(
                 getCandidateSettings(Settings.System.class),
-                newHashSet(Settings.System.SETTINGS_TO_BACKUP),
+                newHashSet(SystemSettings.SETTINGS_TO_BACKUP),
                 BACKUP_BLACKLISTED_SYSTEM_SETTINGS);
     }
 
     @Test
     public void globalSettingsBackedUpOrBlacklisted() {
         checkSettingsBackedUpOrBlacklisted(
-            getCandidateSettings(Settings.Global.class),
-            newHashSet(Settings.Global.SETTINGS_TO_BACKUP),
-            BACKUP_BLACKLISTED_GLOBAL_SETTINGS);
+                getCandidateSettings(Settings.Global.class),
+                newHashSet(GlobalSettings.SETTINGS_TO_BACKUP),
+                BACKUP_BLACKLISTED_GLOBAL_SETTINGS);
     }
 
     @Test
     public void secureSettingsBackedUpOrBlacklisted() {
         HashSet<String> keys = new HashSet<String>();
-        Collections.addAll(keys, Settings.Secure.SETTINGS_TO_BACKUP);
+        Collections.addAll(keys, SecureSettings.SETTINGS_TO_BACKUP);
         Collections.addAll(keys, Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
         checkSettingsBackedUpOrBlacklisted(
                 getCandidateSettings(Settings.Secure.class),
                 keys,
-            BACKUP_BLACKLISTED_SECURE_SETTINGS);
+                BACKUP_BLACKLISTED_SECURE_SETTINGS);
     }
 
     private static void checkSettingsBackedUpOrBlacklisted(
             Set<String> settings, Set<String> settingsToBackup, Set<String> blacklist) {
         Set<String> settingsNotBackedUp = difference(settings, settingsToBackup);
         Set<String> settingsNotBackedUpOrBlacklisted = difference(settingsNotBackedUp, blacklist);
-        assertThat(
+        assertTrue(
                 "Settings not backed up or blacklisted",
-                settingsNotBackedUpOrBlacklisted,
-                is(empty()));
+                settingsNotBackedUpOrBlacklisted.isEmpty());
 
-        assertThat(
-                "blacklisted settings backed up",
-                intersect(settingsToBackup, blacklist),
-                is(empty()));
+        assertTrue(
+                "blacklisted settings backed up", intersect(settingsToBackup, blacklist).isEmpty());
     }
 
-    private static Set<String> getCandidateSettings(Class<? extends Settings.NameValueTable> clazz) {
+    private static Set<String> getCandidateSettings(
+            Class<? extends Settings.NameValueTable> clazz) {
         HashSet<String> result = new HashSet<String>();
         for (Field field : clazz.getDeclaredFields()) {
             if (looksLikeValidSetting(field)) {

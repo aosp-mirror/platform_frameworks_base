@@ -23,8 +23,8 @@ import static android.provider.settings.validators.SettingsValidators.PACKAGE_NA
  *
  * @hide
  */
-public final class PackageNameListValidator extends ListValidator {
-    public PackageNameListValidator(String separator) {
+final class PackageNameListValidator extends ListValidator {
+    PackageNameListValidator(String separator) {
         super(separator);
     }
 
