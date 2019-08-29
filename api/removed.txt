@@ -5,10 +5,6 @@ package android.app {
     method @Deprecated public static int getMaxNumPictureInPictureActions();
   }
 
-  public class KeyguardManager {
-    method @Deprecated public void dismissKeyguard(@NonNull android.app.Activity, @Nullable android.app.KeyguardManager.KeyguardDismissCallback, @Nullable android.os.Handler);
-  }
-
   public class Notification implements android.os.Parcelable {
     method @Deprecated public String getChannel();
     method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
