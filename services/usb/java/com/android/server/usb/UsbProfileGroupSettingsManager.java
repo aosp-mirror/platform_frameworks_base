@@ -319,7 +319,7 @@ class UsbProfileGroupSettingsManager {
 
     /**
      * Upgrade any single-user settings from {@link #sSingleUserSettingsFile}.
-     * Should only by called by owner.
+     * Should only be called by owner.
      */
     @GuardedBy("mLock")
     private void upgradeSingleUserLocked() {

@@ -60,6 +60,10 @@ class UsbPermissionManager {
         }
     }
 
+    @NonNull UsbUserPermissionManager getPermissionsForUser(@NonNull UserHandle user) {
+        return getPermissionsForUser(user.getIdentifier());
+    }
+
     void remove(@NonNull UserHandle userToRemove) {
         synchronized (mPermissionsByUser) {
             mPermissionsByUser.remove(userToRemove.getIdentifier());
