@@ -94,9 +94,11 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
+import android.util.SparseArray;
 
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 
@@ -347,17 +349,33 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int getStagedSessions() {
-        final PrintWriter pw = getOutPrintWriter();
+        final IndentingPrintWriter pw = new IndentingPrintWriter(
+                getOutPrintWriter(), /* singleIndent */ "  ", /* wrapLength */ 120);
         try {
-            List<SessionInfo> stagedSessionsList =
+            List<SessionInfo> stagedSessions =
                     mInterface.getPackageInstaller().getStagedSessions().getList();
-            for (SessionInfo session: stagedSessionsList) {
-                pw.println("appPackageName = " + session.getAppPackageName()
-                        + "; sessionId = " + session.getSessionId()
-                        + "; isStaged = " + session.isStaged()
-                        + "; isStagedSessionReady = " + session.isStagedSessionReady()
-                        + "; isStagedSessionApplied = " + session.isStagedSessionApplied()
-                        + "; isStagedSessionFailed = " + session.isStagedSessionFailed() + ";");
+            final SparseArray<SessionInfo> sessionById = new SparseArray<>(stagedSessions.size());
+            for (SessionInfo session : stagedSessions) {
+                sessionById.put(session.getSessionId(), session);
+            }
+            for (SessionInfo session: stagedSessions) {
+                if (session.getParentSessionId() != SessionInfo.INVALID_ID) {
+                    continue;
+                }
+                printStagedSession(session, pw);
+                if (session.isMultiPackage()) {
+                    pw.increaseIndent();
+                    final int[] childIds = session.getChildSessionIds();
+                    for (int i = 0; i < childIds.length; i++) {
+                        final SessionInfo childSession = sessionById.get(childIds[i]);
+                        if (childSession == null) {
+                            pw.println("sessionId = " + childIds[i] + "; not found");
+                        } else {
+                            printStagedSession(childSession, pw);
+                        }
+                    }
+                    pw.decreaseIndent();
+                }
             }
         } catch (RemoteException e) {
             pw.println("Failure ["
@@ -366,6 +384,15 @@ class PackageManagerShellCommand extends ShellCommand {
             return 0;
         }
         return 1;
+    }
+
+    private static void printStagedSession(SessionInfo session, PrintWriter pw) {
+        pw.println("sessionId = " + session.getSessionId()
+                + "; appPackageName = " + session.getAppPackageName()
+                + "; isStaged = " + session.isStaged()
+                + "; isReady = " + session.isStagedSessionReady()
+                + "; isApplied = " + session.isStagedSessionApplied()
+                + "; isFailed = " + session.isStagedSessionFailed() + ";");
     }
 
     private int uninstallSystemUpdates() {
