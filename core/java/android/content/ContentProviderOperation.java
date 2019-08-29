@@ -684,10 +684,26 @@ public class ContentProviderOperation implements Parcelable {
             return new ContentProviderOperation(this);
         }
 
-        private void setValue(@NonNull String key, @NonNull Object value) {
+        private void ensureValues() {
             if (mValues == null) {
                 mValues = new ArrayMap<>();
             }
+        }
+
+        private void ensureExtras() {
+            if (mExtras == null) {
+                mExtras = new ArrayMap<>();
+            }
+        }
+
+        private void ensureSelectionArgs() {
+            if (mSelectionArgs == null) {
+                mSelectionArgs = new SparseArray<>();
+            }
+        }
+
+        private void setValue(@NonNull String key, @NonNull Object value) {
+            ensureValues();
             final boolean oldReference = mValues.get(key) instanceof BackReference;
             final boolean newReference = value instanceof BackReference;
             if (!oldReference || newReference) {
@@ -696,9 +712,7 @@ public class ContentProviderOperation implements Parcelable {
         }
 
         private void setExtra(@NonNull String key, @NonNull Object value) {
-            if (mExtras == null) {
-                mExtras = new ArrayMap<>();
-            }
+            ensureExtras();
             final boolean oldReference = mExtras.get(key) instanceof BackReference;
             final boolean newReference = value instanceof BackReference;
             if (!oldReference || newReference) {
@@ -707,9 +721,7 @@ public class ContentProviderOperation implements Parcelable {
         }
 
         private void setSelectionArg(int index, @NonNull Object value) {
-            if (mSelectionArgs == null) {
-                mSelectionArgs = new SparseArray<>();
-            }
+            ensureSelectionArgs();
             final boolean oldReference = mSelectionArgs.get(index) instanceof BackReference;
             final boolean newReference = value instanceof BackReference;
             if (!oldReference || newReference) {
@@ -728,6 +740,7 @@ public class ContentProviderOperation implements Parcelable {
          */
         public @NonNull Builder withValues(@NonNull ContentValues values) {
             assertValuesAllowed();
+            ensureValues();
             final ArrayMap<String, Object> rawValues = values.getValues();
             for (int i = 0; i < rawValues.size(); i++) {
                 setValue(rawValues.keyAt(i), rawValues.valueAt(i));
@@ -815,6 +828,7 @@ public class ContentProviderOperation implements Parcelable {
          */
         public @NonNull Builder withExtras(@NonNull Bundle extras) {
             assertExtrasAllowed();
+            ensureExtras();
             for (String key : extras.keySet()) {
                 setExtra(key, extras.get(key));
             }
@@ -885,6 +899,7 @@ public class ContentProviderOperation implements Parcelable {
             assertSelectionAllowed();
             mSelection = selection;
             if (selectionArgs != null) {
+                ensureSelectionArgs();
                 for (int i = 0; i < selectionArgs.length; i++) {
                     setSelectionArg(i, selectionArgs[i]);
                 }
