@@ -214,10 +214,7 @@ public class RuntimeInit {
         RuntimeHooks.setTimeZoneIdSupplier(() -> SystemProperties.get("persist.sys.timezone"));
 
         /*
-         * Replace libcore's minimal default mapping between MIME types and file
-         * extensions with a mapping that's suitable for Android. Android's mapping
-         * contains many more entries that are derived from IANA registrations but
-         * with several customizations (extensions, overrides).
+         * Set a default mapping between MIME types and file extensions.
          */
         MimeMap.setDefault(MimeMapImpl.createDefaultInstance());
 
