@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -693,6 +694,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
     }
 
     @Test
+    @Ignore("b/140250974")
     public void testLocationModeChanges_viaFrontEndApi() throws Exception {
         setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
@@ -735,6 +737,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
     }
 
     @Test
+    @Ignore("b/140250974")
     public void testLocationProvidersAllowed_disableProviders() throws Exception {
         setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
@@ -766,6 +769,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
     }
 
     @Test
+    @Ignore("b/140250974")
     public void testLocationProvidersAllowed_enableAndDisable() throws Exception {
         setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
@@ -788,6 +792,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
     }
 
     @Test
+    @Ignore("b/140250974")
     public void testLocationProvidersAllowedLocked_invalidInput() throws Exception {
         setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
