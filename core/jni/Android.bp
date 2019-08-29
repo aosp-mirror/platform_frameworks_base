@@ -110,7 +110,6 @@ cc_library_shared {
                 "android_view_InputEventReceiver.cpp",
                 "android_view_InputEventSender.cpp",
                 "android_view_InputQueue.cpp",
-                "android_view_FrameMetricsObserver.cpp",
                 "android_view_KeyCharacterMap.cpp",
                 "android_view_KeyEvent.cpp",
                 "android_view_MotionEvent.cpp",
@@ -423,7 +422,9 @@ cc_library_static {
         android: {
             srcs: [ // sources that depend on android only libraries
                 "android/graphics/apex/android_canvas.cpp",
+                "android/graphics/apex/jni_runtime.cpp",
 
+                "android_view_FrameMetricsObserver.cpp",
                 "android_view_TextureLayer.cpp",
                 "android_view_ThreadedRenderer.cpp",
                 "android/graphics/BitmapRegionDecoder.cpp",
