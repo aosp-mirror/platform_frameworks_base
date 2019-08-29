@@ -477,6 +477,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(listToVerify.get(0)).isEqualTo(TEST_SUBSCRIPTION_2);
     }
 
+    @Test
+    public void testIsUserUnlocked() {
+        // mUserManager will report the user as unlocked on @Before
+        assertThat(mKeyguardUpdateMonitor.isUserUnlocked(KeyguardUpdateMonitor.getCurrentUser()))
+                .isTrue();
+        // Invalid user should not be unlocked.
+        int randomUser = 99;
+        assertThat(mKeyguardUpdateMonitor.isUserUnlocked(randomUser)).isFalse();
+    }
+
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
         int subscription = simInited
                 ? 1/* mock subid=1 */ : SubscriptionManager.DUMMY_SUBSCRIPTION_ID_BASE;
