@@ -103,7 +103,7 @@ public class PreferencesHelper implements RankingConfig {
     @VisibleForTesting
     static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    private static final boolean DEFAULT_ALLOW_BUBBLE = true;
+    static final boolean DEFAULT_ALLOW_BUBBLE = true;
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
     private static final boolean DEFAULT_APP_LOCKED_IMPORTANCE  = false;
 
@@ -133,7 +133,7 @@ public class PreferencesHelper implements RankingConfig {
     private final ZenModeHelper mZenModeHelper;
 
     private SparseBooleanArray mBadgingEnabled;
-    private SparseBooleanArray mBubblesEnabled;
+    private boolean mBubblesEnabled = DEFAULT_ALLOW_BUBBLE;
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
 
@@ -1834,39 +1834,18 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public void updateBubblesEnabled() {
-        if (mBubblesEnabled == null) {
-            mBubblesEnabled = new SparseBooleanArray();
-        }
-        boolean changed = false;
-        // update the cached values
-        for (int index = 0; index < mBubblesEnabled.size(); index++) {
-            int userId = mBubblesEnabled.keyAt(index);
-            final boolean oldValue = mBubblesEnabled.get(userId);
-            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.NOTIFICATION_BUBBLES,
-                    DEFAULT_ALLOW_BUBBLE ? 1 : 0, userId) != 0;
-            mBubblesEnabled.put(userId, newValue);
-            changed |= oldValue != newValue;
-        }
-        if (changed) {
+        final boolean newValue = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.NOTIFICATION_BUBBLES,
+                DEFAULT_ALLOW_BUBBLE ? 1 : 0) == 1;
+        if (newValue != mBubblesEnabled) {
+            mBubblesEnabled = newValue;
             updateConfig();
         }
     }
 
-    public boolean bubblesEnabled(UserHandle userHandle) {
-        int userId = userHandle.getIdentifier();
-        if (userId == UserHandle.USER_ALL) {
-            return false;
-        }
-        if (mBubblesEnabled.indexOfKey(userId) < 0) {
-            mBubblesEnabled.put(userId,
-                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                            Settings.Secure.NOTIFICATION_BUBBLES,
-                            DEFAULT_ALLOW_BUBBLE ? 1 : 0, userId) != 0);
-        }
-        return mBubblesEnabled.get(userId, DEFAULT_ALLOW_BUBBLE);
+    public boolean bubblesEnabled() {
+        return mBubblesEnabled;
     }
-
 
     public void updateBadgingEnabled() {
         if (mBadgingEnabled == null) {

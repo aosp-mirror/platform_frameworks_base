@@ -250,9 +250,9 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"ପ୍ୟାନେଲ୍ ବନ୍ଦ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"ଅଧିକ ସମୟ।"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"କମ୍ ସମୟ।"</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ଫ୍ଲାସ୍‍ଲାଇଟ୍ ବନ୍ଦ ଅଛି।"</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ଫ୍ଲାଶ୍‌ଲାଇଟ୍ ଅଫ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ଟର୍ଚ୍ଚ ଲାଇଟ୍‍ ଅନୁପଲବ୍ଧ।"</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ଫ୍ଲାସ୍‍ଲାଇଟ୍ ଚାଲୁଅଛି।"</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ଫ୍ଲାଶ୍‌ଲାଇଟ୍ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ଟର୍ଚ୍ଚ ଲାଇଟ୍ ବନ୍ଦ ଅଛି।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ଟର୍ଚ୍ଚ ଲାଇଟ୍ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"ରଙ୍ଗ ବିପରୀତିକରଣକୁ ବନ୍ଦ କରିଦିଆଗଲା।"</string>
@@ -362,7 +362,7 @@
       <item quantity="one">%d ଡିଭାଇସ୍</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ବିଜ୍ଞପ୍ତି"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ଫ୍ଲାସ୍‍ଲାଇଟ୍"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ଫ୍ଲାଶ୍‍ଲାଇଟ"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ମୋବାଇଲ୍‌ ଡାଟା"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ଡାଟାର ବ୍ୟବହାର"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ଅବଶିଷ୍ଟ ଡାଟା"</string>

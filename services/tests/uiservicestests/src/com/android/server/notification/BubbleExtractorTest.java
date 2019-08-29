@@ -86,7 +86,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         BubbleExtractor extractor = new BubbleExtractor();
         extractor.setConfig(mConfig);
 
-        when(mConfig.bubblesEnabled(mUser)).thenReturn(true);
+        when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
         NotificationRecord r = getNotificationRecord(false, IMPORTANCE_UNSPECIFIED);
 
@@ -100,7 +100,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         BubbleExtractor extractor = new BubbleExtractor();
         extractor.setConfig(mConfig);
 
-        when(mConfig.bubblesEnabled(mUser)).thenReturn(true);
+        when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(false);
         NotificationRecord r = getNotificationRecord(true, IMPORTANCE_HIGH);
 
@@ -114,7 +114,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         BubbleExtractor extractor = new BubbleExtractor();
         extractor.setConfig(mConfig);
 
-        when(mConfig.bubblesEnabled(mUser)).thenReturn(true);
+        when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
         NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
 
@@ -128,7 +128,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         BubbleExtractor extractor = new BubbleExtractor();
         extractor.setConfig(mConfig);
 
-        when(mConfig.bubblesEnabled(mUser)).thenReturn(true);
+        when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(false);
         NotificationRecord r = getNotificationRecord(false, IMPORTANCE_UNSPECIFIED);
 
@@ -142,7 +142,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         BubbleExtractor extractor = new BubbleExtractor();
         extractor.setConfig(mConfig);
 
-        when(mConfig.bubblesEnabled(mUser)).thenReturn(false);
+        when(mConfig.bubblesEnabled()).thenReturn(false);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
         NotificationRecord r = getNotificationRecord(true, IMPORTANCE_HIGH);
 

@@ -361,7 +361,7 @@
     <string name="runningservices_settings_summary" msgid="854608995821032748">"इस समय चल रही सेवाओं को देखें और नियंत्रित करें"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबव्यू लागू करें"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबव्यू सेट करें"</string>
-    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"यह चुनाव अब मान्य नहीं है. दोबारा कोशिश करें."</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"यह चयन अब मान्य नहीं है. पुनः प्रयास करें."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फ़ाइल आधारित सुरक्षित करने के तरीके में बदलें"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रूपांतरित करें..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"फ़ाइल पहले से एन्क्रिप्ट की हुई है"</string>
