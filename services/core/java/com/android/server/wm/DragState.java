@@ -120,7 +120,7 @@ class DragState {
     // A surface used to catch input events for the drag-and-drop operation.
     SurfaceControl mInputSurface;
 
-    private final SurfaceControl.Transaction mTransaction;
+    final SurfaceControl.Transaction mTransaction;
 
     private final Rect mTmpClipRect = new Rect();
 
@@ -170,7 +170,7 @@ class DragState {
         // syncInputWindows here to ensure the input window info is sent before the
         // transferTouchFocus is called.
         mTransaction.syncInputWindows();
-        mTransaction.apply();
+        mTransaction.apply(true);
     }
 
     /**
