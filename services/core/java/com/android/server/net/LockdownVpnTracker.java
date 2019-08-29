@@ -77,8 +77,6 @@ public class LockdownVpnTracker {
     private final PendingIntent mResetIntent;
 
     private String mAcceptedEgressIface;
-    private String mAcceptedIface;
-    private List<LinkAddress> mAcceptedSourceAddr;
 
     private int mErrorCount;
 
@@ -175,11 +173,6 @@ public class LockdownVpnTracker {
         } else if (vpnInfo.isConnected() && vpnConfig != null) {
             final String iface = vpnConfig.interfaze;
             final List<LinkAddress> sourceAddrs = vpnConfig.addresses;
-
-            if (TextUtils.equals(iface, mAcceptedIface)
-                  && sourceAddrs.equals(mAcceptedSourceAddr)) {
-                return;
-            }
 
             Slog.d(TAG, "VPN connected using iface=" + iface +
                     ", sourceAddr=" + sourceAddrs.toString());
