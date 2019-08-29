@@ -220,10 +220,10 @@ SkIRect* GraphicsJNI::jrect_to_irect(JNIEnv* env, jobject obj, SkIRect* ir)
 {
     ALOG_ASSERT(env->IsInstanceOf(obj, gRect_class));
 
-    ir->set(env->GetIntField(obj, gRect_leftFieldID),
-            env->GetIntField(obj, gRect_topFieldID),
-            env->GetIntField(obj, gRect_rightFieldID),
-            env->GetIntField(obj, gRect_bottomFieldID));
+    ir->setLTRB(env->GetIntField(obj, gRect_leftFieldID),
+                env->GetIntField(obj, gRect_topFieldID),
+                env->GetIntField(obj, gRect_rightFieldID),
+                env->GetIntField(obj, gRect_bottomFieldID));
     return ir;
 }
 
@@ -241,10 +241,10 @@ SkRect* GraphicsJNI::jrectf_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 {
     ALOG_ASSERT(env->IsInstanceOf(obj, gRectF_class));
 
-    r->set(env->GetFloatField(obj, gRectF_leftFieldID),
-           env->GetFloatField(obj, gRectF_topFieldID),
-           env->GetFloatField(obj, gRectF_rightFieldID),
-           env->GetFloatField(obj, gRectF_bottomFieldID));
+    r->setLTRB(env->GetFloatField(obj, gRectF_leftFieldID),
+               env->GetFloatField(obj, gRectF_topFieldID),
+               env->GetFloatField(obj, gRectF_rightFieldID),
+               env->GetFloatField(obj, gRectF_bottomFieldID));
     return r;
 }
 
@@ -252,10 +252,10 @@ SkRect* GraphicsJNI::jrect_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 {
     ALOG_ASSERT(env->IsInstanceOf(obj, gRect_class));
 
-    r->set(SkIntToScalar(env->GetIntField(obj, gRect_leftFieldID)),
-           SkIntToScalar(env->GetIntField(obj, gRect_topFieldID)),
-           SkIntToScalar(env->GetIntField(obj, gRect_rightFieldID)),
-           SkIntToScalar(env->GetIntField(obj, gRect_bottomFieldID)));
+    r->setLTRB(SkIntToScalar(env->GetIntField(obj, gRect_leftFieldID)),
+               SkIntToScalar(env->GetIntField(obj, gRect_topFieldID)),
+               SkIntToScalar(env->GetIntField(obj, gRect_rightFieldID)),
+               SkIntToScalar(env->GetIntField(obj, gRect_bottomFieldID)));
     return r;
 }
 
