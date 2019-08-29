@@ -340,7 +340,6 @@ java_library {
 
 platform_compat_config {
     name: "framework-platform-compat-config",
-    prefix: "framework",
     src: ":framework-annotation-proc",
 }
 
