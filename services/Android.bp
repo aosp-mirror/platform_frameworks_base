@@ -57,6 +57,5 @@ cc_library_shared {
 
 platform_compat_config {
     name: "services-platform-compat-config",
-    prefix: "services",
     src: ":services",
 }

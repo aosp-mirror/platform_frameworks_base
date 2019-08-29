@@ -47,11 +47,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 public final class CompatConfig {
 
     private static final String TAG = "CompatConfig";
-    private static final String CONFIG_FILE_SUFFIX = "platform_compat_config.xml";
 
     private static final CompatConfig sInstance = new CompatConfig().initConfigFromLib(
             Environment.buildPath(
-                    Environment.getRootDirectory(), "etc", "sysconfig"));
+                    Environment.getRootDirectory(), "etc", "compatconfig"));
 
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
@@ -212,10 +211,9 @@ public final class CompatConfig {
             return this;
         }
         for (File f : libraryDir.listFiles()) {
+            Slog.d(TAG, "Found a config file: " + f.getPath());
             //TODO(b/138222363): Handle duplicate ids across config files.
-            if (f.getPath().endsWith(CONFIG_FILE_SUFFIX)) {
-                readConfig(f);
-            }
+            readConfig(f);
         }
         return this;
     }
@@ -223,7 +221,7 @@ public final class CompatConfig {
     private void readConfig(File configFile) {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             for (Change change : XmlParser.read(in).getCompatChange()) {
-                Slog.w(TAG, "Adding: " + change.toString());
+                Slog.d(TAG, "Adding: " + change.toString());
                 addChange(new CompatChange(change));
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
