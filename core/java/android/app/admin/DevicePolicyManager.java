@@ -5764,21 +5764,6 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
-    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
-        if (mService != null) {
-            try {
-                mService.setActivePasswordState(metrics, userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * @hide
-     */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void reportPasswordChanged(@UserIdInt int userId) {
         if (mService != null) {

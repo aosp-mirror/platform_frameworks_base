@@ -64,6 +64,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -102,6 +103,7 @@ public class MockSystemServices {
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
+    public final LockSettingsInternal lockSettingsInternal;
     public final StorageManagerForMock storageManager;
     public final WifiManager wifiManager;
     public final SettingsForMock settings;
@@ -143,6 +145,7 @@ public class MockSystemServices {
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);
         lockPatternUtils = mock(LockPatternUtils.class);
+        lockSettingsInternal = mock(LockSettingsInternal.class);
         storageManager = mock(StorageManagerForMock.class);
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);

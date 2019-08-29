@@ -248,6 +248,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
@@ -500,6 +501,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     final UsageStatsManagerInternal mUsageStatsManagerInternal;
     final TelephonyManager mTelephonyManager;
     private final LockPatternUtils mLockPatternUtils;
+    private final LockSettingsInternal mLockSettingsInternal;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
     private final OverlayPackagesProvider mOverlayPackagesProvider;
 
@@ -739,7 +741,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     final SparseArray<DevicePolicyData> mUserData = new SparseArray<>();
 
     @GuardedBy("getLockObject()")
-    final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
 
     final Handler mHandler;
     final Handler mBackgroundHandler;
@@ -1994,6 +1995,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return IAudioService.Stub.asInterface(ServiceManager.getService(Context.AUDIO_SERVICE));
         }
 
+        LockSettingsInternal getLockSettingsInternal() {
+            return LocalServices.getService(LockSettingsInternal.class);
+        }
+
         boolean isBuildDebuggable() {
             return Build.IS_DEBUGGABLE;
         }
@@ -2233,7 +2238,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mLocalService = new LocalService();
         mLockPatternUtils = injector.newLockPatternUtils();
-
+        mLockSettingsInternal = injector.getLockSettingsInternal();
         // TODO: why does SecurityLogMonitor need to be created even when mHasFeature == false?
         mSecurityLogMonitor = new SecurityLogMonitor(this);
 
@@ -2309,17 +2314,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Provides PasswordMetrics object corresponding to the given user.
-     * @param userHandle the user for whom to provide metrics.
-     * @return the user password metrics, or {@code null} if none have been associated with
-     * the user yet (for example, if the device has booted but not been unlocked).
-     */
-    @GuardedBy("getLockObject()")
-    PasswordMetrics getUserPasswordMetricsLocked(int userHandle) {
-        return mUserPasswordMetrics.get(userHandle);
-    }
-
-    /**
      * Creates and loads the policy data from xml for data that is shared between
      * various profiles of a user. In contrast to {@link #getUserData(int)}
      * it allows access to data of users other than the calling user.
@@ -2352,9 +2346,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             DevicePolicyData policy = mUserData.get(userHandle);
             if (policy != null) {
                 mUserData.remove(userHandle);
-            }
-            if (mUserPasswordMetrics.get(userHandle) != null) {
-                mUserPasswordMetrics.remove(userHandle);
             }
 
             File policyFile = new File(mInjector.environmentGetUserSystemDirectory(userHandle),
@@ -4183,15 +4174,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void updatePasswordValidityCheckpointLocked(int userHandle, boolean parent) {
         final int credentialOwner = getCredentialOwner(userHandle, parent);
         DevicePolicyData policy = getUserData(credentialOwner);
-        PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
-        if (metrics == null) {
-            metrics = new PasswordMetrics();
+        PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
+        // Update the checkpoint only if the user's password metrics is known
+        if (metrics != null) {
+            final boolean newCheckpoint = isPasswordSufficientForUserWithoutCheckpointLocked(
+                    metrics, userHandle, parent);
+            if (newCheckpoint != policy.mPasswordValidAtLastCheckpoint) {
+                policy.mPasswordValidAtLastCheckpoint = newCheckpoint;
+                saveSettingsLocked(credentialOwner);
+            }
         }
-        policy.mPasswordValidAtLastCheckpoint =
-                isPasswordSufficientForUserWithoutCheckpointLocked(
-                        metrics, userHandle, parent);
-
-        saveSettingsLocked(credentialOwner);
     }
 
     /**
@@ -4766,7 +4758,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             int credentialOwner = getCredentialOwner(userHandle, parent);
             DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
-            PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
             return isActivePasswordSufficientForUserLocked(
                     policy.mPasswordValidAtLastCheckpoint, metrics, userHandle, parent);
         }
@@ -4796,15 +4788,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             enforceUserUnlocked(targetUser, false);
             int credentialOwner = getCredentialOwner(userHandle, false);
             DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
-            PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
             return isActivePasswordSufficientForUserLocked(
                     policy.mPasswordValidAtLastCheckpoint, metrics, targetUser, false);
         }
     }
 
     private boolean isActivePasswordSufficientForUserLocked(
-            boolean passwordValidAtLastCheckpoint, PasswordMetrics metrics, int userHandle,
-            boolean parent) {
+            boolean passwordValidAtLastCheckpoint, @Nullable PasswordMetrics metrics,
+            int userHandle, boolean parent) {
         if (!mInjector.storageManagerIsFileBasedEncryptionEnabled() && (metrics == null)) {
             // Before user enters their password for the first time after a reboot, return the
             // value of this flag, which tells us whether the password was valid the last time
@@ -4815,9 +4807,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (metrics == null) {
-            // This could happen if the user never had a password set, for example, so
-            // setActivePasswordState has never been called for it.
-            metrics = new PasswordMetrics();
+            // Called on a FBE device when the user password exists but its metrics is unknown.
+            // This shouldn't happen since we enforce the user to be unlocked (which would result
+            // in the metrics known to the framework on a FBE device) at all call sites.
+            throw new IllegalStateException("isActivePasswordSufficient called on FBE-locked user");
         }
 
         return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, parent);
@@ -4829,7 +4822,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * {@code userId} (or its parent, if {@code parent} is set to {@code true}).
      */
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
-            PasswordMetrics metrics, @UserIdInt int userId, boolean parent) {
+            @NonNull PasswordMetrics metrics, @UserIdInt int userId, boolean parent) {
         final int requiredQuality = getPasswordQuality(null, userId, parent);
 
         if (requiredQuality >= PASSWORD_QUALITY_NUMERIC
@@ -4867,7 +4860,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             int targetUserId = getCredentialOwner(callingUserId, /* parent= */ false);
-            PasswordMetrics metrics = getUserPasswordMetricsLocked(targetUserId);
+            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(targetUserId);
             return metrics == null ? PASSWORD_COMPLEXITY_NONE : metrics.determineComplexity();
         }
     }
@@ -6704,31 +6697,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     result.sendResult(getResultExtras(false));
                 }
             }, null, Activity.RESULT_OK, null, null);
-        }
-    }
-
-    /**
-     * Notify DPMS regarding the metric of the current password. This happens when the user changes
-     * the password, but also when the user just unlocks the keyguard. In comparison,
-     * reportPasswordChanged() is only called when the user changes the password.
-     */
-    @Override
-    public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
-        if (!mLockPatternUtils.hasSecureLockScreen()) {
-            return;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-
-        // If the managed profile doesn't have a separate password, set the metrics to default
-        if (isManagedProfile(userHandle) && !isSeparateProfileChallengeEnabled(userHandle)) {
-            metrics = new PasswordMetrics();
-        }
-
-        validateQualityConstant(metrics.quality);
-        synchronized (getLockObject()) {
-            mUserPasswordMetrics.put(userHandle, metrics);
         }
     }
 
