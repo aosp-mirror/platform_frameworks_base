@@ -30,10 +30,23 @@ java_test {
 }
 
 java_library {
+    name: "flickerlib_without_helpers",
+    platform_apis: true,
+    srcs: ["src/**/*.java"],
+    exclude_srcs: ["src/**/helpers/*.java"],
+    static_libs: [
+        "cts-wm-util",
+        "platformprotosnano",
+        "layersprotosnano",
+        "truth-prebuilt"
+    ],
+}
+
+java_library {
     name: "flickerautomationhelperlib",
     sdk_version: "test_current",
     srcs: [
-        "src/com/android/server/wm/flicker/AutomationUtils.java",
+        "src/com/android/server/wm/flicker/helpers/AutomationUtils.java",
         "src/com/android/server/wm/flicker/WindowUtils.java",
     ],
     static_libs: [

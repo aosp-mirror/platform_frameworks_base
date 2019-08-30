@@ -19,12 +19,12 @@ package com.android.server.wm.flicker;
 import static android.os.SystemClock.sleep;
 import static android.view.Surface.rotationToString;
 
-import static com.android.server.wm.flicker.AutomationUtils.clearRecents;
-import static com.android.server.wm.flicker.AutomationUtils.closePipWindow;
-import static com.android.server.wm.flicker.AutomationUtils.exitSplitScreen;
-import static com.android.server.wm.flicker.AutomationUtils.expandPipWindow;
-import static com.android.server.wm.flicker.AutomationUtils.launchSplitScreen;
-import static com.android.server.wm.flicker.AutomationUtils.stopPackage;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.clearRecents;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.closePipWindow;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.exitSplitScreen;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.expandPipWindow;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.launchSplitScreen;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.stopPackage;
 
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +40,7 @@ import android.view.Surface;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.server.wm.flicker.TransitionRunner.TransitionBuilder;
+import com.android.server.wm.flicker.helpers.AutomationUtils;
 
 /**
  * Collection of common transitions which can be used to test different apps or scenarios.

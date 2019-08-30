@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker;
 
-import static com.android.server.wm.flicker.AutomationUtils.setDefaultWait;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.setDefaultWait;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
