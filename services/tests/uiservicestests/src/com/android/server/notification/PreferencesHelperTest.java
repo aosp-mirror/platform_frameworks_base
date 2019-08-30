@@ -60,7 +60,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
@@ -154,8 +156,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         contentResolver.setFallbackToExisting(false);
         Secure.putIntForUser(contentResolver,
                 Secure.NOTIFICATION_BADGING, 1, UserHandle.getUserId(UID_N_MR1));
-        Secure.putIntForUser(contentResolver,
-                Secure.NOTIFICATION_BUBBLES, 1, UserHandle.getUserId(UID_N_MR1));
+        Global.putInt(contentResolver, Global.NOTIFICATION_BUBBLES, 1);
 
         ContentProvider testContentProvider = mock(ContentProvider.class);
         when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);
@@ -1950,42 +1951,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testBubblesOverrideTrue() {
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.NOTIFICATION_BUBBLES, 1,
-                USER.getIdentifier());
+        Global.putInt(getContext().getContentResolver(),
+                Global.NOTIFICATION_BUBBLES, 1);
         mHelper.updateBubblesEnabled(); // would be called by settings observer
-        assertTrue(mHelper.bubblesEnabled(USER));
+        assertTrue(mHelper.bubblesEnabled());
     }
 
     @Test
     public void testBubblesOverrideFalse() {
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.NOTIFICATION_BUBBLES, 0,
-                USER.getIdentifier());
+        Global.putInt(getContext().getContentResolver(),
+                Global.NOTIFICATION_BUBBLES, 0);
         mHelper.updateBubblesEnabled(); // would be called by settings observer
-        assertFalse(mHelper.bubblesEnabled(USER));
-    }
-
-    @Test
-    public void testBubblesForUserAll() {
-        try {
-            mHelper.bubblesEnabled(UserHandle.ALL);
-        } catch (Exception e) {
-            fail("just don't throw");
-        }
-    }
-
-    @Test
-    public void testBubblesOverrideUserIsolation() {
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.NOTIFICATION_BUBBLES, 0,
-                USER.getIdentifier());
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.NOTIFICATION_BUBBLES, 1,
-                USER2.getIdentifier());
-        mHelper.updateBubblesEnabled(); // would be called by settings observer
-        assertFalse(mHelper.bubblesEnabled(USER));
-        assertTrue(mHelper.bubblesEnabled(USER2));
+        assertFalse(mHelper.bubblesEnabled());
     }
 
     @Test
