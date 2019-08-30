@@ -77,7 +77,7 @@ public class RunningTasksTest extends ActivityTestsBase {
         final int numFetchTasks = 5;
         ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
         mRunningTasks.getTasks(5, tasks, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED,
-                displays, -1 /* callingUid */, true /* allowed */);
+                displays, -1 /* callingUid */, true /* allowed */, true /*crossUser */);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < numFetchTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);
@@ -87,7 +87,7 @@ public class RunningTasksTest extends ActivityTestsBase {
         // and does not crash
         tasks.clear();
         mRunningTasks.getTasks(100, tasks, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED,
-                displays, -1 /* callingUid */, true /* allowed */);
+                displays, -1 /* callingUid */, true /* allowed */, true /* crossUser */);
         assertThat(tasks).hasSize(numTasks);
         for (int i = 0; i < numTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);
