@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection;
+package com.android.systemui.bubbles;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -31,6 +32,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,13 +43,14 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class NotificationEntryTest extends SysuiTestCase {
+public class BubbleTest extends SysuiTestCase {
     @Mock
     private StatusBarNotification mStatusBarNotification;
     @Mock
     private Notification mNotif;
 
     private NotificationEntry mEntry;
+    private Bubble mBubble;
     private Bundle mExtras;
 
     @Before
@@ -56,11 +59,12 @@ public class NotificationEntryTest extends SysuiTestCase {
 
         when(mStatusBarNotification.getKey()).thenReturn("key");
         when(mStatusBarNotification.getNotification()).thenReturn(mNotif);
-
+        when(mStatusBarNotification.getUser()).thenReturn(new UserHandle(0));
         mExtras = new Bundle();
         mNotif.extras = mExtras;
 
         mEntry = NotificationEntry.buildForTest(mStatusBarNotification);
+        mBubble = new Bubble(mContext, mEntry);
     }
 
     @Test
@@ -79,7 +83,7 @@ public class NotificationEntryTest extends SysuiTestCase {
         final String msg = "Hello there!";
         doReturn(Notification.Style.class).when(mNotif).getNotificationStyle();
         mExtras.putCharSequence(Notification.EXTRA_TEXT, msg);
-        assertEquals(msg, mEntry.getUpdateMessage(mContext));
+        assertEquals(msg, mBubble.getUpdateMessage(mContext));
     }
 
     @Test
@@ -90,7 +94,7 @@ public class NotificationEntryTest extends SysuiTestCase {
         mExtras.putCharSequence(Notification.EXTRA_BIG_TEXT, msg);
 
         // Should be big text, not the small text.
-        assertEquals(msg, mEntry.getUpdateMessage(mContext));
+        assertEquals(msg, mBubble.getUpdateMessage(mContext));
     }
 
     @Test
@@ -98,7 +102,7 @@ public class NotificationEntryTest extends SysuiTestCase {
         doReturn(Notification.MediaStyle.class).when(mNotif).getNotificationStyle();
 
         // Media notifs don't get update messages.
-        assertNull(mEntry.getUpdateMessage(mContext));
+        assertNull(mBubble.getUpdateMessage(mContext));
     }
 
     @Test
@@ -113,7 +117,7 @@ public class NotificationEntryTest extends SysuiTestCase {
                         "Really? I prefer them that way."});
 
         // Should be the last one only.
-        assertEquals("Really? I prefer them that way.", mEntry.getUpdateMessage(mContext));
+        assertEquals("Really? I prefer them that way.", mBubble.getUpdateMessage(mContext));
     }
 
     @Test
@@ -128,6 +132,6 @@ public class NotificationEntryTest extends SysuiTestCase {
                                 "Oh, hello!", 0, "Mady").toBundle()});
 
         // Should be the last one only.
-        assertEquals("Mady: Oh, hello!", mEntry.getUpdateMessage(mContext));
+        assertEquals("Mady: Oh, hello!", mBubble.getUpdateMessage(mContext));
     }
 }
