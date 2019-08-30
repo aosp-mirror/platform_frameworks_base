@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import com.android.systemui.pip.phone.PipMediaController.ActionListener;
 import com.android.systemui.shared.system.InputConsumerController;
@@ -156,14 +157,6 @@ public class PipMenuActivityController {
                     mListeners.forEach(l -> l.onPipShowMenu());
                     break;
                 }
-                case MESSAGE_REGISTER_INPUT_CONSUMER: {
-                    mInputConsumerController.registerInputConsumer();
-                    break;
-                }
-                case MESSAGE_UNREGISTER_INPUT_CONSUMER: {
-                    mInputConsumerController.unregisterInputConsumer();
-                    break;
-                }
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {
                     mToActivityMessenger = msg.replyTo;
                     setStartActivityRequested(false);
@@ -212,15 +205,12 @@ public class PipMenuActivityController {
     }
 
     public void onActivityPinned() {
-        if (mMenuState == MENU_STATE_NONE) {
-            // If the menu is not visible, then re-register the input consumer if it is not already
-            // registered
-            mInputConsumerController.registerInputConsumer();
-        }
+        mInputConsumerController.registerInputConsumer();
     }
 
     public void onActivityUnpinned() {
         hideMenu();
+        mInputConsumerController.unregisterInputConsumer();
         setStartActivityRequested(false);
     }
 
@@ -495,11 +485,7 @@ public class PipMenuActivityController {
             Log.d(TAG, "onMenuStateChanged() mMenuState=" + mMenuState
                     + " menuState=" + menuState + " resize=" + resize);
         }
-        if (menuState == MENU_STATE_NONE) {
-            mInputConsumerController.registerInputConsumer();
-        } else {
-            mInputConsumerController.unregisterInputConsumer();
-        }
+
         if (menuState != mMenuState) {
             mListeners.forEach(l -> l.onPipMenuStateChanged(menuState, resize));
             if (menuState == MENU_STATE_FULL) {
@@ -519,6 +505,22 @@ public class PipMenuActivityController {
         mHandler.removeCallbacks(mStartActivityRequestedTimeoutRunnable);
         mStartActivityRequested = requested;
         mStartActivityRequestedTime = requested ? SystemClock.uptimeMillis() : 0;
+    }
+
+    /**
+     * Handles touch event sent from pip input consumer.
+     */
+    void handleTouchEvent(MotionEvent ev) {
+        if (mToActivityMessenger != null) {
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_TOUCH_EVENT;
+            m.obj = ev;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not dispatch touch event", e);
+            }
+        }
     }
 
     public void dump(PrintWriter pw, String prefix) {
