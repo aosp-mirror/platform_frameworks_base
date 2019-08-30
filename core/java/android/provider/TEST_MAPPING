@@ -4,17 +4,21 @@
             "name": "CtsProviderTestCases",
             "options": [
                 {
-                    "include-annotation": "android.platform.test.annotations.Presubmit"
+                    "exclude-filter": "android.provider.cts.SettingsPanelTest"
                 }
             ]
         },
         {
-            "name": "SettingsProviderTest",
-            "options": [
-                {
-                    "include-annotation": "android.platform.test.annotations.Presubmit"
-                }
-            ]
+            "name": "CalendarProviderTests"
+        },
+        {
+            "name": "ContactsProviderTests"
+        },
+        {
+            "name": "MediaProviderTests"
+        },
+        {
+            "name": "SettingsProviderTest"
         }
     ]
 }
