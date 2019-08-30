@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -336,6 +337,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
 
+    @FlakyTest(bugId = 140308162)
     public void testTokenBasedResetPassword() throws RemoteException {
         final byte[] password = "password".getBytes();
         final byte[] pattern = "123654".getBytes();
