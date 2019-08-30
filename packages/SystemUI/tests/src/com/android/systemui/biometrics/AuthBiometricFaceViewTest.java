@@ -63,7 +63,7 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
         mFaceView.mNegativeButton = mNegativeButton;
         mFaceView.mPositiveButton = mPositiveButton;
         mFaceView.mTryAgainButton = mTryAgainButton;
-        mFaceView.mErrorView = mErrorView;
+        mFaceView.mIndicatorView = mErrorView;
     }
 
     @Test

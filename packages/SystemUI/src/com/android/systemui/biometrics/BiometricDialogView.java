@@ -23,6 +23,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.graphics.Outline;
@@ -738,7 +739,10 @@ public abstract class BiometricDialogView extends LinearLayout implements AuthDi
     }
 
     @Override
-    public void show(WindowManager wm) {
+    public void show(WindowManager wm, @Nullable Bundle savedState) {
+        if (savedState != null) {
+            restoreState(savedState);
+        }
         wm.addView(this, getLayoutParams(mWindowToken));
     }
 
@@ -832,7 +836,6 @@ public abstract class BiometricDialogView extends LinearLayout implements AuthDi
         bundle.putInt(KEY_DIALOG_SIZE, mSize);
     }
 
-    @Override
     public void restoreState(Bundle bundle) {
         mRestoredState = bundle;
 

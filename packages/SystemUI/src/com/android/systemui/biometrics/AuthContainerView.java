@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Binder;
@@ -269,7 +271,8 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
-    public void show(WindowManager wm) {
+    public void show(WindowManager wm, @Nullable Bundle savedState) {
+        mBiometricView.restoreState(savedState);
         wm.addView(this, getLayoutParams(mWindowToken));
     }
 
@@ -308,13 +311,8 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
-    public void onSaveState(Bundle outState) {
-
-    }
-
-    @Override
-    public void restoreState(Bundle savedState) {
-
+    public void onSaveState(@NonNull Bundle outState) {
+        mBiometricView.onSaveState(outState);
     }
 
     @Override

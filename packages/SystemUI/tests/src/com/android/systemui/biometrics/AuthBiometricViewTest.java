@@ -17,12 +17,15 @@
 package com.android.systemui.biometrics;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricPrompt;
+import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -55,10 +58,10 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     @Mock private TextView mTitleView;
     @Mock private TextView mSubtitleView;
     @Mock private TextView mDescriptionView;
-    @Mock private TextView mErrorView;
+    @Mock private TextView mIndicatorView;
     @Mock private ImageView mIconView;
 
-    TestableBiometricView mBiometricView;
+    private TestableBiometricView mBiometricView;
 
     @Before
     public void setup() {
@@ -87,8 +90,8 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         verify(mCallback, never()).onAction(anyInt());
         verify(mBiometricView.mNegativeButton).setText(eq(R.string.cancel));
         verify(mBiometricView.mPositiveButton).setEnabled(eq(true));
-        verify(mErrorView).setText(eq(R.string.biometric_dialog_tap_confirm));
-        verify(mErrorView).setVisibility(eq(View.VISIBLE));
+        verify(mIndicatorView).setText(eq(R.string.biometric_dialog_tap_confirm));
+        verify(mIndicatorView).setVisibility(eq(View.VISIBLE));
     }
 
     @Test
@@ -193,11 +196,88 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
     }
 
+    @Test
+    public void testRestoresState() {
+        final boolean requireConfirmation = true; // set/init from AuthController
+
+        Button tryAgainButton = new Button(mContext);
+        TextView indicatorView = new TextView(mContext);
+        initDialog(mContext, mCallback, new MockInjector() {
+            @Override
+            public Button getTryAgainButton() {
+                return tryAgainButton;
+            }
+            @Override
+            public TextView getIndicatorView() {
+                return indicatorView;
+            }
+        });
+
+        final String failureMessage = "testFailureMessage";
+        mBiometricView.setRequireConfirmation(requireConfirmation);
+        mBiometricView.onAuthenticationFailed(failureMessage);
+        waitForIdleSync();
+
+        Bundle state = new Bundle();
+        mBiometricView.onSaveState(state);
+
+        assertEquals(View.VISIBLE, tryAgainButton.getVisibility());
+        assertEquals(View.VISIBLE, state.getInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY));
+
+        assertEquals(AuthBiometricView.STATE_ERROR, mBiometricView.mState);
+        assertEquals(AuthBiometricView.STATE_ERROR, state.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
+
+        assertEquals(View.VISIBLE, mBiometricView.mIndicatorView.getVisibility());
+        assertTrue(state.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING));
+
+        assertEquals(failureMessage, mBiometricView.mIndicatorView.getText());
+        assertEquals(failureMessage, state.getString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING));
+
+        // TODO: Test dialog size. Should move requireConfirmation to buildBiometricPromptBundle
+
+        // Create new dialog and restore the previous state into it
+        Button tryAgainButton2 = new Button(mContext);
+        TextView indicatorView2 = new TextView(mContext);
+        initDialog(mContext, mCallback, state, new MockInjector() {
+            @Override
+            public Button getTryAgainButton() {
+                return tryAgainButton2;
+            }
+            @Override
+            public TextView getIndicatorView() {
+                return indicatorView2;
+            }
+        });
+        mBiometricView.setRequireConfirmation(requireConfirmation);
+        waitForIdleSync();
+
+        // Test restored state
+        assertEquals(View.VISIBLE, tryAgainButton.getVisibility());
+        assertEquals(AuthBiometricView.STATE_ERROR, mBiometricView.mState);
+        assertEquals(View.VISIBLE, mBiometricView.mIndicatorView.getVisibility());
+        assertEquals(failureMessage, mBiometricView.mIndicatorView.getText());
+    }
+
+    private Bundle buildBiometricPromptBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putCharSequence(BiometricPrompt.KEY_TITLE, "Title");
+        bundle.putCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT, "Negative");
+        return bundle;
+    }
+
+    private void initDialog(Context context, AuthBiometricView.Callback callback,
+            Bundle savedState, MockInjector injector) {
+        mBiometricView = new TestableBiometricView(context, null, injector);
+        mBiometricView.setBiometricPromptBundle(buildBiometricPromptBundle());
+        mBiometricView.setCallback(callback);
+        mBiometricView.restoreState(savedState);
+        mBiometricView.onFinishInflateInternal();
+        mBiometricView.onAttachedToWindowInternal();
+    }
+
     private void initDialog(Context context, AuthBiometricView.Callback callback,
             MockInjector injector) {
-        mBiometricView = new TestableBiometricView(context, null, injector);
-        mBiometricView.setCallback(callback);
-        mBiometricView.initializeViews();
+        initDialog(context, callback, null /* savedState */, injector);
     }
 
     private class MockInjector extends AuthBiometricView.Injector {
@@ -232,8 +312,8 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         }
 
         @Override
-        public TextView getErrorView() {
-            return mErrorView;
+        public TextView getIndicatorView() {
+            return mIndicatorView;
         }
 
         @Override
