@@ -288,6 +288,48 @@ status_t BootAnimation::readyToRun() {
             dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
 
     SurfaceComposerClient::Transaction t;
+
+    // this guest property specifies multi-display IDs to show the boot animation
+    // multiple ids can be set with comma (,) as separator, for example:
+    // setprop boot.animation.displays 19260422155234049,19261083906282754
+    Vector<uint64_t> physicalDisplayIds;
+    char displayValue[PROPERTY_VALUE_MAX] = "";
+    property_get("boot.animation.displays", displayValue, "");
+    bool isValid = displayValue[0] != '\0';
+    if (isValid) {
+        char *p = displayValue;
+        while (*p) {
+            if (!isdigit(*p) && *p != ',') {
+                isValid = false;
+                break;
+            }
+            p ++;
+        }
+        if (!isValid)
+            SLOGE("Invalid syntax for the value of system prop: boot.animation.displays");
+    }
+    if (isValid) {
+        std::istringstream stream(displayValue);
+        for (PhysicalDisplayId id; stream >> id; ) {
+            physicalDisplayIds.add(id);
+            if (stream.peek() == ',')
+                stream.ignore();
+        }
+
+        // In the case of multi-display, boot animation shows on the specified displays
+        // in addition to the primary display
+        auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
+        constexpr uint32_t LAYER_STACK = 0;
+        for (auto id : physicalDisplayIds) {
+            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
+                sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(id);
+                if (token != nullptr)
+                    t.setDisplayLayerStack(token, LAYER_STACK);
+            }
+        }
+        t.setLayerStack(control, LAYER_STACK);
+    }
+
     t.setLayer(control, 0x40000000)
         .apply();
 
