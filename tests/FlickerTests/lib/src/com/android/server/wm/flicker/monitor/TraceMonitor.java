@@ -20,7 +20,7 @@ import static com.android.compatibility.common.util.SystemUtil.runShellCommand;
 
 import android.os.RemoteException;
 
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,9 +34,15 @@ public abstract class TraceMonitor implements ITransitionMonitor {
     public static final String TAG = "FLICKER";
     private static final String TRACE_DIR = "/data/misc/wmtrace/";
 
-    String traceFileName;
+    private Path mOutputDir;
+    public String mTraceFileName;
 
-    abstract boolean isEnabled() throws RemoteException;
+    public abstract boolean isEnabled() throws RemoteException;
+
+    public TraceMonitor(String outputDir, String traceFileName) {
+        mOutputDir = Paths.get(outputDir);
+        mTraceFileName = traceFileName;
+    }
 
     /**
      * Saves trace file to the external storage directory suffixing the name with the testtag
@@ -53,14 +59,16 @@ public abstract class TraceMonitor implements ITransitionMonitor {
     public Path save(String testTag) {
         OUTPUT_DIR.toFile().mkdirs();
         Path traceFileCopy = getOutputTraceFilePath(testTag);
+
+        // Read the input stream fully.
         String copyCommand = String.format(Locale.getDefault(), "mv %s%s %s", TRACE_DIR,
-                traceFileName, traceFileCopy.toString());
+                mTraceFileName, traceFileCopy.toString());
         runShellCommand(copyCommand);
         return traceFileCopy;
     }
 
     @VisibleForTesting
-    Path getOutputTraceFilePath(String testTag) {
-        return OUTPUT_DIR.resolve(traceFileName + "_" + testTag);
+    public Path getOutputTraceFilePath(String testTag) {
+        return mOutputDir.resolve(mTraceFileName + "_" + testTag);
     }
 }

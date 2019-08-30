@@ -19,8 +19,9 @@ package com.android.server.wm.flicker;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import android.annotation.Nullable;
 import android.graphics.Rect;
+
+import androidx.annotation.Nullable;
 
 import com.android.server.wm.flicker.Assertions.Result;
 import com.android.server.wm.flicker.LayersTrace.Entry;

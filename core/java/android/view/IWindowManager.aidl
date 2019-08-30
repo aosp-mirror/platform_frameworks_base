@@ -640,4 +640,14 @@ interface IWindowManager
      * native InputManager before proceeding with tests.
      */
     void syncInputTransactions();
+
+    /**
+     * Returns whether SurfaceFlinger layer tracing is enabled.
+     */
+    boolean isLayerTracing();
+
+    /**
+     * Enables/disables SurfaceFlinger layer tracing.
+     */
+    void setLayerTracing(boolean enabled);
 }
