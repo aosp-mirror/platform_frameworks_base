@@ -15,11 +15,11 @@
  */
 package com.android.systemui.car;
 
-import android.content.Context;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,8 +34,8 @@ import javax.inject.Singleton;
 public class CarNotificationEntryManager extends NotificationEntryManager {
 
     @Inject
-    public CarNotificationEntryManager(Context context) {
-        super(context);
+    public CarNotificationEntryManager(NotificationData notificationData) {
+        super(notificationData);
     }
 
     @Override

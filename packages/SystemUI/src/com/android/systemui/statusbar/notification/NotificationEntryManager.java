@@ -20,7 +20,6 @@ import static android.service.notification.NotificationListenerService.REASON_ER
 
 import android.annotation.Nullable;
 import android.app.Notification;
-import android.content.Context;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
@@ -124,8 +123,8 @@ public class NotificationEntryManager implements
     }
 
     @Inject
-    public NotificationEntryManager(Context context) {
-        mNotificationData = new NotificationData(context);
+    public NotificationEntryManager(NotificationData notificationData) {
+        mNotificationData = notificationData;
     }
 
     /** Adds a {@link NotificationEntryListener}. */

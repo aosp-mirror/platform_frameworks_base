@@ -50,7 +50,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -78,6 +77,7 @@ import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -139,7 +139,8 @@ public class NotificationDataTest extends SysuiTestCase {
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
-        mNotificationData = new TestableNotificationData(mContext);
+        mNotificationData = new TestableNotificationData(
+                mock(NotificationSectionsFeatureManager.class));
         mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class));
         mRow = new NotificationTestHelper(getContext()).createRow();
         Dependency.get(InitController.class).executePostInitTasks();
@@ -631,8 +632,8 @@ public class NotificationDataTest extends SysuiTestCase {
     }
 
     public static class TestableNotificationData extends NotificationData {
-        public TestableNotificationData(Context context) {
-            super(context);
+        public TestableNotificationData(NotificationSectionsFeatureManager sectionsFeatureManager) {
+            super(sectionsFeatureManager);
         }
 
         public static final String OVERRIDE_RANK = "r";

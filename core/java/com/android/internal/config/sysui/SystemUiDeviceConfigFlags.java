@@ -239,6 +239,13 @@ public final class SystemUiDeviceConfigFlags {
     public static final String ASSIST_TRANSCRIPTION_MIN_DURATION =
             "assist_transcription_min_duration";
 
+    /**
+     * (boolean) Whether or not to enable an extra section in the notification shade which
+     * filters for "people" related messages.
+     */
+    public static final String NOTIFICATIONS_USE_PEOPLE_FILTERING =
+            "notifications_use_people_filtering";
+
     // Flags related to brightline falsing
 
     /**

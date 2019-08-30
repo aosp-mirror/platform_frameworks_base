@@ -236,7 +236,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsLogger = new FakeMetricsLogger();
         TestableNotificationEntryManager entryManager = new TestableNotificationEntryManager(
-                mContext);
+                mNotificationData);
         NotificationLogger notificationLogger = new NotificationLogger(mNotificationListener,
                 Dependency.get(UiOffloadThread.class), entryManager, mStatusBarStateController,
                 mExpansionStateLogger);
@@ -354,7 +354,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         entryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
-                mHeadsUpManager, mNotificationData);
+                mHeadsUpManager);
         entryManager.addNotificationEntryListener(mEntryListener);
         notificationLogger.setUpWithContainer(mStackScroller);
     }
@@ -865,16 +865,14 @@ public class StatusBarTest extends SysuiTestCase {
 
     public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
-        public TestableNotificationEntryManager(Context context) {
-            super(context);
+        public TestableNotificationEntryManager(NotificationData notificationData) {
+            super(notificationData);
         }
 
         public void setUpForTest(NotificationPresenter presenter,
                 NotificationListContainer listContainer,
-                HeadsUpManagerPhone headsUpManager,
-                NotificationData notificationData) {
+                HeadsUpManagerPhone headsUpManager) {
             super.setUpWithPresenter(presenter, listContainer, headsUpManager);
-            mNotificationData = notificationData;
         }
     }
 
