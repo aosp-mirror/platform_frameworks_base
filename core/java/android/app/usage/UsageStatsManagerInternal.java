@@ -21,6 +21,7 @@ import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.os.UserHandle;
+import android.os.UserManager;
 
 import java.util.List;
 import java.util.Set;
@@ -33,7 +34,10 @@ import java.util.Set;
 public abstract class UsageStatsManagerInternal {
 
     /**
-     * Reports an event to the UsageStatsManager.
+     * Reports an event to the UsageStatsManager. <br/>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then this event will be added to a queue and processed once the device is unlocked.</em>
      *
      * @param component The component for which this event occurred.
      * @param userId The user id to which the component belongs to.
@@ -48,7 +52,10 @@ public abstract class UsageStatsManagerInternal {
             int instanceId, ComponentName taskRoot);
 
     /**
-     * Reports an event to the UsageStatsManager.
+     * Reports an event to the UsageStatsManager. <br/>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then this event will be added to a queue and processed once the device is unlocked.</em>
      *
      * @param packageName The package for which this event occurred.
      * @param userId The user id to which the component belongs to.
@@ -58,14 +65,20 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportEvent(String packageName, @UserIdInt int userId, int eventType);
 
     /**
-     * Reports a configuration change to the UsageStatsManager.
+     * Reports a configuration change to the UsageStatsManager. <br/>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then this event will be added to a queue and processed once the device is unlocked.</em>
      *
      * @param config The new device configuration.
      */
     public abstract void reportConfigurationChange(Configuration config, @UserIdInt int userId);
 
     /**
-     * Reports that an application has posted an interruptive notification.
+     * Reports that an application has posted an interruptive notification. <br/>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then this event will be added to a queue and processed once the device is unlocked.</em>
      *
      * @param packageName The package name of the app that posted the notification
      * @param channelId The ID of the NotificationChannel to which the notification was posted
@@ -75,7 +88,10 @@ public abstract class UsageStatsManagerInternal {
             @UserIdInt int userId);
 
     /**
-     * Reports that an action equivalent to a ShortcutInfo is taken by the user.
+     * Reports that an action equivalent to a ShortcutInfo is taken by the user. <br/>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then this event will be added to a queue and processed once the device is unlocked.</em>
      *
      * @param packageName The package name of the shortcut publisher
      * @param shortcutId The ID of the shortcut in question

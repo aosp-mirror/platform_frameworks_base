@@ -276,10 +276,24 @@ public final class UsageEvents implements Parcelable {
         public static final int DEVICE_STARTUP = 27;
 
         /**
+         * An event type denoting that a user has been unlocked for the first time. This event
+         * mainly indicates when the user's credential encrypted storage was first accessible.
+         * @hide
+         */
+        public static final int USER_UNLOCKED = 28;
+
+        /**
+         * An event type denoting that a user has been stopped. This typically happens when the
+         * system is being turned off or when users are being switched.
+         * @hide
+         */
+        public static final int USER_STOPPED = 29;
+
+        /**
          * Keep in sync with the greatest event type value.
          * @hide
          */
-        public static final int MAX_EVENT_TYPE = 27;
+        public static final int MAX_EVENT_TYPE = 29;
 
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
