@@ -8285,8 +8285,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (shareDescription != null) {
                 triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
             }
-            // Send broadcast to shell to trigger bugreport using Bugreport API
-            mContext.sendBroadcast(triggerShellBugreport);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // Send broadcast to shell to trigger bugreport using Bugreport API
+                mContext.sendBroadcast(triggerShellBugreport);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         } else {
             SystemProperties.set("dumpstate.options", type);
             SystemProperties.set("ctl.start", "bugreport");
