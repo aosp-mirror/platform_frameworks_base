@@ -1102,7 +1102,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mSettingsObserver = new SettingsObserver(mContext, mHandler);
         registerSettingsCallbacks();
 
-        final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext);
+        final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext, mHandler);
         dataConnectionStats.startMonitoring();
 
         mKeepaliveTracker = new KeepaliveTracker(mContext, mHandler);
