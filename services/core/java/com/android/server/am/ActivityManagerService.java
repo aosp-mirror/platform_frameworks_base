@@ -9023,7 +9023,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                 Integer.toString(currentUserId), currentUserId);
-        mSystemServiceManager.startUser(currentUserId);
+
+        // On Automotive, at this point the system user has already been started and unlocked,
+        // and some of the tasks we do here have already been done. So skip those in that case.
+        // TODO(b/132262830): this workdound shouldn't be necessary once we move the
+        // headless-user start logic to UserManager-land
+        final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+
+        if (bootingSystemUser) {
+            mSystemServiceManager.startUser(currentUserId);
+        }
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
@@ -9047,9 +9056,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw e.rethrowAsRuntimeException();
                 }
             }
-            // On Automotive, at this point the system user has already been started and unlocked,
-            // and some of the tasks we do here have already been done. So skip those in that case.
-            final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
 
             if (bootingSystemUser) {
                 mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
