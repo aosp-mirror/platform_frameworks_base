@@ -3800,7 +3800,7 @@ public class CarrierConfigManager {
      * @see #getConfigForSubId
      */
     @Nullable
-    public PersistableBundle getConfigByComponentForSubId(String prefix, int subId) {
+    public PersistableBundle getConfigByComponentForSubId(@NonNull String prefix, int subId) {
         PersistableBundle configs = getConfigForSubId(subId);
 
         if (configs == null) {

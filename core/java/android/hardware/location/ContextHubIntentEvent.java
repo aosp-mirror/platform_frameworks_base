@@ -192,6 +192,7 @@ public class ContextHubIntentEvent {
         return mNanoAppMessage;
     }
 
+    @NonNull
     @Override
     public String toString() {
         String out = "ContextHubIntentEvent[eventType = " + mEventType

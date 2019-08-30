@@ -17,6 +17,7 @@
 package android.net.apf;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.res.Resources;
@@ -91,6 +92,7 @@ public final class ApfCapabilities implements Parcelable {
         }
     };
 
+    @NonNull
     @Override
     public String toString() {
         return String.format("%s{version: %d, maxSize: %d, format: %d}", getClass().getSimpleName(),
@@ -98,7 +100,7 @@ public final class ApfCapabilities implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof  ApfCapabilities)) return false;
         final ApfCapabilities other = (ApfCapabilities) obj;
         return apfVersionSupported == other.apfVersionSupported

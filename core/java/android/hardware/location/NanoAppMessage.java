@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -136,7 +137,7 @@ public final class NanoAppMessage implements Parcelable {
         out.writeByteArray(mMessageBody);
     }
 
-    public static final @android.annotation.NonNull Creator<NanoAppMessage> CREATOR =
+    public static final @NonNull Creator<NanoAppMessage> CREATOR =
             new Creator<NanoAppMessage>() {
                 @Override
                 public NanoAppMessage createFromParcel(Parcel in) {
@@ -149,6 +150,7 @@ public final class NanoAppMessage implements Parcelable {
                 }
             };
 
+    @NonNull
     @Override
     public String toString() {
         int length = mMessageBody.length;

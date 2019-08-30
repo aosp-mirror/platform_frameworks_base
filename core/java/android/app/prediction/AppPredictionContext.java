@@ -90,7 +90,7 @@ public final class AppPredictionContext implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) return true;
         if (!getClass().equals(o != null ? o.getClass() : null)) return false;
 

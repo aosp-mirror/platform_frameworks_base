@@ -236,6 +236,7 @@ public final class StaticIpConfiguration implements Parcelable {
         return lp;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuffer str = new StringBuffer();
@@ -267,7 +268,7 @@ public final class StaticIpConfiguration implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
 
         if (!(obj instanceof StaticIpConfiguration)) return false;

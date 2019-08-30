@@ -16,8 +16,8 @@
 
 package android.net.wifi;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,7 +39,7 @@ public class WifiNetworkConnectionStatistics implements Parcelable {
 
     public WifiNetworkConnectionStatistics() { }
 
-
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
