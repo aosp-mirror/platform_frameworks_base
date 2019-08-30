@@ -743,8 +743,8 @@ status_t JMediaCodec::getCodecInfo(JNIEnv *env, jobject *codecInfoObject) const 
 }
 
 status_t JMediaCodec::getMetrics(JNIEnv *, MediaAnalyticsItem * &reply) const {
-
-    status_t status = mCodec->getMetrics(reply);
+    mediametrics_handle_t reply2 = MediaAnalyticsItem::convert(reply);
+    status_t status = mCodec->getMetrics(reply2);
     return status;
 }
 
@@ -1848,7 +1848,7 @@ android_media_MediaCodec_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // get what we have for the metrics from the codec
-    MediaAnalyticsItem *item = NULL;
+    MediaAnalyticsItem *item = 0;
 
     status_t err = codec->getMetrics(env, item);
     if (err != OK) {
@@ -1860,7 +1860,7 @@ android_media_MediaCodec_native_getMetrics(JNIEnv *env, jobject thiz)
 
     // housekeeping
     delete item;
-    item = NULL;
+    item = 0;
 
     return mybundle;
 }
