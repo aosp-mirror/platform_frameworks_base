@@ -554,6 +554,7 @@ public final class UsageEvents implements Parcelable {
          * event is of type {@link #NOTIFICATION_INTERRUPTION}, otherwise it returns null;
          * @hide
          */
+        @Nullable
         @SystemApi
         public String getNotificationChannelId() {
             return mNotificationChannelId;

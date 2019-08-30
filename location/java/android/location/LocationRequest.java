@@ -734,6 +734,7 @@ public final class LocationRequest implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

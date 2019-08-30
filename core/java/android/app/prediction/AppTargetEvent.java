@@ -98,7 +98,7 @@ public final class AppTargetEvent implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!getClass().equals(o != null ? o.getClass() : null)) return false;
 
         AppTargetEvent other = (AppTargetEvent) o;

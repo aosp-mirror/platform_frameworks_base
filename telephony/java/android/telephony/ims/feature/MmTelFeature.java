@@ -291,6 +291,7 @@ public class MmTelFeature extends ImsFeature {
             return super.isCapable(capabilities);
         }
 
+        @NonNull
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder("MmTel Capabilities - [");

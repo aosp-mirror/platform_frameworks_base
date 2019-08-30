@@ -17,6 +17,7 @@
 package android.net.wifi.rtt;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.wifi.ScanResult;
@@ -245,7 +246,7 @@ public final class RangingRequest implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

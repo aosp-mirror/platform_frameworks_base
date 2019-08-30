@@ -229,13 +229,14 @@ public abstract class ExplicitHealthCheckService extends Service {
             return mHealthCheckTimeoutMillis;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "PackageConfig{" + mPackageName + ", " + mHealthCheckTimeoutMillis + "}";
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             if (other == this) {
                 return true;
             }
