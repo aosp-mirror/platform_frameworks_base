@@ -16,6 +16,8 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -81,7 +83,7 @@ public class AudioState implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         }
@@ -93,6 +95,7 @@ public class AudioState implements Parcelable {
                 getSupportedRouteMask() == state.getSupportedRouteMask();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format(Locale.US,

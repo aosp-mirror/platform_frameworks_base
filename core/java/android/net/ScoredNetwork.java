@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Bundle;
@@ -182,7 +183,7 @@ public class ScoredNetwork implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -220,6 +221,7 @@ public class ScoredNetwork implements Parcelable {
         return Objects.hash(networkKey, rssiCurve, meteredHint, attributes);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder(

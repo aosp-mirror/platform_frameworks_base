@@ -566,6 +566,7 @@ public class StatusBarManager {
             mSearch = true;
         }
 
+        @NonNull
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();

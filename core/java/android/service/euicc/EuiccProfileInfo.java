@@ -16,6 +16,7 @@
 package android.service.euicc;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
@@ -395,7 +396,7 @@ public final class EuiccProfileInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -430,6 +431,7 @@ public final class EuiccProfileInfo implements Parcelable {
         return result;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "EuiccProfileInfo (nickname="
