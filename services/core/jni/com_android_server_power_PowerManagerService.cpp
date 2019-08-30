@@ -201,13 +201,8 @@ sp<ISystemSuspend> getSuspendHal() {
 sp<ISuspendControlService> getSuspendControl() {
     static std::once_flag suspendControlFlag;
     std::call_once(suspendControlFlag, [](){
-        while(gSuspendControl == nullptr) {
-            sp<IBinder> control =
-                    defaultServiceManager()->getService(String16("suspend_control"));
-            if (control != nullptr) {
-                gSuspendControl = interface_cast<ISuspendControlService>(control);
-            }
-        }
+        gSuspendControl = waitForService<ISuspendControlService>(String16("suspend_control"));
+        LOG_ALWAYS_FATAL_IF(gSuspendControl == nullptr);
     });
     return gSuspendControl;
 }
