@@ -55,13 +55,14 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.AtomicFile;
 import com.android.server.LocalServices;
-import com.android.server.pm.permission.PermissionManagerService;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.permission.PermissionSettings;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -78,7 +79,14 @@ public class PackageManagerSettingsTests {
     private static final String PACKAGE_NAME_3 = "com.android.app3";
     private static final String PACKAGE_NAME_1 = "com.android.app1";
     public static final String TAG = "PackageManagerSettingsTests";
-    protected final String PREFIX = "android.content.pm";
+
+    @Mock
+    PermissionSettings mPermissionSettings;
+
+    @Before
+    public void initializeMocks() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     /** make sure our initialized KeySetManagerService metadata matches packages.xml */
     @Test
@@ -88,9 +96,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
-        Settings settings =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+        Settings settings = new Settings(context.getFilesDir(), mPermissionSettings, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
     }
@@ -103,9 +109,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
-        Settings settings =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+        Settings settings = new Settings(context.getFilesDir(), mPermissionSettings, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         // write out, read back in and verify the same
@@ -116,13 +120,11 @@ public class PackageManagerSettingsTests {
 
     @Test
     public void testSettingsReadOld() {
-        // Write the package files and make sure they're parsed properly the first time
+        // Write delegateshellthe package files and make sure they're parsed properly the first time
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
-        Settings settings =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+        Settings settings = new Settings(context.getFilesDir(), mPermissionSettings, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_3), is(notNullValue()));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_1), is(notNullValue()));
@@ -143,15 +145,12 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
-        Settings settings =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+        Settings settings = new Settings(context.getFilesDir(), mPermissionSettings, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         settings.writeLPr();
 
         // Create Settings again to make it read from the new files
-        settings =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+        settings = new Settings(context.getFilesDir(), mPermissionSettings, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_2);
@@ -313,9 +312,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
-        Settings settings =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+        Settings settings = new Settings(context.getFilesDir(), mPermissionSettings, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         // Enable/Disable a package
@@ -507,9 +504,8 @@ public class PackageManagerSettingsTests {
     public void testUpdatePackageSetting03() {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         final Settings testSettings01 =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+                new Settings(context.getFilesDir(), mPermissionSettings, lock);
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
                 testSettings01, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
         final PackageSetting testPkgSetting01 =
@@ -625,9 +621,8 @@ public class PackageManagerSettingsTests {
     public void testCreateNewSetting03() {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         final Settings testSettings01 =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
+                new Settings(context.getFilesDir(), mPermissionSettings, lock);
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
                 testSettings01, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
         final PackageSetting testPkgSetting01 = Settings.createNewSetting(
