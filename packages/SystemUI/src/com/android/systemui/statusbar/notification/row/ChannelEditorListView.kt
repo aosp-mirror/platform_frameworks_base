@@ -59,7 +59,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
     }
 
     private fun updateRows() {
-        val enabled = controller.appNotificationsEnabled
+        val enabled = controller.areAppNotificationsEnabled()
 
         val transition = AutoTransition()
         transition.duration = 200
@@ -114,7 +114,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
                 .getString(R.string.notification_channel_dialog_title, appName)
         appControlRow.switch.isChecked = enabled
         appControlRow.switch.setOnCheckedChangeListener { _, b ->
-            controller.appNotificationsEnabled = b
+            controller.proposeSetAppNotificationsEnabled(b)
             updateRows()
         }
     }
@@ -150,6 +150,7 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
         }
 
     override fun onFinishInflate() {
+        super.onFinishInflate()
         channelName = findViewById(R.id.channel_name)
         channelDescription = findViewById(R.id.channel_description)
         switch = findViewById(R.id.toggle)

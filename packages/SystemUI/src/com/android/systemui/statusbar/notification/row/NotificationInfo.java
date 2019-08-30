@@ -174,6 +174,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             PackageManager pm,
             INotificationManager iNotificationManager,
             VisualStabilityManager visualStabilityManager,
+            ChannelEditorDialogController channelEditorDialogController,
             String pkg,
             NotificationChannel notificationChannel,
             Set<NotificationChannel> uniqueChannelsInRow,
@@ -187,7 +188,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mINotificationManager = iNotificationManager;
         mMetricsLogger = Dependency.get(MetricsLogger.class);
         mVisualStabilityManager = visualStabilityManager;
-        mChannelEditorDialogController = Dependency.get(ChannelEditorDialogController.class);
+        mChannelEditorDialogController = channelEditorDialogController;
         mPackageName = pkg;
         mUniqueChannelsInRow = uniqueChannelsInRow;
         mNumUniqueChannelsInRow = uniqueChannelsInRow.size();

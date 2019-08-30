@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
+import com.android.systemui.statusbar.notification.row.ChannelEditorDialogController;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
@@ -111,6 +112,7 @@ public interface NotificationsModule {
             INotificationManager notificationManager,
             LauncherApps launcherApps,
             ShortcutManager shortcutManager,
+            ChannelEditorDialogController channelEditorDialogController,
             CurrentUserContextTracker contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
         return new NotificationGutsManager(
@@ -123,6 +125,7 @@ public interface NotificationsModule {
                 notificationManager,
                 launcherApps,
                 shortcutManager,
+                channelEditorDialogController,
                 contextTracker,
                 builderProvider);
     }
