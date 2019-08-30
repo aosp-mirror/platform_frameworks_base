@@ -37,6 +37,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.widget.TextViewInputDisabler;
+import com.android.systemui.R;
 
 import java.util.List;
 /**

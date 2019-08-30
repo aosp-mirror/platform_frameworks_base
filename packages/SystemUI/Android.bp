@@ -71,10 +71,6 @@ android_library {
         "telephony-common",
     ],
 
-    aaptflags: [
-        "--extra-packages",
-        "com.android.keyguard",
-    ],
     kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler-2.19"],
@@ -133,7 +129,7 @@ android_library {
     kotlincflags: ["-Xjvm-default=enable"],
     aaptflags: [
         "--extra-packages",
-        "com.android.keyguard:com.android.systemui",
+        "com.android.systemui",
     ],
     plugins: ["dagger2-compiler-2.19"],
 }
@@ -161,10 +157,6 @@ android_app {
     kotlincflags: ["-Xjvm-default=enable"],
 
     dxflags: ["--multi-dex"],
-    aaptflags: [
-        "--extra-packages",
-        "com.android.keyguard",
-    ],
     required: ["privapp_whitelist_com.android.systemui"],
 
 }
@@ -181,10 +173,6 @@ android_app {
     privileged: true,
 
     dxflags: ["--multi-dex"],
-    aaptflags: [
-        "--extra-packages",
-        "com.android.keyguard",
-    ],
     optimize: {
         proguard_flags_files: ["proguard.flags", "legacy/recents/proguard.flags"],
     },

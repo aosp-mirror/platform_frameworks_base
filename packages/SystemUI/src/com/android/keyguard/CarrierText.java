@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 
 import java.util.Locale;
 

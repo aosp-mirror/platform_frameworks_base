@@ -40,9 +40,9 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.R;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;

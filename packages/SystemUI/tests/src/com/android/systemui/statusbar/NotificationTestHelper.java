@@ -40,7 +40,6 @@ import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
 
-import com.android.systemui.R;
 import com.android.systemui.bubbles.BubblesTestActivity;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -50,6 +49,7 @@ import com.android.systemui.statusbar.notification.row.NotificationContentInflat
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.tests.R;
 
 /**
  * A helper class to create {@link ExpandableNotificationRow} (for both individual and group

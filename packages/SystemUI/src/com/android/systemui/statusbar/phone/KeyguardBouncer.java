@@ -41,9 +41,9 @@ import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.R;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 
