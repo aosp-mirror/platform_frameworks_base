@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.AppOpsManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -267,7 +268,9 @@ public final class Parcel {
     private static final int EX_UNSUPPORTED_OPERATION = -7;
     private static final int EX_SERVICE_SPECIFIC = -8;
     private static final int EX_PARCELABLE = -9;
-    private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
+    /** @hide */
+    public static final int EX_HAS_NOTED_APPOPS_REPLY_HEADER = -127; // special; see below
+    private static final int EX_HAS_STRICTMODE_REPLY_HEADER = -128;  // special; see below
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
     private static final int EX_TRANSACTION_FAILED = -129;
@@ -1866,6 +1869,8 @@ public final class Parcel {
      * @see #readException
      */
     public final void writeException(@NonNull Exception e) {
+        AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
+
         int code = 0;
         if (e instanceof Parcelable
                 && (e.getClass().getClassLoader() == Parcelable.class.getClassLoader())) {
@@ -1944,6 +1949,8 @@ public final class Parcel {
      * @see #readException
      */
     public final void writeNoException() {
+        AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
+
         // Despite the name of this function ("write no exception"),
         // it should instead be thought of as "write the RPC response
         // header", but because this function name is written out by
@@ -1951,14 +1958,14 @@ public final class Parcel {
         //
         // The response header, in the non-exception case (see also
         // writeException above, also called by the AIDL compiler), is
-        // either a 0 (the default case), or EX_HAS_REPLY_HEADER if
+        // either a 0 (the default case), or EX_HAS_STRICTMODE_REPLY_HEADER if
         // StrictMode has gathered up violations that have occurred
         // during a Binder call, in which case we write out the number
         // of violations and their details, serialized, before the
         // actual RPC respons data.  The receiving end of this is
         // readException(), below.
         if (StrictMode.hasGatheredViolations()) {
-            writeInt(EX_HAS_REPLY_HEADER);
+            writeInt(EX_HAS_STRICTMODE_REPLY_HEADER);
             final int sizePosition = dataPosition();
             writeInt(0);  // total size of fat header, to be filled in later
             StrictMode.writeGatheredViolationsToParcel(this);
@@ -2005,7 +2012,13 @@ public final class Parcel {
     @TestApi
     public final int readExceptionCode() {
         int code = readInt();
-        if (code == EX_HAS_REPLY_HEADER) {
+        if (code == EX_HAS_NOTED_APPOPS_REPLY_HEADER) {
+            AppOpsManager.readAndLogNotedAppops(this);
+            // Read next header or real exception if there is no more header
+            code = readInt();
+        }
+
+        if (code == EX_HAS_STRICTMODE_REPLY_HEADER) {
             int headerSize = readInt();
             if (headerSize == 0) {
                 Log.e(TAG, "Unexpected zero-sized Parcel reply header.");
