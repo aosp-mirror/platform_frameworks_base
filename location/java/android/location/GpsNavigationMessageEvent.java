@@ -109,6 +109,7 @@ public class GpsNavigationMessageEvent implements Parcelable {
         parcel.writeParcelable(mNavigationMessage, flags);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("[ GpsNavigationMessageEvent:\n\n");

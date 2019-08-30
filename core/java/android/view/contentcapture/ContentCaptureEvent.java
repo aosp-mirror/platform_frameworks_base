@@ -373,6 +373,7 @@ public final class ContentCaptureEvent implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         final StringBuilder string = new StringBuilder("ContentCaptureEvent[type=")

@@ -151,7 +151,7 @@ public final class AppTarget implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!getClass().equals(o != null ? o.getClass() : null)) return false;
 
         AppTarget other = (AppTarget) o;

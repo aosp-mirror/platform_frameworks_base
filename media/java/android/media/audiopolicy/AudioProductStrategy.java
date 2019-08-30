@@ -299,6 +299,7 @@ public final class AudioProductStrategy implements Parcelable {
                 }
             };
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

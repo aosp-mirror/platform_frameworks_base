@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -134,6 +135,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
         return 0;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return new StringBuilder().append(this.getClass().getName())
@@ -155,7 +157,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
 
         if (!(o instanceof DataSpecificRegistrationInfo)) return false;
