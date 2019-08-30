@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.os.Parcel;
@@ -247,6 +248,7 @@ public class ContextHubInfo implements Parcelable {
         return mChrePatchVersion;
     }
 
+    @NonNull
     @Override
     public String toString() {
         String retVal = "";

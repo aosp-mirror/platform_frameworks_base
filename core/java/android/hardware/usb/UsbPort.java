@@ -16,6 +16,7 @@
 
 package android.hardware.usb;
 
+import android.annotation.NonNull;
 import android.hardware.usb.V1_0.Constants;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -271,7 +272,7 @@ public final class UsbPort implements Parcelable {
         return false;
     }
 
-
+    @NonNull
     @Override
     public String toString() {
         return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes) + "}";

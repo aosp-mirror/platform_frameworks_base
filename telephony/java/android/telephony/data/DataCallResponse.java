@@ -213,6 +213,7 @@ public final class DataCallResponse implements Parcelable {
      */
     public int getMtu() { return mMtu; }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -233,7 +234,7 @@ public final class DataCallResponse implements Parcelable {
     }
 
     @Override
-    public boolean equals (Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
 
         if (!(o instanceof DataCallResponse)) {

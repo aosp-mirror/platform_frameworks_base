@@ -211,6 +211,7 @@ public class RttManager {
         /** Draft 11mc version supported, including major and minor version. e.g, draft 4.3 is 43 */
         public int mcVersion;
 
+        @NonNull
         @Override
         public String toString() {
             StringBuffer sb = new StringBuffer();
@@ -1130,6 +1131,7 @@ public class RttManager {
          */
         public int preamble;
 
+        @NonNull
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();

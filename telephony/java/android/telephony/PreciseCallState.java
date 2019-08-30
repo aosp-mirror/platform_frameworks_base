@@ -17,6 +17,8 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -276,7 +278,7 @@ public final class PreciseCallState implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -294,6 +296,7 @@ public final class PreciseCallState implements Parcelable {
                 && mPreciseDisconnectCause == other.mPreciseDisconnectCause);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();

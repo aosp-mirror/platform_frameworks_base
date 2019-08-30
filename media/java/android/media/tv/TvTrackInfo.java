@@ -394,6 +394,7 @@ public final class TvTrackInfo implements Parcelable {
          *
          * @param encrypted The encryption status of the track.
          */
+        @NonNull
         public Builder setEncrypted(boolean encrypted) {
             mEncrypted = encrypted;
             return this;

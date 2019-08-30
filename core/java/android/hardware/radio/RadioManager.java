@@ -485,6 +485,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "ModuleProperties [mId=" + mId
@@ -507,7 +508,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof ModuleProperties)) return false;
             ModuleProperties other = (ModuleProperties) obj;
@@ -660,6 +661,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "BandDescriptor [mRegion=" + mRegion + ", mType=" + mType + ", mLowerLimit="
@@ -679,7 +681,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!(obj instanceof BandDescriptor))
@@ -788,6 +790,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "FmBandDescriptor [ "+ super.toString() + " mStereo=" + mStereo
@@ -808,7 +811,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -877,6 +880,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "AmBandDescriptor [ "+ super.toString() + " mStereo=" + mStereo + "]";
@@ -891,7 +895,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -997,6 +1001,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "BandConfig [ " + mDescriptor.toString() + "]";
@@ -1011,7 +1016,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!(obj instanceof BandConfig))
@@ -1125,6 +1130,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "FmBandConfig [" + super.toString()
@@ -1145,7 +1151,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -1317,6 +1323,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "AmBandConfig [" + super.toString()
@@ -1332,7 +1339,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -1656,6 +1663,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "ProgramInfo"
@@ -1676,7 +1684,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof ProgramInfo)) return false;
             ProgramInfo other = (ProgramInfo) obj;

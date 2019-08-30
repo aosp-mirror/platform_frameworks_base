@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -75,6 +76,7 @@ public final class BrightnessConfiguration implements Parcelable {
         return 0;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("BrightnessConfiguration{[");
@@ -105,7 +107,7 @@ public final class BrightnessConfiguration implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }

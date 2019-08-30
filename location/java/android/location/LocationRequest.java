@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -705,6 +706,7 @@ public final class LocationRequest implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

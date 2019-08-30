@@ -21,6 +21,7 @@ import static android.net.wifi.ScanResult.InformationElement.EID_VHT_CAPABILITIE
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.wifi.ScanResult;
@@ -443,7 +444,7 @@ public final class ResponderConfig implements Parcelable {
     };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

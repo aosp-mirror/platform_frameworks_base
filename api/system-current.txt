@@ -695,7 +695,7 @@ package android.app.usage {
   }
 
   public static final class UsageEvents.Event {
-    method public String getNotificationChannelId();
+    method @Nullable public String getNotificationChannelId();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
     field public static final int SLICE_PINNED = 14; // 0xe
@@ -1661,7 +1661,7 @@ package android.hardware.location {
     method @Deprecated public void setMsgType(int);
     method @Deprecated public void setVersion(int);
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubMessage> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubMessage> CREATOR;
   }
 
   public class ContextHubTransaction<T> {
@@ -1749,7 +1749,7 @@ package android.hardware.location {
     method public int getMonitoringType();
     method public int getSourceTechnologies();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.GeofenceHardwareMonitorEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.GeofenceHardwareMonitorEvent> CREATOR;
   }
 
   public final class GeofenceHardwareRequest {
@@ -1872,7 +1872,7 @@ package android.hardware.location {
     method public long getNanoAppId();
     method public boolean isBroadcastMessage();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
 
   public final class NanoAppState implements android.os.Parcelable {

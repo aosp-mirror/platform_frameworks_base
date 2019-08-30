@@ -257,6 +257,7 @@ public final class DataProfile implements Parcelable {
         return 0;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DataProfile=" + mProfileId + "/" + mProtocolType + "/" + mAuthType
@@ -303,7 +304,7 @@ public final class DataProfile implements Parcelable {
     };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DataProfile that = (DataProfile) o;
