@@ -174,11 +174,14 @@ static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jsurface) {
+        jlong proxyPtr, jobject jsurface, jboolean discardBuffer) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     sp<Surface> surface;
     if (jsurface) {
         surface = android_view_Surface_getSurface(env, jsurface);
+    }
+    if (discardBuffer) {
+      proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     }
     proxy->setSurface(surface);
 }
@@ -632,7 +635,7 @@ static const JNINativeMethod gMethods[] = {
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
     { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
     { "nSetName", "(JLjava/lang/String;)V", (void*) android_view_ThreadedRenderer_setName },
-    { "nSetSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_setSurface },
+    { "nSetSurface", "(JLandroid/view/Surface;Z)V", (void*) android_view_ThreadedRenderer_setSurface },
     { "nPause", "(J)Z", (void*) android_view_ThreadedRenderer_pause },
     { "nSetStopped", "(JZ)V", (void*) android_view_ThreadedRenderer_setStopped },
     { "nSetLightAlpha", "(JFF)V", (void*) android_view_ThreadedRenderer_setLightAlpha },
