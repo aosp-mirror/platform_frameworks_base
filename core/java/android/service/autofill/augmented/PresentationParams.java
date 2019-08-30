@@ -82,6 +82,7 @@ public abstract class PresentationParams {
             return mBounds;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return mBounds.toString();

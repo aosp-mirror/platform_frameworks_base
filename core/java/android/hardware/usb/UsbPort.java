@@ -327,7 +327,7 @@ public final class UsbPort {
         return false;
     }
 
-
+    @NonNull
     @Override
     public String toString() {
         return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes)

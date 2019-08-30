@@ -185,7 +185,7 @@ public final class SuspendDialogInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -200,6 +200,7 @@ public final class SuspendDialogInfo implements Parcelable {
                 && Objects.equals(mDialogMessage, otherDialogInfo.mDialogMessage);
     }
 
+    @NonNull
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder("SuspendDialogInfo: {");

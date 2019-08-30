@@ -16,6 +16,7 @@
 package android.hardware.radio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -279,7 +280,7 @@ public final class RadioMetadata implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof RadioMetadata)) return false;
         Bundle otherBundle = ((RadioMetadata) obj).mBundle;
@@ -308,6 +309,7 @@ public final class RadioMetadata implements Parcelable {
         mBundle = in.readBundle();
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("RadioMetadata[");

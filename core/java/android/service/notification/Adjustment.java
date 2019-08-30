@@ -257,6 +257,7 @@ public final class Adjustment implements Parcelable {
         dest.writeString(mIssuer);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Adjustment{"

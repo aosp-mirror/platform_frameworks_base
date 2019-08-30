@@ -185,6 +185,7 @@ public final class ImsCallForwardInfo implements Parcelable {
         out.writeInt(mServiceClass);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return super.toString() + ", Condition: " + mCondition

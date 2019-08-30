@@ -81,6 +81,7 @@ public final class FillRequest {
         return mProxy.getSmartSuggestionParams();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "FillRequest[act=" + getActivityComponent().flattenToShortString()
