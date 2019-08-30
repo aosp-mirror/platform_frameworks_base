@@ -1062,6 +1062,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         addWindowToken(token.token, token);
+
+        if (mWmService.mAccessibilityController != null) {
+            final int prevDisplayId = prevDc != null ? prevDc.getDisplayId() : INVALID_DISPLAY;
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(prevDisplayId,
+                    getDisplayId());
+        }
     }
 
     void removeAppToken(IBinder binder) {

@@ -255,13 +255,19 @@ final class AccessibilityController {
         }
     }
 
-    public void onSomeWindowResizedOrMovedLocked(int displayId) {
+    /**
+     * Called when the location or the size of the window is changed. Moving the window to
+     * another display is also taken into consideration.
+     * @param displayIds the display ids of displays when the situation happens.
+     */
+    public void onSomeWindowResizedOrMovedLocked(int... displayIds) {
         // Not relevant for the display magnifier.
-
-        final WindowsForAccessibilityObserver windowsForA11yObserver =
-                mWindowsForAccessibilityObserver.get(displayId);
-        if (windowsForA11yObserver != null) {
-            windowsForA11yObserver.scheduleComputeChangedWindowsLocked();
+        for (int i = 0; i < displayIds.length; i++) {
+            final WindowsForAccessibilityObserver windowsForA11yObserver =
+                    mWindowsForAccessibilityObserver.get(displayIds[i]);
+            if (windowsForA11yObserver != null) {
+                windowsForA11yObserver.scheduleComputeChangedWindowsLocked();
+            }
         }
     }
 
