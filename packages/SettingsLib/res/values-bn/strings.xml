@@ -452,7 +452,7 @@
     <string name="cancel" msgid="6859253417269739139">"বাতিল"</string>
     <string name="okay" msgid="1997666393121016642">"ঠিক আছে"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"চালু করুন"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"\'বিরক্ত করবে না\' মোড চালু করুন"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"\'বিরক্ত করবেন না\' মোড চালু করুন"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"কখনও নয়"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"শুধুমাত্র অগ্রাধিকার"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

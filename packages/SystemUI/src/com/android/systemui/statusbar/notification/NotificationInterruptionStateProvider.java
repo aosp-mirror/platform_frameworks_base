@@ -39,7 +39,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import javax.inject.Inject;
@@ -57,9 +56,8 @@ public class NotificationInterruptionStateProvider {
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
-    private final StatusBarStateController mStatusBarStateController =
-            Dependency.get(StatusBarStateController.class);
-    private final NotificationFilter mNotificationFilter = Dependency.get(NotificationFilter.class);
+    private final StatusBarStateController mStatusBarStateController;
+    private final NotificationFilter mNotificationFilter;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
 
     private final Context mContext;
@@ -67,7 +65,6 @@ public class NotificationInterruptionStateProvider {
     private final IDreamManager mDreamManager;
 
     private NotificationPresenter mPresenter;
-    private ShadeController mShadeController;
     private HeadsUpManager mHeadsUpManager;
     private HeadsUpSuppressor mHeadsUpSuppressor;
 
@@ -77,12 +74,15 @@ public class NotificationInterruptionStateProvider {
     private boolean mDisableNotificationAlerts;
 
     @Inject
-    public NotificationInterruptionStateProvider(Context context) {
+    public NotificationInterruptionStateProvider(Context context, NotificationFilter filter,
+            StatusBarStateController stateController) {
         this(context,
                 (PowerManager) context.getSystemService(Context.POWER_SERVICE),
                 IDreamManager.Stub.asInterface(
                         ServiceManager.checkService(DreamService.DREAM_SERVICE)),
-                new AmbientDisplayConfiguration(context));
+                new AmbientDisplayConfiguration(context),
+                filter,
+                stateController);
     }
 
     @VisibleForTesting
@@ -90,11 +90,15 @@ public class NotificationInterruptionStateProvider {
             Context context,
             PowerManager powerManager,
             IDreamManager dreamManager,
-            AmbientDisplayConfiguration ambientDisplayConfiguration) {
+            AmbientDisplayConfiguration ambientDisplayConfiguration,
+            NotificationFilter notificationFilter,
+            StatusBarStateController statusBarStateController) {
         mContext = context;
         mPowerManager = powerManager;
         mDreamManager = dreamManager;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
+        mNotificationFilter = notificationFilter;
+        mStatusBarStateController = statusBarStateController;
     }
 
     /** Sets up late-binding dependencies for this component. */
@@ -102,29 +106,39 @@ public class NotificationInterruptionStateProvider {
             NotificationPresenter notificationPresenter,
             HeadsUpManager headsUpManager,
             HeadsUpSuppressor headsUpSuppressor) {
+        setUpWithPresenter(notificationPresenter, headsUpManager, headsUpSuppressor,
+                new ContentObserver(Dependency.get(Dependency.MAIN_HANDLER)) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        boolean wasUsing = mUseHeadsUp;
+                        mUseHeadsUp = ENABLE_HEADS_UP && !mDisableNotificationAlerts
+                                && Settings.Global.HEADS_UP_OFF != Settings.Global.getInt(
+                                mContext.getContentResolver(),
+                                Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                                Settings.Global.HEADS_UP_OFF);
+                        Log.d(TAG, "heads up is " + (mUseHeadsUp ? "enabled" : "disabled"));
+                        if (wasUsing != mUseHeadsUp) {
+                            if (!mUseHeadsUp) {
+                                Log.d(TAG,
+                                        "dismissing any existing heads up notification on disable"
+                                                + " event");
+                                mHeadsUpManager.releaseAllImmediately();
+                            }
+                        }
+                    }
+                });
+    }
+
+    /** Sets up late-binding dependencies for this component. */
+    public void setUpWithPresenter(
+            NotificationPresenter notificationPresenter,
+            HeadsUpManager headsUpManager,
+            HeadsUpSuppressor headsUpSuppressor,
+            ContentObserver observer) {
         mPresenter = notificationPresenter;
         mHeadsUpManager = headsUpManager;
         mHeadsUpSuppressor = headsUpSuppressor;
-
-        mHeadsUpObserver = new ContentObserver(Dependency.get(Dependency.MAIN_HANDLER)) {
-            @Override
-            public void onChange(boolean selfChange) {
-                boolean wasUsing = mUseHeadsUp;
-                mUseHeadsUp = ENABLE_HEADS_UP && !mDisableNotificationAlerts
-                        && Settings.Global.HEADS_UP_OFF != Settings.Global.getInt(
-                        mContext.getContentResolver(),
-                        Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
-                        Settings.Global.HEADS_UP_OFF);
-                Log.d(TAG, "heads up is " + (mUseHeadsUp ? "enabled" : "disabled"));
-                if (wasUsing != mUseHeadsUp) {
-                    if (!mUseHeadsUp) {
-                        Log.d(TAG,
-                                "dismissing any existing heads up notification on disable event");
-                        mHeadsUpManager.releaseAllImmediately();
-                    }
-                }
-            }
-        };
+        mHeadsUpObserver = observer;
 
         if (ENABLE_HEADS_UP) {
             mContext.getContentResolver().registerContentObserver(
@@ -138,13 +152,6 @@ public class NotificationInterruptionStateProvider {
         mHeadsUpObserver.onChange(true); // set up
     }
 
-    private ShadeController getShadeController() {
-        if (mShadeController == null) {
-            mShadeController = Dependency.get(ShadeController.class);
-        }
-        return mShadeController;
-    }
-
     /**
      * Whether the notification should appear as a bubble with a fly-out on top of the screen.
      *
@@ -153,6 +160,15 @@ public class NotificationInterruptionStateProvider {
      */
     public boolean shouldBubbleUp(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.notification;
+
+        if (!canAlertCommon(entry)) {
+            return false;
+        }
+
+        if (!canAlertAwakeCommon(entry)) {
+            return false;
+        }
+
         if (!entry.canBubble) {
             if (DEBUG) {
                 Log.d(TAG, "No bubble up: not allowed to bubble: " + sbn.getKey());
@@ -177,10 +193,6 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (!canHeadsUpCommon(entry)) {
-            return false;
-        }
-
         return true;
     }
 
@@ -201,6 +213,21 @@ public class NotificationInterruptionStateProvider {
     private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
+        if (!mUseHeadsUp) {
+            if (DEBUG_HEADS_UP) {
+                Log.d(TAG, "No heads up: no huns");
+            }
+            return false;
+        }
+
+        if (!canAlertCommon(entry)) {
+            return false;
+        }
+
+        if (!canAlertAwakeCommon(entry)) {
+            return false;
+        }
+
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
             if (DEBUG_HEADS_UP) {
@@ -210,14 +237,10 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (!canAlertCommon(entry)) {
+        if (entry.shouldSuppressPeek()) {
             if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: notification shouldn't alert: " + sbn.getKey());
+                Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
             }
-            return false;
-        }
-
-        if (!canHeadsUpCommon(entry)) {
             return false;
         }
 
@@ -294,16 +317,13 @@ public class NotificationInterruptionStateProvider {
     }
 
     /**
-     * Common checks between regular heads up and when pulsing.  See
-     * {@link #shouldHeadsUp(NotificationEntry)} and
-     * {@link #shouldHeadsUpWhenDozing(NotificationEntry)}.  Notifications that fail any of these
-     * checks
-     * should not alert at all.
+     * Common checks between regular & AOD heads up and bubbles.
      *
      * @param entry the entry to check
      * @return true if these checks pass, false if the notification should not alert
      */
-    protected boolean canAlertCommon(NotificationEntry entry) {
+    @VisibleForTesting
+    public boolean canAlertCommon(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
         if (mNotificationFilter.shouldFilterOut(entry)) {
@@ -320,46 +340,36 @@ public class NotificationInterruptionStateProvider {
             }
             return false;
         }
-
         return true;
     }
 
     /**
-     * Common checks between heads up alerting and bubble fly out alerting. See
-     * {@link #shouldHeadsUp(NotificationEntry)} and
-     * {@link #shouldBubbleUp(NotificationEntry)}. Notifications that fail any of these
-     * checks should not interrupt the user on screen.
+     * Common checks between alerts that occur while the device is awake (heads up & bubbles).
      *
      * @param entry the entry to check
-     * @return true if these checks pass, false if the notification should not interrupt on screen
+     * @return true if these checks pass, false if the notification should not alert
      */
-    public boolean canHeadsUpCommon(NotificationEntry entry) {
+    @VisibleForTesting
+    public boolean canAlertAwakeCommon(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
-        if (!mUseHeadsUp || mPresenter.isDeviceInVrMode()) {
+        if (mPresenter.isDeviceInVrMode()) {
             if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: no huns or vr mode");
-            }
-            return false;
-        }
-
-        if (entry.shouldSuppressPeek()) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
+                Log.d(TAG, "No alerting: no huns or vr mode");
             }
             return false;
         }
 
         if (isSnoozedPackage(sbn)) {
             if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: snoozed package: " + sbn.getKey());
+                Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.hasJustLaunchedFullScreenIntent()) {
             if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: recent fullscreen: " + sbn.getKey());
+                Log.d(TAG, "No alerting: recent fullscreen: " + sbn.getKey());
             }
             return false;
         }
@@ -375,6 +385,18 @@ public class NotificationInterruptionStateProvider {
     public void setDisableNotificationAlerts(boolean disableNotificationAlerts) {
         mDisableNotificationAlerts = disableNotificationAlerts;
         mHeadsUpObserver.onChange(true);
+    }
+
+    /** Whether all alerts are disabled. */
+    @VisibleForTesting
+    public boolean areNotificationAlertsDisabled() {
+        return mDisableNotificationAlerts;
+    }
+
+    /** Whether HUNs should be used. */
+    @VisibleForTesting
+    public boolean getUseHeadsUp() {
+        return mUseHeadsUp;
     }
 
     protected NotificationPresenter getPresenter() {

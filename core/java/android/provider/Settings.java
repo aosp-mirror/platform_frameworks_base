@@ -7910,8 +7910,10 @@ public final class Settings {
          * Whether the notification bubbles are globally enabled
          * The value is boolean (1 or 0).
          * @hide
+         * @deprecated use {@link Global#NOTIFICATION_BUBBLES} instead.
          */
         @TestApi
+        @Deprecated
         public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
 
         /**
@@ -8233,6 +8235,14 @@ public final class Settings {
          * The content:// style URL for global secure settings items.  Not public.
          */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/global");
+
+        /**
+         * Whether the notification bubbles are globally enabled
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        @TestApi
+        public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
 
         /**
          * Whether users are allowed to add more users or guest from lockscreen.

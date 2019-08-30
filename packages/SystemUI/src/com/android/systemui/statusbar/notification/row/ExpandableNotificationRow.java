@@ -2311,9 +2311,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public int getIntrinsicHeight() {
-        if (isShownAsBubble()) {
-            return getMaxExpandHeight();
-        }
         if (isUserLocked()) {
             return getActualHeight();
         }
@@ -2357,10 +2354,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private boolean isDozing() {
         return mStatusbarStateController != null && mStatusbarStateController.isDozing();
-    }
-
-    private boolean isShownAsBubble() {
-        return mEntry.isBubble() && !mEntry.showInShadeWhenBubble() && !mEntry.isBubbleDismissed();
     }
 
     @Override

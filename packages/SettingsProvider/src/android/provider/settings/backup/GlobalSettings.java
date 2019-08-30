@@ -69,5 +69,6 @@ public class GlobalSettings {
         Settings.Global.ZEN_DURATION,
         Settings.Global.CHARGING_VIBRATION_ENABLED,
         Settings.Global.AWARE_ALLOWED,
+        Settings.Global.NOTIFICATION_BUBBLES,
     };
 }

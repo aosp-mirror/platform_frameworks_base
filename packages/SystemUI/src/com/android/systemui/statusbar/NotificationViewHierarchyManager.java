@@ -28,7 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleData;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -85,7 +85,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      * possible.
      */
     private final boolean mAlwaysExpandNonGroupedNotification;
-    private final BubbleData mBubbleData;
+    private final BubbleController mBubbleController;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
 
@@ -107,8 +107,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             StatusBarStateController statusBarStateController,
             NotificationEntryManager notificationEntryManager,
             Lazy<ShadeController> shadeController,
-            BubbleData bubbleData,
             KeyguardBypassController bypassController,
+            BubbleController bubbleController,
             DynamicPrivacyController privacyController) {
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
@@ -121,7 +121,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
-        mBubbleData = bubbleData;
+        mBubbleController = bubbleController;
         mDynamicPrivacyController = privacyController;
         privacyController.addListener(this);
     }
@@ -147,7 +147,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
             if (ent.isRowDismissed() || ent.isRowRemoved()
-                    || (mBubbleData.hasBubbleWithKey(ent.key) && !ent.showInShadeWhenBubble())) {
+                    || mBubbleController.isBubbleNotificationSuppressedFromShade(ent.key)) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.
                 continue;
