@@ -25,15 +25,12 @@ import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.system.ErrnoException;
-import android.system.Os;
 import android.util.Slog;
 
 import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -288,7 +285,6 @@ public final class RecoverySystemService extends SystemService {
                     byte[] cmdUtf8 = command.getBytes("UTF-8");
                     dos.writeInt(cmdUtf8.length);
                     dos.write(cmdUtf8, 0, cmdUtf8.length);
-                    dos.flush();
                 }
 
                 // Read the status from the socket.
