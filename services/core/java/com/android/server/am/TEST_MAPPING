@@ -14,6 +14,18 @@
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-filter": "android.app.cts.AlarmManagerTest#testSetRepeating"
+        },
+        {
+          "exclude-filter": "android.app.cts.ServiceTest#testAppZygoteServices"
+        },
+        {
+          "exclude-filter": "android.app.cts.SystemFeaturesTest#testLocationFeatures"
+        },
+        {
+          "exclude-filter": "android.app.cts.SystemFeaturesTest#testSensorFeatures"
         }
       ]
     },
