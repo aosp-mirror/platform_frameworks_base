@@ -2606,7 +2606,7 @@ public class SubscriptionManager {
      * @hide
      */
     public boolean canManageSubscription(SubscriptionInfo info, String packageName) {
-        if (info.getAllAccessRules() == null) {
+        if (info == null || info.getAllAccessRules() == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
@@ -2614,7 +2614,8 @@ public class SubscriptionManager {
         try {
             packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown package: " + packageName, e);
+            logd("Unknown package: " + packageName);
+            return false;
         }
         for (UiccAccessRule rule : info.getAllAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)

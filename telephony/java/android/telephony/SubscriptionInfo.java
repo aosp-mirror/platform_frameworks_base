@@ -580,7 +580,8 @@ public class SubscriptionInfo implements Parcelable {
         try {
             packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown package: " + packageName, e);
+            Log.d("SubscriptionInfo", "canManageSubscription: Unknown package: " + packageName, e);
+            return false;
         }
         for (UiccAccessRule rule : allAccessRules) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
@@ -612,7 +613,9 @@ public class SubscriptionInfo implements Parcelable {
      */
     public @Nullable List<UiccAccessRule> getAllAccessRules() {
         List<UiccAccessRule> merged = new ArrayList<>();
-        if (mNativeAccessRules != null) merged.addAll(getAccessRules());
+        if (mNativeAccessRules != null) {
+            merged.addAll(getAccessRules());
+        }
         if (mCarrierConfigAccessRules != null) {
             merged.addAll(Arrays.asList(mCarrierConfigAccessRules));
         }
