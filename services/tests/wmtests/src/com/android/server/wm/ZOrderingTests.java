@@ -51,6 +51,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 /**
  * Tests for the {@link DisplayContent#assignChildLayers(SurfaceControl.Transaction)} method.
@@ -131,7 +132,8 @@ public class ZOrderingTests extends WindowTestsBase {
         }
     }
 
-    private static class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
+    private static class HierarchyRecordingBuilderFactory implements Function<SurfaceSession,
+                SurfaceControl.Builder> {
         private LayerRecordingTransaction mTransaction;
 
         HierarchyRecordingBuilderFactory(LayerRecordingTransaction transaction) {
@@ -139,7 +141,7 @@ public class ZOrderingTests extends WindowTestsBase {
         }
 
         @Override
-        public SurfaceControl.Builder make(SurfaceSession s) {
+        public SurfaceControl.Builder apply(SurfaceSession s) {
             final LayerRecordingTransaction transaction = mTransaction;
             return new HierarchyRecorder(s, transaction);
         }
@@ -153,7 +155,7 @@ public class ZOrderingTests extends WindowTestsBase {
         // which is after construction of the DisplayContent, meaning the HierarchyRecorder
         // would miss construction of the top-level layers.
         mTransaction = new LayerRecordingTransaction();
-        mWm.mSurfaceBuilderFactory = new HierarchyRecordingBuilderFactory(mTransaction);
+        mWm.mSurfaceControlFactory = new HierarchyRecordingBuilderFactory(mTransaction);
         mWm.mTransactionFactory = () -> mTransaction;
     }
 

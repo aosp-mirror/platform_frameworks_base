@@ -254,17 +254,14 @@ public class SystemServicesTestRule implements TestRule {
         mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
                 mPowerManagerWrapper);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new);
+                mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new,
+                () -> mock(Surface.class), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
 
         // Setup factory classes to prevent calls to native code.
         mTransaction = spy(StubTransaction.class);
         // Return a spied Transaction class than can be used to verify calls.
         mWmService.mTransactionFactory = () -> mTransaction;
-        // Return a SurfaceControl.Builder class that creates mocked SurfaceControl instances.
-        mWmService.mSurfaceBuilderFactory = (unused) -> new MockSurfaceControlBuilder();
-        // Return mocked Surface instances.
-        mWmService.mSurfaceFactory = () -> mock(Surface.class);
         mWmService.mSurfaceAnimationRunner = new SurfaceAnimationRunner(
                 null, null, mTransaction, mWmService.mPowerManagerInternal);
 

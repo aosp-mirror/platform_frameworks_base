@@ -4388,7 +4388,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         .show(mSplitScreenDividerAnchor);
                 scheduleAnimation();
             } else {
-                mWmService.mTransactionFactory.make()
+                mWmService.mTransactionFactory.get()
                         .remove(mAppAnimationLayer)
                         .remove(mBoostedAppAnimationLayer)
                         .remove(mHomeAppAnimationLayer)

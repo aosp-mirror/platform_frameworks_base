@@ -48,7 +48,7 @@ public class LetterboxTest {
     @Before
     public void setUp() throws Exception {
         mSurfaces = new SurfaceControlMocker();
-        mLetterbox = new Letterbox(mSurfaces);
+        mLetterbox = new Letterbox(mSurfaces, () -> mock(SurfaceControl.Transaction.class));
         mTransaction = mock(SurfaceControl.Transaction.class);
     }
 

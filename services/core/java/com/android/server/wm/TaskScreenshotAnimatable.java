@@ -23,6 +23,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
+import java.util.function.Function;
+
 /**
  * Class used by {@link RecentsAnimationController} to create a surface control with taking
  * screenshot of task when canceling recents animation.
@@ -36,7 +38,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     private int mWidth;
     private int mHeight;
 
-    TaskScreenshotAnimatable(Task task,
+    TaskScreenshotAnimatable(Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory, Task task,
             SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
         GraphicBuffer buffer = screenshotBuffer == null
                 ? null : screenshotBuffer.getGraphicBuffer();
@@ -47,7 +49,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
             Slog.d(TAG, "Creating TaskScreenshotAnimatable: task: " + task
                     + "width: " + mWidth + "height: " + mHeight);
         }
-        mSurfaceControl = new SurfaceControl.Builder(new SurfaceSession())
+        mSurfaceControl = surfaceControlFactory.apply(new SurfaceSession())
                 .setName("RecentTaskScreenshotSurface")
                 .setBufferSize(mWidth, mHeight)
                 .build();

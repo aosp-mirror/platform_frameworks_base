@@ -33,6 +33,8 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
+import java.util.function.Supplier;
+
 /**
  * Displays a watermark on top of the window manager's windows.
  */
@@ -47,19 +49,20 @@ class Watermark {
     private final int mDeltaY;
 
     private final SurfaceControl mSurfaceControl;
-    private final Surface mSurface = new Surface();
+    private final Surface mSurface;
     private int mLastDW;
     private int mLastDH;
     private boolean mDrawNeeded;
 
-    Watermark(DisplayContent dc, DisplayMetrics dm, String[] tokens) {
+    Watermark(Supplier<Surface> surfaceFactory, DisplayContent dc, DisplayMetrics dm,
+            String[] tokens) {
         if (false) {
             Log.i(TAG_WM, "*********************** WATERMARK");
             for (int i=0; i<tokens.length; i++) {
                 Log.i(TAG_WM, "  TOKEN #" + i + ": " + tokens[i]);
             }
         }
-
+        mSurface = surfaceFactory.get();
         mDisplay = dc.getDisplay();
         mTokens = tokens;
 

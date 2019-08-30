@@ -153,7 +153,7 @@ final class InputMonitor {
         mService = service;
         mDisplayContent = mService.mRoot.getDisplayContent(displayId);
         mDisplayId = displayId;
-        mInputTransaction = mService.mTransactionFactory.make();
+        mInputTransaction = mService.mTransactionFactory.get();
         mHandler = AnimationThread.getHandler();
         mUpdateInputForAllWindowsConsumer = new UpdateInputForAllWindowsConsumer();
     }

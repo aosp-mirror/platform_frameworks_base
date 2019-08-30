@@ -27,6 +27,7 @@ import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 
 /**
  * Four black surfaces put together to make a black frame.
@@ -97,7 +98,7 @@ public class BlackFrame {
     final BlackSurface[] mBlackSurfaces = new BlackSurface[4];
 
     final boolean mForceDefaultOrientation;
-    private final TransactionFactory mTransactionFactory;
+    private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
 
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Outer: "); mOuterRect.printShortString(pw);
@@ -112,8 +113,8 @@ public class BlackFrame {
         }
     }
 
-    public BlackFrame(TransactionFactory factory, SurfaceControl.Transaction t, Rect outer,
-            Rect inner, int layer, DisplayContent dc, boolean forceDefaultOrientation)
+    public BlackFrame(Supplier<SurfaceControl.Transaction> factory, SurfaceControl.Transaction t,
+            Rect outer, Rect inner, int layer, DisplayContent dc, boolean forceDefaultOrientation)
             throws OutOfResourcesException {
         boolean success = false;
 
@@ -151,7 +152,7 @@ public class BlackFrame {
 
     public void kill() {
         if (mBlackSurfaces != null) {
-            SurfaceControl.Transaction t = mTransactionFactory.make();
+            SurfaceControl.Transaction t = mTransactionFactory.get();
             for (int i=0; i<mBlackSurfaces.length; i++) {
                 if (mBlackSurfaces[i] != null) {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,

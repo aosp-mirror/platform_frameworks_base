@@ -159,7 +159,7 @@ class WindowStateAnimator {
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
 
-    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mTmpTransaction;
 
     /** The pixel format of the underlying SurfaceControl */
     int mSurfaceFormat;
@@ -246,6 +246,7 @@ class WindowStateAnimator {
         final WindowManagerService service = win.mWmService;
 
         mService = service;
+        mTmpTransaction = service.mTransactionFactory.get();
         mAnimator = service.mAnimator;
         mPolicy = service.mPolicy;
         mContext = service.mContext;

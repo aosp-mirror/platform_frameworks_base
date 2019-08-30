@@ -83,12 +83,13 @@ public class WindowAnimator {
     private final ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
     private boolean mInExecuteAfterPrepareSurfacesRunnables;
 
-    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mTransaction;
 
     WindowAnimator(final WindowManagerService service) {
         mService = service;
         mContext = service.mContext;
         mPolicy = service.mPolicy;
+        mTransaction = service.mTransactionFactory.get();
         AnimationThread.getHandler().runWithScissors(
                 () -> mChoreographer = Choreographer.getSfInstance(), 0 /* timeout */);
 

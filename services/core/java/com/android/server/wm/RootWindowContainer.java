@@ -134,7 +134,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     // Only a separate transaction until we separate the apply surface changes
     // transaction from the global transaction.
-    private final SurfaceControl.Transaction mDisplayTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mDisplayTransaction;
 
     private final Consumer<WindowState> mCloseSystemDialogsConsumer = w -> {
         if (w.mHasSurface) {
@@ -154,6 +154,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     RootWindowContainer(WindowManagerService service) {
         super(service);
+        mDisplayTransaction = service.mTransactionFactory.get();
         mHandler = new MyHandler(service.mH.getLooper());
     }
 

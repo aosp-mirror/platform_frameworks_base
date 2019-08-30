@@ -592,7 +592,7 @@ public class RecentsAnimationController implements DeathRecipient {
             return null;
         }
 
-        final TaskScreenshotAnimatable animatable = new TaskScreenshotAnimatable(task,
+        final TaskScreenshotAnimatable animatable = new TaskScreenshotAnimatable(mService.mSurfaceControlFactory, task,
                 new SurfaceControl.ScreenshotGraphicBuffer(taskSnapshot.getSnapshot(),
                         taskSnapshot.getColorSpace(), false /* containsSecureLayers */));
         mRecentScreenshotAnimator = new SurfaceAnimator(

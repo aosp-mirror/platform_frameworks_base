@@ -283,6 +283,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -855,9 +857,9 @@ public class WindowManagerService extends IWindowManager.Stub
     static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
             new WindowManagerThreadPriorityBooster();
 
-    SurfaceBuilderFactory mSurfaceBuilderFactory = SurfaceControl.Builder::new;
-    TransactionFactory mTransactionFactory = SurfaceControl.Transaction::new;
-    SurfaceFactory mSurfaceFactory = Surface::new;
+    Function<SurfaceSession, SurfaceControl.Builder> mSurfaceControlFactory;
+    Supplier<SurfaceControl.Transaction> mTransactionFactory;
+    final Supplier<Surface> mSurfaceFactory;
 
     private final SurfaceControl.Transaction mTransaction;
 
@@ -957,20 +959,22 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
             ActivityTaskManagerService atm) {
         return main(context, im, showBootMsgs, onlyCore, policy, atm,
-                SurfaceControl.Transaction::new);
+                SurfaceControl.Transaction::new, Surface::new, SurfaceControl.Builder::new);
     }
 
     /**
      * Creates and returns an instance of the WindowManagerService. This call allows the caller
-     * to override the {@link TransactionFactory} to stub functionality under test.
+     * to override factories that can be used to stub native calls during test.
      */
     @VisibleForTesting
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
-            ActivityTaskManagerService atm, TransactionFactory transactionFactory) {
+            ActivityTaskManagerService atm, Supplier<SurfaceControl.Transaction> transactionFactory,
+            Supplier<Surface> surfaceFactory,
+            Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory) {
         DisplayThread.getHandler().runWithScissors(() ->
                 sInstance = new WindowManagerService(context, im, showBootMsgs, onlyCore, policy,
-                        atm, transactionFactory), 0);
+                        atm, transactionFactory, surfaceFactory, surfaceControlFactory), 0);
         return sInstance;
     }
 
@@ -992,7 +996,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, InputManagerService inputManager,
             boolean showBootMsgs, boolean onlyCore, WindowManagerPolicy policy,
-            ActivityTaskManagerService atm, TransactionFactory transactionFactory) {
+            ActivityTaskManagerService atm, Supplier<SurfaceControl.Transaction> transactionFactory,
+            Supplier<Surface> surfaceFactory,
+            Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory) {
         installLock(this, INDEX_WINDOW);
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
@@ -1020,10 +1026,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_lowRamTaskSnapshotsAndRecents);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mDisplayWindowSettings = new DisplayWindowSettings(this);
 
+        mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
-        mTransaction = mTransactionFactory.make();
+        mSurfaceFactory = surfaceFactory;
+        mTransaction = mTransactionFactory.get();
+
+        mDisplayWindowSettings = new DisplayWindowSettings(this);
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
@@ -1127,7 +1136,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG_WM);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner(mPowerManagerInternal);
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(mTransactionFactory,
+                mPowerManagerInternal);
 
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
@@ -3404,7 +3414,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         int maskThickness = mContext.getResources().getDimensionPixelSize(
                                 com.android.internal.R.dimen.circular_display_mask_thickness);
 
-                        mCircularDisplayMask = new CircularDisplayMask(
+                        mCircularDisplayMask = new CircularDisplayMask(mSurfaceFactory,
                                 getDefaultDisplayContentLocked(),
                                 mPolicy.getWindowLayerFromTypeLw(
                                         WindowManager.LayoutParams.TYPE_POINTER)
@@ -3432,6 +3442,7 @@ public class WindowManagerService extends IWindowManager.Stub
             try {
                 if (mEmulatorDisplayOverlay == null) {
                     mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(
+                            mSurfaceFactory,
                             mContext,
                             getDefaultDisplayContentLocked(),
                             mPolicy.getWindowLayerFromTypeLw(
@@ -3480,7 +3491,7 @@ public class WindowManagerService extends IWindowManager.Stub
             try {
                 // TODO(multi-display): support multiple displays
                 if (mStrictModeFlash == null) {
-                    mStrictModeFlash = new StrictModeFlash(
+                    mStrictModeFlash = new StrictModeFlash(mSurfaceFactory,
                             getDefaultDisplayContentLocked());
                 }
                 mStrictModeFlash.setVisibility(on);
@@ -5497,7 +5508,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (toks != null && toks.length > 0) {
                     // TODO(multi-display): Show watermarks on secondary displays.
                     final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                    mWatermark = new Watermark(displayContent, displayContent.mRealDisplayMetrics,
+                    mWatermark = new Watermark(mSurfaceFactory, displayContent,
+                            displayContent.mRealDisplayMetrics,
                             toks);
                 }
             }
@@ -7488,7 +7500,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     SurfaceControl.Builder makeSurfaceBuilder(SurfaceSession s) {
-        return mSurfaceBuilderFactory.make(s);
+        return mSurfaceControlFactory.apply(s);
     }
 
     /**
@@ -7560,7 +7572,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.forAllDisplays(displayContent ->
                     displayContent.getInputMonitor().updateInputWindowsImmediately());
         }
-        new SurfaceControl.Transaction().syncInputWindows().apply(true);
+
+        mTransactionFactory.get().syncInputWindows().apply(true);
     }
 
     private void waitForAnimationsToComplete() {
@@ -7682,7 +7695,7 @@ public class WindowManagerService extends IWindowManager.Stub
         h.replaceTouchableRegionWithCrop(null);
 
         SurfaceSession s = new SurfaceSession();
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
         t.apply();
 
