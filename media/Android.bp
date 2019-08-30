@@ -43,13 +43,6 @@ filegroup {
 }
 
 filegroup {
-    name: "updatable-media-srcs-without-aidls",
-    srcs : [
-        ":mediasession2-srcs-without-aidls",
-    ],
-}
-
-filegroup {
     name: "mediasession2-srcs",
     srcs: [
         "apex/java/android/media/Controller2Link.java",
@@ -65,18 +58,7 @@ filegroup {
         "apex/java/android/media/Session2Link.java",
         "apex/java/android/media/Session2Token.java",
     ],
-}
-
-filegroup {
-    name: "mediasession2-srcs-without-aidls",
-    srcs: [
-        ":mediasession2-srcs",
-    ],
-    exclude_srcs: [
-        "apex/java/android/media/IMediaController2.aidl",
-        "apex/java/android/media/IMediaSession2.aidl",
-        "apex/java/android/media/IMediaSession2Service.aidl",
-    ],
+    path: "apex/java",
 }
 
 filegroup {
@@ -96,6 +78,7 @@ filegroup {
         "apex/java/android/media/BufferingParams.java",
         "apex/java/android/media/ProxyDataSourceCallback.java",
     ],
+    path: "apex/java",
 }
 
 metalava_updatable_media_args = " --error UnhiddenSystemApi " +
@@ -108,21 +91,21 @@ metalava_updatable_media_args = " --error UnhiddenSystemApi " +
 droidstubs {
     name: "updatable-media-stubs",
     srcs: [
-        ":updatable-media-srcs-without-aidls",
+        ":updatable-media-srcs",
         ":framework-media-annotation-srcs",
     ],
     args: metalava_updatable_media_args,
-    // Ideally, sdk_version here should be "current_system", but "current - 1" is used
-    // to avoid dependency cycle with framework.
-    sdk_version: "28",
+    aidl: {
+        // TODO(b/135922046) remove this
+        include_dirs: ["frameworks/base/core/java"],
+    },
+    sdk_version: "system_current",
 }
 
 java_library {
     name: "updatable_media_stubs",
     srcs: [":updatable-media-stubs"],
-    // Ideally, sdk_version here should be "current_system", but "current - 1" is used
-    // to avoid dependency cycle with framework.
-    sdk_version: "28",
+    sdk_version: "system_current",
 }
 
 java_library {
