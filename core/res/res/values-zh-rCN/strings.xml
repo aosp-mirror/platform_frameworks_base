@@ -1255,14 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"点按即可查看所有网络"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"连接"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"所有网络"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"是否允许系统连接到建议的 WLAN 网络？"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g>建议的网络。设备可能会自动连接到这些网络。"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"允许"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"不用了"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WLAN 将自动开启"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"当您位于已保存的高品质网络信号范围内时"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"不要重新开启"</string>
