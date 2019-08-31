@@ -491,9 +491,9 @@ void CanvasContext::draw() {
                 swap.dequeueDuration = 0;
             } else {
                 swap.dequeueDuration =
-                        us2ns(ANativeWindow_getLastDequeueDuration(mNativeSurface.get()));
+                        ANativeWindow_getLastDequeueDuration(mNativeSurface.get());
             }
-            swap.queueDuration = us2ns(ANativeWindow_getLastQueueDuration(mNativeSurface.get()));
+            swap.queueDuration = ANativeWindow_getLastQueueDuration(mNativeSurface.get());
         } else {
             swap.dequeueDuration = 0;
             swap.queueDuration = 0;
