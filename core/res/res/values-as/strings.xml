@@ -1257,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"সকলো নেটৱৰ্ক চাবলৈ টিপক"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"সংযোগ কৰক"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"সকলো নেটৱৰ্ক"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"পৰামর্শ হিচাপে পোৱা নেটৱর্কবোৰক অনুমতি দিবনে?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g>এ পৰামর্শ হিচাপে দিয়া নেটৱর্কবোৰ। ডিভাইচটো স্বয়ংক্ৰিয়ভাৱে সংযোগ হ\'ব পাৰে।"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"অনুমতি দিয়ক"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"নালাগে, ধন্যবাদ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ৱাই-ফাই স্বয়ংক্ৰিয়ভাৱে অন হ\'ব"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"যেতিয়া আপুনি ছেভ কৰি থোৱা উচ্চ মানৰ নেটৱৰ্কৰ কাষত থাকে"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"পুনৰাই অন নকৰিব"</string>

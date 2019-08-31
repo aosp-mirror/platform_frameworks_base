@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="3616391919559751192">"படங்கள் மற்றும் வீடியோக்களை எடுத்தல்"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"இந்த ஆப்ஸ் எப்போது வேண்டுமானாலும் கேமராவைப் பயன்படுத்தி படங்களை எடுக்கலாம், வீடியோக்களை ரெக்கார்டு செய்யலாம்."</string>
     <string name="permlab_systemCamera" msgid="4074081285026193898">"படங்களையும் வீடியோக்களையும் எடுப்பதற்கு சிஸ்டம் கேமராக்களை அணுக ஆப்ஸையோ சேவையையோ அனுமதி"</string>
-    <string name="permdesc_systemCamera" msgid="6488131672529669229">"இந்த முன்னுரிமை பெற்ற சிஸ்டம் ஆப்ஸால் சிஸ்டம் கேமராவைப் பயன்படுத்தி எப்போது வேண்டுமானாலும் படங்களை எடுக்கவோ வீடியோக்களை ரெக்கார்டு செய்யவோ முடியும். அதே போல android.permission.CAMERA அனுமதியும் ஆப்ஸிற்குத் தேவை"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"இந்த முன்னுரிமை பெற்ற சிஸ்டம் ஆப்ஸால் சிஸ்டம் கேமராவைப் பயன்படுத்தி எப்போது வேண்டுமானாலும் படங்களை எடுக்கவோ வீடியோக்களை ரெக்கார்டு செய்யவோ முடியும். android.permission.CAMERA அனுமதியும் ஆப்ஸிற்குத் தேவை"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"அதிர்வைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"அதிர்வைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
@@ -1257,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"எல்லா நெட்வொர்க்குகளையும் பார்க்க, தட்டவும்"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"இணை"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"எல்லா நெட்வொர்க்குகளும்"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"பரிந்துரைக்கப்பட்ட வைஃபை நெட்வொர்க்குகளை அனுமதிக்க வேண்டுமா?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> பரிந்துரைக்கும் நெட்வொர்க்குகள். சாதனம் தானாக இணைக்கப்படக்கூடும்."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"அனுமதி"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"வேண்டாம்"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"வைஃபை தானாக ஆன் ஆகும்"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"சேமித்த, உயர்தர நெட்வொர்க்கிற்கு அருகில் இருக்கும்போது"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"மீண்டும் ஆன் செய்யாதே"</string>
