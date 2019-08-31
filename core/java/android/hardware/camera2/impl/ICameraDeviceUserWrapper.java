@@ -258,4 +258,13 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
+    public int setCameraAudioRestriction(int mode) throws CameraAccessException {
+        try {
+            return mRemoteDevice.setCameraAudioRestriction(mode);
+        } catch (Throwable t) {
+            CameraManager.throwAsPublicException(t);
+            throw new UnsupportedOperationException("Unexpected exception", t);
+        }
+    }
+
 }

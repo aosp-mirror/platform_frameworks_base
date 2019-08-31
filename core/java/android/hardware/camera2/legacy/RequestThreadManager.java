@@ -1104,4 +1104,11 @@ public class RequestThreadManager {
         handler.sendMessage(handler.obtainMessage(MSG_CONFIGURE_OUTPUTS, 0, 0, holder));
         condition.block();
     }
+
+    public int setAudioRestriction(int mode) {
+        if (mCamera != null) {
+            return mCamera.setAudioRestriction(mode);
+        }
+        throw new IllegalStateException("Camera has been released!");
+    }
 }

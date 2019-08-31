@@ -164,6 +164,37 @@ public abstract class CameraDevice implements AutoCloseable {
           TEMPLATE_MANUAL})
      public @interface RequestTemplate {};
 
+     /**
+      * No vibration or sound muting for this camera device. This is the default
+      * mode for all camera devices.
+      *
+      * @see #setCameraAudioRestriction
+      */
+     public static final int AUDIO_RESTRICTION_NONE = 0;
+
+     /**
+      * Mute vibration from ringtones, alarms or notifications while this camera device is in use.
+      *
+      * @see #setCameraAudioRestriction
+      */
+     public static final int AUDIO_RESTRICTION_VIBRATION = 1;
+
+     /**
+      * Mute vibration and sound from ringtones, alarms or notifications while this camera device is
+      * in use.
+      *
+      * @see #setCameraAudioRestriction
+      */
+     public static final int AUDIO_RESTRICTION_VIBRATION_SOUND = 3;
+
+     /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef(prefix = {"AUDIO_RESTRICTION_"}, value =
+         {AUDIO_RESTRICTION_NONE,
+          AUDIO_RESTRICTION_VIBRATION,
+          AUDIO_RESTRICTION_VIBRATION_SOUND})
+     public @interface CAMERA_AUDIO_RESTRICTION {};
+
     /**
      * Get the ID of this camera device.
      *
@@ -1205,6 +1236,37 @@ public abstract class CameraDevice implements AutoCloseable {
          */
         public abstract void onError(@NonNull CameraDevice camera,
                 @ErrorCode int error); // Must implement
+    }
+
+    /**
+     * Set audio restriction mode when this CameraDevice is being used.
+     *
+     * <p>Some camera hardware (e.g. devices with optical image stabilization support)
+     * are sensitive to device vibration and video recordings can be ruined by unexpected sounds.
+     * Applications can use this method to suppress vibration or sounds coming from
+     * ringtones, alarms or notifications.
+     * Other vibration or sounds (e.g. media playback or accessibility) will not be muted.</p>
+     *
+     * <p>The mute mode is a system-wide setting. When multiple CameraDevice objects
+     * are setting different modes, the system will pick a the mode that's union of
+     * all modes set by CameraDevice.</p>
+     *
+     * <p>The mute settings will be automatically removed when the CameraDevice is closed or
+     * the application is disconnected from the camera.</p>
+     *
+     * @param mode An enumeration selecting the audio restriction mode for this camera device.
+     *
+     * @return The system-wide mute mode setting resulting from this call
+     *
+     * @throws IllegalArgumentException if the mode is not supported
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     */
+    public @CAMERA_AUDIO_RESTRICTION int setCameraAudioRestriction(
+            @CAMERA_AUDIO_RESTRICTION int mode) throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
     }
 
     /**

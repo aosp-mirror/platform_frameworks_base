@@ -64,6 +64,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -572,7 +573,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     final ArrayMap<IBinder, ModeCallback> mModeWatchers = new ArrayMap<>();
     final ArrayMap<IBinder, SparseArray<ActiveCallback>> mActiveWatchers = new ArrayMap<>();
     final ArrayMap<IBinder, SparseArray<NotedCallback>> mNotedWatchers = new ArrayMap<>();
-    final SparseArray<SparseArray<Restriction>> mAudioRestrictions = new SparseArray<>();
+    final AudioRestrictionManager mAudioRestrictionManager = new AudioRestrictionManager();
 
     final class ModeCallback implements DeathRecipient {
         final IAppOpsCallback mCallback;
@@ -1837,24 +1838,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
-        synchronized (this) {
-            final int mode = checkRestrictionLocked(code, usage, uid, packageName);
-            if (mode != AppOpsManager.MODE_ALLOWED) {
-                return mode;
-            }
+        final int mode = mAudioRestrictionManager.checkAudioOperation(
+                code, usage, uid, packageName);
+        if (mode != AppOpsManager.MODE_ALLOWED) {
+            return mode;
         }
         return checkOperation(code, uid, packageName);
-    }
-
-    private int checkRestrictionLocked(int code, int usage, int uid, String packageName) {
-        final SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
-        if (usageRestrictions != null) {
-            final Restriction r = usageRestrictions.get(usage);
-            if (r != null && !r.exceptionPackages.contains(packageName)) {
-                return r.mode;
-            }
-        }
-        return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
@@ -1863,32 +1852,27 @@ public class AppOpsService extends IAppOpsService.Stub {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        synchronized (this) {
-            SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
-            if (usageRestrictions == null) {
-                usageRestrictions = new SparseArray<Restriction>();
-                mAudioRestrictions.put(code, usageRestrictions);
-            }
-            usageRestrictions.remove(usage);
-            if (mode != AppOpsManager.MODE_ALLOWED) {
-                final Restriction r = new Restriction();
-                r.mode = mode;
-                if (exceptionPackages != null) {
-                    final int N = exceptionPackages.length;
-                    r.exceptionPackages = new ArraySet<String>(N);
-                    for (int i = 0; i < N; i++) {
-                        final String pkg = exceptionPackages[i];
-                        if (pkg != null) {
-                            r.exceptionPackages.add(pkg.trim());
-                        }
-                    }
-                }
-                usageRestrictions.put(usage, r);
-            }
-        }
+
+        mAudioRestrictionManager.setZenModeAudioRestriction(
+                code, usage, uid, mode, exceptionPackages);
 
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 AppOpsService::notifyWatchersOfChange, this, code, UID_ANY));
+    }
+
+
+    @Override
+    public void setCameraAudioRestriction(@CAMERA_AUDIO_RESTRICTION int mode) {
+        enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), -1);
+
+        mAudioRestrictionManager.setCameraAudioRestriction(mode);
+
+        mHandler.sendMessage(PooledLambda.obtainMessage(
+                AppOpsService::notifyWatchersOfChange, this,
+                AppOpsManager.OP_PLAY_AUDIO, UID_ANY));
+        mHandler.sendMessage(PooledLambda.obtainMessage(
+                AppOpsService::notifyWatchersOfChange, this,
+                AppOpsManager.OP_VIBRATE, UID_ANY));
     }
 
     @Override
@@ -4135,31 +4119,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
-            if (mAudioRestrictions.size() > 0 && dumpOp < 0 && dumpPackage != null
-                    && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
-                boolean printedHeader = false;
-                for (int o=0; o<mAudioRestrictions.size(); o++) {
-                    final String op = AppOpsManager.opToName(mAudioRestrictions.keyAt(o));
-                    final SparseArray<Restriction> restrictions = mAudioRestrictions.valueAt(o);
-                    for (int i=0; i<restrictions.size(); i++) {
-                        if (!printedHeader){
-                            pw.println("  Audio Restrictions:");
-                            printedHeader = true;
-                            needSep = true;
-                        }
-                        final int usage = restrictions.keyAt(i);
-                        pw.print("    "); pw.print(op);
-                        pw.print(" usage="); pw.print(AudioAttributes.usageToString(usage));
-                        Restriction r = restrictions.valueAt(i);
-                        pw.print(": mode="); pw.println(AppOpsManager.modeToName(r.mode));
-                        if (!r.exceptionPackages.isEmpty()) {
-                            pw.println("      Exceptions:");
-                            for (int j=0; j<r.exceptionPackages.size(); j++) {
-                                pw.print("        "); pw.println(r.exceptionPackages.valueAt(j));
-                            }
-                        }
-                    }
-                }
+            if (mAudioRestrictionManager.hasActiveRestrictions() && dumpOp < 0
+                    && dumpPackage != null && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
+                needSep = mAudioRestrictionManager.dump(pw) | needSep ;
             }
             if (needSep) {
                 pw.println();
@@ -4408,12 +4370,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (dumpHistory && !dumpWatchers) {
             mHistoricalRegistry.dump("  ", pw, dumpUid, dumpPackage, dumpOp);
         }
-    }
-
-    private static final class Restriction {
-        private static final ArraySet<String> NO_EXCEPTIONS = new ArraySet<String>();
-        int mode;
-        ArraySet<String> exceptionPackages = NO_EXCEPTIONS;
     }
 
     @Override

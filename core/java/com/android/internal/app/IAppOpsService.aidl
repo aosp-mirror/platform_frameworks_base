@@ -44,6 +44,7 @@ interface IAppOpsService {
     void noteAsyncOp(String callingPackageName, int uid, String packageName, int opCode,
             String message);
     boolean shouldCollectNotes(int opCode);
+    void setCameraAudioRestriction(int mode);
     // End of methods also called by native code.
     // Any new method exposed to native must be added after the last one, do not reorder
 
