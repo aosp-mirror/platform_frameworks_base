@@ -1255,14 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"అన్ని నెట్‌వర్క్‌లు చూడటానికి నొక్కండి"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"కనెక్ట్ చేయి"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"అన్ని నెట్‌వర్క్‌లు"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"సూచించిన Wi‑Fi నెట్‌వర్క్‍లను అనుమతించాలా?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> సూచించిన నెట్ వర్క్ లు పరికరం ఆటోమేటిక్ గా కనెక్ట్ కాకపోవచ్చు."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"అనుమతించు"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"వద్దు"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi స్వయంచాలకంగా ఆన్ అవుతుంది"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"మీరు అధిక నాణ్యత గల సేవ్ చేసిన నెట్‌వర్క్‌కు సమీపంగా ఉన్నప్పుడు"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"తిరిగి ఆన్ చేయవద్దు"</string>
