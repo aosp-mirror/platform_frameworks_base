@@ -1255,14 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ketuk untuk melihat semua jaringan"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Hubungkan"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua jaringan"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Izinkan jaringan Wi-Fi yang disarankan?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> jaringan yang disarankan. Perangkat dapat terhubung secara otomatis."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Izinkan"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Lain kali"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan aktif otomatis"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Saat berada di dekat jaringan berkualitas tinggi yang tersimpan"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan aktifkan kembali"</string>
@@ -1981,7 +1977,7 @@
     <string name="popup_window_default_title" msgid="4874318849712115433">"Jendela Pop-up"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Versi aplikasi di-downgrade, atau tidak kompatibel dengan pintasan ini"</string>
-    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Tidak dapat memulihkan pintasan karena aplikasi tidak mendukung backup dan pulihkan"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Tidak dapat memulihkan pintasan karena aplikasi tidak mendukung pencadangan dan pemulihan"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Tidak dapat memulihkan pintasan karena tanda tangan aplikasi tidak cocok"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Tidak dapat memulihkan pintasan."</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Pintasan dinonaktifkan"</string>
