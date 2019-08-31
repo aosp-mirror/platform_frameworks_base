@@ -1255,14 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Gusa ili uone mitandao yote"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Unganisha"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Mitandao yote"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Ungependa kuruhusu mitandao inayopendekezwa ya Wi-Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Mitandao inayopendekezwa kwa ajili ya <xliff:g id="NAME">%s</xliff:g>. Huenda kifaa kikaunganisha kiotomatiki."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Ruhusu"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Hapana, asante"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi itawashwa kiotomatiki"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Unapokuwa karibu na mtandao uliohifadhiwa wenye ubora wa juu"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Usiwashe tena"</string>
