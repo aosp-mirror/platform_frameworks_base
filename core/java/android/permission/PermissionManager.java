@@ -19,6 +19,7 @@ package android.permission;
 import android.Manifest;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -144,7 +145,7 @@ public final class PermissionManager {
         private final int mTargetSdk;
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SplitPermissionInfo that = (SplitPermissionInfo) o;

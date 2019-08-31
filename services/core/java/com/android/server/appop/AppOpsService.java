@@ -31,9 +31,11 @@ import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE_LOCATION;
 import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
 import static android.app.AppOpsManager.UID_STATE_TOP;
+import static android.app.AppOpsManager._NUM_OP;
 import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
+import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -49,6 +51,7 @@ import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.OpFlags;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
+import android.app.AsyncNotedAppOp;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -58,8 +61,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -69,6 +74,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteCallback;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -86,6 +92,7 @@ import android.util.AtomicFile;
 import android.util.KeyValueListParser;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -96,6 +103,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsActiveCallback;
+import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
@@ -181,12 +189,37 @@ public class AppOpsService extends IAppOpsService.Stub {
             OP_CAMERA,
     };
 
+    private static final int MAX_UNFORWARED_OPS = 10;
+
     Context mContext;
     final AtomicFile mFile;
     final Handler mHandler;
 
     private final AppOpsManagerInternalImpl mAppOpsManagerInternal
             = new AppOpsManagerInternalImpl();
+
+    /**
+     * Registered callbacks, called from {@link #noteAsyncOp}.
+     *
+     * <p>(package name, uid) -> callbacks
+     *
+     * @see #getAsyncNotedOpsKey(String, int)
+     */
+    @GuardedBy("this")
+    private final ArrayMap<Pair<String, Integer>, RemoteCallbackList<IAppOpsAsyncNotedCallback>>
+            mAsyncOpWatchers = new ArrayMap<>();
+
+    /**
+     * Async note-ops collected from {@link #noteAsyncOp} that have not been delivered to a
+     * callback yet.
+     *
+     * <p>(package name, uid) -> list&lt;ops&gt;
+     *
+     * @see #getAsyncNotedOpsKey(String, int)
+     */
+    @GuardedBy("this")
+    private final ArrayMap<Pair<String, Integer>, ArrayList<AsyncNotedAppOp>>
+            mUnforwardedAsyncNotedOps = new ArrayMap<>();
 
     boolean mWriteScheduled;
     boolean mFastWriteScheduled;
@@ -540,7 +573,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     final ArrayMap<IBinder, ModeCallback> mModeWatchers = new ArrayMap<>();
     final ArrayMap<IBinder, SparseArray<ActiveCallback>> mActiveWatchers = new ArrayMap<>();
     final ArrayMap<IBinder, SparseArray<NotedCallback>> mNotedWatchers = new ArrayMap<>();
-    final SparseArray<SparseArray<Restriction>> mAudioRestrictions = new SparseArray<>();
+    final AudioRestrictionManager mAudioRestrictionManager = new AudioRestrictionManager();
 
     final class ModeCallback implements DeathRecipient {
         final IAppOpsCallback mCallback;
@@ -1805,24 +1838,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
-        synchronized (this) {
-            final int mode = checkRestrictionLocked(code, usage, uid, packageName);
-            if (mode != AppOpsManager.MODE_ALLOWED) {
-                return mode;
-            }
+        final int mode = mAudioRestrictionManager.checkAudioOperation(
+                code, usage, uid, packageName);
+        if (mode != AppOpsManager.MODE_ALLOWED) {
+            return mode;
         }
         return checkOperation(code, uid, packageName);
-    }
-
-    private int checkRestrictionLocked(int code, int usage, int uid, String packageName) {
-        final SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
-        if (usageRestrictions != null) {
-            final Restriction r = usageRestrictions.get(usage);
-            if (r != null && !r.exceptionPackages.contains(packageName)) {
-                return r.mode;
-            }
-        }
-        return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
@@ -1831,32 +1852,27 @@ public class AppOpsService extends IAppOpsService.Stub {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        synchronized (this) {
-            SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
-            if (usageRestrictions == null) {
-                usageRestrictions = new SparseArray<Restriction>();
-                mAudioRestrictions.put(code, usageRestrictions);
-            }
-            usageRestrictions.remove(usage);
-            if (mode != AppOpsManager.MODE_ALLOWED) {
-                final Restriction r = new Restriction();
-                r.mode = mode;
-                if (exceptionPackages != null) {
-                    final int N = exceptionPackages.length;
-                    r.exceptionPackages = new ArraySet<String>(N);
-                    for (int i = 0; i < N; i++) {
-                        final String pkg = exceptionPackages[i];
-                        if (pkg != null) {
-                            r.exceptionPackages.add(pkg.trim());
-                        }
-                    }
-                }
-                usageRestrictions.put(usage, r);
-            }
-        }
+
+        mAudioRestrictionManager.setZenModeAudioRestriction(
+                code, usage, uid, mode, exceptionPackages);
 
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 AppOpsService::notifyWatchersOfChange, this, code, UID_ANY));
+    }
+
+
+    @Override
+    public void setCameraAudioRestriction(@CAMERA_AUDIO_RESTRICTION int mode) {
+        enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), -1);
+
+        mAudioRestrictionManager.setCameraAudioRestriction(mode);
+
+        mHandler.sendMessage(PooledLambda.obtainMessage(
+                AppOpsService::notifyWatchersOfChange, this,
+                AppOpsManager.OP_PLAY_AUDIO, UID_ANY));
+        mHandler.sendMessage(PooledLambda.obtainMessage(
+                AppOpsService::notifyWatchersOfChange, this,
+                AppOpsManager.OP_VIBRATE, UID_ANY));
     }
 
     @Override
@@ -2094,6 +2110,141 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < callbackCount; i++) {
                 notedCallbacks.valueAt(i).destroy();
             }
+        }
+    }
+
+    @Override
+    public void noteAsyncOp(String callingPackageName, int uid, String packageName, int opCode,
+            String message) {
+        Preconditions.checkNotNull(message);
+        Preconditions.checkNotNull(packageName);
+        verifyAndGetIsPrivileged(uid, packageName);
+
+        verifyIncomingUid(uid);
+        verifyIncomingOp(opCode);
+
+        int callingUid = Binder.getCallingUid();
+        long now = System.currentTimeMillis();
+
+        if (callingPackageName != null) {
+            verifyAndGetIsPrivileged(callingUid, callingPackageName);
+        }
+
+        long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
+
+                RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
+                AsyncNotedAppOp asyncNotedOp = new AsyncNotedAppOp(opCode, callingUid,
+                        callingPackageName, message, now);
+                final boolean[] wasNoteForwarded = {false};
+
+                if (callbacks != null) {
+                    callbacks.broadcast((cb) -> {
+                        try {
+                            cb.opNoted(asyncNotedOp);
+                            wasNoteForwarded[0] = true;
+                        } catch (RemoteException e) {
+                            Slog.e(TAG,
+                                    "Could not forward noteOp of " + opCode + " to " + packageName
+                                            + "/" + uid, e);
+                        }
+                    });
+                }
+
+                if (!wasNoteForwarded[0]) {
+                    ArrayList<AsyncNotedAppOp> unforwardedOps = mUnforwardedAsyncNotedOps.get(key);
+                    if (unforwardedOps == null) {
+                        unforwardedOps = new ArrayList<>(1);
+                        mUnforwardedAsyncNotedOps.put(key, unforwardedOps);
+                    }
+
+                    unforwardedOps.add(asyncNotedOp);
+                    if (unforwardedOps.size() > MAX_UNFORWARED_OPS) {
+                        unforwardedOps.remove(0);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Compute a key to be used in {@link #mAsyncOpWatchers} and {@link #mUnforwardedAsyncNotedOps}
+     *
+     * @param packageName The package name of the app
+     * @param uid The uid of the app
+     *
+     * @return They key uniquely identifying the app
+     */
+    private @NonNull Pair<String, Integer> getAsyncNotedOpsKey(@NonNull String packageName,
+            int uid) {
+        return new Pair<>(packageName, uid);
+    }
+
+    @Override
+    public void startWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(callback);
+
+        int uid = Binder.getCallingUid();
+        Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
+
+        verifyAndGetIsPrivileged(uid, packageName);
+
+        synchronized (this) {
+            RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
+            if (callbacks == null) {
+                callbacks = new RemoteCallbackList<IAppOpsAsyncNotedCallback>() {
+                    @Override
+                    public void onCallbackDied(IAppOpsAsyncNotedCallback callback) {
+                        synchronized (AppOpsService.this) {
+                            if (getRegisteredCallbackCount() == 0) {
+                                mAsyncOpWatchers.remove(key);
+                            }
+                        }
+                    }
+                };
+                mAsyncOpWatchers.put(key, callbacks);
+            }
+
+            callbacks.register(callback);
+        }
+    }
+
+    @Override
+    public void stopWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkNotNull(callback);
+
+        int uid = Binder.getCallingUid();
+        Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
+
+        verifyAndGetIsPrivileged(uid, packageName);
+
+        synchronized (this) {
+            RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
+            if (callbacks != null) {
+                callbacks.unregister(callback);
+                if (callbacks.getRegisteredCallbackCount() == 0) {
+                    mAsyncOpWatchers.remove(key);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<AsyncNotedAppOp> extractAsyncOps(String packageName) {
+        Preconditions.checkNotNull(packageName);
+
+        int uid = Binder.getCallingUid();
+
+        verifyAndGetIsPrivileged(uid, packageName);
+
+        synchronized (this) {
+            return mUnforwardedAsyncNotedOps.remove(getAsyncNotedOpsKey(packageName, uid));
         }
     }
 
@@ -2338,6 +2489,25 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.OP_NONE;
         }
         return AppOpsManager.permissionToOpCode(permission);
+    }
+
+    @Override
+    public boolean shouldCollectNotes(int opCode) {
+        Preconditions.checkArgumentInRange(opCode, 0, _NUM_OP - 1, "opCode");
+
+        String perm = AppOpsManager.opToPermission(opCode);
+        if (perm == null) {
+            return false;
+        }
+
+        PermissionInfo permInfo;
+        try {
+            permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        return permInfo.getProtection() == PROTECTION_DANGEROUS;
     }
 
     void finishOperationLocked(Op op, boolean finishNested) {
@@ -3949,31 +4119,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
-            if (mAudioRestrictions.size() > 0 && dumpOp < 0 && dumpPackage != null
-                    && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
-                boolean printedHeader = false;
-                for (int o=0; o<mAudioRestrictions.size(); o++) {
-                    final String op = AppOpsManager.opToName(mAudioRestrictions.keyAt(o));
-                    final SparseArray<Restriction> restrictions = mAudioRestrictions.valueAt(o);
-                    for (int i=0; i<restrictions.size(); i++) {
-                        if (!printedHeader){
-                            pw.println("  Audio Restrictions:");
-                            printedHeader = true;
-                            needSep = true;
-                        }
-                        final int usage = restrictions.keyAt(i);
-                        pw.print("    "); pw.print(op);
-                        pw.print(" usage="); pw.print(AudioAttributes.usageToString(usage));
-                        Restriction r = restrictions.valueAt(i);
-                        pw.print(": mode="); pw.println(AppOpsManager.modeToName(r.mode));
-                        if (!r.exceptionPackages.isEmpty()) {
-                            pw.println("      Exceptions:");
-                            for (int j=0; j<r.exceptionPackages.size(); j++) {
-                                pw.print("        "); pw.println(r.exceptionPackages.valueAt(j));
-                            }
-                        }
-                    }
-                }
+            if (mAudioRestrictionManager.hasActiveRestrictions() && dumpOp < 0
+                    && dumpPackage != null && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
+                needSep = mAudioRestrictionManager.dump(pw) | needSep ;
             }
             if (needSep) {
                 pw.println();
@@ -4222,12 +4370,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (dumpHistory && !dumpWatchers) {
             mHistoricalRegistry.dump("  ", pw, dumpUid, dumpPackage, dumpOp);
         }
-    }
-
-    private static final class Restriction {
-        private static final ArraySet<String> NO_EXCEPTIONS = new ArraySet<String>();
-        int mode;
-        ArraySet<String> exceptionPackages = NO_EXCEPTIONS;
     }
 
     @Override

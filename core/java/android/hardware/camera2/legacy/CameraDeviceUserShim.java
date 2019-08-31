@@ -767,6 +767,17 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
+    public int setCameraAudioRestriction(int mode) {
+        if (mLegacyDevice.isClosed()) {
+            String err = "Cannot set camera audio restriction, device has been closed.";
+            Log.e(TAG, err);
+            throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
+        }
+
+        return mLegacyDevice.setAudioRestriction(mode);
+    }
+
+    @Override
     public IBinder asBinder() {
         // This is solely intended to be used for in-process binding.
         return null;

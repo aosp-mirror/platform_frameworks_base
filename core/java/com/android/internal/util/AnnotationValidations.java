@@ -61,16 +61,52 @@ public class AnnotationValidations {
     }
 
     public static void validate(Class<IntRange> annotation, IntRange ignored, int value,
-            String paramName1, int param1, String paramName2, int param2) {
+            String paramName1, long param1, String paramName2, long param2) {
         validate(annotation, ignored, value, paramName1, param1);
         validate(annotation, ignored, value, paramName2, param2);
     }
 
     public static void validate(Class<IntRange> annotation, IntRange ignored, int value,
-            String paramName, int param) {
+            String paramName, long param) {
         switch (paramName) {
-            case "from": if (value < param) invalid(annotation, value, paramName, param); break;
-            case "to": if (value > param) invalid(annotation, value, paramName, param); break;
+            case "from":
+                if (value < param) {
+                    invalid(annotation, value, paramName, param);
+                }
+                break;
+            case "to":
+                if (value > param) {
+                    invalid(annotation, value, paramName, param);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Validate a long value with two parameters.
+     */
+    public static void validate(Class<IntRange> annotation, IntRange ignored, long value,
+            String paramName1, long param1, String paramName2, long param2) {
+        validate(annotation, ignored, value, paramName1, param1);
+        validate(annotation, ignored, value, paramName2, param2);
+    }
+
+    /**
+     * Validate a long value with one parameter.
+     */
+    public static void validate(Class<IntRange> annotation, IntRange ignored, long value,
+            String paramName, long param) {
+        switch (paramName) {
+            case "from":
+                if (value < param) {
+                    invalid(annotation, value, paramName, param);
+                }
+                break;
+            case "to":
+                if (value > param) {
+                    invalid(annotation, value, paramName, param);
+                }
+                break;
         }
     }
 

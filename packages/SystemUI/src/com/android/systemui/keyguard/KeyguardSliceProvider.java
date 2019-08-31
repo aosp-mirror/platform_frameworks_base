@@ -49,7 +49,9 @@ import androidx.slice.builders.SliceAction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -72,7 +74,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class KeyguardSliceProvider extends SliceProvider implements
         NextAlarmController.NextAlarmChangeCallback, ZenModeController.Callback,
-        NotificationMediaManager.MediaListener, StatusBarStateController.StateListener {
+        NotificationMediaManager.MediaListener, StatusBarStateController.StateListener,
+        SystemUIAppComponentFactory.ContextInitializer {
 
     private static final StyleSpan BOLD_STYLE = new StyleSpan(Typeface.BOLD);
     public static final String KEYGUARD_SLICE_URI = "content://com.android.systemui.keyguard/main";
@@ -93,6 +96,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @VisibleForTesting
     static final int ALARM_VISIBILITY_HOURS = 12;
 
+    private static final Object sInstanceLock = new Object();
     private static KeyguardSliceProvider sInstance;
 
     protected final Uri mSliceUri;
@@ -130,6 +134,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected boolean mDozing;
     private int mStatusBarState;
     private boolean mMediaIsVisible;
+    private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -310,7 +315,11 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public boolean onCreateSliceProvider() {
-        synchronized (this) {
+        if (mContextAvailableCallback != null) {
+            mContextAvailableCallback.onContextAvailable(getContext());
+            Dependency.initDependencies(getContext());
+        }
+        synchronized (KeyguardSliceProvider.sInstanceLock) {
             KeyguardSliceProvider oldInstance = KeyguardSliceProvider.sInstance;
             if (oldInstance != null) {
                 oldInstance.onDestroy();
@@ -335,7 +344,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @VisibleForTesting
     protected void onDestroy() {
-        synchronized (this) {
+        synchronized (KeyguardSliceProvider.sInstanceLock) {
             mNextAlarmController.removeCallback(this);
             mZenModeController.removeCallback(this);
             mMediaWakeLock.setAcquired(false);
@@ -345,6 +354,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
                 getKeyguardUpdateMonitor().removeCallback(mKeyguardUpdateMonitorCallback);
                 getContext().unregisterReceiver(mIntentReceiver);
             }
+            KeyguardSliceProvider.sInstance = null;
         }
     }
 
@@ -449,9 +459,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
         updateNextAlarm();
     }
 
-    @VisibleForTesting
-    protected KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
-        return KeyguardUpdateMonitor.getInstance(getContext());
+    private KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
+        return Dependency.get(KeyguardUpdateMonitor.class);
     }
 
     /**
@@ -529,5 +538,11 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (notify) {
             notifyChange();
         }
+    }
+
+    @Override
+    public void setContextAvailableCallback(
+            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
+        mContextAvailableCallback = callback;
     }
 }

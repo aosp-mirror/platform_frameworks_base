@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 public class KeyguardPresentationTest extends SysuiTestCase {
     @Test
     public void testInflation_doesntCrash() {
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         InjectionInflationController inflationController = new InjectionInflationController(
                 SystemUIFactory.getInstance().getRootComponent());

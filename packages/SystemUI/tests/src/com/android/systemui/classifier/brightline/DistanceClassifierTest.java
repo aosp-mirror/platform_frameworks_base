@@ -24,6 +24,8 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.util.DeviceConfigProxyFake;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +43,7 @@ public class DistanceClassifierTest extends ClassifierTest {
     public void setup() {
         super.setup();
         mDataProvider = getDataProvider();
-        mClassifier = new DistanceClassifier(mDataProvider);
+        mClassifier = new DistanceClassifier(mDataProvider, new DeviceConfigProxyFake());
     }
 
     @After

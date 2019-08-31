@@ -30,6 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.appops.AppOpsController;
@@ -145,6 +146,11 @@ public class Dependency extends SystemUI {
     private static final String TAG = "Dependency";
 
     /**
+     * Key for getting a the main looper.
+     */
+    public static final String MAIN_LOOPER_NAME = "main_looper";
+
+    /**
      * Key for getting a background Looper for background work.
      */
     public static final String BG_LOOPER_NAME = "background_looper";
@@ -176,6 +182,10 @@ public class Dependency extends SystemUI {
      * Key for getting a background Looper for background work.
      */
     public static final DependencyKey<Looper> BG_LOOPER = new DependencyKey<>(BG_LOOPER_NAME);
+    /**
+     * Key for getting a mainer Looper.
+     */
+    public static final DependencyKey<Looper> MAIN_LOOPER = new DependencyKey<>(MAIN_LOOPER_NAME);
     /**
      * Key for getting a background Handler for background work.
      */
@@ -215,6 +225,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<UserSwitcherController> mUserSwitcherController;
     @Inject Lazy<UserInfoController> mUserInfoController;
     @Inject Lazy<KeyguardMonitor> mKeyguardMonitor;
+    @Inject Lazy<KeyguardUpdateMonitor> mKeyguardUpdateMonitor;
     @Inject Lazy<BatteryController> mBatteryController;
     @Inject Lazy<NightDisplayListener> mNightDisplayListener;
     @Inject Lazy<ManagedProfileController> mManagedProfileController;
@@ -291,6 +302,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<PrivacyItemController> mPrivacyItemController;
     @Inject @Named(BG_LOOPER_NAME) Lazy<Looper> mBgLooper;
     @Inject @Named(BG_HANDLER_NAME) Lazy<Handler> mBgHandler;
+    @Inject @Named(MAIN_LOOPER_NAME) Lazy<Looper> mMainLooper;
     @Inject @Named(MAIN_HANDLER_NAME) Lazy<Handler> mMainHandler;
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
     @Nullable
@@ -318,6 +330,7 @@ public class Dependency extends SystemUI {
         mProviders.put(TIME_TICK_HANDLER, mTimeTickHandler::get);
         mProviders.put(BG_LOOPER, mBgLooper::get);
         mProviders.put(BG_HANDLER, mBgHandler::get);
+        mProviders.put(MAIN_LOOPER, mMainLooper::get);
         mProviders.put(MAIN_HANDLER, mMainHandler::get);
         mProviders.put(ActivityStarter.class, mActivityStarter::get);
         mProviders.put(ActivityStarterDelegate.class, mActivityStarterDelegate::get);
@@ -343,6 +356,8 @@ public class Dependency extends SystemUI {
         mProviders.put(FlashlightController.class, mFlashlightController::get);
 
         mProviders.put(KeyguardMonitor.class, mKeyguardMonitor::get);
+
+        mProviders.put(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor::get);
 
         mProviders.put(UserSwitcherController.class, mUserSwitcherController::get);
 

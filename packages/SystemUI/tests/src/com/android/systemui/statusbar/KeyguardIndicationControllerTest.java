@@ -268,12 +268,18 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void unlockMethodCache_listenerUpdatesIndication() {
         createController();
         String restingIndication = "Resting indication";
-        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
-        mController.setRestingIndication(restingIndication);
+
         mController.setVisible(true);
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getString(com.android.internal.R.string.lockscreen_storage_locked));
+
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
+        mController.setRestingIndication(restingIndication);
         assertThat(mTextView.getText()).isEqualTo(mController.getTrustGrantedIndication());
 
         reset(mKeyguardUpdateMonitor);
+        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
         mController.onUnlockMethodStateChanged();
         assertThat(mTextView.getText()).isEqualTo(restingIndication);

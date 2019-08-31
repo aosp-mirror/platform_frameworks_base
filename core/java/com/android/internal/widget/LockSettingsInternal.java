@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import android.annotation.Nullable;
+import android.app.admin.PasswordMetrics;
 
 /**
  * LockSettingsService local system service interface.
@@ -61,4 +63,18 @@ public abstract class LockSettingsInternal {
             long tokenHandle, byte[] token, int requestedQuality, int userId);
 
     public abstract boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId);
+
+    /**
+     * Returns PasswordMetrics object corresponding to the given user's lockscreen password.
+     * If the user has a password but its metrics isn't known yet (for example if the device
+     * has not been unlocked since boot), this method will return {@code null}.
+     * If the user has no password, a default PasswordMetrics (PASSWORD_QUALITY_UNSPECIFIED)
+     * will be returned.
+     *
+     * Calling this method on a managed profile user with unified challenge is undefined.
+     *
+     * @param userHandle the user for whom to provide metrics.
+     * @return the user password metrics.
+     */
+    public abstract @Nullable PasswordMetrics getUserPasswordMetrics(int userHandle);
 }

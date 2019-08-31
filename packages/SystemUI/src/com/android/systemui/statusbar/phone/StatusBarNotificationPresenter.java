@@ -240,7 +240,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     public void onDensityOrFontScaleChanged() {
         MessagingMessage.dropCache();
         MessagingGroup.dropCache();
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
+        if (!Dependency.get(KeyguardUpdateMonitor.class).isSwitchingUser()) {
             updateNotificationsOnDensityOrFontScaleChanged();
         } else {
             mReinflateNotificationsOnUserSwitched = true;
@@ -249,7 +249,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     @Override
     public void onUiModeChanged() {
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
+        if (!Dependency.get(KeyguardUpdateMonitor.class).isSwitchingUser()) {
             updateNotificationOnUiModeChanged();
         } else {
             mDispatchUiModeChangeOnUserSwitched = true;

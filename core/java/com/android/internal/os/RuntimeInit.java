@@ -20,7 +20,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
-import android.content.type.MimeMapImpl;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Debug;
@@ -34,9 +33,6 @@ import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
 import dalvik.system.RuntimeHooks;
 import dalvik.system.VMRuntime;
-
-import libcore.net.MimeMap;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -212,14 +208,6 @@ public class RuntimeInit {
          * Install a time zone supplier that uses the Android persistent time zone system property.
          */
         RuntimeHooks.setTimeZoneIdSupplier(() -> SystemProperties.get("persist.sys.timezone"));
-
-        /*
-         * Replace libcore's minimal default mapping between MIME types and file
-         * extensions with a mapping that's suitable for Android. Android's mapping
-         * contains many more entries that are derived from IANA registrations but
-         * with several customizations (extensions, overrides).
-         */
-        MimeMap.setDefault(MimeMapImpl.createDefaultInstance());
 
         /*
          * Sets handler for java.util.logging to use Android log facilities.

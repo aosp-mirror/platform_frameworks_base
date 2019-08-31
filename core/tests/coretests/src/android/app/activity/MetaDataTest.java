@@ -125,7 +125,7 @@ public class MetaDataTest extends AndroidTestCase {
 
     @SmallTest
     public void testServiceWithData() throws Exception {
-        ComponentName cn = new ComponentName(mContext, LocalService.class);
+        ComponentName cn = new ComponentName(mContext, ServiceTest.RemoteService.class);
         ServiceInfo si = mContext.getPackageManager().getServiceInfo(
                 cn, PackageManager.GET_META_DATA);
 

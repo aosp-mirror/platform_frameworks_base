@@ -19,14 +19,14 @@
 java_sdk_library {
     name: "android.test.mock",
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        ":framework-srcs",
+    ],
 
     api_packages: [
         "android.test.mock",
     ],
-
-    srcs_lib: "framework-minus-apex",
-    srcs_lib_whitelist_pkgs: ["android"],
     compile_dex: true,
 }
 

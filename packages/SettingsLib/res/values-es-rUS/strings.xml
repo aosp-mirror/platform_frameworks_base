@@ -141,7 +141,7 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicaciones y usuarios eliminados"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"Actualizaciones del sistema"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión a red por USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portátil"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartir conexión"</string>
@@ -286,7 +286,7 @@
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Esperar que se conecte el depurador para iniciar la aplicación"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Entrada"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Dibujo"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Procesamiento acelerado mediante hardware"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Representación acelerada mediante hardware"</string>
     <string name="media_category" msgid="4388305075496848353">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Supervisión"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modo estricto"</string>

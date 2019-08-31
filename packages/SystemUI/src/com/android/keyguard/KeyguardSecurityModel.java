@@ -23,6 +23,7 @@ import android.telephony.SubscriptionManager;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Dependency;
 
 public class KeyguardSecurityModel {
 
@@ -57,7 +58,7 @@ public class KeyguardSecurityModel {
     }
 
     SecurityMode getSecurityMode(int userId) {
-        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
 
         if (mIsPukScreenAvailable && SubscriptionManager.isValidSubscriptionId(
                 monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED))) {

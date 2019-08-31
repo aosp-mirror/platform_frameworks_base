@@ -499,10 +499,10 @@ public class NotificationEntryManager implements
         if (rankingMap == null) {
             return;
         }
-        NotificationListenerService.Ranking tmpRanking = new NotificationListenerService.Ranking();
+        NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         for (NotificationEntry pendingNotification : mPendingNotifications.values()) {
-            rankingMap.getRanking(pendingNotification.key, tmpRanking);
-            pendingNotification.populateFromRanking(tmpRanking);
+            rankingMap.getRanking(pendingNotification.key, ranking);
+            pendingNotification.setRanking(ranking);
         }
     }
 

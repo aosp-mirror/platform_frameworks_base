@@ -775,8 +775,9 @@ public final class DeviceConfig {
          *
          * @param namespace The namespace these properties belong to.
          * @param keyValueMap A map between property names and property values.
+         * @hide
          */
-        Properties(@NonNull String namespace, @Nullable Map<String, String> keyValueMap) {
+        public Properties(@NonNull String namespace, @Nullable Map<String, String> keyValueMap) {
             Preconditions.checkNotNull(namespace);
             mNamespace = namespace;
             mMap = new HashMap();

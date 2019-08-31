@@ -17,6 +17,8 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -94,7 +96,7 @@ public final class LteVopsSupportInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == null || !(o instanceof LteVopsSupportInfo)) {
             return false;
         }
@@ -112,6 +114,7 @@ public final class LteVopsSupportInfo implements Parcelable {
     /**
      * @return string representation.
      */
+    @NonNull
     @Override
     public String toString() {
         return ("LteVopsSupportInfo : "

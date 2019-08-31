@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
@@ -117,6 +116,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private static final int DOZE_ANIMATION_STAGGER_DELAY = 48;
     private static final int DOZE_ANIMATION_ELEMENT_DURATION = 250;
 
+    private final UnlockMethodCache mUnlockMethodCache;
     private KeyguardAffordanceView mRightAffordanceView;
     private KeyguardAffordanceView mLeftAffordanceView;
     private ViewGroup mIndicationArea;
@@ -129,7 +129,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private View mCameraPreview;
 
     private ActivityStarter mActivityStarter;
-    private UnlockMethodCache mUnlockMethodCache;
     private LockPatternUtils mLockPatternUtils;
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
@@ -185,6 +184,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
     }
 
     private AccessibilityDelegate mAccessibilityDelegate = new AccessibilityDelegate() {
@@ -242,8 +242,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mBurnInYOffset = getResources().getDimensionPixelSize(
                 R.dimen.default_burn_in_prevention_offset);
         updateCameraVisibility();
-        mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
-        mUnlockMethodCache.addListener(this);
         setClipChildren(false);
         setClipToPadding(false);
         inflateCameraPreview();
@@ -280,17 +278,19 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         getContext().registerReceiverAsUser(mDevicePolicyReceiver,
                 UserHandle.ALL, filter, null, null);
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateMonitorCallback);
+        mUnlockMethodCache.addListener(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mUnlockMethodCache.removeListener(this);
         mAccessibilityController.removeStateChangedCallback(this);
         mRightExtension.destroy();
         mLeftExtension.destroy();
         getContext().unregisterReceiver(mDevicePolicyReceiver);
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mUpdateMonitorCallback);
     }
 
     private void initAccessibility() {
@@ -365,11 +365,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
      * Resolves the intent to launch the camera application.
      */
     public ResolveInfo resolveCameraIntent() {
-        // TODO(b/140057230)
-        return whitelistIpcs(() ->
-                mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
-                    PackageManager.MATCH_DEFAULT_ONLY,
-                    KeyguardUpdateMonitor.getCurrentUser()));
+        return mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
+                PackageManager.MATCH_DEFAULT_ONLY,
+                KeyguardUpdateMonitor.getCurrentUser());
     }
 
     private void updateCameraVisibility() {
@@ -806,11 +804,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public IconState getIcon() {
-            ResolveInfo resolved = resolveCameraIntent();
             boolean isCameraDisabled = (mStatusBar != null) && !mStatusBar.isCameraAllowedByAdmin();
-            mIconState.isVisible = !isCameraDisabled && resolved != null
+            mIconState.isVisible = !isCameraDisabled
                     && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
-                    && mUserSetupComplete;
+                    && mUserSetupComplete
+                    && resolveCameraIntent() != null;
             mIconState.drawable = mContext.getDrawable(R.drawable.ic_camera_alt_24dp);
             mIconState.contentDescription =
                     mContext.getString(R.string.accessibility_camera_button);
@@ -819,12 +817,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public Intent getIntent() {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
             boolean canSkipBouncer = updateMonitor.getUserCanSkipBouncer(
                     KeyguardUpdateMonitor.getCurrentUser());
-            // TODO(b/140057230)
-            boolean secure = whitelistIpcs(() ->
-                    mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser()));
+            boolean secure = mUnlockMethodCache.isMethodSecure();
             return (secure && !canSkipBouncer) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
         }
     }

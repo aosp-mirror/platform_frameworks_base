@@ -421,7 +421,7 @@ public class NotificationPanelView extends PanelView implements
         });
         mThemeResId = context.getThemeResId();
         mKeyguardBypassController = bypassController;
-        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         dynamicPrivacyController.addListener(this);
 
         mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);

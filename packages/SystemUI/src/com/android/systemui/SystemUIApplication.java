@@ -49,7 +49,7 @@ import java.util.Map;
  * Application class for SystemUI.
  */
 public class SystemUIApplication extends Application implements SysUiServiceProvider,
-        SystemUIAppComponentFactory.ContextProvider {
+        SystemUIAppComponentFactory.ContextInitializer {
 
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
@@ -182,7 +182,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                     o = ((SystemUI.Injector) o).apply(this);
                 }
                 mServices[i] = (SystemUI) o;
-            } catch(ClassNotFoundException ex){
+            } catch (ClassNotFoundException ex) {
                 throw new RuntimeException(ex);
             } catch (IllegalAccessException ex) {
                 throw new RuntimeException(ex);

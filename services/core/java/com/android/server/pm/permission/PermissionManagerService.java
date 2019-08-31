@@ -650,9 +650,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void updatePermissionFlagsInternal(String permName, String packageName, int flagMask,
             int flagValues, int callingUid, int userId, boolean overridePolicy,
             PermissionCallback callback) {
-        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+        if (ApplicationPackageManager.DEBUG_TRACE_PERMISSION_UPDATES
                 && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is updating flags for "
+            Log.i(TAG, "System is updating flags for " + packageName + " "
                             + permName + " for user " + userId  + " "
                             + DebugUtils.flagsToString(
                                     PackageManager.class, "FLAG_PERMISSION_", flagMask)
@@ -1185,7 +1185,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
         if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
                 && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is granting "
+            Log.i(TAG, "System is granting " + packageName + " "
                     + permName + " for user " + userId + " on behalf of uid " + callingUid
                     + " " + mPackageManagerInt.getNameForUid(callingUid),
                     new RuntimeException());
@@ -1345,9 +1345,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     // TODO swap permission name and package name
     private void revokeRuntimePermissionInternal(String permName, String packageName,
             boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
-        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+        if (ApplicationPackageManager.DEBUG_TRACE_PERMISSION_UPDATES
                 && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is revoking "
+            Log.i(TAG, "System is revoking " + packageName + " "
                             + permName + " for user " + userId + " on behalf of uid " + callingUid
                             + " " + mPackageManagerInt.getNameForUid(callingUid),
                     new RuntimeException());

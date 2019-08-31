@@ -413,7 +413,7 @@ public final class OverlayInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -448,6 +448,7 @@ public final class OverlayInfo implements Parcelable {
         return true;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "OverlayInfo { overlay=" + packageName + ", targetPackage=" + targetPackageName

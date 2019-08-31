@@ -96,7 +96,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME,
                 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
-        mEntry = new NotificationEntry(sbn);
+        mEntry = NotificationEntry.buildForTest(sbn);
         mEntry.setRow(mRow);
 
         mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),

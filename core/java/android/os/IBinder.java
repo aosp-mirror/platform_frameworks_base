@@ -170,6 +170,11 @@ public interface IBinder {
     int FLAG_ONEWAY             = 0x00000001;
 
     /**
+     * @hide
+     */
+    int FLAG_COLLECT_NOTED_APP_OPS = 0x00000002;
+
+    /**
      * Limit that should be placed on IPC sizes to keep them safely under the
      * transaction buffer limit.
      * @hide

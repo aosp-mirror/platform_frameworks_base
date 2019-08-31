@@ -195,12 +195,12 @@ public class NotificationFilterTest extends SysuiTestCase {
 
         // test should filter out hidden notifications:
         // hidden
-        NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
+        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
         entry.suspended = true;
         assertTrue(mNotificationFilter.shouldFilterOut(entry));
 
         // not hidden
-        entry = new NotificationEntry(mMockStatusBarNotification);
+        entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
         entry.suspended = false;
         assertFalse(mNotificationFilter.shouldFilterOut(entry));
     }

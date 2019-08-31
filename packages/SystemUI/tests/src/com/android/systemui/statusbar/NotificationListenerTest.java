@@ -91,7 +91,7 @@ public class NotificationListenerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationUpdateCallsUpdateNotification() {
-        when(mNotificationData.get(mSbn.getKey())).thenReturn(new NotificationEntry(mSbn));
+        when(mNotificationData.get(mSbn.getKey())).thenReturn(NotificationEntry.buildForTest(mSbn));
         mListener.onNotificationPosted(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
         verify(mEntryManager).updateNotification(mSbn, mRanking);

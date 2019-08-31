@@ -4644,7 +4644,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         boolean didSomething = mProcessList.killPackageProcessesLocked(packageName, appId, userId,
-                ProcessList.INVALID_ADJ, callerWillRestart, true /* allowRestart */, doit,
+                ProcessList.INVALID_ADJ, callerWillRestart, false /* allowRestart */, doit,
                 evenPersistent, true /* setRemoved */,
                 packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
@@ -13924,9 +13924,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Remove published content providers.
         for (int i = app.pubProviders.size() - 1; i >= 0; i--) {
             ContentProviderRecord cpr = app.pubProviders.valueAt(i);
-            final boolean always = app.bad || !allowRestart;
-            boolean inLaunching = removeDyingProviderLocked(app, cpr, always);
-            if ((inLaunching || always) && cpr.hasConnectionOrHandle()) {
+            final boolean alwaysRemove = app.bad || !allowRestart;
+            final boolean inLaunching = removeDyingProviderLocked(app, cpr, alwaysRemove);
+            if (!alwaysRemove && inLaunching && cpr.hasConnectionOrHandle()) {
                 // We left the provider in the launching list, need to
                 // restart it.
                 restart = true;

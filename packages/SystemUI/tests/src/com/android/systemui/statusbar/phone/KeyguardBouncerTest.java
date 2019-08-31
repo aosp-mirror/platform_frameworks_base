@@ -95,6 +95,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     public void setup() {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
         DejankUtils.setImmediate(true);
         final ViewGroup container = new FrameLayout(getContext());
         when(mKeyguardHostView.getViewTreeObserver()).thenReturn(mViewTreeObserver);

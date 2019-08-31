@@ -142,7 +142,7 @@ public class KeyguardIndicationController implements StateListener,
                 Dependency.get(AccessibilityController.class),
                 UnlockMethodCache.getInstance(context),
                 Dependency.get(StatusBarStateController.class),
-                KeyguardUpdateMonitor.getInstance(context));
+                Dependency.get(KeyguardUpdateMonitor.class));
     }
 
     /**
@@ -384,8 +384,7 @@ public class KeyguardIndicationController implements StateListener,
             int userId = KeyguardUpdateMonitor.getCurrentUser();
             String trustGrantedIndication = getTrustGrantedIndication();
             String trustManagedIndication = getTrustManagedIndication();
-            // TODO(b/140053632)
-            if (!whitelistIpcs(() -> mUserManager.isUserUnlocked(userId))) {
+            if (!mKeyguardUpdateMonitor.isUserUnlocked(userId)) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
                 mTextView.setTextColor(mInitialTextColorState);
             } else if (!TextUtils.isEmpty(mTransientIndication)) {
@@ -650,7 +649,7 @@ public class KeyguardIndicationController implements StateListener,
         @Override
         public void onBiometricHelp(int msgId, String helpString,
                 BiometricSourceType biometricSourceType) {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
             if (!updateMonitor.isUnlockingWithBiometricAllowed()) {
                 return;
             }
@@ -675,7 +674,7 @@ public class KeyguardIndicationController implements StateListener,
         @Override
         public void onBiometricError(int msgId, String errString,
                 BiometricSourceType biometricSourceType) {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
             if (shouldSuppressBiometricError(msgId, biometricSourceType, updateMonitor)) {
                 return;
             }
@@ -754,6 +753,13 @@ public class KeyguardIndicationController implements StateListener,
         public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
             super.onBiometricAuthenticated(userId, biometricSourceType);
             mHandler.sendEmptyMessage(MSG_HIDE_TRANSIENT);
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            if (mVisible) {
+                updateIndication(false);
+            }
         }
 
         @Override

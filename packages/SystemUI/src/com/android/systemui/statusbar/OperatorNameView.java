@@ -70,7 +70,7 @@ public class OperatorNameView extends TextView implements DemoMode, DarkReceiver
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardUpdateMonitor.registerCallback(mCallback);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
         Dependency.get(NetworkController.class).addCallback(this);

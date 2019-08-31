@@ -30,6 +30,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -64,8 +66,10 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     private TestFriendlySettingsBackupAgent mAgentUnderTest;
     private Context mContext;
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         mContext = new ContextWithMockContentResolver(getContext());
 
         mAgentUnderTest = new TestFriendlySettingsBackupAgent();
@@ -267,6 +271,18 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
                 result.addRow(resultRow);
             }
             return result;
+        }
+
+        @Override
+        public Bundle call(String method, String request, Bundle args) {
+            for (Object[] resultRow : RESULT_ROWS) {
+                if (Objects.equals(request, resultRow[0])) {
+                    final Bundle res = new Bundle();
+                    res.putString("value", String.valueOf(resultRow[1]));
+                    return res;
+                }
+            }
+            return Bundle.EMPTY;
         }
     }
 }

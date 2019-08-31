@@ -75,7 +75,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         mH = h;
         mWallpaperManager = (WallpaperManager) ctx.getSystemService(Context.WALLPAPER_SERVICE);
         mCurrentUserId = ActivityManager.getCurrentUser();
-        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(ctx);
+        mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
 
         IWallpaperManager service = IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE));

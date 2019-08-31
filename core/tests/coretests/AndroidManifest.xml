@@ -1270,28 +1270,14 @@
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_REMOTE_DENIED" />
             </intent-filter>
         </receiver>
-        <service android:name="android.app.activity.LocalService">
-            <intent-filter>
-                <action android:name="com.android.frameworks.coretests.activity.SERVICE_LOCAL" />
-            </intent-filter>
+        <service android:name="android.app.activity.ServiceTest$RemoteService"
+                android:process=":RemoteService">
             <meta-data android:name="com.android.frameworks.coretests.string" android:value="foo" />
             <meta-data android:name="com.android.frameworks.coretests.boolean" android:value="true" />
             <meta-data android:name="com.android.frameworks.coretests.integer" android:value="100" />
             <meta-data android:name="com.android.frameworks.coretests.color" android:value="#ff000000" />
             <meta-data android:name="com.android.frameworks.coretests.float" android:value="100.1" />
             <meta-data android:name="com.android.frameworks.coretests.reference" android:resource="@xml/metadata" />
-        </service>
-        <service android:name="android.app.activity.LocalDeniedService"
-                android:permission="com.android.frameworks.coretests.permission.TEST_DENIED">
-            <intent-filter>
-                <action android:name="com.android.frameworks.coretests.activity.SERVICE_LOCAL_DENIED" />
-            </intent-filter>
-        </service>
-        <service android:name="android.app.activity.LocalGrantedService"
-                android:permission="com.android.frameworks.coretests.permission.TEST_GRANTED">
-            <intent-filter>
-                <action android:name="com.android.frameworks.coretests.activity.SERVICE_LOCAL_GRANTED" />
-            </intent-filter>
         </service>
 
         <service

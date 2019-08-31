@@ -377,7 +377,7 @@ public final class ProgramList implements AutoCloseable {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof Filter)) return false;
             Filter other = (Filter) obj;
@@ -389,6 +389,7 @@ public final class ProgramList implements AutoCloseable {
             return true;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "Filter [mIdentifierTypes=" + mIdentifierTypes

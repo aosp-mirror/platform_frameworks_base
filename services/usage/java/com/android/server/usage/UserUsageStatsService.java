@@ -156,6 +156,15 @@ class UserUsageStatsService {
         }
     }
 
+    void userUnlocked(long currentTimeMillis) {
+        init(currentTimeMillis);
+    }
+
+    void userStopped() {
+        // Flush events to disk immediately to guarantee persistence.
+        persistActiveStats();
+    }
+
     void onTimeChanged(long oldTime, long newTime) {
         persistActiveStats();
         mDatabase.onTimeChanged(newTime - oldTime);

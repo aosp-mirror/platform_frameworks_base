@@ -18,14 +18,18 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.CHOOSER_ACTION;
 import static android.app.usage.UsageEvents.Event.CONFIGURATION_CHANGE;
+import static android.app.usage.UsageEvents.Event.DEVICE_EVENT_PACKAGE_NAME;
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
+import static android.app.usage.UsageEvents.Event.USER_STOPPED;
+import static android.app.usage.UsageEvents.Event.USER_UNLOCKED;
 import static android.app.usage.UsageStatsManager.USAGE_SOURCE_CURRENT_ACTIVITY;
 import static android.app.usage.UsageStatsManager.USAGE_SOURCE_TASK_ROOT_ACTIVITY;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
@@ -70,8 +74,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.content.PackageMonitor;
@@ -81,11 +87,20 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -111,6 +126,12 @@ public class UsageStatsService extends SystemService implements
     private static final boolean ENABLE_KERNEL_UPDATES = true;
     private static final File KERNEL_COUNTER_FILE = new File("/proc/uid_procstat/set");
 
+    private static final File USAGE_STATS_LEGACY_DIR = new File(
+            Environment.getDataSystemDirectory(), "usagestats");
+    // For migration purposes, indicates whether to keep the legacy usage stats directory or not
+    // STOPSHIP: b/138323140 this should be false on launch
+    private static final boolean KEEP_LEGACY_DIR = true;
+
     private static final char TOKEN_DELIMITER = '/';
 
     // Handler message types.
@@ -119,6 +140,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_REMOVE_USER = 2;
     static final int MSG_UID_STATE_CHANGED = 3;
     static final int MSG_REPORT_EVENT_TO_ALL_USERID = 4;
+    static final int MSG_UNLOCKED_USER = 5;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -132,8 +154,8 @@ public class UsageStatsService extends SystemService implements
     DevicePolicyManagerInternal mDpmInternal;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
+    private final SparseBooleanArray mUserUnlockedStates = new SparseBooleanArray();
     private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
-    private File mUsageStatsDir;
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
     int mUsageSource;
@@ -144,6 +166,8 @@ public class UsageStatsService extends SystemService implements
     /** Manages app time limit observers */
     AppTimeLimitController mAppTimeLimit;
 
+    // A map maintaining a queue of events to be reported per user.
+    private final SparseArray<LinkedList<Event>> mReportedEvents = new SparseArray<>();
     final SparseArray<ArraySet<String>> mUsageReporters = new SparseArray();
     final SparseArray<ActivityData> mVisibleActivities = new SparseArray();
 
@@ -165,7 +189,7 @@ public class UsageStatsService extends SystemService implements
                             SystemClock.elapsedRealtime());
                     event.mBucketAndReason = (bucket << 16) | (reason & 0xFFFF);
                     event.mPackage = packageName;
-                    mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+                    reportEventOrAddToQueue(userId, event);
                 }
 
                 @Override
@@ -223,30 +247,17 @@ public class UsageStatsService extends SystemService implements
                 }, mHandler.getLooper());
 
         mAppStandby.addListener(mStandbyChangeListener);
-        File systemDataDir = new File(Environment.getDataDirectory(), "system");
-        mUsageStatsDir = new File(systemDataDir, "usagestats");
-        mUsageStatsDir.mkdirs();
-        if (!mUsageStatsDir.exists()) {
-            throw new IllegalStateException("Usage stats directory does not exist: "
-                    + mUsageStatsDir.getAbsolutePath());
-        }
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
                 null, mHandler);
 
-        synchronized (mLock) {
-            cleanUpRemovedUsersLocked();
-        }
-
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
-        // Make sure we initialize the data, in case job scheduler needs it early.
-        getUserDataAndInitializeIfNeededLocked(UserHandle.USER_SYSTEM, mSystemTimeSnapshot);
     }
 
     @Override
@@ -272,6 +283,85 @@ public class UsageStatsService extends SystemService implements
                 Slog.w(TAG, "Missing procfs interface: " + KERNEL_COUNTER_FILE);
             }
             readUsageSourceSetting();
+        }
+    }
+
+    @Override
+    public void onStartUser(UserInfo userInfo) {
+        // Create an entry in the user state map to indicate that the user has been started but
+        // not necessarily unlocked. This will ensure that reported events are flushed to disk
+        // event if the user is never unlocked (following the logic in #flushToDiskLocked)
+        mUserState.put(userInfo.id, null);
+        super.onStartUser(userInfo);
+    }
+
+    @Override
+    public void onUnlockUser(@NonNull UserInfo userInfo) {
+        mHandler.obtainMessage(MSG_UNLOCKED_USER, userInfo.id, 0).sendToTarget();
+        super.onUnlockUser(userInfo);
+    }
+
+    @Override
+    public void onStopUser(@NonNull UserInfo userInfo) {
+        synchronized (mLock) {
+            // User was started but never unlocked so no need to report a user stopped event
+            if (!mUserUnlockedStates.get(userInfo.id)) {
+                persistPendingEventsLocked(userInfo.id);
+                super.onStopUser(userInfo);
+                return;
+            }
+
+            // Report a user stopped event before persisting all stats to disk via the user service
+            final Event event = new Event(USER_STOPPED, SystemClock.elapsedRealtime());
+            event.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
+            reportEvent(event, userInfo.id);
+            final UserUsageStatsService userService = mUserState.get(userInfo.id);
+            if (userService != null) {
+                userService.userStopped();
+            }
+            mUserUnlockedStates.put(userInfo.id, false);
+            mUserState.put(userInfo.id, null); // release the service (mainly for GC)
+        }
+        super.onStopUser(userInfo);
+    }
+
+    private void onUserUnlocked(int userId) {
+        synchronized (mLock) {
+            // Create a user unlocked event to report
+            final Event unlockEvent = new Event(USER_UNLOCKED, SystemClock.elapsedRealtime());
+            unlockEvent.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
+
+            migrateStatsToSystemCeIfNeededLocked(userId);
+
+            // Read pending reported events from disk and merge them with those stored in memory
+            final LinkedList<Event> pendingEvents = new LinkedList<>();
+            loadPendingEventsLocked(userId, pendingEvents);
+            final LinkedList<Event> eventsInMem = mReportedEvents.get(userId);
+            if (eventsInMem != null) {
+                pendingEvents.addAll(eventsInMem);
+            }
+            boolean needToFlush = !pendingEvents.isEmpty();
+
+            mUserUnlockedStates.put(userId, true);
+            final UserUsageStatsService userService = getUserDataAndInitializeIfNeededLocked(
+                    userId, System.currentTimeMillis());
+            userService.userUnlocked(checkAndGetTimeLocked());
+            // Process all the pending reported events
+            while (pendingEvents.peek() != null) {
+                reportEvent(pendingEvents.poll(), userId);
+            }
+            reportEvent(unlockEvent, userId);
+
+            // Remove all the stats stored in memory and in system DE.
+            mReportedEvents.remove(userId);
+            deleteRecursively(new File(Environment.getDataSystemDeDirectory(userId), "usagestats"));
+            // Force a flush to disk for the current user to ensure important events are persisted.
+            // Note: there is a very very small chance that the system crashes between deleting
+            // the stats above from DE and persisting them to CE here in which case we will lose
+            // those events that were in memory and deleted from DE. (b/139836090)
+            if (needToFlush) {
+                userService.persistActiveStats();
+            }
         }
     }
 
@@ -350,33 +440,6 @@ public class UsageStatsService extends SystemService implements
         return !mPackageManagerInternal.canAccessInstantApps(callingUid, userId);
     }
 
-    private void cleanUpRemovedUsersLocked() {
-        final List<UserInfo> users = mUserManager.getUsers(true);
-        if (users == null || users.size() == 0) {
-            throw new IllegalStateException("There can't be no users");
-        }
-
-        ArraySet<String> toDelete = new ArraySet<>();
-        String[] fileNames = mUsageStatsDir.list();
-        if (fileNames == null) {
-            // No users to delete.
-            return;
-        }
-
-        toDelete.addAll(Arrays.asList(fileNames));
-
-        final int userCount = users.size();
-        for (int i = 0; i < userCount; i++) {
-            final UserInfo userInfo = users.get(i);
-            toDelete.remove(Integer.toString(userInfo.id));
-        }
-
-        final int deleteCount = toDelete.size();
-        for (int i = 0; i < deleteCount; i++) {
-            deleteRecursively(new File(mUsageStatsDir, toDelete.valueAt(i)));
-        }
-    }
-
     private static void deleteRecursively(File f) {
         File[] files = f.listFiles();
         if (files != null) {
@@ -385,7 +448,7 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
-        if (!f.delete()) {
+        if (f.exists() && !f.delete()) {
             Slog.e(TAG, "Failed to delete " + f);
         }
     }
@@ -394,12 +457,115 @@ public class UsageStatsService extends SystemService implements
             long currentTimeMillis) {
         UserUsageStatsService service = mUserState.get(userId);
         if (service == null) {
-            service = new UserUsageStatsService(getContext(), userId,
-                    new File(mUsageStatsDir, Integer.toString(userId)), this);
-            service.init(currentTimeMillis);
+            final File usageStatsDir = new File(Environment.getDataSystemCeDirectory(userId),
+                    "usagestats");
+            service = new UserUsageStatsService(getContext(), userId, usageStatsDir, this);
+            if (mUserUnlockedStates.get(userId)) {
+                service.init(currentTimeMillis);
+            }
             mUserState.put(userId, service);
         }
         return service;
+    }
+
+    private void migrateStatsToSystemCeIfNeededLocked(int userId) {
+        final File usageStatsDir = new File(Environment.getDataSystemCeDirectory(userId),
+                "usagestats");
+        if (!usageStatsDir.mkdirs() && !usageStatsDir.exists()) {
+            throw new IllegalStateException("Usage stats directory does not exist: "
+                    + usageStatsDir.getAbsolutePath());
+        }
+        // Check if the migrated status file exists - if not, migrate usage stats.
+        final File migrated = new File(usageStatsDir, "migrated");
+        if (migrated.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(migrated))) {
+                final int previousVersion = Integer.parseInt(reader.readLine());
+                // UsageStatsDatabase.BACKUP_VERSION was 4 when usage stats were migrated to CE.
+                if (previousVersion >= 4) {
+                    deleteLegacyDir(userId);
+                    return;
+                }
+                // If migration logic needs to be changed in a future version, do it here.
+            } catch (NumberFormatException | IOException e) {
+                Slog.e(TAG, "Failed to read migration status file, possibly corrupted.");
+                deleteRecursively(usageStatsDir);
+                if (usageStatsDir.exists()) {
+                    Slog.e(TAG, "Unable to delete usage stats CE directory.");
+                    throw new RuntimeException(e);
+                } else {
+                    // Make the directory again since previous migration was not complete
+                    if (!usageStatsDir.mkdirs() && !usageStatsDir.exists()) {
+                        throw new IllegalStateException("Usage stats directory does not exist: "
+                                + usageStatsDir.getAbsolutePath());
+                    }
+                }
+            }
+        }
+
+        Slog.i(TAG, "Starting migration to system CE for user " + userId);
+        final File legacyUserDir = new File(USAGE_STATS_LEGACY_DIR, Integer.toString(userId));
+        if (legacyUserDir.exists()) {
+            copyRecursively(usageStatsDir, legacyUserDir);
+        }
+        // Create a status file to indicate that the migration to CE has been completed.
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(migrated))) {
+            writer.write(Integer.toString(UsageStatsDatabase.BACKUP_VERSION));
+            writer.write("\n");
+            writer.flush();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write migrated status file");
+            throw new RuntimeException(e);
+        }
+        Slog.i(TAG, "Finished migration to system CE for user " + userId);
+
+        // Migration was successful - delete the legacy directory
+        deleteLegacyDir(userId);
+    }
+
+    private static void copyRecursively(final File parent, File f) {
+        final File[] files = f.listFiles();
+        if (files == null) {
+            try {
+                Files.copy(f.toPath(), new File(parent, f.getName()).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to move usage stats file : " + f.toString());
+                throw new RuntimeException(e);
+            }
+            return;
+        }
+
+        for (int i = files.length - 1; i >= 0; i--) {
+            File newParent = parent;
+            if (files[i].isDirectory()) {
+                newParent = new File(parent, files[i].getName());
+                final boolean mkdirSuccess = newParent.mkdirs();
+                if (!mkdirSuccess && !newParent.exists()) {
+                    throw new IllegalStateException(
+                            "Failed to create usage stats directory during migration: "
+                            + newParent.getAbsolutePath());
+                }
+            }
+            copyRecursively(newParent, files[i]);
+        }
+    }
+
+    private void deleteLegacyDir(int userId) {
+        final File legacyUserDir = new File(USAGE_STATS_LEGACY_DIR, Integer.toString(userId));
+        if (!KEEP_LEGACY_DIR) {
+            deleteRecursively(legacyUserDir);
+            if (legacyUserDir.exists()) {
+                Slog.w(TAG, "Error occurred while attempting to delete legacy usage stats "
+                        + "dir for user " + userId);
+            }
+            // If all users have been migrated, delete the parent legacy usage stats directory
+            if (USAGE_STATS_LEGACY_DIR.list() != null
+                    && USAGE_STATS_LEGACY_DIR.list().length == 0) {
+                if (!USAGE_STATS_LEGACY_DIR.delete()) {
+                    Slog.w(TAG, "Error occurred while attempting to delete legacy usage stats dir");
+                }
+            }
+        }
     }
 
     /**
@@ -463,11 +629,95 @@ public class UsageStatsService extends SystemService implements
         mHandler.sendEmptyMessage(MSG_FLUSH_TO_DISK);
     }
 
+    private void loadPendingEventsLocked(int userId, LinkedList<Event> pendingEvents) {
+        final File usageStatsDeDir = new File(Environment.getDataSystemDeDirectory(userId),
+                "usagestats");
+        final File[] pendingEventsFiles = usageStatsDeDir.listFiles();
+        if (pendingEventsFiles == null || pendingEventsFiles.length == 0) {
+            return;
+        }
+        Arrays.sort(pendingEventsFiles);
+
+        for (int i = 0; i < pendingEventsFiles.length; i++) {
+            final AtomicFile af = new AtomicFile(pendingEventsFiles[i]);
+            try {
+                try (FileInputStream in = af.openRead()) {
+                    UsageStatsProto.readPendingEvents(in, pendingEvents);
+                }
+            } catch (IOException e) {
+                // Even if one file read fails, exit here to keep all events in order on disk -
+                // they will be read and processed the next time user is unlocked.
+                Slog.e(TAG, "Could not read " + pendingEventsFiles[i] + " for user " + userId);
+                pendingEvents.clear();
+                return;
+            }
+        }
+    }
+
+    private void persistPendingEventsLocked(int userId) {
+        final LinkedList<Event> pendingEvents = mReportedEvents.get(userId);
+        if (pendingEvents == null || pendingEvents.isEmpty()) {
+            return;
+        }
+
+        final File usageStatsDeDir = new File(Environment.getDataSystemDeDirectory(userId),
+                "usagestats");
+        if (!usageStatsDeDir.mkdirs() && !usageStatsDeDir.exists()) {
+            throw new IllegalStateException("Usage stats DE directory does not exist: "
+                    + usageStatsDeDir.getAbsolutePath());
+        }
+        final File pendingEventsFile = new File(usageStatsDeDir,
+                "pendingevents_" + System.currentTimeMillis());
+        final AtomicFile af = new AtomicFile(pendingEventsFile);
+        FileOutputStream fos = null;
+        try {
+            fos = af.startWrite();
+            UsageStatsProto.writePendingEvents(fos, pendingEvents);
+            af.finishWrite(fos);
+            fos = null;
+            pendingEvents.clear();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write " + pendingEventsFile.getAbsolutePath()
+                    + " for user " + userId);
+        } finally {
+            af.failWrite(fos); // when fos is null (successful write), this will no-op
+        }
+    }
+
+    private void reportEventOrAddToQueue(int userId, Event event) {
+        synchronized (mLock) {
+            if (mUserUnlockedStates.get(userId)) {
+                mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+                return;
+            }
+
+            final LinkedList<Event> events = mReportedEvents.get(userId, new LinkedList<>());
+            events.add(event);
+            if (mReportedEvents.get(userId) == null) {
+                mReportedEvents.put(userId, events);
+            }
+            if (events.size() == 1) {
+                // Every time a file is persisted to disk, mReportedEvents is cleared for this user
+                // so trigger a flush to disk every time the first event has been added.
+                mHandler.sendEmptyMessageDelayed(MSG_FLUSH_TO_DISK, FLUSH_INTERVAL);
+            }
+        }
+    }
+
     /**
      * Called by the Binder stub.
      */
     void reportEvent(Event event, int userId) {
         synchronized (mLock) {
+            // This should never be called directly when the user is locked
+            if (!mUserUnlockedStates.get(userId)) {
+                Slog.wtf(TAG, "Failed to report event for locked user " + userId
+                        + " (" + event.mPackage + "/" + event.mClass
+                        + " eventType:" + event.mEventType
+                        + " instanceId:" + event.mInstanceId + ")");
+                return;
+            }
+
             final long timeNow = checkAndGetTimeLocked();
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             convertToSystemTimeLocked(event);
@@ -581,7 +831,7 @@ public class UsageStatsService extends SystemService implements
             final int userCount = mUserState.size();
             for (int i = 0; i < userCount; i++) {
                 Event copy = new Event(event);
-                reportEvent(copy, mUserState.keyAt(i));
+                reportEventOrAddToQueue(mUserState.keyAt(i), copy);
             }
         }
     }
@@ -597,6 +847,7 @@ public class UsageStatsService extends SystemService implements
             // The FLUSH_TO_DISK event is an internal event, it will not show up in IntervalStats'
             // EventList.
             Event event = new Event(FLUSH_TO_DISK, SystemClock.elapsedRealtime());
+            event.mPackage = DEVICE_EVENT_PACKAGE_NAME;
             reportEventToAllUserId(event);
             flushToDiskLocked();
         }
@@ -611,7 +862,6 @@ public class UsageStatsService extends SystemService implements
             mUserState.remove(userId);
             mAppStandby.onUserRemoved(userId);
             mAppTimeLimit.onUserRemoved(userId);
-            cleanUpRemovedUsersLocked();
         }
     }
 
@@ -621,6 +871,11 @@ public class UsageStatsService extends SystemService implements
     List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime,
             boolean obfuscateInstantApps) {
         synchronized (mLock) {
+            if (!mUserUnlockedStates.get(userId)) {
+                Slog.w(TAG, "Failed to query usage stats for locked user " + userId);
+                return null;
+            }
+
             final long timeNow = checkAndGetTimeLocked();
             if (!validRange(timeNow, beginTime, endTime)) {
                 return null;
@@ -643,7 +898,6 @@ public class UsageStatsService extends SystemService implements
                     }
                 }
             }
-
             return list;
         }
     }
@@ -654,6 +908,11 @@ public class UsageStatsService extends SystemService implements
     List<ConfigurationStats> queryConfigurationStats(int userId, int bucketType, long beginTime,
             long endTime) {
         synchronized (mLock) {
+            if (!mUserUnlockedStates.get(userId)) {
+                Slog.w(TAG, "Failed to query configuration stats for locked user " + userId);
+                return null;
+            }
+
             final long timeNow = checkAndGetTimeLocked();
             if (!validRange(timeNow, beginTime, endTime)) {
                 return null;
@@ -671,6 +930,11 @@ public class UsageStatsService extends SystemService implements
     List<EventStats> queryEventStats(int userId, int bucketType, long beginTime,
             long endTime) {
         synchronized (mLock) {
+            if (!mUserUnlockedStates.get(userId)) {
+                Slog.w(TAG, "Failed to query event stats for locked user " + userId);
+                return null;
+            }
+
             final long timeNow = checkAndGetTimeLocked();
             if (!validRange(timeNow, beginTime, endTime)) {
                 return null;
@@ -688,6 +952,11 @@ public class UsageStatsService extends SystemService implements
     UsageEvents queryEvents(int userId, long beginTime, long endTime,
             boolean shouldObfuscateInstantApps) {
         synchronized (mLock) {
+            if (!mUserUnlockedStates.get(userId)) {
+                Slog.w(TAG, "Failed to query events for locked user " + userId);
+                return null;
+            }
+
             final long timeNow = checkAndGetTimeLocked();
             if (!validRange(timeNow, beginTime, endTime)) {
                 return null;
@@ -705,6 +974,11 @@ public class UsageStatsService extends SystemService implements
     UsageEvents queryEventsForPackage(int userId, long beginTime, long endTime,
             String packageName, boolean includeTaskRoot) {
         synchronized (mLock) {
+            if (!mUserUnlockedStates.get(userId)) {
+                Slog.w(TAG, "Failed to query package events for locked user " + userId);
+                return null;
+            }
+
             final long timeNow = checkAndGetTimeLocked();
             if (!validRange(timeNow, beginTime, endTime)) {
                 return null;
@@ -731,9 +1005,14 @@ public class UsageStatsService extends SystemService implements
     private void flushToDiskLocked() {
         final int userCount = mUserState.size();
         for (int i = 0; i < userCount; i++) {
-            UserUsageStatsService service = mUserState.valueAt(i);
+            final int userId = mUserState.keyAt(i);
+            if (!mUserUnlockedStates.get(userId)) {
+                persistPendingEventsLocked(userId);
+                continue;
+            }
+            UserUsageStatsService service = mUserState.get(userId);
             service.persistActiveStats();
-            mAppStandby.flushToDisk(mUserState.keyAt(i));
+            mAppStandby.flushToDisk(userId);
         }
         mAppStandby.flushDurationsToDisk();
 
@@ -833,6 +1112,18 @@ public class UsageStatsService extends SystemService implements
                     } else if ("appstandby".equals(arg)) {
                         mAppStandby.dumpState(args, pw);
                         return;
+                    } else if ("stats-directory".equals(arg)) {
+                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                        final int userId;
+                        try {
+                            userId = Integer.valueOf(args[i + 1]);
+                        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                            ipw.println("invalid user specified.");
+                            return;
+                        }
+                        ipw.println(new File(Environment.getDataSystemCeDirectory(userId),
+                                "usagestats").getAbsolutePath());
+                        return;
                     } else if (arg != null && !arg.startsWith("-")) {
                         // Anything else that doesn't start with '-' is a pkg to filter
                         pkg = arg;
@@ -887,7 +1178,9 @@ public class UsageStatsService extends SystemService implements
                 case MSG_FLUSH_TO_DISK:
                     flushToDisk();
                     break;
-
+                case MSG_UNLOCKED_USER:
+                    onUserUnlocked(msg.arg1);
+                    break;
                 case MSG_REMOVE_USER:
                     onUserRemoved(msg.arg1);
                     break;
@@ -1368,7 +1661,7 @@ public class UsageStatsService extends SystemService implements
             event.mAction = action;
             event.mContentType = contentType;
             event.mContentAnnotations = annotations;
-            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override
@@ -1640,7 +1933,7 @@ public class UsageStatsService extends SystemService implements
                 event.mTaskRootPackage = taskRoot.getPackageName();
                 event.mTaskRootClass = taskRoot.getClassName();
             }
-            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override
@@ -1652,7 +1945,7 @@ public class UsageStatsService extends SystemService implements
 
             Event event = new Event(eventType, SystemClock.elapsedRealtime());
             event.mPackage = packageName;
-            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override
@@ -1665,7 +1958,7 @@ public class UsageStatsService extends SystemService implements
             Event event = new Event(CONFIGURATION_CHANGE, SystemClock.elapsedRealtime());
             event.mPackage = "android";
             event.mConfiguration = new Configuration(config);
-            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override
@@ -1679,7 +1972,7 @@ public class UsageStatsService extends SystemService implements
             Event event = new Event(NOTIFICATION_INTERRUPTION, SystemClock.elapsedRealtime());
             event.mPackage = packageName.intern();
             event.mNotificationChannelId = channelId.intern();
-            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override
@@ -1692,7 +1985,7 @@ public class UsageStatsService extends SystemService implements
             Event event = new Event(SHORTCUT_INVOCATION, SystemClock.elapsedRealtime());
             event.mPackage = packageName.intern();
             event.mShortcutId = shortcutId.intern();
-            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override
@@ -1749,8 +2042,13 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public byte[] getBackupPayload(int user, String key) {
-            // Check to ensure that only user 0's data is b/r for now
             synchronized (mLock) {
+                if (!mUserUnlockedStates.get(user)) {
+                    Slog.w(TAG, "Failed to get backup payload for locked user " + user);
+                    return null;
+                }
+
+                // Check to ensure that only user 0's data is b/r for now
                 if (user == UserHandle.USER_SYSTEM) {
                     final UserUsageStatsService userStats =
                             getUserDataAndInitializeIfNeededLocked(user, checkAndGetTimeLocked());
@@ -1764,6 +2062,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void applyRestoredPayload(int user, String key, byte[] payload) {
             synchronized (mLock) {
+                if (!mUserUnlockedStates.get(user)) {
+                    Slog.w(TAG, "Failed to apply restored payload for locked user " + user);
+                    return;
+                }
+
                 if (user == UserHandle.USER_SYSTEM) {
                     final UserUsageStatsService userStats =
                             getUserDataAndInitializeIfNeededLocked(user, checkAndGetTimeLocked());

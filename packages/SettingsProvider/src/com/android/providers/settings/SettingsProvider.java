@@ -70,6 +70,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.provider.settings.validators.SystemSettingsValidators;
 import android.provider.settings.validators.Validator;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1717,7 +1718,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void validateSystemSettingValue(String name, String value) {
-        Validator validator = Settings.System.VALIDATORS.get(name);
+        Validator validator = SystemSettingsValidators.VALIDATORS.get(name);
         if (validator != null && !validator.validate(value)) {
             throw new IllegalArgumentException("Invalid value: " + value
                     + " for setting: " + name);
@@ -3185,7 +3186,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 182;
+            private static final int SETTINGS_VERSION = 183;
 
             private final int mUserId;
 
@@ -4202,19 +4203,7 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 173) {
                     // Version 173: Set the default value for Secure Settings: NOTIFICATION_BUBBLES
-
-                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
-
-                    final Setting bubblesSetting = secureSettings.getSettingLocked(
-                            Secure.NOTIFICATION_BUBBLES);
-
-                    if (bubblesSetting.isNull()) {
-                        secureSettings.insertSettingLocked(Secure.NOTIFICATION_BUBBLES,
-                                getContext().getResources().getBoolean(
-                                        R.bool.def_notification_bubbles) ? "1" : "0", null,
-                                true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
+                    // Removed. Moved NOTIFICATION_BUBBLES to Global Settings.
                     currentVersion = 174;
                 }
 
@@ -4338,14 +4327,9 @@ public class SettingsProvider extends ContentProvider {
                 if (currentVersion == 179) {
                     // Version 178: Reset the default for Secure Settings: NOTIFICATION_BUBBLES
                     // This is originally set in version 173, however, the default value changed
-                    // so this step is to ensure the value is updated to the correct defaulte
-                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    // so this step is to ensure the value is updated to the correct default.
 
-                    secureSettings.insertSettingLocked(Secure.NOTIFICATION_BUBBLES,
-                            getContext().getResources().getBoolean(
-                                    R.bool.def_notification_bubbles) ? "1" : "0", null,
-                                    true, SettingsState.SYSTEM_PACKAGE_NAME);
-
+                    // Removed. Moved NOTIFICATION_BUBBLES to Global Settings.
                     currentVersion = 180;
                 }
 
@@ -4397,6 +4381,20 @@ public class SettingsProvider extends ContentProvider {
 
                     }
                     currentVersion = 182;
+                }
+
+                if (currentVersion == 182) {
+                    // Remove secure bubble settings.
+                    getSecureSettingsLocked(userId).deleteSettingLocked(
+                            Secure.NOTIFICATION_BUBBLES);
+
+                    // Add global bubble settings.
+                    getGlobalSettingsLocked().insertSettingLocked(Global.NOTIFICATION_BUBBLES,
+                            getContext().getResources().getBoolean(
+                                    R.bool.def_notification_bubbles) ? "1" : "0", null /* tag */,
+                            true /* makeDefault */, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                    currentVersion = 183;
                 }
 
                 // vXXX: Add new settings above this point.

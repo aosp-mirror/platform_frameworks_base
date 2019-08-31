@@ -392,18 +392,18 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     private void entryRemoved(StatusBarNotification notification) {
-        mEntryListener.onEntryRemoved(new NotificationEntry(notification),
+        mEntryListener.onEntryRemoved(NotificationEntry.buildForTest(notification),
                 null, false);
     }
 
     private void entryAdded(StatusBarNotification notification, int importance) {
-        NotificationEntry entry = new NotificationEntry(notification);
+        NotificationEntry entry = NotificationEntry.buildForTest(notification);
         entry.importance = importance;
         mEntryListener.onPendingEntryAdded(entry);
     }
 
     private void entryUpdated(StatusBarNotification notification, int importance) {
-        NotificationEntry entry = new NotificationEntry(notification);
+        NotificationEntry entry = NotificationEntry.buildForTest(notification);
         entry.importance = importance;
         mEntryListener.onPostEntryUpdated(entry);
     }

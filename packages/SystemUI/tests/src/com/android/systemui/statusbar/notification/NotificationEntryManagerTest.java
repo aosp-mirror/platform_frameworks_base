@@ -239,7 +239,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .setContentText("Text");
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, n.build(), new UserHandle(ActivityManager.getCurrentUser()), null, 0);
-        mEntry = new NotificationEntry(mSbn);
+        mEntry = NotificationEntry.buildForTest(mSbn);
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
         mEntryManager = new TestableNotificationEntryManager(mContext);

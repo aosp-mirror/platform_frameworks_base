@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -336,11 +337,13 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
 
+    @FlakyTest(bugId = 140308162)
     public void testTokenBasedResetPassword() throws RemoteException {
         final byte[] password = "password".getBytes();
         final byte[] pattern = "123654".getBytes();
         final byte[] token = "some-high-entropy-secure-token".getBytes();
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
+        reset(mDevicePolicyManager);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
         assertFalse(mService.hasPendingEscrowToken(PRIMARY_USER_ID));
@@ -360,7 +363,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         flushHandlerTasks();
         final PasswordMetrics metric = PasswordMetrics.computeForCredential(
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN, pattern);
-        verify(mDevicePolicyManager).setActivePasswordState(metric, PRIMARY_USER_ID);
+        assertEquals(metric, mService.getUserPasswordMetrics(PRIMARY_USER_ID));
+        verify(mDevicePolicyManager).reportPasswordChanged(PRIMARY_USER_ID);
 
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0, PRIMARY_USER_ID)

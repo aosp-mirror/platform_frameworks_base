@@ -24,6 +24,8 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.util.DeviceConfigProxyFake;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +43,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
     @Before
     public void setup() {
         super.setup();
-        mClassifier = new ZigZagClassifier(getDataProvider());
+        mClassifier = new ZigZagClassifier(getDataProvider(), new DeviceConfigProxyFake());
     }
 
     @After

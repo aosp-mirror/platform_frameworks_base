@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static android.app.AppOpsManager.strOpToOp;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -75,6 +77,16 @@ public final class PermissionChecker {
     }
 
     /**
+     * @deprecated Use {@link #checkPermission(Context, String, int, int, String, String)} instead
+     */
+    @Deprecated
+    @PermissionResult
+    public static int checkPermission(@NonNull Context context, @NonNull String permission,
+            int pid, int uid, @Nullable String packageName) {
+        return checkPermission(context, permission, pid, uid, packageName, null);
+    }
+
+    /**
      * Checks whether a given package in a UID and PID has a given permission
      * and whether the app op that corresponds to this permission is allowed.
      *
@@ -84,12 +96,14 @@ public final class PermissionChecker {
      * @param uid The uid for which to check.
      * @param packageName The package name for which to check. If null the
      *     the first package for the calling UID will be used.
+     * @param message A message describing the reason the permission was checked
+     *
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
      */
     @PermissionResult
     public static int checkPermission(@NonNull Context context, @NonNull String permission,
-            int pid, int uid, @Nullable String packageName) {
+            int pid, int uid, @Nullable String packageName, @Nullable String message) {
         if (context.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_DENIED) {
             return PERMISSION_DENIED;
         }
@@ -108,7 +122,8 @@ public final class PermissionChecker {
             packageName = packageNames[0];
         }
 
-        if (appOpsManager.noteProxyOpNoThrow(op, packageName, uid) != AppOpsManager.MODE_ALLOWED) {
+        if (appOpsManager.noteProxyOpNoThrow(strOpToOp(op), packageName, uid, message)
+                != AppOpsManager.MODE_ALLOWED) {
             return PERMISSION_DENIED_APP_OP;
         }
 
@@ -131,7 +146,17 @@ public final class PermissionChecker {
     public static int checkSelfPermission(@NonNull Context context,
             @NonNull String permission) {
         return checkPermission(context, permission, Process.myPid(),
-                Process.myUid(), context.getPackageName());
+                Process.myUid(), context.getPackageName(), null /* self access */);
+    }
+
+    /**
+     * @deprecated Use {@link #checkCallingPermission(Context, String, String, String)} instead
+     */
+    @Deprecated
+    @PermissionResult
+    public static int checkCallingPermission(@NonNull Context context,
+            @NonNull String permission, @Nullable String packageName) {
+        return checkCallingPermission(context, permission, packageName, null);
     }
 
     /**
@@ -142,17 +167,29 @@ public final class PermissionChecker {
      * @param permission The permission to check.
      * @param packageName The package name making the IPC. If null the
      *     the first package for the calling UID will be used.
+     * @param message A message describing the reason the permission was checked
+     *
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
      */
     @PermissionResult
     public static int checkCallingPermission(@NonNull Context context,
-            @NonNull String permission, @Nullable String packageName) {
+            @NonNull String permission, @Nullable String packageName, @Nullable String message) {
         if (Binder.getCallingPid() == Process.myPid()) {
             return PERMISSION_DENIED;
         }
         return checkPermission(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName);
+                Binder.getCallingUid(), packageName, message);
+    }
+
+    /**
+     * @deprecated Use {@link #checkCallingOrSelfPermission(Context, String, String)} instead
+     */
+    @Deprecated
+    @PermissionResult
+    public static int checkCallingOrSelfPermission(@NonNull Context context,
+            @NonNull String permission) {
+        return checkCallingOrSelfPermission(context, permission, null);
     }
 
     /**
@@ -161,15 +198,17 @@ public final class PermissionChecker {
      *
      * @param context Context for accessing resources.
      * @param permission The permission to check.
+     * @param message A message describing the reason the permission was checked
+     *
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
      */
     @PermissionResult
     public static int checkCallingOrSelfPermission(@NonNull Context context,
-            @NonNull String permission) {
+            @NonNull String permission, @Nullable String message) {
         String packageName = (Binder.getCallingPid() == Process.myPid())
                 ? context.getPackageName() : null;
         return checkPermission(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName);
+                Binder.getCallingUid(), packageName, message);
     }
 }

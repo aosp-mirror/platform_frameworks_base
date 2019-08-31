@@ -23,6 +23,8 @@ import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 
 import android.provider.DeviceConfig;
 
+import com.android.systemui.util.DeviceConfigProxy;
+
 /**
  * False on swipes that are too close to 45 degrees.
  *
@@ -42,14 +44,14 @@ class DiagonalClassifier extends FalsingClassifier {
     private final float mHorizontalAngleRange;
     private final float mVerticalAngleRange;
 
-    DiagonalClassifier(FalsingDataProvider dataProvider) {
+    DiagonalClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 
-        mHorizontalAngleRange = DeviceConfig.getFloat(
+        mHorizontalAngleRange = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DIAGONAL_HORIZONTAL_ANGLE_RANGE,
                 HORIZONTAL_ANGLE_RANGE);
-        mVerticalAngleRange = DeviceConfig.getFloat(
+        mVerticalAngleRange = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DIAGONAL_VERTICAL_ANGLE_RANGE,
                 VERTICAL_ANGLE_RANGE);

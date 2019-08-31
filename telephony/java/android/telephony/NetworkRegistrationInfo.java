@@ -501,6 +501,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return new StringBuilder("NetworkRegistrationInfo{")
@@ -531,7 +532,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
 
         if (!(o instanceof NetworkRegistrationInfo)) {

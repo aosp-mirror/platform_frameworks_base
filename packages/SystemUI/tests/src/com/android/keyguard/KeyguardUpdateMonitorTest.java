@@ -51,7 +51,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
@@ -72,12 +71,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-// We must run on the main looper because KeyguardUpdateMonitor#mHandler is initialized with
-// new Handler(Looper.getMainLooper()).
-//
-// Using the main looper should be avoided whenever possible, please don't copy this over to
-// new tests.
-@RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private static final String TEST_CARRIER = "TEST_CARRIER";
     private static final String TEST_CARRIER_2 = "TEST_CARRIER_2";
@@ -477,6 +471,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(listToVerify.get(0)).isEqualTo(TEST_SUBSCRIPTION_2);
     }
 
+    @Test
+    public void testIsUserUnlocked() {
+        // mUserManager will report the user as unlocked on @Before
+        assertThat(mKeyguardUpdateMonitor.isUserUnlocked(KeyguardUpdateMonitor.getCurrentUser()))
+                .isTrue();
+        // Invalid user should not be unlocked.
+        int randomUser = 99;
+        assertThat(mKeyguardUpdateMonitor.isUserUnlocked(randomUser)).isFalse();
+    }
+
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
         int subscription = simInited
                 ? 1/* mock subid=1 */ : SubscriptionManager.DUMMY_SUBSCRIPTION_ID_BASE;
@@ -491,7 +495,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         AtomicBoolean mSimStateChanged = new AtomicBoolean(false);
 
         protected TestableKeyguardUpdateMonitor(Context context) {
-            super(context);
+            super(context, TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper());
             context.unregisterReceiver(mBroadcastReceiver);
             context.unregisterReceiver(mBroadcastAllReceiver);
             mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;

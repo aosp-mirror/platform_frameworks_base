@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.AppOpsManager;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -1029,7 +1030,17 @@ public class Binder implements IBinder {
                 Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":"
                         + (transactionName != null ? transactionName : code));
             }
-            res = onTransact(code, data, reply, flags);
+
+            if ((flags & FLAG_COLLECT_NOTED_APP_OPS) != 0) {
+                AppOpsManager.startNotedAppOpsCollection(callingUid);
+                try {
+                    res = onTransact(code, data, reply, flags);
+                } finally {
+                    AppOpsManager.finishNotedAppOpsCollection();
+                }
+            } else {
+                res = onTransact(code, data, reply, flags);
+            }
         } catch (RemoteException|RuntimeException e) {
             if (observer != null) {
                 observer.callThrewException(callSession, e);

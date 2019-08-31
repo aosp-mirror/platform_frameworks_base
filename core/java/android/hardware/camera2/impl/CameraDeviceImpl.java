@@ -2568,4 +2568,13 @@ public class CameraDeviceImpl extends CameraDevice
             Binder.restoreCallingIdentity(ident);
         }
     }
+
+    @Override
+    public @CAMERA_AUDIO_RESTRICTION int setCameraAudioRestriction(
+            @CAMERA_AUDIO_RESTRICTION int mode) throws CameraAccessException {
+        synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
+            return mRemoteDevice.setCameraAudioRestriction(mode);
+        }
+    }
 }

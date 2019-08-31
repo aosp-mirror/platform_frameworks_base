@@ -45,11 +45,15 @@ public final class NotificationGroupTestHelper {
     }
 
     public NotificationEntry createSummaryNotification() {
-        return createSummaryNotification(Notification.GROUP_ALERT_ALL);
+        return createSummaryNotification(Notification.GROUP_ALERT_ALL, mId++);
     }
 
     public NotificationEntry createSummaryNotification(int groupAlertBehavior) {
-        return createEntry(true, groupAlertBehavior);
+        return createSummaryNotification(groupAlertBehavior, mId++);
+    }
+
+    public NotificationEntry createSummaryNotification(int groupAlertBehavior, int id) {
+        return createEntry(id, true, groupAlertBehavior);
     }
 
     public NotificationEntry createChildNotification() {
@@ -57,10 +61,14 @@ public final class NotificationGroupTestHelper {
     }
 
     public NotificationEntry createChildNotification(int groupAlertBehavior) {
-        return createEntry(false, groupAlertBehavior);
+        return createEntry(mId++, false, groupAlertBehavior);
     }
 
-    public NotificationEntry createEntry(boolean isSummary, int groupAlertBehavior) {
+    public NotificationEntry createChildNotification(int groupAlertBehavior, int id) {
+        return createEntry(id, false, groupAlertBehavior);
+    }
+
+    public NotificationEntry createEntry(int id, boolean isSummary, int groupAlertBehavior) {
         Notification notif = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("Title")
                 .setSmallIcon(R.drawable.ic_person)
@@ -71,7 +79,7 @@ public final class NotificationGroupTestHelper {
         StatusBarNotification sbn = new StatusBarNotification(
                 TEST_PACKAGE_NAME /* pkg */,
                 TEST_PACKAGE_NAME,
-                mId++,
+                id,
                 null /* tag */,
                 0, /* uid */
                 0 /* initialPid */,
@@ -79,7 +87,7 @@ public final class NotificationGroupTestHelper {
                 new UserHandle(ActivityManager.getCurrentUser()),
                 null /* overrideGroupKey */,
                 0 /* postTime */);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
         entry.setRow(row);
         when(row.getEntry()).thenReturn(entry);

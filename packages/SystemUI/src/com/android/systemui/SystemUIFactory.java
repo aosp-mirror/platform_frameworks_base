@@ -136,16 +136,17 @@ public class SystemUIFactory {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
                 dismissCallbackRegistry, falsingManager,
                 expansionCallback, UnlockMethodCache.getInstance(context),
-                KeyguardUpdateMonitor.getInstance(context), bypassController,
+                Dependency.get(KeyguardUpdateMonitor.class), bypassController,
                 new Handler(Looper.getMainLooper()));
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
+            ScrimView scrimForBubble,
             LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
-        return new ScrimController(scrimBehind, scrimInFront, scrimStateListener,
+        return new ScrimController(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
                 scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
     }
 

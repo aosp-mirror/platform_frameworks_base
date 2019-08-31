@@ -50,6 +50,7 @@ public class KeyguardStatusViewTest extends SysuiTestCase {
     @Before
     public void setUp() {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         InjectionInflationController inflationController = new InjectionInflationController(
                 SystemUIFactory.getInstance().getRootComponent());
         LayoutInflater layoutInflater = inflationController

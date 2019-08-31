@@ -878,7 +878,7 @@ public class BubbleDataTest extends SysuiTestCase {
         when(sbn.getNotification()).thenReturn(notification);
 
         // NotificationEntry -> StatusBarNotification -> Notification -> BubbleMetadata
-        return new NotificationEntry(sbn);
+        return NotificationEntry.buildForTest(sbn);
     }
 
     private void setCurrentTime(long time) {
@@ -887,7 +887,7 @@ public class BubbleDataTest extends SysuiTestCase {
 
     private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime) {
         setPostTime(entry, postTime);
-        mBubbleData.notificationEntryUpdated(entry);
+        mBubbleData.notificationEntryUpdated(entry, /* suppressFlyout=*/ false);
     }
 
     private void changeExpandedStateAtTime(boolean shouldBeExpanded, long time) {

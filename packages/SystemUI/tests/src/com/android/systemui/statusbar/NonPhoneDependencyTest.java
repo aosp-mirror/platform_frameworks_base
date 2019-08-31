@@ -24,6 +24,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
@@ -66,6 +67,7 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                new Handler(TestableLooper.get(this).getLooper()));
     }

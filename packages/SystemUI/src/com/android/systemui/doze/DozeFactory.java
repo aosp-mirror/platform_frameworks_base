@@ -29,8 +29,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AsyncSensorManager;
@@ -104,7 +104,7 @@ public class DozeFactory {
             DozeMachine machine, Handler handler, AlarmManager alarmManager,
             DozeParameters params) {
         return new DozeUi(context, alarmManager, machine, wakeLock, host, handler, params,
-                KeyguardUpdateMonitor.getInstance(context));
+                Dependency.get(KeyguardUpdateMonitor.class));
     }
 
     public static DozeHost getHost(DozeService service) {

@@ -225,7 +225,7 @@ public class CarrierTextController {
             // TODO(b/140034799)
             if (whitelistIpcs(() -> ConnectivityManager.from(mContext).isNetworkSupported(
                     ConnectivityManager.TYPE_MOBILE))) {
-                mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+                mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
                 mKeyguardUpdateMonitor.registerCallback(mCallback);
                 mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
                 telephonyManager.listen(mPhoneStateListener,
@@ -487,7 +487,7 @@ public class CarrierTextController {
         }
 
         final boolean missingAndNotProvisioned =
-                !KeyguardUpdateMonitor.getInstance(mContext).isDeviceProvisioned()
+                !Dependency.get(KeyguardUpdateMonitor.class).isDeviceProvisioned()
                         && (simState == IccCardConstants.State.ABSENT
                         || simState == IccCardConstants.State.PERM_DISABLED);
 

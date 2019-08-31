@@ -39,6 +39,7 @@ public class KeyguardHostViewTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mKeyguardHostView = new KeyguardHostView(getContext());
     }
 

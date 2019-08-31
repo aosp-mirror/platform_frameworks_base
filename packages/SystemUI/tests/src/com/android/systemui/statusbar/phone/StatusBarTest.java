@@ -208,7 +208,8 @@ public class StatusBarTest extends SysuiTestCase {
 
         mNotificationInterruptionStateProvider =
                 new TestableNotificationInterruptionStateProvider(mContext, mPowerManager,
-                        mDreamManager, mAmbientDisplayConfiguration);
+                        mDreamManager, mAmbientDisplayConfiguration, mNotificationFilter,
+                        mStatusBarStateController);
         mDependency.injectTestDependency(NotificationInterruptionStateProvider.class,
                 mNotificationInterruptionStateProvider);
         mDependency.injectMockDependency(NavigationBarController.class);
@@ -418,7 +419,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
@@ -439,7 +440,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
@@ -456,7 +457,7 @@ public class StatusBarTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
         entry.importance = IMPORTANCE_HIGH;
 
@@ -474,7 +475,7 @@ public class StatusBarTest extends SysuiTestCase {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
-        NotificationEntry entry = new NotificationEntry(sbn);
+        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.importance = IMPORTANCE_HIGH;
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
@@ -870,8 +871,11 @@ public class StatusBarTest extends SysuiTestCase {
                 Context context,
                 PowerManager powerManager,
                 IDreamManager dreamManager,
-                AmbientDisplayConfiguration ambientDisplayConfiguration) {
-            super(context, powerManager, dreamManager, ambientDisplayConfiguration);
+                AmbientDisplayConfiguration ambientDisplayConfiguration,
+                NotificationFilter filter,
+                StatusBarStateController controller) {
+            super(context, powerManager, dreamManager, ambientDisplayConfiguration, filter,
+                    controller);
             mUseHeadsUp = true;
         }
     }

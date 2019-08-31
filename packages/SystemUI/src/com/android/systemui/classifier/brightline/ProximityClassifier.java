@@ -24,6 +24,8 @@ import android.hardware.SensorEvent;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.systemui.util.DeviceConfigProxy;
+
 
 /**
  * False touch if proximity sensor is covered for more than a certain percentage of the gesture.
@@ -44,11 +46,11 @@ class ProximityClassifier extends FalsingClassifier {
     private float mPercentNear;
 
     ProximityClassifier(DistanceClassifier distanceClassifier,
-            FalsingDataProvider dataProvider) {
+            FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
         this.mDistanceClassifier = distanceClassifier;
 
-        mPercentCoveredThreshold = DeviceConfig.getFloat(
+        mPercentCoveredThreshold = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD,
                 PERCENT_COVERED_THRESHOLD);

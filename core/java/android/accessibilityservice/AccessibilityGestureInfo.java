@@ -114,6 +114,7 @@ public final class AccessibilityGestureInfo implements Parcelable {
         return mGestureId;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("AccessibilityGestureInfo[");
@@ -133,7 +134,7 @@ public final class AccessibilityGestureInfo implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int flags) {
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeInt(mGestureId);
         parcel.writeInt(mDisplayId);
     }

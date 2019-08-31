@@ -81,7 +81,7 @@ public final class CacheQuotaHint implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof CacheQuotaHint) {
             final CacheQuotaHint other = (CacheQuotaHint) o;
             return Objects.equals(mUuid, other.mUuid)

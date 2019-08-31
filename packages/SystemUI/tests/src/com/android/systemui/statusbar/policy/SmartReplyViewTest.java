@@ -48,6 +48,7 @@ import android.widget.LinearLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
@@ -112,6 +113,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mDependency.get(KeyguardDismissUtil.class).setDismissHandler((action, unused) -> {
             action.onDismiss();
         });
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectTestDependency(ActivityStarter.class, mActivityStarter);
         mDependency.injectTestDependency(SmartReplyConstants.class, mConstants);
@@ -140,7 +142,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         StatusBarNotification sbn = mock(StatusBarNotification.class);
         when(sbn.getNotification()).thenReturn(mNotification);
         when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
-        mEntry = new NotificationEntry(sbn);
+        mEntry = NotificationEntry.buildForTest(sbn);
 
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
     }

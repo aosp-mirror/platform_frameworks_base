@@ -29,7 +29,8 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.Assert;
 
 import org.junit.After;
@@ -74,7 +75,9 @@ public abstract class SysuiTestCase {
                     "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext");
         });
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
-        KeyguardUpdateMonitor.disableHandlerCheckForTesting(inst);
+        // A lot of tests get the FalsingManager, often via several layers of indirection.
+        // None of them actually need it.
+        mDependency.injectTestDependency(FalsingManager.class, new FalsingManagerFake());
     }
 
     @After
