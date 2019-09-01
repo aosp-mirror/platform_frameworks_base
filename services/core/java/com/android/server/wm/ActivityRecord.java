@@ -1844,9 +1844,14 @@ final class ActivityRecord extends ConfigurationContainer {
         final ActivityRecord next = getDisplay().topRunningActivity(
                 true /* considerKeyguardState */);
         final boolean isVisible = visible || nowVisible;
+        // isNextNotYetVisible is to check if the next activity is invisible, or it has been
+        // requested to be invisible but its windows haven't reported as invisible.  If so, it
+        // implied that the current finishing activity should be added into stopping list rather
+        // than destroy immediately.
+        final boolean isNextNotYetVisible = next != null && (!next.nowVisible || !next.visible);
         final ActivityStack stack = getActivityStack();
         final boolean notFocusedStack = stack != mRootActivityContainer.getTopDisplayFocusedStack();
-        if (isVisible && next != null && !next.nowVisible) {
+        if (isVisible && isNextNotYetVisible) {
             addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
                     "completeFinishing");
             if (DEBUG_STATES) {
