@@ -60,7 +60,7 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Doimo ushbu kompyuterdan ruxsat berilsin"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Ruxsat berish"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB orqali nosozliklarni tuzatishga ruxsat berilmagan"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ayni paytda ushbu qurilmaga o‘z hisobi bilan kirgan foydalanuvchi USB orqali nosozliklarni tuzatish funksiyasini yoqa olmaydi. Bu funksiyadan foydalanish uchun asosiy foydalanuvchi profiliga o‘ting."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ayni paytda ushbu qurilmaga o‘z hisobi bilan kirgan foydalanuvchi USB orqali nosozliklarni aniqlash funksiyasini yoqa olmaydi. Bu funksiyadan foydalanish uchun asosiy foydalanuvchi profiliga o‘ting."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB port faolsizlashtirildi"</string>
     <string name="usb_contaminant_message" msgid="7379089091591609111">"Qurilmangizni suyuqlik va turli parchalardan himoya qilish uchun USB port faolsizlashtiriladi va hech qanday aksessuarni aniqlay olmaydi.\n\nUSB portdan xavfsiz foydalanish mumkin boʻlganda, sizga xabar beriladi."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"Quvvatlash moslamalari va aksessuarlarni aniqlash uchun USB port yoqildi"</string>
@@ -459,7 +459,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Boshqa ko‘rsatilmasin"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hammasini tozalash"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Boshqarish"</string>
-    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Ovozsiz bildirishnomalar"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Sokin bildirishnomalar"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Barcha tovushsiz bildirishnomalarni tozalash"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilingan"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Boshlash"</string>
