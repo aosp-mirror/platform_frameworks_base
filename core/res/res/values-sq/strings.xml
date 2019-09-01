@@ -1257,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trokit për të parë të gjitha rrjetet"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Lidhu"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Të gjitha rrjetet"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Të lejohen rrjetet e sugjeruara Wi‑Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Rrjet e sugjeruara të <xliff:g id="NAME">%s</xliff:g>. Pajisja mund të lidhet automatikisht."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Lejo"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Jo, faleminderit"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi do të aktivizohet automatikisht"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kur ndodhesh pranë një rrjeti të ruajtur me cilësi të lartë"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Mos e aktivizo përsëri"</string>
@@ -1679,7 +1675,7 @@
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Zgjidh një shërbim për ta përdorur kur troket butonin e qasshmërisë:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Zgjidh një shërbim për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me dy gishta):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Zgjidh një shërbim për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me tre gishta):"</string>
-    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Për të kaluar mes shërbimeve, prek dhe mbaj prekur butonin e qasshmërisë."</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Për të kaluar mes shërbimeve, prek dhe mbaj të shtypur butonin e qasshmërisë."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Për të kaluar mes pajisjeve, rrëshqit shpejt lart me dy gishta dhe mbaje prekur."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Për të kaluar mes pajisjeve, rrëshqit shpejt lart me tre gishta dhe mbaje prekur."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zmadhimi"</string>

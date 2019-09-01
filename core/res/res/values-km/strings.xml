@@ -1259,14 +1259,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ចុចដើម្បីមើលបណ្តាញទាំងអស់"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ភ្ជាប់"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"បណ្ដាញ​ទាំងអស់"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"អនុញ្ញាតឱ្យ​ភ្ជាប់​បណ្ដាញ Wi‑Fi ដែលបាន​ណែនាំ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"បណ្ដាញ​ដែលបាន​ណែនាំ​របស់ <xliff:g id="NAME">%s</xliff:g> ។ ឧបករណ៍​អាច​ភ្ជាប់​ដោយស្វ័យប្រវត្តិ។"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"អនុញ្ញាត"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"ទេ អរគុណ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi នឹង​បើក​ដោយ​ស្វ័យប្រវត្តិ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"នៅពេល​ដែល​អ្នក​នៅ​ជិត​បណ្តាញ​គុណភាព​ខ្ពស់​ដែល​បាន​រក្សាទុក"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"កុំ​បើក​ឡើង​វិញ"</string>

@@ -1257,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"تمام نیٹ ورکس دیکھنے کیلئے تھپتھپائيں"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"منسلک کریں"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"سبھی نیٹ ورکس"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏تجویز کردہ Wi‑Fi نیٹ ورکس کو اجازت دیں؟"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> تجویز کردہ نیٹ ورکس۔ آلہ خودکار طور پر منسلک ہو سکتا ہے۔"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"اجازت ہیں"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"نہیں شکریہ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏Wi‑Fi از خود آن ہو جائے گا"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"جب آپ اعلی معیار کے محفوظ کردہ نیٹ ورک کے قریب ہوں"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"دوبارہ آن نہ کریں"</string>
