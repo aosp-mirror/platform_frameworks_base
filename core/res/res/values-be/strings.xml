@@ -989,7 +989,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Апошні месяц"</string>
     <string name="older" msgid="5211975022815554840">"Раней"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"дата: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"у <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"у <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"дзень"</string>
@@ -1299,14 +1299,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Дакраніцеся, каб убачыць усе сеткі"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Падключыцца"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Усе сеткі"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Дазволіць падключэнне да прапанаваных сетак Wi‑Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Праграма \"<xliff:g id="NAME">%s</xliff:g>\" прапанавала сеткі. Прылада можа падключыцца аўтаматычна."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Дазволіць"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Не, дзякуй"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi уключыцца аўтаматычна"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Побач з захаванай сеткай з высакаякасным сігналам"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не ўключаць зноў"</string>
