@@ -1257,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सभी नेटवर्क देखने के लिए यहां पर टैप करें"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"कनेक्ट करें"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"सभी नेटवर्क"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"सुझाए गए वाई-फ़ाई नेटवर्क को अनुमति देना चाहते हैं?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> के सुझाए गए नेटवर्क. डिवाइस अपने आप कनेक्ट हो सकता है."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"अनुमति दें"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"रहने दें"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"वाई-फ़ाई अपने आप चालू हो जाएगा"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"जब आप किसी अच्छी क्वालिटी वाले सेव किए गए नेटवर्क के पास हों"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"वापस चालू न करें"</string>
@@ -1351,7 +1347,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक है"</string>
     <string name="usb_charging_notification_title" msgid="1595122345358177163">"यह डिवाइस यूएसबी से चार्ज हो रहा है"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"जोड़ा गया डिवाइस यूएसबी के ज़रिए चार्ज हो रहा है"</string>
-    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"यूएसबी फ़ाइल ट्रांसफ़र की सुविधा चालू की गई"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"यूएसबी फ़ाइल ट्रांसफ़र करने की सुविधा चालू की गई"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"यूएसबी के ज़रिए पीटीपी की सुविधा चालू की गई"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"यूएसबी टेदरिंग की सुविधा चालू की गई"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"यूएसबी के ज़रिए एमआईडीआई (मिडी) की सुविधा चालू की गई"</string>
@@ -1360,7 +1356,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"जोड़ा गया डिवाइस चार्ज हो रहा है. ज़्यादा विकल्पों के लिए टैप करें."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"एनालॉग ऑडियो एक्सेसरी का पता चला"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"अटैच किया गया डिवाइस इस फ़ोन से संगत नहीं है. ज़्यादा जानने के लिए टैप करें."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"डीबग करने के लिए एडीबी कनेक्ट किया गया"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"यूएसबी डीबग करने के लिए एडीबी कनेक्ट किया गया"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"यूएसबी को डीबग करने की सुविधा बंद करने के लिए टैप करें"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबग करना अक्षम करने के लिए चुनें."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"टेस्ट हार्नेस मोड चालू किया गया"</string>

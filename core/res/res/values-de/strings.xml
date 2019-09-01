@@ -434,8 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Diese App kann deine körperliche Aktivität erkennen."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Bilder und Videos aufnehmen"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Diese App kann mit der Kamera jederzeit Bilder und Videos aufnehmen."</string>
-    <string name="permlab_systemCamera" msgid="4074081285026193898">"Einer App oder einem Dienst Zugriff auf Systemkameras erlauben, um Fotos und Videos aufzunehmen"</string>
-    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Diese privilegierte System-App kann jederzeit mit einer System-Kamera Bilder und Videos aufnehmen. Sie benötigt auch die Berechtigung \"android.permission.CAMERA\"."</string>
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"Einer App oder einem Dienst Zugriff auf Systemkameras erlauben, um Fotos und Videos aufnehmen zu können"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"Diese privilegierte App | System-App kann jederzeit mit einer Systemkamera Bilder und Videos aufnehmen. Die App benötigt auch die Berechtigung \"android.permission.CAMERA\"."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"Vibrationsalarm steuern"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Telefonnummern direkt anrufen"</string>
@@ -999,7 +999,7 @@
     <string name="weeks" msgid="6509623834583944518">"Wochen"</string>
     <string name="year" msgid="4001118221013892076">"Jahr"</string>
     <string name="years" msgid="6881577717993213522">"Jahre"</string>
-    <string name="now_string_shortest" msgid="8912796667087856402">"jetzt"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"Jetzt"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
@@ -1257,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tippen, um alle Netzwerke zu sehen"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinden"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle Netzwerke"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vorgeschlagene WLANs zulassen?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Von <xliff:g id="NAME">%s</xliff:g> vorgeschlagene Netzwerke. Gerät verbindet sich möglicherweise automatisch."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Zulassen"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nein danke"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WLAN wird automatisch aktiviert"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wenn du in der Nähe eines sicheren gespeicherten Netzwerks bist"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nicht wieder aktivieren"</string>

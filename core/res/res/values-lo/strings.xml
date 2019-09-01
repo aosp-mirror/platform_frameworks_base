@@ -1257,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ແຕະເພື່ອເບິ່ງເຄືອຂ່າຍທັງໝົດ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ເຊື່ອມ​ຕໍ່"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ເຄືອຂ່າຍທັງໝົດ"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"ອະນຸຍາດເຄືອຂ່າຍ Wi‑Fi ທີ່ແນະນຳບໍ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"ເຄືອຂ່າຍ <xliff:g id="NAME">%s</xliff:g> ທີ່ແນະນຳ. ອຸປະກອນອາດເຊື່ອມຕໍ່ເອງໂດຍອັດຕະໂນມັດ."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"ອະນຸຍາດ"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"ບໍ່, ຂອບໃຈ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ຈະມີການເປີດໃຊ້ Wi‑Fi ອັດຕະໂນມັດ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ເມື່ອທ່ານຢູ່ໃກ້ເຄືອຂ່າຍຄຸນນະພາບສູງທີ່ບັນທຶກໄວ້"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ບໍ່ຕ້ອງເປີດໃຊ້ຄືນໃໝ່"</string>

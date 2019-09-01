@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം ഈ ആപ്പിന് തിരിച്ചറിയാനാവും."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"ഏതുസമയത്തും ക്യാമറ ഉപയോഗിച്ചുകൊണ്ട് ചിത്രങ്ങൾ എടുക്കാനും വീഡിയോകൾ റെക്കോർഡുചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
-    <!-- no translation found for permlab_systemCamera (4074081285026193898) -->
-    <skip />
-    <!-- no translation found for permdesc_systemCamera (6488131672529669229) -->
-    <skip />
+    <string name="permlab_systemCamera" msgid="4074081285026193898">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കാൻ, സിസ്‌റ്റം ക്യാമറ ആക്‌സസ് ചെയ്യുന്നതിന് ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക"</string>
+    <string name="permdesc_systemCamera" msgid="6488131672529669229">"സിസ്‌റ്റം ക്യാമറ ഉപയോഗിച്ച് ഏത് സമയത്തും ചിത്രങ്ങളെടുക്കാനും വീഡിയോകൾ റെക്കോർഡ് ചെയ്യാനും ഈ വിശേഷാധികാര | സിസ്‌റ്റം ആപ്പിന് കഴിയും. ആപ്പിലും android.permission.CAMERA അനുമതി ഉണ്ടായിരിക്കണം"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>
@@ -1259,14 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"എല്ലാ നെറ്റ്‌വർക്കുകളും കാണാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"കണക്റ്റുചെയ്യുക"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"എല്ലാ നെറ്റ്‌വർക്കുകളും"</string>
-    <!-- no translation found for wifi_suggestion_title (6396033039578436801) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5603992011371520746) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_allow_app (7978995387498669901) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_action_disallow_app (6434097275967940372) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"നിർദ്ദേശിച്ച വെെഫെെ നെറ്റ്‌വർക്കുകൾ അനുവദിക്കണോ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> നിർദ്ദേശിച്ച നെറ്റ്‌വർക്കുകൾ. ഉപകരണം സ്വയമേവ കണക്‌റ്റ് ചെയ്‌തേക്കാം."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"അനുവദിക്കുക"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"വേണ്ട"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"വൈഫൈ സ്വമേധയാ ഓണാകും"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"നിങ്ങൾ ഉയർന്ന നിലവാരമുള്ള സംരക്ഷിക്കപ്പെട്ട നെറ്റ്‌വർക്കിനരികിലെത്തുമ്പോൾ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"തിരികെ ഓണാക്കരുത്"</string>
