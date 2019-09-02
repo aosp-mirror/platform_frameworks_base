@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -49,6 +50,9 @@ public class NetworkStackClient {
     private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
 
     private static NetworkStackClient sInstance;
+
+    @NonNull
+    private final Dependencies mDependencies;
 
     @NonNull
     @GuardedBy("mPendingNetStackRequests")
@@ -66,7 +70,50 @@ public class NetworkStackClient {
         void onNetworkStackConnected(INetworkStackConnector connector);
     }
 
-    private NetworkStackClient() { }
+    @VisibleForTesting
+    protected NetworkStackClient(@NonNull Dependencies dependencies) {
+        mDependencies = dependencies;
+    }
+
+    private NetworkStackClient() {
+        this(new DependenciesImpl());
+    }
+
+    @VisibleForTesting
+    protected interface Dependencies {
+        void addToServiceManager(@NonNull IBinder service);
+        void checkCallerUid();
+        ConnectivityModuleConnector getConnectivityModuleConnector();
+    }
+
+    private static class DependenciesImpl implements Dependencies {
+        @Override
+        public void addToServiceManager(@NonNull IBinder service) {
+            ServiceManager.addService(Context.NETWORK_STACK_SERVICE, service,
+                    false /* allowIsolated */, DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+        }
+
+        @Override
+        public void checkCallerUid() {
+            final int caller = Binder.getCallingUid();
+            // This is a client lib so "caller" is the current UID in most cases. The check is done
+            // here in the caller's process just to provide a nicer error message to clients; more
+            // generic checks are also done in NetworkStackService.
+            // See PermissionUtil in NetworkStack for the actual check on the service side - the
+            // checks here should be kept in sync with PermissionUtil.
+            if (caller != Process.SYSTEM_UID
+                    && caller != Process.NETWORK_STACK_UID
+                    && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)) {
+                throw new SecurityException(
+                        "Only the system server should try to bind to the network stack.");
+            }
+        }
+
+        @Override
+        public ConnectivityModuleConnector getConnectivityModuleConnector() {
+            return ConnectivityModuleConnector.getInstance();
+        }
+    }
 
     /**
      * Get the NetworkStackClient singleton instance.
@@ -150,9 +197,7 @@ public class NetworkStackClient {
 
     private void registerNetworkStackService(@NonNull IBinder service) {
         final INetworkStackConnector connector = INetworkStackConnector.Stub.asInterface(service);
-
-        ServiceManager.addService(Context.NETWORK_STACK_SERVICE, service, false /* allowIsolated */,
-                DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+        mDependencies.addToServiceManager(service);
         log("Network stack service registered");
 
         final ArrayList<NetworkStackCallback> requests;
@@ -185,7 +230,7 @@ public class NetworkStackClient {
      * started.
      */
     public void start() {
-        ConnectivityModuleConnector.getInstance().startModuleService(
+        mDependencies.getConnectivityModuleConnector().startModuleService(
                 INetworkStackConnector.class.getName(), PERMISSION_MAINLINE_NETWORK_STACK,
                 new NetworkStackConnection());
         log("Network stack service start requested");
@@ -251,16 +296,7 @@ public class NetworkStackClient {
     }
 
     private void requestConnector(@NonNull NetworkStackCallback request) {
-        // TODO: PID check.
-        final int caller = Binder.getCallingUid();
-        if (caller != Process.SYSTEM_UID
-                && caller != Process.NETWORK_STACK_UID
-                && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)
-                && !UserHandle.isSameApp(caller, Process.PHONE_UID)) {
-            // Don't even attempt to obtain the connector and give a nice error message
-            throw new SecurityException(
-                    "Only the system server should try to bind to the network stack.");
-        }
+        mDependencies.checkCallerUid();
 
         if (!mWasSystemServerInitialized) {
             // The network stack is not being started in this process, e.g. this process is not
