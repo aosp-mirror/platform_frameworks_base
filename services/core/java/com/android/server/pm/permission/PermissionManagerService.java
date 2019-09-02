@@ -2962,8 +2962,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
                                         + " for " + pkgName + " as split permission is also new");
                             }
-
-                            break;
                         } else {
                             // Inherit from new install or existing runtime permissions
                             inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
