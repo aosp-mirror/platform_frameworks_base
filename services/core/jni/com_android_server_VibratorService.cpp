@@ -56,37 +56,57 @@ inline Return<R> NullptrStatus() {
     return Return<R>{Status::fromExceptionCode(Status::EX_NULL_POINTER)};
 }
 
-// Helper used to transparently deal with the vibrator HAL becoming unavailable.
+template <typename I>
+class HalWrapper {
+  public:
+    static std::unique_ptr<HalWrapper> Create() {
+        // Assume that if getService returns a nullptr, HAL is not available on the
+        // device.
+        auto hal = I::getService();
+        return hal ? std::unique_ptr<HalWrapper>(new HalWrapper(std::move(hal))) : nullptr;
+    }
+
+    // Helper used to transparently deal with the vibrator HAL becoming unavailable.
+    template<class R, class... Args0, class... Args1>
+    Return<R> call(Return<R> (I::* fn)(Args0...), Args1&&... args1) {
+        // Return<R> doesn't have a default constructor, so make a Return<R> with
+        // STATUS::EX_NONE.
+        using ::android::hardware::Status;
+        Return<R> ret{Status::fromExceptionCode(Status::EX_NONE)};
+
+        // Note that ret is guaranteed to be changed after this loop.
+        for (int i = 0; i < NUM_TRIES; ++i) {
+            ret = (mHal == nullptr) ? NullptrStatus<R>()
+                    : (*mHal.*fn)(std::forward<Args1>(args1)...);
+
+            if (ret.isOk()) {
+                break;
+            }
+
+            ALOGE("Failed to issue command to vibrator HAL. Retrying.");
+            // Restoring connection to the HAL.
+            mHal = I::tryGetService();
+        }
+        return ret;
+    }
+
+  private:
+    HalWrapper(sp<I> &&hal) : mHal(std::move(hal)) {}
+
+  private:
+    sp<I> mHal;
+};
+
+template <typename I>
+static auto getHal() {
+    static auto sHalWrapper = HalWrapper<I>::Create();
+    return sHalWrapper.get();
+}
+
 template<class R, class I, class... Args0, class... Args1>
 Return<R> halCall(Return<R> (I::* fn)(Args0...), Args1&&... args1) {
-    // Assume that if getService returns a nullptr, HAL is not available on the
-    // device.
-    static sp<I> sHal = I::getService();
-    static bool sAvailable = sHal != nullptr;
-
-    if (!sAvailable) {
-        return NullptrStatus<R>();
-    }
-
-    // Return<R> doesn't have a default constructor, so make a Return<R> with
-    // STATUS::EX_NONE.
-    using ::android::hardware::Status;
-    Return<R> ret{Status::fromExceptionCode(Status::EX_NONE)};
-
-    // Note that ret is guaranteed to be changed after this loop.
-    for (int i = 0; i < NUM_TRIES; ++i) {
-        ret = (sHal == nullptr) ? NullptrStatus<R>()
-                : (*sHal.*fn)(std::forward<Args1>(args1)...);
-
-        if (ret.isOk()) {
-            break;
-        }
-
-        ALOGE("Failed to issue command to vibrator HAL. Retrying.");
-        // Restoring connection to the HAL.
-        sHal = I::tryGetService();
-    }
-    return ret;
+    auto hal = getHal<I>();
+    return hal ? hal->call(fn, std::forward<Args1>(args1)...) : NullptrStatus<R>();
 }
 
 template<class R>
