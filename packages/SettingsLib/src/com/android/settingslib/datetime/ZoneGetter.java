@@ -34,11 +34,14 @@ import androidx.core.text.TextDirectionHeuristicsCompat;
 
 import com.android.settingslib.R;
 
+import libcore.timezone.CountryTimeZones;
+import libcore.timezone.CountryTimeZones.TimeZoneMapping;
 import libcore.timezone.TimeZoneFinder;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -387,7 +390,21 @@ public class ZoneGetter {
 
         @VisibleForTesting
         public List<String> lookupTimeZoneIdsByCountry(String country) {
-            return TimeZoneFinder.getInstance().lookupTimeZoneIdsByCountry(country);
+            final CountryTimeZones countryTimeZones =
+                    TimeZoneFinder.getInstance().lookupCountryTimeZones(country);
+            if (countryTimeZones == null) {
+                return null;
+            }
+            final List<TimeZoneMapping> mappings = countryTimeZones.getTimeZoneMappings();
+            return extractTimeZoneIds(mappings);
+        }
+
+        private static List<String> extractTimeZoneIds(List<TimeZoneMapping> timeZoneMappings) {
+            final List<String> zoneIds = new ArrayList<>(timeZoneMappings.size());
+            for (TimeZoneMapping timeZoneMapping : timeZoneMappings) {
+                zoneIds.add(timeZoneMapping.timeZoneId);
+            }
+            return Collections.unmodifiableList(zoneIds);
         }
     }
 }
