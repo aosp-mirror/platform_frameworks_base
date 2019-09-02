@@ -883,7 +883,7 @@ public final class LoadedApk {
             }
         }
 
-        // /aepx/com.android.runtime/lib, /vendor/lib, /odm/lib and /product/lib
+        // /apex/com.android.art/lib, /vendor/lib, /odm/lib and /product/lib
         // are added to the native lib search paths of the classloader.
         // Note that this is done AFTER the classloader is
         // created by ApplicationLoaders.getDefault().getClassLoader(...). The
@@ -904,8 +904,8 @@ public final class LoadedApk {
         // (linker namespace).
         List<String> extraLibPaths = new ArrayList<>(4);
         String abiSuffix = VMRuntime.getRuntime().is64Bit() ? "64" : "";
-        if (!defaultSearchPaths.contains("/apex/com.android.runtime/lib")) {
-            extraLibPaths.add("/apex/com.android.runtime/lib" + abiSuffix);
+        if (!defaultSearchPaths.contains("/apex/com.android.art/lib")) {
+            extraLibPaths.add("/apex/com.android.art/lib" + abiSuffix);
         }
         if (!defaultSearchPaths.contains("/vendor/lib")) {
             extraLibPaths.add("/vendor/lib" + abiSuffix);
