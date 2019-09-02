@@ -15,51 +15,47 @@
   ~ limitations under the License
   -->
 
+<!-- Layout for the seekbar in media notification -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_media_progress"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:layout_alignParentBottom="true"
-    >
-    <SeekBar android:id="@+id/notification_media_progress_bar"
-        style="@style/Widget.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxHeight="3dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="24dp"
-        android:clickable="true"
-        android:layout_marginBottom="-24dp"
-        android:layout_marginTop="-8dp"
-        android:splitTrack="false"
-    />
-    <FrameLayout
+    android:orientation="vertical">
+    <RelativeLayout
         android:id="@+id/notification_media_progress_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="11dp"
-        >
-
-        <!-- width is set to "match_parent" to avoid extra layout calls -->
-        <TextView android:id="@+id/notification_media_elapsed_time"
-            style="@style/Widget.DeviceDefault.Notification.Text"
-            android:layout_width="match_parent"
+        android:layout_marginBottom="18dp">
+        <TextView
+            android:id="@+id/notification_media_elapsed_time"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:gravity="start"
-        />
-
-        <TextView android:id="@+id/notification_media_total_time"
-            style="@style/Widget.DeviceDefault.Notification.Text"
+            style="@style/Widget.Material.Notification.Text" />
+        <SeekBar
+            android:id="@+id/notification_media_progress_bar"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/notification_media_total_time"
+            android:layout_toRightOf="@id/notification_media_elapsed_time"
+            android:layout_alignTop="@id/notification_media_elapsed_time"
+            android:layout_alignBottom="@id/notification_media_total_time"
+            android:clickable="true"
+            android:maxHeight="3dp"
+            android:splitTrack="false"
+            style="@style/Widget.ProgressBar.Horizontal" />
+        <TextView
+            android:id="@+id/notification_media_total_time"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:gravity="end"
-        />
-    </FrameLayout>
+            style="@style/Widget.Material.Notification.Text" />
+    </RelativeLayout>
 </LinearLayout>
