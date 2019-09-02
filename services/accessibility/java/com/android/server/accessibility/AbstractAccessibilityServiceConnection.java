@@ -23,7 +23,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCE
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
-import android.accessibilityservice.AccessibilityGestureInfo;
+import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
@@ -1168,9 +1168,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    public void notifyGesture(AccessibilityGestureInfo gestureInfo) {
+    public void notifyGesture(AccessibilityGestureEvent gestureEvent) {
         mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_GESTURE,
-                gestureInfo).sendToTarget();
+                gestureEvent).sendToTarget();
     }
 
     public void notifyClearAccessibilityNodeInfoCache() {
@@ -1259,7 +1259,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private void notifyGestureInternal(AccessibilityGestureInfo gestureInfo) {
+    private void notifyGestureInternal(AccessibilityGestureEvent gestureInfo) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
@@ -1464,7 +1464,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final int type = message.what;
             switch (type) {
                 case MSG_ON_GESTURE: {
-                    notifyGestureInternal((AccessibilityGestureInfo) message.obj);
+                    notifyGestureInternal((AccessibilityGestureEvent) message.obj);
                 } break;
 
                 case MSG_CLEAR_ACCESSIBILITY_CACHE: {

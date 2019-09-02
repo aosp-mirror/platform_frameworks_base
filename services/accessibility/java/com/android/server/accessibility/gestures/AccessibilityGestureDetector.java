@@ -16,7 +16,7 @@
 
 package com.android.server.accessibility.gestures;
 
-import android.accessibilityservice.AccessibilityGestureInfo;
+import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.gesture.GesturePoint;
@@ -119,11 +119,11 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         /**
          * Called when an event stream is recognized as a gesture.
          *
-         * @param gestureInfo Information about the gesture.
+         * @param gestureEvent Information about the gesture.
          *
          * @return true if the event is consumed, else false
          */
-        boolean onGestureCompleted(AccessibilityGestureInfo gestureInfo);
+        boolean onGestureCompleted(AccessibilityGestureEvent gestureEvent);
 
         /**
          * Called when the system has decided an event stream doesn't match any
@@ -567,19 +567,19 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
             switch (direction) {
                 case LEFT:
                     return mListener.onGestureCompleted(
-                            new AccessibilityGestureInfo(AccessibilityService.GESTURE_SWIPE_LEFT,
+                            new AccessibilityGestureEvent(AccessibilityService.GESTURE_SWIPE_LEFT,
                                     displayId));
                 case RIGHT:
                     return mListener.onGestureCompleted(
-                            new AccessibilityGestureInfo(AccessibilityService.GESTURE_SWIPE_RIGHT,
+                            new AccessibilityGestureEvent(AccessibilityService.GESTURE_SWIPE_RIGHT,
                                     displayId));
                 case UP:
                     return mListener.onGestureCompleted(
-                            new AccessibilityGestureInfo(AccessibilityService.GESTURE_SWIPE_UP,
+                            new AccessibilityGestureEvent(AccessibilityService.GESTURE_SWIPE_UP,
                                     displayId));
                 case DOWN:
                     return mListener.onGestureCompleted(
-                            new AccessibilityGestureInfo(AccessibilityService.GESTURE_SWIPE_DOWN,
+                            new AccessibilityGestureEvent(AccessibilityService.GESTURE_SWIPE_DOWN,
                                     displayId));
                 default:
                     // Do nothing.
@@ -600,7 +600,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
             int segmentDirection1 = toDirection(dX1, dY1);
             int gestureId = DIRECTIONS_TO_GESTURE_ID[segmentDirection0][segmentDirection1];
             return mListener.onGestureCompleted(
-                    new AccessibilityGestureInfo(gestureId, displayId));
+                    new AccessibilityGestureEvent(gestureId, displayId));
         }
         // else if (path.size() < 2 || 3 < path.size()) then no gesture recognized.
         return mListener.onGestureCancelled(event, policyFlags);

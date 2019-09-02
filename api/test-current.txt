@@ -34,8 +34,8 @@ package android {
 
 package android.accessibilityservice {
 
-  public final class AccessibilityGestureInfo implements android.os.Parcelable {
-    ctor public AccessibilityGestureInfo(int, int);
+  public final class AccessibilityGestureEvent implements android.os.Parcelable {
+    ctor public AccessibilityGestureEvent(int, int);
   }
 
 }
