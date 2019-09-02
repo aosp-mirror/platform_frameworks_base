@@ -3617,6 +3617,10 @@ class ActivityStack extends ConfigurationContainer {
         }
 
         stack.moveToFront(myReason);
+        // Top display focused stack is changed, update top resumed activity if needed.
+        if (stack.mResumedActivity != null) {
+            mStackSupervisor.updateTopResumedActivityIfNeeded();
+        }
         return stack;
     }
 
