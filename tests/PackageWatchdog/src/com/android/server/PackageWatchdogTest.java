@@ -83,6 +83,7 @@ public class PackageWatchdogTest {
     private static final String OBSERVER_NAME_4 = "observer4";
     private static final long SHORT_DURATION = TimeUnit.SECONDS.toMillis(1);
     private static final long LONG_DURATION = TimeUnit.SECONDS.toMillis(5);
+    private final TestClock mTestClock = new TestClock();
     private TestLooper mTestLooper;
     private Context mSpyContext;
     @Mock
@@ -158,8 +159,7 @@ public class PackageWatchdogTest {
         assertTrue(watchdog.getPackages(observer3).contains(APP_A));
 
         // Then advance time a little and run messages in Handlers so observer2 expires
-        Thread.sleep(SHORT_DURATION);
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify observer3 left with reduced expiry duration
         // 1
@@ -171,8 +171,7 @@ public class PackageWatchdogTest {
         assertTrue(watchdog.getPackages(observer3).contains(APP_A));
 
         // Then advance time some more and run messages in Handlers so observer3 expires
-        Thread.sleep(LONG_DURATION);
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(LONG_DURATION);
 
         // Verify observer3 expired
         // 1
@@ -193,15 +192,13 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then advance time half-way
-        Thread.sleep(SHORT_DURATION / 2);
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(SHORT_DURATION / 2);
 
         // Start observing APP_A again
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then advance time such that it should have expired were it not for the second observation
-        Thread.sleep((SHORT_DURATION / 2) + 1);
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch((SHORT_DURATION / 2) + 1);
 
         // Verify that APP_A not expired since second observation extended the time
         assertEquals(1, watchdog.getPackages(observer).size());
@@ -552,9 +549,7 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer3, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then expire observers
-        Thread.sleep(SHORT_DURATION);
-        // Run handler so package failures are dispatched to observers
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify we cancelled all requests on expiry
         assertEquals(0, controller.getRequestedPackages().size());
@@ -609,8 +604,7 @@ public class PackageWatchdogTest {
         assertEquals(0, controller.getRequestedPackages().size());
 
         // Then expire APP_A
-        Thread.sleep(SHORT_DURATION);
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify APP_A is not failed (APP_B) is not expired yet
         assertEquals(0, observer.mFailedPackages.size());
@@ -638,8 +632,7 @@ public class PackageWatchdogTest {
         assertEquals(APP_C, requestedPackages.get(0));
 
         // Then expire APP_A and APP_C
-        Thread.sleep(SHORT_DURATION);
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify only APP_C is failed because explicit health checks was not supported for APP_A
         assertEquals(1, observer.mFailedPackages.size());
@@ -664,8 +657,7 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), LONG_DURATION);
 
         // Then APP_A has exceeded health check duration
-        Thread.sleep(SHORT_DURATION);
-        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify that health check is failed
         assertEquals(1, observer.mFailedPackages.size());
@@ -772,6 +764,12 @@ public class PackageWatchdogTest {
         }
     }
 
+    private void moveTimeForwardAndDispatch(long milliSeconds) {
+        mTestClock.moveTimeForward(milliSeconds);
+        mTestLooper.moveTimeForward(milliSeconds);
+        mTestLooper.dispatchAll();
+    }
+
     private PackageWatchdog createWatchdog() {
         return createWatchdog(new TestController(), true /* withPackagesReady */);
     }
@@ -782,7 +780,7 @@ public class PackageWatchdogTest {
         Handler handler = new Handler(mTestLooper.getLooper());
         PackageWatchdog watchdog =
                 new PackageWatchdog(mSpyContext, policyFile, handler, handler, controller,
-                        mConnectivityModuleConnector, android.os.SystemClock::uptimeMillis);
+                        mConnectivityModuleConnector, mTestClock);
         // Verify controller is not automatically started
         assertFalse(controller.mIsEnabled);
         if (withPackagesReady) {
@@ -886,6 +884,19 @@ public class PackageWatchdogTest {
             } else {
                 return Collections.emptyList();
             }
+        }
+    }
+
+    private static class TestClock implements PackageWatchdog.SystemClock {
+        // Note 0 is special to the internal clock of PackageWatchdog. We need to start from
+        // a non-zero value in order not to disrupt the logic of PackageWatchdog.
+        private long mUpTimeMillis = 1;
+        @Override
+        public long uptimeMillis() {
+            return mUpTimeMillis;
+        }
+        public void moveTimeForward(long milliSeconds) {
+            mUpTimeMillis += milliSeconds;
         }
     }
 }
