@@ -39,8 +39,10 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AccessibilityClickableSpan;
+import android.text.style.AccessibilityReplacementSpan;
 import android.text.style.AccessibilityURLSpan;
 import android.text.style.ClickableSpan;
+import android.text.style.ReplacementSpan;
 import android.text.style.URLSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2640,34 +2642,83 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setText(CharSequence text) {
         enforceNotSealed();
         mOriginalText = text;
-        // Replace any ClickableSpans in mText with placeholders
         if (text instanceof Spanned) {
-            ClickableSpan[] spans =
-                    ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
-            if (spans.length > 0) {
-                Spannable spannable = new SpannableStringBuilder(text);
-                for (int i = 0; i < spans.length; i++) {
-                    ClickableSpan span = spans[i];
-                    if ((span instanceof AccessibilityClickableSpan)
-                            || (span instanceof AccessibilityURLSpan)) {
-                        // We've already done enough
-                        break;
-                    }
-                    int spanToReplaceStart = spannable.getSpanStart(span);
-                    int spanToReplaceEnd = spannable.getSpanEnd(span);
-                    int spanToReplaceFlags = spannable.getSpanFlags(span);
-                    spannable.removeSpan(span);
-                    ClickableSpan replacementSpan = (span instanceof URLSpan)
-                            ? new AccessibilityURLSpan((URLSpan) span)
-                            : new AccessibilityClickableSpan(span.getId());
-                    spannable.setSpan(replacementSpan, spanToReplaceStart, spanToReplaceEnd,
-                            spanToReplaceFlags);
-                }
-                mText = spannable;
-                return;
-            }
+            CharSequence tmpText = text;
+            tmpText = replaceClickableSpan(tmpText);
+            tmpText = replaceReplacementSpan(tmpText);
+            mText = tmpText;
+            return;
         }
         mText = (text == null) ? null : text.subSequence(0, text.length());
+    }
+
+    /**
+     * Replaces any ClickableSpans in mText with placeholders.
+     *
+     * @param text The text.
+     *
+     * @return The spannable with ClickableSpan replacement.
+     */
+    private CharSequence replaceClickableSpan(CharSequence text) {
+        ClickableSpan[] clickableSpans =
+                ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
+        Spannable spannable = new SpannableStringBuilder(text);
+        if (clickableSpans.length == 0) {
+            return text;
+        }
+        for (int i = 0; i < clickableSpans.length; i++) {
+            ClickableSpan span = clickableSpans[i];
+            if ((span instanceof AccessibilityClickableSpan)
+                    || (span instanceof AccessibilityURLSpan)) {
+                // We've already done enough
+                break;
+            }
+            int spanToReplaceStart = spannable.getSpanStart(span);
+            int spanToReplaceEnd = spannable.getSpanEnd(span);
+            int spanToReplaceFlags = spannable.getSpanFlags(span);
+            spannable.removeSpan(span);
+            ClickableSpan replacementSpan = (span instanceof URLSpan)
+                    ? new AccessibilityURLSpan((URLSpan) span)
+                    : new AccessibilityClickableSpan(span.getId());
+            spannable.setSpan(replacementSpan, spanToReplaceStart, spanToReplaceEnd,
+                    spanToReplaceFlags);
+        }
+        return spannable;
+    }
+
+    /**
+     * Replace any ImageSpans in mText with its content description.
+     *
+     * @param text The text.
+     *
+     * @return The spannable with ReplacementSpan replacement.
+     */
+    private CharSequence replaceReplacementSpan(CharSequence text) {
+        ReplacementSpan[] replacementSpans =
+                ((Spanned) text).getSpans(0, text.length(), ReplacementSpan.class);
+        SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+        if (replacementSpans.length == 0) {
+            return text;
+        }
+        for (int i = 0; i < replacementSpans.length; i++) {
+            ReplacementSpan span = replacementSpans[i];
+            CharSequence replacementText = span.getContentDescription();
+            if (span instanceof AccessibilityReplacementSpan) {
+                // We've already done enough
+                break;
+            }
+            if (replacementText == null) {
+                continue;
+            }
+            int spanToReplaceStart = spannable.getSpanStart(span);
+            int spanToReplaceEnd = spannable.getSpanEnd(span);
+            int spanToReplaceFlags = spannable.getSpanFlags(span);
+            spannable.removeSpan(span);
+            ReplacementSpan replacementSpan = new AccessibilityReplacementSpan(replacementText);
+            spannable.setSpan(replacementSpan, spanToReplaceStart, spanToReplaceEnd,
+                    spanToReplaceFlags);
+        }
+        return spannable;
     }
 
     /**

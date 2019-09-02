@@ -25,6 +25,8 @@ import android.text.TextPaint;
 
 public abstract class ReplacementSpan extends MetricAffectingSpan {
 
+    private CharSequence mContentDescription = null;
+
     /**
      * Returns the width of the span. Extending classes can set the height of the span by updating
      * attributes of {@link android.graphics.Paint.FontMetricsInt}. If the span covers the whole
@@ -59,6 +61,27 @@ public abstract class ReplacementSpan extends MetricAffectingSpan {
     public abstract void draw(@NonNull Canvas canvas, CharSequence text,
                               @IntRange(from = 0) int start, @IntRange(from = 0) int end, float x,
                               int top, int y, int bottom, @NonNull Paint paint);
+
+    /**
+     * Gets a brief description of this ImageSpan for use in accessibility support.
+     *
+     * @return The content description.
+     */
+    @Nullable
+    public CharSequence getContentDescription() {
+        return mContentDescription;
+    }
+
+    /**
+     * Sets the specific content description into ImageSpan.
+     * ReplacementSpans are shared with accessibility services,
+     * but only the content description is available from them.
+     *
+     * @param contentDescription content description. The default value is null.
+     */
+    public void setContentDescription(@Nullable CharSequence contentDescription) {
+        mContentDescription = contentDescription;
+    }
 
     /**
      * This method does nothing, since ReplacementSpans are measured
