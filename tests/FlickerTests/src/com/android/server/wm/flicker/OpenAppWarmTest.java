@@ -21,11 +21,13 @@ import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
 import static com.android.server.wm.flicker.WmTraceSubject.assertThat;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -46,7 +48,7 @@ public class OpenAppWarmTest extends FlickerTestBase {
 
     @Before
     public void runTransition() {
-        super.runTransition(openAppWarm(mTestApp, mUiDevice).build());
+        super.runTransition(openAppWarm(mTestApp, mUiDevice).includeJankyRuns().build());
     }
 
     @Test
@@ -64,9 +66,9 @@ public class OpenAppWarmTest extends FlickerTestBase {
     @Test
     public void checkVisibility_wallpaperBecomesInvisible() {
         checkResults(result -> assertThat(result)
-                .showsBelowAppWindow("wallpaper")
+                .showsBelowAppWindow("Wallpaper")
                 .then()
-                .hidesBelowAppWindow("wallpaper")
+                .hidesBelowAppWindow("Wallpaper")
                 .forAllEntries());
     }
 
@@ -74,12 +76,14 @@ public class OpenAppWarmTest extends FlickerTestBase {
     public void checkZOrder_appWindowReplacesLauncherAsTopWindow() {
         checkResults(result -> assertThat(result)
                 .showsAppWindowOnTop(
-                        "com.google.android.apps.nexuslauncher/.NexusLauncherActivity")
+                        "com.android.launcher3/.Launcher")
                 .then()
                 .showsAppWindowOnTop(mTestApp.getPackage())
                 .forAllEntries());
     }
 
+    @FlakyTest(bugId = 141235985)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkCoveredRegion_noUncoveredRegions() {
         checkResults(result -> LayersTraceSubject.assertThat(result).coversRegion(
@@ -101,9 +105,9 @@ public class OpenAppWarmTest extends FlickerTestBase {
     @Test
     public void checkVisibility_wallpaperLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer("wallpaper")
+                .showsLayer("Wallpaper")
                 .then()
-                .hidesLayer("wallpaper")
+                .hidesLayer("Wallpaper")
                 .forAllEntries());
     }
 }
