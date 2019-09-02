@@ -184,6 +184,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -2187,6 +2188,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    @FlakyTest(bugId = 140306320)
     public void testPartialConnectivity() throws Exception {
         // Register network callback.
         NetworkRequest request = new NetworkRequest.Builder()
@@ -3633,6 +3635,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    @FlakyTest(bugId = 140305589)
     public void testPacketKeepalives() throws Exception {
         InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
@@ -5697,6 +5700,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    @FlakyTest(bugId = 140305678)
     public void testTcpBufferReset() throws Exception {
         final String testTcpBufferSizes = "1,2,3,4,5,6";
         final NetworkRequest networkRequest = new NetworkRequest.Builder()
