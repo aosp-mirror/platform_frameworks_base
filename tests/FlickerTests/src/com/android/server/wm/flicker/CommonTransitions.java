@@ -67,7 +67,7 @@ class CommonTransitions {
                     device.setOrientationNatural();
             }
             // Wait for animation to complete
-            sleep(3000);
+            sleep(1000);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
