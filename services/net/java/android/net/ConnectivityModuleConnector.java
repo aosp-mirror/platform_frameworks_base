@@ -38,6 +38,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -76,8 +77,17 @@ public class ConnectivityModuleConnector {
     private final SharedLog mLog = new SharedLog(TAG);
     @GuardedBy("mHealthListeners")
     private final ArraySet<ConnectivityModuleHealthListener> mHealthListeners = new ArraySet<>();
+    @NonNull
+    private final Dependencies mDeps;
 
-    private ConnectivityModuleConnector() { }
+    private ConnectivityModuleConnector() {
+        this(new DependenciesImpl());
+    }
+
+    @VisibleForTesting
+    ConnectivityModuleConnector(@NonNull Dependencies deps) {
+        mDeps = deps;
+    }
 
     /**
      * Get the {@link ConnectivityModuleConnector} singleton instance.
@@ -124,6 +134,59 @@ public class ConnectivityModuleConnector {
         void onModuleServiceConnected(@NonNull IBinder iBinder);
     }
 
+    /**
+     * Interface used to determine the intent to use to bind to the module. Useful for testing.
+     */
+    @VisibleForTesting
+    protected interface Dependencies {
+        /**
+         * Determine the intent to use to bind to the module.
+         * @return null if the intent could not be resolved, the intent otherwise.
+         */
+        @Nullable
+        Intent getModuleServiceIntent(
+                @NonNull PackageManager pm, @NonNull String serviceIntentBaseAction,
+                @NonNull String servicePermissionName, boolean inSystemProcess);
+    }
+
+    private static class DependenciesImpl implements Dependencies {
+        @Nullable
+        @Override
+        public Intent getModuleServiceIntent(
+                @NonNull PackageManager pm, @NonNull String serviceIntentBaseAction,
+                @NonNull String servicePermissionName, boolean inSystemProcess) {
+            final Intent intent =
+                    new Intent(inSystemProcess
+                            ? serviceIntentBaseAction + IN_PROCESS_SUFFIX
+                            : serviceIntentBaseAction);
+            final ComponentName comp = intent.resolveSystemService(pm, 0);
+            if (comp == null) {
+                return null;
+            }
+            intent.setComponent(comp);
+
+            final int uid;
+            try {
+                uid = pm.getPackageUidAsUser(comp.getPackageName(), UserHandle.USER_SYSTEM);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new SecurityException(
+                        "Could not check network stack UID; package not found.", e);
+            }
+
+            final int expectedUid =
+                    inSystemProcess ? Process.SYSTEM_UID : Process.NETWORK_STACK_UID;
+            if (uid != expectedUid) {
+                throw new SecurityException("Invalid network stack UID: " + uid);
+            }
+
+            if (!inSystemProcess) {
+                checkModuleServicePermission(pm, comp, servicePermissionName);
+            }
+
+            return intent;
+        }
+    }
+
 
     /**
      * Add a {@link ConnectivityModuleHealthListener} to listen to network stack health events.
@@ -156,13 +219,13 @@ public class ConnectivityModuleConnector {
         final PackageManager pm = mContext.getPackageManager();
 
         // Try to bind in-process if the device was shipped with an in-process version
-        Intent intent = getModuleServiceIntent(pm, serviceIntentBaseAction, servicePermissionName,
-                true /* inSystemProcess */);
+        Intent intent = mDeps.getModuleServiceIntent(pm, serviceIntentBaseAction,
+                servicePermissionName, true /* inSystemProcess */);
 
         // Otherwise use the updatable module version
         if (intent == null) {
-            intent = getModuleServiceIntent(pm, serviceIntentBaseAction, servicePermissionName,
-                false /* inSystemProcess */);
+            intent = mDeps.getModuleServiceIntent(pm, serviceIntentBaseAction,
+                    servicePermissionName, false /* inSystemProcess */);
             log("Starting networking module in network_stack process");
         } else {
             log("Starting networking module in system_server process");
@@ -219,41 +282,7 @@ public class ConnectivityModuleConnector {
         }
     }
 
-    @Nullable
-    private Intent getModuleServiceIntent(
-            @NonNull PackageManager pm, @NonNull String serviceIntentBaseAction,
-            @NonNull String servicePermissionName, boolean inSystemProcess) {
-        final Intent intent =
-                new Intent(inSystemProcess
-                        ? serviceIntentBaseAction + IN_PROCESS_SUFFIX
-                        : serviceIntentBaseAction);
-        final ComponentName comp = intent.resolveSystemService(pm, 0);
-        if (comp == null) {
-            return null;
-        }
-        intent.setComponent(comp);
-
-        int uid = -1;
-        try {
-            uid = pm.getPackageUidAsUser(comp.getPackageName(), UserHandle.USER_SYSTEM);
-        } catch (PackageManager.NameNotFoundException e) {
-            logWtf("Networking module package not found", e);
-            // Fall through
-        }
-
-        final int expectedUid = inSystemProcess ? Process.SYSTEM_UID : Process.NETWORK_STACK_UID;
-        if (uid != expectedUid) {
-            throw new SecurityException("Invalid network stack UID: " + uid);
-        }
-
-        if (!inSystemProcess) {
-            checkModuleServicePermission(pm, comp, servicePermissionName);
-        }
-
-        return intent;
-    }
-
-    private void checkModuleServicePermission(
+    private static void checkModuleServicePermission(
             @NonNull PackageManager pm, @NonNull ComponentName comp,
             @NonNull String servicePermissionName) {
         final int hasPermission =
