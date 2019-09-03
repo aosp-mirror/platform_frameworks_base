@@ -4652,6 +4652,30 @@ package android.provider {
     field public static final String WAIT_TIME_RETRY = "wait_time";
   }
 
+  public static final class Telephony.CellBroadcasts implements android.provider.BaseColumns {
+    field public static final String CID = "cid";
+    field public static final String CMAS_CATEGORY = "cmas_category";
+    field public static final String CMAS_CERTAINTY = "cmas_certainty";
+    field public static final String CMAS_MESSAGE_CLASS = "cmas_message_class";
+    field public static final String CMAS_RESPONSE_TYPE = "cmas_response_type";
+    field public static final String CMAS_SEVERITY = "cmas_severity";
+    field public static final String CMAS_URGENCY = "cmas_urgency";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final String DEFAULT_SORT_ORDER = "date DESC";
+    field public static final String DELIVERY_TIME = "date";
+    field public static final String ETWS_WARNING_TYPE = "etws_warning_type";
+    field public static final String GEOGRAPHICAL_SCOPE = "geo_scope";
+    field public static final String LAC = "lac";
+    field public static final String LANGUAGE_CODE = "language";
+    field public static final String MESSAGE_BODY = "body";
+    field public static final String MESSAGE_FORMAT = "format";
+    field public static final String MESSAGE_PRIORITY = "priority";
+    field public static final String MESSAGE_READ = "read";
+    field public static final String PLMN = "plmn";
+    field public static final String SERIAL_NUMBER = "serial_number";
+    field public static final String SERVICE_CATEGORY = "service_category";
+  }
+
   public final class TimeZoneRulesDataContract {
     field public static final String AUTHORITY = "com.android.timezone";
   }
@@ -6227,7 +6251,125 @@ package android.telephony {
     field public static final int ROAMING_TYPE_UNKNOWN = 1; // 0x1
   }
 
+  public final class SmsCbCmasInfo implements android.os.Parcelable {
+    ctor public SmsCbCmasInfo(int, int, int, int, int, int);
+    method public int describeContents();
+    method public int getCategory();
+    method public int getCertainty();
+    method public int getMessageClass();
+    method public int getResponseType();
+    method public int getSeverity();
+    method public int getUrgency();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CMAS_CATEGORY_CBRNE = 10; // 0xa
+    field public static final int CMAS_CATEGORY_ENV = 7; // 0x7
+    field public static final int CMAS_CATEGORY_FIRE = 5; // 0x5
+    field public static final int CMAS_CATEGORY_GEO = 0; // 0x0
+    field public static final int CMAS_CATEGORY_HEALTH = 6; // 0x6
+    field public static final int CMAS_CATEGORY_INFRA = 9; // 0x9
+    field public static final int CMAS_CATEGORY_MET = 1; // 0x1
+    field public static final int CMAS_CATEGORY_OTHER = 11; // 0xb
+    field public static final int CMAS_CATEGORY_RESCUE = 4; // 0x4
+    field public static final int CMAS_CATEGORY_SAFETY = 2; // 0x2
+    field public static final int CMAS_CATEGORY_SECURITY = 3; // 0x3
+    field public static final int CMAS_CATEGORY_TRANSPORT = 8; // 0x8
+    field public static final int CMAS_CATEGORY_UNKNOWN = -1; // 0xffffffff
+    field public static final int CMAS_CERTAINTY_LIKELY = 1; // 0x1
+    field public static final int CMAS_CERTAINTY_OBSERVED = 0; // 0x0
+    field public static final int CMAS_CERTAINTY_UNKNOWN = -1; // 0xffffffff
+    field public static final int CMAS_CLASS_CHILD_ABDUCTION_EMERGENCY = 3; // 0x3
+    field public static final int CMAS_CLASS_CMAS_EXERCISE = 5; // 0x5
+    field public static final int CMAS_CLASS_EXTREME_THREAT = 1; // 0x1
+    field public static final int CMAS_CLASS_OPERATOR_DEFINED_USE = 6; // 0x6
+    field public static final int CMAS_CLASS_PRESIDENTIAL_LEVEL_ALERT = 0; // 0x0
+    field public static final int CMAS_CLASS_REQUIRED_MONTHLY_TEST = 4; // 0x4
+    field public static final int CMAS_CLASS_SEVERE_THREAT = 2; // 0x2
+    field public static final int CMAS_CLASS_UNKNOWN = -1; // 0xffffffff
+    field public static final int CMAS_RESPONSE_TYPE_ASSESS = 6; // 0x6
+    field public static final int CMAS_RESPONSE_TYPE_AVOID = 5; // 0x5
+    field public static final int CMAS_RESPONSE_TYPE_EVACUATE = 1; // 0x1
+    field public static final int CMAS_RESPONSE_TYPE_EXECUTE = 3; // 0x3
+    field public static final int CMAS_RESPONSE_TYPE_MONITOR = 4; // 0x4
+    field public static final int CMAS_RESPONSE_TYPE_NONE = 7; // 0x7
+    field public static final int CMAS_RESPONSE_TYPE_PREPARE = 2; // 0x2
+    field public static final int CMAS_RESPONSE_TYPE_SHELTER = 0; // 0x0
+    field public static final int CMAS_RESPONSE_TYPE_UNKNOWN = -1; // 0xffffffff
+    field public static final int CMAS_SEVERITY_EXTREME = 0; // 0x0
+    field public static final int CMAS_SEVERITY_SEVERE = 1; // 0x1
+    field public static final int CMAS_SEVERITY_UNKNOWN = -1; // 0xffffffff
+    field public static final int CMAS_URGENCY_EXPECTED = 1; // 0x1
+    field public static final int CMAS_URGENCY_IMMEDIATE = 0; // 0x0
+    field public static final int CMAS_URGENCY_UNKNOWN = -1; // 0xffffffff
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SmsCbCmasInfo> CREATOR;
+  }
+
+  public final class SmsCbEtwsInfo implements android.os.Parcelable {
+    ctor public SmsCbEtwsInfo(int, boolean, boolean, boolean, @Nullable byte[]);
+    method public int describeContents();
+    method @Nullable public byte[] getPrimaryNotificationSignature();
+    method public long getPrimaryNotificationTimestamp();
+    method public int getWarningType();
+    method public boolean isEmergencyUserAlert();
+    method public boolean isPopupAlert();
+    method public boolean isPrimary();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SmsCbEtwsInfo> CREATOR;
+    field public static final int ETWS_WARNING_TYPE_EARTHQUAKE = 0; // 0x0
+    field public static final int ETWS_WARNING_TYPE_EARTHQUAKE_AND_TSUNAMI = 2; // 0x2
+    field public static final int ETWS_WARNING_TYPE_OTHER_EMERGENCY = 4; // 0x4
+    field public static final int ETWS_WARNING_TYPE_TEST_MESSAGE = 3; // 0x3
+    field public static final int ETWS_WARNING_TYPE_TSUNAMI = 1; // 0x1
+    field public static final int ETWS_WARNING_TYPE_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public final class SmsCbLocation implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCid();
+    method public int getLac();
+    method @NonNull public String getPlmn();
+    method public boolean isInLocationArea(@NonNull android.telephony.SmsCbLocation);
+    method public boolean isInLocationArea(@Nullable String, int, int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SmsCbLocation> CREATOR;
+  }
+
+  public final class SmsCbMessage implements android.os.Parcelable {
+    ctor public SmsCbMessage(int, int, int, @NonNull android.telephony.SmsCbLocation, int, @Nullable String, @Nullable String, int, @Nullable android.telephony.SmsCbEtwsInfo, @Nullable android.telephony.SmsCbCmasInfo);
+    method @NonNull public static android.telephony.SmsCbMessage createFromCursor(@NonNull android.database.Cursor);
+    method public int describeContents();
+    method @Nullable public android.telephony.SmsCbCmasInfo getCmasWarningInfo();
+    method @NonNull public android.content.ContentValues getContentValues();
+    method @Nullable public android.telephony.SmsCbEtwsInfo getEtwsWarningInfo();
+    method public int getGeographicalScope();
+    method @Nullable public String getLanguageCode();
+    method @NonNull public android.telephony.SmsCbLocation getLocation();
+    method @Nullable public String getMessageBody();
+    method public int getMessageFormat();
+    method public int getMessagePriority();
+    method public long getReceivedTime();
+    method public int getSerialNumber();
+    method public int getServiceCategory();
+    method public boolean isCmasMessage();
+    method public boolean isEmergencyMessage();
+    method public boolean isEtwsMessage();
+    method public boolean needGeoFencingCheck();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SmsCbMessage> CREATOR;
+    field public static final int GEOGRAPHICAL_SCOPE_CELL_WIDE = 3; // 0x3
+    field public static final int GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE = 0; // 0x0
+    field public static final int GEOGRAPHICAL_SCOPE_LOCATION_AREA_WIDE = 2; // 0x2
+    field public static final int GEOGRAPHICAL_SCOPE_PLMN_WIDE = 1; // 0x1
+    field public static final int MESSAGE_FORMAT_3GPP = 1; // 0x1
+    field public static final int MESSAGE_FORMAT_3GPP2 = 2; // 0x2
+    field public static final int MESSAGE_PRIORITY_EMERGENCY = 3; // 0x3
+    field public static final int MESSAGE_PRIORITY_INTERACTIVE = 1; // 0x1
+    field public static final int MESSAGE_PRIORITY_NORMAL = 0; // 0x0
+    field public static final int MESSAGE_PRIORITY_URGENT = 2; // 0x2
+  }
+
   public final class SmsManager {
+    method public boolean disableCellBroadcastRange(int, int, int);
+    method public boolean enableCellBroadcastRange(int, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
     field public static final int RESULT_CANCELLED = 23; // 0x17
     field public static final int RESULT_ENCODING_ERROR = 18; // 0x12
@@ -6257,6 +6399,7 @@ package android.telephony {
   public class SubscriptionManager {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEnabledSubscriptionId(int);
+    method @NonNull public static android.content.res.Resources getResourcesForSubId(@NonNull android.content.Context, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isSubscriptionEnabled(int);
     method public void requestEmbeddedSubscriptionInfoListRefresh();
     method public void requestEmbeddedSubscriptionInfoListRefresh(int);

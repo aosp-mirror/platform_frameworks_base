@@ -16,17 +16,25 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
- * Contains CMAS warning notification Type 1 elements for a {@link SmsCbMessage}.
+ * Contains CMAS (Commercial Mobile Alert System) warning notification Type 1 elements for a
+ * {@link SmsCbMessage}.
  * Supported values for each element are defined in TIA-1149-0-1 (CMAS over CDMA) and
  * 3GPP TS 23.041 (for GSM/UMTS).
  *
  * {@hide}
  */
-public class SmsCbCmasInfo implements Parcelable {
+@SystemApi
+public final class SmsCbCmasInfo implements Parcelable {
 
     // CMAS message class (in GSM/UMTS message identifier or CDMA service category).
 
@@ -53,6 +61,21 @@ public class SmsCbCmasInfo implements Parcelable {
 
     /** CMAS category for warning types that are reserved for future extension. */
     public static final int CMAS_CLASS_UNKNOWN = -1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CMAS_CLASS_"},
+            value = {
+                    CMAS_CLASS_PRESIDENTIAL_LEVEL_ALERT,
+                    CMAS_CLASS_EXTREME_THREAT,
+                    CMAS_CLASS_SEVERE_THREAT,
+                    CMAS_CLASS_CHILD_ABDUCTION_EMERGENCY,
+                    CMAS_CLASS_REQUIRED_MONTHLY_TEST,
+                    CMAS_CLASS_CMAS_EXERCISE,
+                    CMAS_CLASS_OPERATOR_DEFINED_USE,
+                    CMAS_CLASS_UNKNOWN,
+            })
+    public @interface Class {}
 
     // CMAS alert category (in CDMA type 1 elements record).
 
@@ -98,6 +121,26 @@ public class SmsCbCmasInfo implements Parcelable {
      */
     public static final int CMAS_CATEGORY_UNKNOWN = -1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CMAS_CATEORY_"},
+            value = {
+                    CMAS_CATEGORY_GEO,
+                    CMAS_CATEGORY_MET,
+                    CMAS_CATEGORY_SAFETY,
+                    CMAS_CATEGORY_SECURITY,
+                    CMAS_CATEGORY_RESCUE,
+                    CMAS_CATEGORY_FIRE,
+                    CMAS_CATEGORY_HEALTH,
+                    CMAS_CATEGORY_ENV,
+                    CMAS_CATEGORY_TRANSPORT,
+                    CMAS_CATEGORY_INFRA,
+                    CMAS_CATEGORY_CBRNE,
+                    CMAS_CATEGORY_OTHER,
+                    CMAS_CATEGORY_UNKNOWN,
+            })
+    public @interface Category {}
+
     // CMAS response type (in CDMA type 1 elements record).
 
     /** CMAS response type: Take shelter in place. */
@@ -130,6 +173,22 @@ public class SmsCbCmasInfo implements Parcelable {
      */
     public static final int CMAS_RESPONSE_TYPE_UNKNOWN = -1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CMAS_RESPONSE_TYPE_"},
+            value = {
+                    CMAS_RESPONSE_TYPE_SHELTER,
+                    CMAS_RESPONSE_TYPE_EVACUATE,
+                    CMAS_RESPONSE_TYPE_PREPARE,
+                    CMAS_RESPONSE_TYPE_EXECUTE,
+                    CMAS_RESPONSE_TYPE_MONITOR,
+                    CMAS_RESPONSE_TYPE_AVOID,
+                    CMAS_RESPONSE_TYPE_ASSESS,
+                    CMAS_RESPONSE_TYPE_NONE,
+                    CMAS_RESPONSE_TYPE_UNKNOWN,
+    })
+    public @interface ResponseType {}
+
     // 4-bit CMAS severity (in GSM/UMTS message identifier or CDMA type 1 elements record).
 
     /** CMAS severity type: Extraordinary threat to life or property. */
@@ -144,6 +203,16 @@ public class SmsCbCmasInfo implements Parcelable {
      * Presidential-level alert class (Korean Public Alert System Class 0).
      */
     public static final int CMAS_SEVERITY_UNKNOWN = -1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CMAS_SEVERITY_"},
+            value = {
+                    CMAS_SEVERITY_EXTREME,
+                    CMAS_SEVERITY_SEVERE,
+                    CMAS_SEVERITY_UNKNOWN,
+            })
+    public @interface Severity {}
 
     // CMAS urgency (in GSM/UMTS message identifier or CDMA type 1 elements record).
 
@@ -160,6 +229,16 @@ public class SmsCbCmasInfo implements Parcelable {
      */
     public static final int CMAS_URGENCY_UNKNOWN = -1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CMAS_URGENCY_"},
+            value = {
+                    CMAS_URGENCY_IMMEDIATE,
+                    CMAS_URGENCY_EXPECTED,
+                    CMAS_URGENCY_UNKNOWN,
+            })
+    public @interface Urgency {}
+
     // CMAS certainty (in GSM/UMTS message identifier or CDMA type 1 elements record).
 
     /** CMAS certainty type: Determined to have occurred or to be ongoing. */
@@ -175,27 +254,38 @@ public class SmsCbCmasInfo implements Parcelable {
      */
     public static final int CMAS_CERTAINTY_UNKNOWN = -1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CMAS_CERTAINTY_"},
+            value = {
+                    CMAS_CERTAINTY_OBSERVED,
+                    CMAS_CERTAINTY_LIKELY,
+                    CMAS_CERTAINTY_UNKNOWN,
+            })
+    public @interface Certainty {}
+
     /** CMAS message class. */
-    private final int mMessageClass;
+    private final @Class int mMessageClass;
 
     /** CMAS category. */
-    private final int mCategory;
+    private final @Category int mCategory;
 
     /** CMAS response type. */
-    private final int mResponseType;
+    private final @ResponseType int mResponseType;
 
     /** CMAS severity. */
-    private final int mSeverity;
+    private final @Severity int mSeverity;
 
     /** CMAS urgency. */
-    private final int mUrgency;
+    private final @Urgency int mUrgency;
 
     /** CMAS certainty. */
-    private final int mCertainty;
+    private final @Certainty int mCertainty;
 
     /** Create a new SmsCbCmasInfo object with the specified values. */
-    public SmsCbCmasInfo(int messageClass, int category, int responseType, int severity,
-            int urgency, int certainty) {
+    public SmsCbCmasInfo(@Class int messageClass, @Category int category,
+            @ResponseType int responseType,
+            @Severity int severity, @Urgency int urgency, @Certainty int certainty) {
         mMessageClass = messageClass;
         mCategory = category;
         mResponseType = responseType;
@@ -234,7 +324,7 @@ public class SmsCbCmasInfo implements Parcelable {
      * Returns the CMAS message class, e.g. {@link #CMAS_CLASS_PRESIDENTIAL_LEVEL_ALERT}.
      * @return one of the {@code CMAS_CLASS} values
      */
-    public int getMessageClass() {
+    public @Class int getMessageClass() {
         return mMessageClass;
     }
 
@@ -242,7 +332,7 @@ public class SmsCbCmasInfo implements Parcelable {
      * Returns the CMAS category, e.g. {@link #CMAS_CATEGORY_GEO}.
      * @return one of the {@code CMAS_CATEGORY} values
      */
-    public int getCategory() {
+    public @Category int getCategory() {
         return mCategory;
     }
 
@@ -250,7 +340,7 @@ public class SmsCbCmasInfo implements Parcelable {
      * Returns the CMAS response type, e.g. {@link #CMAS_RESPONSE_TYPE_SHELTER}.
      * @return one of the {@code CMAS_RESPONSE_TYPE} values
      */
-    public int getResponseType() {
+    public @ResponseType int getResponseType() {
         return mResponseType;
     }
 
@@ -258,7 +348,7 @@ public class SmsCbCmasInfo implements Parcelable {
      * Returns the CMAS severity, e.g. {@link #CMAS_SEVERITY_EXTREME}.
      * @return one of the {@code CMAS_SEVERITY} values
      */
-    public int getSeverity() {
+    public @Severity int getSeverity() {
         return mSeverity;
     }
 
@@ -266,15 +356,16 @@ public class SmsCbCmasInfo implements Parcelable {
      * Returns the CMAS urgency, e.g. {@link #CMAS_URGENCY_IMMEDIATE}.
      * @return one of the {@code CMAS_URGENCY} values
      */
-    public int getUrgency() {
+    public @Urgency int getUrgency() {
         return mUrgency;
     }
 
     /**
      * Returns the CMAS certainty, e.g. {@link #CMAS_CERTAINTY_OBSERVED}.
+     *
      * @return one of the {@code CMAS_CERTAINTY} values
      */
-    public int getCertainty() {
+    public @Certainty int getCertainty() {
         return mCertainty;
     }
 
@@ -287,6 +378,7 @@ public class SmsCbCmasInfo implements Parcelable {
 
     /**
      * Describe the kinds of special objects contained in the marshalled representation.
+     *
      * @return a bitmask indicating this Parcelable contains no special objects
      */
     @Override
@@ -295,8 +387,9 @@ public class SmsCbCmasInfo implements Parcelable {
     }
 
     /** Creator for unparcelling objects. */
-    public static final Parcelable.Creator<SmsCbCmasInfo>
-            CREATOR = new Parcelable.Creator<SmsCbCmasInfo>() {
+    @NonNull
+    public static final Parcelable.Creator<SmsCbCmasInfo> CREATOR =
+            new Parcelable.Creator<SmsCbCmasInfo>() {
         @Override
         public SmsCbCmasInfo createFromParcel(Parcel in) {
             return new SmsCbCmasInfo(in);
