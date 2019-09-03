@@ -18,13 +18,11 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.pm.PackageParser;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.DumpState;
@@ -37,7 +35,6 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * Permissions and other related data. This class is not meant for
@@ -246,6 +243,18 @@ public class PermissionSettings {
         synchronized (mLock) {
             return BasePermission.enforcePermissionTree(
                     mPermissionTrees.values(), permName, callingUid);
+        }
+    }
+
+    /**
+     * Check whether a permission is runtime.
+     *
+     * @see BasePermission#isRuntime()
+     */
+    public boolean isPermissionRuntime(@NonNull String permName) {
+        synchronized (mLock) {
+            final BasePermission bp = mPermissions.get(permName);
+            return (bp != null && bp.isRuntime());
         }
     }
 
