@@ -3944,9 +3944,10 @@ public final class Telephony {
     }
 
     /**
-     * Contains received SMS cell broadcast messages.
+     * Contains received SMS cell broadcast messages. More details are available in 3GPP TS 23.041.
      * @hide
      */
+    @SystemApi
     public static final class CellBroadcasts implements BaseColumns {
 
         /**
@@ -3958,30 +3959,52 @@ public final class Telephony {
         /**
          * The {@code content://} URI for this table.
          */
+        @NonNull
         public static final Uri CONTENT_URI = Uri.parse("content://cellbroadcasts");
 
         /**
-         * Message geographical scope.
+         * Message geographical scope. Valid values are:
+         * <ul>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_CELL_WIDE}. meaning the
+         * message is for the radio service cell</li>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE},
+         * meaning the message is for the radio service cell and immediately displayed</li>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_PLMN_WIDE}, meaning the
+         * message is for the PLMN (i.e. MCC/MNC)</li>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_LOCATION_AREA_WIDE},
+         * meaning the message is for the location area (in GSM) or service area (in UMTS)</li>
+         * </ul>
+         *
+         * <p>A message meant for a particular scope is automatically dismissed when the device
+         * exits that scope.</p>
          * <P>Type: INTEGER</P>
          */
         public static final String GEOGRAPHICAL_SCOPE = "geo_scope";
 
         /**
          * Message serial number.
+         * <p>
+         * A 16-bit integer which identifies a particular CBS (cell
+         * broadcast short message service) message. The core network is responsible for
+         * allocating this value, and the value may be managed cyclically (3GPP TS 23.041 section
+         * 9.2.1) once the serial message has been incremented a sufficient number of times.
+         * </p>
          * <P>Type: INTEGER</P>
          */
         public static final String SERIAL_NUMBER = "serial_number";
 
         /**
-         * PLMN of broadcast sender. {@code SERIAL_NUMBER + PLMN + LAC + CID} uniquely identifies
-         * a broadcast for duplicate detection purposes.
+         * PLMN (i.e. MCC/MNC) of broadcast sender. {@code SERIAL_NUMBER + PLMN + LAC + CID}
+         * uniquely identifies a broadcast for duplicate detection purposes.
          * <P>Type: TEXT</P>
          */
         public static final String PLMN = "plmn";
 
         /**
-         * Location Area (GSM) or Service Area (UMTS) of broadcast sender. Unused for CDMA.
-         * Only included if Geographical Scope of message is not PLMN wide (01).
+         * Location area code (LAC).
+         * <p>Code representing location area (GSM) or service area (UMTS) of broadcast sender.
+         * Unused for CDMA. Only included if Geographical Scope of message is not PLMN wide (01).
+         * This value is sent by the network based on the cell tower.
          * <P>Type: INTEGER</P>
          */
         public static final String LAC = "lac";
@@ -3996,23 +4019,29 @@ public final class Telephony {
         /**
          * Message code. <em>OBSOLETE: merged into SERIAL_NUMBER.</em>
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String V1_MESSAGE_CODE = "message_code";
 
         /**
          * Message identifier. <em>OBSOLETE: renamed to SERVICE_CATEGORY.</em>
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String V1_MESSAGE_IDENTIFIER = "message_id";
 
         /**
-         * Service category (GSM/UMTS: message identifier; CDMA: service category).
+         * Service category which represents the general topic of the message.
+         * <p>
+         * For GSM/UMTS: message identifier (see 3GPP TS 23.041 section 9.4.1.2.2)
+         * For CDMA: a 16-bit CDMA service category (see 3GPP2 C.R1001-D section 9.3)
+         * </p>
          * <P>Type: INTEGER</P>
          */
         public static final String SERVICE_CATEGORY = "service_category";
 
         /**
-         * Message language code.
+         * Message language code. (See 3GPP TS 23.041 section 9.4.1.2.3 for details).
          * <P>Type: TEXT</P>
          */
         public static final String LANGUAGE_CODE = "language";
@@ -4025,6 +4054,7 @@ public final class Telephony {
 
         /**
          * Message delivery time.
+         * <p>This value is a system timestamp using {@link System#currentTimeMillis}</p>
          * <P>Type: INTEGER (long)</P>
          */
         public static final String DELIVERY_TIME = "date";
@@ -4036,25 +4066,36 @@ public final class Telephony {
         public static final String MESSAGE_READ = "read";
 
         /**
-         * Message format (3GPP or 3GPP2).
+         * Message format ({@link android.telephony.SmsCbMessage#MESSAGE_FORMAT_3GPP} or
+         * {@link android.telephony.SmsCbMessage#MESSAGE_FORMAT_3GPP2}).
          * <P>Type: INTEGER</P>
          */
         public static final String MESSAGE_FORMAT = "format";
 
         /**
-         * Message priority (including emergency).
+         * Message priority.
+         * <p>This includes
+         * <ul>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_NORMAL}</li>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_INTERACTIVE}</li>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_URGENT}</li>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_EMERGENCY}</li>
+         * </p>
+         * </ul>
          * <P>Type: INTEGER</P>
          */
         public static final String MESSAGE_PRIORITY = "priority";
 
         /**
-         * ETWS warning type (ETWS alerts only).
+         * ETWS (Earthquake and Tsunami Warning System) warning type (ETWS alerts only).
+         * <p>See {@link android.telephony.SmsCbEtwsInfo}</p>
          * <P>Type: INTEGER</P>
          */
         public static final String ETWS_WARNING_TYPE = "etws_warning_type";
 
         /**
-         * CMAS message class (CMAS alerts only).
+         * CMAS (Commercial Mobile Alert System) message class (CMAS alerts only).
+         * <p>See {@link android.telephony.SmsCbCmasInfo}</p>
          * <P>Type: INTEGER</P>
          */
         public static final String CMAS_MESSAGE_CLASS = "cmas_message_class";
@@ -4095,12 +4136,14 @@ public final class Telephony {
         /**
          * The timestamp in millisecond of when the device received the message.
          * <P>Type: BIGINT</P>
+         * @hide
          */
         public static final String RECEIVED_TIME = "received_time";
 
         /**
          * Indicates that whether the message has been broadcasted to the application.
          * <P>Type: BOOLEAN</P>
+         * @hide
          */
         public static final String MESSAGE_BROADCASTED = "message_broadcasted";
 
@@ -4136,12 +4179,15 @@ public final class Telephony {
          * "circle|0,0|100;polygon|0,0|0,1.5|1,1|1,0;circle|100.123,100|200.123"
          *
          * <P>Type: TEXT</P>
+         * @hide
          */
         public static final String GEOMETRIES = "geometries";
 
         /**
          * Query columns for instantiating {@link android.telephony.CellBroadcastMessage} objects.
+         * @hide
          */
+        @NonNull
         public static final String[] QUERY_COLUMNS = {
                 _ID,
                 GEOGRAPHICAL_SCOPE,
@@ -4167,6 +4213,7 @@ public final class Telephony {
 
         /**
          * Query columns for instantiating {@link android.telephony.SmsCbMessage} objects.
+         * @hide
          */
         public static final String[] QUERY_COLUMNS_FWK = {
                 _ID,

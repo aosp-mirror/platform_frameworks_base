@@ -369,15 +369,16 @@ public class ServiceState implements Parcelable {
     /**
      * Create a new ServiceState from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver and maybe by
+     * This method is used by PhoneStateIntentReceiver, CellBroadcastReceiver, and maybe by
      * external applications.
      *
      * @param m Bundle from intent notifier
      * @return newly created ServiceState
      * @hide
      */
+    @NonNull
     @UnsupportedAppUsage
-    public static ServiceState newFromBundle(Bundle m) {
+    public static ServiceState newFromBundle(@NonNull Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
         ret.setFromNotifierBundle(m);

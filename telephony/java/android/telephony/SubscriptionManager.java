@@ -2280,14 +2280,19 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns the resources associated with Subscription.
+     * Returns the {@link Resources} from the given {@link Context} for the MCC/MNC associated with
+     * the subscription. If the subscription ID is invalid, the base resources are returned instead.
+     *
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
      * @param context Context object
-     * @param subId Subscription Id of Subscription who's resources are required
+     * @param subId Subscription Id of Subscription whose resources are required
      * @return Resources associated with Subscription.
      * @hide
      */
-    @UnsupportedAppUsage
-    public static Resources getResourcesForSubId(Context context, int subId) {
+    @NonNull
+    @SystemApi
+    public static Resources getResourcesForSubId(@NonNull Context context, int subId) {
         return getResourcesForSubId(context, subId, false);
     }
 
