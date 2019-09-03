@@ -42,8 +42,8 @@ def logcat_save_timestamp() -> str:
 def vm_drop_cache():
   """Free pagecache and slab object."""
   cmd_utils.run_adb_shell_command('echo 3 > /proc/sys/vm/drop_caches')
-  # Sleep a little bit to provide enougth time for cache cleanup.
-  time.sleep(2)
+  # Sleep a little bit to provide enough time for cache cleanup.
+  time.sleep(1)
 
 def root():
   """Roots adb and successive adb commands will run under root."""

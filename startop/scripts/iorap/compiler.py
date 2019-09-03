@@ -190,6 +190,7 @@ def calc_trace_end_time(trace2db: Trace2Db,
       MmFilemapAddToPageCache.raw_ftrace_entry).order_by(
       RawFtraceEntry.timestamp).first()
 
+  # total_seconds() will return a float number.
   return first_event.raw_ftrace_entry.timestamp + trace_duration.total_seconds()
 
 def query_add_to_page_cache(trace2db: Trace2Db, trace_duration: Optional[timedelta]):
