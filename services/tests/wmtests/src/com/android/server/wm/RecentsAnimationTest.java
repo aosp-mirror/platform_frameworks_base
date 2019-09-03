@@ -56,6 +56,7 @@ import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallback
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
@@ -63,6 +64,7 @@ import org.junit.Test;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RecentsAnimationTest extends ActivityTestsBase {
 
     private static final int TEST_USER_ID = 100;

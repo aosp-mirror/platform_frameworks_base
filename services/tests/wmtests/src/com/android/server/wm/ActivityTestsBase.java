@@ -62,6 +62,10 @@ class ActivityTestsBase {
     @Rule
     public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
 
+    @WindowTestRunner.MethodWrapperRule
+    public final WindowManagerGlobalLockRule mLockRule =
+            new WindowManagerGlobalLockRule(mSystemServicesTestRule);
+
     final Context mContext = getInstrumentation().getTargetContext();
 
     ActivityTaskManagerService mService;

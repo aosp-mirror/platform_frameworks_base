@@ -83,6 +83,7 @@ import com.android.server.wm.utils.MockTracker;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link ActivityStarter} class.
@@ -92,6 +93,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityStarterTests extends ActivityTestsBase {
     private ActivityStarter mStarter;
     private ActivityStartController mController;

@@ -69,6 +69,7 @@ import com.android.server.wm.ActivityStack.ActivityState;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,6 +83,7 @@ import java.util.List;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RootActivityContainerTests extends ActivityTestsBase {
     private ActivityStack mFullscreenStack;
 
@@ -575,7 +577,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testStartSecondaryHomeOnDisplayWithUserKeyLocked() {
         // Create secondary displays.
-        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        final TestActivityDisplay secondDisplay = createNewActivityDisplay();
         mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
 
         doReturn(true).when(secondDisplay).supportsSystemDecorations();
@@ -601,7 +603,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testStartSecondaryHomeOnDisplayWithoutSysDecorations() {
         // Create secondary displays.
-        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        final TestActivityDisplay secondDisplay = createNewActivityDisplay();
         mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
         doReturn(false).when(secondDisplay).supportsSystemDecorations();
 

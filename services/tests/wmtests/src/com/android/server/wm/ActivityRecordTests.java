@@ -100,6 +100,7 @@ import com.android.server.wm.ActivityStack.ActivityState;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.concurrent.TimeUnit;
@@ -112,6 +113,7 @@ import java.util.concurrent.TimeUnit;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityRecordTests extends ActivityTestsBase {
     private ActivityStack mStack;
     private TaskRecord mTask;
@@ -644,7 +646,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // The override configuration should be reset and the activity's process will be killed.
         assertFalse(mActivity.inSizeCompatMode());
         verify(mActivity).restartProcessIfVisible();
-        mService.mH.runWithScissors(() -> { }, TimeUnit.SECONDS.toMillis(3));
+        mLockRule.runWithScissors(mService.mH, () -> { }, TimeUnit.SECONDS.toMillis(3));
         verify(mService.mAmInternal).killProcess(
                 eq(mActivity.app.mName), eq(mActivity.app.mUid), anyString());
     }
