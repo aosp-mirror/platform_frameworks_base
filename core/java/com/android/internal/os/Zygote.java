@@ -135,6 +135,9 @@ public final class Zygote {
     /** Read-write external storage should be mounted instead of package sandbox */
     public static final int MOUNT_EXTERNAL_FULL = IVold.REMOUNT_MODE_FULL;
 
+    /** The lower file system should be bind mounted directly on external storage */
+    public static final int MOUNT_EXTERNAL_PASS_THROUGH = IVold.REMOUNT_MODE_PASS_THROUGH;
+
     /** Number of bytes sent to the Zygote over USAP pipes or the pool event FD */
     static final int USAP_MANAGEMENT_MESSAGE_BYTES = 8;
 
