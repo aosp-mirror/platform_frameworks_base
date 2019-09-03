@@ -123,7 +123,7 @@ std::string GetTestDataPath();
 
 class Idmap2Tests : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
 #ifdef __ANDROID__
     tmp_dir_path_ = "/data/local/tmp/idmap2-tests-XXXXXX";
 #else
@@ -136,7 +136,7 @@ class Idmap2Tests : public testing::Test {
     idmap_path_ = tmp_dir_path_ + "/a.idmap";
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     EXPECT_EQ(rmdir(tmp_dir_path_.c_str()), 0)
         << "Failed to remove temporary directory " << tmp_dir_path_ << ": " << strerror(errno);
   }

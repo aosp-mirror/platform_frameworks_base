@@ -33,11 +33,12 @@ class PrettyPrintVisitor : public Visitor {
  public:
   explicit PrettyPrintVisitor(std::ostream& stream) : stream_(stream) {
   }
-  virtual void visit(const Idmap& idmap);
-  virtual void visit(const IdmapHeader& header);
-  virtual void visit(const IdmapData& data);
-  virtual void visit(const IdmapData::Header& header);
-  virtual void visit(const IdmapData::TypeEntry& type_entry);
+  ~PrettyPrintVisitor() override = default;
+  void visit(const Idmap& idmap) override;
+  void visit(const IdmapHeader& header) override;
+  void visit(const IdmapData& data) override;
+  void visit(const IdmapData::Header& header) override;
+  void visit(const IdmapData::TypeEntry& type_entry) override;
 
  private:
   std::ostream& stream_;
