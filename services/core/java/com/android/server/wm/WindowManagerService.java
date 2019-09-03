@@ -28,6 +28,7 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LE
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
+import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -36,7 +37,9 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE;
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP;
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -666,7 +669,8 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
 
-    private final class SettingsObserver extends ContentObserver {
+    @VisibleForTesting
+    final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
         private final Uri mWindowAnimationScaleUri =
@@ -681,6 +685,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.getUriFor(Settings.Global.POLICY_CONTROL);
         private final Uri mPointerLocationUri =
                 Settings.System.getUriFor(Settings.System.POINTER_LOCATION);
+        private final Uri mForceDesktopModeOnExternalDisplaysUri = Settings.Global.getUriFor(
+                        Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS);
+        private final Uri mFreeformWindowUri = Settings.Global.getUriFor(
+                Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT);
+        private final Uri mForceResizableUri = Settings.Global.getUriFor(
+                DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
 
         public SettingsObserver() {
             super(new Handler());
@@ -697,6 +707,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mPolicyControlUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mPointerLocationUri, false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(mForceDesktopModeOnExternalDisplaysUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mFreeformWindowUri, false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -717,6 +731,21 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mPointerLocationUri.equals(uri)) {
                 updatePointerLocation();
+                return;
+            }
+
+            if (mForceDesktopModeOnExternalDisplaysUri.equals(uri)) {
+                updateForceDesktopModeOnExternalDisplays();
+                return;
+            }
+
+            if (mFreeformWindowUri.equals(uri)) {
+                updateFreeformWindowManagement();
+                return;
+            }
+
+            if (mForceResizableUri.equals(uri)) {
+                updateForceResizableTasks();
                 return;
             }
 
@@ -761,6 +790,33 @@ public class WindowManagerService extends IWindowManager.Stub
                         DisplayPolicy::setPointerLocationEnabled, PooledLambda.__(),
                         mPointerLocationEnabled));
             }
+        }
+
+        void updateForceDesktopModeOnExternalDisplays() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean enableForceDesktopMode = Settings.Global.getInt(resolver,
+                    DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
+            if (mForceDesktopModeOnExternalDisplays == enableForceDesktopMode) {
+                return;
+            }
+            setForceDesktopModeOnExternalDisplays(enableForceDesktopMode);
+        }
+
+        void updateFreeformWindowManagement() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean freeformWindowManagement = mContext.getPackageManager().hasSystemFeature(
+                    FEATURE_FREEFORM_WINDOW_MANAGEMENT) || Settings.Global.getInt(
+                    resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
+
+            mAtmService.mSupportsFreeformWindowManagement = freeformWindowManagement;
+        }
+
+        void updateForceResizableTasks() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean forceResizable = Settings.Global.getInt(resolver,
+                    DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
+
+            mAtmService.mForceResizableActivities = forceResizable;
         }
     }
 
