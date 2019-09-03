@@ -16,6 +16,9 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,9 +30,11 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class SmsCbLocation implements Parcelable {
+@SystemApi
+public final class SmsCbLocation implements Parcelable {
 
-    /** The PLMN. Note that this field may be an empty string, but isn't allowed to be null. */
+    /** The PLMN. Note that this field may be an empty string. */
+    @NonNull
     private final String mPlmn;
 
     private final int mLac;
@@ -38,6 +43,7 @@ public class SmsCbLocation implements Parcelable {
     /**
      * Construct an empty location object. This is used for some test cases, and for
      * cell broadcasts saved in older versions of the database without location info.
+     * @hide
      */
     public SmsCbLocation() {
         mPlmn = "";
@@ -48,6 +54,7 @@ public class SmsCbLocation implements Parcelable {
     /**
      * Construct a location object for the PLMN. This class is immutable, so
      * the same object can be reused for multiple broadcasts.
+     * @hide
      */
     public SmsCbLocation(String plmn) {
         mPlmn = plmn;
@@ -58,6 +65,7 @@ public class SmsCbLocation implements Parcelable {
     /**
      * Construct a location object for the PLMN, LAC, and Cell ID. This class is immutable, so
      * the same object can be reused for multiple broadcasts.
+     * @hide
      */
     public SmsCbLocation(String plmn, int lac, int cid) {
         mPlmn = plmn;
@@ -67,6 +75,7 @@ public class SmsCbLocation implements Parcelable {
 
     /**
      * Initialize the object from a Parcel.
+     * @hide
      */
     public SmsCbLocation(Parcel in) {
         mPlmn = in.readString();
@@ -78,6 +87,7 @@ public class SmsCbLocation implements Parcelable {
      * Returns the MCC/MNC of the network as a String.
      * @return the PLMN identifier (MCC+MNC) as a String
      */
+    @NonNull
     public String getPlmn() {
         return mPlmn;
     }
@@ -129,7 +139,7 @@ public class SmsCbLocation implements Parcelable {
      * @param area the location area to compare with this location
      * @return true if this location is contained within the specified location area
      */
-    public boolean isInLocationArea(SmsCbLocation area) {
+    public boolean isInLocationArea(@NonNull SmsCbLocation area) {
         if (mCid != -1 && mCid != area.mCid) {
             return false;
         }
@@ -147,7 +157,7 @@ public class SmsCbLocation implements Parcelable {
      * @param cid the Cell ID to compare with
      * @return true if this location is contained within the specified PLMN, LAC, and Cell ID
      */
-    public boolean isInLocationArea(String plmn, int lac, int cid) {
+    public boolean isInLocationArea(@Nullable String plmn, int lac, int cid) {
         if (!mPlmn.equals(plmn)) {
             return false;
         }
@@ -176,8 +186,9 @@ public class SmsCbLocation implements Parcelable {
         dest.writeInt(mCid);
     }
 
-    public static final Parcelable.Creator<SmsCbLocation> CREATOR
-            = new Parcelable.Creator<SmsCbLocation>() {
+    @NonNull
+    public static final Parcelable.Creator<SmsCbLocation> CREATOR =
+            new Parcelable.Creator<SmsCbLocation>() {
         @Override
         public SmsCbLocation createFromParcel(Parcel in) {
             return new SmsCbLocation(in);

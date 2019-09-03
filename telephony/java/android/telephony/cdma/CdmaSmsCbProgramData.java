@@ -16,6 +16,7 @@
 
 package android.telephony.cdma;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,7 +29,7 @@ import android.os.Parcelable;
  *
  * {@hide}
  */
-public class CdmaSmsCbProgramData implements Parcelable {
+public final class CdmaSmsCbProgramData implements Parcelable {
 
     /** Delete the specified service category from the list of enabled categories. */
     public static final int OPERATION_DELETE_CATEGORY   = 0;
@@ -95,7 +96,7 @@ public class CdmaSmsCbProgramData implements Parcelable {
 
     /** Create a new CdmaSmsCbProgramData object with the specified values. */
     public CdmaSmsCbProgramData(int operation, int category, int language, int maxMessages,
-            int alertOption, String categoryName) {
+            int alertOption, @NonNull String categoryName) {
         mOperation = operation;
         mCategory = category;
         mLanguage = language;
@@ -174,6 +175,7 @@ public class CdmaSmsCbProgramData implements Parcelable {
      * Returns the service category name, in the language specified by {@link #getLanguage()}.
      * @return an optional service category name
      */
+    @NonNull
     public String getCategoryName() {
         return mCategoryName;
     }
