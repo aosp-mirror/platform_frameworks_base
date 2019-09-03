@@ -43,6 +43,7 @@ import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 
 import java.util.List;
 

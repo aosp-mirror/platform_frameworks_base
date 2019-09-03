@@ -216,6 +216,13 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                 mContext.getContentResolver(), LEARNING_EVENT_COUNT_KEY, ++mLearningCount);
     }
 
+    @Override
+    public void onAssistHandlesRequested() {
+        if (mAssistHandleCallbacks != null && !mIsDozing && !mIsNavBarHidden && !mOnLockscreen) {
+            mAssistHandleCallbacks.showAndGo();
+        }
+    }
+
     private static boolean isNavBarHidden(int sysuiStateFlags) {
         return (sysuiStateFlags & QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN) != 0;
     }

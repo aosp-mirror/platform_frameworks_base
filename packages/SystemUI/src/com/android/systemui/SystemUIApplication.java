@@ -63,12 +63,22 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     private final Map<Class<?>, Object> mComponents = new HashMap<>();
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
 
+    public SystemUIApplication() {
+        super();
+        Log.v(TAG, "SystemUIApplication constructed.");
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.v(TAG, "SystemUIApplication created.");
         // This line is used to setup Dagger's dependency injection and should be kept at the
         // top of this method.
+        TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
+                Trace.TRACE_TAG_APP);
+        log.traceBegin("DependencyInjection");
         mContextAvailableCallback.onContextAvailable(this);
+        log.traceEnd();
 
         // Set the application theme that is inherited by all services. Note that setting the
         // application theme in the manifest does only work for activities. Keep this in sync with
@@ -138,7 +148,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
     /**
      * Ensures that all the Secondary user SystemUI services are running. If they are already
-     * running, this is a no-op. This is needed to conditinally start all the services, as we only
+     * running, this is a no-op. This is needed to conditionally start all the services, as we only
      * need to have it in the main process.
      * <p>This method must only be called from the main thread.</p>
      */
@@ -159,7 +169,9 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             // see ActivityManagerService.finishBooting()
             if ("1".equals(SystemProperties.get("sys.boot_completed"))) {
                 mBootCompleted = true;
-                if (DEBUG) Log.v(TAG, "BOOT_COMPLETED was already sent");
+                if (DEBUG) {
+                    Log.v(TAG, "BOOT_COMPLETED was already sent");
+                }
             }
         }
 
@@ -273,6 +285,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
+            Dependency.staticOnConfigurationChanged(newConfig);
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {
