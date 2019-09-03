@@ -1670,15 +1670,14 @@ public final class SmsManager {
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
-     * @param ranType as defined in class SmsManager, the value can be one of these:
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
+     * @param ranType the message format as defined in {@link SmsCbMessage]
      * @return true if successful, false otherwise
      * @see #disableCellBroadcast(int, int)
      *
      * {@hide}
      */
-    public boolean enableCellBroadcast(int messageIdentifier, int ranType) {
+    public boolean enableCellBroadcast(int messageIdentifier,
+            @android.telephony.SmsCbMessage.MessageFormat int ranType) {
         boolean success = false;
 
         try {
@@ -1717,16 +1716,15 @@ public final class SmsManager {
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
-     * @param ranType as defined in class SmsManager, the value can be one of these:
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
+     * @param ranType the message format as defined in {@link SmsCbMessage}
      * @return true if successful, false otherwise
      *
      * @see #enableCellBroadcast(int, int)
      *
      * {@hide}
      */
-    public boolean disableCellBroadcast(int messageIdentifier, int ranType) {
+    public boolean disableCellBroadcast(int messageIdentifier,
+            @android.telephony.SmsCbMessage.MessageFormat int ranType) {
         boolean success = false;
 
         try {
@@ -1746,8 +1744,8 @@ public final class SmsManager {
 
     /**
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range and RAN type. The RAN type specify this message ID
-     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
+     * message identifier range and RAN type. The RAN type specifies if this message ID
+     * belongs to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
      * the same message identifier, they must both disable it for the device to stop
      * receiving those messages. All received messages will be broadcast in an
      * intent with the action "android.provider.Telephony.SMS_CB_RECEIVED".
@@ -1759,26 +1757,29 @@ public final class SmsManager {
      * dialog. If this method is called on a device that has multiple active subscriptions, this
      * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
      * default subscription is defined, the subscription ID associated with this message will be
-     * INVALID, which will result in the operation being completed on the subscription associated
-     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the
-     * operation is performed on the correct subscription.
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}, which will result in the operation
+     * being completed on the subscription associated with logical slot 0. Use
+     * {@link #getSmsManagerForSubscriptionId(int)} to ensure the operation is performed on the
+     * correct subscription.
      * </p>
+     *
+     * <p>Requires {@link android.Manifest.permission#RECEIVE_EMERGENCY_BROADCAST}</p>
      *
      * @param startMessageId first message identifier as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
-     * @param ranType as defined in class SmsManager, the value can be one of these:
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
-     * @return true if successful, false otherwise
+     * @param ranType the message format as defined in {@link SmsCbMessage}
+     * @return true if successful, false if the modem reports a failure (e.g. the given range or
+     * RAN type is invalid).
      * @see #disableCellBroadcastRange(int, int, int)
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
      * {@hide}
      */
-    @UnsupportedAppUsage
-    public boolean enableCellBroadcastRange(int startMessageId, int endMessageId, int ranType) {
+    @SystemApi
+    public boolean enableCellBroadcastRange(int startMessageId, int endMessageId,
+            @android.telephony.SmsCbMessage.MessageFormat int ranType) {
         boolean success = false;
 
         if (endMessageId < startMessageId) {
@@ -1818,22 +1819,24 @@ public final class SmsManager {
      * operation is performed on the correct subscription.
      * </p>
      *
+     * <p>Requires {@link android.Manifest.permission#RECEIVE_EMERGENCY_BROADCAST}</p>
+     *
      * @param startMessageId first message identifier as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
-     * @param ranType as defined in class SmsManager, the value can be one of these:
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
-     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
-     * @return true if successful, false otherwise
+     * @param ranType the message format as defined in {@link SmsCbMessage}
+     * @return true if successful, false if the modem reports a failure (e.g. the given range or
+     * RAN type is invalid).
      *
      * @see #enableCellBroadcastRange(int, int, int)
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
      * {@hide}
      */
-    @UnsupportedAppUsage
-    public boolean disableCellBroadcastRange(int startMessageId, int endMessageId, int ranType) {
+    @SystemApi
+    public boolean disableCellBroadcastRange(int startMessageId, int endMessageId,
+            @android.telephony.SmsCbMessage.MessageFormat int ranType) {
         boolean success = false;
 
         if (endMessageId < startMessageId) {
