@@ -37,6 +37,7 @@ import org.junit.runners.MethodSorters;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 140856143)
 public class SplitScreenToLauncherTest extends FlickerTestBase {
 
     public SplitScreenToLauncherTest() {

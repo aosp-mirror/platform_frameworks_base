@@ -28,6 +28,7 @@ import android.platform.helpers.IAppHelper;
 import android.util.Rational;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -44,6 +45,7 @@ import org.junit.runners.MethodSorters;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 140854698)
 public class ResizeSplitScreenTest extends FlickerTestBase {
 
     public ResizeSplitScreenTest() {
