@@ -1699,6 +1699,12 @@ final class ActivityRecord extends ConfigurationContainer {
             return FINISH_RESULT_CANCELLED;
         }
 
+        final ActivityStack stack = getActivityStack();
+        final boolean mayAdjustFocus = (isState(RESUMED) || stack.mResumedActivity == null)
+                // It must be checked before {@link #makeFinishingLocked} is called, because a stack
+                // is not visible if it only contains finishing activities.
+                && mRootActivityContainer.isTopDisplayFocusedStack(stack);
+
         mAtmService.mWindowManager.deferSurfaceLayout();
         try {
             makeFinishingLocked();
@@ -1720,8 +1726,12 @@ final class ActivityRecord extends ConfigurationContainer {
 
             pauseKeyDispatchingLocked();
 
-            final ActivityStack stack = getActivityStack();
-            stack.adjustFocusedActivityStack(this, "finishIfPossible");
+            // We are finishing the top focused activity and its stack has nothing to be focused so
+            // the next focusable stack should be focused.
+            if (mayAdjustFocus
+                    && (stack.topRunningActivityLocked() == null || !stack.isFocusable())) {
+                stack.adjustFocusToNextFocusableStack("finish-top");
+            }
 
             finishActivityResults(resultCode, resultData);
 
@@ -3012,7 +3022,6 @@ final class ActivityRecord extends ConfigurationContainer {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + this);
                     if (finishIfPossible("stop-no-history", false /* oomAdj */)
                             != FINISH_RESULT_CANCELLED) {
-                        // {@link adjustFocusedActivityStack} must have been already called.
                         resumeKeyDispatchingLocked();
                         return;
                     }
@@ -3028,7 +3037,6 @@ final class ActivityRecord extends ConfigurationContainer {
         if (!attachedToProcess()) {
             return;
         }
-        stack.adjustFocusedActivityStack(this, "stopActivity");
         resumeKeyDispatchingLocked();
         try {
             stopped = false;
