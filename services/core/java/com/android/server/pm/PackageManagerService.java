@@ -13788,8 +13788,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void restoreAndPostInstall(
             int userId, PackageInstalledInfo res, @Nullable PostInstallData data) {
         if (DEBUG_INSTALL) {
-            Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package="
-                    + res.pkg.packageName);
+            Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.pkg);
         }
 
         // A restore should be performed at this point if (a) the install
