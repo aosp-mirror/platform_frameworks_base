@@ -350,11 +350,13 @@ interface IActivityManager {
     // Request a heap dump for the system server.
     void requestSystemServerHeapDump();
 
-    // Deprecated - This method is only used by a few internal components and it will soon be
-    // replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+    // Deprecated - This method is only used by a few internal components and it will soon start
+    // using bug report API (which will be restricted to a few, pre-defined apps).
     // No new code should be calling it.
     @UnsupportedAppUsage
     void requestBugReport(int bugreportType);
+    void requestBugReportWithDescription(in @nullable String shareTitle,
+                in @nullable String shareDescription, int bugreportType);
 
     /**
      *  Takes a telephony bug report and notifies the user with the title and description
@@ -369,7 +371,7 @@ interface IActivityManager {
     void requestTelephonyBugReport(in String shareTitle, in String shareDescription);
 
     /**
-     *  Deprecated - This method is only used by Wifi, and it will soon be replaced by a proper
+     *  Deprecated - This method is only used by Wifi, and it will soon start using
      *  bug report API.
      *
      *  Takes a minimal bugreport of Wifi-related state.
@@ -381,6 +383,12 @@ interface IActivityManager {
      *          parameters cannot be encoding to an UTF-8 charset.
      */
     void requestWifiBugReport(in String shareTitle, in String shareDescription);
+    void requestInteractiveBugReportWithDescription(in String shareTitle,
+            in String shareDescription);
+
+    void requestInteractiveBugReport();
+    void requestFullBugReport();
+    void requestRemoteBugReport();
 
     @UnsupportedAppUsage
     Intent getIntentForIntentSender(in IIntentSender sender);
