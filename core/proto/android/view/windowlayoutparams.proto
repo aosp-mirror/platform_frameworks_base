@@ -68,4 +68,6 @@ message WindowLayoutParamsProto {
     optional uint32 private_flags = 26;
     optional uint32 system_ui_visibility_flags = 27;
     optional uint32 subtree_system_ui_visibility_flags = 28;
+    optional uint32 appearance = 29;
+    optional uint32 behavior = 30;
 }

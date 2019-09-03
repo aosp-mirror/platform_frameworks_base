@@ -602,4 +602,22 @@ public class InsetsController implements WindowInsetsController {
             mAnimCallbackScheduled = true;
         }
     }
+
+    @Override
+    public void setSystemBarsAppearance(@Appearance int appearance) {
+        if (mViewRoot.mWindowAttributes.insetsFlags.appearance != appearance) {
+            mViewRoot.mWindowAttributes.insetsFlags.appearance = appearance;
+            mViewRoot.mWindowAttributesChanged = true;
+            mViewRoot.scheduleTraversals();
+        }
+    }
+
+    @Override
+    public void setSystemBarsBehavior(@Behavior int behavior) {
+        if (mViewRoot.mWindowAttributes.insetsFlags.behavior != behavior) {
+            mViewRoot.mWindowAttributes.insetsFlags.behavior = behavior;
+            mViewRoot.mWindowAttributesChanged = true;
+            mViewRoot.scheduleTraversals();
+        }
+    }
 }
