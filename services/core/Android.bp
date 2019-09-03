@@ -20,6 +20,7 @@ java_library_static {
         ":vold_aidl",
         ":gsiservice_aidl",
         ":platform-compat-config",
+        ":tethering-services-srcs",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
