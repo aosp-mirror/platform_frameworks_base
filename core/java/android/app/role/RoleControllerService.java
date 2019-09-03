@@ -279,6 +279,10 @@ public abstract class RoleControllerService extends Service {
     /**
      * Check whether an application is visible for a role.
      *
+     * While an application can be qualified for a role, it can still stay hidden from user (thus
+     * not visible). If an application is visible for a role, we may show things related to the role
+     * for it, e.g. showing an entry pointing to the role settings in its application info page.
+     *
      * @param roleName name of the role to check for
      * @param packageName package name of the application to check for
      *
