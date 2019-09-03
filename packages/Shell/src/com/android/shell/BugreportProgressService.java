@@ -37,6 +37,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -107,6 +108,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -156,6 +159,8 @@ import java.util.zip.ZipOutputStream;
 public class BugreportProgressService extends Service {
     private static final String TAG = "BugreportProgressService";
     private static final boolean DEBUG = false;
+
+    private Intent startSelfIntent;
 
     private static final String AUTHORITY = "com.android.shell";
 
@@ -235,6 +240,24 @@ public class BugreportProgressService extends Service {
 
     private static final String NOTIFICATION_CHANNEL_ID = "bugreports";
 
+    /**
+     * Always keep the newest 8 bugreport files.
+     */
+    private static final int MIN_KEEP_COUNT = 8;
+
+    /**
+     * Always keep bugreports taken in the last week.
+     */
+    private static final long MIN_KEEP_AGE = DateUtils.WEEK_IN_MILLIS;
+
+    private static final String BUGREPORT_MIMETYPE = "application/vnd.android.bugreport";
+
+    /** Always keep just the last 3 remote bugreport's files around. */
+    private static final int REMOTE_BUGREPORT_FILES_AMOUNT = 3;
+
+    /** Always keep remote bugreport files created in the last day. */
+    private static final long REMOTE_MIN_KEEP_AGE = DateUtils.DAY_IN_MILLIS;
+
     private final Object mLock = new Object();
 
     /** Managed bugreport info (keyed by id) */
@@ -281,6 +304,7 @@ public class BugreportProgressService extends Service {
         mMainThreadHandler = new Handler(Looper.getMainLooper());
         mServiceHandler = new ServiceHandler("BugreportProgressServiceMainThread");
         mScreenshotHandler = new ScreenshotHandler("BugreportProgressServiceScreenshotThread");
+        startSelfIntent = new Intent(this, this.getClass());
 
         mScreenshotsDir = new File(getFilesDir(), SCREENSHOT_DIR);
         if (!mScreenshotsDir.exists()) {
@@ -307,6 +331,9 @@ public class BugreportProgressService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.v(TAG, "onStartCommand(): " + dumpIntent(intent));
         if (intent != null) {
+            if (!intent.hasExtra(EXTRA_ORIGINAL_INTENT) && !intent.hasExtra(EXTRA_ID)) {
+                return START_NOT_STICKY;
+            }
             // Handle it in a separate thread.
             final Message msg = mServiceHandler.obtainMessage();
             msg.what = MSG_SERVICE_COMMAND;
@@ -352,10 +379,11 @@ public class BugreportProgressService extends Service {
 
         private final BugreportInfo mInfo;
 
-        BugreportCallbackImpl(String name, @Nullable String title, @Nullable String description) {
+        BugreportCallbackImpl(String name, @Nullable String title, @Nullable String description,
+                @BugreportParams.BugreportMode int type) {
             // pid not used in this workflow, so setting default = 0
             mInfo = new BugreportInfo(mContext, 0 /* pid */, name,
-                    100 /* max progress*/, title, description);
+                    100 /* max progress*/, title, description, type);
         }
 
         @Override
@@ -380,10 +408,9 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void onFinished() {
+            // TODO: Make all callback functions lock protected.
             trackInfoWithId();
-            // Stop running on foreground, otherwise share notification cannot be dismissed.
-            onBugreportFinished(mInfo.id);
-            stopSelfWhenDone();
+            sendBugreportFinishedBroadcast();
         }
 
         /**
@@ -400,6 +427,90 @@ public class BugreportProgressService extends Service {
             }
             return;
         }
+
+        private void sendBugreportFinishedBroadcast() {
+            final String bugreportFileName = mInfo.name + ".zip";
+            final File bugreportFile = new File(BUGREPORT_DIR, bugreportFileName);
+            final String bugreportFilePath = bugreportFile.getAbsolutePath();
+            if (bugreportFile.length() == 0) {
+                Log.e(TAG, "Bugreport file empty. File path = " + bugreportFilePath);
+                return;
+            }
+            if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
+                sendRemoteBugreportFinishedBroadcast(bugreportFilePath, bugreportFile);
+            } else {
+                cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE);
+                final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
+                intent.putExtra(EXTRA_BUGREPORT, bugreportFilePath);
+                addScreenshotToIntent(intent);
+                mContext.sendBroadcast(intent, android.Manifest.permission.DUMP);
+                onBugreportFinished(mInfo.id);
+            }
+        }
+
+        private void sendRemoteBugreportFinishedBroadcast(String bugreportFileName,
+                File bugreportFile) {
+            cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE);
+            final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
+            final Uri bugreportUri = getUri(mContext, bugreportFile);
+            final String bugreportHash = generateFileHash(bugreportFileName);
+            if (bugreportHash == null) {
+                Log.e(TAG, "Error generating file hash for remote bugreport");
+                return;
+            }
+            intent.setDataAndType(bugreportUri, BUGREPORT_MIMETYPE);
+            intent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH, bugreportHash);
+            intent.putExtra(EXTRA_BUGREPORT, bugreportFileName);
+            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM,
+                    android.Manifest.permission.DUMP);
+        }
+
+        private void addScreenshotToIntent(Intent intent) {
+            final String screenshotFileName = mInfo.name + ".png";
+            final File screenshotFile = new File(BUGREPORT_DIR, screenshotFileName);
+            final String screenshotFilePath = screenshotFile.getAbsolutePath();
+            if (screenshotFile.length() > 0) {
+                intent.putExtra(EXTRA_SCREENSHOT, screenshotFilePath);
+            }
+            return;
+        }
+
+        private String generateFileHash(String fileName) {
+            String fileHash = null;
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                FileInputStream input = new FileInputStream(new File(fileName));
+                byte[] buffer = new byte[65536];
+                int size;
+                while ((size = input.read(buffer)) > 0) {
+                    md.update(buffer, 0, size);
+                }
+                input.close();
+                byte[] hashBytes = md.digest();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.length; i++) {
+                    sb.append(String.format("%02x", hashBytes[i]));
+                }
+                fileHash = sb.toString();
+            } catch (IOException | NoSuchAlgorithmException e) {
+                Log.e(TAG, "generating file hash for bugreport file failed " + fileName, e);
+            }
+            return fileHash;
+        }
+    }
+
+    static void cleanupOldFiles(final int minCount, final long minAge) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    FileUtils.deleteOlderFiles(new File(BUGREPORT_DIR), minCount, minAge);
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "RuntimeException deleting old files", e);
+                }
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -598,7 +709,7 @@ public class BugreportProgressService extends Service {
                 + " screenshot file fd: " + screenshotFd);
 
         BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(bugreportName,
-                shareTitle, shareDescription);
+                shareTitle, shareDescription, bugreportType);
         try {
             mBugreportManager.startBugreport(bugreportFd, screenshotFd,
                     new BugreportParams(bugreportType), executor, bugreportCallback);
@@ -711,6 +822,9 @@ public class BugreportProgressService extends Service {
         } else {
             mForegroundId = id;
             Log.d(TAG, "Start running as foreground service on id " + mForegroundId);
+            // Explicitly starting the service so that stopForeground() does not crash
+            // Workaround for b/140997620
+            startForegroundService(startSelfIntent);
             startForeground(mForegroundId, notification);
         }
     }
@@ -1927,10 +2041,19 @@ public class BugreportProgressService extends Service {
         String shareDescription;
 
         /**
+         * Type of the bugreport
+         */
+        int type;
+
+        /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_STARTED.
          */
         BugreportInfo(Context context, int id, int pid, String name, int max) {
-            this(context, pid, name, max, null, null);
+            // bugreports triggered by STARTED broadcast do not use callback functions,
+            // onFinished() callback method is the only function where type is used.
+            // Set type to -1 as it is unused in this workflow.
+            // This constructor will soon be removed.
+            this(context, pid, name, max, null, null, -1);
             this.id = id;
         }
 
@@ -1938,13 +2061,14 @@ public class BugreportProgressService extends Service {
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_REQUESTED.
          */
         BugreportInfo(Context context, int pid, String name, int max, @Nullable String shareTitle,
-                @Nullable String shareDescription) {
+                @Nullable String shareDescription, int type) {
             this.context = context;
             this.pid = pid;
             this.name = name;
             this.max = this.realMax = max;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
             this.shareDescription = shareDescription == null ? "" : shareDescription;
+            this.type = type;
         }
 
         /**

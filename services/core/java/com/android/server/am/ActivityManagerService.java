@@ -8276,6 +8276,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
             triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
             triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
+            triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
             if (shareTitle != null) {
                 triggerShellBugreport.putExtra(EXTRA_TITLE, shareTitle);
             }
