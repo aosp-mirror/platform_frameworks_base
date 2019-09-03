@@ -378,14 +378,14 @@ import java.util.function.Predicate;
  * <p>
  * Internally there are two important locks:
  * <ul>
- * <li>{@link #mPackages} is used to guard all in-memory parsed package details
+ * <li>{@link #mLock} is used to guard all in-memory parsed package details
  * and other related state. It is a fine-grained lock that should only be held
  * momentarily, as it's one of the most contended locks in the system.
  * <li>{@link #mInstallLock} is used to guard all {@code installd} access, whose
  * operations typically involve heavy lifting of application data on disk. Since
  * {@code installd} is single-threaded, and it's operations can often be slow,
- * this lock should never be acquired while already holding {@link #mPackages}.
- * Conversely, it's safe to acquire {@link #mPackages} momentarily while already
+ * this lock should never be acquired while already holding {@link #mLock}.
+ * Conversely, it's safe to acquire {@link #mLock} momentarily while already
  * holding {@link #mInstallLock}.
  * </ul>
  * Many internal methods rely on the caller to hold the appropriate locks, and
@@ -394,8 +394,8 @@ import java.util.function.Predicate;
  * <li>fooLI(): the caller must hold {@link #mInstallLock}
  * <li>fooLIF(): the caller must hold {@link #mInstallLock} and the package
  * being modified must be frozen
- * <li>fooLPr(): the caller must hold {@link #mPackages} for reading
- * <li>fooLPw(): the caller must hold {@link #mPackages} for writing
+ * <li>fooLPr(): the caller must hold {@link #mLock} for reading
+ * <li>fooLPw(): the caller must hold {@link #mLock} for writing
  * </ul>
  * <p>
  * Because this class is very central to the platform's security; please run all
@@ -669,7 +669,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // Lock for global state used when modifying package state or settings.
     // Methods that must be called with this lock held have
-    // the suffix "Locked". Some methods may use the legacy the suffix "LP"
+    // the suffix "Locked". Some methods may use the legacy suffix "LP"
     final Object mLock;
 
     // Keys are String (package name), values are Package.
@@ -6531,13 +6531,13 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // TODO: handle preferred activities missing while user has amnesia
-    /** <b>must not hold {@link #mPackages}</b> */
+    /** <b>must not hold {@link #mLock}</b> */
     ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mPackages", new Throwable());
+                    + " is holding mLock", new Throwable());
         }
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
@@ -16195,7 +16195,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * On successful install, executes remaining steps after commit completes and the package lock
      * is released. These are typically more expensive or require calls to installd, which often
-     * locks on {@link #mPackages}.
+     * locks on {@link #mLock}.
      */
     private void executePostCommitSteps(CommitRequest commitRequest) {
         for (ReconciledPackage reconciledPkg : commitRequest.reconciledPackages.values()) {
@@ -19872,11 +19872,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
-    /** <b>must not hold {@link #mPackages}</b> */
+    /** <b>must not hold {@link #mLock}</b> */
     private void updateDefaultHomeNotLocked(SparseBooleanArray userIds) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mPackages", new Throwable());
+                    + " is holding mLock", new Throwable());
         }
         for (int i = userIds.size() - 1; i >= 0; --i) {
             final int userId = userIds.keyAt(i);
@@ -19885,14 +19885,14 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * <b>must not hold {@link #mPackages}</b>
+     * <b>must not hold {@link #mLock}</b>
      *
      * @return Whether the ACTION_PREFERRED_ACTIVITY_CHANGED broadcast has been scheduled.
      */
     private boolean updateDefaultHomeNotLocked(int userId) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mPackages", new Throwable());
+                    + " is holding mLock", new Throwable());
         }
         if (!mSystemReady) {
             // We might get called before system is ready because of package changes etc, but
@@ -21823,7 +21823,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * will try recovering system apps by wiping data; third-party app data is
      * left intact.
      * <p>
-     * <em>Note: To avoid a deadlock, do not call this method with {@code mPackages} lock held</em>
+     * <em>Note: To avoid a deadlock, do not call this method with {@code mLock} lock held</em>
      */
     private void prepareAppDataAfterInstallLIF(PackageParser.Package pkg) {
         final PackageSetting ps;
