@@ -24,6 +24,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -56,15 +57,23 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests for the {@link DisplayPolicy} class.
+ *
+ * Build/Install/Run:
+ *  atest WmTests:DisplayPolicyLayoutTests
+ */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -91,6 +100,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         attrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         attrs.format = PixelFormat.TRANSLUCENT;
+    }
+
+    @After
+    public void tearDown() {
+        PolicyControl.setFilters("");
+        mWindow.getDisplayContent().mInputMethodTarget = null;
     }
 
     public void setRotation(int rotation) {
@@ -391,6 +406,105 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
+    }
+
+    @FlakyTest(bugId = 129711077)
+    @Test
+    public void layoutWindowLw_withImmersive_SoftInputAdjustResize() {
+        synchronized (mWm.mGlobalLock) {
+            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
+            mWindow.mAttrs.flags = 0;
+            mWindow.mAttrs.systemUiVisibility =
+                    SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+
+            addWindow(mWindow);
+
+            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+            int bottomInset = mFrames.mDisplayHeight - INPUT_METHOD_WINDOW_TOP;
+            assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), 0, 0);
+            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
+        }
+    }
+
+    @FlakyTest(bugId = 129711077)
+    @Test
+    public void layoutWindowLw_withImmersive_SoftInputAdjustNothing() {
+        synchronized (mWm.mGlobalLock) {
+            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_NOTHING;
+            mWindow.mAttrs.flags = 0;
+            mWindow.mAttrs.systemUiVisibility =
+                    SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+
+            addWindow(mWindow);
+
+            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+            assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), 0, 0);
+            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), 0, 0);
+        }
+    }
+
+    @FlakyTest(bugId = 129711077)
+    @Test
+    public void layoutWindowLw_withForceImmersive_fullscreen() {
+        synchronized (mWm.mGlobalLock) {
+            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
+            mWindow.mAttrs.flags = 0;
+            mWindow.mAttrs.systemUiVisibility = 0;
+            PolicyControl.setFilters(PolicyControl.NAME_IMMERSIVE_FULL + "=*");
+
+            addWindow(mWindow);
+
+            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+            int bottomInset = mFrames.mDisplayHeight - INPUT_METHOD_WINDOW_TOP;
+            assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), 0, 0);
+            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
+        }
+    }
+
+    @FlakyTest(bugId = 129711077)
+    @Test
+    public void layoutWindowLw_withForceImmersive_nonFullscreen() {
+        synchronized (mWm.mGlobalLock) {
+            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
+            mWindow.mAttrs.flags = 0;
+            mWindow.mAttrs.systemUiVisibility = 0;
+            mWindow.mAttrs.width = DISPLAY_WIDTH / 2;
+            mWindow.mAttrs.height = DISPLAY_HEIGHT / 2;
+            PolicyControl.setFilters(PolicyControl.NAME_IMMERSIVE_FULL + "=*");
+
+            addWindow(mWindow);
+
+            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+            int bottomInset = mFrames.mDisplayHeight - INPUT_METHOD_WINDOW_TOP;
+            assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, bottomInset);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
+            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
+        }
     }
 
     @Test
