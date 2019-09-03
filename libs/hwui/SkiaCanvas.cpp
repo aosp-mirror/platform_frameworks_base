@@ -163,7 +163,7 @@ static inline SkCanvas::SaveLayerFlags layerFlags(SaveFlags::Flags flags) {
     SkCanvas::SaveLayerFlags layerFlags = 0;
 
     if (!(flags & SaveFlags::ClipToLayer)) {
-        layerFlags |= SkCanvas::kDontClipToLayer_Legacy_SaveLayerFlag;
+        layerFlags |= SkCanvasPriv::kDontClipToLayer_SaveLayerFlag;
     }
 
     return layerFlags;
