@@ -515,6 +515,20 @@ public final class BluetoothSocket implements Closeable {
         return mSocketIS.available();
     }
 
+    /**
+     * Wait until the data in sending queue is emptied. A polling version
+     * for flush implementation. Used to ensure the writing data afterwards will
+     * be packed in new RFCOMM frame.
+     *
+     * @throws IOException if an i/o error occurs.
+     */
+    @UnsupportedAppUsage
+    /*package*/ void flush() throws IOException {
+        if (mSocketOS == null) throw new IOException("flush is called on null OutputStream");
+        if (VDBG) Log.d(TAG, "flush: " + mSocketOS);
+        mSocketOS.flush();
+    }
+
     /*package*/ int read(byte[] b, int offset, int length) throws IOException {
         int ret = 0;
         if (VDBG) Log.d(TAG, "read in:  " + mSocketIS + " len: " + length);
