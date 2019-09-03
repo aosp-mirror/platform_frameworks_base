@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.graphics.drawable.Animatable2;
@@ -26,7 +26,6 @@ import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.biometrics.DialogViewCallback;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
@@ -35,7 +34,7 @@ import com.android.systemui.biometrics.DialogViewCallback;
  */
 public class FaceDialogView extends BiometricDialogView {
 
-    private static final String TAG = "FaceDialogView";
+    private static final String TAG = "BiometricPrompt/FaceDialogView";
 
     private static final String KEY_DIALOG_ANIMATED_IN = "key_dialog_animated_in";
 
@@ -110,7 +109,7 @@ public class FaceDialogView extends BiometricDialogView {
         announceAccessibilityEvent();
     };
 
-    protected FaceDialogView(Context context, DialogViewCallback callback, Injector injector) {
+    protected FaceDialogView(Context context, AuthDialogCallback callback, Injector injector) {
         super(context, callback, injector);
         mIconController = new IconController();
     }

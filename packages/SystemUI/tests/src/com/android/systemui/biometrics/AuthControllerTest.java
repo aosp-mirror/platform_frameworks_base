@@ -58,16 +58,16 @@ import java.util.List;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-public class BiometricDialogImplTest extends SysuiTestCase {
+public class AuthControllerTest extends SysuiTestCase {
 
     @Mock
     private PackageManager mPackageManager;
     @Mock
     private IBiometricServiceReceiverInternal mReceiver;
     @Mock
-    private BiometricDialog mDialog1;
+    private AuthDialog mDialog1;
     @Mock
-    private BiometricDialog mDialog2;
+    private AuthDialog mDialog2;
 
     private TestableBiometricDialogImpl mBiometricDialogImpl;
 
@@ -102,42 +102,42 @@ public class BiometricDialogImplTest extends SysuiTestCase {
     @Test
     public void testSendsReasonUserCanceled_whenDismissedByUserCancel() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(DialogViewCallback.DISMISSED_USER_CANCELED);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
     }
 
     @Test
     public void testSendsReasonNegative_whenDismissedByButtonNegative() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(DialogViewCallback.DISMISSED_BUTTON_NEGATIVE);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_NEGATIVE);
     }
 
     @Test
     public void testSendsReasonConfirmed_whenDismissedByButtonPositive() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(DialogViewCallback.DISMISSED_BUTTON_POSITIVE);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CONFIRMED);
     }
 
     @Test
     public void testSendsReasonConfirmNotRequired_whenDismissedByAuthenticated() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(DialogViewCallback.DISMISSED_AUTHENTICATED);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_AUTHENTICATED);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED);
     }
 
     @Test
     public void testSendsReasonError_whenDismissedByError() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(DialogViewCallback.DISMISSED_ERROR);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_ERROR);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_ERROR);
     }
 
     @Test
     public void testSendsReasonDismissedBySystemServer_whenDismissedByServer() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(DialogViewCallback.DISMISSED_BY_SYSTEM_SERVER);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
     }
 
@@ -147,7 +147,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
     public void testShowInvoked_whenSystemRequested()
             throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any(), eq(false) /* skipIntro */);
+        verify(mDialog1).show(any());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
     @Test
     public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any(), eq(false) /* skipIntro */);
+        verify(mDialog1).show(any());
 
         showDialog(BiometricPrompt.TYPE_FACE);
 
@@ -223,13 +223,13 @@ public class BiometricDialogImplTest extends SysuiTestCase {
         verify(mDialog1).dismissWithoutCallback(eq(false) /* animate */);
 
         // Second dialog should be shown without animation
-        verify(mDialog2).show(any(), eq(true)) /* skipIntro */;
+        verify(mDialog2).show(any());
     }
 
     @Test
     public void testConfigurationPersists_whenOnConfigurationChanged() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any(), eq(false) /* skipIntro */);
+        verify(mDialog1).show(any());
 
         mBiometricDialogImpl.onConfigurationChanged(new Configuration());
 
@@ -244,7 +244,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
         verify(mDialog2).restoreState(captor2.capture());
 
         // Dialog for new configuration skips intro
-        verify(mDialog2).show(any(), eq(true) /* skipIntro */);
+        verify(mDialog2).show(any());
 
         // TODO: This should check all values we want to save/restore
         assertEquals(captor.getValue(), captor2.getValue());
@@ -296,7 +296,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
         return bundle;
     }
 
-    private final class TestableBiometricDialogImpl extends BiometricDialogImpl {
+    private final class TestableBiometricDialogImpl extends AuthController {
         private int mBuildCount = 0;
 
         public TestableBiometricDialogImpl(Injector injector) {
@@ -304,9 +304,10 @@ public class BiometricDialogImplTest extends SysuiTestCase {
         }
 
         @Override
-        protected BiometricDialog buildDialog(Bundle biometricPromptBundle,
-                boolean requireConfirmation, int userId, int type, String opPackageName) {
-            BiometricDialog dialog;
+        protected AuthDialog buildDialog(Bundle biometricPromptBundle,
+                boolean requireConfirmation, int userId, int type, String opPackageName,
+                boolean skipIntro) {
+            AuthDialog dialog;
             if (mBuildCount == 0) {
                 dialog = mDialog1;
             } else if (mBuildCount == 1) {
@@ -319,7 +320,7 @@ public class BiometricDialogImplTest extends SysuiTestCase {
         }
     }
 
-    private final class MockInjector extends BiometricDialogImpl.Injector {
+    private final class MockInjector extends AuthController.Injector {
         @Override
         IActivityTaskManager getActivityTaskManager() {
             return mock(IActivityTaskManager.class);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
 
@@ -58,17 +58,15 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.biometrics.BiometricDialog;
-import com.android.systemui.biometrics.DialogViewCallback;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.util.leak.RotationUtils;
 
 /**
  * Abstract base class. Shows a dialog for BiometricPrompt.
  */
-public abstract class BiometricDialogView extends LinearLayout implements BiometricDialog {
+public abstract class BiometricDialogView extends LinearLayout implements AuthDialog {
 
-    private static final String TAG = "BiometricDialogView";
+    private static final String TAG = "BiometricPrompt/DialogView";
 
     public static final String KEY_TRY_AGAIN_VISIBILITY = "key_try_again_visibility";
     public static final String KEY_CONFIRM_VISIBILITY = "key_confirm_visibility";
@@ -112,7 +110,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
     private final float mAnimationTranslationOffset;
     private final int mErrorColor;
     private final float mDialogWidth;
-    protected final DialogViewCallback mCallback;
+    protected final AuthDialogCallback mCallback;
     private final DialogOutlineProvider mOutlineProvider = new DialogOutlineProvider();
 
     protected final ViewGroup mLayout;
@@ -176,7 +174,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             new WakefulnessLifecycle.Observer() {
                 @Override
                 public void onStartedGoingToSleep() {
-                    animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+                    animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
                 }
             };
 
@@ -226,17 +224,18 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         public static final int TYPE_FACE = BiometricAuthenticator.TYPE_FACE;
 
         private Context mContext;
-        private DialogViewCallback mCallback;
+        private AuthDialogCallback mCallback;
         private Bundle mBundle;
         private boolean mRequireConfirmation;
         private int mUserId;
         private String mOpPackageName;
+        private boolean mSkipIntro;
 
         public Builder(Context context) {
             mContext = context;
         }
 
-        public Builder setCallback(DialogViewCallback callback) {
+        public Builder setCallback(AuthDialogCallback callback) {
             mCallback = callback;
             return this;
         }
@@ -261,6 +260,11 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             return this;
         }
 
+        public Builder setSkipIntro(boolean skipIntro) {
+            mSkipIntro = skipIntro;
+            return this;
+        }
+
         public BiometricDialogView build(int type) {
             return build(type, new Injector());
         }
@@ -278,6 +282,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             dialog.setRequireConfirmation(mRequireConfirmation);
             dialog.setUserId(mUserId);
             dialog.setOpPackageName(mOpPackageName);
+            dialog.setSkipIntro(mSkipIntro);
             return dialog;
         }
     }
@@ -288,7 +293,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         }
     }
 
-    protected BiometricDialogView(Context context, DialogViewCallback callback, Injector injector) {
+    protected BiometricDialogView(Context context, AuthDialogCallback callback, Injector injector) {
         super(context);
         mWakefulnessLifecycle = injector.getWakefulnessLifecycle();
 
@@ -319,7 +324,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
                     return false;
                 }
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+                    animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
                 }
                 return true;
             }
@@ -348,16 +353,16 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
 
         mNegativeButton.setOnClickListener((View v) -> {
             if (mState == STATE_PENDING_CONFIRMATION || mState == STATE_AUTHENTICATED) {
-                animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+                animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
             } else {
-                animateAway(DialogViewCallback.DISMISSED_BUTTON_NEGATIVE);
+                animateAway(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE);
             }
         });
 
         mPositiveButton.setOnClickListener((View v) -> {
             updateState(STATE_AUTHENTICATED);
             mHandler.postDelayed(() -> {
-                animateAway(DialogViewCallback.DISMISSED_BUTTON_POSITIVE);
+                animateAway(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE);
             }, getDelayAfterAuthenticatedDurationMs());
         });
 
@@ -639,20 +644,20 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         v.setClickable(true);
         v.setOnClickListener(v1 -> {
             if (mState != STATE_AUTHENTICATED && shouldGrayAreaDismissDialog()) {
-                animateAway(DialogViewCallback.DISMISSED_USER_CANCELED);
+                animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
             }
         });
     }
 
-    private void animateAway(@DialogViewCallback.DismissedReason int reason) {
+    private void animateAway(@AuthDialogCallback.DismissedReason int reason) {
         animateAway(true /* sendReason */, reason);
     }
 
     /**
      * Animate the dialog away
-     * @param reason one of the {@link DialogViewCallback} codes
+     * @param reason one of the {@link AuthDialogCallback} codes
      */
-    private void animateAway(boolean sendReason, @DialogViewCallback.DismissedReason int reason) {
+    private void animateAway(boolean sendReason, @AuthDialogCallback.DismissedReason int reason) {
         if (!mCompletedAnimatingIn) {
             Log.w(TAG, "startDismiss(): waiting for onDialogAnimatedIn");
             mPendingDismissDialog = true;
@@ -733,8 +738,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
     }
 
     @Override
-    public void show(WindowManager wm, boolean skipIntroAnimation) {
-        setSkipIntro(skipIntroAnimation);
+    public void show(WindowManager wm) {
         wm.addView(this, getLayoutParams(mWindowToken));
     }
 
@@ -757,7 +761,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
 
     @Override
     public void dismissFromSystemServer() {
-        animateAway(DialogViewCallback.DISMISSED_BY_SYSTEM_SERVER);
+        animateAway(AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER);
     }
 
     @Override
@@ -768,7 +772,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
             updateState(STATE_PENDING_CONFIRMATION);
         } else {
             mHandler.postDelayed(() -> {
-                animateAway(DialogViewCallback.DISMISSED_AUTHENTICATED);
+                animateAway(AuthDialogCallback.DISMISSED_AUTHENTICATED);
             }, getDelayAfterAuthenticatedDurationMs());
 
             updateState(STATE_AUTHENTICATED);
@@ -810,7 +814,7 @@ public abstract class BiometricDialogView extends LinearLayout implements Biomet
         showTryAgainButton(false /* show */);
 
         mHandler.postDelayed(() -> {
-            animateAway(DialogViewCallback.DISMISSED_ERROR);
+            animateAway(AuthDialogCallback.DISMISSED_ERROR);
         }, BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
