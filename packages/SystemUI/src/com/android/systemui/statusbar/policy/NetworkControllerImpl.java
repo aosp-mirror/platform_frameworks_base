@@ -51,6 +51,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
@@ -829,6 +830,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.print("  mEmergencySource=");
         pw.println(emergencyToString(mEmergencySource));
 
+        pw.println("  - config ------");
+        pw.print("  patternOfCarrierSpecificDataIcon=");
+        pw.println(mConfig.patternOfCarrierSpecificDataIcon);
+        pw.print("  nr5GIconMap=");
+        pw.println(mConfig.nr5GIconMap.toString());
+        pw.print("  nrIconDisplayGracePeriodMs=");
+        pw.println(mConfig.nrIconDisplayGracePeriodMs);
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
             mobileSignalController.dump(pw);
@@ -992,6 +1000,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("3g") ? TelephonyIcons.THREE_G :
                             datatype.equals("4g") ? TelephonyIcons.FOUR_G :
                             datatype.equals("4g+") ? TelephonyIcons.FOUR_G_PLUS :
+                            datatype.equals("5g") ? TelephonyIcons.NR_5G :
+                            datatype.equals("5g+") ? TelephonyIcons.NR_5G_PLUS :
                             datatype.equals("e") ? TelephonyIcons.E :
                             datatype.equals("g") ? TelephonyIcons.G :
                             datatype.equals("h") ? TelephonyIcons.H :
@@ -1123,6 +1133,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean inflateSignalStrengths = false;
         boolean alwaysShowDataRatIcon = false;
         public String patternOfCarrierSpecificDataIcon = "";
+        public long nrIconDisplayGracePeriodMs;
 
         /**
          * Mapping from NR 5G status string to an integer. The NR 5G status string should match
@@ -1175,6 +1186,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         add5GIconMapping(pair, config);
                     }
                 }
+                setDisplayGraceTime(
+                        b.getInt(CarrierConfigManager.KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT),
+                        config);
             }
 
             return config;
@@ -1207,6 +1221,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         NR_STATUS_STRING_TO_INDEX.get(key),
                         TelephonyIcons.ICON_NAME_TO_ICON.get(value));
             }
+        }
+
+        /**
+         * Set display gracefully period time(MS) depend on carrierConfig KEY
+         * KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, and this function will convert to ms.
+         * {@link CarrierConfigManager}.
+         *
+         * @param time   showing 5G icon gracefully in the period of the time(SECOND)
+         * @param config container that used to store the parsed configs.
+         */
+        @VisibleForTesting
+        static void setDisplayGraceTime(int time, Config config) {
+            config.nrIconDisplayGracePeriodMs = time * DateUtils.SECOND_IN_MILLIS;
         }
     }
 }
