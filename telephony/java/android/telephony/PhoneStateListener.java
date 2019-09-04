@@ -33,12 +33,12 @@ import android.telephony.ims.ImsReasonInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
 
+import dalvik.system.VMRuntime;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
-import dalvik.system.VMRuntime;
 
 /**
  * A listener class for monitoring changes in specific telephony states
@@ -300,11 +300,6 @@ public class PhoneStateListener {
      *  the current subscription used to setup Cellular Internet data. For example,
      *  it could be the current active opportunistic subscription in use, or the
      *  subscription user selected as default data subscription in DSDS mode.
-     *
-     *  Requires Permission: No permission is required to listen, but notification requires
-     *  {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or the calling
-     *  app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges})
-     *  on any active subscription.
      *
      *  @see #onActiveDataSubscriptionIdChanged
      */
