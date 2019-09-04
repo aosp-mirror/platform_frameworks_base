@@ -3132,16 +3132,59 @@ public class TelephonyManager {
      */
     @SystemApi
     public int getSimCardState() {
-        int simCardState = getSimState();
-        switch (simCardState) {
+        int simState = getSimState();
+        return getSimCardStateFromSimState(simState);
+    }
+
+    /**
+     * Returns a constant indicating the state of the device SIM card in a physical slot.
+     *
+     * @param physicalSlotIndex physical slot index
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_ABSENT
+     * @see #SIM_STATE_CARD_IO_ERROR
+     * @see #SIM_STATE_CARD_RESTRICTED
+     * @see #SIM_STATE_PRESENT
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getSimCardState(int physicalSlotIndex) {
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex));
+        return getSimCardStateFromSimState(simState);
+    }
+
+    /**
+     * Converts SIM state to SIM card state.
+     * @param simState
+     * @return SIM card state
+     */
+    private int getSimCardStateFromSimState(int simState) {
+        switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
             case SIM_STATE_CARD_IO_ERROR:
             case SIM_STATE_CARD_RESTRICTED:
-                return simCardState;
+                return simState;
             default:
                 return SIM_STATE_PRESENT;
         }
+    }
+
+    /**
+     * Converts a physical slot index to logical slot index.
+     * @param physicalSlotIndex physical slot index
+     * @return logical slot index
+     */
+    private int getLogicalSlotIndex(int physicalSlotIndex) {
+        UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
+        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length) {
+            return slotInfos[physicalSlotIndex].getLogicalSlotIdx();
+        }
+
+        return SubscriptionManager.INVALID_SIM_SLOT_INDEX;
     }
 
     /**
@@ -3159,8 +3202,41 @@ public class TelephonyManager {
      */
     @SystemApi
     public int getSimApplicationState() {
-        int simApplicationState = getSimStateIncludingLoaded();
-        switch (simApplicationState) {
+        int simState = getSimStateIncludingLoaded();
+        return getSimApplicationStateFromSimState(simState);
+    }
+
+    /**
+     * Returns a constant indicating the state of the card applications on the device SIM card in
+     * a physical slot.
+     *
+     * @param physicalSlotIndex physical slot index
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_PIN_REQUIRED
+     * @see #SIM_STATE_PUK_REQUIRED
+     * @see #SIM_STATE_NETWORK_LOCKED
+     * @see #SIM_STATE_NOT_READY
+     * @see #SIM_STATE_PERM_DISABLED
+     * @see #SIM_STATE_LOADED
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getSimApplicationState(int physicalSlotIndex) {
+        int simState =
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex));
+        return getSimApplicationStateFromSimState(simState);
+    }
+
+    /**
+     * Converts SIM state to SIM application state.
+     * @param simState
+     * @return SIM application state
+     */
+    private int getSimApplicationStateFromSimState(int simState) {
+        switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
             case SIM_STATE_CARD_IO_ERROR:
@@ -3171,14 +3247,14 @@ public class TelephonyManager {
                 // NOT_READY to either LOCKED or LOADED.
                 return SIM_STATE_NOT_READY;
             default:
-                return simApplicationState;
+                return simState;
         }
     }
 
     /**
-     * Returns a constant indicating the state of the device SIM card in a slot.
+     * Returns a constant indicating the state of the device SIM card in a logical slot.
      *
-     * @param slotIndex
+     * @param slotIndex logical slot index
      *
      * @see #SIM_STATE_UNKNOWN
      * @see #SIM_STATE_ABSENT
