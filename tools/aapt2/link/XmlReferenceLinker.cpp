@@ -83,6 +83,15 @@ class XmlVisitor : public xml::PackageAwareVisitor {
     Attribute default_attribute(android::ResTable_map::TYPE_ANY);
     default_attribute.SetWeak(true);
 
+    // The default orientation of gradients in android Q is different than previous android
+    // versions. Set the android:angle attribute to "0" to ensure that the default gradient
+    // orientation will remain left-to-right in android Q.
+    if (el->name == "gradient" && context_->GetMinSdkVersion() <= SDK_Q) {
+      if (!el->FindAttribute(xml::kSchemaAndroid, "angle")) {
+        el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, "angle", "0"});
+      }
+    }
+
     const Source source = source_.WithLine(el->line_number);
     for (xml::Attribute& attr : el->attributes) {
       // If the attribute has no namespace, interpret values as if
