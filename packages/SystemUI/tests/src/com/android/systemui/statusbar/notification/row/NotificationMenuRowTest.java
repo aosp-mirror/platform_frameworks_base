@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -60,9 +61,11 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mRow = mock(ExpandableNotificationRow.class);
-        NotificationEntry entry = NotificationEntry.buildForTest(
-                mock(StatusBarNotification.class));
-        entry.channel = mock(NotificationChannel.class);
+        NotificationEntry entry = new NotificationEntry(
+                mock(StatusBarNotification.class),
+                new RankingBuilder()
+                        .setChannel(mock(NotificationChannel.class))
+                        .build());
         when(mRow.getEntry()).thenReturn(entry);
     }
 

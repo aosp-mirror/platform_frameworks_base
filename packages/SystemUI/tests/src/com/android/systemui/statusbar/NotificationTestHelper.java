@@ -306,12 +306,21 @@ public class NotificationTestHelper {
                 userHandle,
                 null /* overrideGroupKey */,
                 System.currentTimeMillis());
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
+        final NotificationChannel channel =
+                new NotificationChannel(
+                        notification.getChannelId(),
+                        notification.getChannelId(),
+                        importance);
+        channel.setBlockableSystem(true);
+
+        NotificationEntry entry = new NotificationEntry(
+                sbn,
+                new RankingBuilder()
+                        .setKey(sbn.getKey())
+                        .setChannel(channel)
+                        .build());
         entry.setRow(row);
         entry.createIcons(mContext, sbn);
-        entry.channel = new NotificationChannel(
-                notification.getChannelId(), notification.getChannelId(), importance);
-        entry.channel.setBlockableSystem(true);
         row.setEntry(entry);
         row.getNotificationInflater().addInflationFlags(extraInflationFlags);
         NotificationContentInflaterTest.runThenWaitForInflation(

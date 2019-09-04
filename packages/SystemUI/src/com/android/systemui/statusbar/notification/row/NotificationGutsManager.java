@@ -316,7 +316,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 iNotificationManager,
                 mVisualStabilityManager,
                 packageName,
-                row.getEntry().channel,
+                row.getEntry().getChannel(),
                 row.getUniqueChannels(),
                 sbn,
                 mCheckSaveListener,
