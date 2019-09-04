@@ -185,11 +185,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction setGeometryAppliesWithResize(SurfaceControl sc) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setSecure(SurfaceControl sc, boolean isSecure) {
         return this;
     }

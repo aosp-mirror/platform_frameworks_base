@@ -105,8 +105,6 @@ public final class SurfaceControl implements Parcelable {
             long relativeToObject, int zorder);
     private static native void nativeSetPosition(long transactionObj, long nativeObject,
             float x, float y);
-    private static native void nativeSetGeometryAppliesWithResize(long transactionObj,
-            long nativeObject);
     private static native void nativeSetSize(long transactionObj, long nativeObject, int w, int h);
     private static native void nativeSetTransparentRegionHint(long transactionObj,
             long nativeObject, Region region);
@@ -1098,16 +1096,6 @@ public final class SurfaceControl implements Parcelable {
         checkNotReleased();
         synchronized(SurfaceControl.class) {
             sGlobalTransaction.setPosition(this, x, y);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setGeometryAppliesWithResize() {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setGeometryAppliesWithResize(this);
         }
     }
 
@@ -2484,20 +2472,6 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setColor(SurfaceControl sc, @Size(3) float[] color) {
             sc.checkNotReleased();
             nativeSetColor(mNativeObject, sc.mNativeObject, color);
-            return this;
-        }
-
-        /**
-         * If the buffer size changes in this transaction, position and crop updates specified
-         * in this transaction will not complete until a buffer of the new size
-         * arrives. As transform matrix and size are already frozen in this fashion,
-         * this enables totally freezing the surface until the resize has completed
-         * (at which point the geometry influencing aspects of this transaction will then occur)
-         * @hide
-         */
-        public Transaction setGeometryAppliesWithResize(SurfaceControl sc) {
-            sc.checkNotReleased();
-            nativeSetGeometryAppliesWithResize(mNativeObject, sc.mNativeObject);
             return this;
         }
 
