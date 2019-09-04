@@ -367,15 +367,6 @@ public final class DeviceConfig {
          */
         String KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS =
                 "system_gesture_exclusion_log_debounce_millis";
-
-        /**
-         * Key for controlling which packages are explicitly blocked from running at refresh rates
-         * higher than 90hz.
-         *
-         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
-         * @hide
-         */
-        String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
     }
 
     private static final Object sLock = new Object();

@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.provider.DeviceConfig.WindowManager.KEY_HIGH_REFRESH_RATE_BLACKLIST;
+import static android.hardware.display.DisplayManager.DeviceConfig.KEY_HIGH_REFRESH_RATE_BLACKLIST;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -128,9 +128,9 @@ public class HighRefreshRateBlacklistTest {
 
         @Override
         public String getProperty(String namespace, String name) {
-            if (!DeviceConfig.NAMESPACE_WINDOW_MANAGER.equals(namespace)
+            if (!DeviceConfig.NAMESPACE_DISPLAY_MANAGER.equals(namespace)
                     || !KEY_HIGH_REFRESH_RATE_BLACKLIST.equals(name)) {
-                throw new IllegalArgumentException("Only things in NAMESPACE_WINDOW_MANAGER "
+                throw new IllegalArgumentException("Only things in NAMESPACE_DISPLAY_MANAGER "
                         + "supported.");
             }
             return mBlacklist;
@@ -140,8 +140,8 @@ public class HighRefreshRateBlacklistTest {
         public void addOnPropertiesChangedListener(String namespace, Executor executor,
                 DeviceConfig.OnPropertiesChangedListener listener) {
 
-            if (!DeviceConfig.NAMESPACE_WINDOW_MANAGER.equals(namespace)) {
-                throw new IllegalArgumentException("Only things in NAMESPACE_WINDOW_MANAGER "
+            if (!DeviceConfig.NAMESPACE_DISPLAY_MANAGER.equals(namespace)) {
+                throw new IllegalArgumentException("Only things in NAMESPACE_DISPLAY_MANAGER "
                         + "supported.");
             }
             mListeners.add(new Pair<>(listener, executor));
