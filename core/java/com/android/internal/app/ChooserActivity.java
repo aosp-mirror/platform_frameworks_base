@@ -24,6 +24,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -1585,25 +1586,19 @@ public class ChooserActivity extends ResolverActivity {
         // ShareShortcutInfos directly.
         boolean resultMessageSent = false;
         for (int i = 0; i < driList.size(); i++) {
-            List<ChooserTarget> chooserTargets = new ArrayList<>();
+            List<ShortcutManager.ShareShortcutInfo> matchingShortcuts = new ArrayList<>();
             for (int j = 0; j < resultList.size(); j++) {
                 if (driList.get(i).getResolvedComponentName().equals(
                             resultList.get(j).getTargetComponent())) {
-                    ShortcutManager.ShareShortcutInfo shareShortcutInfo = resultList.get(j);
-                    // Incoming results are ordered but without a score. Create a score
-                    // based on the index in order to be sorted appropriately when joined
-                    // with legacy direct share api results.
-                    float score = Math.max(1.0f - (0.05f * j), 0.0f);
-                    ChooserTarget chooserTarget = convertToChooserTarget(shareShortcutInfo, score);
-                    chooserTargets.add(chooserTarget);
-                    if (mDirectShareAppTargetCache != null && appTargets != null) {
-                        mDirectShareAppTargetCache.put(chooserTarget, appTargets.get(j));
-                    }
+                    matchingShortcuts.add(resultList.get(j));
                 }
             }
-            if (chooserTargets.isEmpty()) {
+            if (matchingShortcuts.isEmpty()) {
                 continue;
             }
+            List<ChooserTarget> chooserTargets = convertToChooserTarget(
+                    matchingShortcuts, resultList, appTargets, shortcutType);
+
             final Message msg = Message.obtain();
             msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
             msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null);
@@ -1641,23 +1636,69 @@ public class ChooserActivity extends ResolverActivity {
         return false;
     }
 
-    private ChooserTarget convertToChooserTarget(ShortcutManager.ShareShortcutInfo shareShortcut,
-                                                 float score) {
-        ShortcutInfo shortcutInfo = shareShortcut.getShortcutInfo();
-        Bundle extras = new Bundle();
-        extras.putString(Intent.EXTRA_SHORTCUT_ID, shortcutInfo.getId());
-        return new ChooserTarget(
-                // The name of this target.
-                shortcutInfo.getShortLabel(),
-                // Don't load the icon until it is selected to be shown
-                null,
-                // The ranking score for this target (0.0-1.0); the system will omit items with low
-                // scores when there are too many Direct Share items.
-                score,
-                // The name of the component to be launched if this target is chosen.
-                shareShortcut.getTargetComponent().clone(),
-                // The extra values here will be merged into the Intent when this target is chosen.
-                extras);
+    /**
+     * Converts a list of ShareShortcutInfos to ChooserTargets.
+     * @param matchingShortcuts List of shortcuts, all from the same package, that match the current
+     *                         share intent filter.
+     * @param allShortcuts List of all the shortcuts from all the packages on the device that are
+     *                    returned for the current sharing action.
+     * @param allAppTargets List of AppTargets. Null if the results are not from prediction service.
+     * @param shortcutType One of the values TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER or
+     *                    TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE
+     * @return A list of ChooserTargets sorted by score in descending order.
+     */
+    @VisibleForTesting
+    @NonNull
+    public List<ChooserTarget> convertToChooserTarget(
+            @NonNull List<ShortcutManager.ShareShortcutInfo> matchingShortcuts,
+            @NonNull List<ShortcutManager.ShareShortcutInfo> allShortcuts,
+            @Nullable List<AppTarget> allAppTargets, @ShareTargetType int shortcutType) {
+        // A set of distinct scores for the matched shortcuts. We use index of a rank in the sorted
+        // list instead of the actual rank value when converting a rank to a score.
+        List<Integer> scoreList = new ArrayList<>();
+        if (shortcutType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER) {
+            for (int i = 0; i < matchingShortcuts.size(); i++) {
+                int shortcutRank = matchingShortcuts.get(i).getShortcutInfo().getRank();
+                if (!scoreList.contains(shortcutRank)) {
+                    scoreList.add(shortcutRank);
+                }
+            }
+            Collections.sort(scoreList);
+        }
+
+        List<ChooserTarget> chooserTargetList = new ArrayList<>(matchingShortcuts.size());
+        for (int i = 0; i < matchingShortcuts.size(); i++) {
+            ShortcutInfo shortcutInfo = matchingShortcuts.get(i).getShortcutInfo();
+            int indexInAllShortcuts = allShortcuts.indexOf(matchingShortcuts.get(i));
+
+            float score;
+            if (shortcutType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE) {
+                // Incoming results are ordered. Create a score based on index in the original list.
+                score = Math.max(1.0f - (0.01f * indexInAllShortcuts), 0.0f);
+            } else {
+                // Create a score based on the rank of the shortcut.
+                int rankIndex = scoreList.indexOf(shortcutInfo.getRank());
+                score = Math.max(1.0f - (0.01f * rankIndex), 0.0f);
+            }
+
+            Bundle extras = new Bundle();
+            extras.putString(Intent.EXTRA_SHORTCUT_ID, shortcutInfo.getId());
+            ChooserTarget chooserTarget = new ChooserTarget(shortcutInfo.getShortLabel(),
+                    null, // Icon will be loaded later if this target is selected to be shown.
+                    score, matchingShortcuts.get(i).getTargetComponent().clone(), extras);
+
+            chooserTargetList.add(chooserTarget);
+            if (mDirectShareAppTargetCache != null && allAppTargets != null) {
+                mDirectShareAppTargetCache.put(chooserTarget,
+                        allAppTargets.get(indexInAllShortcuts));
+            }
+        }
+
+        // Sort ChooserTargets by score in descending order
+        Comparator<ChooserTarget> byScore =
+                (ChooserTarget a, ChooserTarget b) -> -Float.compare(a.getScore(), b.getScore());
+        Collections.sort(chooserTargetList, byScore);
+        return chooserTargetList;
     }
 
     private String convertServiceName(String packageName, String serviceName) {
