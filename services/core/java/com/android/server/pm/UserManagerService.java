@@ -2713,14 +2713,25 @@ public class UserManagerService extends IUserManager.Stub {
         return createUserInternalUnchecked(name, flags, parentId, disallowedPackages);
     }
 
-    private UserInfo createUserInternalUnchecked(String name, int flags, int parentId,
-            String[] disallowedPackages) {
+    private UserInfo createUserInternalUnchecked(@Nullable String name, int flags,
+            int parentId, @Nullable String[] disallowedPackages) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("createUser");
+        UserInfo userInfo =
+                createUserInternalUncheckedNoTracing(name, flags, parentId, disallowedPackages, t);
+        t.traceEnd();
+        return userInfo;
+    }
+
+    private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name, int flags,
+            int parentId, @Nullable String[] disallowedPackages, @NonNull TimingsTraceAndSlog t) {
         DeviceStorageMonitorInternal dsm = LocalServices
                 .getService(DeviceStorageMonitorInternal.class);
         if (dsm.isMemoryLow()) {
             Log.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
             return null;
         }
+
         final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;
@@ -2820,11 +2831,21 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                 }
             }
+
+            t.traceBegin("createUserKey");
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
+            t.traceEnd();
+
+            t.traceBegin("prepareUserData");
             mUserDataPreparer.prepareUserData(userId, userInfo.serialNumber,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+            t.traceEnd();
+
+            t.traceBegin("PM.createNewUser");
             mPm.createNewUser(userId, disallowedPackages);
+            t.traceEnd();
+
             userInfo.partial = false;
             synchronized (mPackagesLock) {
                 writeUserLP(userData);
@@ -2839,7 +2860,11 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.append(userId, restrictions);
             }
+
+            t.traceBegin("PM.onNewUserCreated");
             mPm.onNewUserCreated(userId);
+            t.traceEnd();
+
             Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
