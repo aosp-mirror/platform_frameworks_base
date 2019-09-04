@@ -868,5 +868,16 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_PEAK_REFRESH_RATE_DEFAULT = "peak_refresh_rate_default";
+
+        /**
+         * Key for controlling which packages are explicitly blocked from running at refresh rates
+         * higher than 60hz. An app may be added to this list if they exhibit performance issues at
+         * higher refresh rates.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.array#config_highRefreshRateBlacklist
+         * @hide
+         */
+        String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
     }
 }
