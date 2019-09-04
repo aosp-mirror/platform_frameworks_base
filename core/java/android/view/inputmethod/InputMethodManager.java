@@ -707,9 +707,10 @@ public final class InputMethodManager {
                         if (mBindSequence != bindSequence) {
                             return;
                         }
-                        if (matrixValues == null) {
-                            // That this app is unbound from the parent ActivityView. In this case,
-                            // calling updateCursorAnchorInfo() isn't safe.  Only clear the matrix.
+                        if (matrixValues == null || mActivityViewToScreenMatrix == null) {
+                            // Either InputBoundResult#mActivityViewToScreenMatrixValues is null
+                            // OR this app is unbound from the parent ActivityView. In this case,
+                            // calling updateCursorAnchorInfo() isn't safe. Only clear the matrix.
                             mActivityViewToScreenMatrix = null;
                             return;
                         }
