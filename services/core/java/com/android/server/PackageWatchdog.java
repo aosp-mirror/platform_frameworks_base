@@ -116,6 +116,10 @@ public class PackageWatchdog {
     private final AtomicFile mPolicyFile;
     private final ExplicitHealthCheckController mHealthCheckController;
     private final ConnectivityModuleConnector mConnectivityModuleConnector;
+    private final Runnable mSyncRequests = this::syncRequests;
+    private final Runnable mSyncStateWithScheduledReason = this::syncStateWithScheduledReason;
+    private final Runnable mSaveToFile = this::saveToFile;
+    private final SystemClock mSystemClock;
     @GuardedBy("mLock")
     private boolean mIsPackagesReady;
     // Flag to control whether explicit health checks are supported or not
@@ -130,17 +134,11 @@ public class PackageWatchdog {
     @GuardedBy("mLock")
     private long mUptimeAtLastStateSync;
 
-    private final Runnable mSyncRequests = this::syncRequests;
-    private final Runnable mSyncStateWithScheduledReason = this::syncStateWithScheduledReason;
-    private final Runnable mSaveToFile = this::saveToFile;
-
     @FunctionalInterface
     @VisibleForTesting
     interface SystemClock {
         long uptimeMillis();
     }
-
-    private final SystemClock mSystemClock;
 
     private PackageWatchdog(Context context) {
         // Needs to be constructed inline
