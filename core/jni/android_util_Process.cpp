@@ -31,6 +31,7 @@
 #include <android-base/unique_fd.h>
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <memory>
 #include <string>
@@ -630,14 +631,16 @@ static int pid_compare(const void* v1, const void* v2)
 
 static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
-    static const std::vector<std::string> memFreeTags = {
+    std::array<std::string_view, 2> memFreeTags = {
         ::android::meminfo::SysMemInfo::kMemFree,
         ::android::meminfo::SysMemInfo::kMemCached,
     };
     std::vector<uint64_t> mem(memFreeTags.size());
     ::android::meminfo::SysMemInfo smi;
 
-    if (!smi.ReadMemInfo(memFreeTags, &mem)) {
+    if (!smi.ReadMemInfo(memFreeTags.size(),
+                         memFreeTags.data(),
+                         mem.data())) {
         jniThrowRuntimeException(env, "SysMemInfo read failed to get Free Memory");
         return -1L;
     }
