@@ -34,6 +34,7 @@ import android.view.ViewStub;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.car.CarTrustAgentUnlockDialogHelper.OnHideListener;
 import com.android.systemui.statusbar.car.UserGridRecyclerView.UserRecord;
 
 /**
@@ -116,7 +117,7 @@ public class FullscreenUserSwitcher {
         // Show unlock dialog for initial user
         if (hasTrustedDevice(initialUser)) {
             mUnlockDialogHelper.showUnlockDialogAfterDelay(initialUser,
-                    () -> dismissUserSwitcher());
+                    mOnHideListener);
         }
     }
 
@@ -162,7 +163,7 @@ public class FullscreenUserSwitcher {
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
         mSelectedUser = record;
         if (hasTrustedDevice(record.mInfo.id)) {
-            mUnlockDialogHelper.showUnlockDialog(record.mInfo.id, () -> dismissUserSwitcher());
+            mUnlockDialogHelper.showUnlockDialog(record.mInfo.id, mOnHideListener);
             return;
         }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -202,4 +203,18 @@ public class FullscreenUserSwitcher {
     private boolean hasTrustedDevice(int uid) {
         return !mEnrollmentManager.getEnrolledDeviceInfoForUser(uid).isEmpty();
     }
+
+    private OnHideListener mOnHideListener = new OnHideListener() {
+        @Override
+        public void onHide(boolean dismissUserSwitcher) {
+            if (dismissUserSwitcher) {
+                dismissUserSwitcher();
+            } else {
+                // Re-draw the parent view, otherwise the unlock dialog will not be removed from
+                // the screen immediately.
+                mParent.invalidate();
+            }
+
+        }
+    };
 }
