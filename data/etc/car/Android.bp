@@ -128,3 +128,10 @@ prebuilt_etc {
     filename_from_src: true,
     product_specific: true,
 }
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.car.floatingcardslauncher",
+    sub_dir: "permissions",
+    src: "com.android.car.floatingcardslauncher.xml",
+    filename_from_src: true,
+}
