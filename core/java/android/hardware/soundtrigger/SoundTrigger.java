@@ -71,28 +71,27 @@ public class SoundTrigger {
      * ID used to target any API call to this paricular module. Module
      * properties are returned by listModules() method.
      *
-     * @hide
      ****************************************************************************/
-    public static class ModuleProperties implements Parcelable {
+    public static final class ModuleProperties implements Parcelable {
         /** Unique module ID provided by the native service */
-        @UnsupportedAppUsage
         public final int id;
 
         /** human readable voice detection engine implementor */
+        @NonNull
         public final String implementor;
 
         /** human readable voice detection engine description */
+        @NonNull
         public final String description;
 
         /** Unique voice engine Id (changes with each version) */
-        @UnsupportedAppUsage
+        @NonNull
         public final UUID uuid;
 
         /** Voice detection engine version */
         public final int version;
 
         /** Maximum number of active sound models */
-        @UnsupportedAppUsage
         public final int maxSoundModels;
 
         /** Maximum number of key phrases */
@@ -120,7 +119,6 @@ public class SoundTrigger {
          * recognition callback event */
         public final boolean returnsTriggerInEvent;
 
-        @UnsupportedAppUsage
         ModuleProperties(int id, String implementor, String description,
                 String uuid, int version, int maxSoundModels, int maxKeyphrases,
                 int maxUsers, int recognitionModes, boolean supportsCaptureTransition,

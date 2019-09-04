@@ -383,4 +383,20 @@ public final class SoundTriggerManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Get the hardware sound trigger module properties currently loaded.
+     *
+     * @return The properties currently loaded. Returns null if no supported hardware loaded.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @Nullable
+    public SoundTrigger.ModuleProperties getModuleProperties() {
+
+        try {
+            return mSoundTriggerService.getModuleProperties();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

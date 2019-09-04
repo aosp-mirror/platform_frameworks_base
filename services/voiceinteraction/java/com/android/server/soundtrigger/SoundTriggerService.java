@@ -666,6 +666,23 @@ public class SoundTriggerService extends SystemService {
                 return ret;
             }
         }
+
+        @Override
+        @Nullable
+        public ModuleProperties getModuleProperties() {
+            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+            if (!isInitialized()) return null;
+            if (DEBUG) {
+                Slog.i(TAG, "getModuleProperties()");
+            }
+
+            synchronized (mLock) {
+                ModuleProperties properties = mSoundTriggerHelper.getModuleProperties();
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "getModuleProperties(): " + properties.toString()));
+                return properties;
+            }
+        }
     }
 
     /**
