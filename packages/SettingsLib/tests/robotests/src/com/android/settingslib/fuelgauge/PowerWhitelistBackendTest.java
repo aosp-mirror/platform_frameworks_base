@@ -117,6 +117,8 @@ public class PowerWhitelistBackendTest {
         final String testSms = "com.android.test.defaultsms";
         ShadowSmsApplication.setDefaultSmsApplication(new ComponentName(testSms, "receiver"));
 
+        mPowerWhitelistBackend.refreshList();
+
         assertThat(mPowerWhitelistBackend.isWhitelisted(testSms)).isTrue();
         assertThat(mPowerWhitelistBackend.isDefaultActiveApp(testSms)).isTrue();
     }
@@ -125,6 +127,8 @@ public class PowerWhitelistBackendTest {
     public void isWhitelisted_shouldWhitelistDefaultDialer() {
         final String testDialer = "com.android.test.defaultdialer";
         ShadowDefaultDialerManager.setDefaultDialerApplication(testDialer);
+
+        mPowerWhitelistBackend.refreshList();
 
         assertThat(mPowerWhitelistBackend.isWhitelisted(testDialer)).isTrue();
         assertThat(mPowerWhitelistBackend.isDefaultActiveApp(testDialer)).isTrue();
