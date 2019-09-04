@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.biometrics;
@@ -29,13 +29,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
-import com.android.systemui.biometrics.ui.BiometricDialogView;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.List;
@@ -44,9 +44,12 @@ import java.util.List;
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
  * appropriate biometric UI (e.g. BiometricDialogView).
  */
-public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callbacks,
-        DialogViewCallback {
-    private static final String TAG = "BiometricDialogImpl";
+public class AuthController extends SystemUI implements CommandQueue.Callbacks,
+        AuthDialogCallback {
+    private static final String USE_NEW_DIALOG =
+            "com.android.systemui.biometrics.AuthController.USE_NEW_DIALOG";
+
+    private static final String TAG = "BiometricPrompt/AuthController";
     private static final boolean DEBUG = true;
 
     private final Injector mInjector;
@@ -54,7 +57,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     // TODO: These should just be saved from onSaveState
     private SomeArgs mCurrentDialogArgs;
     @VisibleForTesting
-    BiometricDialog mCurrentDialog;
+    AuthDialog mCurrentDialog;
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private WindowManager mWindowManager;
@@ -107,27 +110,27 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     @Override
     public void onDismissed(@DismissedReason int reason) {
         switch (reason) {
-            case DialogViewCallback.DISMISSED_USER_CANCELED:
+            case AuthDialogCallback.DISMISSED_USER_CANCELED:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
                 break;
 
-            case DialogViewCallback.DISMISSED_BUTTON_NEGATIVE:
+            case AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_NEGATIVE);
                 break;
 
-            case DialogViewCallback.DISMISSED_BUTTON_POSITIVE:
+            case AuthDialogCallback.DISMISSED_BUTTON_POSITIVE:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CONFIRMED);
                 break;
 
-            case DialogViewCallback.DISMISSED_AUTHENTICATED:
+            case AuthDialogCallback.DISMISSED_AUTHENTICATED:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED);
                 break;
 
-            case DialogViewCallback.DISMISSED_ERROR:
+            case AuthDialogCallback.DISMISSED_ERROR:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_ERROR);
                 break;
 
-            case DialogViewCallback.DISMISSED_BY_SYSTEM_SERVER:
+            case AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
                 break;
 
@@ -156,12 +159,12 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
     }
 
-    public BiometricDialogImpl() {
+    public AuthController() {
         this(new Injector());
     }
 
     @VisibleForTesting
-    BiometricDialogImpl(Injector injector) {
+    AuthController(Injector injector) {
         mInjector = injector;
     }
 
@@ -248,12 +251,13 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         final String opPackageName = (String) args.arg4;
 
         // Create a new dialog but do not replace the current one yet.
-        final BiometricDialog newDialog = buildDialog(
+        final AuthDialog newDialog = buildDialog(
                 biometricPromptBundle,
                 requireConfirmation,
                 userId,
                 type,
-                opPackageName);
+                opPackageName,
+                skipAnimation);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type: " + type);
@@ -282,7 +286,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
         mReceiver = (IBiometricServiceReceiverInternal) args.arg2;
         mCurrentDialog = newDialog;
-        mCurrentDialog.show(mWindowManager, skipAnimation);
+        mCurrentDialog.show(mWindowManager);
     }
 
     private void onDialogDismissed(@DismissedReason int reason) {
@@ -309,14 +313,27 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
     }
 
-    protected BiometricDialog buildDialog(Bundle biometricPromptBundle,
-            boolean requireConfirmation, int userId, int type, String opPackageName) {
-        return new BiometricDialogView.Builder(mContext)
-                .setCallback(this)
-                .setBiometricPromptBundle(biometricPromptBundle)
-                .setRequireConfirmation(requireConfirmation)
-                .setUserId(userId)
-                .setOpPackageName(opPackageName)
-                .build(type);
+    protected AuthDialog buildDialog(Bundle biometricPromptBundle, boolean requireConfirmation,
+            int userId, int type, String opPackageName, boolean skipIntro) {
+        if (Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), USE_NEW_DIALOG, userId, 0) != 0) {
+            return new AuthContainerView.Builder(mContext)
+                    .setCallback(this)
+                    .setBiometricPromptBundle(biometricPromptBundle)
+                    .setRequireConfirmation(requireConfirmation)
+                    .setUserId(userId)
+                    .setOpPackageName(opPackageName)
+                    .setSkipIntro(skipIntro)
+                    .build(type);
+        } else {
+            return new BiometricDialogView.Builder(mContext)
+                    .setCallback(this)
+                    .setBiometricPromptBundle(biometricPromptBundle)
+                    .setRequireConfirmation(requireConfirmation)
+                    .setUserId(userId)
+                    .setOpPackageName(opPackageName)
+                    .setSkipIntro(skipIntro)
+                    .build(type);
+        }
     }
 }

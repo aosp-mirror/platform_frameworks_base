@@ -273,7 +273,6 @@
 
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.Dependency$DependencyCreator</item>
         <item>com.android.systemui.util.NotificationChannels</item>
         <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
@@ -292,7 +291,7 @@
         <item>com.android.systemui.LatencyTester</item>
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
         <item>com.android.systemui.ScreenDecorations</item>
-        <item>com.android.systemui.biometrics.BiometricDialogImpl</item>
+        <item>com.android.systemui.biometrics.AuthController</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
         <item>com.android.systemui.SizeCompatModeActivityController</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
@@ -304,7 +303,6 @@
 
     <!-- SystemUI Services (per user): The classes of the stuff to start for each user. This is a subset of the config_systemUIServiceComponents -->
     <string-array name="config_systemUIServiceComponentsPerUser" translatable="false">
-        <item>com.android.systemui.Dependency$DependencyCreator</item>
         <item>com.android.systemui.util.NotificationChannels</item>
     </string-array>
 

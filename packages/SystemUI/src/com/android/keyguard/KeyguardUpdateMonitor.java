@@ -98,6 +98,7 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
+import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -1386,6 +1387,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
         Trace.endSection();
+    }
+
+
+    /** Provides access to the static instance. */
+    public static KeyguardUpdateMonitor getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new KeyguardUpdateMonitor(context, Looper.getMainLooper());
+        }
+        return sInstance;
     }
 
     protected void handleStartedGoingToSleep(int arg1) {

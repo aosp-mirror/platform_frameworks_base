@@ -41,6 +41,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.util.List;

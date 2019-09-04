@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.biometrics;
@@ -22,7 +22,7 @@ import android.annotation.IntDef;
  * Callback interface for dialog views. These should be implemented by the controller (e.g.
  * FingerprintDialogImpl) and passed into their views (e.g. FingerprintDialogView).
  */
-public interface DialogViewCallback {
+public interface AuthDialogCallback {
 
     int DISMISSED_USER_CANCELED = 1;
     int DISMISSED_BUTTON_NEGATIVE = 2;

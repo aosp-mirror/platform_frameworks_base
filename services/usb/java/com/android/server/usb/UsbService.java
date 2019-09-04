@@ -361,6 +361,40 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void setDevicePersistentPermission(UsbDevice device, int uid, UserHandle user,
+            boolean shouldBeGranted) {
+        device = Preconditions.checkNotNull(device);
+        user = Preconditions.checkNotNull(user);
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mPermissionManager.getPermissionsForUser(user).setDevicePersistentPermission(device,
+                    uid, shouldBeGranted);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void setAccessoryPersistentPermission(UsbAccessory accessory, int uid,
+            UserHandle user, boolean shouldBeGranted) {
+        accessory = Preconditions.checkNotNull(accessory);
+        user = Preconditions.checkNotNull(user);
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mPermissionManager.getPermissionsForUser(user).setAccessoryPersistentPermission(
+                    accessory, uid, shouldBeGranted);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
     public boolean hasDevicePermission(UsbDevice device, String packageName) {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(uid);

@@ -16,9 +16,9 @@
 
 package com.android.systemui;
 
-import android.content.ContentProvider;
-
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+
+import android.content.ContentProvider;
 
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBar;

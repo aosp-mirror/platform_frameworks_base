@@ -100,6 +100,7 @@ import com.android.server.wm.ActivityStack.ActivityState;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.concurrent.TimeUnit;
@@ -112,6 +113,7 @@ import java.util.concurrent.TimeUnit;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityRecordTests extends ActivityTestsBase {
     private ActivityStack mStack;
     private TaskRecord mTask;
@@ -644,7 +646,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // The override configuration should be reset and the activity's process will be killed.
         assertFalse(mActivity.inSizeCompatMode());
         verify(mActivity).restartProcessIfVisible();
-        mService.mH.runWithScissors(() -> { }, TimeUnit.SECONDS.toMillis(3));
+        mLockRule.runWithScissors(mService.mH, () -> { }, TimeUnit.SECONDS.toMillis(3));
         verify(mService.mAmInternal).killProcess(
                 eq(mActivity.app.mName), eq(mActivity.app.mUid), anyString());
     }
@@ -795,6 +797,32 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 mActivity.finishIfPossible("test", false /* oomAdj */));
         assertTrue(mActivity.finishing);
         assertFalse(mActivity.isInStackLocked());
+    }
+
+    /**
+     * Verify that when finishing the top focused activity on top display, the stack order will be
+     * changed by adjusting focus.
+     */
+    @Test
+    public void testFinishActivityIfPossible_adjustStackOrder() {
+        // Prepare the stacks with order (top to bottom): mStack, stack1, stack2.
+        final ActivityStack stack1 = new StackBuilder(mRootActivityContainer).build();
+        mStack.moveToFront("test");
+        // The stack2 is needed here for moving back to simulate the
+        // {@link ActivityDisplay#mPreferredTopFocusableStack} is cleared, so
+        // {@link ActivityDisplay#getFocusedStack} will rely on the order of focusable-and-visible
+        // stacks. Then when mActivity is finishing, its stack will be invisible (no running
+        // activities in the stack) that is the key condition to verify.
+        final ActivityStack stack2 = new StackBuilder(mRootActivityContainer).build();
+        stack2.moveToBack("test", stack2.getChildAt(0));
+
+        assertTrue(mStack.isTopStackOnDisplay());
+
+        mActivity.setState(RESUMED, "test");
+        mActivity.finishIfPossible(0 /* resultCode */, null /* resultData */, "test",
+                false /* oomAdj */, false /* pauseImmediately */);
+
+        assertTrue(stack1.isTopStackOnDisplay());
     }
 
     /**

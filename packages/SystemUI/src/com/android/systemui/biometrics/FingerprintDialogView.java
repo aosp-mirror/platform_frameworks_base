@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui;
+package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.android.systemui.R;
-import com.android.systemui.biometrics.DialogViewCallback;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
@@ -31,9 +30,9 @@ import com.android.systemui.biometrics.DialogViewCallback;
  */
 public class FingerprintDialogView extends BiometricDialogView {
 
-    private static final String TAG = "FingerprintDialogView";
+    private static final String TAG = "BiometricPrompt/FingerprintDialogView";
 
-    protected FingerprintDialogView(Context context, DialogViewCallback callback,
+    protected FingerprintDialogView(Context context, AuthDialogCallback callback,
             Injector injector) {
         super(context, callback, injector);
     }

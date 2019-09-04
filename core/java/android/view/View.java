@@ -14403,12 +14403,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
-
-        // Update the gesture exclusion rects only if they are set
-        final ListenerInfo info = getListenerInfo();
-        if (info != null && info.mSystemGestureExclusionRects != null) {
-            updateSystemGestureExclusionRects();
-        }
+        updateSystemGestureExclusionRects();
     }
 
     /**

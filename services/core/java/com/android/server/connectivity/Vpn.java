@@ -2082,6 +2082,7 @@ public class Vpn {
                     }
                     out.write(0xFF);
                     out.write(0xFF);
+                    out.flush();
 
                     // Wait for End-of-File.
                     InputStream in = mSockets[i].getInputStream();

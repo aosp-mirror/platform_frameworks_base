@@ -8203,10 +8203,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon be
-     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * @deprecated This method is only used by a few internal components and it will soon start
+     * using bug report API (which will be restricted to a few, pre-defined apps).
      * No new code should be calling it.
      */
+    // TODO(b/137825297): Remove deprecated annotation and rephrase comments for all
+    // requestBugreport functions below.
     @Deprecated
     @Override
     public void requestBugReport(int bugreportType) {
@@ -8214,11 +8216,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon be
-     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * @deprecated This method is only used by a few internal components and it will soon start
+     * using bug report API (which will be restricted to a few, pre-defined apps).
      * No new code should be calling it.
      */
     @Deprecated
+    @Override
     public void requestBugReportWithDescription(@Nullable String shareTitle,
             @Nullable String shareDescription, int bugreportType) {
         String type = null;
@@ -8299,8 +8302,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon be
-     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * @deprecated This method is only used by a few internal components and it will soon start
+     * using bug report API (which will be restricted to a few, pre-defined apps).
      * No new code should be calling it.
      */
     @Deprecated
@@ -8311,8 +8314,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon be
-     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * @deprecated This method is only used by a few internal components and it will soon start
+     * using bug report API (which will be restricted to a few, pre-defined apps).
      * No new code should be calling it.
      */
     @Deprecated
@@ -8320,6 +8323,41 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void requestWifiBugReport(String shareTitle, String shareDescription) {
         requestBugReportWithDescription(shareTitle, shareDescription,
                 ActivityManager.BUGREPORT_OPTION_WIFI);
+    }
+
+    /**
+     * Takes an interactive bugreport with a progress notification
+     */
+    @Override
+    public void requestInteractiveBugReport() {
+        requestBugReportWithDescription(null, null, ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
+    }
+
+    /**
+     * Takes an interactive bugreport with a progress notification. Also, shows the given title and
+     * description on the final share notification
+     */
+    @Override
+    public void requestInteractiveBugReportWithDescription(String shareTitle,
+            String shareDescription) {
+        requestBugReportWithDescription(shareTitle, shareDescription,
+                ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
+    }
+
+    /**
+     * Takes a bugreport with minimal user interference
+     */
+    @Override
+    public void requestFullBugReport() {
+        requestBugReportWithDescription(null, null, ActivityManager.BUGREPORT_OPTION_FULL);
+    }
+
+    /**
+     * Takes a bugreport remotely
+     */
+    @Override
+    public void requestRemoteBugReport() {
+        requestBugReportWithDescription(null, null, ActivityManager.BUGREPORT_OPTION_REMOTE);
     }
 
     public void registerProcessObserver(IProcessObserver observer) {

@@ -34,11 +34,12 @@ class RawPrintVisitor : public Visitor {
  public:
   explicit RawPrintVisitor(std::ostream& stream) : stream_(stream), offset_(0) {
   }
-  virtual void visit(const Idmap& idmap);
-  virtual void visit(const IdmapHeader& header);
-  virtual void visit(const IdmapData& data);
-  virtual void visit(const IdmapData::Header& header);
-  virtual void visit(const IdmapData::TypeEntry& type_entry);
+  ~RawPrintVisitor() override = default;
+  void visit(const Idmap& idmap) override;
+  void visit(const IdmapHeader& header) override;
+  void visit(const IdmapData& data) override;
+  void visit(const IdmapData::Header& header) override;
+  void visit(const IdmapData::TypeEntry& type_entry) override;
 
  private:
   void print(uint16_t value, const char* fmt, ...);

@@ -3542,50 +3542,6 @@ class ActivityStack extends ConfigurationContainer {
         return taskTop;
     }
 
-    void adjustFocusedActivityStack(ActivityRecord r, String reason) {
-        if (!mRootActivityContainer.isTopDisplayFocusedStack(this) ||
-                ((mResumedActivity != r) && (mResumedActivity != null))) {
-            return;
-        }
-
-        final ActivityRecord next = topRunningActivityLocked();
-        final String myReason = reason + " adjustFocus";
-
-        if (next == r) {
-            final ActivityRecord top = mRootActivityContainer.topRunningActivity();
-            if (top != null) {
-                top.moveFocusableActivityToTop(myReason);
-            }
-            return;
-        }
-
-        if (next != null && isFocusable()) {
-            // Keep focus in stack if we have a top running activity and are focusable.
-            return;
-        }
-
-        // Task is not guaranteed to be non-null. For example, destroying the
-        // {@link ActivityRecord} will disassociate the task from the activity.
-        final TaskRecord task = r.getTaskRecord();
-
-        if (task == null) {
-            throw new IllegalStateException("activity no longer associated with task:" + r);
-        }
-
-        // Move focus to next focusable stack if possible.
-        final ActivityStack nextFocusableStack = adjustFocusToNextFocusableStack(myReason);
-        if (nextFocusableStack != null) {
-            final ActivityRecord top = nextFocusableStack.topRunningActivityLocked();
-            if (top != null && top == mRootActivityContainer.getTopResumedActivity()) {
-                mService.setResumedActivityUncheckLocked(top, reason);
-            }
-            return;
-        }
-
-        // Whatever...go home.
-        getDisplay().moveHomeActivityToTop(myReason);
-    }
-
     /**
      * Find next proper focusable stack and make it focused.
      * @return The stack that now got the focus, {@code null} if none found.
@@ -3620,6 +3576,10 @@ class ActivityStack extends ConfigurationContainer {
         // Top display focused stack is changed, update top resumed activity if needed.
         if (stack.mResumedActivity != null) {
             mStackSupervisor.updateTopResumedActivityIfNeeded();
+            // Set focused app directly because if the next focused activity is already resumed
+            // (e.g. the next top activity is on a different display), there won't have activity
+            // state change to update it.
+            mService.setResumedActivityUncheckLocked(stack.mResumedActivity, reason);
         }
         return stack;
     }

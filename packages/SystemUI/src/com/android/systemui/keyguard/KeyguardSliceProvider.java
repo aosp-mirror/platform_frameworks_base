@@ -317,7 +317,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public boolean onCreateSliceProvider() {
         if (mContextAvailableCallback != null) {
             mContextAvailableCallback.onContextAvailable(getContext());
-            Dependency.initDependencies(getContext());
         }
         synchronized (KeyguardSliceProvider.sInstanceLock) {
             KeyguardSliceProvider oldInstance = KeyguardSliceProvider.sInstance;

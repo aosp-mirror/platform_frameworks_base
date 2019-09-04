@@ -16,16 +16,18 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.IntDef;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.view.WindowManager;
 
-import com.android.systemui.biometrics.ui.BiometricDialogView;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface for the biometric dialog UI.
  */
-public interface BiometricDialog {
+public interface AuthDialog {
 
     // TODO: Clean up save/restore state
     String[] KEYS_TO_BACKUP = {
@@ -49,12 +51,24 @@ public interface BiometricDialog {
             BiometricDialogView.KEY_ERROR_TEXT_COLOR,
     };
 
+    int SIZE_UNKNOWN = 0;
+    int SIZE_SMALL = 1;
+    int SIZE_MEDIUM = 2;
+    int SIZE_LARGE = 3;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SIZE_UNKNOWN, SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE})
+    @interface DialogSize {}
+
+    /**
+     * Animation duration, e.g. small to medium dialog, icon translation, etc.
+     */
+    int ANIMATE_DURATION_MS = 150;
+
     /**
      * Show the dialog.
      * @param wm
-     * @param skipIntroAnimation
      */
-    void show(WindowManager wm, boolean skipIntroAnimation);
+    void show(WindowManager wm);
 
     /**
      * Dismiss the dialog without sending a callback.

@@ -56,6 +56,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.view.InputChannel;
@@ -253,6 +254,8 @@ public class SystemServicesTestRule implements TestRule {
         mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
         mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
                 mPowerManagerWrapper);
+        // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
+        DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new);
         spyOn(mWmService);

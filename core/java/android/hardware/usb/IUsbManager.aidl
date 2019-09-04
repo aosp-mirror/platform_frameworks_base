@@ -24,6 +24,7 @@ import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 
 /** @hide */
 interface IUsbManager
@@ -53,6 +54,14 @@ interface IUsbManager
      * (or clears it if the package name is null)
      */
     void setAccessoryPackage(in UsbAccessory accessory, String packageName, int userId);
+
+    /* Sets the persistent permission granted state for USB device
+     */
+    void setDevicePersistentPermission(in UsbDevice device, int uid, in UserHandle user, boolean shouldBeGranted);
+
+    /* Sets the persistent permission granted state for USB accessory
+     */
+    void setAccessoryPersistentPermission(in UsbAccessory accessory, int uid, in UserHandle user, boolean shouldBeGranted);
 
     /* Returns true if the caller has permission to access the device. */
     boolean hasDevicePermission(in UsbDevice device, String packageName);
