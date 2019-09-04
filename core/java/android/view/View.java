@@ -14324,6 +14324,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @return true if this view and all ancestors are visible as of the last
+     * {@link #onVisibilityAggregated(boolean)} call.
+     */
+    boolean isAggregatedVisible() {
+        return (mPrivateFlags3 & PFLAG3_AGGREGATED_VISIBLE) != 0;
+    }
+
+    /**
      * Internal dispatching method for {@link #onVisibilityAggregated}. Overridden by
      * ViewGroup. Intended to only be called when {@link #isAttachedToWindow()},
      * {@link #getWindowVisibility()} is {@link #VISIBLE} and this view's parent {@link #isShown()}.
@@ -14351,7 +14359,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     public void onVisibilityAggregated(boolean isVisible) {
         // Update our internal visibility tracking so we can detect changes
-        boolean oldVisible = (mPrivateFlags3 & PFLAG3_AGGREGATED_VISIBLE) != 0;
+        boolean oldVisible = isAggregatedVisible();
         mPrivateFlags3 = isVisible ? (mPrivateFlags3 | PFLAG3_AGGREGATED_VISIBLE)
                 : (mPrivateFlags3 & ~PFLAG3_AGGREGATED_VISIBLE);
         if (isVisible && mAttachInfo != null) {
@@ -14403,7 +14411,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
-        updateSystemGestureExclusionRects();
+        if (isVisible != oldVisible) {
+            updateSystemGestureExclusionRects();
+        }
     }
 
     /**
