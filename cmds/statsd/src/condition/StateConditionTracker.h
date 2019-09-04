@@ -25,14 +25,14 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StateTracker : public virtual ConditionTracker {
+class StateConditionTracker : public virtual ConditionTracker {
 public:
-    StateTracker(const ConfigKey& key, const int64_t& id, const int index,
+    StateConditionTracker(const ConfigKey& key, const int64_t& id, const int index,
                  const SimplePredicate& simplePredicate,
                  const std::unordered_map<int64_t, int>& trackerNameIndexMap,
                  const vector<Matcher> primaryKeys);
 
-    ~StateTracker();
+    ~StateConditionTracker();
 
     bool init(const std::vector<Predicate>& allConditionConfig,
               const std::vector<sp<ConditionTracker>>& allConditionTrackers,
@@ -46,8 +46,8 @@ public:
                            std::vector<bool>& changedCache) override;
 
     /**
-     * Note: dimensionFields will be ignored in StateTracker, because we demand metrics
-     * must take the entire dimension fields from StateTracker. This is to make implementation
+     * Note: dimensionFields will be ignored in StateConditionTracker, because we demand metrics
+     * must take the entire dimension fields from StateConditionTracker. This is to make implementation
      * simple and efficient.
      *
      * For example: wakelock duration by uid process states:
@@ -109,7 +109,7 @@ private:
     // maps from [primary_key] to [primary_key, exclusive_state].
     std::unordered_map<HashableDimensionKey, HashableDimensionKey> mSlicedState;
 
-    FRIEND_TEST(StateTrackerTest, TestStateChange);
+    FRIEND_TEST(StateConditionTrackerTest, TestStateChange);
 };
 
 }  // namespace statsd

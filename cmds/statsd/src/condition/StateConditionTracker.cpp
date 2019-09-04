@@ -16,7 +16,7 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include "StateTracker.h"
+#include "StateConditionTracker.h"
 #include "guardrail/StatsdStats.h"
 
 namespace android {
@@ -27,7 +27,7 @@ using std::string;
 using std::unordered_set;
 using std::vector;
 
-StateTracker::StateTracker(const ConfigKey& key, const int64_t& id, const int index,
+StateConditionTracker::StateConditionTracker(const ConfigKey& key, const int64_t& id, const int index,
                            const SimplePredicate& simplePredicate,
                            const unordered_map<int64_t, int>& trackerNameIndexMap,
                            const vector<Matcher> primaryKeys)
@@ -69,19 +69,19 @@ StateTracker::StateTracker(const ConfigKey& key, const int64_t& id, const int in
     mInitialized = true;
 }
 
-StateTracker::~StateTracker() {
-    VLOG("~StateTracker()");
+StateConditionTracker::~StateConditionTracker() {
+    VLOG("~StateConditionTracker()");
 }
 
-bool StateTracker::init(const vector<Predicate>& allConditionConfig,
+bool StateConditionTracker::init(const vector<Predicate>& allConditionConfig,
                         const vector<sp<ConditionTracker>>& allConditionTrackers,
                         const unordered_map<int64_t, int>& conditionIdIndexMap,
                         vector<bool>& stack) {
     return mInitialized;
 }
 
-void StateTracker::dumpState() {
-    VLOG("StateTracker %lld DUMP:", (long long)mConditionId);
+void StateConditionTracker::dumpState() {
+    VLOG("StateConditionTracker %lld DUMP:", (long long)mConditionId);
     for (const auto& value : mSlicedState) {
         VLOG("\t%s -> %s", value.first.toString().c_str(), value.second.toString().c_str());
     }
@@ -95,7 +95,7 @@ void StateTracker::dumpState() {
     }
 }
 
-bool StateTracker::hitGuardRail(const HashableDimensionKey& newKey) {
+bool StateConditionTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     if (mSlicedState.find(newKey) != mSlicedState.end()) {
         // if the condition is not sliced or the key is not new, we are good!
         return false;
@@ -114,7 +114,7 @@ bool StateTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     return false;
 }
 
-void StateTracker::evaluateCondition(const LogEvent& event,
+void StateConditionTracker::evaluateCondition(const LogEvent& event,
                                      const vector<MatchingState>& eventMatcherValues,
                                      const vector<sp<ConditionTracker>>& mAllConditions,
                                      vector<ConditionState>& conditionCache,
@@ -135,7 +135,7 @@ void StateTracker::evaluateCondition(const LogEvent& event,
         return;
     }
 
-    VLOG("StateTracker evaluate event %s", event.ToString().c_str());
+    VLOG("StateConditionTracker evaluate event %s", event.ToString().c_str());
 
     // Primary key can exclusive fields must be simple fields. so there won't be more than
     // one keys matched.
@@ -151,7 +151,7 @@ void StateTracker::evaluateCondition(const LogEvent& event,
     }
     hitGuardRail(primaryKey);
 
-    VLOG("StateTracker: key %s state %s", primaryKey.toString().c_str(), state.toString().c_str());
+    VLOG("StateConditionTracker: key %s state %s", primaryKey.toString().c_str(), state.toString().c_str());
 
     auto it = mSlicedState.find(primaryKey);
     if (it == mSlicedState.end()) {
@@ -176,7 +176,7 @@ void StateTracker::evaluateCondition(const LogEvent& event,
     return;
 }
 
-void StateTracker::isConditionMet(
+void StateConditionTracker::isConditionMet(
         const ConditionKey& conditionParameters, const vector<sp<ConditionTracker>>& allConditions,
         const bool isPartialLink,
         vector<ConditionState>& conditionCache) const {
