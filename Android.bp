@@ -200,30 +200,6 @@ filegroup {
 }
 
 filegroup {
-    name: "framework-wifi-sources",
-    srcs: [
-        "wifi/java/**/*.java",
-        "wifi/java/**/*.aidl",
-    ],
-    exclude_srcs: [
-        ":framework-wifi-non-updatable-sources"
-    ],
-    path: "wifi/java",
-}
-
-filegroup {
-    name: "framework-wifi-non-updatable-sources",
-    srcs: [
-        // TODO(b/146011398) package android.net.wifi is now split amongst 2 jars: framework.jar and
-        // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
-        // to a separate package.
-        "wifi/java/android/net/wifi/WifiNetworkScoreCache.java",
-        "wifi/java/android/net/wifi/WifiCondManager.java",
-        "wifi/java/android/net/wifi/wificond/*.java",
-    ],
-}
-
-filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
@@ -247,9 +223,7 @@ filegroup {
         ":framework-telecomm-sources",
         ":framework-telephony-common-sources",
         ":framework-telephony-sources",
-        ":framework-wifi-sources",
         ":framework-wifi-non-updatable-sources",
-	":libwificond_ipc_aidl",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
 
@@ -290,6 +264,7 @@ filegroup {
         ":framework-sdkext-sources",
         ":framework-statsd-sources",
         ":updatable-media-srcs",
+        ":framework-wifi-updatable-sources",
     ]
 }
 
@@ -453,6 +428,7 @@ java_library {
     libs: [
         // TODO(b/146167933): Use framework-statsd-stubs
         "framework-statsd",
+        "framework-wifi-stubs",
     ],
     installable: true,
     javac_shard_size: 150,
@@ -492,6 +468,8 @@ java_library {
         "framework-sdkext-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
+        // TODO(b/140299412): should be framework-wifi-stubs
+        "framework-wifi",
         // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",
