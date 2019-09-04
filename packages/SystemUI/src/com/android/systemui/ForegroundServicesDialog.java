@@ -44,6 +44,8 @@ import com.android.internal.logging.nano.MetricsProto;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 /**
  * Show a list of currently running foreground services (supplied by the caller)
  * that the user can tap through to their application details.
@@ -72,10 +74,14 @@ public final class ForegroundServicesDialog extends AlertActivity implements
                 }
             };
 
+    @Inject
+    ForegroundServicesDialog() {
+        super();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Dependency.initDependencies(SystemUIFactory.getInstance().getRootComponent());
 
         mMetricsLogger = Dependency.get(MetricsLogger.class);
 

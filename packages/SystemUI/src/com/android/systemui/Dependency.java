@@ -319,19 +319,9 @@ public class Dependency {
     public Dependency() {
     }
 
-
     /**
      * Initialize Depenency.
      */
-    public static void initDependencies(SystemUIRootComponent rootComponent) {
-        if (sDependency != null) {
-            return;
-        }
-        sDependency = new Dependency();
-        rootComponent.createDependency().createSystemUI(sDependency);
-        sDependency.start();
-    }
-
     protected void start() {
         // TODO: Think about ways to push these creation rules out of Dependency to cut down
         // on imports.

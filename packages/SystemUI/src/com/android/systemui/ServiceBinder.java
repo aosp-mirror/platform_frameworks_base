@@ -26,15 +26,10 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /**
- * Services and Activities that are injectable should go here.
+ * Services that are injectable should go here.
  */
 @Module
 public abstract class ServiceBinder {
-
-    @Binds
-    public abstract ContextComponentHelper bindComponentHelper(
-            ContextComponentResolver componentHelper);
-
     @Binds
     @IntoMap
     @ClassKey(DozeService.class)

@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
 import android.content.ContentProvider;
@@ -23,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.AppComponentFactory;
 
 import javax.inject.Inject;
@@ -83,6 +85,18 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
         }
 
         return contentProvider;
+    }
+
+    @NonNull
+    @Override
+    public Activity instantiateActivityCompat(@NonNull ClassLoader cl, @NonNull String className,
+            @Nullable Intent intent)
+            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        Activity activity = mComponentHelper.resolveActivity(className);
+        if (activity != null) {
+            return activity;
+        }
+        return super.instantiateActivityCompat(cl, className, intent);
     }
 
     @NonNull

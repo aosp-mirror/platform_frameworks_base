@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.app.Activity;
 import android.app.Service;
 
 import java.util.Map;
@@ -29,15 +30,26 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ContextComponentResolver implements ContextComponentHelper {
+    private final Map<Class<?>, Provider<Activity>> mActivityCreators;
     private final Map<Class<?>, Provider<Service>> mServiceCreators;
     private final Map<Class<?>, Provider<SystemUI>> mSystemUICreators;
 
     @Inject
     ContextComponentResolver(
+            Map<Class<?>, Provider<Activity>> activityCreators,
             Map<Class<?>, Provider<Service>> serviceCreators,
             Map<Class<?>, Provider<SystemUI>> systemUICreators) {
+        mActivityCreators = activityCreators;
         mServiceCreators = serviceCreators;
         mSystemUICreators = systemUICreators;
+    }
+
+    /**
+     * Looks up the Activity class name to see if Dagger has an instance of it.
+     */
+    @Override
+    public Activity resolveActivity(String className) {
+        return resolve(className, mActivityCreators);
     }
 
     /**
@@ -57,12 +69,12 @@ public class ContextComponentResolver implements ContextComponentHelper {
     }
 
     private <T> T resolve(String className, Map<Class<?>, Provider<T>> creators) {
-        for (Map.Entry<Class<?>, Provider<T>> p : creators.entrySet()) {
-            if (p.getKey().getName().equals(className)) {
-                return p.getValue().get();
-            }
+        try {
+            Class<?> clazz = Class.forName(className);
+            Provider<T> provider = creators.get(clazz);
+            return provider == null ? null : provider.get();
+        } catch (ClassNotFoundException e) {
+            return null;
         }
-
-        return null;
     }
 }

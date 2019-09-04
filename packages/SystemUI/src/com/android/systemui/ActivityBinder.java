@@ -17,18 +17,28 @@
 package com.android.systemui;
 
 import android.app.Activity;
-import android.app.Service;
+
+import com.android.systemui.tuner.TunerActivity;
+
+import dagger.Binds;
+import dagger.Module;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /**
- * Interface necessary to make Dagger happy. See {@link ContextComponentResolver}.
+ * Services and Activities that are injectable should go here.
  */
-public interface ContextComponentHelper {
-    /** Turns a classname into an instance of the class or returns null. */
-    Activity resolveActivity(String className);
+@Module
+public abstract class ActivityBinder {
+    /** Inject into TunerActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(TunerActivity.class)
+    public abstract Activity bindTunerActivity(TunerActivity activity);
 
-    /** Turns a classname into an instance of the class or returns null. */
-    Service resolveService(String className);
-
-    /** Turns a classname into an instance of the class or returns null. */
-    SystemUI resolveSystemUI(String className);
+    /** Inject into ForegroundServicesDialog. */
+    @Binds
+    @IntoMap
+    @ClassKey(ForegroundServicesDialog.class)
+    public abstract Activity bindForegroundServicesDialog(ForegroundServicesDialog activity);
 }

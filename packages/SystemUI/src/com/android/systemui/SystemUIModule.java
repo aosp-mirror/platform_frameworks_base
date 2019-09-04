@@ -35,7 +35,7 @@ import dagger.Provides;
  * A dagger module for injecting components of System UI that are not overridden by the System UI
  * implementation.
  */
-@Module(includes = {AssistModule.class})
+@Module(includes = {AssistModule.class, ComponentBinder.class})
 public abstract class SystemUIModule {
 
     @Singleton
