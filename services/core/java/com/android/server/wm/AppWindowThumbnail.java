@@ -41,6 +41,8 @@ import android.view.animation.Animation;
 
 import com.android.server.wm.SurfaceAnimator.Animatable;
 
+import java.util.function.Supplier;
+
 /**
  * Represents a surface that is displayed over an {@link AppWindowToken}
  */
@@ -55,8 +57,9 @@ class AppWindowThumbnail implements Animatable {
     private final int mHeight;
     private final boolean mRelative;
 
-    AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader) {
-        this(t, appToken, thumbnailHeader, false /* relative */);
+    AppWindowThumbnail(Supplier<Surface> surfaceFactory, Transaction t, AppWindowToken appToken,
+            GraphicBuffer thumbnailHeader) {
+        this(surfaceFactory, t, appToken, thumbnailHeader, false /* relative */);
     }
 
     /**
@@ -66,9 +69,9 @@ class AppWindowThumbnail implements Animatable {
      * @param relative Whether this thumbnail will be a child of appToken (and thus positioned
      *                 relative to it) or not.
      */
-    AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader,
-            boolean relative) {
-        this(t, appToken, thumbnailHeader, relative, new Surface(), null);
+    AppWindowThumbnail(Supplier<Surface> surfaceFactory, Transaction t, AppWindowToken appToken,
+            GraphicBuffer thumbnailHeader, boolean relative) {
+        this(t, appToken, thumbnailHeader, relative, surfaceFactory.get(), null);
     }
 
     AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader,

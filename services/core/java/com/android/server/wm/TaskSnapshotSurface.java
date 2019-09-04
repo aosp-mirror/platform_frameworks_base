@@ -237,7 +237,7 @@ class TaskSnapshotSurface implements StartingSurface {
             int sysUiVis, int windowFlags, int windowPrivateFlags, Rect taskBounds,
             int currentOrientation) {
         mService = service;
-        mSurface = new Surface();
+        mSurface = service.mSurfaceFactory.get();
         mHandler = new Handler(mService.mH.getLooper());
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = window;
@@ -325,13 +325,13 @@ class TaskSnapshotSurface implements StartingSurface {
                 - ((float) mFrame.width() / mFrame.height())) > 0.01f;
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.
-        mChildSurfaceControl = new SurfaceControl.Builder(session)
+        mChildSurfaceControl = mService.mSurfaceControlFactory.apply(session)
                 .setName(mTitle + " - task-snapshot-surface")
                 .setBufferSize(buffer.getWidth(), buffer.getHeight())
                 .setFormat(buffer.getFormat())
                 .setParent(mSurfaceControl)
                 .build();
-        Surface surface = new Surface();
+        Surface surface = mService.mSurfaceFactory.get();
         surface.copyFrom(mChildSurfaceControl);
 
         final Rect frame;

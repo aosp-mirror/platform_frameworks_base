@@ -34,6 +34,8 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
+import java.util.function.Supplier;
+
 class CircularDisplayMask {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "CircularDisplayMask" : TAG_WM;
 
@@ -43,7 +45,7 @@ class CircularDisplayMask {
     private Point mScreenSize;
 
     private final SurfaceControl mSurfaceControl;
-    private final Surface mSurface = new Surface();
+    private final Surface mSurface;
     private int mLastDW;
     private int mLastDH;
     private boolean mDrawNeeded;
@@ -53,10 +55,10 @@ class CircularDisplayMask {
     private boolean mDimensionsUnequal = false;
     private int mMaskThickness;
 
-    public CircularDisplayMask(DisplayContent dc, int zOrder,
+    CircularDisplayMask(Supplier<Surface> surfaceFactory, DisplayContent dc, int zOrder,
             int screenOffset, int maskThickness) {
         final Display display = dc.getDisplay();
-
+        mSurface = surfaceFactory.get();
         mScreenSize = new Point();
         display.getSize(mScreenSize);
         if (mScreenSize.x != mScreenSize.y + screenOffset) {

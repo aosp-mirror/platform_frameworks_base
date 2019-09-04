@@ -1793,8 +1793,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     mWmService.mTaskSnapshotController.createTaskSnapshot(
                             task, 1 /* scaleFraction */);
             if (snapshot != null) {
-                mThumbnail = new AppWindowThumbnail(t, this, snapshot.getGraphicBuffer(),
-                        true /* relative */);
+                mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory, t, this,
+                        snapshot.getGraphicBuffer(), true /* relative */);
             }
         }
     }
@@ -2033,7 +2033,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final boolean needsLetterbox = surfaceReady && w.isLetterboxedAppWindow() && fillsParent();
         if (needsLetterbox) {
             if (mLetterbox == null) {
-                mLetterbox = new Letterbox(() -> makeChildSurface(null));
+                mLetterbox = new Letterbox(() -> makeChildSurface(null),
+                        mWmService.mTransactionFactory);
                 mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
@@ -2981,7 +2982,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return;
         }
         clearThumbnail();
-        mThumbnail = new AppWindowThumbnail(getPendingTransaction(), this, thumbnailHeader);
+        mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory, getPendingTransaction(),
+                this, thumbnailHeader);
         mThumbnail.startAnimation(getPendingTransaction(), loadThumbnailAnimation(thumbnailHeader));
     }
 
@@ -3009,7 +3011,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (thumbnail == null) {
             return;
         }
-        mThumbnail = new AppWindowThumbnail(getPendingTransaction(), this, thumbnail);
+        mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory,
+                getPendingTransaction(), this, thumbnail);
         final Animation animation =
                 getDisplayContent().mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(
                         win.getFrameLw());

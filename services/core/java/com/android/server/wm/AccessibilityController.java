@@ -814,7 +814,7 @@ final class AccessibilityController {
                 private final Paint mPaint = new Paint();
 
                 private final SurfaceControl mSurfaceControl;
-                private final Surface mSurface = new Surface();
+                private final Surface mSurface = mService.mSurfaceFactory.get();
 
                 private final AnimationController mAnimationController;
 
@@ -967,7 +967,7 @@ final class AccessibilityController {
                 }
 
                 public void releaseSurface() {
-                    mService.mTransactionFactory.make().remove(mSurfaceControl).apply();
+                    mService.mTransactionFactory.get().remove(mSurfaceControl).apply();
                     mSurface.release();
                 }
 

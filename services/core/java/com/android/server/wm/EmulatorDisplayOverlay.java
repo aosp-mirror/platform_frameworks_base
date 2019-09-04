@@ -32,6 +32,8 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
+import java.util.function.Supplier;
+
 class EmulatorDisplayOverlay {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "EmulatorDisplayOverlay" : TAG_WM;
 
@@ -39,7 +41,7 @@ class EmulatorDisplayOverlay {
     private Point mScreenSize;
 
     private final SurfaceControl mSurfaceControl;
-    private final Surface mSurface = new Surface();
+    private final Surface mSurface;
     private int mLastDW;
     private int mLastDH;
     private boolean mDrawNeeded;
@@ -47,8 +49,9 @@ class EmulatorDisplayOverlay {
     private int mRotation;
     private boolean mVisible;
 
-    public EmulatorDisplayOverlay(Context context, DisplayContent dc,
+    EmulatorDisplayOverlay(Supplier<Surface> surfaceFactory, Context context, DisplayContent dc,
             int zOrder) {
+        mSurface = surfaceFactory.get();
         final Display display = dc.getDisplay();
         mScreenSize = new Point();
         display.getSize(mScreenSize);
