@@ -782,7 +782,7 @@ public class PackageWatchdogTest {
         Handler handler = new Handler(mTestLooper.getLooper());
         PackageWatchdog watchdog =
                 new PackageWatchdog(mSpyContext, policyFile, handler, handler, controller,
-                        mConnectivityModuleConnector);
+                        mConnectivityModuleConnector, android.os.SystemClock::uptimeMillis);
         // Verify controller is not automatically started
         assertFalse(controller.mIsEnabled);
         if (withPackagesReady) {

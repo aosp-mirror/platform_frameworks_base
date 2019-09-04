@@ -29,7 +29,6 @@ import android.net.ConnectivityModuleConnector;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -135,6 +134,14 @@ public class PackageWatchdog {
     private final Runnable mSyncStateWithScheduledReason = this::syncStateWithScheduledReason;
     private final Runnable mSaveToFile = this::saveToFile;
 
+    @FunctionalInterface
+    @VisibleForTesting
+    interface SystemClock {
+        long uptimeMillis();
+    }
+
+    private final SystemClock mSystemClock;
+
     private PackageWatchdog(Context context) {
         // Needs to be constructed inline
         this(context, new AtomicFile(
@@ -142,7 +149,8 @@ public class PackageWatchdog {
                                 "package-watchdog.xml")),
                 new Handler(Looper.myLooper()), BackgroundThread.getHandler(),
                 new ExplicitHealthCheckController(context),
-                ConnectivityModuleConnector.getInstance());
+                ConnectivityModuleConnector.getInstance(),
+                android.os.SystemClock::uptimeMillis);
     }
 
     /**
@@ -151,13 +159,14 @@ public class PackageWatchdog {
     @VisibleForTesting
     PackageWatchdog(Context context, AtomicFile policyFile, Handler shortTaskHandler,
             Handler longTaskHandler, ExplicitHealthCheckController controller,
-            ConnectivityModuleConnector connectivityModuleConnector) {
+            ConnectivityModuleConnector connectivityModuleConnector, SystemClock clock) {
         mContext = context;
         mPolicyFile = policyFile;
         mShortTaskHandler = shortTaskHandler;
         mLongTaskHandler = longTaskHandler;
         mHealthCheckController = controller;
         mConnectivityModuleConnector = connectivityModuleConnector;
+        mSystemClock = clock;
         loadFromFile();
     }
 
@@ -579,7 +588,7 @@ public class PackageWatchdog {
             mUptimeAtLastStateSync = 0;
         } else {
             Slog.i(TAG, "Scheduling next state sync in " + durationMs + "ms");
-            mUptimeAtLastStateSync = SystemClock.uptimeMillis();
+            mUptimeAtLastStateSync = mSystemClock.uptimeMillis();
             mShortTaskHandler.postDelayed(mSyncStateWithScheduledReason, durationMs);
         }
     }
@@ -612,7 +621,7 @@ public class PackageWatchdog {
     @GuardedBy("mLock")
     private void pruneObserversLocked() {
         long elapsedMs = mUptimeAtLastStateSync == 0
-                ? 0 : SystemClock.uptimeMillis() - mUptimeAtLastStateSync;
+                ? 0 : mSystemClock.uptimeMillis() - mUptimeAtLastStateSync;
         if (elapsedMs <= 0) {
             Slog.i(TAG, "Not pruning observers, elapsed time: " + elapsedMs + "ms");
             return;
@@ -1036,7 +1045,7 @@ public class PackageWatchdog {
          */
         @GuardedBy("mLock")
         public boolean onFailureLocked() {
-            final long now = SystemClock.uptimeMillis();
+            final long now = mSystemClock.uptimeMillis();
             final long duration = now - mUptimeStartMs;
             if (duration > mTriggerFailureDurationMs) {
                 // TODO(b/120598832): Reseting to 1 is not correct
