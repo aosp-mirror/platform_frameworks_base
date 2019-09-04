@@ -118,6 +118,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @GuardedBy("mLock")
     private final List<Rollback> mRollbacks;
 
+    // Apk sessions from a staged session with no matching rollback.
+    @GuardedBy("mLock")
+    private final IntArray mOrphanedApkSessionIds = new IntArray();
+
     private final RollbackStore mRollbackStore;
 
     private final Context mContext;
@@ -655,6 +659,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 // hasn't actually been updated.
                 onPackageReplaced(apexPackageName);
             }
+
+            synchronized (mLock) {
+                mOrphanedApkSessionIds.clear();
+            }
+
             mPackageHealthObserver.onBootCompletedAsync();
         });
     }
@@ -862,6 +871,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     // need to create a new rollback for this session.
                     return true;
                 }
+            }
+        }
+
+        // Check to see if this is the apk session for a staged session for which rollback was
+        // cancelled.
+        synchronized (mLock) {
+            if (mOrphanedApkSessionIds.indexOf(parentSession.getSessionId()) != -1) {
+                Slog.w(TAG, "Not enabling rollback for apk as no matching staged session "
+                        + "rollback exists");
+                return false;
             }
         }
 
@@ -1121,6 +1140,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         rollback = candidate;
                         break;
                     }
+                }
+                if (rollback == null) {
+                    // Did not find rollback matching originalSessionId.
+                    Slog.e(TAG, "notifyStagedApkSession did not find rollback for session "
+                            + originalSessionId
+                            + ". Adding orphaned apk session " + apkSessionId);
+                    mOrphanedApkSessionIds.add(apkSessionId);
                 }
             }
 
