@@ -292,9 +292,7 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer1, Arrays.asList(APP_B), SHORT_DURATION);
 
         // Then fail APP_C (not observed) above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -326,10 +324,8 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A (different version) above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(
-                            new VersionedPackage(APP_A, differentVersionCode)));
-        }
+        raiseFatalFailure(watchdog,
+                Arrays.asList(new VersionedPackage(APP_A, differentVersionCode)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -365,12 +361,10 @@ public class PackageWatchdogTest {
                 SHORT_DURATION);
 
         // Then fail all apps above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
-                    new VersionedPackage(APP_B, VERSION_CODE),
-                    new VersionedPackage(APP_C, VERSION_CODE),
-                    new VersionedPackage(APP_D, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
+                new VersionedPackage(APP_B, VERSION_CODE),
+                new VersionedPackage(APP_C, VERSION_CODE),
+                new VersionedPackage(APP_D, VERSION_CODE)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -418,9 +412,7 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observerSecond, Arrays.asList(APP_A), LONG_DURATION);
 
         // Then fail APP_A above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
@@ -435,9 +427,7 @@ public class PackageWatchdogTest {
         observerSecond.mFailedPackages.clear();
 
         // Then fail APP_A again above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
@@ -452,9 +442,7 @@ public class PackageWatchdogTest {
         observerSecond.mFailedPackages.clear();
 
         // Then fail APP_A again above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
@@ -469,9 +457,7 @@ public class PackageWatchdogTest {
         observerSecond.mFailedPackages.clear();
 
         // Then fail APP_A again above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
@@ -496,9 +482,7 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -768,6 +752,13 @@ public class PackageWatchdogTest {
         mTestClock.moveTimeForward(milliSeconds);
         mTestLooper.moveTimeForward(milliSeconds);
         mTestLooper.dispatchAll();
+    }
+
+    /** Trigger package failures above the threshold. */
+    private void raiseFatalFailure(PackageWatchdog watchdog, List<VersionedPackage> packages) {
+        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
+            watchdog.onPackageFailure(packages);
+        }
     }
 
     private PackageWatchdog createWatchdog() {
