@@ -59,6 +59,16 @@
     <dimen name="car_keyline_1">24dp</dimen>
     <dimen name="car_keyline_2">96dp</dimen>
     <dimen name="car_keyline_3">128dp</dimen>
+    <dimen name="privacy_chip_icon_height">36dp</dimen>
+    <dimen name="privacy_chip_icon_padding_left">0dp</dimen>
+    <dimen name="privacy_chip_icon_padding_right">0dp</dimen>
+    <dimen name="privacy_chip_icon_padding_top">0dp</dimen>
+    <dimen name="privacy_chip_icon_padding_bottom">0dp</dimen>
+
+    <dimen name="privacy_chip_text_padding_left">0dp</dimen>
+    <dimen name="privacy_chip_text_padding_right">0dp</dimen>
+    <dimen name="privacy_chip_text_padding_top">0dp</dimen>
+    <dimen name="privacy_chip_text_padding_bottom">0dp</dimen>
 
     <dimen name="privacy_chip_icon_max_height">100dp</dimen>
 
@@ -76,6 +86,16 @@
     <dimen name="ongoing_appops_chip_bg_padding">4dp</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
     <dimen name="ongoing_appops_chip_bg_corner_radius">12dp</dimen>
+    <!-- Start padding for the app icon displayed in the dialog -->
+    <dimen name="privacy_dialog_app_icon_padding_start">40dp</dimen>
+    <!-- End padding for the app opps icon displayed in the dialog -->
+    <dimen name="privacy_dialog_app_ops_icon_padding_end">40dp</dimen>
+    <!-- Top padding for the list of application displayed in the dialog -->
+    <dimen name="privacy_dialog_app_list_padding_top">20dp</dimen>
+    <!-- Top padding for the dialog container-->
+    <dimen name="privacy_dialog_container_padding_top">10dp</dimen>
+    <!-- Top padding for the dialog title-->
+    <dimen name="privacy_dialog_title_padding_start">10dp</dimen>
 
     <!-- Car volume dimens. -->
     <dimen name="car_volume_item_icon_size">@dimen/car_primary_icon_size</dimen>
