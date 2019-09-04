@@ -24,4 +24,7 @@ import android.app.Service;
 public interface ContextComponentHelper {
     /** Turns a classname into an instance of the class or returns null. */
     Service resolveService(String className);
+
+    /** Turns a classname into an instance of the class or returns null. */
+    SystemUI resolveSystemUI(String className);
 }

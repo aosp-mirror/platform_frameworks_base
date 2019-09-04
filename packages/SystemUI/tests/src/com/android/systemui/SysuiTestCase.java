@@ -29,6 +29,7 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.Assert;
@@ -78,6 +79,7 @@ public abstract class SysuiTestCase {
         // A lot of tests get the FalsingManager, often via several layers of indirection.
         // None of them actually need it.
         mDependency.injectTestDependency(FalsingManager.class, new FalsingManagerFake());
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
     }
 
     @After

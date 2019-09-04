@@ -38,10 +38,18 @@ import dagger.Component;
         DependencyProvider.class,
         DependencyBinder.class,
         ServiceBinder.class,
+        SystemUIBinder.class,
         SystemUIFactory.ContextHolder.class,
         SystemUIModule.class,
         SystemUIDefaultModule.class})
 public interface SystemUIRootComponent {
+
+    /**
+     * Creates a GarbageMonitor.
+     */
+    @Singleton
+    ContextComponentHelper getContextComponentHelper();
+
     /**
      * Main dependency providing module.
      */
@@ -66,7 +74,7 @@ public interface SystemUIRootComponent {
     InjectionInflationController.ViewCreator createViewCreator();
 
     /**
-     * Creatse a GarbageMonitor.
+     * Creates a GarbageMonitor.
      */
     @Singleton
     GarbageMonitor createGarbageMonitor();

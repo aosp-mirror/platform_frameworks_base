@@ -54,6 +54,8 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
 
+    private ContextComponentHelper mComponentHelper;
+
     /**
      * Hold a reference on the stuff we start.
      */
@@ -78,6 +80,8 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 Trace.TRACE_TAG_APP);
         log.traceBegin("DependencyInjection");
         mContextAvailableCallback.onContextAvailable(this);
+        mComponentHelper = SystemUIFactory
+                .getInstance().getRootComponent().getContextComponentHelper();
         log.traceEnd();
 
         // Set the application theme that is inherited by all services. Note that setting the
@@ -186,14 +190,12 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             if (DEBUG) Log.d(TAG, "loading: " + clsName);
             log.traceBegin("StartServices" + clsName);
             long ti = System.currentTimeMillis();
-            Class cls;
             try {
-                cls = Class.forName(clsName);
-                Object o = cls.newInstance();
-                if (o instanceof SystemUI.Injector) {
-                    o = ((SystemUI.Injector) o).apply(this);
+                SystemUI obj = mComponentHelper.resolveSystemUI(clsName);
+                if (obj == null) {
+                    obj = (SystemUI) Class.forName(clsName).newInstance();
                 }
-                mServices[i] = (SystemUI) o;
+                mServices[i] = obj;
             } catch (ClassNotFoundException ex) {
                 throw new RuntimeException(ex);
             } catch (IllegalAccessException ex) {
@@ -211,7 +213,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             // Warn if initialization of component takes too long
             ti = System.currentTimeMillis() - ti;
             if (ti > 1000) {
-                Log.w(TAG, "Initialization of " + cls.getName() + " took " + ti + " ms");
+                Log.w(TAG, "Initialization of " + clsName + " took " + ti + " ms");
             }
             if (mBootCompleted) {
                 mServices[i].onBootCompleted();
