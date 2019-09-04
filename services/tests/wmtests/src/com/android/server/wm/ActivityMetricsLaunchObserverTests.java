@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link ActivityMetricsLaunchObserver} class.
@@ -118,7 +119,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
     static <T> T verifyAsync(T mock) {
         // AMLO callbacks happen on a separate thread than AML calls, so we need to use a timeout.
-        return verify(mock, timeout(100));
+        return verify(mock, timeout(TimeUnit.SECONDS.toMillis(5)));
     }
 
     @Test
