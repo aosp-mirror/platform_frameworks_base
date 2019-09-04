@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <vector>
 #include <cmath>
@@ -892,6 +893,13 @@ static status_t convertCFA(uint8_t cfaEnum, /*out*/uint8_t* cfaOut) {
             cfaOut[3] = 0;
             break;
         }
+        // MONO and NIR are degenerate case of RGGB pattern: only Red channel
+        // will be used.
+        case ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO:
+        case ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR: {
+            cfaOut[0] = 0;
+            break;
+        }
         default: {
             return BAD_VALUE;
         }
@@ -967,6 +975,167 @@ static status_t generateNoiseProfile(const double* perChannelNoiseProfile, uint8
         }
     }
     return OK;
+}
+
+static void undistort(/*inout*/double& x, /*inout*/double& y,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f) {
+    double xp = (x - cx) / f;
+    double yp = (y - cy) / f;
+
+    double x2 = xp * xp;
+    double y2 = yp * yp;
+    double r2 = x2 + y2;
+    double xy2 = 2.0 * xp * yp;
+
+    const float k0 = distortion[0];
+    const float k1 = distortion[1];
+    const float k2 = distortion[2];
+    const float k3 = distortion[3];
+    const float p1 = distortion[4];
+    const float p2 = distortion[5];
+
+    double kr = k0 + ((k3 * r2 + k2) * r2 + k1) * r2;
+    double xpp = xp * kr + p1 * xy2 + p2 * (r2 + 2.0 * x2);
+    double ypp = yp * kr + p1 * (r2 + 2.0 * y2) + p2 * xy2;
+
+    x = xpp * f + cx;
+    y = ypp * f + cy;
+    return;
+}
+
+static inline bool unDistortWithinPreCorrArray(
+        double x, double y,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f,
+        const int preCorrW, const int preCorrH, const int xMin, const int yMin) {
+    undistort(x, y, distortion, cx, cy, f);
+    // xMin and yMin are inclusive, and xMax and yMax are exclusive.
+    int xMax = xMin + preCorrW;
+    int yMax = yMin + preCorrH;
+    if (x < xMin || y < yMin || x >= xMax || y >= yMax) {
+        return false;
+    }
+    return true;
+}
+
+static inline bool boxWithinPrecorrectionArray(
+        int left, int top, int right, int bottom,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f,
+        const int preCorrW, const int preCorrH, const int xMin, const int yMin){
+    // Top row
+    if (!unDistortWithinPreCorrArray(left, top,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(cx, top,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(right, top,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+
+    // Middle row
+    if (!unDistortWithinPreCorrArray(left, cy,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(right, cy,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+
+    // Bottom row
+    if (!unDistortWithinPreCorrArray(left, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(cx, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(right, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+        return false;
+    }
+    return true;
+}
+
+static inline bool scaledBoxWithinPrecorrectionArray(
+        double scale/*must be <= 1.0*/,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f,
+        const int preCorrW, const int preCorrH,
+        const int xMin, const int yMin){
+
+    double left = cx * (1.0 - scale);
+    double right = (preCorrW - 1) * scale + cx * (1.0 - scale);
+    double top = cy * (1.0 - scale);
+    double bottom = (preCorrH - 1) * scale + cy * (1.0 - scale);
+
+    return boxWithinPrecorrectionArray(left, top, right, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin);
+}
+
+static status_t findPostCorrectionScale(
+        double stepSize, double minScale,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f,
+        const int preCorrW, const int preCorrH, const int xMin, const int yMin,
+        /*out*/ double* outScale) {
+    if (outScale == nullptr) {
+        ALOGE("%s: outScale must not be null", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    for (double scale = 1.0; scale > minScale; scale -= stepSize) {
+        if (scaledBoxWithinPrecorrectionArray(
+                scale, distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
+            *outScale = scale;
+            return OK;
+        }
+    }
+    ALOGE("%s: cannot find cropping scale for lens distortion: stepSize %f, minScale %f",
+            __FUNCTION__, stepSize, minScale);
+    return BAD_VALUE;
+}
+
+// Apply a scale factor to distortion coefficients so that the image is zoomed out and all pixels
+// are sampled within the precorrection array
+static void normalizeLensDistortion(
+        /*inout*/std::array<float, 6>& distortion,
+        float cx, float cy, float f, int preCorrW, int preCorrH, int xMin = 0, int yMin = 0) {
+    ALOGV("%s: distortion [%f, %f, %f, %f, %f, %f], (cx,cy) (%f, %f), f %f, (W,H) (%d, %d)"
+            ", (xmin, ymin, xmax, ymax) (%d, %d, %d, %d)",
+            __FUNCTION__, distortion[0], distortion[1], distortion[2],
+            distortion[3], distortion[4], distortion[5],
+            cx, cy, f, preCorrW, preCorrH,
+            xMin, yMin, xMin + preCorrW - 1, yMin + preCorrH - 1);
+
+    // Only update distortion coeffients if we can find a good bounding box
+    double scale = 1.0;
+    if (OK == findPostCorrectionScale(0.002, 0.5,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin,
+            /*out*/&scale)) {
+        ALOGV("%s: scaling distortion coefficients by %f", __FUNCTION__, scale);
+        // The formula:
+        // xc = xi * (k0 + k1*r^2 + k2*r^4 + k3*r^6) + k4 * (2*xi*yi) + k5 * (r^2 + 2*xi^2)
+        // To create effective zoom we want to replace xi by xi *m, yi by yi*m and r^2 by r^2*m^2
+        // Factor the extra m power terms into k0~k6
+        std::array<float, 6> scalePowers = {1, 3, 5, 7, 2, 2};
+        for (size_t i = 0; i < 6; i++) {
+            distortion[i] *= pow(scale, scalePowers[i]);
+        }
+    }
+    return;
 }
 
 // ----------------------------------------------------------------------------
@@ -1061,13 +1230,19 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     sp<TiffWriter> writer = new TiffWriter();
 
+    uint32_t preXMin = 0;
+    uint32_t preYMin = 0;
     uint32_t preWidth = 0;
     uint32_t preHeight = 0;
+    uint8_t colorFilter = 0;
+    bool isBayer = true;
     {
         // Check dimensions
         camera_metadata_entry entry =
                 characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
         BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_IMAGEWIDTH, writer);
+        preXMin = static_cast<uint32_t>(entry.data.i32[0]);
+        preYMin = static_cast<uint32_t>(entry.data.i32[1]);
         preWidth = static_cast<uint32_t>(entry.data.i32[2]);
         preHeight = static_cast<uint32_t>(entry.data.i32[3]);
 
@@ -1077,15 +1252,30 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         uint32_t pixHeight = static_cast<uint32_t>(pixelArrayEntry.data.i32[1]);
 
         if (!((imageWidth == preWidth && imageHeight == preHeight) ||
-            (imageWidth == pixWidth && imageHeight == pixHeight))) {
+                (imageWidth == pixWidth && imageHeight == pixHeight))) {
             jniThrowException(env, "java/lang/AssertionError",
-                    "Height and width of imate buffer did not match height and width of"
+                    "Height and width of image buffer did not match height and width of"
                     "either the preCorrectionActiveArraySize or the pixelArraySize.");
             return nullptr;
         }
+
+        camera_metadata_entry colorFilterEntry =
+                characteristics.find(ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT);
+        colorFilter = colorFilterEntry.data.u8[0];
+        camera_metadata_entry capabilitiesEntry =
+                characteristics.find(ANDROID_REQUEST_AVAILABLE_CAPABILITIES);
+        size_t capsCount = capabilitiesEntry.count;
+        uint8_t* caps = capabilitiesEntry.data.u8;
+        if (std::find(caps, caps+capsCount, ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME)
+                != caps+capsCount) {
+            isBayer = false;
+        } else if (colorFilter == ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO ||
+                colorFilter == ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR) {
+            jniThrowException(env, "java/lang/AssertionError",
+                    "A camera device with MONO/NIR color filter must have MONOCHROME capability.");
+            return nullptr;
+        }
     }
-
-
 
     writer->addIfd(TIFF_IFD_0);
 
@@ -1094,9 +1284,12 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
     const uint32_t samplesPerPixel = 1;
     const uint32_t bitsPerSample = BITS_PER_SAMPLE;
 
-    OpcodeListBuilder::CfaLayout opcodeCfaLayout = OpcodeListBuilder::CFA_RGGB;
+    OpcodeListBuilder::CfaLayout opcodeCfaLayout = OpcodeListBuilder::CFA_NONE;
     uint8_t cfaPlaneColor[3] = {0, 1, 2};
-    uint8_t cfaEnum = -1;
+    camera_metadata_entry cfaEntry =
+            characteristics.find(ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT);
+    BAIL_IF_EMPTY_RET_NULL_SP(cfaEntry, env, TAG_CFAPATTERN, writer);
+    uint8_t cfaEnum = cfaEntry.data.u8[0];
 
     // TODO: Greensplit.
     // TODO: Add remaining non-essential tags
@@ -1141,12 +1334,20 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // Set photometric interpretation
-        uint16_t interpretation = 32803; // CFA
+        uint16_t interpretation = isBayer ? 32803 /* CFA */ :
+                34892; /* Linear Raw */;
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_PHOTOMETRICINTERPRETATION, 1,
                 &interpretation, TIFF_IFD_0), env, TAG_PHOTOMETRICINTERPRETATION, writer);
     }
 
     {
+        uint16_t repeatDim[2] = {2, 2};
+        if (!isBayer) {
+            repeatDim[0] = repeatDim[1] = 1;
+        }
+        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVELREPEATDIM, 2, repeatDim,
+                TIFF_IFD_0), env, TAG_BLACKLEVELREPEATDIM, writer);
+
         // Set blacklevel tags, using dynamic black level if available
         camera_metadata_entry entry =
                 results.find(ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL);
@@ -1165,14 +1366,9 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 blackLevelRational[i * 2] = static_cast<uint32_t>(entry.data.i32[i]);
                 blackLevelRational[i * 2 + 1] = 1;
             }
-
         }
-        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVEL, 4, blackLevelRational,
-                TIFF_IFD_0), env, TAG_BLACKLEVEL, writer);
-
-        uint16_t repeatDim[2] = {2, 2};
-        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVELREPEATDIM, 2, repeatDim,
-                TIFF_IFD_0), env, TAG_BLACKLEVELREPEATDIM, writer);
+        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVEL, repeatDim[0]*repeatDim[1],
+                blackLevelRational, TIFF_IFD_0), env, TAG_BLACKLEVEL, writer);
     }
 
     {
@@ -1189,21 +1385,15 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 TIFF_IFD_0), env, TAG_PLANARCONFIGURATION, writer);
     }
 
-    {
+    // All CFA pattern tags are not necessary for monochrome cameras.
+    if (isBayer) {
         // Set CFA pattern dimensions
         uint16_t repeatDim[2] = {2, 2};
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_CFAREPEATPATTERNDIM, 2, repeatDim,
                 TIFF_IFD_0), env, TAG_CFAREPEATPATTERNDIM, writer);
-    }
 
-    {
         // Set CFA pattern
-        camera_metadata_entry entry =
-                        characteristics.find(ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT);
-        BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_CFAPATTERN, writer);
-
         const int cfaLength = 4;
-        cfaEnum = entry.data.u8[0];
         uint8_t cfa[cfaLength];
         if ((err = convertCFA(cfaEnum, /*out*/cfa)) != OK) {
             jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
@@ -1214,15 +1404,11 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 env, TAG_CFAPATTERN, writer);
 
         opcodeCfaLayout = convertCFAEnumToOpcodeLayout(cfaEnum);
-    }
 
-    {
         // Set CFA plane color
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_CFAPLANECOLOR, 3, cfaPlaneColor,
                 TIFF_IFD_0), env, TAG_CFAPLANECOLOR, writer);
-    }
 
-    {
         // Set CFA layout
         uint16_t cfaLayout = 1;
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_CFALAYOUT, 1, &cfaLayout, TIFF_IFD_0),
@@ -1442,7 +1628,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
     }
 
     bool singleIlluminant = false;
-    {
+    if (isBayer) {
         // Set calibration illuminants
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_REFERENCE_ILLUMINANT1);
@@ -1464,7 +1650,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set color transforms
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_COLOR_TRANSFORM1);
@@ -1497,7 +1683,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set calibration transforms
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_CALIBRATION_TRANSFORM1);
@@ -1531,7 +1717,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set forward transforms
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_FORWARD_MATRIX1);
@@ -1565,7 +1751,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set camera neutral
         camera_metadata_entry entry =
             results.find(ANDROID_SENSOR_NEUTRAL_COLOR_POINT);
@@ -1632,8 +1818,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         camera_metadata_entry entry =
             results.find(ANDROID_SENSOR_NOISE_PROFILE);
 
-        const status_t numPlaneColors = 3;
-        const status_t numCfaChannels = 4;
+        const status_t numPlaneColors = isBayer ? 3 : 1;
+        const status_t numCfaChannels = isBayer ? 4 : 1;
 
         uint8_t cfaOut[numCfaChannels];
         if ((err = convertCFA(cfaEnum, /*out*/cfaOut)) != OK) {
@@ -1710,57 +1896,60 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             }
         }
 
+        // Hot pixel map is specific to bayer camera per DNG spec.
+        if (isBayer) {
+            // Set up bad pixel correction list
+            camera_metadata_entry entry3 = characteristics.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
 
-        // Set up bad pixel correction list
-        camera_metadata_entry entry3 = characteristics.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
-
-        if ((entry3.count % 2) != 0) {
-            ALOGE("%s: Hot pixel map contains odd number of values, cannot map to pairs!",
-                    __FUNCTION__);
-            jniThrowRuntimeException(env, "failed to add hotpixel map.");
-            return nullptr;
-        }
-
-        // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
-        std::vector<uint32_t> v;
-        for (size_t i = 0; i < entry3.count; i += 2) {
-            int32_t x = entry3.data.i32[i];
-            int32_t y = entry3.data.i32[i + 1];
-            x -= static_cast<int32_t>(xmin);
-            y -= static_cast<int32_t>(ymin);
-            if (x < 0 || y < 0 || static_cast<uint32_t>(x) >= width ||
-                    static_cast<uint32_t>(y) >= height) {
-                continue;
-            }
-            v.push_back(x);
-            v.push_back(y);
-        }
-        const uint32_t* badPixels = &v[0];
-        uint32_t badPixelCount = v.size();
-
-        if (badPixelCount > 0) {
-            err = builder.addBadPixelListForMetadata(badPixels, badPixelCount, opcodeCfaLayout);
-
-            if (err != OK) {
-                ALOGE("%s: Could not add hotpixel map.", __FUNCTION__);
+            if ((entry3.count % 2) != 0) {
+                ALOGE("%s: Hot pixel map contains odd number of values, cannot map to pairs!",
+                        __FUNCTION__);
                 jniThrowRuntimeException(env, "failed to add hotpixel map.");
                 return nullptr;
             }
+
+            // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
+            std::vector<uint32_t> v;
+            for (size_t i = 0; i < entry3.count; i += 2) {
+                int32_t x = entry3.data.i32[i];
+                int32_t y = entry3.data.i32[i + 1];
+                x -= static_cast<int32_t>(xmin);
+                y -= static_cast<int32_t>(ymin);
+                if (x < 0 || y < 0 || static_cast<uint32_t>(x) >= width ||
+                        static_cast<uint32_t>(y) >= height) {
+                    continue;
+                }
+                v.push_back(x);
+                v.push_back(y);
+            }
+            const uint32_t* badPixels = &v[0];
+            uint32_t badPixelCount = v.size();
+
+            if (badPixelCount > 0) {
+                err = builder.addBadPixelListForMetadata(badPixels, badPixelCount, opcodeCfaLayout);
+
+                if (err != OK) {
+                    ALOGE("%s: Could not add hotpixel map.", __FUNCTION__);
+                    jniThrowRuntimeException(env, "failed to add hotpixel map.");
+                    return nullptr;
+                }
+            }
         }
 
-
-        size_t listSize = builder.getSize();
-        uint8_t opcodeListBuf[listSize];
-        err = builder.buildOpList(opcodeListBuf);
-        if (err == OK) {
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST2, listSize, opcodeListBuf,
-                    TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
-        } else {
-            ALOGE("%s: Could not build list of opcodes for distortion correction and lens shading"
-                    "map.", __FUNCTION__);
-            jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
-                    " correction and lens shading map");
-            return nullptr;
+        if (builder.getCount() > 0) {
+            size_t listSize = builder.getSize();
+            uint8_t opcodeListBuf[listSize];
+            err = builder.buildOpList(opcodeListBuf);
+            if (err == OK) {
+                BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST2, listSize,
+                        opcodeListBuf, TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
+            } else {
+                ALOGE("%s: Could not build list of opcodes for lens shading map and bad pixel "
+                        "correction.", __FUNCTION__);
+                jniThrowRuntimeException(env, "failed to construct opcode list for lens shading "
+                        "map and bad pixel correction");
+                return nullptr;
+            }
         }
     }
 
@@ -1770,7 +1959,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         status_t err = OK;
 
         // Set up rectilinear distortion correction
-        float distortion[6] {1.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+        std::array<float, 6> distortion = {1.f, 0.f, 0.f, 0.f, 0.f, 0.f};
         bool gotDistortion = false;
 
         camera_metadata_entry entry4 =
@@ -1787,8 +1976,27 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                     results.find(ANDROID_LENS_DISTORTION);
             if (entry3.count == 5) {
                 gotDistortion = true;
-                float m_x = std::fmaxf(preWidth-1 - cx, cx);
-                float m_y = std::fmaxf(preHeight-1 - cy, cy);
+
+                // Scale the distortion coefficients to create a zoom in warpped image so that all
+                // pixels are drawn within input image.
+                for (size_t i = 0; i < entry3.count; i++) {
+                    distortion[i+1] = entry3.data.f[i];
+                }
+
+                if (preWidth == imageWidth && preHeight == imageHeight) {
+                    normalizeLensDistortion(distortion, cx, cy, f, preWidth, preHeight);
+                } else {
+                    // image size == pixel array size (contains optical black pixels)
+                    // cx/cy is defined in preCorrArray so adding the offset
+                    // Also changes default xmin/ymin so that pixels are only
+                    // sampled within preCorrection array
+                    normalizeLensDistortion(
+                            distortion, cx + preXMin, cy + preYMin, f, preWidth, preHeight,
+                            preXMin, preYMin);
+                }
+
+                float m_x = std::fmaxf(preWidth - cx, cx);
+                float m_y = std::fmaxf(preHeight - cy, cy);
                 float m_sq = m_x*m_x + m_y*m_y;
                 float m = sqrtf(m_sq); // distance to farthest corner from optical center
                 float f_sq = f * f;
@@ -1808,7 +2016,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                     m / f
                 };
                 for (size_t i = 0; i < entry3.count; i++) {
-                    distortion[i+1] = convCoeff[i] * entry3.data.f[i];
+                    distortion[i+1] *= convCoeff[i];
                 }
             } else {
                 entry3 = results.find(ANDROID_LENS_RADIAL_DISTORTION);
@@ -1836,8 +2044,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 }
             }
             if (gotDistortion) {
-                err = builder.addWarpRectilinearForMetadata(distortion, preWidth, preHeight, cx,
-                        cy);
+                err = builder.addWarpRectilinearForMetadata(
+                        distortion.data(), preWidth, preHeight, cx, cy);
                 if (err != OK) {
                     ALOGE("%s: Could not add distortion correction.", __FUNCTION__);
                     jniThrowRuntimeException(env, "failed to add distortion correction.");
@@ -1846,18 +2054,20 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             }
         }
 
-        size_t listSize = builder.getSize();
-        uint8_t opcodeListBuf[listSize];
-        err = builder.buildOpList(opcodeListBuf);
-        if (err == OK) {
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST3, listSize, opcodeListBuf,
-                    TIFF_IFD_0), env, TAG_OPCODELIST3, writer);
-        } else {
-            ALOGE("%s: Could not build list of opcodes for distortion correction and lens shading"
-                    "map.", __FUNCTION__);
-            jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
-                    " correction and lens shading map");
-            return nullptr;
+        if (builder.getCount() > 0) {
+            size_t listSize = builder.getSize();
+            uint8_t opcodeListBuf[listSize];
+            err = builder.buildOpList(opcodeListBuf);
+            if (err == OK) {
+                BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST3, listSize,
+                        opcodeListBuf, TIFF_IFD_0), env, TAG_OPCODELIST3, writer);
+            } else {
+                ALOGE("%s: Could not build list of opcodes for distortion correction.",
+                        __FUNCTION__);
+                jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
+                        " correction");
+                return nullptr;
+            }
         }
     }
 
@@ -1957,10 +2167,12 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         tagsToMove.add(TAG_BLACKLEVELREPEATDIM);
         tagsToMove.add(TAG_SAMPLESPERPIXEL);
         tagsToMove.add(TAG_PLANARCONFIGURATION);
-        tagsToMove.add(TAG_CFAREPEATPATTERNDIM);
-        tagsToMove.add(TAG_CFAPATTERN);
-        tagsToMove.add(TAG_CFAPLANECOLOR);
-        tagsToMove.add(TAG_CFALAYOUT);
+        if (isBayer) {
+            tagsToMove.add(TAG_CFAREPEATPATTERNDIM);
+            tagsToMove.add(TAG_CFAPATTERN);
+            tagsToMove.add(TAG_CFAPLANECOLOR);
+            tagsToMove.add(TAG_CFALAYOUT);
+        }
         tagsToMove.add(TAG_XRESOLUTION);
         tagsToMove.add(TAG_YRESOLUTION);
         tagsToMove.add(TAG_RESOLUTIONUNIT);
@@ -1968,8 +2180,14 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         tagsToMove.add(TAG_DEFAULTSCALE);
         tagsToMove.add(TAG_DEFAULTCROPORIGIN);
         tagsToMove.add(TAG_DEFAULTCROPSIZE);
-        tagsToMove.add(TAG_OPCODELIST2);
-        tagsToMove.add(TAG_OPCODELIST3);
+
+        if (nullptr != writer->getEntry(TAG_OPCODELIST2, TIFF_IFD_0).get()) {
+            tagsToMove.add(TAG_OPCODELIST2);
+        }
+
+        if (nullptr != writer->getEntry(TAG_OPCODELIST3, TIFF_IFD_0).get()) {
+            tagsToMove.add(TAG_OPCODELIST3);
+        }
 
         if (moveEntries(writer, TIFF_IFD_0, TIFF_IFD_SUB1, tagsToMove) != OK) {
             jniThrowException(env, "java/lang/IllegalStateException", "Failed to move entries");

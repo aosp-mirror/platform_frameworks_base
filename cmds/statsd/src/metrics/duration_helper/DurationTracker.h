@@ -44,7 +44,6 @@ struct DurationInfo {
     int64_t lastStartTime;
     // existing duration in current bucket.
     int64_t lastDuration;
-    // TODO: Optimize the way we track sliced condition in duration metrics.
     // cache the HashableDimensionKeys we need to query the condition for this duration event.
     ConditionKey conditionKeys;
 
@@ -156,8 +155,8 @@ protected:
                                  const int64_t& currentBucketValue) {
         for (auto& anomalyTracker : mAnomalyTrackers) {
             if (anomalyTracker != nullptr) {
-                anomalyTracker->detectAndDeclareAnomaly(timestamp, currBucketNum, mEventKey,
-                                                        currentBucketValue);
+                anomalyTracker->detectAndDeclareAnomaly(timestamp, currBucketNum, mTrackerId,
+                                                        mEventKey, currentBucketValue);
             }
         }
     }

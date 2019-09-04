@@ -198,7 +198,7 @@ public class VerificationParams implements Parcelable {
         mInstallerUid = source.readInt();
     }
 
-    public static final Parcelable.Creator<VerificationParams> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<VerificationParams> CREATOR =
             new Parcelable.Creator<VerificationParams>() {
         public VerificationParams createFromParcel(Parcel source) {
                 return new VerificationParams(source);

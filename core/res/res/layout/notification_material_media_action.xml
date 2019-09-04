@@ -18,7 +18,6 @@
 <ImageButton
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@android:style/Widget.Material.Button.Borderless.Small"
-    android:id="@+id/action0"
     android:layout_width="@dimen/media_notification_action_button_size"
     android:layout_height="@dimen/media_notification_action_button_size"
     android:paddingBottom="8dp"
@@ -28,4 +27,5 @@
     android:layout_marginEnd="2dp"
     android:gravity="center"
     android:background="@drawable/notification_material_media_action_background"
+    android:visibility="gone"
     />

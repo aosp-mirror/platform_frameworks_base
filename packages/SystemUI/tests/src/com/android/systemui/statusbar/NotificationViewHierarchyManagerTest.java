@@ -20,11 +20,16 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -33,10 +38,23 @@ import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleData;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.util.Assert;
 
 import com.google.android.collect.Lists;
 
@@ -51,7 +69,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationData mNotificationData;
@@ -62,29 +80,44 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGroupManager mGroupManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
+    @Mock private ShadeController mShadeController;
 
+    private TestableLooper mTestableLooper;
+    private Handler mHandler;
     private NotificationViewHierarchyManager mViewHierarchyManager;
-    private NotificationTestHelper mHelper = new NotificationTestHelper(mContext);;
+    private NotificationTestHelper mHelper;
+    private boolean mMadeReentrantCall = false;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mTestableLooper = TestableLooper.get(this);
+        Assert.sMainLooper = mTestableLooper.getLooper();
+        mHandler = Handler.createAsync(mTestableLooper.getLooper());
+
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
                 mLockscreenUserManager);
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        mDependency.injectTestDependency(ShadeController.class, mShadeController);
+
+        mHelper = new NotificationTestHelper(mContext);
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
-        mViewHierarchyManager = new NotificationViewHierarchyManager(mContext);
-        mViewHierarchyManager.setUpWithPresenter(mPresenter, mEntryManager, mListContainer);
+        mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
+                mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
+                mock(StatusBarStateControllerImpl.class), mEntryManager,
+                () -> mShadeController, new BubbleData(mContext), mock(DynamicPrivacyController.class));
+        Dependency.get(InitController.class).executePostInitTasks();
+        mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 
-    private NotificationData.Entry createEntry() throws Exception {
+    private NotificationEntry createEntry() throws Exception {
         ExpandableNotificationRow row = mHelper.createRow();
-        NotificationData.Entry entry = new NotificationData.Entry(row.getStatusBarNotification());
-        entry.row = row;
+        NotificationEntry entry = new NotificationEntry(row.getStatusBarNotification());
+        entry.setRow(row);
         return entry;
     }
 
@@ -92,14 +125,14 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     public void testNotificationsBecomingBundled() throws Exception {
         // Tests 3 top level notifications becoming a single bundled notification with |entry0| as
         // the summary.
-        NotificationData.Entry entry0 = createEntry();
-        NotificationData.Entry entry1 = createEntry();
-        NotificationData.Entry entry2 = createEntry();
+        NotificationEntry entry0 = createEntry();
+        NotificationEntry entry1 = createEntry();
+        NotificationEntry entry2 = createEntry();
 
         // Set up the prior state to look like three top level notifications.
-        mListContainer.addContainerView(entry0.row);
-        mListContainer.addContainerView(entry1.row);
-        mListContainer.addContainerView(entry2.row);
+        mListContainer.addContainerView(entry0.getRow());
+        mListContainer.addContainerView(entry1.getRow());
+        mListContainer.addContainerView(entry2.getRow());
         when(mNotificationData.getActiveNotifications()).thenReturn(
                 Lists.newArrayList(entry0, entry1, entry2));
 
@@ -107,28 +140,28 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         when(mGroupManager.isChildInGroupWithSummary(entry0.notification)).thenReturn(false);
         when(mGroupManager.isChildInGroupWithSummary(entry1.notification)).thenReturn(true);
         when(mGroupManager.isChildInGroupWithSummary(entry2.notification)).thenReturn(true);
-        when(mGroupManager.getGroupSummary(entry1.notification)).thenReturn(entry0.row);
-        when(mGroupManager.getGroupSummary(entry2.notification)).thenReturn(entry0.row);
+        when(mGroupManager.getGroupSummary(entry1.notification)).thenReturn(entry0);
+        when(mGroupManager.getGroupSummary(entry2.notification)).thenReturn(entry0);
 
         // Run updateNotifications - the view hierarchy should be reorganized.
         mViewHierarchyManager.updateNotificationViews();
 
-        verify(mListContainer).notifyGroupChildAdded(entry1.row);
-        verify(mListContainer).notifyGroupChildAdded(entry2.row);
-        assertTrue(Lists.newArrayList(entry0.row).equals(mListContainer.mRows));
+        verify(mListContainer).notifyGroupChildAdded(entry1.getRow());
+        verify(mListContainer).notifyGroupChildAdded(entry2.getRow());
+        assertTrue(Lists.newArrayList(entry0.getRow()).equals(mListContainer.mRows));
     }
 
     @Test
     public void testNotificationsBecomingUnbundled() throws Exception {
         // Tests a bundled notification becoming three top level notifications.
-        NotificationData.Entry entry0 = createEntry();
-        NotificationData.Entry entry1 = createEntry();
-        NotificationData.Entry entry2 = createEntry();
-        entry0.row.addChildNotification(entry1.row);
-        entry0.row.addChildNotification(entry2.row);
+        NotificationEntry entry0 = createEntry();
+        NotificationEntry entry1 = createEntry();
+        NotificationEntry entry2 = createEntry();
+        entry0.getRow().addChildNotification(entry1.getRow());
+        entry0.getRow().addChildNotification(entry2.getRow());
 
         // Set up the prior state to look like one top level notification.
-        mListContainer.addContainerView(entry0.row);
+        mListContainer.addContainerView(entry0.getRow());
         when(mNotificationData.getActiveNotifications()).thenReturn(
                 Lists.newArrayList(entry0, entry1, entry2));
 
@@ -141,21 +174,23 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mViewHierarchyManager.updateNotificationViews();
 
         verify(mListContainer).notifyGroupChildRemoved(
-                entry1.row, entry0.row.getChildrenContainer());
+                entry1.getRow(), entry0.getRow().getChildrenContainer());
         verify(mListContainer).notifyGroupChildRemoved(
-                entry2.row, entry0.row.getChildrenContainer());
-        assertTrue(Lists.newArrayList(entry0.row, entry1.row, entry2.row).equals(mListContainer.mRows));
+                entry2.getRow(), entry0.getRow().getChildrenContainer());
+        assertTrue(
+                Lists.newArrayList(entry0.getRow(), entry1.getRow(), entry2.getRow())
+                        .equals(mListContainer.mRows));
     }
 
     @Test
     public void testNotificationsBecomingSuppressed() throws Exception {
         // Tests two top level notifications becoming a suppressed summary and a child.
-        NotificationData.Entry entry0 = createEntry();
-        NotificationData.Entry entry1 = createEntry();
-        entry0.row.addChildNotification(entry1.row);
+        NotificationEntry entry0 = createEntry();
+        NotificationEntry entry1 = createEntry();
+        entry0.getRow().addChildNotification(entry1.getRow());
 
         // Set up the prior state to look like a top level notification.
-        mListContainer.addContainerView(entry0.row);
+        mListContainer.addContainerView(entry0.getRow());
         when(mNotificationData.getActiveNotifications()).thenReturn(
                 Lists.newArrayList(entry0, entry1));
 
@@ -168,49 +203,103 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mViewHierarchyManager.updateNotificationViews();
 
         verify(mListContainer).notifyGroupChildRemoved(
-                entry1.row, entry0.row.getChildrenContainer());
-        assertTrue(Lists.newArrayList(entry0.row, entry1.row).equals(mListContainer.mRows));
-        assertEquals(View.GONE, entry0.row.getVisibility());
-        assertEquals(View.VISIBLE, entry1.row.getVisibility());
+                entry1.getRow(), entry0.getRow().getChildrenContainer());
+        assertTrue(Lists.newArrayList(entry0.getRow(), entry1.getRow()).equals(mListContainer.mRows));
+        assertEquals(View.GONE, entry0.getRow().getVisibility());
+        assertEquals(View.VISIBLE, entry1.getRow().getVisibility());
     }
 
     @Test
     public void testUpdateNotificationViews_appOps() throws Exception {
-        NotificationData.Entry entry0 = createEntry();
-        entry0.row = spy(entry0.row);
+        NotificationEntry entry0 = createEntry();
+        entry0.setRow(spy(entry0.getRow()));
         when(mNotificationData.getActiveNotifications()).thenReturn(
                 Lists.newArrayList(entry0));
-        mListContainer.addContainerView(entry0.row);
+        mListContainer.addContainerView(entry0.getRow());
 
         mViewHierarchyManager.updateNotificationViews();
 
-        verify(entry0.row, times(1)).showAppOpsIcons(any());
+        verify(entry0.getRow(), times(1)).showAppOpsIcons(any());
+    }
+
+    @Test
+    public void testReentrantCallsToOnDynamicPrivacyChangedPostForLater() {
+        // GIVEN a ListContainer that will make a re-entrant call to updateNotificationViews()
+        mMadeReentrantCall = false;
+        doAnswer((invocation) -> {
+            if (!mMadeReentrantCall) {
+                mMadeReentrantCall = true;
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+            }
+            return null;
+        }).when(mListContainer).setMaxDisplayedNotifications(anyInt());
+
+        // WHEN we call updateNotificationViews()
+        mViewHierarchyManager.updateNotificationViews();
+
+        // THEN onNotificationViewUpdateFinished() is only called once
+        verify(mListContainer).onNotificationViewUpdateFinished();
+
+        // WHEN we drain the looper
+        mTestableLooper.processAllMessages();
+
+        // THEN updateNotificationViews() is called a second time (for the reentrant call)
+        verify(mListContainer, times(2)).onNotificationViewUpdateFinished();
+    }
+
+    @Test
+    public void testMultipleReentrantCallsToOnDynamicPrivacyChangedOnlyPostOnce() {
+        // GIVEN a ListContainer that will make many re-entrant calls to updateNotificationViews()
+        mMadeReentrantCall = false;
+        doAnswer((invocation) -> {
+            if (!mMadeReentrantCall) {
+                mMadeReentrantCall = true;
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+            }
+            return null;
+        }).when(mListContainer).setMaxDisplayedNotifications(anyInt());
+
+        // WHEN we call updateNotificationViews() and drain the looper
+        mViewHierarchyManager.updateNotificationViews();
+        verify(mListContainer).onNotificationViewUpdateFinished();
+        clearInvocations(mListContainer);
+        mTestableLooper.processAllMessages();
+
+        // THEN updateNotificationViews() is called only one more time
+        verify(mListContainer).onNotificationViewUpdateFinished();
     }
 
     private class FakeListContainer implements NotificationListContainer {
         final LinearLayout mLayout = new LinearLayout(mContext);
         final List<View> mRows = Lists.newArrayList();
+        private boolean mMakeReentrantCallDuringSetMaxDisplayedNotifications;
 
         @Override
         public void setChildTransferInProgress(boolean childTransferInProgress) {}
 
         @Override
-        public void changeViewPosition(View child, int newIndex) {
+        public void changeViewPosition(ExpandableView child, int newIndex) {
             mRows.remove(child);
             mRows.add(newIndex, child);
         }
 
         @Override
-        public void notifyGroupChildAdded(View row) {}
+        public void notifyGroupChildAdded(ExpandableView row) {}
 
         @Override
-        public void notifyGroupChildRemoved(View row, ViewGroup childrenContainer) {}
+        public void notifyGroupChildRemoved(ExpandableView row, ViewGroup childrenContainer) {}
 
         @Override
-        public void generateAddAnimation(View child, boolean fromMoreCard) {}
+        public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {}
 
         @Override
         public void generateChildOrderChangedEvent() {}
+
+        @Override
+        public void onReset(ExpandableView view) {}
 
         @Override
         public int getContainerChildCount() {
@@ -235,13 +324,14 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void setMaxDisplayedNotifications(int maxNotifications) {}
+        public void setMaxDisplayedNotifications(int maxNotifications) {
+            if (mMakeReentrantCallDuringSetMaxDisplayedNotifications) {
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+            }
+        }
 
         @Override
-        public void snapViewIfNeeded(ExpandableNotificationRow row) {}
-
-        @Override
-        public ViewGroup getViewParentForNotification(NotificationData.Entry entry) {
+        public ViewGroup getViewParentForNotification(NotificationEntry entry) {
             return null;
         }
 
@@ -257,10 +347,10 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void cleanUpViewState(View view) {}
+        public void cleanUpViewStateForEntry(NotificationEntry entry) { }
 
         @Override
-        public boolean isInVisibleLocation(ExpandableNotificationRow row) {
+        public boolean isInVisibleLocation(NotificationEntry entry) {
             return true;
         }
 
@@ -272,5 +362,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         public boolean hasPulsingNotifications() {
             return false;
         }
+
+        @Override
+        public void onNotificationViewUpdateFinished() { }
     }
 }

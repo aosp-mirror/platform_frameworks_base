@@ -26,6 +26,8 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -69,7 +71,8 @@ public class TileQueryHelper {
         mSpecs.clear();
         mFinished = false;
         // Enqueue jobs to fetch every system tile and then ever package tile.
-        addStockTiles(host);
+        addCurrentAndStockTiles(host);
+
         addPackageTiles(host);
     }
 
@@ -77,16 +80,30 @@ public class TileQueryHelper {
         return mFinished;
     }
 
-    private void addStockTiles(QSTileHost host) {
-        String possible = mContext.getString(R.string.quick_settings_tiles_stock);
+    private void addCurrentAndStockTiles(QSTileHost host) {
+        String stock = mContext.getString(R.string.quick_settings_tiles_stock);
+        String current = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.QS_TILES);
         final ArrayList<String> possibleTiles = new ArrayList<>();
-        possibleTiles.addAll(Arrays.asList(possible.split(",")));
-        if (Build.IS_DEBUGGABLE) {
+        if (current != null) {
+            // The setting QS_TILES is not populated immediately upon Factory Reset
+            possibleTiles.addAll(Arrays.asList(current.split(",")));
+        } else {
+            current = "";
+        }
+        String[] stockSplit =  stock.split(",");
+        for (String spec : stockSplit) {
+            if (!current.contains(spec)) {
+                possibleTiles.add(spec);
+            }
+        }
+        if (Build.IS_DEBUGGABLE && !current.contains(GarbageMonitor.MemoryTile.TILE_SPEC)) {
             possibleTiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
         for (String spec : possibleTiles) {
+            // Only add current and stock tiles that can be created from QSFactoryImpl
             final QSTile tile = host.createTile(spec);
             if (tile == null) {
                 continue;
@@ -150,7 +167,8 @@ public class TileQueryHelper {
                 icon.mutate();
                 icon.setTint(mContext.getColor(android.R.color.white));
                 CharSequence label = info.serviceInfo.loadLabel(pm);
-                addTile(spec, icon, label != null ? label.toString() : "null", appLabel);
+                createStateAndAddTile(spec, icon, label != null ? label.toString() : "null",
+                        appLabel);
             }
 
             notifyTilesChanged(true);
@@ -191,9 +209,10 @@ public class TileQueryHelper {
         mSpecs.add(spec);
     }
 
-    private void addTile(
+    private void createStateAndAddTile(
             String spec, Drawable drawable, CharSequence label, CharSequence appLabel) {
         QSTile.State state = new QSTile.State();
+        state.state = Tile.STATE_INACTIVE;
         state.label = label;
         state.contentDescription = label;
         state.icon = new DrawableIcon(drawable);

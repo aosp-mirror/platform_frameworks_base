@@ -74,7 +74,7 @@ public class Session {
         }
 
         /** Responsible for creating Info objects for deserialized Parcels. */
-        public static final Parcelable.Creator<Info> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Info> CREATOR =
                 new Parcelable.Creator<Info> () {
                     @Override
                     public Info createFromParcel(Parcel source) {

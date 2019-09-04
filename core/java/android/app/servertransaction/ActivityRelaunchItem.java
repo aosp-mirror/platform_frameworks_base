@@ -130,7 +130,7 @@ public class ActivityRelaunchItem extends ClientTransactionItem {
         mPreserveWindow = in.readBoolean();
     }
 
-    public static final Creator<ActivityRelaunchItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<ActivityRelaunchItem> CREATOR =
             new Creator<ActivityRelaunchItem>() {
                 public ActivityRelaunchItem createFromParcel(Parcel in) {
                     return new ActivityRelaunchItem(in);

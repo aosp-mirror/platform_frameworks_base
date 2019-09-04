@@ -20,7 +20,6 @@
 #include "SkMatrix.h"
 #include "core_jni_helpers.h"
 
-#include <Caches.h>
 #include <jni.h>
 
 namespace android {

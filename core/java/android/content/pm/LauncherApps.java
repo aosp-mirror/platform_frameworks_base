@@ -16,11 +16,13 @@
 
 package android.content.pm;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -32,6 +34,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInstaller.SessionCallback;
+import android.content.pm.PackageInstaller.SessionCallbackDelegate;
+import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -65,7 +70,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Class for retrieving a list of launchable activities for the current user and any associated
@@ -143,8 +150,8 @@ public class LauncherApps {
     private final PackageManager mPm;
     private final UserManager mUserManager;
 
-    private List<CallbackMessageHandler> mCallbacks
-            = new ArrayList<CallbackMessageHandler>();
+    private final List<CallbackMessageHandler> mCallbacks = new ArrayList<>();
+    private final List<SessionCallbackDelegate> mDelegates = new ArrayList<>();
 
     /**
      * Callbacks for package changes to this and related managed profiles.
@@ -497,7 +504,8 @@ public class LauncherApps {
 
     /**
      * Retrieves a list of launchable activities that match {@link Intent#ACTION_MAIN} and
-     * {@link Intent#CATEGORY_LAUNCHER}, for a specified user.
+     * {@link Intent#CATEGORY_LAUNCHER}, for a specified user. Result may include
+     * synthesized activities like app details Activity injected by system.
      *
      * @param packageName The specific package to query. If null, it checks all installed packages
      *            in the profile.
@@ -555,6 +563,24 @@ public class LauncherApps {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
                     mContext.getPackageName(),
                     component, sourceBounds, opts, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts an activity to show the details of the specified session.
+     *
+     * @param sessionInfo The SessionInfo of the session
+     * @param sourceBounds The Rect containing the source bounds of the clicked icon
+     * @param opts Options to pass to startActivity
+     */
+    public void startPackageInstallerSessionDetailsActivity(@NonNull SessionInfo sessionInfo,
+            @Nullable Rect sourceBounds, @Nullable Bundle opts) {
+        try {
+            mService.startSessionDetailsActivityAsUser(mContext.getIApplicationThread(),
+                    mContext.getPackageName(), sessionInfo, sourceBounds, opts,
+                    sessionInfo.getUser());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -697,6 +723,26 @@ public class LauncherApps {
     }
 
     /**
+     * Returns whether a package should be hidden from suggestions to the user. Currently, this
+     * could be done because the package was marked as distracting to the user via
+     * {@code PackageManager.setDistractingPackageRestrictions(String[], int)}.
+     *
+     * @param packageName The package for which to check.
+     * @param user the {@link UserHandle} of the profile.
+     * @return
+     */
+    public boolean shouldHideFromSuggestions(@NonNull String packageName,
+            @NonNull UserHandle user) {
+        Preconditions.checkNotNull(packageName, "packageName");
+        Preconditions.checkNotNull(user, "user");
+        try {
+            return mService.shouldHideFromSuggestions(packageName, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns {@link ApplicationInfo} about an application installed for a specific user profile.
      *
      * @param packageName The package name of the application
@@ -727,7 +773,34 @@ public class LauncherApps {
     }
 
     /**
+     * Returns an object describing the app usage limit for the given package.
+     * If there are multiple limits that apply to the package, the one with the smallest
+     * time remaining will be returned.
+     *
+     * @param packageName name of the package whose app usage limit will be returned
+     * @param user the user of the package
+     *
+     * @return an {@link AppUsageLimit} object describing the app time limit containing
+     * the given package with the smallest time remaining, or {@code null} if none exist.
+     * @throws SecurityException when the caller is not the recents app.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public LauncherApps.AppUsageLimit getAppUsageLimit(@NonNull String packageName,
+            @NonNull UserHandle user) {
+        try {
+            return mService.getAppUsageLimit(mContext.getPackageName(), packageName, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks if the activity exists and it enabled for a profile.
+     *
+     * <p>The activity may still not be exported, in which case {@link #startMainActivity} will
+     * throw a {@link SecurityException} unless the caller has the same UID as the target app's.
      *
      * @param component The activity to check.
      * @param user The UserHandle of the profile.
@@ -1076,7 +1149,7 @@ public class LauncherApps {
     }
 
     /**
-     * Registers a callback for changes to packages in current and managed profiles.
+     * Registers a callback for changes to packages in this user and managed profiles.
      *
      * @param callback The callback to register.
      */
@@ -1085,7 +1158,7 @@ public class LauncherApps {
     }
 
     /**
-     * Registers a callback for changes to packages in current and managed profiles.
+     * Registers a callback for changes to packages in this user and managed profiles.
      *
      * @param callback The callback to register.
      * @param handler that should be used to post callbacks on, may be null.
@@ -1391,6 +1464,64 @@ public class LauncherApps {
     }
 
     /**
+     * Register a callback to watch for session lifecycle events in this user and managed profiles.
+     * @param callback The callback to register.
+     * @param executor {@link Executor} to handle the callbacks, cannot be null.
+     *
+     * @see PackageInstaller#registerSessionCallback(SessionCallback)
+     */
+    public void registerPackageInstallerSessionCallback(
+            @NonNull @CallbackExecutor Executor executor, @NonNull SessionCallback callback) {
+        if (executor == null) {
+            throw new NullPointerException("Executor must not be null");
+        }
+
+        synchronized (mDelegates) {
+            final SessionCallbackDelegate delegate = new SessionCallbackDelegate(callback,
+                    executor);
+            try {
+                mService.registerPackageInstallerCallback(mContext.getPackageName(),
+                        delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mDelegates.add(delegate);
+        }
+    }
+
+    /**
+     * Unregisters a callback that was previously registered.
+     *
+     * @param callback The callback to unregister.
+     * @see #registerPackageInstallerSessionCallback(Executor, SessionCallback)
+     */
+    public void unregisterPackageInstallerSessionCallback(@NonNull SessionCallback callback) {
+        synchronized (mDelegates) {
+            for (Iterator<SessionCallbackDelegate> i = mDelegates.iterator(); i.hasNext();) {
+                final SessionCallbackDelegate delegate = i.next();
+                if (delegate.mCallback == callback) {
+                    mPm.getPackageInstaller().unregisterSessionCallback(delegate.mCallback);
+                    i.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Return list of all known install sessions in this user and managed profiles, regardless
+     * of the installer.
+     *
+     * @see PackageInstaller#getAllSessions()
+     */
+    public @NonNull List<SessionInfo> getAllPackageInstallerSessions() {
+        try {
+            return mService.getAllSessions(mContext.getPackageName()).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * A helper method to extract a {@link PinItemRequest} set to
      * the {@link #EXTRA_PIN_ITEM_REQUEST} extra.
      */
@@ -1586,7 +1717,7 @@ public class LauncherApps {
             dest.writeStrongBinder(mInner.asBinder());
         }
 
-        public static final Creator<PinItemRequest> CREATOR =
+        public static final @android.annotation.NonNull Creator<PinItemRequest> CREATOR =
                 new Creator<PinItemRequest>() {
                     public PinItemRequest createFromParcel(Parcel source) {
                         return new PinItemRequest(source);
@@ -1599,6 +1730,76 @@ public class LauncherApps {
         @Override
         public int describeContents() {
             return 0;
+        }
+    }
+
+    /**
+     * A class that encapsulates information about the usage limit set for an app or
+     * a group of apps.
+     *
+     * <p>The launcher can query specifics about the usage limit such as how much usage time
+     * the limit has and how much of the total usage time is remaining via the APIs available
+     * in this class.
+     *
+     * @see #getAppUsageLimit(String, UserHandle)
+     * @hide
+     */
+    @SystemApi
+    public static final class AppUsageLimit implements Parcelable {
+        private final long mTotalUsageLimit;
+        private final long mUsageRemaining;
+
+        /** @hide */
+        public AppUsageLimit(long totalUsageLimit, long usageRemaining) {
+            this.mTotalUsageLimit = totalUsageLimit;
+            this.mUsageRemaining = usageRemaining;
+        }
+
+        /**
+         * Returns the total usage limit in milliseconds set for an app or a group of apps.
+         *
+         * @return the total usage limit in milliseconds
+         */
+        public long getTotalUsageLimit() {
+            return mTotalUsageLimit;
+        }
+
+        /**
+         * Returns the usage remaining in milliseconds for an app or the group of apps
+         * this limit refers to.
+         *
+         * @return the usage remaining in milliseconds
+         */
+        public long getUsageRemaining() {
+            return mUsageRemaining;
+        }
+
+        private AppUsageLimit(Parcel source) {
+            mTotalUsageLimit = source.readLong();
+            mUsageRemaining = source.readLong();
+        }
+
+        public static final @android.annotation.NonNull Creator<AppUsageLimit> CREATOR = new Creator<AppUsageLimit>() {
+            @Override
+            public AppUsageLimit createFromParcel(Parcel source) {
+                return new AppUsageLimit(source);
+            }
+
+            @Override
+            public AppUsageLimit[] newArray(int size) {
+                return new AppUsageLimit[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(mTotalUsageLimit);
+            dest.writeLong(mUsageRemaining);
         }
     }
 }

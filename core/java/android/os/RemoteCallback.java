@@ -29,7 +29,7 @@ import android.annotation.TestApi;
 public final class RemoteCallback implements Parcelable {
 
     public interface OnResultListener {
-        public void onResult(Bundle result);
+        void onResult(@Nullable Bundle result);
     }
 
     private final OnResultListener mListener;
@@ -94,7 +94,7 @@ public final class RemoteCallback implements Parcelable {
         parcel.writeStrongBinder(mCallback.asBinder());
     }
 
-    public static final Parcelable.Creator<RemoteCallback> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<RemoteCallback> CREATOR
             = new Parcelable.Creator<RemoteCallback>() {
         public RemoteCallback createFromParcel(Parcel parcel) {
             return new RemoteCallback(parcel);

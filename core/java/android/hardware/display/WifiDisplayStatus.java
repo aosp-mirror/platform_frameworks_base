@@ -69,7 +69,7 @@ public final class WifiDisplayStatus implements Parcelable {
     @UnsupportedAppUsage
     public static final int DISPLAY_STATE_CONNECTED = 2;
 
-    public static final Creator<WifiDisplayStatus> CREATOR = new Creator<WifiDisplayStatus>() {
+    public static final @android.annotation.NonNull Creator<WifiDisplayStatus> CREATOR = new Creator<WifiDisplayStatus>() {
         public WifiDisplayStatus createFromParcel(Parcel in) {
             int featureState = in.readInt();
             int scanState = in.readInt();

@@ -18,11 +18,12 @@ package android.media.audiofx;
 
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
-import android.util.Log;
-import java.lang.ref.WeakReference;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
+
+import java.lang.ref.WeakReference;
 
 /**
  * The Visualizer class enables application to retrieve part of the currently playing audio for
@@ -455,7 +456,7 @@ public class Visualizer {
      *   <li> Rfk, Ifk are respectively  the real and imaginary parts of the kth frequency
      *   component</li>
      *   <li> If Fs is the sampling frequency retuned by getSamplingRate() the kth frequency is:
-     *   (k*Fs)/(n/2) </li>
+     *   k * Fs / n </li>
      * </ul>
      * <table border="0" cellspacing="0" cellpadding="0">
      * <tr><td>Index </p></td>
@@ -476,9 +477,23 @@ public class Visualizer {
      *     <td>Rf2 </p></td>
      *     <td>If2 </p></td>
      *     <td>... </p></td>
-     *     <td>Rf(n-1)/2 </p></td>
-     *     <td>If(n-1)/2 </p></td></tr>
+     *     <td>Rf(n/2-1) </p></td>
+     *     <td>If(n/2-1) </p></td></tr>
      * </table>
+     * <p>In order to obtain magnitude and phase values the following code can
+     * be used:
+     *    <pre class="prettyprint">
+     *       int n = fft.size();
+     *       float[] magnitudes = new float[n / 2 + 1];
+     *       float[] phases = new float[n / 2 + 1];
+     *       magnitudes[0] = (float)Math.abs(fft[0]);      // DC
+     *       magnitudes[n / 2] = (float)Math.abs(fft[1]);  // Nyquist
+     *       phases[0] = phases[n / 2] = 0;
+     *       for (int k = 1; k &lt; n / 2; k++) {
+     *           int i = k * 2;
+     *           magnitudes[k] = (float)Math.hypot(fft[i], fft[i + 1]);
+     *           phases[k] = (float)Math.atan2(fft[i + 1], fft[i]);
+     *       }</pre>
      * @param fft array of bytes where the FFT should be returned
      * @return {@link #SUCCESS} in case of success,
      * {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT}
@@ -561,25 +576,11 @@ public class Visualizer {
          * <p>Data in the fft buffer is valid only within the scope of the callback.
          * Applications which need access to the fft data after returning from the callback
          * should make a copy of the data instead of holding a reference.
+         * <p>For the explanation of the fft data array layout, and the example
+         * code for processing it, please see the documentation for {@link #getFft(byte[])} method.
          *
-         * <p>In order to obtain magnitude and phase values the following formulas can
-         * be used:
-         *    <pre class="prettyprint">
-         *       for (int i = 0; i &lt; fft.size(); i += 2) {
-         *           float magnitude = (float)Math.hypot(fft[i], fft[i + 1]);
-         *           float phase = (float)Math.atan2(fft[i + 1], fft[i]);
-         *       }</pre>
          * @param visualizer Visualizer object on which the listener is registered.
          * @param fft array of bytes containing the frequency representation.
-         *    The fft array only contains the first half of the actual
-         *    FFT spectrum (frequencies up to Nyquist frequency), exploiting
-         *    the symmetry of the spectrum. For each frequencies bin <code>i</code>:
-         *    <ul>
-         *      <li>the element at index <code>2*i</code> in the array contains
-         *          the real part of a complex number,</li>
-         *      <li>the element at index <code>2*i+1</code> contains the imaginary
-         *          part of the complex number.</li>
-         *    </ul>
          * @param samplingRate sampling rate of the visualized audio.
          */
         void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate);

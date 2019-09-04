@@ -16,31 +16,30 @@
 
 package com.android.systemui.power;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.os.BatteryManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.util.NotificationChannels;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,24 +52,17 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public static final String FORMATTED_45M = "0h 45m";
     public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
-    private final KeyguardManager mMockKeyguardManager = mock(KeyguardManager.class);
-    private PowerNotificationWarnings mPowerNotificationWarnings, mSpyPowerNotificationWarnings;
+    private PowerNotificationWarnings mPowerNotificationWarnings;
 
     @Before
     public void setUp() throws Exception {
         // Test Instance.
-        mContext.addMockSystemService(KeyguardManager.class, mMockKeyguardManager);
         mContext.addMockSystemService(NotificationManager.class, mMockNotificationManager);
-        mPowerNotificationWarnings = new PowerNotificationWarnings(mContext);
-        mSpyPowerNotificationWarnings = spy(mPowerNotificationWarnings);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (mSpyPowerNotificationWarnings.mOverheatAlarmDialog != null) {
-            mSpyPowerNotificationWarnings.mOverheatAlarmDialog.dismiss();
-            mSpyPowerNotificationWarnings.mOverheatAlarmDialog = null;
-        }
+        ActivityStarter starter = mDependency.injectMockDependency(ActivityStarter.class);
+        mPowerNotificationWarnings = new PowerNotificationWarnings(mContext, starter);
+        BatteryStateSnapshot snapshot = new BatteryStateSnapshot(100, false, false, 1,
+                BatteryManager.BATTERY_HEALTH_GOOD, 5, 15);
+        mPowerNotificationWarnings.updateSnapshot(snapshot);
     }
 
     @Test
@@ -166,69 +158,11 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetOverheatAlarmDialog_Overheat_ShouldShowing() {
-        final boolean overheat = true;
-        final boolean shouldBeepSound = false;
-        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+    public void testShowUsbHighTemperatureAlarm() {
+        mPowerNotificationWarnings.showUsbHighTemperatureAlarm();
         waitForIdleSync(mContext.getMainThreadHandler());
+        assertThat(mPowerNotificationWarnings.mUsbHighTempDialog).isNotNull();
 
-        verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(shouldBeepSound);
+        mPowerNotificationWarnings.mUsbHighTempDialog.dismiss();
     }
-
-    @Test
-    public void testSetOverheatAlarmDialog_Overheat_ShouldShowingWithBeepSound() {
-        final boolean overheat = true;
-        final boolean shouldBeepSound = true;
-        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
-        waitForIdleSync(mContext.getMainThreadHandler());
-
-        verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(shouldBeepSound);
-    }
-
-    @Test
-    public void testSetOverheatAlarmDialog_NotOverheat_ShouldNotShowing() {
-        final boolean overheat = false;
-        final boolean shouldBeepSound = false;
-        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
-        waitForIdleSync(mContext.getMainThreadHandler());
-
-        verify(mSpyPowerNotificationWarnings, never()).setOverheatAlarmDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, never()).setAlarmShouldSound(shouldBeepSound);
-    }
-
-    @Test
-    public void testSetOverheatAlarmDialog_NotOverheat_ShouldNotAlarmBeepSound() {
-        final boolean overheat = false;
-        final boolean configBeepSound = true;
-        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, configBeepSound);
-        waitForIdleSync(mContext.getMainThreadHandler());
-
-        verify(mSpyPowerNotificationWarnings, never()).setOverheatAlarmDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, never()).setAlarmShouldSound(configBeepSound);
-    }
-
-    @Test
-    public void testOverheatAlarmDialogShowing() {
-        final boolean overheat = true;
-        final boolean shouldBeepSound = false;
-        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
-        waitForIdleSync(mContext.getMainThreadHandler());
-
-        verify(mSpyPowerNotificationWarnings, atLeastOnce()).setOverheatAlarmDialogShowing(
-                overheat);
-    }
-
-    @Test
-    public void testOverheatAlarmDialogNotShowing() {
-        final boolean overheat = false;
-        final boolean shouldBeepSound = false;
-        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
-
-        waitForIdleSync(mContext.getMainThreadHandler());
-        verify(mSpyPowerNotificationWarnings, never()).setOverheatAlarmDialogShowing(
-                overheat);
-    }
-
 }

@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.UserManager;
-import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -33,7 +33,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
@@ -95,6 +94,30 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         registerListener();
     }
 
+    public boolean isMultiUserEnabled() {
+        // Short-circuiting from UserManager. Needs to be extracted because of SystemUI boolean flag
+        // qs_show_user_switcher_for_single_user
+
+        // The default in UserManager is to show the switcher. We want to not show it unless the
+        // user explicitly requests it in Settings
+        final boolean userSwitcherEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.USER_SWITCHER_ENABLED, 0) != 0;
+
+        if (!UserManager.supportsMultipleUsers()
+                || mUserManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)
+                || UserManager.isDeviceInDemoMode(mContext)
+                || !userSwitcherEnabled) {
+            return false;
+        }
+
+        final boolean guestEnabled = !mContext.getSystemService(DevicePolicyManager.class)
+                .getGuestUserDisabled(null);
+        return mUserSwitcherController.getSwitchableUserCount() > 1
+                // If we cannot add guests even if they are enabled, do not show
+                || (guestEnabled && !mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER))
+                || mContext.getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user);
+    }
+
     private void registerListener() {
         if (mUserManager.isUserSwitcherEnabled() && mUserListener == null) {
 
@@ -118,29 +141,20 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if (mUserManager.isUserSwitcherEnabled()) {
-            if (mKeyguardMode) {
-                if (mKeyguardUserSwitcher != null) {
-                    mKeyguardUserSwitcher.show(true /* animate */);
-                }
-            } else if (mQsPanel != null && mUserSwitcherController != null) {
-                View center = getChildCount() > 0 ? getChildAt(0) : this;
-
-                center.getLocationInWindow(mTmpInt2);
-                mTmpInt2[0] += center.getWidth() / 2;
-                mTmpInt2[1] += center.getHeight() / 2;
-
-                mQsPanel.showDetailAdapter(true,
-                        getUserDetailAdapter(),
-                        mTmpInt2);
+        if (mKeyguardMode) {
+            if (mKeyguardUserSwitcher != null) {
+                mKeyguardUserSwitcher.show(true /* animate */);
             }
-        } else {
-            if (mQsPanel != null) {
-                Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
-                        getContext(), v, ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.QuickContact.MODE_LARGE, null);
-                Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(intent, 0);
-            }
+        } else if (mQsPanel != null && mUserSwitcherController != null) {
+            View center = getChildCount() > 0 ? getChildAt(0) : this;
+
+            center.getLocationInWindow(mTmpInt2);
+            mTmpInt2[0] += center.getWidth() / 2;
+            mTmpInt2[1] += center.getHeight() / 2;
+
+            mQsPanel.showDetailAdapter(true,
+                    getUserDetailAdapter(),
+                    mTmpInt2);
         }
     }
 

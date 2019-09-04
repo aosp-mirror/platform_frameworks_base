@@ -18,56 +18,30 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"শ্বেল"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"বাগ সম্পৰ্কীয় প্ৰতিবেদন"</string>
-    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (1223616207145252689) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
-    <!-- no translation found for bugreport_unreadable_text (586517851044535486) -->
-    <skip />
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
-    <!-- no translation found for bugreport_info_action (2158204228510576227) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
-    <skip />
-    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
-    <skip />
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (2306030793918239804) -->
-    <skip />
-    <!-- no translation found for bugreport_info_description (5072835127481627722) -->
-    <skip />
-    <!-- no translation found for save (4781509040564835759) -->
-    <skip />
-    <!-- no translation found for bugreport_intent_chooser_title (7605709494790894076) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"বাগ সম্পর্কীয় অভিযোগ <xliff:g id="ID">#%d</xliff:g> সৃষ্টি কৰি থকা হৈছে"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"বাগ সম্পর্কীয় অভিযোগ <xliff:g id="ID">#%d</xliff:g> ৰেকৰ্ড কৰা হ’ল"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"বাগ সম্পর্কীয় অভিযোগটোত বিশদ তথ্য যোগ কৰি থকা হৈছে"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"অনুগ্রহ কৰি অপেক্ষা কৰক…"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ফ\'নত বাগ সম্পর্কীয় অভিযোগ অতি সোনকালে উপলব্ধ হ\'ব"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"আপোনাৰ বাগ সম্পৰ্কীয় অভিযোগ শ্বেয়াৰ কৰিবৰ বাবে বাছনি কৰক"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"আপোনাৰ বাগ সম্পর্কীয় অভিযোগ শ্বেয়াৰ কৰিবৰ বাবে ইয়াত টিপক"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"ষ্ক্ৰীণশ্বট নোলোৱাকৈ বাগ সম্পৰ্কীয় অভিযোগ শ্বেয়াৰ কৰিবলৈ বাছনি কৰক বা ষ্ক্ৰীণশ্বট লোৱা কাৰ্য সম্পূৰ্ণ হোৱালৈ অপেক্ষা কৰক"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"স্ক্ৰীণশ্বট নোলোৱাকৈ বাগ সম্পর্কীয় অভিযোগ শ্বেয়াৰ কৰিবলৈ ইয়াত টিপক বা স্ক্ৰীণশ্বট সম্পূৰ্ণ হোৱালৈ অপেক্ষা কৰক"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"স্ক্ৰীণশ্বট নোলোৱাকৈ বাগ সম্পর্কীয় অভিযোগ শ্বেয়াৰ কৰিবলৈ ইয়াত টিপক বা স্ক্ৰীণশ্বট সম্পূৰ্ণ হোৱালৈ অপেক্ষা কৰক"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"বাগ সম্পর্কীয় অভিযোগত ছিষ্টেমৰ বিভিন্ন লগ ফাইল থাকে, ইয়াৰ ভিতৰত আপুনি স্পর্শকাতৰ বুলি গণ্য কৰা ডেটা (যেনে এপৰ ব্য়ৱহাৰ আৰু অৱস্থান সম্পৰ্কীয় তথ্য়) অন্তর্ভুক্ত হ\'ব পাৰে। কেৱল আপোনাৰ বিশ্বাসী লোক বা এপৰ সৈতেহে বাগ সম্পর্কীয় অভিযোগ শ্বেয়াৰ কৰিব।"</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"পুনৰাই নেদেখুৱাব"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"বাগ সম্পর্কীয় প্ৰতিবেদনসমূহ"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"বাগ সম্পর্কীয় অভিযোগৰ ফাইলটো পঢ়িব পৰা নগ\'ল"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"বাগ সম্পর্কীয় অভিযোগৰ বিৱৰণ জিপ ফাইলত যোগ কৰিব পৰা নগ\'ল"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"নামবিহীন"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"সবিশেষ"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"স্ক্ৰীণশ্বট"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"স্ক্ৰীণশ্বট সফলতাৰে লোৱা হ\'ল৷"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"স্ক্ৰীণশ্বট ল\'ব পৰা নগ\'ল।"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"বাগ সম্পর্কীয় অভিযোগৰ বিৱৰণ <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ফাইলৰ নাম"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"বাগৰ শিৰোনাম"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"বাগ সাৰাংশ"</string>
+    <string name="save" msgid="4781509040564835759">"ছেভ কৰক"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"বাগ সম্পর্কীয় অভিযোগ শ্বেয়াৰ কৰক"</string>
 </resources>

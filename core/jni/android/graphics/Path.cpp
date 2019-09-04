@@ -28,7 +28,6 @@
 #include "SkPathOps.h"
 #include "SkGeometry.h" // WARNING: Internal Skia Header
 
-#include <Caches.h>
 #include <vector>
 #include <map>
 
@@ -38,10 +37,6 @@ class SkPathGlue {
 public:
 
     static void finalizer(SkPath* obj) {
-        // Purge entries from the HWUI path cache if this path's data is unique
-        if (obj->unique() && android::uirenderer::Caches::hasInstance()) {
-            android::uirenderer::Caches::getInstance().pathCache.removeDeferred(obj);
-        }
         delete obj;
     }
 

@@ -128,8 +128,8 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
     private static void verifySameType(final Class<?> expected, final Class<?> actual) {
         if (!actual.equals(expected)) {
             throw new IllegalArgumentException("Can't unparcel type "
-                    + actual.getName() + " in list of type "
-                    + expected.getName());
+                    + (actual == null ? null : actual.getName()) + " in list of type "
+                    + (expected == null ? null : expected.getName()));
         }
     }
 

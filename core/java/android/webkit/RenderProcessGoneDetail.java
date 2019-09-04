@@ -22,6 +22,13 @@ package android.webkit;
  **/
 public abstract class RenderProcessGoneDetail {
     /**
+     * @deprecated This class should not be constructed by applications.
+     */
+    // TODO(ntfschr): mark this as @SystemApi after a year.
+    @Deprecated
+    public RenderProcessGoneDetail() {}
+
+    /**
      * Indicates whether the render process was observed to crash, or whether
      * it was killed by the system.
      *

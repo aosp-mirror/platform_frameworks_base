@@ -115,7 +115,7 @@ public final class TextClassificationSessionId implements Parcelable {
         return new TextClassificationSessionId(string);
     }
 
-    public static final Parcelable.Creator<TextClassificationSessionId> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationSessionId> CREATOR =
             new Parcelable.Creator<TextClassificationSessionId>() {
                 @Override
                 public TextClassificationSessionId createFromParcel(Parcel parcel) {

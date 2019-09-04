@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:minLevel="0" android:maxLevel="0" android:drawable="@drawable/ic_signal_cellular_0_4_bar" />
+    <item android:minLevel="1" android:maxLevel="1" android:drawable="@drawable/ic_signal_cellular_1_4_bar" />
+    <item android:minLevel="2" android:maxLevel="2" android:drawable="@drawable/ic_signal_cellular_2_4_bar" />
+    <item android:minLevel="3" android:maxLevel="3" android:drawable="@drawable/ic_signal_cellular_3_4_bar" />
+    <item android:minLevel="4" android:maxLevel="4" android:drawable="@drawable/ic_signal_cellular_4_4_bar" />
+    <item android:minLevel="10" android:maxLevel="10" android:drawable="@drawable/ic_signal_cellular_0_5_bar" />
+    <item android:minLevel="11" android:maxLevel="11" android:drawable="@drawable/ic_signal_cellular_1_5_bar" />
+    <item android:minLevel="12" android:maxLevel="12" android:drawable="@drawable/ic_signal_cellular_2_5_bar" />
+    <item android:minLevel="13" android:maxLevel="13" android:drawable="@drawable/ic_signal_cellular_3_5_bar" />
+    <item android:minLevel="14" android:maxLevel="14" android:drawable="@drawable/ic_signal_cellular_4_5_bar" />
+    <item android:minLevel="15" android:maxLevel="15" android:drawable="@drawable/ic_signal_cellular_5_5_bar" />
+</level-list>

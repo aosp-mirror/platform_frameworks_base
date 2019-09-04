@@ -16,10 +16,12 @@
 
 package com.android.server.accessibility;
 
-import android.app.Notification;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Pair;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,13 +36,22 @@ public class MessageCapturingHandler extends Handler {
     Handler.Callback mCallback;
 
     public MessageCapturingHandler(Handler.Callback callback) {
+        this(InstrumentationRegistry.getContext().getMainLooper(), callback);
+    }
+
+    public MessageCapturingHandler(Looper looper, Callback callback) {
+        super(looper);
         mCallback = callback;
     }
 
+    /**
+     * Holding messages in queue, but never dispatching.
+     * @see #removeAllMessages()
+     */
     @Override
     public boolean sendMessageAtTime(Message message, long uptimeMillis) {
         timedMessages.add(new Pair<>(Message.obtain(message), uptimeMillis));
-        return super.sendMessageAtTime(message, uptimeMillis);
+        return super.sendMessageAtTime(message, Long.MAX_VALUE);
     }
 
     public void setCallback(Handler.Callback callback) {
@@ -65,6 +76,22 @@ public class MessageCapturingHandler extends Handler {
         removeMessages(message.what, message.obj);
         dispatchMessage(message);
         removeStaleMessages();
+    }
+
+    /**
+     * Clear messages sent from this handler in queue.
+     * <p>
+     * If main looper is used, this method should be called in tear down function
+     * to ensure messages isolation between test cases.
+     * </p>
+     */
+    public void removeAllMessages() {
+        if (hasMessages()) {
+            for (int i = 0; i < timedMessages.size(); i++) {
+                Message message = timedMessages.get(i).first;
+                removeMessages(message.what, message.obj);
+            }
+        }
     }
 
     public boolean hasMessages() {

@@ -424,8 +424,16 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 1 << 10;
 
+    /**
+     * Set by the framework to indicate that a Conference or Connection is hosted by a device other
+     * than the current one.  Used in scenarios where the conference originator is the remote device
+     * and the current device is a participant of that conference.
+     * @hide
+     */
+    public static final int PROPERTY_REMOTELY_HOSTED = 1 << 11;
+
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<10
+    // Next PROPERTY value: 1<<12
     //**********************************************************************************************
 
     /**
@@ -632,7 +640,7 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.event.HANDOVER_FAILED";
 
     /**
-     * Connection extra key used to store SIP invite fields for an incoming call for IMS calls
+     * String Connection extra key used to store SIP invite fields for an incoming call for IMS call
      */
     public static final String EXTRA_SIP_INVITE = "android.telecom.extra.SIP_INVITE";
 
@@ -848,6 +856,10 @@ public abstract class Connection extends Conferenceable {
 
         if (can(properties, PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)) {
             builder.append(isLong ? " PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL" : " ecall");
+        }
+
+        if (can(properties, PROPERTY_REMOTELY_HOSTED)) {
+            builder.append(isLong ? " PROPERTY_REMOTELY_HOSTED" : " remote_hst");
         }
 
         builder.append("]");
@@ -1781,6 +1793,11 @@ public abstract class Connection extends Conferenceable {
     private ConnectionService mConnectionService;
     private Bundle mExtras;
     private final Object mExtrasLock = new Object();
+    /**
+     * The direction of the connection; used where an existing connection is created and we need to
+     * communicate to Telecom whether its incoming or outgoing.
+     */
+    private @Call.Details.CallDirection int mCallDirection = Call.Details.DIRECTION_UNKNOWN;
 
     /**
      * Tracks the key set for the extras bundle provided on the last invocation of
@@ -3344,5 +3361,22 @@ public abstract class Connection extends Conferenceable {
         for (Listener l : mListeners) {
             l.onConnectionEvent(this, event, extras);
         }
+    }
+
+    /**
+     * @return The direction of the call.
+     * @hide
+     */
+    public final @Call.Details.CallDirection int getCallDirection() {
+        return mCallDirection;
+    }
+
+    /**
+     * Sets the direction of this connection.
+     * @param callDirection The direction of this connection.
+     * @hide
+     */
+    public void setCallDirection(@Call.Details.CallDirection int callDirection) {
+        mCallDirection = callDirection;
     }
 }

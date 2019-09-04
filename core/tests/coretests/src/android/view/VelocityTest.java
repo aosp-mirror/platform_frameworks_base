@@ -16,15 +16,16 @@
 
 package android.view;
 
-import android.test.suitebuilder.annotation.Suppress;
-import junit.framework.Assert;
-
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
+
+import junit.framework.Assert;
 
 /**
  * Exercises {@link android.view.VelocityTracker} to compute correct velocity.<br>

@@ -42,6 +42,7 @@ import com.android.internal.util.Preconditions;
 import java.io.CharArrayWriter;
 import java.io.File;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -158,7 +159,7 @@ public class VolumeInfo implements Parcelable {
     public final DiskInfo disk;
     public final String partGuid;
     public int mountFlags = 0;
-    public int mountUserId = -1;
+    public int mountUserId = UserHandle.USER_NULL;
     @UnsupportedAppUsage
     public int state = STATE_UNMOUNTED;
     public String fsType;
@@ -252,6 +253,10 @@ public class VolumeInfo implements Parcelable {
     @UnsupportedAppUsage
     public @Nullable String getFsUuid() {
         return fsUuid;
+    }
+
+    public @Nullable String getNormalizedFsUuid() {
+        return fsUuid != null ? fsUuid.toLowerCase(Locale.US) : null;
     }
 
     @UnsupportedAppUsage
@@ -522,7 +527,7 @@ public class VolumeInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
+    public static final @android.annotation.NonNull Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
         @Override
         public VolumeInfo createFromParcel(Parcel in) {
             return new VolumeInfo(in);

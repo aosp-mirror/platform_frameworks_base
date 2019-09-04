@@ -167,7 +167,7 @@ public final class ImsFeatureConfiguration implements Parcelable {
         }
     }
 
-    public static final Creator<ImsFeatureConfiguration> CREATOR
+    public static final @android.annotation.NonNull Creator<ImsFeatureConfiguration> CREATOR
             = new Creator<ImsFeatureConfiguration>() {
         @Override
         public ImsFeatureConfiguration createFromParcel(Parcel in) {

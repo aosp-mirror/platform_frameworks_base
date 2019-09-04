@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.provider;
 
 import static android.provider.FontsContract.Columns;
@@ -21,16 +22,13 @@ import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
-import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
-import android.util.ArraySet;
-import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,8 +43,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.android.internal.annotations.GuardedBy;
 
 public class MockFontProvider extends ContentProvider {
     final static String AUTHORITY = "android.provider.fonts.font";

@@ -259,7 +259,7 @@ public final class PreciseCallState implements Parcelable {
         out.writeInt(mPreciseDisconnectCause);
     }
 
-    public static final Parcelable.Creator<PreciseCallState> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PreciseCallState> CREATOR
             = new Parcelable.Creator<PreciseCallState>() {
 
         public PreciseCallState createFromParcel(Parcel in) {

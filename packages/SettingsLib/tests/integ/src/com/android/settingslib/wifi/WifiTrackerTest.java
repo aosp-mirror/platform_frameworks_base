@@ -21,13 +21,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,14 +49,19 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiSsid;
+import android.net.wifi.hotspot2.OsuProvider;
+import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.util.ArraySet;
+import android.util.Pair;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.settingslib.utils.ThreadUtils;
 
@@ -74,13 +79,15 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 // TODO(sghuman): Change these to robolectric tests b/35766684.
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WifiTrackerTest {
@@ -95,6 +102,8 @@ public class WifiTrackerTest {
     private static final int RSSI_1 = -30;
     private static final byte SCORE_1 = 10;
     private static final int BADGE_1 = AccessPoint.Speed.MODERATE;
+    private static final String FQDN_1 = "fqdn1";
+    private static final String PROVIDER_FRIENDLY_NAME_1 = "providerFriendlyName1";
 
     private static final String SSID_2 = "ssid2";
     private static final String BSSID_2 = "AA:AA:AA:AA:AA:AA";
@@ -103,6 +112,12 @@ public class WifiTrackerTest {
     private static final int RSSI_2 = -30;
     private static final byte SCORE_2 = 15;
     private static final int BADGE_2 = AccessPoint.Speed.FAST;
+    private static final String FQDN_2 = "fqdn2";
+    private static final String PROVIDER_FRIENDLY_NAME_2 = "providerFriendlyName2";
+
+    private static final String SSID_3 = "ssid3";
+    private static final String BSSID_3 = "CC:00:00:00:00:00";
+    private static final int RSSI_3 = -40;
 
     // TODO(b/65594609): Convert mutable Data objects to instance variables / builder pattern
     private static final int NETWORK_ID_1 = 123;
@@ -255,6 +270,75 @@ public class WifiTrackerTest {
                 SystemClock.elapsedRealtime() * 1000 /* microsecond timestamp */);
     }
 
+    private static ScanResult buildScanResultWithTimestamp(long timestampMillis) {
+        return new ScanResult(
+                WifiSsid.createFromAsciiEncoded(SSID_3),
+                BSSID_3,
+                0, // hessid
+                0, //anqpDomainId
+                null, // osuProviders
+                "", // capabilities
+                RSSI_3,
+                0, // frequency
+                timestampMillis * 1000 /* microsecond timestamp */);
+    }
+
+    private static WifiConfiguration buildPasspointConfiguration(String fqdn, String friendlyName) {
+        WifiConfiguration config = spy(new WifiConfiguration());
+        config.FQDN = fqdn;
+        config.providerFriendlyName = friendlyName;
+        when(config.isPasspoint()).thenReturn(true);
+        return config;
+    }
+
+    private List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>>
+            createPasspointMatchingWifiConfigsWithDuplicates() {
+        List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> matchingList =
+                new ArrayList<>();
+        Map<Integer, List<ScanResult>> mapping = new HashMap<>();
+
+        mapping.put(WifiManager.PASSPOINT_HOME_NETWORK, Arrays.asList(buildScanResult1()));
+
+        WifiConfiguration passpointConfig1 =
+                buildPasspointConfiguration(FQDN_1, PROVIDER_FRIENDLY_NAME_1);
+        WifiConfiguration passpointConfig2 =
+                buildPasspointConfiguration(FQDN_2, PROVIDER_FRIENDLY_NAME_2);
+
+        matchingList.add(new Pair(passpointConfig1, mapping));
+        matchingList.add(new Pair(passpointConfig1, mapping));
+        matchingList.add(new Pair(passpointConfig2, mapping));
+        matchingList.add(new Pair(passpointConfig2, mapping));
+
+        return matchingList;
+    }
+
+    private List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>>
+            createPasspointMatchingWifiConfigWithScanResults(
+            List<ScanResult> homeList, List<ScanResult> roamingList,
+            String fqdn, String friendlyName) {
+        List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> matchingList =
+                new ArrayList<>();
+        Map<Integer, List<ScanResult>> mapping = new HashMap<>();
+
+        if (homeList != null) {
+            mapping.put(WifiManager.PASSPOINT_HOME_NETWORK, homeList);
+        }
+        if (roamingList != null) {
+            mapping.put(WifiManager.PASSPOINT_ROAMING_NETWORK, roamingList);
+        }
+
+        matchingList.add(new Pair(buildPasspointConfiguration(fqdn, friendlyName),
+                mapping));
+
+        return matchingList;
+    }
+
+    private static OsuProvider buildOsuProvider(String friendlyName) {
+        Map<String, String> friendlyNames = new HashMap<>();
+        friendlyNames.put("en", friendlyName);
+        return new OsuProvider(null, friendlyNames, null, null, null, null, null);
+    }
+
     private WifiTracker createTrackerWithImmediateBroadcastsAndInjectInitialScanResults(
                     Intent ... intents)
             throws InterruptedException {
@@ -293,6 +377,12 @@ public class WifiTrackerTest {
 
     private void sendScanResults(WifiTracker tracker) throws InterruptedException {
         Intent i = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        tracker.mReceiver.onReceive(mContext, i);
+    }
+
+    private void sendFailedScanResults(WifiTracker tracker) throws InterruptedException {
+        Intent i = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        i.putExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
         tracker.mReceiver.onReceive(mContext, i);
     }
 
@@ -895,5 +985,235 @@ public class WifiTrackerTest {
 
         assertThat(aps.get(0).isReachable()).isTrue();
         assertThat(aps.get(1).isReachable()).isTrue();
+    }
+
+    @Test
+    public void onStart_updateScanResults_evictOldScanResult() {
+        when(mockWifiManager.getScanResults()).thenReturn(Arrays.asList(
+                buildScanResult1(), buildScanResult2(), buildScanResultWithTimestamp(0)));
+        WifiTracker tracker = createMockedWifiTracker();
+
+        tracker.forceUpdate();
+
+        // Only has scanResult1 and scanResult2
+        assertThat(tracker.getAccessPoints()).hasSize(2);
+        assertThat(tracker.getAccessPoints().get(0).getBssid()).isEqualTo(BSSID_1);
+        assertThat(tracker.getAccessPoints().get(1).getBssid()).isEqualTo(BSSID_2);
+    }
+
+    /**
+     * Verifies that a failed scan reported on SCAN_RESULTS_AVAILABLE_ACTION should increase the
+     * ScanResult eviction timeout to twice the default.
+     */
+    @Test
+    public void failedScan_increasesEvictionTimeout() throws InterruptedException {
+        when(mockWifiManager.getScanResults()).thenReturn(Arrays.asList(
+                buildScanResult1(), buildScanResult2(), buildScanResultWithTimestamp(
+                        SystemClock.elapsedRealtime() - WifiTracker.MAX_SCAN_RESULT_AGE_MILLIS)));
+        WifiTracker tracker = createMockedWifiTracker();
+
+        sendFailedScanResults(tracker);
+
+        // Failed scan increases timeout window to include the stale scan
+        assertThat(tracker.getAccessPoints()).hasSize(3);
+        assertThat(tracker.getAccessPoints().get(0).getBssid()).isEqualTo(BSSID_1);
+        assertThat(tracker.getAccessPoints().get(1).getBssid()).isEqualTo(BSSID_2);
+        assertThat(tracker.getAccessPoints().get(2).getBssid()).isEqualTo(BSSID_3);
+
+        sendScanResults(tracker);
+
+        // Successful scan resets the timeout window to remove the stale scan
+        assertThat(tracker.getAccessPoints()).hasSize(2);
+        assertThat(tracker.getAccessPoints().get(0).getBssid()).isEqualTo(BSSID_1);
+        assertThat(tracker.getAccessPoints().get(1).getBssid()).isEqualTo(BSSID_2);
+    }
+
+    /**
+     * Verifies that updatePasspointAccessPoints will only return AccessPoints whose
+     * isPasspoint() evaluates as true.
+     */
+    @Test
+    public void updatePasspointAccessPoints_returnedAccessPointsArePasspoint() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        List<AccessPoint> passpointAccessPoints = tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigsWithDuplicates(), new ArrayList<>());
+
+        assertTrue(passpointAccessPoints.size() != 0);
+        for (AccessPoint ap : passpointAccessPoints) {
+            assertTrue(ap.isPasspoint());
+        }
+    }
+
+    /**
+     * Verifies that updatePasspointAccessPoints will return the same amount of AccessPoints as
+     * unique WifiConfigurations, even if duplicate FQDNs exist.
+     */
+    @Test
+    public void updatePasspointAccessPoints_ignoresDuplicateFQDNs() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        // Process matching list of four configs with two duplicate FQDNs.
+        List<AccessPoint> passpointAccessPoints = tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigsWithDuplicates(), new ArrayList<>());
+
+        // Should have 2 APs with unique FQDNs, ignoring the 2 duplicate FQDNs.
+        assertThat(passpointAccessPoints).hasSize(2);
+
+        Set<String> fqdns = new ArraySet<>(Arrays.asList(FQDN_1, FQDN_2));
+
+        assertTrue(fqdns.remove(passpointAccessPoints.get(0).getConfig().FQDN));
+        assertTrue(fqdns.remove(passpointAccessPoints.get(1).getConfig().FQDN));
+    }
+
+    /**
+     * Verifies that updatePasspointAccessPoints will return matching cached APs and update their
+     * scan results instead of creating new APs.
+     */
+    @Test
+    public void updatePasspointAccessPoints_usesCachedAccessPoints() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        ScanResult result = buildScanResult1();
+
+        List<AccessPoint> passpointAccessPointsFirstUpdate = tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_1), new ArrayList<>());
+        List<AccessPoint> cachedAccessPoints = new ArrayList<>(passpointAccessPointsFirstUpdate);
+
+        int prevRssi = result.level;
+        int newRssi = prevRssi + 10;
+        result.level = newRssi;
+
+        List<AccessPoint> passpointAccessPointsSecondUpdate = tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_1), cachedAccessPoints);
+
+        // Verify second update AP is the same object as the first update AP
+        assertThat(passpointAccessPointsFirstUpdate.get(0))
+                .isSameAs(passpointAccessPointsSecondUpdate.get(0));
+        // Verify second update AP has the average of the first and second update RSSIs
+        assertThat(passpointAccessPointsSecondUpdate.get(0).getRssi())
+                .isEqualTo((prevRssi + newRssi) / 2);
+    }
+
+    /**
+     * Verifies that the internal WifiConfiguration of a Passpoint AccessPoint is updated
+     */
+    @Test
+    public void updatePasspointAccessPoints_updatesConfig() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        ScanResult result = buildScanResult1();
+
+        List<AccessPoint> passpointAccessPoints = tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_1), new ArrayList<>());
+
+        AccessPoint ap = passpointAccessPoints.get(0);
+        assertEquals(ap.getTitle(), PROVIDER_FRIENDLY_NAME_1);
+
+        tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_2), passpointAccessPoints);
+        assertEquals(ap.getTitle(), PROVIDER_FRIENDLY_NAME_2);
+    }
+
+    /**
+     * Verifies that updateOsuAccessPoints will only return AccessPoints whose
+     * isOsuProvider() evaluates as true.
+     */
+    @Test
+    public void updateOsuAccessPoints_returnedAccessPointsAreOsuProviders() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        Map<OsuProvider, List<ScanResult>> providersAndScans = new HashMap<>();
+        providersAndScans.put(
+                buildOsuProvider(PROVIDER_FRIENDLY_NAME_1), Arrays.asList(buildScanResult1()));
+        providersAndScans.put(
+                buildOsuProvider(PROVIDER_FRIENDLY_NAME_2), Arrays.asList(buildScanResult2()));
+
+        List<AccessPoint> osuAccessPoints = tracker.updateOsuAccessPoints(
+                providersAndScans, new ArrayList<>());
+
+        assertThat(osuAccessPoints).hasSize(2);
+        for (AccessPoint ap: osuAccessPoints) {
+            assertThat(ap.isOsuProvider()).isTrue();
+        }
+    }
+
+    /**
+     * Verifies that updateOsuAccessPoints will not return Osu AccessPoints for already provisioned
+     * networks
+     */
+    @Test
+    public void updateOsuAccessPoints_doesNotReturnAlreadyProvisionedOsuAccessPoints() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        // Start with two Osu Providers
+        Map<OsuProvider, List<ScanResult>> providersAndScans = new HashMap<>();
+        providersAndScans.put(
+                buildOsuProvider(PROVIDER_FRIENDLY_NAME_1), Arrays.asList(buildScanResult1()));
+        providersAndScans.put(
+                buildOsuProvider(PROVIDER_FRIENDLY_NAME_2), Arrays.asList(buildScanResult2()));
+
+        // First update
+        List<AccessPoint> osuAccessPoints = tracker.updateOsuAccessPoints(
+                providersAndScans, new ArrayList<>());
+
+        // Make sure both Osu Providers' APs are returned
+        assertThat(osuAccessPoints).hasSize(2);
+        List<String> friendlyNames = Arrays.asList(
+                osuAccessPoints.get(0).getTitle(), osuAccessPoints.get(1).getTitle());
+        assertThat(friendlyNames)
+                .containsExactly(PROVIDER_FRIENDLY_NAME_1, PROVIDER_FRIENDLY_NAME_2);
+
+        // Simulate Osu Provider 1 being provisioned
+        Map<OsuProvider, PasspointConfiguration> matchingPasspointConfigForOsuProvider =
+                new HashMap<>();
+        matchingPasspointConfigForOsuProvider.put(buildOsuProvider(PROVIDER_FRIENDLY_NAME_1), null);
+        when(mockWifiManager.getMatchingPasspointConfigsForOsuProviders(any())).thenReturn(
+                matchingPasspointConfigForOsuProvider);
+
+        // Second update
+        osuAccessPoints = tracker.updateOsuAccessPoints(
+                providersAndScans, new ArrayList<>());
+
+        // Returned AP should only be for Osu Provider 2
+        assertThat(osuAccessPoints).hasSize(1);
+        assertThat(osuAccessPoints.get(0).getTitle()).isEqualTo(PROVIDER_FRIENDLY_NAME_2);
+    }
+
+    /**
+     * Verifies that updateOsuAccessPoints will return matching cached APs and update their
+     * scan results instead of creating new APs.
+     */
+    @Test
+    public void updateOsuAccessPoints_usesCachedAccessPoints() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        ScanResult result = buildScanResult1();
+
+        Map<OsuProvider, List<ScanResult>> providersAndScans = new HashMap<>();
+        providersAndScans.put(
+                buildOsuProvider(PROVIDER_FRIENDLY_NAME_1), Arrays.asList(result));
+
+        List<AccessPoint> osuAccessPointsFirstUpdate = tracker.updateOsuAccessPoints(
+                providersAndScans, new ArrayList<>());
+        List<AccessPoint> cachedAccessPoints = new ArrayList<>(osuAccessPointsFirstUpdate);
+
+        // New RSSI for second update
+        int prevRssi = result.level;
+        int newRssi = prevRssi + 10;
+        result.level = newRssi;
+
+        List<AccessPoint> osuAccessPointsSecondUpdate = tracker.updateOsuAccessPoints(
+                providersAndScans, cachedAccessPoints);
+
+        // Verify second update AP is the same object as the first update AP
+        assertThat(osuAccessPointsFirstUpdate.get(0)).isSameAs(osuAccessPointsSecondUpdate.get(0));
+        // Verify second update AP has the average of the first and second update RSSIs
+        assertThat(osuAccessPointsSecondUpdate.get(0).getRssi())
+                .isEqualTo((prevRssi + newRssi) / 2);
     }
 }

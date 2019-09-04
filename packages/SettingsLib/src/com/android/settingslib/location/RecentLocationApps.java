@@ -18,17 +18,19 @@ package com.android.settingslib.location;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
-import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import androidx.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
+
+import androidx.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,9 +48,14 @@ public class RecentLocationApps {
     private static final long RECENT_TIME_INTERVAL_MILLIS = DateUtils.DAY_IN_MILLIS;
 
     @VisibleForTesting
-    static final int[] LOCATION_OPS = new int[] {
+    static final int[] LOCATION_REQUEST_OPS = new int[]{
             AppOpsManager.OP_MONITOR_LOCATION,
             AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION,
+    };
+    @VisibleForTesting
+    static final int[] LOCATION_PERMISSION_OPS = new int[]{
+            AppOpsManager.OP_FINE_LOCATION,
+            AppOpsManager.OP_COARSE_LOCATION,
     };
 
     private final PackageManager mPackageManager;
@@ -65,11 +72,13 @@ public class RecentLocationApps {
      * Fills a list of applications which queried location recently within specified time.
      * Apps are sorted by recency. Apps with more recent location requests are in the front.
      */
-    public List<Request> getAppList() {
+    public List<Request> getAppList(boolean showSystemApps) {
+        // Retrieve a location usage list from AppOps
+        PackageManager pm = mContext.getPackageManager();
         // Retrieve a location usage list from AppOps
         AppOpsManager aoManager =
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-        List<AppOpsManager.PackageOps> appOps = aoManager.getPackagesForOps(LOCATION_OPS);
+        List<AppOpsManager.PackageOps> appOps = aoManager.getPackagesForOps(LOCATION_REQUEST_OPS);
 
         final int appOpsCount = appOps != null ? appOps.size() : 0;
 
@@ -81,26 +90,58 @@ public class RecentLocationApps {
 
         for (int i = 0; i < appOpsCount; ++i) {
             AppOpsManager.PackageOps ops = appOps.get(i);
-            // Don't show the Android System in the list - it's not actionable for the user.
-            // Also don't show apps belonging to background users except managed users.
             String packageName = ops.getPackageName();
             int uid = ops.getUid();
-            int userId = UserHandle.getUserId(uid);
-            boolean isAndroidOs =
-                    (uid == Process.SYSTEM_UID) && ANDROID_SYSTEM_PACKAGE_NAME.equals(packageName);
-            if (isAndroidOs || !profiles.contains(new UserHandle(userId))) {
+            final UserHandle user = UserHandle.getUserHandleForUid(uid);
+
+            // Don't show apps belonging to background users except managed users.
+            if (!profiles.contains(user)) {
                 continue;
             }
-            Request request = getRequestFromOps(now, ops);
-            if (request != null) {
-                requests.add(request);
+
+            // Don't show apps that do not have user sensitive location permissions
+            boolean showApp = true;
+            if (!showSystemApps) {
+                for (int op : LOCATION_PERMISSION_OPS) {
+                    final String permission = AppOpsManager.opToPermission(op);
+                    final int permissionFlags = pm.getPermissionFlags(permission, packageName,
+                            user);
+                    if (PermissionChecker.checkPermission(mContext, permission, -1, uid,
+                            packageName)
+                            == PermissionChecker.PERMISSION_GRANTED) {
+                        if ((permissionFlags
+                                & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED)
+                                == 0) {
+                            showApp = false;
+                            break;
+                        }
+                    } else {
+                        if ((permissionFlags
+                                & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED) == 0) {
+                            showApp = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (showApp) {
+                Request request = getRequestFromOps(now, ops);
+                if (request != null) {
+                    requests.add(request);
+                }
             }
         }
         return requests;
     }
 
-    public List<Request> getAppListSorted() {
-        List<Request> requests = getAppList();
+    /**
+     * Gets a list of apps that requested for location recently, sorting by recency.
+     *
+     * @param showSystemApps whether includes system apps in the list.
+     * @return the list of apps that recently requested for location.
+     */
+    public List<Request> getAppListSorted(boolean showSystemApps) {
+        List<Request> requests = getAppList(showSystemApps);
         // Sort the list of Requests by recency. Most recent request first.
         Collections.sort(requests, Collections.reverseOrder(new Comparator<Request>() {
             @Override

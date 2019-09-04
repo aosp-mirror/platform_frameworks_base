@@ -17,14 +17,15 @@
 package android.os;
 
 import android.os.PerformanceCollector.PerformanceResultsWriter;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+
+import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Random;
-
-import junit.framework.TestCase;
 
 public class PerformanceCollectorTest extends TestCase {
 

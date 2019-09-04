@@ -17,18 +17,19 @@
 package com.android.systemui.shared.system;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
 import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.IPinnedStackListener;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.shared.recents.view.RecentsTransition;
@@ -62,7 +63,7 @@ public class WindowManagerWrapper {
     public static final int TRANSIT_KEYGUARD_OCCLUDE = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
     public static final int TRANSIT_KEYGUARD_UNOCCLUDE = WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 
-    public static final int NAV_BAR_POS_INVALID = -1;
+    public static final int NAV_BAR_POS_INVALID = NAV_BAR_INVALID;
     public static final int NAV_BAR_POS_LEFT = NAV_BAR_LEFT;
     public static final int NAV_BAR_POS_RIGHT = NAV_BAR_RIGHT;
     public static final int NAV_BAR_POS_BOTTOM = NAV_BAR_BOTTOM;
@@ -80,6 +81,13 @@ public class WindowManagerWrapper {
     public static final int WINDOWING_MODE_FREEFORM = WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
     private static final WindowManagerWrapper sInstance = new WindowManagerWrapper();
+
+    /**
+     * Forwarder to which we can add multiple pinned stack listeners. Each listener will receive
+     * updates from the window manager service.
+     */
+    private PinnedStackListenerForwarder mPinnedStackListenerForwarder =
+            new PinnedStackListenerForwarder();
 
     public static WindowManagerWrapper getInstance() {
         return sInstance;
@@ -101,23 +109,23 @@ public class WindowManagerWrapper {
      * Overrides a pending app transition.
      */
     public void overridePendingAppTransitionMultiThumbFuture(
-            AppTransitionAnimationSpecsFuture animationSpecFuture,
-            Runnable animStartedCallback, Handler animStartedCallbackHandler, boolean scaleUp) {
+            AppTransitionAnimationSpecsFuture animationSpecFuture, Runnable animStartedCallback,
+            Handler animStartedCallbackHandler, boolean scaleUp, int displayId) {
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .overridePendingAppTransitionMultiThumbFuture(animationSpecFuture.getFuture(),
                             RecentsTransition.wrapStartedListener(animStartedCallbackHandler,
-                                    animStartedCallback), scaleUp);
+                                    animStartedCallback), scaleUp, displayId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override pending app transition (multi-thumbnail future): ", e);
         }
     }
 
     public void overridePendingAppTransitionRemote(
-            RemoteAnimationAdapterCompat remoteAnimationAdapter) {
+            RemoteAnimationAdapterCompat remoteAnimationAdapter, int displayId) {
         try {
             WindowManagerGlobal.getWindowManagerService().overridePendingAppTransitionRemote(
-                    remoteAnimationAdapter.getWrapped());
+                    remoteAnimationAdapter.getWrapped(), displayId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override pending app transition (remote): ", e);
         }
@@ -151,6 +159,27 @@ public class WindowManagerWrapper {
         }
     }
 
+    public void setPipVisibility(final boolean visible) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().setPipVisibility(visible);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reach window manager", e);
+        }
+    }
+
+    /**
+     * @param displayId the id of display to check if there is a software navigation bar.
+     *
+     * @return whether there is a soft nav bar on specific display.
+     */
+    public boolean hasSoftNavigationBar(int displayId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().hasNavigationBar(displayId);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     /**
      * @return The side of the screen where navigation bar is positioned.
      * @see #NAV_BAR_POS_RIGHT
@@ -158,12 +187,41 @@ public class WindowManagerWrapper {
      * @see #NAV_BAR_POS_BOTTOM
      * @see #NAV_BAR_POS_INVALID
      */
-    public int getNavBarPosition() {
+    public int getNavBarPosition(int displayId) {
         try {
-            return WindowManagerGlobal.getWindowManagerService().getNavBarPosition();
+            return WindowManagerGlobal.getWindowManagerService().getNavBarPosition(displayId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get nav bar position");
         }
         return NAV_BAR_POS_INVALID;
+    }
+
+    /**
+     * Registers a docked stack listener with the system.
+     */
+    public void registerDockedStackListener(DockedStackListenerCompat listener) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(
+                    listener.mListener);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register docked stack listener");
+        }
+    }
+
+    /**
+     * Adds a pinned stack listener, which will receive updates from the window manager service
+     * along with any other pinned stack listeners that were added via this method.
+     */
+    public void addPinnedStackListener(IPinnedStackListener listener) throws RemoteException {
+        mPinnedStackListenerForwarder.addListener(listener);
+        WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
+                DEFAULT_DISPLAY, mPinnedStackListenerForwarder);
+    }
+
+    /**
+     * Removes a pinned stack listener.
+     */
+    public void removePinnedStackListener(IPinnedStackListener listener) {
+        mPinnedStackListenerForwarder.removeListener(listener);
     }
 }

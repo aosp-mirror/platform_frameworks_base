@@ -16,6 +16,7 @@
 
 package com.android.systemui.media;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -24,6 +25,7 @@ import android.media.AudioAttributes;
 import android.media.IAudioService;
 import android.media.IRingtonePlayer;
 import android.media.Ringtone;
+import android.media.VolumeShaper;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
@@ -33,10 +35,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Audio.AudioColumns;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.android.systemui.SystemUI;
 
 import java.io.FileDescriptor;
@@ -80,11 +80,16 @@ public class RingtonePlayer extends SystemUI {
         private final Ringtone mRingtone;
 
         public Client(IBinder token, Uri uri, UserHandle user, AudioAttributes aa) {
+            this(token, uri, user, aa, null);
+        }
+
+        Client(IBinder token, Uri uri, UserHandle user, AudioAttributes aa,
+                @Nullable VolumeShaper.Configuration volumeShaperConfig) {
             mToken = token;
 
             mRingtone = new Ringtone(getContextForUser(user), false);
             mRingtone.setAudioAttributes(aa);
-            mRingtone.setUri(uri);
+            mRingtone.setUri(uri, volumeShaperConfig);
         }
 
         @Override
@@ -101,6 +106,12 @@ public class RingtonePlayer extends SystemUI {
         @Override
         public void play(IBinder token, Uri uri, AudioAttributes aa, float volume, boolean looping)
                 throws RemoteException {
+            playWithVolumeShaping(token, uri, aa, volume, looping, null);
+        }
+        @Override
+        public void playWithVolumeShaping(IBinder token, Uri uri, AudioAttributes aa, float volume,
+                boolean looping, @Nullable VolumeShaper.Configuration volumeShaperConfig)
+                throws RemoteException {
             if (LOGD) {
                 Log.d(TAG, "play(token=" + token + ", uri=" + uri + ", uid="
                         + Binder.getCallingUid() + ")");
@@ -110,7 +121,7 @@ public class RingtonePlayer extends SystemUI {
                 client = mClients.get(token);
                 if (client == null) {
                     final UserHandle user = Binder.getCallingUserHandle();
-                    client = new Client(token, uri, user, aa);
+                    client = new Client(token, uri, user, aa, volumeShaperConfig);
                     token.linkToDeath(client, 0);
                     mClients.put(token, client);
                 }

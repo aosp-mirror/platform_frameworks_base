@@ -29,6 +29,15 @@
 #include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
+#include "cmd/Command.h"
+#include "cmd/Compile.h"
+#include "cmd/Convert.h"
+#include "cmd/Diff.h"
+#include "cmd/Dump.h"
+#include "cmd/Link.h"
+#include "cmd/Optimize.h"
+#include "io/FileStream.h"
+#include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Util.h"
 
@@ -37,101 +46,116 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
-// DO NOT UPDATE, this is more of a marketing version.
-static const char* sMajorVersion = "2";
+/** Prints the version information of AAPT2. */
+class VersionCommand : public Command {
+ public:
+  explicit VersionCommand() : Command("version") {
+    SetDescription("Prints the version of aapt.");
+  }
 
-// Update minor version whenever a feature or flag is added.
-static const char* sMinorVersion = "19";
-
-static void PrintVersion() {
-  std::cerr << StringPrintf("Android Asset Packaging Tool (aapt) %s:%s", sMajorVersion,
-                            sMinorVersion)
-            << std::endl;
-}
-
-static void PrintUsage() {
-  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|convert|version] ..." << std::endl;
-}
-
-extern int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics);
-extern int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics);
-extern int Dump(const std::vector<StringPiece>& args);
-extern int Diff(const std::vector<StringPiece>& args);
-extern int Optimize(const std::vector<StringPiece>& args);
-extern int Convert(const std::vector<StringPiece>& args);
-
-static int ExecuteCommand(const StringPiece& command, const std::vector<StringPiece>& args,
-                          IDiagnostics* diagnostics) {
-  if (command == "compile" || command == "c") {
-    return Compile(args, diagnostics);
-  } else if (command == "link" || command == "l") {
-    return Link(args, diagnostics);
-  } else if (command == "dump" || command == "d") {
-    return Dump(args);
-  } else if (command == "diff") {
-    return Diff(args);
-  } else if (command == "optimize") {
-    return Optimize(args);
-  } else if (command == "convert") {
-    return Convert(args);
-  } else if (command == "version") {
-    PrintVersion();
+  int Action(const std::vector<std::string>& /* args */) override {
+    std::cerr << StringPrintf("%s %s", util::GetToolName(), util::GetToolFingerprint().c_str())
+              << std::endl;
     return 0;
   }
-  diagnostics->Error(DiagMessage() << "unknown command '" << command << "'");
-  return -1;
-}
+};
 
-static void RunDaemon(IDiagnostics* diagnostics) {
-  std::cout << "Ready" << std::endl;
-
-  // Run in daemon mode. The first line of input is the command. This can be 'quit' which ends
-  // the daemon mode. Each subsequent line is a single parameter to the command. The end of a
-  // invocation is signaled by providing an empty line. At any point, an EOF signal or the
-  // command 'quit' will end the daemon mode.
-  while (true) {
-    std::vector<std::string> raw_args;
-    for (std::string line; std::getline(std::cin, line) && !line.empty();) {
-      raw_args.push_back(line);
-    }
-
-    if (!std::cin) {
-      break;
-    }
-
-    // An empty command does nothing.
-    if (raw_args.empty()) {
-      continue;
-    }
-
-    if (raw_args[0] == "quit") {
-      break;
-    }
-
-    std::vector<StringPiece> args;
-    args.insert(args.end(), ++raw_args.begin(), raw_args.end());
-    int ret = ExecuteCommand(raw_args[0], args, diagnostics);
-    if (ret != 0) {
-      std::cerr << "Error" << std::endl;
-    }
-    std::cerr << "Done" << std::endl;
+/** The main entry point of AAPT. */
+class MainCommand : public Command {
+ public:
+  explicit MainCommand(text::Printer* printer, IDiagnostics* diagnostics)
+      : Command("aapt2"), diagnostics_(diagnostics) {
+    AddOptionalSubcommand(util::make_unique<CompileCommand>(diagnostics));
+    AddOptionalSubcommand(util::make_unique<LinkCommand>(diagnostics));
+    AddOptionalSubcommand(util::make_unique<DumpCommand>(printer, diagnostics));
+    AddOptionalSubcommand(util::make_unique<DiffCommand>());
+    AddOptionalSubcommand(util::make_unique<OptimizeCommand>());
+    AddOptionalSubcommand(util::make_unique<ConvertCommand>());
+    AddOptionalSubcommand(util::make_unique<VersionCommand>());
   }
-  std::cout << "Exiting daemon" << std::endl;
-}
+
+  int Action(const std::vector<std::string>& args) override {
+    if (args.size() == 0) {
+      diagnostics_->Error(DiagMessage() << "no subcommand specified");
+    } else {
+      diagnostics_->Error(DiagMessage() << "unknown subcommand '" << args[0] << "'");
+    }
+
+    Usage(&std::cerr);
+    return -1;
+  }
+
+ private:
+  IDiagnostics* diagnostics_;
+};
+
+/*
+ * Run in daemon mode. The first line of input is the command. This can be 'quit' which ends
+ * the daemon mode. Each subsequent line is a single parameter to the command. The end of a
+ * invocation is signaled by providing an empty line. At any point, an EOF signal or the
+ * command 'quit' will end the daemon mode.
+ */
+class DaemonCommand : public Command {
+ public:
+  explicit DaemonCommand(io::FileOutputStream* out, IDiagnostics* diagnostics)
+      : Command("daemon", "m"), out_(out), diagnostics_(diagnostics) {
+    SetDescription("Runs aapt in daemon mode. Each subsequent line is a single parameter to the\n"
+        "command. The end of an invocation is signaled by providing an empty line.");
+    AddOptionalFlag("--trace_folder", "Generate systrace json trace fragment to specified folder.",
+                    &trace_folder_);
+  }
+
+  int Action(const std::vector<std::string>& arguments) override {
+    TRACE_FLUSH_ARGS(trace_folder_ ? trace_folder_.value() : "", "daemon", arguments);
+    text::Printer printer(out_);
+    std::cout << "Ready" << std::endl;
+
+    while (true) {
+      std::vector<std::string> raw_args;
+      for (std::string line; std::getline(std::cin, line) && !line.empty();) {
+        raw_args.push_back(line);
+      }
+
+      if (!std::cin) {
+        break;
+      }
+
+      // An empty command does nothing.
+      if (raw_args.empty()) {
+        continue;
+      }
+
+      // End the dameon
+      if (raw_args[0] == "quit") {
+        break;
+      }
+
+      std::vector<StringPiece> args;
+      args.insert(args.end(), raw_args.begin(), raw_args.end());
+      int result = MainCommand(&printer, diagnostics_).Execute(args, &std::cerr);
+      out_->Flush();
+      if (result != 0) {
+        std::cerr << "Error" << std::endl;
+      }
+      std::cerr << "Done" << std::endl;
+    }
+    std::cout << "Exiting daemon" << std::endl;
+
+    return 0;
+  }
+
+ private:
+  io::FileOutputStream* out_;
+  IDiagnostics* diagnostics_;
+  Maybe<std::string> trace_folder_;
+};
 
 }  // namespace aapt
 
 int MainImpl(int argc, char** argv) {
-  if (argc < 2) {
-    std::cerr << "no command specified\n";
-    aapt::PrintUsage();
+  if (argc < 1) {
     return -1;
   }
-
-  argv += 1;
-  argc -= 1;
-
-  aapt::StdErrDiagnostics diagnostics;
 
   // Collect the arguments starting after the program name and command name.
   std::vector<StringPiece> args;
@@ -139,18 +163,18 @@ int MainImpl(int argc, char** argv) {
     args.push_back(argv[i]);
   }
 
-  const StringPiece command(argv[0]);
-  if (command != "daemon" && command != "m") {
-    // Single execution.
-    const int result = aapt::ExecuteCommand(command, args, &diagnostics);
-    if (result < 0) {
-      aapt::PrintUsage();
-    }
-    return result;
-  }
+  // Use a smaller buffer so that there is less latency for printing to stdout.
+  constexpr size_t kStdOutBufferSize = 1024u;
+  aapt::io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
+  aapt::text::Printer printer(&fout);
 
-  aapt::RunDaemon(&diagnostics);
-  return 0;
+  aapt::StdErrDiagnostics diagnostics;
+  auto main_command = new aapt::MainCommand(&printer, &diagnostics);
+
+  // Add the daemon subcommand here so it cannot be called while executing the daemon
+  main_command->AddOptionalSubcommand(
+      aapt::util::make_unique<aapt::DaemonCommand>(&fout, &diagnostics));
+  return main_command->Execute(args, &std::cerr);
 }
 
 int main(int argc, char** argv) {

@@ -19,11 +19,8 @@ package com.android.internal.util;
 import junit.framework.TestCase;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**

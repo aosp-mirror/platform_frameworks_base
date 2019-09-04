@@ -58,7 +58,6 @@ public abstract class RestrictionsReceiver extends BroadcastReceiver {
      * @param request the request data bundle containing at a minimum a request id.
      *
      * @see RestrictionsManager#REQUEST_TYPE_APPROVAL
-     * @see RestrictionsManager#REQUEST_TYPE_LOCAL_APPROVAL
      * @see RestrictionsManager#REQUEST_KEY_ID
      */
     public abstract void onRequestPermission(Context context,

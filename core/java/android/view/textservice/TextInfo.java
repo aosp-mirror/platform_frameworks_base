@@ -138,7 +138,7 @@ public final class TextInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<TextInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<TextInfo> CREATOR
             = new Parcelable.Creator<TextInfo>() {
         @Override
         public TextInfo createFromParcel(Parcel source) {

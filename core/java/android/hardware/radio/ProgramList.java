@@ -304,7 +304,7 @@ public final class ProgramList implements AutoCloseable {
             return 0;
         }
 
-        public static final Parcelable.Creator<Filter> CREATOR = new Parcelable.Creator<Filter>() {
+        public static final @android.annotation.NonNull Parcelable.Creator<Filter> CREATOR = new Parcelable.Creator<Filter>() {
             public Filter createFromParcel(Parcel in) {
                 return new Filter(in);
             }
@@ -409,7 +409,7 @@ public final class ProgramList implements AutoCloseable {
             return 0;
         }
 
-        public static final Parcelable.Creator<Chunk> CREATOR = new Parcelable.Creator<Chunk>() {
+        public static final @android.annotation.NonNull Parcelable.Creator<Chunk> CREATOR = new Parcelable.Creator<Chunk>() {
             public Chunk createFromParcel(Parcel in) {
                 return new Chunk(in);
             }

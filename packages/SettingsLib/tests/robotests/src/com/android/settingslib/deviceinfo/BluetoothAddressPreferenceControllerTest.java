@@ -22,10 +22,10 @@ import static org.mockito.Mockito.doReturn;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.Before;
@@ -33,11 +33,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class BluetoothAddressPreferenceControllerTest {
     @Mock
     private Context mContext;

@@ -16,8 +16,10 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import android.annotation.Nullable;
 import android.security.keystore.recovery.RecoveryController;
 import android.util.Log;
+import android.util.Pair;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -49,6 +51,7 @@ public class WrappedKey {
     private final int mRecoveryStatus;
     private final byte[] mNonce;
     private final byte[] mKeyMaterial;
+    private final byte[] mKeyMetadata;
 
     /**
      * Returns a wrapped form of {@code key}, using {@code wrappingKey} to encrypt the key material.
@@ -58,7 +61,8 @@ public class WrappedKey {
      *     {@link android.security.keystore.AndroidKeyStoreKey} for an example of a key that does
      *     not expose its key material.
      */
-    public static WrappedKey fromSecretKey(PlatformEncryptionKey wrappingKey, SecretKey key)
+    public static WrappedKey fromSecretKey(PlatformEncryptionKey wrappingKey, SecretKey key,
+            @Nullable byte[] metadata)
             throws InvalidKeyException, KeyStoreException {
         if (key.getEncoded() == null) {
             throw new InvalidKeyException(
@@ -96,6 +100,7 @@ public class WrappedKey {
         return new WrappedKey(
                 /*nonce=*/ cipher.getIV(),
                 /*keyMaterial=*/ encryptedKeyMaterial,
+                /*keyMetadata=*/ metadata,
                 /*platformKeyGenerationId=*/ wrappingKey.getGenerationId(),
                 RecoveryController.RECOVERY_STATUS_SYNC_IN_PROGRESS);
     }
@@ -110,11 +115,10 @@ public class WrappedKey {
      * @see RecoveryController#RECOVERY_STATUS_SYNC_IN_PROGRESS
      * @hide
      */
-    public WrappedKey(byte[] nonce, byte[] keyMaterial, int platformKeyGenerationId) {
-        mNonce = nonce;
-        mKeyMaterial = keyMaterial;
-        mPlatformKeyGenerationId = platformKeyGenerationId;
-        mRecoveryStatus = RecoveryController.RECOVERY_STATUS_SYNC_IN_PROGRESS;
+    public WrappedKey(byte[] nonce, byte[] keyMaterial, @Nullable byte[] keyMetadata,
+            int platformKeyGenerationId) {
+        this(nonce, keyMaterial, keyMetadata, platformKeyGenerationId,
+                RecoveryController.RECOVERY_STATUS_SYNC_IN_PROGRESS);
     }
 
     /**
@@ -122,15 +126,18 @@ public class WrappedKey {
      *
      * @param nonce The nonce with which the key material was encrypted.
      * @param keyMaterial The encrypted bytes of the key material.
+     * @param keyMetadata The metadata that will be authenticated (but unencrypted) together with
+     *     the key material when the key is uploaded to cloud.
      * @param platformKeyGenerationId The generation ID of the key used to wrap this key.
      * @param recoveryStatus recovery status of the key.
      *
      * @hide
      */
-    public WrappedKey(byte[] nonce, byte[] keyMaterial, int platformKeyGenerationId,
-            int recoveryStatus) {
+    public WrappedKey(byte[] nonce, byte[] keyMaterial, @Nullable byte[] keyMetadata,
+            int platformKeyGenerationId, int recoveryStatus) {
         mNonce = nonce;
         mKeyMaterial = keyMaterial;
+        mKeyMetadata = keyMetadata;
         mPlatformKeyGenerationId = platformKeyGenerationId;
         mRecoveryStatus = recoveryStatus;
     }
@@ -151,6 +158,15 @@ public class WrappedKey {
      */
     public byte[] getKeyMaterial() {
         return mKeyMaterial;
+    }
+
+    /**
+     * Returns the key metadata.
+     *
+     * @hide
+     */
+    public @Nullable byte[] getKeyMetadata() {
+        return mKeyMetadata;
     }
 
     /**
@@ -181,12 +197,12 @@ public class WrappedKey {
      *
      * @hide
      */
-    public static Map<String, SecretKey> unwrapKeys(
+    public static Map<String, Pair<SecretKey, byte[]>> unwrapKeys(
             PlatformDecryptionKey platformKey,
             Map<String, WrappedKey> wrappedKeys)
             throws NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException,
             InvalidKeyException, InvalidAlgorithmParameterException {
-        HashMap<String, SecretKey> unwrappedKeys = new HashMap<>();
+        HashMap<String, Pair<SecretKey, byte[]>> unwrappedKeys = new HashMap<>();
         Cipher cipher = Cipher.getInstance(KEY_WRAP_CIPHER_ALGORITHM);
         int platformKeyGenerationId = platformKey.getGenerationId();
 
@@ -219,7 +235,7 @@ public class WrappedKey {
                         e);
                 continue;
             }
-            unwrappedKeys.put(alias, key);
+            unwrappedKeys.put(alias, Pair.create(key, wrappedKey.getKeyMetadata()));
         }
 
         return unwrappedKeys;

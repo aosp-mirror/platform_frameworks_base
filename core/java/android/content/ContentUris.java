@@ -16,7 +16,10 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.net.Uri;
+
+import java.util.List;
 
 /**
 * Utility methods useful for working with {@link android.net.Uri} objects
@@ -81,7 +84,7 @@ public class ContentUris {
      * @return the long conversion of the last segment or -1 if the path is
      *  empty
      */
-    public static long parseId(Uri contentUri) {
+    public static long parseId(@NonNull Uri contentUri) {
         String last = contentUri.getLastPathSegment();
         return last == null ? -1 : Long.parseLong(last);
     }
@@ -94,7 +97,7 @@ public class ContentUris {
      *
      * @return the given builder
      */
-    public static Uri.Builder appendId(Uri.Builder builder, long id) {
+    public static @NonNull Uri.Builder appendId(@NonNull Uri.Builder builder, long id) {
         return builder.appendEncodedPath(String.valueOf(id));
     }
 
@@ -106,7 +109,33 @@ public class ContentUris {
      *
      * @return a new URI with the given ID appended to the end of the path
      */
-    public static Uri withAppendedId(Uri contentUri, long id) {
+    public static @NonNull Uri withAppendedId(@NonNull Uri contentUri, long id) {
         return appendId(contentUri.buildUpon(), id).build();
+    }
+
+    /**
+     * Removes any ID from the end of the path.
+     *
+     * @param contentUri that ends with an ID
+     * @return a new URI with the ID removed from the end of the path
+     * @throws IllegalArgumentException when the given URI has no ID to remove
+     *             from the end of the path
+     */
+    public static @NonNull Uri removeId(@NonNull Uri contentUri) {
+        // Verify that we have a valid ID to actually remove
+        final String last = contentUri.getLastPathSegment();
+        if (last == null) {
+            throw new IllegalArgumentException("No path segments to remove");
+        } else {
+            Long.parseLong(last);
+        }
+
+        final List<String> segments = contentUri.getPathSegments();
+        final Uri.Builder builder = contentUri.buildUpon();
+        builder.path(null);
+        for (int i = 0; i < segments.size() - 1; i++) {
+            builder.appendPath(segments.get(i));
+        }
+        return builder.build();
     }
 }

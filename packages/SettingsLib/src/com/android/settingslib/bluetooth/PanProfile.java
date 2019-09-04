@@ -34,11 +34,9 @@ import java.util.List;
  */
 public class PanProfile implements LocalBluetoothProfile {
     private static final String TAG = "PanProfile";
-    private static boolean V = true;
 
     private BluetoothPan mService;
     private boolean mIsProfileReady;
-    private final LocalBluetoothAdapter mLocalAdapter;
 
     // Tethering direction for each device
     private final HashMap<BluetoothDevice, Integer> mDeviceRoleMap =
@@ -54,13 +52,11 @@ public class PanProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (V) Log.d(TAG,"Bluetooth service connected");
             mService = (BluetoothPan) proxy;
             mIsProfileReady=true;
         }
 
         public void onServiceDisconnected(int profile) {
-            if (V) Log.d(TAG,"Bluetooth service disconnected");
             mIsProfileReady=false;
         }
     }
@@ -74,9 +70,8 @@ public class PanProfile implements LocalBluetoothProfile {
         return BluetoothProfile.PAN;
     }
 
-    PanProfile(Context context, LocalBluetoothAdapter adapter) {
-        mLocalAdapter = adapter;
-        mLocalAdapter.getProfileProxy(context, new PanServiceListener(),
+    PanProfile(Context context) {
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new PanServiceListener(),
             BluetoothProfile.PAN);
     }
 
@@ -153,12 +148,12 @@ public class PanProfile implements LocalBluetoothProfile {
                 }
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_network_pan;
+        return com.android.internal.R.drawable.ic_bt_network_pan;
     }
 
     // Tethering direction determines UI strings.
@@ -175,7 +170,7 @@ public class PanProfile implements LocalBluetoothProfile {
     }
 
     protected void finalize() {
-        if (V) Log.d(TAG, "finalize()");
+        Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
                 BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.PAN, mService);

@@ -33,11 +33,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
-import libcore.io.Streams;
-
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 /**
  * This class is a command line utility for manipulating content. A client
@@ -81,7 +77,7 @@ public class Content {
                     + "  <BINDING> binds a typed value to a column and is formatted:\n"
                     + "  <COLUMN_NAME>:<TYPE>:<COLUMN_VALUE> where:\n"
                     + "  <TYPE> specifies data type such as:\n"
-                    + "  b - boolean, s - string, i - integer, l - long, f - float, d - double\n"
+                    + "  b - boolean, s - string, i - integer, l - long, f - float, d - double, n - null\n"
                     + "  Note: Omit the value for passing an empty string, e.g column:s:\n"
                     + "  Example:\n"
                     + "  # Add \"new_setting\" secure setting with value \"new_value\".\n"
@@ -157,6 +153,7 @@ public class Content {
         private static final String TYPE_LONG = "l";
         private static final String TYPE_FLOAT = "f";
         private static final String TYPE_DOUBLE = "d";
+        private static final String TYPE_NULL = "n";
         private static final String COLON = ":";
         private static final String ARGUMENT_PREFIX = "--";
 
@@ -414,6 +411,8 @@ public class Content {
                 values.put(column, Long.parseLong(value));
             } else if (TYPE_FLOAT.equalsIgnoreCase(type) || TYPE_DOUBLE.equalsIgnoreCase(type)) {
                 values.put(column, Double.parseDouble(value));
+            } else if (TYPE_NULL.equalsIgnoreCase(type)) {
+                values.putNull(column);
             } else {
                 throw new IllegalArgumentException("Unsupported type: " + type);
             }
@@ -462,7 +461,7 @@ public class Content {
                 IBinder token = new Binder();
                 try {
                     ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                            providerName, mUserId, token);
+                            providerName, mUserId, token, "*cmd*");
                     if (holder == null) {
                         throw new IllegalStateException("Could not find provider: " + providerName);
                     }
@@ -470,7 +469,8 @@ public class Content {
                     onExecute(provider);
                 } finally {
                     if (provider != null) {
-                        activityManager.removeContentProviderExternal(providerName, token);
+                        activityManager.removeContentProviderExternalAsUser(
+                                providerName, token, mUserId);
                     }
                 }
             } catch (Exception e) {
@@ -557,7 +557,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Bundle result = provider.call(null, mMethod, mArg, mExtras);
+            Bundle result = provider.call(null, mUri.getAuthority(), mMethod, mArg, mExtras);
             if (result != null) {
                 result.size(); // unpack
             }

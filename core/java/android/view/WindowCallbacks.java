@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 
 /**
@@ -82,5 +83,5 @@ public interface WindowCallbacks {
      *
      * @param canvas The canvas to draw on.
      */
-    void onPostDraw(DisplayListCanvas canvas);
+    void onPostDraw(RecordingCanvas canvas);
 }

@@ -40,6 +40,11 @@ struct UsageLocation {
   Source source;
 };
 
+struct NameAndSignature {
+  std::string name;
+  std::string signature;
+};
+
 class KeepSet {
  public:
   KeepSet() = default;
@@ -51,12 +56,13 @@ class KeepSet {
     manifest_class_set_[class_name].insert(file);
   }
 
-  inline void AddConditionalClass(const UsageLocation& file, const std::string& class_name) {
-    conditional_class_set_[class_name].insert(file);
+  inline void AddConditionalClass(const UsageLocation& file,
+                                  const NameAndSignature& class_and_signature) {
+    conditional_class_set_[class_and_signature].insert(file);
   }
 
-  inline void AddMethod(const UsageLocation& file, const std::string& method_name) {
-    method_set_[method_name].insert(file);
+  inline void AddMethod(const UsageLocation& file, const NameAndSignature& name_and_signature) {
+    method_set_[name_and_signature].insert(file);
   }
 
   inline void AddReference(const UsageLocation& file, const ResourceName& resource_name) {
@@ -64,26 +70,26 @@ class KeepSet {
   }
 
  private:
-  friend void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out);
+  friend void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out, bool minimal_keep);
 
   friend bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
                                std::set<UsageLocation>* locations);
 
   bool conditional_keep_rules_ = false;
   std::map<std::string, std::set<UsageLocation>> manifest_class_set_;
-  std::map<std::string, std::set<UsageLocation>> method_set_;
-  std::map<std::string, std::set<UsageLocation>> conditional_class_set_;
+  std::map<NameAndSignature, std::set<UsageLocation>> method_set_;
+  std::map<NameAndSignature, std::set<UsageLocation>> conditional_class_set_;
   std::map<ResourceName, std::set<UsageLocation>> reference_set_;
 };
 
 bool CollectProguardRulesForManifest(xml::XmlResource* res, KeepSet* keep_set,
                                      bool main_dex_only = false);
 
-bool CollectProguardRules(xml::XmlResource* res, KeepSet* keep_set);
+bool CollectProguardRules(IAaptContext* context, xml::XmlResource* res, KeepSet* keep_set);
 
 bool CollectResourceReferences(IAaptContext* context, ResourceTable* table, KeepSet* keep_set);
 
-void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out);
+void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out, bool minimal_keep);
 
 bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
                       std::set<UsageLocation>* locations);
@@ -98,6 +104,20 @@ inline bool operator==(const UsageLocation& lhs, const UsageLocation& rhs) {
 
 inline int operator<(const UsageLocation& lhs, const UsageLocation& rhs) {
   return lhs.name.compare(rhs.name);
+}
+
+//
+// NameAndSignature implementation.
+//
+
+inline bool operator<(const NameAndSignature& lhs, const NameAndSignature& rhs) {
+  if (lhs.name < rhs.name) {
+    return true;
+  }
+  if (lhs.name == rhs.name) {
+    return lhs.signature < rhs.signature;
+  }
+  return false;
 }
 
 }  // namespace proguard

@@ -21,6 +21,36 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+jint android_util_MemoryIntArrayTest_createAshmem(__attribute__((unused)) JNIEnv* env,
+        __attribute__((unused)) jobject clazz,
+        jstring name, jint size)
+{
+
+    if (name == NULL) {
+        return -1;
+    }
+
+    if (size < 0) {
+        return -1;
+    }
+
+    const char* nameStr = env->GetStringUTFChars(name, NULL);
+    const int ashmemSize = sizeof(std::atomic_int) * size;
+    int fd = ashmem_create_region(nameStr, ashmemSize);
+    env->ReleaseStringUTFChars(name, nameStr);
+
+    if (fd < 0) {
+        return -1;
+    }
+
+    int setProtResult = ashmem_set_prot_region(fd, PROT_READ | PROT_WRITE);
+    if (setProtResult < 0) {
+        return -1;
+    }
+
+    return fd;
+}
+
 void android_util_MemoryIntArrayTest_setAshmemSize(__attribute__((unused)) JNIEnv* env,
         __attribute__((unused)) jobject clazz, jint fd, jint size)
 {

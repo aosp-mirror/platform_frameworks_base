@@ -22,21 +22,30 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
+import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 public class FullBackupJob extends JobService {
-    private static final String TAG = "FullBackupJob";
-    private static final boolean DEBUG = true;
+    private static final String USER_ID_EXTRA_KEY = "userId";
+
+    @VisibleForTesting
+    public static final int MIN_JOB_ID = 52418896;
+    @VisibleForTesting
+    public static final int MAX_JOB_ID = 52419896;
 
     private static ComponentName sIdleService =
             new ComponentName("android", FullBackupJob.class.getName());
 
-    private static final int JOB_ID = 0x5038;
+    @GuardedBy("mParamsForUser")
+    private final SparseArray<JobParameters> mParamsForUser = new SparseArray<>();
 
-    JobParameters mParams;
-
-    public static void schedule(Context ctx, long minDelay, BackupManagerConstants constants) {
+    public static void schedule(int userId, Context ctx, long minDelay,
+            BackupManagerConstants constants) {
         JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, sIdleService);
+        JobInfo.Builder builder = new JobInfo.Builder(getJobIdForUserId(userId), sIdleService);
         synchronized (constants) {
             builder.setRequiresDeviceIdle(true)
                     .setRequiredNetworkType(constants.getFullBackupRequiredNetworkType())
@@ -45,14 +54,28 @@ public class FullBackupJob extends JobService {
         if (minDelay > 0) {
             builder.setMinimumLatency(minDelay);
         }
+
+        Bundle extraInfo = new Bundle();
+        extraInfo.putInt(USER_ID_EXTRA_KEY, userId);
+        builder.setTransientExtras(extraInfo);
+
         js.schedule(builder.build());
     }
 
+    public static void cancel(int userId, Context ctx) {
+        JobScheduler js = (JobScheduler) ctx.getSystemService(
+                Context.JOB_SCHEDULER_SERVICE);
+        js.cancel(getJobIdForUserId(userId));
+    }
+
     // callback from the Backup Manager Service: it's finished its work for this pass
-    public void finishBackupPass() {
-        if (mParams != null) {
-            jobFinished(mParams, false);
-            mParams = null;
+    public void finishBackupPass(int userId) {
+        synchronized (mParamsForUser) {
+            JobParameters jobParameters = mParamsForUser.get(userId);
+            if (jobParameters != null) {
+                jobFinished(jobParameters, false);
+                mParamsForUser.remove(userId);
+            }
         }
     }
 
@@ -60,19 +83,33 @@ public class FullBackupJob extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        mParams = params;
+        int userId = params.getTransientExtras().getInt(USER_ID_EXTRA_KEY);
+
+        synchronized (mParamsForUser) {
+            mParamsForUser.put(userId, params);
+        }
+
         Trampoline service = BackupManagerService.getInstance();
-        return service.beginFullBackup(this);
+        return service.beginFullBackup(userId, this);
     }
 
     @Override
     public boolean onStopJob(JobParameters params) {
-        if (mParams != null) {
-            mParams = null;
-            Trampoline service = BackupManagerService.getInstance();
-            service.endFullBackup();
+        int userId = params.getTransientExtras().getInt(USER_ID_EXTRA_KEY);
+
+        synchronized (mParamsForUser) {
+            if (mParamsForUser.removeReturnOld(userId) == null) {
+                return false;
+            }
         }
+
+        Trampoline service = BackupManagerService.getInstance();
+        service.endFullBackup(userId);
+
         return false;
     }
 
+    private static int getJobIdForUserId(int userId) {
+        return JobIdManager.getJobIdForUserId(MIN_JOB_ID, MAX_JOB_ID, userId);
+    }
 }

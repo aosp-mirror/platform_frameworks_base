@@ -395,7 +395,7 @@ public class GpsClock implements Parcelable {
         mDriftUncertaintyInNsPerSec = Double.NaN;
     }
 
-    public static final Creator<GpsClock> CREATOR = new Creator<GpsClock>() {
+    public static final @android.annotation.NonNull Creator<GpsClock> CREATOR = new Creator<GpsClock>() {
         @Override
         public GpsClock createFromParcel(Parcel parcel) {
             GpsClock gpsClock = new GpsClock();

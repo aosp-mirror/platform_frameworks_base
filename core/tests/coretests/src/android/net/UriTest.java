@@ -18,7 +18,8 @@ package android.net;
 
 import android.content.ContentUris;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

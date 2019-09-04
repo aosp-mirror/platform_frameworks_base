@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.Slog;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.systemui.R;

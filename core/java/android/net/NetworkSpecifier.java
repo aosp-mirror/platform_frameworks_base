@@ -23,7 +23,6 @@ package android.net;
  * subclasses of this class via other APIs.
  */
 public abstract class NetworkSpecifier {
-    /** @hide */
     public NetworkSpecifier() {}
 
     /**

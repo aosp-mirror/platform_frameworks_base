@@ -268,7 +268,7 @@ public final class CellIdentityCdma extends CellIdentity {
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Creator<CellIdentityCdma> CREATOR =
+    public static final @android.annotation.NonNull Creator<CellIdentityCdma> CREATOR =
             new Creator<CellIdentityCdma>() {
         @Override
         public CellIdentityCdma createFromParcel(Parcel in) {

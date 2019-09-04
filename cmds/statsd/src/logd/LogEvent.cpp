@@ -18,10 +18,17 @@
 #include "logd/LogEvent.h"
 
 #include "stats_log_util.h"
+#include "statslog.h"
+
+#include <binder/IPCThreadState.h>
+#include <private/android_filesystem_config.h>
 
 namespace android {
 namespace os {
 namespace statsd {
+
+// for TrainInfo experiment id serialization
+const int FIELD_ID_EXPERIMENT_ID = 1;
 
 using namespace android::util;
 using android::util::ProtoOutputStream;
@@ -40,8 +47,81 @@ LogEvent::LogEvent(log_msg& msg) {
     }
 }
 
+LogEvent::LogEvent(const LogEvent& event) {
+    mTagId = event.mTagId;
+    mLogUid = event.mLogUid;
+    mElapsedTimestampNs = event.mElapsedTimestampNs;
+    mLogdTimestampNs = event.mLogdTimestampNs;
+    mValues = event.mValues;
+}
+
+LogEvent::LogEvent(const StatsLogEventWrapper& statsLogEventWrapper, int workChainIndex) {
+    mTagId = statsLogEventWrapper.getTagId();
+    mLogdTimestampNs = statsLogEventWrapper.getWallClockTimeNs();
+    mElapsedTimestampNs = statsLogEventWrapper.getElapsedRealTimeNs();
+    mLogUid = 0;
+    int workChainPosOffset = 0;
+    if (workChainIndex != -1) {
+        const WorkChain& wc = statsLogEventWrapper.getWorkChains()[workChainIndex];
+        // chains are at field 1, level 2
+        int depth = 2;
+        for (int i = 0; i < (int)wc.uids.size(); i++) {
+            int pos[] = {1, i + 1, 1};
+            mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(wc.uids[i])));
+            pos[2]++;
+            mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(wc.tags[i])));
+            mValues.back().mField.decorateLastPos(2);
+        }
+        mValues.back().mField.decorateLastPos(1);
+        workChainPosOffset = 1;
+    }
+    for (int i = 0; i < (int)statsLogEventWrapper.getElements().size(); i++) {
+        Field field(statsLogEventWrapper.getTagId(), getSimpleField(i + 1 + workChainPosOffset));
+        switch (statsLogEventWrapper.getElements()[i].type) {
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::INT:
+                mValues.push_back(
+                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].int_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::LONG:
+                mValues.push_back(
+                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].long_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::FLOAT:
+                mValues.push_back(FieldValue(
+                        field, Value(statsLogEventWrapper.getElements()[i].float_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::DOUBLE:
+                mValues.push_back(FieldValue(
+                        field, Value(statsLogEventWrapper.getElements()[i].double_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::STRING:
+                mValues.push_back(
+                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].str_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::STORAGE:
+                mValues.push_back(FieldValue(
+                        field, Value(statsLogEventWrapper.getElements()[i].storage_value)));
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void LogEvent::createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,
+                               std::vector<std::shared_ptr<LogEvent>>& logEvents) {
+    if (statsLogEventWrapper.getWorkChains().size() == 0) {
+        logEvents.push_back(std::make_shared<LogEvent>(statsLogEventWrapper, -1));
+    } else {
+        for (size_t i = 0; i < statsLogEventWrapper.getWorkChains().size(); i++) {
+            logEvents.push_back(std::make_shared<LogEvent>(statsLogEventWrapper, i));
+        }
+    }
+}
+
 LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
     mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
     mTagId = tagId;
     mLogUid = 0;
     mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
@@ -51,10 +131,134 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
     }
 }
 
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) {
+LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   int32_t uid,
+                   const std::map<int32_t, int32_t>& int_map,
+                   const std::map<int32_t, int64_t>& long_map,
+                   const std::map<int32_t, std::string>& string_map,
+                   const std::map<int32_t, float>& float_map) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::KEY_VALUE_PAIRS_ATOM;
+    mLogUid = uid;
+
+    int pos[] = {1, 1, 1};
+
+    mValues.push_back(FieldValue(Field(mTagId, pos, 0 /* depth */), Value(uid)));
+    pos[0]++;
+    for (const auto&itr : int_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 2;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+
+    for (const auto&itr : long_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 3;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+
+    for (const auto&itr : string_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 4;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+
+    for (const auto&itr : float_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 5;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+        mValues.at(mValues.size() - 2).mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requiresStaging,
+                   bool rollbackEnabled, bool requiresLowLatencyMonitor, int32_t state,
+                   const std::vector<uint8_t>& experimentIds, int32_t userId) {
+    mLogdTimestampNs = getWallClockNs();
+    mElapsedTimestampNs = getElapsedRealtimeNs();
+    mTagId = android::util::BINARY_PUSH_STATE_CHANGED;
+    mLogUid = android::IPCThreadState::self()->getCallingUid();
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)), Value(trainName)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainVersionCode)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)), Value((int)requiresStaging)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value((int)rollbackEnabled)));
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(5)), Value((int)requiresLowLatencyMonitor)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(6)), Value(state)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(7)), Value(experimentIds)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(8)), Value(userId)));
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const VendorAtom& vendorAtom) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = vendorAtom.atomId;
+    mLogUid = AID_STATSD;
+
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(1)), Value(vendorAtom.reverseDomainName)));
+    for (int i = 0; i < (int)vendorAtom.values.size(); i++) {
+        switch (vendorAtom.values[i].getDiscriminator()) {
+            case VendorAtom::Value::hidl_discriminator::intValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].intValue())));
+                break;
+            case VendorAtom::Value::hidl_discriminator::longValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].longValue())));
+                break;
+            case VendorAtom::Value::hidl_discriminator::floatValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].floatValue())));
+                break;
+            case VendorAtom::Value::hidl_discriminator::stringValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].stringValue())));
+                break;
+        }
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const InstallTrainInfo& trainInfo) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::TRAIN_INFO;
+
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(1)), Value(trainInfo.trainVersionCode)));
+    std::vector<uint8_t> experimentIdsProto;
+    writeExperimentIdsToProto(trainInfo.experimentIds, &experimentIdsProto);
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(experimentIdsProto)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)), Value(trainInfo.trainName)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
+}
+
+LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, timestampNs) {
+}
+
+LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
     mLogdTimestampNs = timestampNs;
     mTagId = tagId;
-    mLogUid = 0;
+    mLogUid = uid;
     mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
     if (mContext) {
         android_log_write_int64(mContext, timestampNs);
@@ -128,6 +332,68 @@ bool LogEvent::write(float value) {
     return false;
 }
 
+bool LogEvent::writeKeyValuePairs(int32_t uid,
+                                  const std::map<int32_t, int32_t>& int_map,
+                                  const std::map<int32_t, int64_t>& long_map,
+                                  const std::map<int32_t, std::string>& string_map,
+                                  const std::map<int32_t, float>& float_map) {
+    if (mContext) {
+         if (android_log_write_list_begin(mContext) < 0) {
+            return false;
+         }
+         write(uid);
+         for (const auto& itr : int_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second);
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         for (const auto& itr : long_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second);
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         for (const auto& itr : string_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second.c_str());
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         for (const auto& itr : float_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second);
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         if (android_log_write_list_end(mContext) < 0) {
+            return false;
+         }
+         return true;
+    }
+    return false;
+}
+
 bool LogEvent::write(const std::vector<AttributionNodeInternal>& nodes) {
     if (mContext) {
          if (android_log_write_list_begin(mContext) < 0) {
@@ -178,6 +444,7 @@ void LogEvent::init(android_log_context context) {
     int i = 0;
     int depth = -1;
     int pos[] = {1, 1, 1};
+    bool isKeyValuePairAtom = false;
     do {
         elem = android_log_read_next(context);
         switch ((int)elem.type) {
@@ -185,6 +452,7 @@ void LogEvent::init(android_log_context context) {
                 // elem at [0] is EVENT_TYPE_LIST, [1] is the timestamp, [2] is tag id.
                 if (i == 2) {
                     mTagId = elem.data.int32;
+                    isKeyValuePairAtom = (mTagId == android::util::KEY_VALUE_PAIRS_ATOM);
                 } else {
                     if (depth < 0 || depth > 2) {
                         return;
@@ -202,6 +470,11 @@ void LogEvent::init(android_log_context context) {
                     return;
                 }
 
+                // Handles the oneof field in KeyValuePair atom.
+                if (isKeyValuePairAtom && depth == 2) {
+                    pos[depth] = 5;
+                }
+
                 mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(elem.data.float32)));
 
                 pos[depth]++;
@@ -213,6 +486,10 @@ void LogEvent::init(android_log_context context) {
                     return;
                 }
 
+                // Handles the oneof field in KeyValuePair atom.
+                if (isKeyValuePairAtom && depth == 2) {
+                    pos[depth] = 4;
+                }
                 mValues.push_back(FieldValue(Field(mTagId, pos, depth),
                                              Value(string(elem.data.string, elem.len))));
 
@@ -226,6 +503,10 @@ void LogEvent::init(android_log_context context) {
                     if (depth < 0 || depth > 2) {
                         ALOGE("Depth > 2. Not supported!");
                         return;
+                    }
+                    // Handles the oneof field in KeyValuePair atom.
+                    if (isKeyValuePairAtom && depth == 2) {
+                        pos[depth] = 3;
                     }
                     mValues.push_back(
                             FieldValue(Field(mTagId, pos, depth), Value((int64_t)elem.data.int64)));
@@ -270,10 +551,14 @@ void LogEvent::init(android_log_context context) {
         }
         i++;
     } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
+    if (isKeyValuePairAtom && mValues.size() > 0) {
+        mValues[0] = FieldValue(Field(android::util::KEY_VALUE_PAIRS_ATOM, getSimpleField(1)),
+                                Value((int32_t)mLogUid));
+    }
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
-    // TODO: encapsulate the magical operations all in Field struct as a static function.
+    // TODO(b/110561208): encapsulate the magical operations in Field struct as static functions
     int field = getSimpleField(key);
     for (const auto& value : mValues) {
         if (value.mField.getField() == field) {
@@ -391,6 +676,25 @@ string LogEvent::ToString() const {
 
 void LogEvent::ToProto(ProtoOutputStream& protoOutput) const {
     writeFieldValueTreeToStream(mTagId, getValues(), &protoOutput);
+}
+
+void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds,
+                               std::vector<uint8_t>* protoOut) {
+    ProtoOutputStream proto;
+    for (const auto& expId : experimentIds) {
+        proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
+                    (long long)expId);
+    }
+
+    protoOut->resize(proto.size());
+    size_t pos = 0;
+    sp<ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(protoOut->data() + pos, reader->readBuffer(), toRead);
+        pos += toRead;
+        reader->move(toRead);
+    }
 }
 
 }  // namespace statsd

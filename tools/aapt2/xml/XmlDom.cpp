@@ -26,6 +26,7 @@
 #include "android-base/logging.h"
 
 #include "ResourceUtils.h"
+#include "trace/TraceBuffer.h"
 #include "XmlPullParser.h"
 #include "util/Util.h"
 
@@ -264,6 +265,7 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
 }
 
 std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* out_error) {
+  TRACE_CALL();
   // We import the android namespace because on Windows NO_ERROR is a macro, not
   // an enum, which causes errors when qualifying it with android::
   using namespace android;

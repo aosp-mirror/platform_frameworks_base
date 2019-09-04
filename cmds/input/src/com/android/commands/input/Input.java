@@ -16,15 +16,20 @@
 
 package com.android.commands.input;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.hardware.input.InputManager;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.os.BaseCommand;
+
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,9 +38,14 @@ import java.util.Map;
  * desired character output.
  */
 
-public class Input {
+public class Input extends BaseCommand {
     private static final String TAG = "Input";
     private static final String INVALID_ARGUMENTS = "Error: Invalid arguments for command: ";
+    private static final String INVALID_DISPLAY_ARGUMENTS =
+            "Error: Invalid arguments for display ID.";
+
+    private static final float DEFAULT_PRESSURE = 1.0f;
+    private static final float NO_PRESSURE = 0.0f;
 
     private static final Map<String, Integer> SOURCES = new HashMap<String, Integer>() {{
         put("keyboard", InputDevice.SOURCE_KEYBOARD);
@@ -50,6 +60,7 @@ public class Input {
         put("joystick", InputDevice.SOURCE_JOYSTICK);
     }};
 
+    private static final Map<String, InputCmd> COMMANDS = new HashMap<String, InputCmd>();
 
     /**
      * Command-line entry point.
@@ -60,220 +71,292 @@ public class Input {
         (new Input()).run(args);
     }
 
-    private void run(String[] args) {
-        if (args.length < 1) {
-            showUsage();
-            return;
-        }
+    Input() {
+        COMMANDS.put("text", new InputText());
+        COMMANDS.put("keyevent", new InputKeyEvent());
+        COMMANDS.put("tap", new InputTap());
+        COMMANDS.put("swipe", new InputSwipe());
+        COMMANDS.put("draganddrop", new InputDragAndDrop());
+        COMMANDS.put("press", new InputPress());
+        COMMANDS.put("roll", new InputRoll());
+        COMMANDS.put("motionevent", new InputMotionEvent());
+    }
 
-        int index = 0;
-        String command = args[index];
+    @Override
+    public void onRun() throws Exception {
+        String arg = nextArgRequired();
         int inputSource = InputDevice.SOURCE_UNKNOWN;
-        if (SOURCES.containsKey(command)) {
-            inputSource = SOURCES.get(command);
-            index++;
-            command = args[index];
-        }
-        final int length = args.length - index;
 
-        try {
-            if (command.equals("text")) {
-                if (length == 2) {
-                    inputSource = getSource(inputSource, InputDevice.SOURCE_KEYBOARD);
-                    sendText(inputSource, args[index+1]);
-                    return;
+        // Get source (optional).
+        if (SOURCES.containsKey(arg)) {
+            inputSource = SOURCES.get(arg);
+            arg = nextArgRequired();
+        }
+
+        // Get displayId (optional).
+        int displayId = INVALID_DISPLAY;
+        if ("-d".equals(arg)) {
+            displayId = getDisplayId();
+            arg = nextArgRequired();
+        }
+
+        // Get command and run.
+        InputCmd cmd = COMMANDS.get(arg);
+        if (cmd != null) {
+            try {
+                cmd.run(inputSource, displayId);
+                return;
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException(INVALID_ARGUMENTS + arg);
+            }
+        }
+
+        throw new IllegalArgumentException("Error: Unknown command: " + arg);
+    }
+
+    private int getDisplayId() {
+        String displayArg = nextArgRequired();
+        if ("INVALID_DISPLAY".equalsIgnoreCase(displayArg)) {
+            return INVALID_DISPLAY;
+        } else if ("DEFAULT_DISPLAY".equalsIgnoreCase(displayArg)) {
+            return DEFAULT_DISPLAY;
+        } else {
+            try {
+                final int displayId = Integer.parseInt(displayArg);
+                if (displayId == INVALID_DISPLAY) {
+                    return INVALID_DISPLAY;
                 }
-            } else if (command.equals("keyevent")) {
-                if (length >= 2) {
-                    final boolean longpress = "--longpress".equals(args[index + 1]);
-                    final int start = longpress ? index + 2 : index + 1;
-                    inputSource = getSource(inputSource, InputDevice.SOURCE_KEYBOARD);
-                    if (args.length > start) {
-                        for (int i = start; i < args.length; i++) {
-                            int keyCode = KeyEvent.keyCodeFromString(args[i]);
-                            if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
-                                keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[i]);
-                            }
-                            sendKeyEvent(inputSource, keyCode, longpress);
-                        }
-                        return;
+                return Math.max(displayId, 0);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(INVALID_DISPLAY_ARGUMENTS);
+            }
+        }
+    }
+
+    class InputText implements InputCmd {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_KEYBOARD);
+            sendText(inputSource, nextArgRequired(), displayId);
+        }
+
+        /**
+         * Convert the characters of string text into key event's and send to
+         * device.
+         *
+         * @param text is a string of characters you want to input to the device.
+         */
+        private void sendText(int source, final String text, int displayId) {
+            final StringBuffer buff = new StringBuffer(text);
+            boolean escapeFlag = false;
+            for (int i = 0; i < buff.length(); i++) {
+                if (escapeFlag) {
+                    escapeFlag = false;
+                    if (buff.charAt(i) == 's') {
+                        buff.setCharAt(i, ' ');
+                        buff.deleteCharAt(--i);
                     }
                 }
-            } else if (command.equals("tap")) {
-                if (length == 3) {
-                    inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
-                    sendTap(inputSource, Float.parseFloat(args[index+1]),
-                            Float.parseFloat(args[index+2]));
-                    return;
+                if (buff.charAt(i) == '%') {
+                    escapeFlag = true;
                 }
-            } else if (command.equals("swipe")) {
-                int duration = -1;
-                inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
-                switch (length) {
-                    case 6:
-                        duration = Integer.parseInt(args[index+5]);
-                    case 5:
-                        sendSwipe(inputSource,
-                                Float.parseFloat(args[index+1]), Float.parseFloat(args[index+2]),
-                                Float.parseFloat(args[index+3]), Float.parseFloat(args[index+4]),
-                                duration);
-                        return;
-                }
-            } else if (command.equals("draganddrop")) {
-                int duration = -1;
-                inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
-                switch (length) {
-                    case 6:
-                        duration = Integer.parseInt(args[index+5]);
-                    case 5:
-                        sendDragAndDrop(inputSource,
-                                Float.parseFloat(args[index+1]), Float.parseFloat(args[index+2]),
-                                Float.parseFloat(args[index+3]), Float.parseFloat(args[index+4]),
-                                duration);
-                        return;
-                }
-            } else if (command.equals("press")) {
-                inputSource = getSource(inputSource, InputDevice.SOURCE_TRACKBALL);
-                if (length == 1) {
-                    sendTap(inputSource, 0.0f, 0.0f);
-                    return;
-                }
-            } else if (command.equals("roll")) {
-                inputSource = getSource(inputSource, InputDevice.SOURCE_TRACKBALL);
-                if (length == 3) {
-                    sendMove(inputSource, Float.parseFloat(args[index+1]),
-                            Float.parseFloat(args[index+2]));
-                    return;
-                }
-            } else {
-                System.err.println("Error: Unknown command: " + command);
-                showUsage();
-                return;
             }
-        } catch (NumberFormatException ex) {
+
+            final char[] chars = buff.toString().toCharArray();
+            final KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+            final KeyEvent[] events = kcm.getEvents(chars);
+            for (int i = 0; i < events.length; i++) {
+                KeyEvent e = events[i];
+                if (source != e.getSource()) {
+                    e.setSource(source);
+                }
+                e.setDisplayId(displayId);
+                injectKeyEvent(e);
+            }
         }
-        System.err.println(INVALID_ARGUMENTS + command);
-        showUsage();
+    }
+
+    class InputKeyEvent implements InputCmd {
+        @Override
+        public void run(int inputSource, int displayId) {
+            String arg = nextArgRequired();
+            final boolean longpress = "--longpress".equals(arg);
+            if (longpress) {
+                arg = nextArgRequired();
+            }
+
+            do {
+                final int keycode = KeyEvent.keyCodeFromString(arg);
+                sendKeyEvent(inputSource, keycode, longpress, displayId);
+            } while ((arg = nextArg()) != null);
+        }
+
+        private void sendKeyEvent(int inputSource, int keyCode, boolean longpress, int displayId) {
+            final long now = SystemClock.uptimeMillis();
+            int repeatCount = 0;
+
+            KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, repeatCount,
+                    0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
+                    inputSource);
+            event.setDisplayId(displayId);
+
+            injectKeyEvent(event);
+            if (longpress) {
+                repeatCount++;
+                injectKeyEvent(KeyEvent.changeTimeRepeat(event, now, repeatCount,
+                        KeyEvent.FLAG_LONG_PRESS));
+            }
+            injectKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP));
+        }
+    }
+
+    class InputTap implements InputCmd {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
+            sendTap(inputSource, Float.parseFloat(nextArgRequired()),
+                    Float.parseFloat(nextArgRequired()), displayId);
+        }
+
+        void sendTap(int inputSource, float x, float y, int displayId) {
+            final long now = SystemClock.uptimeMillis();
+            injectMotionEvent(inputSource, MotionEvent.ACTION_DOWN, now, now, x, y, 1.0f,
+                    displayId);
+            injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, now, x, y, 0.0f, displayId);
+        }
+    }
+
+    class InputPress extends InputTap {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_TRACKBALL);
+            sendTap(inputSource, 0.0f, 0.0f, displayId);
+        }
+    }
+
+    class InputSwipe implements InputCmd {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
+            sendSwipe(inputSource, displayId, false);
+        }
+
+        void sendSwipe(int inputSource, int displayId, boolean isDragDrop) {
+            // Parse two points and duration.
+            final float x1 = Float.parseFloat(nextArgRequired());
+            final float y1 = Float.parseFloat(nextArgRequired());
+            final float x2 = Float.parseFloat(nextArgRequired());
+            final float y2 = Float.parseFloat(nextArgRequired());
+            String durationArg = nextArg();
+            int duration = durationArg != null ? Integer.parseInt(durationArg) : -1;
+            if (duration < 0) {
+                duration = 300;
+            }
+
+            final long down = SystemClock.uptimeMillis();
+            injectMotionEvent(inputSource, MotionEvent.ACTION_DOWN, down, down, x1, y1, 1.0f,
+                    displayId);
+            if (isDragDrop) {
+                // long press until drag start.
+                try {
+                    Thread.sleep(ViewConfiguration.getLongPressTimeout());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            long now = SystemClock.uptimeMillis();
+            final long endTime = down + duration;
+            while (now < endTime) {
+                final long elapsedTime = now - down;
+                final float alpha = (float) elapsedTime / duration;
+                injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, down, now,
+                        lerp(x1, x2, alpha), lerp(y1, y2, alpha), 1.0f, displayId);
+                now = SystemClock.uptimeMillis();
+            }
+            injectMotionEvent(inputSource, MotionEvent.ACTION_UP, down, now, x2, y2, 0.0f,
+                    displayId);
+        }
+    }
+
+    class InputDragAndDrop extends InputSwipe {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
+            sendSwipe(inputSource, displayId, true);
+        }
+    }
+
+    class InputRoll implements InputCmd {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_TRACKBALL);
+            sendMove(inputSource, Float.parseFloat(nextArgRequired()),
+                    Float.parseFloat(nextArgRequired()), displayId);
+        }
+
+        /**
+         * Sends a simple zero-pressure move event.
+         *
+         * @param inputSource the InputDevice.SOURCE_* sending the input event
+         * @param dx change in x coordinate due to move
+         * @param dy change in y coordinate due to move
+         */
+        private void sendMove(int inputSource, float dx, float dy, int displayId) {
+            final long now = SystemClock.uptimeMillis();
+            injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, now, now, dx, dy, 0.0f,
+                    displayId);
+        }
+    }
+
+    class InputMotionEvent implements InputCmd {
+        @Override
+        public void run(int inputSource, int displayId) {
+            inputSource = getSource(inputSource, InputDevice.SOURCE_TOUCHSCREEN);
+            sendMotionEvent(inputSource, nextArgRequired(), Float.parseFloat(nextArgRequired()),
+                    Float.parseFloat(nextArgRequired()), displayId);
+        }
+
+        private void sendMotionEvent(int inputSource, String motionEventType, float x, float y,
+                int displayId) {
+            final int action;
+            final float pressure;
+
+            switch (motionEventType.toUpperCase()) {
+                case "DOWN":
+                    action = MotionEvent.ACTION_DOWN;
+                    pressure = DEFAULT_PRESSURE;
+                    break;
+                case "UP":
+                    action = MotionEvent.ACTION_UP;
+                    pressure = NO_PRESSURE;
+                    break;
+                case "MOVE":
+                    action = MotionEvent.ACTION_MOVE;
+                    pressure = DEFAULT_PRESSURE;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown motionevent " + motionEventType);
+            }
+
+            final long now = SystemClock.uptimeMillis();
+            injectMotionEvent(inputSource, action, now, now, x, y, pressure, displayId);
+        }
     }
 
     /**
-     * Convert the characters of string text into key event's and send to
-     * device.
-     *
-     * @param text is a string of characters you want to input to the device.
+     * Abstract class for command
+     * use nextArgRequired or nextArg to check next argument if necessary.
      */
-    private void sendText(int source, String text) {
-
-        StringBuffer buff = new StringBuffer(text);
-
-        boolean escapeFlag = false;
-        for (int i=0; i<buff.length(); i++) {
-            if (escapeFlag) {
-                escapeFlag = false;
-                if (buff.charAt(i) == 's') {
-                    buff.setCharAt(i, ' ');
-                    buff.deleteCharAt(--i);
-                }
-            }
-            if (buff.charAt(i) == '%') {
-                escapeFlag = true;
-            }
-        }
-
-        char[] chars = buff.toString().toCharArray();
-
-        KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
-        KeyEvent[] events = kcm.getEvents(chars);
-        for(int i = 0; i < events.length; i++) {
-            KeyEvent e = events[i];
-            if (source != e.getSource()) {
-                e.setSource(source);
-            }
-            injectKeyEvent(e);
-        }
+    private interface InputCmd {
+        void run(int inputSource, int displayId);
     }
 
-    private void sendKeyEvent(int inputSource, int keyCode, boolean longpress) {
-        long now = SystemClock.uptimeMillis();
-        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0, 0,
-                KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, inputSource));
-        if (longpress) {
-            injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 1, 0,
-                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_LONG_PRESS,
-                    inputSource));
-        }
-        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0, 0,
-                KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, inputSource));
-    }
-
-    private void sendTap(int inputSource, float x, float y) {
-        long now = SystemClock.uptimeMillis();
-        injectMotionEvent(inputSource, MotionEvent.ACTION_DOWN, now, x, y, 1.0f);
-        injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, x, y, 0.0f);
-    }
-
-    private void sendSwipe(int inputSource, float x1, float y1, float x2, float y2, int duration) {
-        if (duration < 0) {
-            duration = 300;
-        }
-        long now = SystemClock.uptimeMillis();
-        injectMotionEvent(inputSource, MotionEvent.ACTION_DOWN, now, x1, y1, 1.0f);
-        long startTime = now;
-        long endTime = startTime + duration;
-        while (now < endTime) {
-            long elapsedTime = now - startTime;
-            float alpha = (float) elapsedTime / duration;
-            injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, now, lerp(x1, x2, alpha),
-                    lerp(y1, y2, alpha), 1.0f);
-            now = SystemClock.uptimeMillis();
-        }
-        injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, x2, y2, 0.0f);
-    }
-
-    private void sendDragAndDrop(int inputSource, float x1, float y1, float x2, float y2,
-            int dragDuration) {
-        if (dragDuration < 0) {
-            dragDuration = 300;
-        }
-        long now = SystemClock.uptimeMillis();
-        injectMotionEvent(inputSource, MotionEvent.ACTION_DOWN, now, x1, y1, 1.0f);
-        try {
-            Thread.sleep(ViewConfiguration.getLongPressTimeout());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        now = SystemClock.uptimeMillis();
-        long startTime = now;
-        long endTime = startTime + dragDuration;
-        while (now < endTime) {
-            long elapsedTime = now - startTime;
-            float alpha = (float) elapsedTime / dragDuration;
-            injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, now, lerp(x1, x2, alpha),
-                    lerp(y1, y2, alpha), 1.0f);
-            now = SystemClock.uptimeMillis();
-        }
-        injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, x2, y2, 0.0f);
-    }
-
-    /**
-     * Sends a simple zero-pressure move event.
-     *
-     * @param inputSource the InputDevice.SOURCE_* sending the input event
-     * @param dx change in x coordinate due to move
-     * @param dy change in y coordinate due to move
-     */
-    private void sendMove(int inputSource, float dx, float dy) {
-        long now = SystemClock.uptimeMillis();
-        injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, now, dx, dy, 0.0f);
-    }
-
-    private void injectKeyEvent(KeyEvent event) {
-        Log.i(TAG, "injectKeyEvent: " + event);
+    private static void injectKeyEvent(KeyEvent event) {
         InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
-    private int getInputDeviceId(int inputSource) {
+    private static int getInputDeviceId(int inputSource) {
         final int DEFAULT_DEVICE_ID = 0;
         int[] devIds = InputDevice.getDeviceIds();
         for (int devId : devIds) {
@@ -290,22 +373,27 @@ public class Input {
      *
      * @param inputSource the InputDevice.SOURCE_* sending the input event
      * @param action the MotionEvent.ACTION_* for the event
+     * @param downTime the value of the ACTION_DOWN event happened
      * @param when the value of SystemClock.uptimeMillis() at which the event happened
      * @param x x coordinate of event
      * @param y y coordinate of event
      * @param pressure pressure of event
      */
-    private void injectMotionEvent(int inputSource, int action, long when, float x, float y, float pressure) {
+    private static void injectMotionEvent(int inputSource, int action, long downTime, long when,
+            float x, float y, float pressure, int displayId) {
         final float DEFAULT_SIZE = 1.0f;
         final int DEFAULT_META_STATE = 0;
         final float DEFAULT_PRECISION_X = 1.0f;
         final float DEFAULT_PRECISION_Y = 1.0f;
         final int DEFAULT_EDGE_FLAGS = 0;
-        MotionEvent event = MotionEvent.obtain(when, when, action, x, y, pressure, DEFAULT_SIZE,
+        MotionEvent event = MotionEvent.obtain(downTime, when, action, x, y, pressure, DEFAULT_SIZE,
                 DEFAULT_META_STATE, DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y,
                 getInputDeviceId(inputSource), DEFAULT_EDGE_FLAGS);
         event.setSource(inputSource);
-        Log.i(TAG, "injectMotionEvent: " + event);
+        if (displayId == INVALID_DISPLAY && (inputSource & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            displayId = DEFAULT_DISPLAY;
+        }
+        event.setDisplayId(displayId);
         InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
@@ -318,24 +406,30 @@ public class Input {
         return inputSource == InputDevice.SOURCE_UNKNOWN ? defaultSource : inputSource;
     }
 
-    private void showUsage() {
-        System.err.println("Usage: input [<source>] <command> [<arg>...]");
-        System.err.println();
-        System.err.println("The sources are: ");
+    @Override
+    public void onShowUsage(PrintStream out) {
+        out.println("Usage: input [<source>] [-d DISPLAY_ID] <command> [<arg>...]");
+        out.println();
+        out.println("The sources are: ");
         for (String src : SOURCES.keySet()) {
-            System.err.println("      " + src);
+            out.println("      " + src);
         }
-        System.err.println();
-        System.err.println("The commands and default sources are:");
-        System.err.println("      text <string> (Default: touchscreen)");
-        System.err.println("      keyevent [--longpress] <key code number or name> ..."
+        out.println();
+        out.printf("-d: specify the display ID.\n"
+                + "      (Default: %d for key event, %d for motion event if not specified.)",
+                INVALID_DISPLAY, DEFAULT_DISPLAY);
+        out.println();
+        out.println("The commands and default sources are:");
+        out.println("      text <string> (Default: touchscreen)");
+        out.println("      keyevent [--longpress] <key code number or name> ..."
                 + " (Default: keyboard)");
-        System.err.println("      tap <x> <y> (Default: touchscreen)");
-        System.err.println("      swipe <x1> <y1> <x2> <y2> [duration(ms)]"
+        out.println("      tap <x> <y> (Default: touchscreen)");
+        out.println("      swipe <x1> <y1> <x2> <y2> [duration(ms)]"
                 + " (Default: touchscreen)");
-        System.err.println("      draganddrop <x1> <y1> <x2> <y2> [duration(ms)]"
+        out.println("      draganddrop <x1> <y1> <x2> <y2> [duration(ms)]"
                 + " (Default: touchscreen)");
-        System.err.println("      press (Default: trackball)");
-        System.err.println("      roll <dx> <dy> (Default: trackball)");
+        out.println("      press (Default: trackball)");
+        out.println("      roll <dx> <dy> (Default: trackball)");
+        out.println("      event <DOWN|UP|MOVE> <x> <y> (Default: touchscreen)");
     }
 }

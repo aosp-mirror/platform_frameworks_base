@@ -34,4 +34,13 @@ private:                              \
 
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 
+#if ALIGN_DOUBLE
+#define ALIGN_SZ (sizeof(double))
+#else
+#define ALIGN_SZ (sizeof(int))
+#endif
+
+#define ALIGN(x) (((x) + ALIGN_SZ - 1) & ~(ALIGN_SZ - 1))
+#define ALIGN_PTR(p) ((void*)(ALIGN((size_t)(p))))
+
 #endif /* MACROS_H */

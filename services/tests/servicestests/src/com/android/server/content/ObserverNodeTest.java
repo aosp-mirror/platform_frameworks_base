@@ -30,7 +30,7 @@ import com.android.server.content.ContentService.ObserverCall;
 import com.android.server.content.ContentService.ObserverNode;
 
 /**
- * bit FrameworksServicesTests:com.android.server.content.ObserverNodeTest
+ * atest FrameworksServicesTests:com.android.server.content.ObserverNodeTest
  */
 @SmallTest
 public class ObserverNodeTest extends AndroidTestCase {

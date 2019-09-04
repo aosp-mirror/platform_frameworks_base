@@ -76,7 +76,7 @@ public final class IpReachabilityEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<IpReachabilityEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IpReachabilityEvent> CREATOR
         = new Parcelable.Creator<IpReachabilityEvent>() {
         public IpReachabilityEvent createFromParcel(Parcel in) {
             return new IpReachabilityEvent(in);

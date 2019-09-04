@@ -14,12 +14,16 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static androidx.lifecycle.Lifecycle.State.DESTROYED;
+import static androidx.lifecycle.Lifecycle.State.RESUMED;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_SECONDARY_CLICK;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CONTEXT;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_IS_FULL_QS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_POSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_VALUE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_STATUS_BAR_STATE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
@@ -37,21 +41,31 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QuickStatusBarHeader;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -60,8 +74,10 @@ import java.util.ArrayList;
  * State management done on a looper provided by the host.  Tiles should update state in
  * handleUpdateState.  Callbacks affecting state should use refreshState to trigger another
  * state update pass on tile looper.
+ *
+ * @param <TState> see above
  */
-public abstract class QSTileImpl<TState extends State> implements QSTile {
+public abstract class QSTileImpl<TState extends State> implements QSTile, LifecycleOwner, Dumpable {
     protected final String TAG = "Tile." + getClass().getSimpleName();
     protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
@@ -75,6 +91,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
     private final ArraySet<Object> mListeners = new ArraySet<>();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final StatusBarStateController
+            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
@@ -86,6 +104,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     private EnforcedAdmin mEnforcedAdmin;
     private boolean mShowingDetail;
     private int mIsFullQs;
+
+    private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
     public abstract TState newTileState();
 
@@ -104,6 +124,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mLifecycle;
     }
 
     /**
@@ -171,17 +197,23 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     public void click() {
-        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)));
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)
+                .addTaggedData(FIELD_STATUS_BAR_STATE,
+                        mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.CLICK);
     }
 
     public void secondaryClick() {
-        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)));
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)
+                .addTaggedData(FIELD_STATUS_BAR_STATE,
+                        mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
     }
 
     public void longClick() {
-        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)));
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
+                .addTaggedData(FIELD_STATUS_BAR_STATE,
+                        mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.LONG_CLICK);
 
         Prefs.putInt(
@@ -195,7 +227,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
             logMaker.addTaggedData(FIELD_QS_VALUE, ((BooleanState) mState).value ? 1 : 0);
         }
         return logMaker.setSubtype(getMetricsCategory())
-                .addTaggedData(FIELD_CONTEXT, mIsFullQs)
+                .addTaggedData(FIELD_IS_FULL_QS, mIsFullQs)
                 .addTaggedData(FIELD_QS_POSITION, mHost.indexOf(mTileSpec));
     }
 
@@ -328,12 +360,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         if (listening) {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 if (DEBUG) Log.d(TAG, "handleSetListening true");
+                mLifecycle.markState(RESUMED);
                 handleSetListening(listening);
                 refreshState(); // Ensure we get at least one refresh after listening.
             }
         } else {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
                 if (DEBUG) Log.d(TAG, "handleSetListening false");
+                mLifecycle.markState(DESTROYED);
                 handleSetListening(listening);
             }
         }
@@ -360,9 +394,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
-        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                 userRestriction, ActivityManager.getCurrentUser());
-        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
                 userRestriction, ActivityManager.getCurrentUser())) {
             state.disabledByPolicy = true;
             mEnforcedAdmin = admin;
@@ -378,11 +412,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         switch (state) {
             case Tile.STATE_UNAVAILABLE:
                 return Utils.getDisabled(context,
-                        Utils.getColorAttr(context, android.R.attr.textColorSecondary));
+                        Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary));
             case Tile.STATE_INACTIVE:
-                return Utils.getColorAttr(context, android.R.attr.textColorSecondary);
+                return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
             case Tile.STATE_ACTIVE:
-                return Utils.getColorAttr(context, android.R.attr.colorPrimary);
+                return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
             default:
                 Log.e("QSTile", "Invalid state " + state);
                 return 0;
@@ -517,7 +551,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
             mResId = resId;
         }
 
-        public static Icon get(int resId) {
+        public static synchronized Icon get(int resId) {
             Icon icon = ICONS.get(resId);
             if (icon == null) {
                 icon = new ResourceIcon(resId);
@@ -560,5 +594,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
             // workaround: get a clean state for every new AVD
             return context.getDrawable(mAnimatedResId).getConstantState().newDrawable();
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(this.getClass().getSimpleName() + ":");
+        pw.print("    "); pw.println(getState().toString());
     }
 }

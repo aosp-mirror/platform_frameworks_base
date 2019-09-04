@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -28,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.Editable;
 import android.text.SpannedString;
 import android.text.TextWatcher;
@@ -39,7 +42,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
@@ -56,10 +58,12 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
-import com.android.systemui.statusbar.notification.NotificationViewWrapper;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.LightBarController;
 
 import java.util.function.Consumer;
 
@@ -84,7 +88,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private RemoteInputController mController;
     private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
 
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
 
     private boolean mRemoved;
 
@@ -143,7 +147,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         Intent fillInIntent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         RemoteInput.addResultsToIntent(mRemoteInputs, fillInIntent,
                 results);
-        RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_FREE_FORM_INPUT);
+        if (mEntry.editedSuggestionInfo == null) {
+            RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_FREE_FORM_INPUT);
+        } else {
+            RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_CHOICE);
+        }
 
         mEditText.setEnabled(false);
         mSendButton.setVisibility(INVISIBLE);
@@ -181,12 +189,13 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     public static RemoteInputView inflate(Context context, ViewGroup root,
-            NotificationData.Entry entry,
+            NotificationEntry entry,
             RemoteInputController controller) {
         RemoteInputView v = (RemoteInputView)
                 LayoutInflater.from(context).inflate(R.layout.remote_input, root, false);
         v.mController = controller;
         v.mEntry = entry;
+        v.mEditText.setTextOperationUser(computeTextOperationUser(entry.notification.getUser()));
         v.setTag(VIEW_TAG);
 
         return v;
@@ -246,7 +255,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mEntry.row.isChangingPosition()) {
+        if (mEntry.getRow().isChangingPosition()) {
             if (getVisibility() == VISIBLE && mEditText.isFocusable()) {
                 mEditText.requestFocus();
             }
@@ -256,7 +265,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mEntry.row.isChangingPosition() || isTemporarilyDetached()) {
+        if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
         mController.removeRemoteInput(mEntry, mToken);
@@ -267,10 +276,24 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mPendingIntent = pendingIntent;
     }
 
-    public void setRemoteInput(RemoteInput[] remoteInputs, RemoteInput remoteInput) {
+    /**
+     * Sets the remote input for this view.
+     *
+     * @param remoteInputs The remote inputs that need to be sent to the app.
+     * @param remoteInput The remote input that needs to be activated.
+     * @param editedSuggestionInfo The smart reply that should be inserted in the remote input, or
+     *         {@code null} if the user is not editing a smart reply.
+     */
+    public void setRemoteInput(RemoteInput[] remoteInputs, RemoteInput remoteInput,
+            @Nullable EditedSuggestionInfo editedSuggestionInfo) {
         mRemoteInputs = remoteInputs;
         mRemoteInput = remoteInput;
         mEditText.setHint(mRemoteInput.getLabel());
+
+        mEntry.editedSuggestionInfo = editedSuggestionInfo;
+        if (editedSuggestionInfo != null) {
+            mEntry.remoteInputText = editedSuggestionInfo.originalText;
+        }
     }
 
     public void focusAnimated() {
@@ -282,6 +305,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             animator.start();
         }
         focus();
+    }
+
+    private static UserHandle computeTextOperationUser(UserHandle notificationUser) {
+        return UserHandle.ALL.equals(notificationUser)
+                ? UserHandle.of(ActivityManager.getCurrentUser()) : notificationUser;
     }
 
     public void focus() {
@@ -382,7 +410,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     public void stealFocusFrom(RemoteInputView other) {
         other.close();
         setPendingIntent(other.mPendingIntent);
-        setRemoteInput(other.mRemoteInputs, other.mRemoteInput);
+        setRemoteInput(other.mRemoteInputs, other.mRemoteInput, mEntry.editedSuggestionInfo);
         setRevealParameters(other.mRevealCx, other.mRevealCy, other.mRevealR);
         focus();
     }
@@ -422,7 +450,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 continue;
             }
             setPendingIntent(a.actionIntent);
-            setRemoteInput(inputs, input);
+            setRemoteInput(inputs, input, null /* editedSuggestionInfo*/);
             return true;
         }
         return false;
@@ -489,14 +517,16 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         private final Drawable mBackground;
         private RemoteInputView mRemoteInputView;
         boolean mShowImeOnInputConnection;
+        private LightBarController mLightBarController;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
             mBackground = getBackground();
+            mLightBarController = Dependency.get(LightBarController.class);
         }
 
         private void defocusIfNeeded(boolean animate) {
-            if (mRemoteInputView != null && mRemoteInputView.mEntry.row.isChangingPosition()
+            if (mRemoteInputView != null && mRemoteInputView.mEntry.getRow().isChangingPosition()
                     || isTemporarilyDetached()) {
                 if (isTemporarilyDetached()) {
                     // We might get reattached but then the other one of HUN / expanded might steal
@@ -530,6 +560,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             super.onFocusChanged(focused, direction, previouslyFocusedRect);
             if (!focused) {
                 defocusIfNeeded(true /* animate */);
+            }
+            if (!mRemoteInputView.mRemoved) {
+                mLightBarController.setDirectReplying(focused);
             }
         }
 
@@ -587,7 +620,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
 
             if (mShowImeOnInputConnection && inputConnection != null) {
-                final InputMethodManager imm = InputMethodManager.getInstance();
+                final InputMethodManager imm =
+                        getContext().getSystemService(InputMethodManager.class);
                 if (imm != null) {
                     // onCreateInputConnection is called by InputMethodManager in the middle of
                     // setting up the connection to the IME; wait with requesting the IME until that

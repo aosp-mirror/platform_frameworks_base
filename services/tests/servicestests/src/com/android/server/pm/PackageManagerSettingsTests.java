@@ -35,8 +35,10 @@ import static org.junit.Assert.fail;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
@@ -53,8 +55,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.AtomicFile;
 import com.android.server.LocalServices;
-import com.android.server.pm.permission.PermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -86,7 +88,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
+        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         Settings settings =
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -101,7 +103,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
+        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         Settings settings =
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -118,7 +120,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
+        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         Settings settings =
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -141,7 +143,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
+        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         Settings settings =
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -200,13 +202,21 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME_1, 1L, 0.01, true, "appString1");
         final PersistableBundle launcherExtras1 = getPersistableBundle(
                 PACKAGE_NAME_1, 10L, 0.1, false, "launcherString1");
-        ps1.setSuspended(true, "suspendingPackage1", "dialogMsg1", appExtras1, launcherExtras1, 0);
+
+        final SuspendDialogInfo dialogInfo1 = new SuspendDialogInfo.Builder()
+                .setIcon(0x11220001)
+                .setTitle(0x11220002)
+                .setMessage("1st message")
+                .setNeutralButtonText(0x11220003)
+                .build();
+
+        ps1.setSuspended(true, "suspendingPackage1", dialogInfo1, appExtras1, launcherExtras1, 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
 
-        ps2.setSuspended(true, "suspendingPackage2", "dialogMsg2", null, null, 0);
+        ps2.setSuspended(true, "suspendingPackage2", null, null, null, 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
-        ps3.setSuspended(false, "irrelevant", "irrevelant2", null, null, 0);
+        ps3.setSuspended(false, "irrelevant", dialogInfo1, null, null, 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
 
         settingsUnderTest.writePackageRestrictionsLPr(0);
@@ -217,36 +227,84 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
         // now read and verify
         settingsUnderTest.readPackageRestrictionsLPr(0);
-        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1).
-                readUserState(0);
+        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
+                .readUserState(0);
         assertThat(readPus1.suspended, is(true));
         assertThat(readPus1.suspendingPackage, equalTo("suspendingPackage1"));
-        assertThat(readPus1.dialogMessage, equalTo("dialogMsg1"));
+        assertThat(readPus1.dialogInfo, equalTo(dialogInfo1));
         assertThat(BaseBundle.kindofEquals(readPus1.suspendedAppExtras, appExtras1), is(true));
         assertThat(BaseBundle.kindofEquals(readPus1.suspendedLauncherExtras, launcherExtras1),
                 is(true));
 
-        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2).
-                readUserState(0);
+        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
+                .readUserState(0);
         assertThat(readPus2.suspended, is(true));
         assertThat(readPus2.suspendingPackage, equalTo("suspendingPackage2"));
-        assertThat(readPus2.dialogMessage, equalTo("dialogMsg2"));
+        assertThat(readPus2.dialogInfo, is(nullValue()));
         assertThat(readPus2.suspendedAppExtras, is(nullValue()));
         assertThat(readPus2.suspendedLauncherExtras, is(nullValue()));
 
-        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3).
-                readUserState(0);
+        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
+                .readUserState(0);
         assertThat(readPus3.suspended, is(false));
         assertThat(readPus3.suspendingPackage, is(nullValue()));
-        assertThat(readPus3.dialogMessage, is(nullValue()));
+        assertThat(readPus3.dialogInfo, is(nullValue()));
         assertThat(readPus3.suspendedAppExtras, is(nullValue()));
         assertThat(readPus3.suspendedLauncherExtras, is(nullValue()));
     }
 
     @Test
     public void testPackageRestrictionsSuspendedDefault() {
-        final PackageSetting defaultSetting =  createPackageSetting(PACKAGE_NAME_1);
+        final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
         assertThat(defaultSetting.getSuspended(0), is(false));
+    }
+
+    @Test
+    public void testReadWritePackageRestrictions_distractionFlags() {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, new Object());
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
+        final PackageSetting ps3 = createPackageSetting(PACKAGE_NAME_3);
+
+        final int distractionFlags1 = PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+        ps1.setDistractionFlags(distractionFlags1, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
+
+        final int distractionFlags2 = PackageManager.RESTRICTION_HIDE_NOTIFICATIONS
+                | PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+        ps2.setDistractionFlags(distractionFlags2, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
+
+        final int distractionFlags3 = PackageManager.RESTRICTION_NONE;
+        ps3.setDistractionFlags(distractionFlags3, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
+
+        settingsUnderTest.writePackageRestrictionsLPr(0);
+
+        settingsUnderTest.mPackages.clear();
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
+        // now read and verify
+        settingsUnderTest.readPackageRestrictionsLPr(0);
+        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
+                .readUserState(0);
+        assertThat(readPus1.distractionFlags, is(distractionFlags1));
+
+        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
+                .readUserState(0);
+        assertThat(readPus2.distractionFlags, is(distractionFlags2));
+
+        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
+                .readUserState(0);
+        assertThat(readPus3.distractionFlags, is(distractionFlags3));
+    }
+
+    @Test
+    public void testPackageRestrictionsDistractionFlagsDefault() {
+        final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
+        assertThat(defaultSetting.getDistractionFlags(0), is(PackageManager.RESTRICTION_NONE));
     }
 
     @Test
@@ -255,7 +313,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
+        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         Settings settings =
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -449,7 +507,7 @@ public class PackageManagerSettingsTests {
     public void testUpdatePackageSetting03() {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
+        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         final Settings testSettings01 =
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
@@ -567,7 +625,7 @@ public class PackageManagerSettingsTests {
     public void testCreateNewSetting03() {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
+        PermissionManagerServiceInternal pmInt = PermissionManagerService.create(context, lock);
         final Settings testSettings01 =
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
@@ -683,6 +741,7 @@ public class PackageManagerSettingsTests {
         assertThat(userState.notLaunched, is(notLaunched));
         assertThat(userState.stopped, is(stopped));
         assertThat(userState.suspended, is(false));
+        assertThat(userState.distractionFlags, is(0));
         if (oldUserState != null) {
             assertThat(userState.equals(oldUserState), is(not(userStateChanged)));
         }
@@ -716,9 +775,9 @@ public class PackageManagerSettingsTests {
         assertNotSame(origPkgSetting.mPermissionsState, testPkgSetting.mPermissionsState);
         assertThat(origPkgSetting.mPermissionsState, is(testPkgSetting.mPermissionsState));
         assertThat(origPkgSetting.name, is(testPkgSetting.name));
-        // oldCodePaths is _not_ copied
-        // assertNotSame(origPkgSetting.oldCodePaths, testPkgSetting.oldCodePaths);
-        // assertThat(origPkgSetting.oldCodePaths, is(not(testPkgSetting.oldCodePaths)));
+        // mOldCodePaths is _not_ copied
+        // assertNotSame(origPkgSetting.mOldCodePaths, testPkgSetting.mOldCodePaths);
+        // assertThat(origPkgSetting.mOldCodePaths, is(not(testPkgSetting.mOldCodePaths)));
         assertSame(origPkgSetting.parentPackageName, testPkgSetting.parentPackageName);
         assertThat(origPkgSetting.parentPackageName, is(testPkgSetting.parentPackageName));
         assertSame(origPkgSetting.pkg, testPkgSetting.pkg);

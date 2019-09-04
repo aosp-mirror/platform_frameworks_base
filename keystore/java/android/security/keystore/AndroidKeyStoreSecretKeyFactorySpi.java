@@ -182,8 +182,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                     KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
 
         boolean invalidatedByBiometricEnrollment = false;
-        if (keymasterSwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_FINGERPRINT
-            || keymasterHwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_FINGERPRINT) {
+        if (keymasterSwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_BIOMETRIC
+            || keymasterHwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_BIOMETRIC) {
             // Fingerprint-only key; will be invalidated if the root SID isn't in the SID list.
             invalidatedByBiometricEnrollment = keymasterSecureUserIds != null
                     && !keymasterSecureUserIds.isEmpty()

@@ -63,13 +63,15 @@ public class TypedArray {
     }
 
     // STYLE_ prefixed constants are offsets within the typed data array.
-    static final int STYLE_NUM_ENTRIES = 6;
+    // Keep this in sync with libs/androidfw/include/androidfw/AttributeResolution.h
+    static final int STYLE_NUM_ENTRIES = 7;
     static final int STYLE_TYPE = 0;
     static final int STYLE_DATA = 1;
     static final int STYLE_ASSET_COOKIE = 2;
     static final int STYLE_RESOURCE_ID = 3;
     static final int STYLE_CHANGING_CONFIGURATIONS = 4;
     static final int STYLE_DENSITY = 5;
+    static final int STYLE_SOURCE_RESOURCE_ID = 6;
 
     @UnsupportedAppUsage
     private final Resources mResources;
@@ -85,11 +87,47 @@ public class TypedArray {
     /*package*/ XmlBlock.Parser mXml;
     @UnsupportedAppUsage
     /*package*/ Resources.Theme mTheme;
+    /**
+     * mData is used to hold the value/id and other metadata about each attribute.
+     *
+     * [type, data, asset cookie, resource id, changing configuration, density]
+     *
+     * type - type of this attribute, see TypedValue#TYPE_*
+     *
+     * data - can be used in various ways:
+     *     a) actual value of the attribute if type is between #TYPE_FIRST_INT and #TYPE_LAST_INT
+     *        1) color represented by an integer (#TYPE_INT_COLOR_*)
+     *        2) boolean represented by an integer (#TYPE_INT_BOOLEAN)
+     *        3) integer number (#TYPE_TYPE_INT_DEC or #TYPE_INT_HEX)
+     *        4) float number where integer gets interpreted as float (#TYPE_FLOAT, #TYPE_FRACTION
+     *            and #TYPE_DIMENSION)
+     *     b) index into string block inside AssetManager (#TYPE_STRING)
+     *     c) attribute resource id in the current theme/style (#TYPE_ATTRIBUTE)
+     *
+     * asset cookie - used in two ways:
+     *     a) for strings, drawables, and fonts it specifies the set of apk assets to look at
+     *     (multi-apk case)
+     *     b) cookie + asset as a unique identifier for drawable caches
+     *
+     * resource id - id that was finally used to resolve this attribute
+     *
+     * changing configuration - a mask of the configuration parameters for which the values in this
+     * attribute may change
+     *
+     * density - density of drawable pointed to by this attribute
+     */
     @UnsupportedAppUsage
     /*package*/ int[] mData;
+    /**
+     * Pointer to the start of the memory address of mData. It is passed via JNI and used to write
+     * to mData array directly from native code (AttributeResolution.cpp).
+     */
     /*package*/ long mDataAddress;
     @UnsupportedAppUsage
     /*package*/ int[] mIndices;
+    /**
+     * Similar to mDataAddress, but instead it is a pointer to mIndices address.
+     */
     /*package*/ long mIndicesAddress;
     @UnsupportedAppUsage
     /*package*/ int mLength;
@@ -1062,6 +1100,54 @@ public class TypedArray {
     }
 
     /**
+     * Returns the resource ID of the style or layout against which the specified attribute was
+     * resolved, otherwise returns defValue.
+     *
+     * For example, if you we resolving two attributes {@code android:attribute1} and
+     * {@code android:attribute2} and you were inflating a {@link android.view.View} from
+     * {@code layout/my_layout.xml}:
+     * <pre>
+     *     &lt;View
+     *         style="@style/viewStyle"
+     *         android:layout_width="wrap_content"
+     *         android:layout_height="wrap_content"
+     *         android:attribute1="foo"/&gt;
+     * </pre>
+     *
+     * and {@code @style/viewStyle} is:
+     * <pre>
+     *     &lt;style android:name="viewStyle"&gt;
+     *         &lt;item name="android:attribute2"&gt;bar&lt;item/&gt;
+     *     &lt;style/&gt;
+     * </pre>
+     *
+     * then resolved {@link TypedArray} will have values that return source resource ID of
+     * {@code R.layout.my_layout} for {@code android:attribute1} and {@code R.style.viewStyle} for
+     * {@code android:attribute2}.
+     *
+     * @param index Index of attribute whose source style to retrieve.
+     * @param defaultValue Value to return if the attribute is not defined or
+     *                     not a resource.
+     *
+     * @return Either a style resource ID, layout resource ID, or defaultValue if it was not
+     * resolved in a style or layout.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     */
+    @AnyRes
+    public int getSourceResourceId(@StyleableRes int index, @AnyRes int defaultValue) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        index *= STYLE_NUM_ENTRIES;
+        final int resid = mData[index + STYLE_SOURCE_RESOURCE_ID];
+        if (resid != 0) {
+            return resid;
+        }
+        return defaultValue;
+    }
+
+    /**
      * Determines whether there is an attribute at <var>index</var>.
      * <p>
      * <strong>Note:</strong> If the attribute was set to {@code @empty} or
@@ -1273,6 +1359,7 @@ public class TypedArray {
                 data[index + STYLE_CHANGING_CONFIGURATIONS]);
         outValue.density = data[index + STYLE_DENSITY];
         outValue.string = (type == TypedValue.TYPE_STRING) ? loadStringValueAt(index) : null;
+        outValue.sourceResourceId = data[index + STYLE_SOURCE_RESOURCE_ID];
         return true;
     }
 

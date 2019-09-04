@@ -21,23 +21,29 @@ import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.LargeTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
+import android.view.ViewTreeObserver.OnDrawListener;
 import android.widget.FrameLayout;
 
-import com.android.compatibility.common.util.WidgetTestUtils;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test of invalidates, drawing, and the flags that support them
@@ -49,7 +55,6 @@ public class ViewInvalidateTest {
     public ActivityTestRule<Activity> mActivityRule = new ActivityTestRule<>(Activity.class);
 
     private static final int INVAL_TEST_FLAG_MASK = View.PFLAG_DIRTY
-            | View.PFLAG_DIRTY_OPAQUE
             | View.PFLAG_DRAWN
             | View.PFLAG_DRAWING_CACHE_VALID
             | View.PFLAG_INVALIDATED
@@ -281,5 +286,43 @@ public class ViewInvalidateTest {
                 View.PFLAG_DRAW_ANIMATION, // carried up to parent
                 View.PFLAG_DRAWN);
         assertTrue(getViewRoot(mParent).mIsAnimating);
+    }
+
+    /** Copied from cts/common/device-side/util. */
+    static class WidgetTestUtils {
+        public static void runOnMainAndDrawSync(@NonNull final ActivityTestRule activityTestRule,
+                @NonNull final View view, @Nullable final Runnable runner) throws Throwable {
+            final CountDownLatch latch = new CountDownLatch(1);
+
+            activityTestRule.runOnUiThread(() -> {
+                final OnDrawListener listener = new OnDrawListener() {
+                    @Override
+                    public void onDraw() {
+                        // posting so that the sync happens after the draw that's about to happen
+                        view.post(() -> {
+                            activityTestRule.getActivity().getWindow().getDecorView()
+                                    .getViewTreeObserver().removeOnDrawListener(this);
+                            latch.countDown();
+                        });
+                    }
+                };
+
+                activityTestRule.getActivity().getWindow().getDecorView()
+                        .getViewTreeObserver().addOnDrawListener(listener);
+
+                if (runner != null) {
+                    runner.run();
+                }
+                view.invalidate();
+            });
+
+            try {
+                Assert.assertTrue("Expected draw pass occurred within 5 seconds",
+                        latch.await(5, TimeUnit.SECONDS));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 }

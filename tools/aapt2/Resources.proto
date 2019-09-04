@@ -41,6 +41,12 @@ message Source {
   SourcePosition position = 2;
 }
 
+// The name and version fingerprint of a build tool.
+message ToolFingerprint {
+  string tool = 1;
+  string version = 2;
+}
+
 // Top level message representing a resource table.
 message ResourceTable {
   // The string pool containing source paths referenced throughout the resource table. This does
@@ -49,6 +55,12 @@ message ResourceTable {
 
   // Resource definitions corresponding to an Android package.
   repeated Package package = 2;
+
+  // The <overlayable> declarations within the resource table.
+  repeated Overlayable overlayable = 3;
+
+  // The version fingerprints of the tools that built the resource table.
+  repeated ToolFingerprint tool_fingerprint = 4;
 }
 
 // A package ID in the range [0x00, 0xff].
@@ -133,13 +145,43 @@ message AllowNew {
   string comment = 2;
 }
 
-// Whether a resource is overlayable by runtime resource overlays (RRO).
+// Represents a set of overlayable resources.
 message Overlayable {
-  // Where this declaration was defined in source.
+  // The name of the <overlayable>.
+  string name = 1;
+
+  // The location of the <overlayable> declaration in the source.
+  Source source = 2;
+
+  // The component responsible for enabling and disabling overlays targeting this <overlayable>.
+  string actor = 3;
+}
+
+// Represents an overlayable <item> declaration within an <overlayable> tag.
+message OverlayableItem {
+  enum Policy {
+    NONE = 0;
+    PUBLIC = 1;
+    SYSTEM = 2;
+    VENDOR = 3;
+    PRODUCT = 4;
+    SIGNATURE = 5;
+    ODM = 6;
+    OEM = 7;
+  }
+
+  // The location of the <item> declaration in source.
   Source source = 1;
 
   // Any comment associated with the declaration.
   string comment = 2;
+
+  // The policy defined by the enclosing <policy> tag of this <item>.
+  repeated Policy policy = 3;
+
+  // The index into overlayable list that points to the <overlayable> tag that contains
+  // this <item>.
+  uint32 overlayable_idx = 4;
 }
 
 // An entry ID in the range [0x0000, 0xffff].
@@ -169,7 +211,7 @@ message Entry {
   AllowNew allow_new = 4;
 
   // Whether this resource can be overlaid by a runtime resource overlay (RRO).
-  Overlayable overlayable = 5;
+  OverlayableItem overlayable_item = 5;
 
   // The set of values defined for this entry, each corresponding to a different
   // configuration/variant.

@@ -19,6 +19,8 @@
 #include "android-base/scopeguard.h"
 #include "android-base/stringprintf.h"
 
+#include "trace/TraceBuffer.h"
+
 using ::android::base::StringPrintf;
 using ::google::protobuf::io::CodedInputStream;
 using ::google::protobuf::io::CodedOutputStream;
@@ -171,6 +173,7 @@ ContainerEntryType ContainerReaderEntry::Type() const {
 }
 
 bool ContainerReaderEntry::GetResTable(pb::ResourceTable* out_table) {
+  TRACE_CALL();
   CHECK(type_ == ContainerEntryType::kResTable) << "reading a kResTable when the type is kResFile";
   if (length_ > std::numeric_limits<int>::max()) {
     reader_->error_ = StringPrintf("entry length %zu is too large", length_);
@@ -261,6 +264,7 @@ ContainerReader::ContainerReader(io::InputStream* in)
       total_entry_count_(0u),
       current_entry_count_(0u),
       entry_(this) {
+  TRACE_CALL();
   ::google::protobuf::uint32 magic;
   if (!coded_in_.ReadLittleEndian32(&magic)) {
     std::ostringstream error;
@@ -270,7 +274,8 @@ ContainerReader::ContainerReader(io::InputStream* in)
   }
 
   if (magic != kContainerFormatMagic) {
-    error_ = "magic value doesn't match AAPT";
+    error_ =
+        StringPrintf("magic value is 0x%08x but AAPT expects 0x%08x", magic, kContainerFormatMagic);
     return;
   }
 

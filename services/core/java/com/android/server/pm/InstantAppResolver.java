@@ -36,9 +36,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
-import android.content.pm.InstantAppRequest;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppIntentFilter;
+import android.content.pm.InstantAppRequest;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
 import android.metrics.LogMaker;
@@ -132,7 +132,7 @@ public abstract class InstantAppResolver {
         try {
             final List<InstantAppResolveInfo> instantAppResolveInfoList =
                     connection.getInstantAppResolveInfoList(sanitizedIntent,
-                            requestObj.digest.getDigestPrefixSecure(), token);
+                            requestObj.digest.getDigestPrefixSecure(), requestObj.userId, token);
             if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                 resolveInfo = InstantAppResolver.filterInstantAppIntent(
                         instantAppResolveInfoList, origIntent, requestObj.resolvedType,
@@ -224,8 +224,8 @@ public abstract class InstantAppResolver {
         };
         try {
             connection.getInstantAppIntentFilterList(sanitizedIntent,
-                    requestObj.digest.getDigestPrefixSecure(), token, callback, callbackHandler,
-                    startTime);
+                    requestObj.digest.getDigestPrefixSecure(), requestObj.userId, token, callback,
+                    callbackHandler, startTime);
         } catch (ConnectionException e) {
             @ResolutionStatus int resolutionStatus = RESOLUTION_FAILURE;
             if (e.failure == ConnectionException.FAILURE_BIND) {
@@ -265,13 +265,9 @@ public abstract class InstantAppResolver {
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         if (token != null) {
-            // TODO(b/72700831): remove populating old extra
-            intent.putExtra(Intent.EXTRA_EPHEMERAL_TOKEN, token);
             intent.putExtra(Intent.EXTRA_INSTANT_APP_TOKEN, token);
         }
         if (origIntent.getData() != null) {
-            // TODO(b/72700831): remove populating old extra
-            intent.putExtra(Intent.EXTRA_EPHEMERAL_HOSTNAME, origIntent.getData().getHost());
             intent.putExtra(Intent.EXTRA_INSTANT_APP_HOSTNAME, origIntent.getData().getHost());
         }
         intent.putExtra(Intent.EXTRA_INSTANT_APP_ACTION, origIntent.getAction());
@@ -308,7 +304,6 @@ public abstract class InstantAppResolver {
                                     null /*bOptions*/, userId);
                     IntentSender failureSender = new IntentSender(failureIntentTarget);
                     // TODO(b/72700831): remove populating old extra
-                    intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, failureSender);
                     intent.putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, failureSender);
                 } catch (RemoteException ignore) { /* ignore; same process */ }
             }
@@ -327,8 +322,6 @@ public abstract class InstantAppResolver {
                                         | PendingIntent.FLAG_IMMUTABLE,
                                 null /*bOptions*/, userId);
                 IntentSender successSender = new IntentSender(successIntentTarget);
-                // TODO(b/72700831): remove populating old extra
-                intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, successSender);
                 intent.putExtra(Intent.EXTRA_INSTANT_APP_SUCCESS, successSender);
             } catch (RemoteException ignore) { /* ignore; same process */ }
             if (verificationBundle != null) {
@@ -465,8 +458,8 @@ public abstract class InstantAppResolver {
             }
             return Collections.emptyList();
         }
-        final PackageManagerService.InstantAppIntentResolver instantAppResolver =
-                new PackageManagerService.InstantAppIntentResolver();
+        final ComponentResolver.InstantAppIntentResolver instantAppResolver =
+                new ComponentResolver.InstantAppIntentResolver();
         for (int j = instantAppFilters.size() - 1; j >= 0; --j) {
             final InstantAppIntentFilter instantAppFilter = instantAppFilters.get(j);
             final List<IntentFilter> splitFilters = instantAppFilter.getFilters();

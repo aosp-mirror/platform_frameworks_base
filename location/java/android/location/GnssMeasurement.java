@@ -16,8 +16,9 @@
 
 package android.location;
 
-import android.annotation.TestApi;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -48,6 +49,7 @@ public final class GnssMeasurement implements Parcelable {
     private int mMultipathIndicator;
     private double mSnrInDb;
     private double mAutomaticGainControlLevelInDb;
+    @NonNull private String mCodeType;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -58,6 +60,7 @@ public final class GnssMeasurement implements Parcelable {
     private static final int HAS_CARRIER_PHASE = (1<<11);
     private static final int HAS_CARRIER_PHASE_UNCERTAINTY = (1<<12);
     private static final int HAS_AUTOMATIC_GAIN_CONTROL = (1<<13);
+    private static final int HAS_CODE_TYPE = (1 << 14);
 
     /**
      * The status of the multipath indicator.
@@ -92,7 +95,7 @@ public final class GnssMeasurement implements Parcelable {
             STATE_TOW_DECODED, STATE_MSEC_AMBIGUOUS, STATE_SYMBOL_SYNC, STATE_GLO_STRING_SYNC,
             STATE_GLO_TOD_DECODED, STATE_BDS_D2_BIT_SYNC, STATE_BDS_D2_SUBFRAME_SYNC,
             STATE_GAL_E1BC_CODE_LOCK, STATE_GAL_E1C_2ND_CODE_LOCK, STATE_GAL_E1B_PAGE_SYNC,
-            STATE_SBAS_SYNC, STATE_TOW_KNOWN, STATE_GLO_TOD_KNOWN
+            STATE_SBAS_SYNC, STATE_TOW_KNOWN, STATE_GLO_TOD_KNOWN, STATE_2ND_CODE_LOCK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {}
@@ -139,6 +142,9 @@ public final class GnssMeasurement implements Parcelable {
      * will also be set.
      */
     public static final int STATE_GLO_TOD_KNOWN = (1<<15);
+
+    /** This GNSS measurement's tracking state has secondary code lock. */
+    public static final int STATE_2ND_CODE_LOCK  = (1 << 16);
 
     /**
      * All the GNSS receiver state flags, for bit masking purposes (not a sensible state for any
@@ -248,6 +254,7 @@ public final class GnssMeasurement implements Parcelable {
         mMultipathIndicator = measurement.mMultipathIndicator;
         mSnrInDb = measurement.mSnrInDb;
         mAutomaticGainControlLevelInDb = measurement.mAutomaticGainControlLevelInDb;
+        mCodeType = measurement.mCodeType;
     }
 
     /**
@@ -404,6 +411,9 @@ public final class GnssMeasurement implements Parcelable {
         if ((mState & STATE_SBAS_SYNC) != 0) {
             builder.append("SbasSync|");
         }
+        if ((mState & STATE_2ND_CODE_LOCK) != 0) {
+            builder.append("2ndCodeLock|");
+        }
 
         int remainingStates = mState & ~STATE_ALL;
         if (remainingStates > 0) {
@@ -418,96 +428,315 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the received GNSS satellite time, at the measurement time, in nanoseconds.
      *
-     * <p>For GPS &amp; QZSS, this is:
-     * <ul>
-     * <li>Received GPS Time-of-Week at the measurement time, in nanoseconds.</li>
-     * <li>The value is relative to the beginning of the current GPS week.</li>
-     * </ul>
+     * <p>The received satellite time is relative to the beginning of the system week for all
+     * constellations except for Glonass where it is relative to the beginning of the Glonass
+     * system day.
      *
-     * <p>Given the highest sync state that can be achieved, per each satellite, valid range
-     * for this field can be:
-     * <pre>
-     *     Searching       : [ 0       ]   : STATE_UNKNOWN
-     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
-     *     Bit sync        : [ 0  20ms ]   : STATE_BIT_SYNC is set
-     *     Subframe sync   : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
-     *     TOW decoded     : [ 0 1week ]   : STATE_TOW_DECODED is set
-     *     TOW Known       : [ 0 1week ]   : STATE_TOW_KNOWN set</pre>
+     * <p>The table below indicates the valid range of the received GNSS satellite time. These
+     * ranges depend on the constellation and code being tracked and the state of the tracking
+     * algorithms given by the {@link #getState} method. The minimum value of this field is zero.
+     * The maximum value of this field is determined by looking across all of the state flags
+     * that are set, for the given constellation and code type, and finding the the maximum value
+     * in this table.
      *
-     * Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
+     * <p>For example, for GPS L1 C/A, if STATE_TOW_KNOWN is set, this field can be any value from 0
+     * to 1 week (in nanoseconds), and for GAL E1B code, if only STATE_GAL_E1BC_CODE_LOCK is set,
+     * then this field can be any value from 0 to 4 milliseconds (in nanoseconds.)
+     *
+     * <table border="1">
+     *   <thead>
+     *     <tr>
+     *       <td />
+     *       <td colspan="3"><strong>GPS/QZSS</strong></td>
+     *       <td><strong>GLNS</strong></td>
+     *       <td colspan="2"><strong>BDS</strong></td>
+     *       <td colspan="3"><strong>GAL</strong></td>
+     *       <td><strong>SBAS</strong></td>
+     *     </tr>
+     *     <tr>
+     *       <td><strong>State Flag</strong></td>
+     *       <td><strong>L1 C/A</strong></td>
+     *       <td><strong>L5I</strong></td>
+     *       <td><strong>L5Q</strong></td>
+     *       <td><strong>L1OF</strong></td>
+     *       <td><strong>B1I (D1)</strong></td>
+     *       <td><strong>B1I &nbsp;(D2)</strong></td>
+     *       <td><strong>E1B</strong></td>
+     *       <td><strong>E1C</strong></td>
+     *       <td><strong>E5AQ</strong></td>
+     *       <td><strong>L1 C/A</strong></td>
+     *     </tr>
+     *   </thead>
+     *   <tbody>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_UNKNOWN</strong>
+     *       </td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_CODE_LOCK</strong>
+     *       </td>
+     *       <td>1 ms</td>
+     *       <td>1 ms</td>
+     *       <td>1 ms</td>
+     *       <td>1 ms</td>
+     *       <td>1 ms</td>
+     *       <td>1 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>1 ms</td>
+     *       <td>1 ms</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_SYMBOL_SYNC</strong>
+     *       </td>
+     *       <td>20 ms (optional)</td>
+     *       <td>10 ms</td>
+     *       <td>1 ms (optional)</td>
+     *       <td>10 ms</td>
+     *       <td>20 ms (optional)</td>
+     *       <td>2 ms</td>
+     *       <td>4 ms (optional)</td>
+     *       <td>4 ms (optional)</td>
+     *       <td>1 ms (optional)</td>
+     *       <td>2 ms</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_BIT_SYNC</strong>
+     *       </td>
+     *       <td>20 ms</td>
+     *       <td>20 ms</td>
+     *       <td>1 ms (optional)</td>
+     *       <td>20 ms</td>
+     *       <td>20 ms</td>
+     *       <td>-</td>
+     *       <td>8 ms</td>
+     *       <td>-</td>
+     *       <td>1 ms (optional)</td>
+     *       <td>4 ms</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_SUBFRAME_SYNC</strong>
+     *       </td>
+     *       <td>6s</td>
+     *       <td>6s</td>
+     *       <td>-</td>
+     *       <td>2 s</td>
+     *       <td>6 s</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>100 ms</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_TOW_DECODED</strong>
+     *       </td>
+     *       <td colspan="2">1 week</td>
+     *       <td>-</td>
+     *       <td>1 day</td>
+     *       <td colspan="2">1 week</td>
+     *       <td colspan="2">1 week</td>
+     *       <td>-</td>
+     *       <td>1 week</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_TOW_KNOWN</strong>
+     *       </td>
+     *       <td colspan="3">1 week</td>
+     *       <td>1 day</td>
+     *       <td colspan="2">1 week</td>
+     *       <td colspan="3">1 week</td>
+     *       <td>1 week</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_GLO_STRING_SYNC</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>2 s</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_GLO_TOD_DECODED</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>1 day</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_GLO_TOD_KNOWN</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>1 day</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_BDS_D2_BIT_SYNC</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>2 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_BDS_D2_SUBFRAME_SYNC</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>600 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_GAL_E1BC_CODE_LOCK</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>4 ms</td>
+     *       <td>4 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_GAL_E1C_2ND_CODE_LOCK</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>100 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_2ND_CODE_LOCK</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>10 ms (optional)</td>
+     *       <td>20 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>100 ms (optional)</td>
+     *       <td>100 ms</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_GAL_E1B_PAGE_SYNC</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>2 s</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *     </tr>
+     *     <tr>
+     *       <td>
+     *         <strong>STATE_SBAS_SYNC</strong>
+     *       </td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>1 s</td>
+     *     </tr>
+     *   </tbody>
+     * </table>
+     *
+     * <p>Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
      * been determined from other sources. If TOW decoded is set then TOW Known must also be set.
      *
-     * <p>Note well: if there is any ambiguity in integer millisecond, {@code STATE_MSEC_AMBIGUOUS}
-     * must be set accordingly, in the 'state' field.
+     * <p>Note well: if there is any ambiguity in integer millisecond, STATE_MSEC_AMBIGUOUS must be
+     * set accordingly, in the 'state' field. This value must be populated, unless the 'state' ==
+     * STATE_UNKNOWN.
      *
-     * <p>This value must be populated if 'state' != {@code STATE_UNKNOWN}.
-     *
-     * <p>For Glonass, this is:
+     * <p>Note on optional flags:
      * <ul>
-     * <li>Received Glonass time of day, at the measurement time in nanoseconds.</li>
+     *     <li> For L1 C/A and B1I, STATE_SYMBOL_SYNC is optional since the symbol length is the
+     *     same as the bit length.
+     *     <li> For L5Q and E5aQ, STATE_BIT_SYNC and STATE_SYMBOL_SYNC are optional since they are
+     *     implied by STATE_CODE_LOCK.
+     *     <li> STATE_2ND_CODE_LOCK for L5I is optional since it is implied by STATE_SYMBOL_SYNC.
+     *     <li> STATE_2ND_CODE_LOCK for E1C is optional since it is implied by
+     *     STATE_GAL_E1C_2ND_CODE_LOCK.
+     *     <li> For E1B and E1C, STATE_SYMBOL_SYNC is optional, because it is implied by
+     *     STATE_GAL_E1BC_CODE_LOCK.
      * </ul>
-     *
-     * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
-     * this field can be:
-     * <pre>
-     *     Searching           : [ 0       ]   : STATE_UNKNOWN
-     *     C/A code lock       : [ 0   1ms ]   : STATE_CODE_LOCK is set
-     *     Symbol sync         : [ 0  10ms ]   : STATE_SYMBOL_SYNC is set
-     *     Bit sync            : [ 0  20ms ]   : STATE_BIT_SYNC is set
-     *     String sync         : [ 0    2s ]   : STATE_GLO_STRING_SYNC is set
-     *     Time of day decoded : [ 0  1day ]   : STATE_GLO_TOD_DECODED is set
-     *     Time of day known   : [ 0  1day ]   : STATE_GLO_TOD_KNOWN set</pre>
-     *
-     * Note: Time of day known refers to the case where it is possibly not decoded over the air but
-     * has been determined from other sources. If Time of day decoded is set then Time of day known
-     * must also be set.
-     *
-     * <p>For Beidou, this is:
-     * <ul>
-     * <li>Received Beidou time of week, at the measurement time in nanoseconds.</li>
-     * </ul>
-     *
-     * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
-     * this field can be:
-     * <pre>
-     *     Searching              : [ 0       ]   : STATE_UNKNOWN
-     *     C/A code lock          : [ 0   1ms ]   : STATE_CODE_LOCK is set
-     *     Bit sync (D2)          : [ 0   2ms ]   : STATE_BDS_D2_BIT_SYNC is set
-     *     Bit sync (D1)          : [ 0  20ms ]   : STATE_BIT_SYNC is set
-     *     Subframe (D2)          : [ 0  0.6s ]   : STATE_BDS_D2_SUBFRAME_SYNC is set
-     *     Subframe (D1)          : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
-     *     Time of week decoded   : [ 0 1week ]   : STATE_TOW_DECODED is set
-     *     Time of week known     : [ 0 1week ]   : STATE_TOW_KNOWN set</pre>
-     *
-     * Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
-     * been determined from other sources. If TOW decoded is set then TOW Known must also be set.
-     *
-     * <p>For Galileo, this is:
-     * <ul>
-     * <li>Received Galileo time of week, at the measurement time in nanoseconds.</li>
-     * </ul>
-     * <pre>
-     *     E1BC code lock       : [ 0   4ms ]  : STATE_GAL_E1BC_CODE_LOCK is set
-     *     E1C 2nd code lock    : [ 0 100ms ]  : STATE_GAL_E1C_2ND_CODE_LOCK is set
-     *     E1B page             : [ 0    2s ]  : STATE_GAL_E1B_PAGE_SYNC is set
-     *     Time of week decoded : [ 0 1week ]  : STATE_TOW_DECODED is set
-     *     Time of week known   : [ 0 1week ]  : STATE_TOW_KNOWN set</pre>
-     *
-     * Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
-     * been determined from other sources. If TOW decoded is set then TOW Known must also be set.
-     *
-     * <p>For SBAS, this is:
-     * <ul>
-     * <li>Received SBAS time, at the measurement time in nanoseconds.</li>
-     * </ul>
-     *
-     * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
-     * this field can be:
-     * <pre>
-     *     Searching       : [ 0       ]   : STATE_UNKNOWN
-     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
-     *     Symbol sync     : [ 0   2ms ]   : STATE_SYMBOL_SYNC is set
-     *     Message         : [ 0    1s ]   : STATE_SBAS_SYNC is set</pre>
      */
     public long getReceivedSvTimeNanos() {
         return mReceivedSvTimeNanos;
@@ -685,6 +914,12 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <p>This includes ensuring that all half-cycle ambiguities are resolved before this value is
      * reported as {@link #ADR_STATE_VALID}.
+     *
+     * <p>The alignment of the phase measurement will not be adjusted by the receiver so the
+     * in-phase and quadrature phase components will have a quarter cycle offset as they do when
+     * transmitted from the satellites. If the measurement is from a combination of the in-phase
+     * and quadrature phase components, then the alignment of the phase measurement will be aligned
+     * to the in-phase component.
      */
     public double getAccumulatedDeltaRangeMeters() {
         return mAccumulatedDeltaRangeMeters;
@@ -961,7 +1196,7 @@ public final class GnssMeasurement implements Parcelable {
      * <p>For internal and logging use only.
      */
     private String getMultipathIndicatorString() {
-        switch(mMultipathIndicator) {
+        switch (mMultipathIndicator) {
             case MULTIPATH_INDICATOR_UNKNOWN:
                 return "Unknown";
             case MULTIPATH_INDICATOR_DETECTED:
@@ -1057,7 +1292,89 @@ public final class GnssMeasurement implements Parcelable {
         mAutomaticGainControlLevelInDb = Double.NaN;
     }
 
-    public static final Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
+    /**
+     * Returns {@code true} if {@link #getCodeType()} is available,
+     * {@code false} otherwise.
+     */
+    public boolean hasCodeType() {
+        return isFlagSet(HAS_CODE_TYPE);
+    }
+
+    /**
+     * Gets the GNSS measurement's code type.
+     *
+     * <p>Similar to the Attribute field described in RINEX 3.03, e.g., in Tables 4-10, and Table
+     * A2 at the RINEX 3.03 Update 1 Document.
+     *
+     * <p>Returns "A" for GALILEO E1A, GALILEO E6A, IRNSS L5A, IRNSS SA.
+     *
+     * <p>Returns "B" for GALILEO E1B, GALILEO E6B, IRNSS L5B, IRNSS SB.
+     *
+     * <p>Returns "C" for GPS L1 C/A,  GPS L2 C/A, GLONASS G1 C/A, GLONASS G2 C/A, GALILEO E1C,
+     * GALILEO E6C, SBAS L1 C/A, QZSS L1 C/A, IRNSS L5C.
+     *
+     * <p>Returns "I" for GPS L5 I, GLONASS G3 I, GALILEO E5a I, GALILEO E5b I, GALILEO E5a+b I,
+     * SBAS L5 I, QZSS L5 I, BDS B1 I, BDS B2 I, BDS B3 I.
+     *
+     * <p>Returns "L" for GPS L1C (P), GPS L2C (L), QZSS L1C (P), QZSS L2C (L), LEX(6) L.
+     *
+     * <p>Returns "M" for GPS L1M, GPS L2M.
+     *
+     * <p>Returns "N" for GPS L1 codeless, GPS L2 codeless.
+     *
+     * <p>Returns "P" for GPS L1P, GPS L2P, GLONASS G1P, GLONASS G2P.
+     *
+     * <p>Returns "Q" for GPS L5 Q, GLONASS G3 Q, GALILEO E5a Q, GALILEO E5b Q, GALILEO E5a+b Q,
+     * SBAS L5 Q, QZSS L5 Q, BDS B1 Q, BDS B2 Q, BDS B3 Q.
+     *
+     * <p>Returns "S" for GPS L1C (D), GPS L2C (M), QZSS L1C (D), QZSS L2C (M), LEX(6) S.
+     *
+     * <p>Returns "W" for GPS L1 Z-tracking, GPS L2 Z-tracking.
+     *
+     * <p>Returns "X" for GPS L1C (D+P), GPS L2C (M+L), GPS L5 (I+Q), GLONASS G3 (I+Q), GALILEO
+     * E1 (B+C), GALILEO E5a (I+Q), GALILEO E5b (I+Q), GALILEO E5a+b(I+Q), GALILEO E6 (B+C), SBAS
+     * L5 (I+Q), QZSS L1C (D+P), QZSS L2C (M+L), QZSS L5 (I+Q), LEX(6) (S+L), BDS B1 (I+Q), BDS
+     * B2 (I+Q), BDS B3 (I+Q), IRNSS L5 (B+C).
+     *
+     * <p>Returns "Y" for GPS L1Y, GPS L2Y.
+     *
+     * <p>Returns "Z" for GALILEO E1 (A+B+C), GALILEO E6 (A+B+C), QZSS L1-SAIF.
+     *
+     * <p>Returns "UNKNOWN" if the GNSS Measurement's code type is unknown.
+     *
+     * <p>This is used to specify the observation descriptor defined in GNSS Observation Data File
+     * Header Section Description in the RINEX standard (Version 3.XX), in cases where the code type
+     * does not align with the above listed values. For example, if a code type "G" is added, this
+     * string shall be set to "G".
+     */
+    @NonNull
+    public String getCodeType() {
+        return mCodeType;
+    }
+
+    /**
+     * Sets the GNSS measurement's code type.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setCodeType(@NonNull String codeType) {
+        setFlag(HAS_CODE_TYPE);
+        mCodeType = codeType;
+    }
+
+    /**
+     * Resets the GNSS measurement's code type.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetCodeType() {
+        resetFlag(HAS_CODE_TYPE);
+        mCodeType = "UNKNOWN";
+    }
+
+    public static final @android.annotation.NonNull Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
         @Override
         public GnssMeasurement createFromParcel(Parcel parcel) {
             GnssMeasurement gnssMeasurement = new GnssMeasurement();
@@ -1082,6 +1399,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mMultipathIndicator = parcel.readInt();
             gnssMeasurement.mSnrInDb = parcel.readDouble();
             gnssMeasurement.mAutomaticGainControlLevelInDb = parcel.readDouble();
+            gnssMeasurement.mCodeType = parcel.readString();
 
             return gnssMeasurement;
         }
@@ -1114,6 +1432,7 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeInt(mMultipathIndicator);
         parcel.writeDouble(mSnrInDb);
         parcel.writeDouble(mAutomaticGainControlLevelInDb);
+        parcel.writeString(mCodeType);
     }
 
     @Override
@@ -1185,9 +1504,13 @@ public final class GnssMeasurement implements Parcelable {
                 "SnrInDb",
                 hasSnrInDb() ? mSnrInDb : null));
         builder.append(String.format(
-            format,
-            "AgcLevelDb",
-            hasAutomaticGainControlLevelDb() ? mAutomaticGainControlLevelInDb : null));
+                format,
+                "AgcLevelDb",
+                hasAutomaticGainControlLevelDb() ? mAutomaticGainControlLevelInDb : null));
+        builder.append(String.format(
+                format,
+                "CodeType",
+                hasCodeType() ? mCodeType : null));
 
         return builder.toString();
     }
@@ -1212,6 +1535,7 @@ public final class GnssMeasurement implements Parcelable {
         setMultipathIndicator(MULTIPATH_INDICATOR_UNKNOWN);
         resetSnrInDb();
         resetAutomaticGainControlLevel();
+        resetCodeType();
     }
 
     private void setFlag(int flag) {

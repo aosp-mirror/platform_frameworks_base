@@ -16,10 +16,15 @@
 
 package android.net;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
@@ -453,5 +458,31 @@ public class NetworkUtils {
             routedIPCount = routedIPCount.add(BigInteger.ONE.shiftLeft(rank));
         }
         return routedIPCount;
+    }
+
+    private static final int[] ADDRESS_FAMILIES = new int[] {AF_INET, AF_INET6};
+
+    /**
+     * Returns true if the hostname is weakly validated.
+     * @param hostname Name of host to validate.
+     * @return True if it's a valid-ish hostname.
+     *
+     * @hide
+     */
+    public static boolean isWeaklyValidatedHostname(@NonNull String hostname) {
+        // TODO(b/34953048): Use a validation method that permits more accurate,
+        // but still inexpensive, checking of likely valid DNS hostnames.
+        final String weakHostnameRegex = "^[a-zA-Z0-9_.-]+$";
+        if (!hostname.matches(weakHostnameRegex)) {
+            return false;
+        }
+
+        for (int address_family : ADDRESS_FAMILIES) {
+            if (Os.inet_pton(address_family, hostname) != null) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

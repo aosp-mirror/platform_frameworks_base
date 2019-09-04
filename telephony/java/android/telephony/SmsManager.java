@@ -16,7 +16,10 @@
 
 package android.telephony;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
@@ -28,8 +31,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.BaseBundle;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -50,6 +55,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /*
  * TODO(code review): Curious question... Why are a lot of these
@@ -267,15 +273,6 @@ public final class SmsManager {
      */
     public static final String MMS_CONFIG_SUPPORT_HTTP_CHARSET_HEADER =
             CarrierConfigManager.KEY_MMS_SUPPORT_HTTP_CHARSET_HEADER_BOOL;
-
-    /**
-     * When roaming, some operator's MCC would change. It results in MMSService's verification
-     * failure. This config could use correct country.
-     * @hide
-     */
-    public static final String MMS_CONFIG_SIM_COUNTRY_ISO_OVERRIDE =
-            CarrierConfigManager.KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING;
-
     /**
      * If true, add "Connection: close" header to MMS HTTP requests so the connection
      * is immediately closed (disabling keep-alive). (Boolean type)
@@ -1263,6 +1260,9 @@ public final class SmsManager {
      * <p class="note"><strong>Note:</strong> Constructing an {@link SmsManager} in this manner will
      * never cause an SMS disambiguation dialog to appear, unlike {@link #getDefault()}.
      * </p>
+     *
+     * @param subId an SMS subscription ID, typically accessed using {@link SubscriptionManager}
+     * @return the instance of the SmsManager associated with subscription
      *
      * @see SubscriptionManager#getActiveSubscriptionInfoList()
      * @see SubscriptionManager#getDefaultSmsSubscriptionId()
@@ -2733,6 +2733,134 @@ public final class SmsManager {
         }
     }
 
+    /** callback for providing asynchronous sms messages for financial app. */
+    public abstract static class FinancialSmsCallback {
+        /**
+         * Callback to send sms messages back to financial app asynchronously.
+         *
+         * @param msgs SMS messages.
+         */
+        public abstract void onFinancialSmsMessages(CursorWindow msgs);
+    };
+
+    /**
+     * Get SMS messages for the calling financial app.
+     * The result will be delivered asynchronously in the passing in callback interface.
+     *
+     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
+     * dialog. If this method is called on a device that has multiple active subscriptions, this
+     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
+     * default subscription is defined, the subscription ID associated with this message will be
+     * INVALID, which will result in the operation being completed on the subscription associated
+     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the
+     * operation is performed on the correct subscription.
+     * </p>
+     *
+     * @param params the parameters to filter SMS messages returned.
+     * @param executor the executor on which callback will be invoked.
+     * @param callback a callback to receive CursorWindow with SMS messages.
+     */
+    @RequiresPermission(android.Manifest.permission.SMS_FINANCIAL_TRANSACTIONS)
+    public void getSmsMessagesForFinancialApp(
+            Bundle params,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull FinancialSmsCallback callback) {
+        try {
+            ISms iccSms = getISmsServiceOrThrow();
+            iccSms.getSmsMessagesForFinancialApp(
+                    getSubscriptionId(), ActivityThread.currentPackageName(), params,
+                    new IFinancialSmsCallback.Stub() {
+                        public void onGetSmsMessagesForFinancialApp(CursorWindow msgs) {
+                            Binder.withCleanCallingIdentity(() -> executor.execute(
+                                    () -> callback.onFinancialSmsMessages(msgs)));
+                        }});
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The prefixes is a list of prefix {@code String} separated by this delimiter.
+     * @hide
+     */
+    public static final String REGEX_PREFIX_DELIMITER = ",";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The success status to be added into the intent to be sent to the calling package.
+     * @hide
+     */
+    public static final int RESULT_STATUS_SUCCESS = 0;
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The timeout status to be added into the intent to be sent to the calling package.
+     * @hide
+     */
+    public static final int RESULT_STATUS_TIMEOUT = 1;
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * Intent extra key of the retrieved SMS message as a {@code String}.
+     * @hide
+     */
+    public static final String EXTRA_SMS_MESSAGE = "android.telephony.extra.SMS_MESSAGE";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * Intent extra key of SMS retriever status, which indicates whether the request for the
+     * coming SMS message is SUCCESS or TIMEOUT
+     * @hide
+     */
+    public static final String EXTRA_STATUS = "android.telephony.extra.STATUS";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * [Optional] Intent extra key of the retrieved Sim card subscription Id if any. {@code int}
+     * @hide
+     */
+    public static final String EXTRA_SIM_SUBSCRIPTION_ID =
+            "android.telephony.extra.SIM_SUBSCRIPTION_ID";
+
+    /**
+     * Create a single use app specific incoming SMS request for the calling package.
+     *
+     * This method returns a token that if included in a subsequent incoming SMS message, and the
+     * SMS message has a prefix from the given prefixes list, the provided {@code intent} will be
+     * sent with the SMS data to the calling package.
+     *
+     * The token is only good for one use within a reasonable amount of time. After an SMS has been
+     * received containing the token all subsequent SMS messages with the token will be routed as
+     * normal.
+     *
+     * An app can only have one request at a time, if the app already has a request pending it will
+     * be replaced with a new request.
+     *
+     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
+     * dialog. If this method is called on a device that has multiple active subscriptions, this
+     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
+     * default subscription is defined, the subscription ID associated with this message will be
+     * INVALID, which will result in the operation being completed on the subscription associated
+     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the
+     * operation is performed on the correct subscription.
+     * </p>
+     *
+     * @param prefixes this is a list of prefixes string separated by REGEX_PREFIX_DELIMITER. The
+     *  matching SMS message should have at least one of the prefixes in the beginning of the
+     *  message.
+     * @param intent this intent is sent when the matching SMS message is received.
+     * @return Token to include in an SMS message.
+     */
+    @Nullable
+    public String createAppSpecificSmsTokenWithPackageInfo(
+            @Nullable String prefixes, @NonNull PendingIntent intent) {
+        try {
+            ISms iccSms = getISmsServiceOrThrow();
+            return iccSms.createAppSpecificSmsTokenWithPackageInfo(getSubscriptionId(),
+                    ActivityThread.currentPackageName(), prefixes, intent);
+
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
     /**
      * Filters a bundle to only contain MMS config variables.
      *
@@ -2794,8 +2922,6 @@ public final class SmsManager {
         filtered.putString(MMS_CONFIG_EMAIL_GATEWAY_NUMBER,
                 config.getString(MMS_CONFIG_EMAIL_GATEWAY_NUMBER));
         filtered.putString(MMS_CONFIG_NAI_SUFFIX, config.getString(MMS_CONFIG_NAI_SUFFIX));
-        filtered.putString(MMS_CONFIG_SIM_COUNTRY_ISO_OVERRIDE,
-                config.getString(MMS_CONFIG_SIM_COUNTRY_ISO_OVERRIDE));
         filtered.putBoolean(MMS_CONFIG_SHOW_CELL_BROADCAST_APP_LINKS,
                 config.getBoolean(MMS_CONFIG_SHOW_CELL_BROADCAST_APP_LINKS));
         filtered.putBoolean(MMS_CONFIG_SUPPORT_HTTP_CHARSET_HEADER,
@@ -2855,6 +2981,16 @@ public final class SmsManager {
      * Check if the destination address is a possible premium short code.
      * NOTE: the caller is expected to strip non-digits from the destination number with
      * {@link PhoneNumberUtils#extractNetworkPortion} before calling this method.
+     *
+     * <p class="note"><strong>Note:</strong> This method is intended for internal use by carrier
+     * applications or the Telephony framework and will never trigger an SMS disambiguation
+     * dialog. If this method is called on a device that has multiple active subscriptions, this
+     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
+     * default subscription is defined, the subscription ID associated with this message will be
+     * INVALID, which will result in the operation being completed on the subscription associated
+     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the
+     * operation is performed on the correct subscription.
+     * </p>
      *
      * @param destAddress the destination address to test for possible short code
      * @param countryIso the ISO country code

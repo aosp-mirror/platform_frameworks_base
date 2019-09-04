@@ -36,6 +36,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.Window;
+import android.view.inspector.InspectableProperty;
 import android.widget.SpinnerAdapter;
 
 import java.lang.annotation.Retention;
@@ -1374,6 +1375,9 @@ public abstract class ActionBar {
                 @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
                 @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
         })
+        @InspectableProperty(
+                name = "layout_gravity",
+                valueType = InspectableProperty.ValueType.GRAVITY)
         public int gravity = Gravity.NO_GRAVITY;
 
         public LayoutParams(@NonNull Context c, AttributeSet attrs) {

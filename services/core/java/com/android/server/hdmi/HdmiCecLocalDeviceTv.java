@@ -41,17 +41,18 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
-import android.os.RemoteException;
 import android.provider.Settings.Global;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,11 +76,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // Stores whether ARC feature is enabled per port.
     // True by default for all the ARC-enabled ports.
     private final SparseBooleanArray mArcFeatureEnabled = new SparseBooleanArray();
-
-    // Whether System audio mode is activated or not.
-    // This becomes true only when all system audio sequences are finished.
-    @GuardedBy("mLock")
-    private boolean mSystemAudioActivated = false;
 
     // Whether the System Audio Control feature is enabled or not. True by default.
     @GuardedBy("mLock")
@@ -307,7 +303,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void handleSelectInternalSource() {
         assertRunOnServiceThread();
         // Seq #18
-        if (mService.isControlEnabled() && mActiveSource.logicalAddress != mAddress) {
+        if (mService.isControlEnabled() && getActiveSource().logicalAddress != mAddress) {
             updateActiveSource(mAddress, mService.getPhysicalAddress());
             if (mSkipRoutingControl) {
                 mSkipRoutingControl = false;
@@ -329,7 +325,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void updateActiveSource(ActiveSource newActive) {
         assertRunOnServiceThread();
         // Seq #14
-        if (mActiveSource.equals(newActive)) {
+        if (getActiveSource().equals(newActive)) {
             return;
         }
         setActiveSource(newActive);
@@ -343,10 +339,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // TODO: If displayed, remove the OSD banner related to the previous
             //       active source device.
         }
-    }
-
-    int getPortId(int physicalAddress) {
-        return mService.pathToPortId(physicalAddress);
     }
 
     /**
@@ -402,7 +394,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        mActiveSource.invalidate();
+        getActiveSource().invalidate();
         if (!mService.isControlEnabled()) {
             setActivePortId(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
@@ -450,17 +442,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return info.getLogicalAddress();
         }
         return Constants.ADDR_INVALID;
-    }
-
-    private static void invokeCallback(IHdmiControlCallback callback, int result) {
-        if (callback == null) {
-            return;
-        }
-        try {
-            callback.onComplete(result);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Invoking callback failed:" + e);
-        }
     }
 
     @Override
@@ -518,7 +499,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         } else {
             // No HDMI port to switch to was found. Notify the input change listers to
             // switch to the lastly shown internal input.
-            mActiveSource.invalidate();
+            getActiveSource().invalidate();
             setActivePath(Constants.INVALID_PHYSICAL_ADDRESS);
             mService.invokeInputChangeListener(HdmiDeviceInfo.INACTIVE_DEVICE);
         }
@@ -685,7 +666,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         byte[] params = message.getParams();
         int currentPath = HdmiUtils.twoBytesToInt(params);
         if (HdmiUtils.isAffectingActiveRoutingPath(getActivePath(), currentPath)) {
-            mActiveSource.invalidate();
+            getActiveSource().invalidate();
             removeAction(RoutingControlAction.class);
             int newPath = HdmiUtils.twoBytesToInt(params, 2);
             addAndStartAction(new RoutingControlAction(this, newPath, true, null));
@@ -843,11 +824,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     + "because the System Audio Control feature is disabled.");
             return;
         }
-        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]", mSystemAudioActivated, on);
+        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]",
+                mService.isSystemAudioActivated(), on);
         updateAudioManagerForSystemAudio(on);
         synchronized (mLock) {
-            if (mSystemAudioActivated != on) {
-                mSystemAudioActivated = on;
+            if (mService.isSystemAudioActivated() != on) {
+                mService.setSystemAudioActivated(on);
                 mService.announceSystemAudioModeChange(on);
             }
             if (on && !mArcEstablished) {
@@ -867,9 +849,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!hasSystemAudioDevice()) {
             return false;
         }
-        synchronized (mLock) {
-            return mSystemAudioActivated;
-        }
+        return mService.isSystemAudioActivated();
     }
 
     @ServiceThreadOnly
@@ -1926,7 +1906,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         super.dump(pw);
         pw.println("mArcEstablished: " + mArcEstablished);
         pw.println("mArcFeatureEnabled: " + mArcFeatureEnabled);
-        pw.println("mSystemAudioActivated: " + mSystemAudioActivated);
         pw.println("mSystemAudioMute: " + mSystemAudioMute);
         pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
         pw.println("mAutoDeviceOff: " + mAutoDeviceOff);

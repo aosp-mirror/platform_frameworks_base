@@ -16,11 +16,15 @@
 
 package android.view.inputmethod;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Printer;
@@ -472,6 +476,22 @@ public class EditorInfo implements InputType, Parcelable {
     public String[] contentMimeTypes = null;
 
     /**
+     * If not {@code null}, this editor needs to talk to IMEs that run for the specified user, no
+     * matter what user ID the calling process has.
+     *
+     * <p>Note: This field will be silently ignored when
+     * {@link android.view.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED} is
+     * {@code true}.</p>
+     *
+     * <p>Note also that pseudo handles such as {@link UserHandle#ALL} are not supported.</p>
+     *
+     * @hide
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    @Nullable
+    public UserHandle targetInputMethodUser = null;
+
+    /**
      * Ensure that the data in this EditorInfo is compatible with an application
      * that was developed against the given target API version.  This can
      * impact the following input types:
@@ -527,6 +547,9 @@ public class EditorInfo implements InputType, Parcelable {
         pw.println(prefix + "extras=" + extras);
         pw.println(prefix + "hintLocales=" + hintLocales);
         pw.println(prefix + "contentMimeTypes=" + Arrays.toString(contentMimeTypes));
+        if (targetInputMethodUser != null) {
+            pw.println(prefix + "targetInputMethodUserId=" + targetInputMethodUser.getIdentifier());
+        }
     }
 
     /**
@@ -556,12 +579,13 @@ public class EditorInfo implements InputType, Parcelable {
             LocaleList.getEmptyLocaleList().writeToParcel(dest, flags);
         }
         dest.writeStringArray(contentMimeTypes);
+        UserHandle.writeToParcel(targetInputMethodUser, dest);
     }
 
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<EditorInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<EditorInfo> CREATOR =
             new Parcelable.Creator<EditorInfo>() {
                 public EditorInfo createFromParcel(Parcel source) {
                     EditorInfo res = new EditorInfo();
@@ -582,6 +606,7 @@ public class EditorInfo implements InputType, Parcelable {
                     LocaleList hintLocales = LocaleList.CREATOR.createFromParcel(source);
                     res.hintLocales = hintLocales.isEmpty() ? null : hintLocales;
                     res.contentMimeTypes = source.readStringArray();
+                    res.targetInputMethodUser = UserHandle.readFromParcel(source);
                     return res;
                 }
 

@@ -19,14 +19,20 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.Path;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.PathShape;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.PathParser;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +40,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.Switch;
 
 import com.android.settingslib.Utils;
@@ -46,7 +51,9 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     private static final String TAG = "QSTileBaseView";
+    private static final int ICON_MASK_ID = com.android.internal.R.string.config_icon_mask;
     private final H mHandler = new H();
+    private final int[] mLocInScreen = new int[2];
     private final FrameLayout mIconFrame;
     protected QSIconView mIcon;
     protected RippleDrawable mRipple;
@@ -55,12 +62,14 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private boolean mTileState;
     private boolean mCollapsedView;
     private boolean mClicked;
+    private boolean mShowRippleEffect = true;
 
     private final ImageView mBg;
     private final int mColorActive;
     private final int mColorInactive;
     private final int mColorDisabled;
     private int mCircleColor;
+    private int mBgSize;
 
     public QSTileBaseView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -70,19 +79,27 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         super(context);
         // Default to Quick Tile padding, and QSTileView will specify its own padding.
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
-
         mIconFrame = new FrameLayout(context);
-        mIconFrame.setForegroundGravity(Gravity.CENTER);
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
         addView(mIconFrame, new LayoutParams(size, size));
         mBg = new ImageView(getContext());
-        mBg.setScaleType(ScaleType.FIT_CENTER);
-        mBg.setImageResource(R.drawable.ic_qs_circle);
-        mIconFrame.addView(mBg);
+        Path path = new Path(PathParser.createPathFromPathData(
+                context.getResources().getString(ICON_MASK_ID)));
+        float pathSize = AdaptiveIconDrawable.MASK_SIZE;
+        PathShape p = new PathShape(path, pathSize, pathSize);
+        ShapeDrawable d = new ShapeDrawable(p);
+        d.setTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+        int bgSize = context.getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
+        d.setIntrinsicHeight(bgSize);
+        d.setIntrinsicWidth(bgSize);
+        mBg.setImageDrawable(d);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(bgSize, bgSize, Gravity.CENTER);
+        mIconFrame.addView(mBg, lp);
+        mBg.setLayoutParams(lp);
         mIcon = icon;
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, padding, 0, padding);
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER);
         mIconFrame.addView(mIcon, params);
         mIconFrame.setClipChildren(false);
         mIconFrame.setClipToPadding(false);
@@ -94,10 +111,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         setBackground(mTileBackground);
 
-        mColorActive = Utils.getColorAttr(context, android.R.attr.colorAccent);
+        mColorActive = Utils.getColorAttrDefaultColor(context, android.R.attr.colorAccent);
         mColorDisabled = Utils.getDisabled(context,
-                Utils.getColorAttr(context, android.R.attr.textColorTertiary));
-        mColorInactive = Utils.getColorAttr(context, android.R.attr.textColorSecondary);
+                Utils.getColorAttrDefaultColor(context, android.R.attr.textColorTertiary));
+        mColorInactive = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
 
         setPadding(0, 0, 0, 0);
         setClipChildren(false);
@@ -106,7 +123,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         setFocusable(true);
     }
 
-    public View getBgCicle() {
+    public View getBgCircle() {
         return mBg;
     }
 
@@ -178,8 +195,9 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     protected void handleStateChanged(QSTile.State state) {
         int circleColor = getCircleColor(state.state);
+        boolean allowAnimations = animationsEnabled();
         if (circleColor != mCircleColor) {
-            if (mBg.isShown() && animationsEnabled()) {
+            if (allowAnimations) {
                 ValueAnimator animator = ValueAnimator.ofArgb(mCircleColor, circleColor)
                         .setDuration(QS_ANIM_LENGTH);
                 animator.addUpdateListener(animation -> mBg.setImageTintList(ColorStateList.valueOf(
@@ -191,12 +209,14 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
             mCircleColor = circleColor;
         }
 
+        mShowRippleEffect = state.showRippleEffect;
         setClickable(state.state != Tile.STATE_UNAVAILABLE);
-        mIcon.setIcon(state);
         setLongClickable(state.handlesLongClick);
+        mIcon.setIcon(state, allowAnimations);
         setContentDescription(state.contentDescription);
 
-        mAccessibilityClass = state.expandedAccessibilityClassName;
+        mAccessibilityClass =
+                state.state == Tile.STATE_UNAVAILABLE ? null : state.expandedAccessibilityClassName;
         if (state instanceof QSTile.BooleanState) {
             boolean newState = ((BooleanState) state).value;
             if (mTileState != newState) {
@@ -206,8 +226,17 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         }
     }
 
+    /* The view should not be animated if it's not on screen and no part of it is visible.
+     */
     protected boolean animationsEnabled() {
-        return true;
+        if (!isShown()) {
+            return false;
+        }
+        if (getAlpha() != 1f) {
+            return false;
+        }
+        getLocationOnScreen(mLocInScreen);
+        return mLocInScreen[1] >= -getHeight();
     }
 
     private int getCircleColor(int state) {
@@ -226,7 +255,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     @Override
     public void setClickable(boolean clickable) {
         super.setClickable(clickable);
-        setBackground(clickable ? mRipple : null);
+        setBackground(clickable && mShowRippleEffect ? mRipple : null);
     }
 
     @Override
@@ -289,8 +318,19 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
+        sb.append("locInScreen=(" + mLocInScreen[0] + ", " + mLocInScreen[1] + ")");
+        sb.append(", iconView=" + mIcon.toString());
+        sb.append(", tileState=" + mTileState);
+        sb.append("]");
+        return sb.toString();
+    }
+
     private class H extends Handler {
         private static final int STATE_CHANGED = 1;
+
         public H() {
             super(Looper.getMainLooper());
         }

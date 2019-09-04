@@ -16,19 +16,20 @@
 
 package android.widget.focus;
 
-import com.android.frameworks.coretests.R;
-import com.google.android.collect.Lists;
-
 import android.app.ListActivity;
+import android.content.Context;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.LayoutInflater;
-import android.webkit.WebView;
+
+import com.android.frameworks.coretests.R;
+
+import com.google.android.collect.Lists;
 
 import java.util.List;
 

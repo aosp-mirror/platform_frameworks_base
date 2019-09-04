@@ -16,10 +16,16 @@
 
 package android.widget;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Random;
+import android.app.Activity;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
+import android.perftests.utils.StubActivity;
+import android.view.KeyEvent;
+import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,22 +33,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.RenderNodeAnimator;
-import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
-
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.StubActivity;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.InstrumentationRegistry;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Random;
 
 @LargeTest
 @RunWith(Parameterized.class)

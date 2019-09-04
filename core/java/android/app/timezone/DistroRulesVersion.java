@@ -46,7 +46,7 @@ public final class DistroRulesVersion implements Parcelable {
         mRevision = validateVersion("revision", revision);
     }
 
-    public static final Creator<DistroRulesVersion> CREATOR = new Creator<DistroRulesVersion>() {
+    public static final @android.annotation.NonNull Creator<DistroRulesVersion> CREATOR = new Creator<DistroRulesVersion>() {
         public DistroRulesVersion createFromParcel(Parcel in) {
             String rulesVersion = in.readString();
             int revision = in.readInt();

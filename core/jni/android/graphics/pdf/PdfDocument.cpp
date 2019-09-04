@@ -21,11 +21,11 @@
 
 #include "CreateJavaOutputStreamAdaptor.h"
 
-#include "SkDocument.h"
+#include "SkPDFDocument.h"
 #include "SkPicture.h"
 #include "SkPictureRecorder.h"
-#include "SkStream.h"
 #include "SkRect.h"
+#include "SkStream.h"
 
 #include <hwui/Canvas.h>
 
@@ -88,7 +88,7 @@ public:
     }
 
     void write(SkWStream* stream) {
-        sk_sp<SkDocument> document = SkDocument::MakePDF(stream);
+        sk_sp<SkDocument> document = SkPDF::MakeDocument(stream);
         for (unsigned i = 0; i < mPages.size(); i++) {
             PageRecord* page =  mPages[i];
 

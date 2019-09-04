@@ -429,7 +429,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Parcelable.Creator<CellSignalStrengthLte> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CellSignalStrengthLte> CREATOR =
             new Parcelable.Creator<CellSignalStrengthLte>() {
         @Override
         public CellSignalStrengthLte createFromParcel(Parcel in) {

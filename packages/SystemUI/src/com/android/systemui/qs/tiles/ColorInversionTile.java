@@ -22,14 +22,15 @@ import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.R.drawable;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
-import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
+
+import javax.inject.Inject;
 
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTileImpl<BooleanState> {
@@ -39,6 +40,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     private boolean mListening;
 
+    @Inject
     public ColorInversionTile(QSHost host) {
         super(host);
 

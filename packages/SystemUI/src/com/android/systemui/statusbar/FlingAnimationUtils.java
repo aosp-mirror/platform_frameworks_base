@@ -18,17 +18,21 @@ package com.android.systemui.statusbar;
 
 import android.animation.Animator;
 import android.content.Context;
+import android.util.Log;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * Utility class to calculate general fling animation when the finger is released.
  */
 public class FlingAnimationUtils {
+
+    private static final String TAG = "FlingAnimationUtils";
 
     private static final float LINEAR_OUT_SLOW_IN_X2 = 0.35f;
     private static final float LINEAR_OUT_SLOW_IN_X2_MAX = 0.68f;
@@ -193,12 +197,23 @@ public class FlingAnimationUtils {
     }
 
     private Interpolator getInterpolator(float startGradient, float velocityFactor) {
+        if (Float.isNaN(velocityFactor)) {
+            Log.e(TAG, "Invalid velocity factor", new Throwable());
+            return Interpolators.LINEAR_OUT_SLOW_IN;
+        }
         if (startGradient != mCachedStartGradient
                 || velocityFactor != mCachedVelocityFactor) {
             float speedup = mSpeedUpFactor * (1.0f - velocityFactor);
-            mInterpolator = new PathInterpolator(speedup,
-                    speedup * startGradient,
-                    mLinearOutSlowInX2, mY2);
+            float x1 = speedup;
+            float y1 = speedup * startGradient;
+            float x2 = mLinearOutSlowInX2;
+            float y2 = mY2;
+            try {
+                mInterpolator = new PathInterpolator(x1, y1, x2, y2);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Illegal path with "
+                        + "x1=" + x1 + " y1=" + y1 + " x2=" + x2 + " y2=" + y2, e);
+            }
             mCachedStartGradient = startGradient;
             mCachedVelocityFactor = velocityFactor;
         }

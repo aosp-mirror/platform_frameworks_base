@@ -25,6 +25,7 @@ import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Handler;
+import android.os.ConditionVariable;
 import android.util.Range;
 import android.view.Surface;
 
@@ -51,6 +52,7 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
         extends CameraConstrainedHighSpeedCaptureSession implements CameraCaptureSessionCore {
     private final CameraCharacteristics mCharacteristics;
     private final CameraCaptureSessionImpl mSessionImpl;
+    private final ConditionVariable mInitialized = new ConditionVariable();
 
     /**
      * Create a new CameraCaptureSession.
@@ -68,6 +70,7 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
         CameraCaptureSession.StateCallback wrapperCallback = new WrapperCallback(callback);
         mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, wrapperCallback,
                 stateExecutor, deviceImpl, deviceStateExecutor, configureSuccess);
+        mInitialized.open();
     }
 
     @Override
@@ -321,11 +324,13 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
 
         @Override
         public void onConfigured(CameraCaptureSession session) {
+            mInitialized.block();
             mCallback.onConfigured(CameraConstrainedHighSpeedCaptureSessionImpl.this);
         }
 
         @Override
         public void onConfigureFailed(CameraCaptureSession session) {
+            mInitialized.block();
             mCallback.onConfigureFailed(CameraConstrainedHighSpeedCaptureSessionImpl.this);
         }
 

@@ -17,13 +17,10 @@
 package com.android.systemui.statusbar.policy;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 
-import android.R.attr;
 import android.app.ActivityManager;
 import android.app.Dialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,24 +46,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
-import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.util.NotificationChannels;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -74,10 +68,15 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /**
  * Keeps a list of all users on the device for user switching.
  */
-public class UserSwitcherController {
+@Singleton
+public class UserSwitcherController implements Dumpable {
 
     private static final String TAG = "UserSwitcherController";
     private static final boolean DEBUG = false;
@@ -108,10 +107,13 @@ public class UserSwitcherController {
     private Intent mSecondaryUserServiceIntent;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
 
+    @Inject
     public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor,
-            Handler handler, ActivityStarter activityStarter) {
+            @Named(MAIN_HANDLER_NAME) Handler handler, ActivityStarter activityStarter) {
         mContext = context;
-        mGuestResumeSessionReceiver.register(context);
+        if (!UserManager.isGuestUserEphemeral()) {
+            mGuestResumeSessionReceiver.register(context);
+        }
         mKeyguardMonitor = keyguardMonitor;
         mHandler = handler;
         mActivityStarter = activityStarter;
@@ -403,7 +405,7 @@ public class UserSwitcherController {
         final int N = mUsers.size();
         for (int i = 0; i < N; ++i) {
             UserRecord record = mUsers.get(i);
-            if (record.info != null && record.info.supportsSwitchTo()) {
+            if (record.info != null && record.info.supportsSwitchToByUser()) {
                 count++;
             }
         }
@@ -556,6 +558,7 @@ public class UserSwitcherController {
         };
     };
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("UserSwitcherController state:");
         pw.println("  mLastNonGuestUser=" + mLastNonGuestUser);
@@ -595,7 +598,7 @@ public class UserSwitcherController {
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
-            mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+            mKeyguardMonitor = controller.mKeyguardMonitor;
             controller.addAdapter(new WeakReference<>(this));
         }
 
@@ -677,7 +680,8 @@ public class UserSwitcherController {
             Drawable icon = UserIcons.getDefaultUserIcon(
                     context.getResources(), item.resolveId(), /* light= */ false);
             if (item.isGuest) {
-                icon.setColorFilter(Utils.getColorAttr(context, android.R.attr.colorForeground),
+                icon.setColorFilter(Utils.getColorAttrDefaultColor(context,
+                        android.R.attr.colorForeground),
                         Mode.SRC_IN);
             }
             return icon;
@@ -689,9 +693,9 @@ public class UserSwitcherController {
     }
 
     private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
-        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                 UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser());
-        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
                 UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser())) {
             record.isDisabledByAdmin = true;
             record.enforcedAdmin = admin;

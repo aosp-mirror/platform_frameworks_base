@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.IdRes;
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -97,6 +98,8 @@ public class RadioGroup extends LinearLayout {
         // XML layout file
         TypedArray attributes = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.RadioGroup, com.android.internal.R.attr.radioButtonStyle, 0);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.RadioGroup,
+                attrs, attributes, com.android.internal.R.attr.radioButtonStyle, 0);
 
         int value = attributes.getResourceId(R.styleable.RadioGroup_checkedButton, View.NO_ID);
         if (value != View.NO_ID) {
@@ -424,10 +427,15 @@ public class RadioGroup extends LinearLayout {
         }
     }
 
+    /** @hide */
     @Override
-    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutofillStructure(structure, flags);
-        structure.setDataIsSensitive(mCheckedId != mInitialCheckedId);
+    protected void onProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, int flags) {
+        super.onProvideStructure(structure, viewFor, flags);
+
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
+            structure.setDataIsSensitive(mCheckedId != mInitialCheckedId);
+        }
     }
 
     @Override

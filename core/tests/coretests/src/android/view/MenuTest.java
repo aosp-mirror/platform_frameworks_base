@@ -17,7 +17,8 @@
 package android.view;
 
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.view.menu.MenuBuilder;

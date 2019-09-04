@@ -16,5 +16,5 @@
   -->
 <wallpaper
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    androidprv:supportsAmbientMode="true"/>
+    android:settingsSliceUri="content://com.android.internal.tests/slice"
+    android:supportsAmbientMode="true"/>

@@ -18,12 +18,12 @@ package android.widget.layout.linear;
 
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.View;
 import android.widget.ImageButton;
 
+import androidx.test.filters.MediumTest;
+
 import com.android.frameworks.coretests.R;
-import android.widget.layout.linear.BaselineButtons;
 
 public class BaselineButtonsTest extends ActivityInstrumentationTestCase<BaselineButtons> {
     private View mCurrentTime;

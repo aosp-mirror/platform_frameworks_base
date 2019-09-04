@@ -33,6 +33,8 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.dump.DualDumpOutputStream;
 
+import java.util.List;
+
 /**
  * Maintains all {@link UsbUserSettingsManager} for all users.
  */
@@ -55,10 +57,12 @@ class UsbSettingsManager {
     private final SparseArray<UsbProfileGroupSettingsManager> mSettingsByProfileGroup
             = new SparseArray<>();
     private UserManager mUserManager;
+    private UsbHandlerManager mUsbHandlerManager;
 
     public UsbSettingsManager(@NonNull Context context) {
         mContext = context;
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mUsbHandlerManager = new UsbHandlerManager(context);
     }
 
     /**
@@ -72,7 +76,8 @@ class UsbSettingsManager {
         synchronized (mSettingsByUser) {
             UsbUserSettingsManager settings = mSettingsByUser.get(userId);
             if (settings == null) {
-                settings = new UsbUserSettingsManager(mContext, new UserHandle(userId));
+                settings = new UsbUserSettingsManager(mContext, UserHandle.of(userId),
+                        new UsbPermissionManager(mContext, UserHandle.of(userId)));
                 mSettingsByUser.put(userId, settings);
             }
             return settings;
@@ -100,7 +105,8 @@ class UsbSettingsManager {
             UsbProfileGroupSettingsManager settings = mSettingsByProfileGroup.get(
                     parentUser.getIdentifier());
             if (settings == null) {
-                settings = new UsbProfileGroupSettingsManager(mContext, parentUser, this);
+                settings = new UsbProfileGroupSettingsManager(mContext, parentUser, this,
+                      mUsbHandlerManager);
                 mSettingsByProfileGroup.put(parentUser.getIdentifier(), settings);
             }
             return settings;
@@ -140,9 +146,10 @@ class UsbSettingsManager {
         long token = dump.start(idName, id);
 
         synchronized (mSettingsByUser) {
-            int numUsers = mSettingsByUser.size();
+            List<UserInfo> users = mUserManager.getUsers();
+            int numUsers = users.size();
             for (int i = 0; i < numUsers; i++) {
-                mSettingsByUser.valueAt(i).dump(dump, "user_settings",
+                getSettingsForUser(users.get(i).id).dump(dump, "user_settings",
                         UsbSettingsManagerProto.USER_SETTINGS);
             }
         }

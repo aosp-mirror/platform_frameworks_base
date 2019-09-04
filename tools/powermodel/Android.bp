@@ -1,0 +1,26 @@
+
+java_library_host {
+    name: "powermodel",
+    srcs: [
+        "src/**/*.java",
+    ],
+    static_libs: [
+        "guava",
+    ],
+}
+
+java_test_host {
+    name: "powermodel-test",
+
+    test_suites: ["general-tests"],
+
+    srcs: ["test/**/*.java"],
+    java_resource_dirs: ["test-resource"],
+
+    static_libs: [
+        "powermodel",
+        "junit",
+        "mockito",
+    ],
+}
+

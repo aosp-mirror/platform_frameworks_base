@@ -21,6 +21,7 @@
 #include "HashableDimensionKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
+#include "statslog.h"
 
 namespace android {
 namespace os {
@@ -72,20 +73,29 @@ int64_t MillisToNano(const int64_t millis);
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,
                               util::ProtoOutputStream* protoOutput);
 
+// Helper function to write AtomMetricStats to ProtoOutputStream
+void writeAtomMetricStatsToStream(const std::pair<int64_t, StatsdStats::AtomMetricStats> &pair,
+                                  util::ProtoOutputStream *protoOutput);
+
 template<class T>
 bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
     std::string pbBytes;
-    auto iter = protoOutput.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-         pbBytes.append(reinterpret_cast<const char*>(iter.readBuffer()), toRead);
-        iter.rp()->move(toRead);
+    sp<android::util::ProtoReader> reader = protoOutput.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+         pbBytes.append(reinterpret_cast<const char*>(reader->readBuffer()), toRead);
+        reader->move(toRead);
     }
     return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
 }
 
-// Returns the truncated timestamp.
-int64_t truncateTimestampNsToFiveMinutes(int64_t timestampNs);
+// Checks the blacklist of atoms as well as the blacklisted range of 300,000 - 304,999.
+// Returns the truncated timestamp to the nearest 5 minutes if needed.
+int64_t truncateTimestampIfNecessary(int atomId, int64_t timestampNs);
+
+inline bool isVendorPulledAtom(int atomId) {
+    return atomId >= StatsdStats::kVendorPulledAtomStartTag && atomId < StatsdStats::kMaxAtomTag;
+}
 
 }  // namespace statsd
 }  // namespace os

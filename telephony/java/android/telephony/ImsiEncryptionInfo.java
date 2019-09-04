@@ -115,7 +115,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ImsiEncryptionInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ImsiEncryptionInfo> CREATOR =
             new Parcelable.Creator<ImsiEncryptionInfo>() {
                 @Override
                 public ImsiEncryptionInfo createFromParcel(Parcel in) {

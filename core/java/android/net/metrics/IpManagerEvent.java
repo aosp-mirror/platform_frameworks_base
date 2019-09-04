@@ -86,7 +86,7 @@ public final class IpManagerEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<IpManagerEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IpManagerEvent> CREATOR
         = new Parcelable.Creator<IpManagerEvent>() {
         public IpManagerEvent createFromParcel(Parcel in) {
             return new IpManagerEvent(in);

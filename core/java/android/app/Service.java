@@ -16,7 +16,10 @@
 
 package android.app;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
@@ -24,6 +27,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
+import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.IBinder;
@@ -685,6 +690,11 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * the permission {@link android.Manifest.permission#FOREGROUND_SERVICE} in order to use
      * this API.</p>
      *
+     * <p>Apps built with SDK version {@link android.os.Build.VERSION_CODES#Q} or later can specify
+     * the foreground service types using attribute {@link android.R.attr#foregroundServiceType} in
+     * service element of manifest file. The value of attribute
+     * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
+     *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
@@ -696,11 +706,46 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         try {
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, id,
-                    notification, 0);
+                    notification, 0, FOREGROUND_SERVICE_TYPE_MANIFEST);
         } catch (RemoteException ex) {
         }
     }
-    
+
+  /**
+   * An overloaded version of {@link #startForeground(int, Notification)} with additional
+   * foregroundServiceType parameter.
+   *
+   * <p>Apps built with SDK version {@link android.os.Build.VERSION_CODES#Q} or later can specify
+   * the foreground service types using attribute {@link android.R.attr#foregroundServiceType} in
+   * service element of manifest file. The value of attribute
+   * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
+   *
+   * <p>The foregroundServiceType parameter must be a subset flags of what is specified in manifest
+   * attribute {@link android.R.attr#foregroundServiceType}, if not, an IllegalArgumentException is
+   * thrown. Specify foregroundServiceType parameter as
+   * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST} to use all flags that
+   * is specified in manifest attribute foregroundServiceType.</p>
+   *
+   * @param id The identifier for this notification as per
+   * {@link NotificationManager#notify(int, Notification)
+   * NotificationManager.notify(int, Notification)}; must not be 0.
+   * @param notification The Notification to be displayed.
+   * @param foregroundServiceType must be a subset flags of manifest attribute
+   * {@link android.R.attr#foregroundServiceType} flags.
+   * @throws IllegalArgumentException if param foregroundServiceType is not subset of manifest
+   *     attribute {@link android.R.attr#foregroundServiceType}.
+   * @see android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST
+   */
+    public final void startForeground(int id, @NonNull Notification notification,
+            @ForegroundServiceType int foregroundServiceType) {
+        try {
+            mActivityManager.setServiceForeground(
+                    new ComponentName(this, mClassName), mToken, id,
+                    notification, 0, foregroundServiceType);
+        } catch (RemoteException ex) {
+        }
+    }
+
     /**
      * Synonym for {@link #stopForeground(int)}.
      * @param removeNotification If true, the {@link #STOP_FOREGROUND_REMOVE} flag
@@ -724,9 +769,34 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     public final void stopForeground(@StopForegroundFlags int flags) {
         try {
             mActivityManager.setServiceForeground(
-                    new ComponentName(this, mClassName), mToken, 0, null, flags);
+                    new ComponentName(this, mClassName), mToken, 0, null,
+                    flags, 0);
         } catch (RemoteException ex) {
         }
+    }
+
+    /**
+     * If the service has become a foreground service by calling
+     * {@link #startForeground(int, Notification)}
+     * or {@link #startForeground(int, Notification, int)}, {@link #getForegroundServiceType()}
+     * returns the current foreground service type.
+     *
+     * <p>If there is no foregroundServiceType specified
+     * in manifest, {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE} is returned. </p>
+     *
+     * <p>If the service is not a foreground service,
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE} is returned.</p>
+     *
+     * @return current foreground service type flags.
+     */
+    public final @ForegroundServiceType int getForegroundServiceType() {
+        int ret = ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+        try {
+            ret = mActivityManager.getForegroundServiceType(
+                    new ComponentName(this, mClassName), mToken);
+        } catch (RemoteException ex) {
+        }
+        return ret;
     }
 
     /**

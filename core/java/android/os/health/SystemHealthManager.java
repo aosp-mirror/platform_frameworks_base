@@ -37,11 +37,13 @@ import com.android.internal.app.IBatteryStats;
  * by the logging itself.  It can be substantial.
  * <p>
  * <b>Battery Usage</b><br>
- * The statistics related to power (battery) usage are recorded since the device
- * was last unplugged. It is expected that applications schedule more work to do
- * while the device is plugged in (e.g. using {@link android.app.job.JobScheduler
- * JobScheduler}), and while that can affect charging rates, it is still preferable
- * to actually draining the battery.
+ * Since Android version {@link android.os.Build.VERSION_CODES#Q}, the statistics related to power
+ * (battery) usage are recorded since the device was last considered fully charged (for previous
+ * versions, it is instead since the device was last unplugged).
+ * It is expected that applications schedule more work to do while the device is
+ * plugged in (e.g. using {@link android.app.job.JobScheduler JobScheduler}), and
+ * while that can affect charging rates, it is still preferable to actually draining
+ * the battery.
  */
 @SystemService(Context.SYSTEM_HEALTH_SERVICE)
 public class SystemHealthManager {

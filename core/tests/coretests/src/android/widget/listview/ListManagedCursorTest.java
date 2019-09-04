@@ -18,11 +18,12 @@ package android.widget.listview;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.TouchUtils;
 import android.view.KeyEvent;
 import android.widget.ListView;
-import android.test.TouchUtils;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 /**
  * Tests restoring the scroll position in a list with a managed cursor.

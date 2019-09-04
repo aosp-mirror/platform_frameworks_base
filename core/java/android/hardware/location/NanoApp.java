@@ -21,6 +21,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 /** A class describing nano apps.
  * A nano app is a piece of executable code that can be
  * downloaded onto a specific architecture. These are targtted
@@ -196,10 +198,12 @@ public class NanoApp implements Parcelable {
      *               needed Sensors
      */
     public void setNeededSensors(int[] neededSensors) {
+        Preconditions.checkNotNull(neededSensors, "neededSensors must not be null");
         mNeededSensors = neededSensors;
     }
 
     public void setOutputEvents(int[] outputEvents) {
+        Preconditions.checkNotNull(outputEvents, "outputEvents must not be null");
         mOutputEvents = outputEvents;
     }
 
@@ -209,9 +213,9 @@ public class NanoApp implements Parcelable {
      * @param appBinary generated events
      */
     public void setAppBinary(byte[] appBinary) {
+        Preconditions.checkNotNull(appBinary, "appBinary must not be null");
         mAppBinary = appBinary;
     }
-
 
     /**
      * get the publisher name
@@ -356,7 +360,7 @@ public class NanoApp implements Parcelable {
         out.writeByteArray(mAppBinary);
     }
 
-    public static final Parcelable.Creator<NanoApp> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NanoApp> CREATOR
             = new Parcelable.Creator<NanoApp>() {
         public NanoApp createFromParcel(Parcel in) {
             return new NanoApp(in);

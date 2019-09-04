@@ -62,12 +62,22 @@ public class FakeKeyguardMonitor implements KeyguardMonitor {
     }
 
     @Override
+    public boolean isLaunchTransitionFadingAway() {
+        return false;
+    }
+
+    @Override
     public long getKeyguardFadingAwayDuration() {
         return 0;
     }
 
     @Override
     public long getKeyguardFadingAwayDelay() {
+        return 0;
+    }
+
+    @Override
+    public long calculateGoingToFullShadeDelay() {
         return 0;
     }
 

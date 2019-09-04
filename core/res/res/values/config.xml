@@ -46,6 +46,8 @@
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_microphone</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
@@ -56,6 +58,7 @@
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
@@ -87,7 +90,10 @@
     <string translatable="false" name="status_bar_mobile">mobile</string>
     <string translatable="false" name="status_bar_vpn">vpn</string>
     <string translatable="false" name="status_bar_ethernet">ethernet</string>
+    <string translatable="false" name="status_bar_microphone">microphone</string>
+    <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
+    <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -123,7 +129,7 @@
     <bool name="config_sendAudioBecomingNoisy">true</bool>
 
     <!-- Whether Hearing Aid profile is supported -->
-    <bool name="config_hearing_aid_profile_supported">true</bool>
+    <bool name="config_hearing_aid_profile_supported">false</bool>
 
     <!-- Flag to disable all transition animations -->
     <bool name="config_disableTransitionAnimation">false</bool>
@@ -220,6 +226,11 @@
          correctly use them when installed on your device.  Otherwise, keep this disabled
          so that applications can still use their own mechanisms. -->
     <bool name="config_enableAutoPowerModes">false</bool>
+
+    <!-- Whether (if true) this is a kind of device that can be moved around (eg. phone/laptop),
+         or (if false) something for which movement is either not measurable or should not count
+         toward power states (eg. tv/soundbar). -->
+    <bool name="config_autoPowerModeUseMotionSensor">true</bool>
 
     <!-- The threshold angle for any motion detection in auto-power save modes.
          In hundreths of a degree. -->
@@ -544,6 +555,9 @@
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
 
+    <!-- Maximum number of concurrent WiFi interfaces in AP mode -->
+    <integer translatable="false" name="config_wifi_max_ap_interfaces">1</integer>
+
     <!-- Boolean indicating whether the wifi chipset requires the softap band be -->
     <!-- converted from 5GHz to ANY due to hardware restrictions -->
     <bool translatable="false" name="config_wifi_convert_apband_5ghz_to_any">false</bool>
@@ -568,14 +582,20 @@
          radio is unable to find any MCC information to infer wifi country code from -->
     <bool translatable="false" name="config_wifi_revert_country_code_on_cellular_loss">false</bool>
 
-    <!-- Boolean indicating whether or not wifi firmware debugging is enabled -->
-    <bool translatable="false" name="config_wifi_enable_wifi_firmware_debugging">true</bool>
-
     <!-- Integer size limit, in KB, for a single WifiLogger ringbuffer, in default logging mode -->
     <integer translatable="false" name="config_wifi_logger_ring_buffer_default_size_limit_kb">32</integer>
 
     <!-- Integer size limit, in KB, for a single WifiLogger ringbuffer, in verbose logging mode -->
     <integer translatable="false" name="config_wifi_logger_ring_buffer_verbose_size_limit_kb">1024</integer>
+
+    <!-- Array indicating wifi fatal firmware alert error code list from driver -->
+    <integer-array translatable="false" name="config_wifi_fatal_firmware_alert_error_code_list">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
 
     <!-- Boolean indicating whether or not wifi should turn off when emergency call is made -->
     <bool translatable="false" name="config_wifi_turn_off_during_emergency_call">false</bool>
@@ -600,18 +620,16 @@
     <integer translatable="false" name="config_wifi_framework_min_rx_rate_for_staying_on_network">16</integer>
     <!-- Integer parameters of the wifi to cellular handover feature
          wifi should not stick to bad networks -->
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-82</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_5GHz">-82</integer>
+    <!-- Integer threshold for low network score, should be somewhat less than the entry threshhold -->
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-80</integer>
+    <!-- Integer threshold, do not connect to APs with RSSI lower than the entry threshold -->
+    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_5GHz">-77</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz">-70</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-57</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-85</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_24GHz">-85</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-83</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_24GHz">-80</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-73</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-60</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_24">6</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_5">12</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_5">36</integer>
 
     <!-- Integer delay in milliseconds before shutting down soft AP when there
          are no connected devices. Framework will enforce a minimum limit on
@@ -642,15 +660,6 @@
     <!-- Integer indicating wpa_supplicant scan interval when p2p is connected in milliseconds -->
     <integer translatable="false" name="config_wifi_scan_interval_p2p_connected">60000</integer>
 
-    <!-- Integer indicating the framework scan interval in milliseconds. This is used in the scenario
-         where the chipset does not support background scanning (config_wifi_background_scan_suport
-         is false) to set up a periodic wake up scan so that the device can connect to a new access
-         point on the move. A value of 0 means no periodic scans will be used in the framework. -->
-    <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
-
-    <!-- Integer indicating the framework no networks periodic scan interval in milliseconds. -->
-    <integer translatable="false" name="config_wifi_no_network_periodic_scan_interval">300000</integer>
-
     <!-- Integer indicating disconnect mode short scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_disconnected_short_scan_interval">15000</integer>
 
@@ -671,6 +680,9 @@
 
     <!-- Integer indicating RSSI boost given to current network -->
     <integer translatable="false" name="config_wifi_framework_current_network_boost">16</integer>
+
+    <!-- Integer delay in milliseconds before set wlan interface up during watchdog recovery -->
+    <integer translatable="false" name="config_wifi_framework_recovery_timeout_delay">2000</integer>
 
     <!-- Integer indicating how to handle beacons with uninitialized RSSI value of 0 -->
     <integer translatable="false" name="config_wifi_framework_scan_result_rssi_level_patchup_value">-85</integer>
@@ -716,12 +728,33 @@
     <!-- Wifi driver supports Automatic channel selection (ACS) for softap -->
     <bool translatable="false" name="config_wifi_softap_acs_supported">false</bool>
 
+    <!-- Channel list restriction to Automatic channel selection (ACS) for softap. If the device
+         doesn't want to restrict channels this should be empty. Value is a comma separated channel
+         string and/or channel range string like '1-6,11' -->
+    <string translatable="false" name="config_wifi_softap_acs_supported_channel_list"></string>
+
     <!-- Wifi driver supports IEEE80211AC for softap -->
     <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">false</bool>
+
+    <!-- Indicates that local-only hotspot should be brought up at 5GHz.  This option is
+         for automotive builds only (the one that have PackageManager#FEATURE_AUTOMOTIVE) -->
+    <bool translatable="false" name="config_wifi_local_only_hotspot_5ghz">false</bool>
+
+    <!-- Indicates that connected MAC randomization is supported on this device -->
+    <bool translatable="false" name="config_wifi_connected_mac_randomization_supported">false</bool>
+
+    <!-- Indicates that p2p MAC randomization is supported on this device -->
+    <bool translatable="false" name="config_wifi_p2p_mac_randomization_supported">false</bool>
+
+    <!-- Indicates that wifi link probing is supported on this device -->
+    <bool translatable="false" name="config_wifi_link_probing_supported">false</bool>
 
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
+
+    <!-- Flag indicating whether we should enable the adaptive sleep.-->
+    <bool name="config_adaptive_sleep_available">false</bool>
 
     <!-- Flag indicating whether we should enable smart battery. -->
     <bool name="config_smart_battery_available">false</bool>
@@ -736,6 +769,10 @@
     <bool name="config_annoy_dianne">true</bool>
 
     <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
+
+    <!-- If this is true, notification effects will be played by the notification server.
+         When false, car notification effects will be handled elsewhere. -->
+    <bool name="config_enableServerNotificationEffectsForAutomotive">false</bool>
 
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">false</bool>
@@ -865,6 +902,14 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
+    <!-- Indicate whether closing the lid causes the device to enter the folded state which means
+         to get a smaller screen and opening the lid causes the device to enter the unfolded state
+         which means to get a larger screen. -->
+    <bool name="config_lidControlsDisplayFold">false</bool>
+
+    <!-- Indicate the display area rect for foldable devices in folded state. -->
+    <string name="config_foldedArea"></string>
+
     <!-- Desk dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a desk dock.
@@ -910,6 +955,11 @@
           case, this can be disabled (set to false). -->
     <bool name="config_enableCarDockHomeLaunch">true</bool>
 
+    <!-- Control whether to force the display of System UI Bars at all times regardless of
+         System Ui Flags. This can be useful in the Automotive case if there's a requirement for
+         a UI element to be on screen at all times. -->
+    <bool name="config_forceShowSystemBars">false</bool>
+
     <!-- HDMI behavior -->
 
     <!-- The number of degrees to rotate the display when the device has HDMI connected
@@ -935,7 +985,7 @@
     <!--  Control whether to lock day/night mode change from normal application. When it is
           true, day / night mode change is only allowed to apps with MODIFY_DAY_NIGHT_MODE
           permission. -->
-    <bool name="config_lockDayNightMode">false</bool>
+    <bool name="config_lockDayNightMode">true</bool>
 
     <!-- Control the default night mode to use when there is no other mode override set.
          One of the following values (see UiModeManager.java):
@@ -949,15 +999,19 @@
          in hardware. -->
     <bool name="config_setColorTransformAccelerated">false</bool>
 
+    <!-- Boolean indicating whether the HWC setColorTransform function can be performed efficiently
+         in hardware for individual layers. -->
+    <bool name="config_setColorTransformAcceleratedPerLayer">false</bool>
+
     <!-- Control whether Night display is available. This should only be enabled on devices
          that have a HWC implementation that can apply the matrix passed to setColorTransform
          without impacting power, performance, and app compatibility (e.g. protected content). -->
     <bool name="config_nightDisplayAvailable">@bool/config_setColorTransformAccelerated</bool>
 
     <!-- Default mode to control how Night display is automatically activated.
-         One of the following values (see ColorDisplayController.java):
+         One of the following values (see ColorDisplayManager.java):
              0 - AUTO_MODE_DISABLED
-             1 - AUTO_MODE_CUSTOM
+             1 - AUTO_MODE_CUSTOM_TIME
              2 - AUTO_MODE_TWILIGHT
     -->
     <integer name="config_defaultNightDisplayAutoMode">0</integer>
@@ -1004,8 +1058,50 @@
         <!-- B y-intercept --> <item>-0.198650895</item>
     </string-array>
 
+    <!-- Boolean indicating whether display white balance is supported. -->
+    <bool name="config_displayWhiteBalanceAvailable">false</bool>
 
-    <!-- Indicate available ColorDisplayController.COLOR_MODE_xxx. -->
+    <!-- Boolean indicating whether display white balance should be enabled by default. -->
+    <bool name="config_displayWhiteBalanceEnabledDefault">false</bool>
+
+    <!-- Minimum color temperature, in Kelvin, supported by display white balance. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureMin">4000</integer>
+
+    <!-- Maximum color temperature, in Kelvin, supported by display white balance. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureMax">8000</integer>
+
+    <!-- Default color temperature, in Kelvin, used by display white balance. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureDefault">6500</integer>
+
+    <!-- The display primaries, in CIE1931 XYZ color space, for display
+         white balance to use in its calculations. The array must include a total of 12 float
+         values: 3 values per color (X, Y, Z) and 4 colors (R, G, B, W) -->
+    <string-array name="config_displayWhiteBalanceDisplayPrimaries">
+        <!-- Red X -->   <item>0.412315</item>
+        <!-- Red Y -->   <item>0.212600</item>
+        <!-- Red Z -->   <item>0.019327</item>
+        <!-- Green X --> <item>0.357600</item>
+        <!-- Green Y --> <item>0.715200</item>
+        <!-- Green Z --> <item>0.119200</item>
+        <!-- Blue X -->  <item>0.180500</item>
+        <!-- Blue Y -->  <item>0.072200</item>
+        <!-- Blue Z -->  <item>0.950633</item>
+        <!-- White X --> <item>0.950456</item>
+        <!-- White Y --> <item>1.000000</item>
+        <!-- White Z --> <item>1.089058</item>
+    </string-array>
+
+    <!-- The nominal white coordinates, in CIE1931 XYZ color space, for Display White Balance to
+         use in its calculations. AWB will adapt this white point to the target ambient white
+         point. The array must include a total of 3 float values (X, Y, Z) -->
+    <string-array name="config_displayWhiteBalanceDisplayNominalWhite">
+        <!-- Nominal White X --> <item>0.950456</item>
+        <!-- Nominal White Y --> <item>1.000000</item>
+        <!-- Nominal White Z --> <item>1.089058</item>
+    </string-array>
+
+
+    <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
         <!-- Example:
         <item>0</item>
@@ -1013,6 +1109,11 @@
         <item>2</item>
         -->
     </integer-array>
+
+    <!-- Color mode to use when accessibility transforms are enabled. This color mode must be
+         supported by the device, but not necessarily appear in config_availableColorModes. The
+         regularly selected color mode will be used if this value is negative. -->
+    <integer name="config_accessibilityColorMode">-1</integer>
 
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
@@ -1027,6 +1128,7 @@
             2 - Power off (with confirmation)
             3 - Power off (without confirmation)
             4 - Go to voice assist
+            5 - Go to assistant (Settings.Secure.ASSISTANT)
     -->
     <integer name="config_longPressOnPowerBehavior">1</integer>
 
@@ -1169,8 +1271,19 @@
          Settings.System.NOTIFICATION_VIBRATION_INTENSITY more details on the constant values and
          meanings. -->
     <integer name="config_defaultNotificationVibrationIntensity">2</integer>
+    <!-- The default intensity level for ring vibrations. See
+         Settings.System.RING_VIBRATION_INTENSITY more details on the constant values and
+         meanings. -->
+    <integer name="config_defaultRingVibrationIntensity">2</integer>
 
+    <!-- Whether to use the strict phone number matcher by default. -->
     <bool name="config_use_strict_phone_number_comparation">false</bool>
+
+    <!-- Whether to use the strict phone number matcher in Russia. -->
+    <bool name="config_use_strict_phone_number_comparation_for_russia">true</bool>
+
+    <!-- Whether to use the strict phone number matcher in Kazakhstan. -->
+    <bool name="config_use_strict_phone_number_comparation_for_kazakhstan">true</bool>
 
     <!-- The character count of the minimum match for comparison phone numbers -->
     <integer name="config_phonenumber_compare_min_match">7</integer>
@@ -1187,6 +1300,10 @@
 
     <!-- The default suggested battery % at which we enable battery saver automatically.  -->
     <integer name="config_lowBatteryAutoTriggerDefaultLevel">15</integer>
+
+    <!-- The app which will handle routine based automatic battery saver, if empty the UI for
+         routine based battery saver will be hidden -->
+    <string name="config_batterySaverScheduleProvider"></string>
 
     <!-- Close low battery warning when battery level reaches the lowBatteryWarningLevel
          plus this -->
@@ -1233,12 +1350,6 @@
 
     <!-- Disable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
-
-    <!-- Enable lockscreen translucent decor by default -->
-    <bool name="config_enableLockScreenTranslucentDecor">true</bool>
-
-    <!-- Enable translucent decor by default -->
-    <bool name="config_enableTranslucentDecor">true</bool>
 
     <!-- Is the device capable of hot swapping an UICC Card -->
     <bool name="config_hotswapCapable">false</bool>
@@ -1306,6 +1417,10 @@
          May be less than the minimum allowed brightness setting
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
+
+    <!-- Delay that allows some content to arrive at the display before switching
+         from DOZE to ON. -->
+    <integer name="config_wakeUpDelayDoze">0</integer>
 
     <!-- Whether or not to skip the initial brightness ramps when the display transitions to
          STATE_ON. Setting this to true will skip the brightness ramp to the last stored active
@@ -1415,6 +1530,13 @@
          Must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLevels">
     </integer-array>
+
+    <!-- Timeout (in milliseconds) after which we remove the effects any user interactions might've
+         had on the brightness mapping. This timeout doesn't start until we transition to a
+         non-interactive display policy so that we don't reset while users are using their devices,
+         but also so that we don't erroneously keep the short-term model if the device is dozing
+         but the display is fully on. -->
+    <integer name="config_autoBrightnessShortTermModelTimeout">300000</integer>
 
     <!-- Array of output values for LCD backlight corresponding to the lux values
          in the config_autoBrightnessLevels array.  This array should have size one greater
@@ -1582,7 +1704,7 @@
     <bool name="config_checkWallpaperAtBoot">true</bool>
 
     <!-- Class name of WallpaperManagerService. -->
-    <string name="config_wallpaperManagerServiceName">com.android.server.wallpaper.WallpaperManagerService</string>
+    <string name="config_wallpaperManagerServiceName" translatable="false">com.android.server.wallpaper.WallpaperManagerService</string>
 
     <!-- Enables the TimeZoneRuleManager service. This is the master switch for the updateable time
          zone update mechanism. -->
@@ -1654,6 +1776,8 @@
     <!-- Package name providing fused location support. Used only when
          config_enableFusedLocationOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
+
+    <string-array name="config_locationExtraPackageNames" translatable="false"></string-array>
 
     <!-- The package name of the default network recommendation app.
          A network recommendation provider must:
@@ -1863,7 +1987,9 @@
          application is desired.
 
          If this string is empty or the specified package does not exist, then
-         the platform will search for an SMS app and use that (if there is one)-->
+         the platform will search for an SMS app and use that (if there is one)
+
+         Note: This config is deprecated, please use config_defaultSms instead. -->
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
     <!-- Default web browser.  This is the package name of the application that will
@@ -1871,8 +1997,25 @@
          can select whatever browser app they wish to use as the default.
 
          If this string is empty or the specified package does not exist, then
-         the behavior will be as though no app was named as an explicit default. -->
+         the behavior will be as though no app was named as an explicit default.
+
+         Note: This config is deprecated, please use config_defaultBrowser instead. -->
     <string name="default_browser" translatable="false"></string>
+
+    <!-- The name of the package that will hold the assistant role by default. -->
+    <string name="config_defaultAssistant" translatable="false" />
+    <!-- Whether the default assistant settings should be shown. -->
+    <bool name="config_showDefaultAssistant">true</bool>
+    <!-- The name of the package that will hold the browser role by default. -->
+    <string name="config_defaultBrowser" translatable="false">@string/default_browser</string>
+    <!-- The name of the package that will hold the dialer role by default. -->
+    <string name="config_defaultDialer" translatable="false">com.android.dialer</string>
+    <!-- The name of the package that will hold the SMS role by default. -->
+    <string name="config_defaultSms" translatable="false">@string/default_sms_application</string>
+    <!-- Whether the default emergency settings should be shown. -->
+    <bool name="config_showDefaultEmergency">false</bool>
+    <!-- Whether the default home settings should be shown. -->
+    <bool name="config_showDefaultHome">true</bool>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
@@ -1916,11 +2059,6 @@
          The PERSIST mode results in data persisting in the journal beyond the life of
          a transaction, so it interacts poorly with SECURE_DELETE. -->
     <string name="db_default_journal_mode" translatable="false">TRUNCATE</string>
-
-    <!-- Enables compatibility WAL mode.
-         In this mode, only database journal mode will be changed, connection pool
-         size will still be limited to a single connection. -->
-    <bool name="db_compatibility_wal_supported">true</bool>
 
     <!-- Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
@@ -2072,6 +2210,10 @@
          This is intended to allow packaging drivers or tools for installation on a PC. -->
     <string translatable="false" name="config_isoImagePath"></string>
 
+    <!-- Whether the system enables per-display focus. If the system has the input method for each
+         display, this value should be true. -->
+    <bool name="config_perDisplayFocusEnabled">false</bool>
+
     <!-- Whether a software navigation bar should be shown. NOTE: in the future this may be
          autodetected from the Configuration. -->
     <bool name="config_showNavigationBar">false</bool>
@@ -2143,6 +2285,10 @@
          has expired, then assume the device is receiving insufficient current to charge
          effectively and terminate the dream.  Use -1 to disable this safety feature.  -->
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
+    <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
+    <integer name="config_attentionMaximumExtension">240000</integer> <!-- 4 minutes -->
+    <!-- How long we should wait until we give up on receiving an attention API callback.  -->
+    <integer name="config_attentionApiTimeout">2000</integer> <!-- 2 seconds -->
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -2165,8 +2311,15 @@
     <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
     <string name="config_dozeDoubleTapSensorType" translatable="false"></string>
 
+    <!-- Type of the tap sensor. Empty if tap is not supported. -->
+    <string name="config_dozeTapSensorType" translatable="false"></string>
+
     <!-- Type of the long press sensor. Empty if long press is not supported. -->
     <string name="config_dozeLongPressSensorType" translatable="false"></string>
+
+    <!-- If the sensor that wakes up the lock screen is available or not. -->
+    <bool name="config_dozeWakeLockScreenSensorAvailable">false</bool>
+    <integer name="config_dozeWakeLockScreenDebounce">1500</integer>
 
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND
@@ -2176,6 +2329,9 @@
     <!-- Control whether the always on display mode is enabled by default. This value will be used
          during initialization when the setting is still null. -->
     <bool name="config_dozeAlwaysOnEnabled">true</bool>
+
+    <!-- If AOD can show an ambient version of the wallpaper -->
+    <bool name="config_dozeSupportsAodWallpaper">true</bool>
 
     <!-- Whether the display blanks itself when transitioning from a doze to a non-doze state -->
     <bool name="config_displayBlanksAfterDoze">false</bool>
@@ -2283,8 +2439,13 @@
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
 
-    <!-- Amount of time in ms the user needs to press the relevant key to bring up the global actions dialog -->
+    <!-- Amount of time in ms the user needs to press the relevant key to bring up the
+         global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
+
+    <!-- Amount of time in ms the user needs to press the relevant keys to trigger the
+         screenshot chord -->
+    <integer name="config_screenshotChordKeyTimeout">500</integer>
 
     <!-- Default width of a vertical scrollbar and height of a horizontal scrollbar.
          Takes effect only if the scrollbar drawables have no intrinsic size. -->
@@ -2324,6 +2485,16 @@
 
     <!-- Maximum number of users we allow to be running at a time -->
     <integer name="config_multiuserMaxRunningUsers">3</integer>
+
+    <!-- Whether to delay user data locking for background user.
+         If false, user switched-out from user switching will still be in running state until
+         config_multiuserMaxRunningUsers is reached. Once config_multiuserMaxRunningUsers is
+         reached, user will be stopped and user data is locked.
+         If true, user switched out from user switching will always be stopped but its user data
+         is not locked. Total number of unlocked users will be limited by
+         config_multiuserMaxRunningUsers. Once that limit is reached, least recently stopped user
+         will be locked. -->
+    <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
@@ -2402,9 +2573,10 @@
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
 
-    <!-- Indicates whether local non-default displays are private.
-         {@see android.view.Display#FLAG_PRIVATE} -->
-    <bool name="config_localDisplaysPrivate">false</bool>
+    <!-- Controls if local secondary displays should be private or not. Value specified in the array
+         represents physical port address of each display and display in this list will be marked
+         as private. {@see android.view.Display#FLAG_PRIVATE} -->
+    <integer-array translatable="false" name="config_localPrivateDisplayPorts"></integer-array>
 
     <!-- The default mode for the default display. One of the following values (See Display.java):
              0 - COLOR_MODE_DEFAULT
@@ -2484,7 +2656,10 @@
          Can be customized for other product types -->
     <string name="config_chooseTypeAndAccountActivity" translatable="false"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
-
+    <!-- Name of the activity that will handle requests to the system to choose an activity for
+         the purposes of resolving an intent. -->
+    <string name="config_chooserActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.chooser.ChooserActivity</string>
     <!-- Component name of a custom ResolverActivity (Intent resolver) to be used instead of
          the default framework version. If left empty, then the framework version will be used.
          Example: com.google.android.myapp/.resolver.MyResolverActivity  -->
@@ -2546,6 +2721,7 @@
         extractor must come first -->
         <item>com.android.server.notification.NotificationChannelExtractor</item>
         <item>com.android.server.notification.NotificationAdjustmentExtractor</item>
+        <item>com.android.server.notification.BubbleExtractor</item>
         <!-- depends on AdjustmentExtractor-->
         <item>com.android.server.notification.ValidateNotificationPeople</item>
         <item>com.android.server.notification.PriorityExtractor</item>
@@ -2557,13 +2733,9 @@
         <item>com.android.server.notification.VisibilityExtractor</item>
         <!-- Depends on ZenModeExtractor -->
         <item>com.android.server.notification.BadgeExtractor</item>
+        <item>com.android.server.notification.CriticalNotificationExtractor</item>
 
     </string-array>
-
-    <!-- Flag indicating that this device does not rotate and will always remain in its default
-         orientation. Activities that desire to run in a non-compatible orientation will be run
-         from an emulated display within the physical display. -->
-    <bool name="config_forceDefaultOrientation">false</bool>
 
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
@@ -2612,6 +2784,14 @@
 
     <!-- Package name for default network scorer app; overridden by product overlays. -->
     <string name="config_defaultNetworkScorerPackageName"></string>
+
+    <!-- Feature flag to enable memory efficient task snapshots that are used in recents optimized
+         for low memory devices and replace the app transition starting window with the splash
+         screen. -->
+    <bool name="config_lowRamTaskSnapshotsAndRecents">false</bool>
+
+    <!-- The amount to scale fullscreen snapshots for Overview and snapshot starting windows. -->
+    <item name="config_fullTaskSnapshotScale" format="float" type="dimen">1.0</item>
 
     <!-- Determines whether recent tasks are provided to the user. Default device has recents
          property. If this is false, then the following recents config flags are ignored. -->
@@ -2747,6 +2927,9 @@
     <!-- Flag indicating which package name can access the persistent data partition -->
     <string name="config_persistentDataPackageName" translatable="false"></string>
 
+    <!-- Flag indicating which package name can access DeviceConfig table -->
+    <string name="config_deviceConfiguratorPackageName" translatable="false"></string>
+
     <!-- Flag indicating apps will skip sending hold request before merge. In this case
         IMS service implementation will do both.i.e.hold followed by merge. -->
     <bool name="skipHoldBeforeMerge">true</bool>
@@ -2847,19 +3030,6 @@
     </string-array>
 
     <bool name="config_auto_attach_data_on_creation">true</bool>
-
-    <!-- Values for GPS configuration -->
-    <string-array translatable="false" name="config_gpsParameters">
-        <item>SUPL_HOST=supl.google.com</item>
-        <item>SUPL_PORT=7275</item>
-        <item>SUPL_VER=0x20000</item>
-        <item>SUPL_MODE=1</item>
-        <item>SUPL_ES=1</item>
-        <item>LPP_PROFILE=0</item>
-        <item>USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL=1</item>
-        <item>A_GLONASS_POS_PROTOCOL_SELECT=0</item>
-        <item>GPS_LOCK=0</item>
-    </string-array>
 
     <!-- Sprint need a 70 ms delay for 3way call -->
     <integer name="config_cdma_3waycall_flash_delay">0</integer>
@@ -2990,6 +3160,9 @@
 
     <!-- Keyguard component -->
     <string name="config_keyguardComponent" translatable="false">com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
+
+    <!-- Limit for the number of face templates per user -->
+    <integer name="config_faceMaxTemplatesPerUser">1</integer>
 
     <!-- For performance and storage reasons, limit the number of fingerprints per user -->
     <integer name="config_fingerprintMaxTemplatesPerUser">5</integer>
@@ -3130,9 +3303,42 @@
          various workspace stacks.
          0 - Nav bar is always opaque when either the freeform stack or docked stack is visible.
          1 - Nav bar is always translucent when the freeform stack is visible, otherwise always
-         opaque.
+             opaque.
+         2 - Nav bar is never forced opaque.
          -->
     <integer name="config_navBarOpacityMode">0</integer>
+
+    <!-- Controls the navigation bar interaction mode:
+         0: 3 button mode (back, home, overview buttons)
+         1: 2 button mode (back, home buttons + swipe up for overview)
+         2: gestures only for back, home and overview -->
+    <integer name="config_navBarInteractionMode">0</integer>
+
+    <!-- Controls whether the nav bar can move from the bottom to the side in landscape.
+         Only applies if the device display is not square. -->
+    <bool name="config_navBarCanMove">true</bool>
+
+    <!-- Controls whether the navigation bar lets through taps. -->
+    <bool name="config_navBarTapThrough">false</bool>
+
+    <!-- Controls whether the side edge gestures can always trigger the transient nav bar to
+         show. -->
+    <bool name="config_navBarAlwaysShowOnSideEdgeGesture">false</bool>
+
+    <!-- Controls the size of the back gesture inset. -->
+    <dimen name="config_backGestureInset">0dp</dimen>
+
+    <!-- Controls whether the navbar needs a scrim with
+         {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
+    <bool name="config_navBarNeedsScrim">true</bool>
+
+    <!-- Controls whether seamless rotation should be allowed even though the navbar can move
+         (which normally prevents seamless rotation). -->
+    <bool name="config_allowSeamlessRotationDespiteNavBarMoving">false</bool>
+
+    <!-- Controls whether hints for gestural navigation are shown when the device is setup.
+         This should only be set when the device has gestural navigation enabled by default. -->
+    <bool name="config_showGesturalNavigationHints">false</bool>
 
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
@@ -3160,7 +3366,7 @@
          skinny aspect ratio that is not expected to be widely used. -->
     <item name="config_pictureInPictureMinAspectRatio" format="float" type="dimen">0.41841004184</item>
 
-    <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture. Any
+    <!-- The maximum aspect ratio (width/height) that is supported for picture-in-picture. Any
          ratio larger than this is considered to wide and short to be usable. Currently 2.39:1. -->
     <item name="config_pictureInPictureMaxAspectRatio" format="float" type="dimen">2.39</item>
 
@@ -3180,6 +3386,10 @@
              2 - 1 snap target: 1:1
     -->
     <integer name="config_dockedStackDividerSnapMode">0</integer>
+
+    <!-- The maximum aspect ratio (longerSide/shorterSide) that is treated as close-to-square. The
+         orientation requests from apps would be ignored if the display is close-to-square. -->
+    <item name="config_closeToSquareDisplayMaxAspectRatio" format="float" type="dimen">1.333</item>
 
     <!-- List of comma separated package names for which we the system will not show crash, ANR,
          etc. dialogs. -->
@@ -3219,6 +3429,12 @@
     <!-- True if the device has no home screen. That is a launcher activity
          where the user can launch other applications from.  -->
     <bool name="config_noHomeScreen">false</bool>
+
+    <!-- True if the device supports system decorations on secondary displays. -->
+    <bool name="config_supportsSystemDecorsOnSecondaryDisplays">true</bool>
+
+    <!-- True if the device supports insecure lock screen. -->
+    <bool name="config_supportsInsecureLockScreen">true</bool>
 
     <!-- True if the device requires AppWidgetService even if it does not have
          the PackageManager.FEATURE_APP_WIDGETS feature -->
@@ -3275,7 +3491,7 @@
 
     <!-- Flag indicating whether the assist disclosure can be disabled using
          ASSIST_DISCLOSURE_ENABLED. -->
-    <bool name="config_allowDisablingAssistDisclosure">false</bool>
+    <bool name="config_allowDisablingAssistDisclosure">true</bool>
 
     <!-- True if the device supports system navigation keys. -->
     <bool name="config_supportSystemNavigationKeys">false</bool>
@@ -3301,12 +3517,11 @@
     <string-array translatable="false" name="config_defaultFirstUserRestrictions">
     </string-array>
 
-    <!-- Specifies whether the permissions needed by a legacy app should be
-         reviewed before any of its components can run. A legacy app is one
-         with targetSdkVersion < 23, i.e apps using the old permission model.
-         If review is not required, permissions are reviewed before the app
-         is installed. -->
-    <bool name="config_permissionReviewRequired">false</bool>
+    <!-- Specifies whether certain permissions should be individually controlled. -->
+    <bool name="config_permissionsIndividuallyControlled">false</bool>
+
+    <!-- Specifies whether the user has to give consent to manage wireless (wifi + bluetooth). -->
+    <bool name="config_wirelessConsentRequired">false</bool>
 
     <!-- Default value for android:focusableInTouchMode for some framework scrolling containers.
          ListView/GridView are notably absent since this is their default anyway.
@@ -3345,6 +3560,12 @@
     <string-array translatable="false" name="config_nonBlockableNotificationPackages">
         <item>com.android.dialer</item>
         <item>com.android.messaging</item>
+    </string-array>
+
+    <!-- An array of packages that can make sound on the ringer stream in priority-only DND
+     mode -->
+    <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
+        <item>com.android.dialer</item>
     </string-array>
 
     <!-- An array of packages which can listen for notifications on low ram devices. -->
@@ -3415,6 +3636,71 @@
     -->
     <string name="config_defaultTextClassifierPackage" translatable="false"></string>
 
+    <!-- The package name for the default wellbeing app.
+         This package must be trusted, as it has the permissions to control other applications
+         on the device.
+         Example: "com.android.wellbeing"
+     -->
+    <string name="config_defaultWellbeingPackage" translatable="false"></string>
+
+    <!-- The component name for the default system attention service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         See android.attention.AttentionManagerService.
+    -->
+    <string name="config_defaultAttentionService" translatable="false"></string>
+
+    <!-- The component name for the system-wide captions service.
+         This service must be trusted, as it controls part of the UI of the volume bar.
+         Example: "com.android.captions/.SystemCaptionsService"
+    -->
+    <string name="config_defaultSystemCaptionsService" translatable="false"></string>
+
+    <!-- The component name for the system-wide captions manager service.
+         This service must be trusted, as the system binds to it and keeps it running.
+         Example: "com.android.captions/.SystemCaptionsManagerService"
+    -->
+    <string name="config_defaultSystemCaptionsManagerService" translatable="false"></string>
+
+    <!-- The package name for the incident report approver app.
+        This app is usually PermissionController or an app that replaces it.  When
+        a bugreport or incident report with EXPLICT-level sharing flags is going to be
+        shared, this app will be sent the PENDING_INCIDENT_REPORTS_CHANGED broadcast.
+    -->
+    <string name="config_incidentReportApproverPackage" translatable="false">com.android.permissioncontroller</string>
+
+    <!-- The package name for the system's content capture service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         If no service with the specified name exists on the device, content capture will be
+         disabled.
+         Example: "com.android.contentcapture/.ContentcaptureService"
+    -->
+    <string name="config_defaultContentCaptureService" translatable="false"></string>
+
+    <!-- The package name for the system's augmented autofill service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         If no service with the specified name exists on the device, augmented autofill wil be
+         disabled.
+         Example: "com.android.augmentedautofill/.AugmentedAutofillService"
+    -->
+    <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
+
+    <!-- The package name for the system's app prediction service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         Example: "com.android.intelligence/.AppPredictionService"
+    -->
+    <string name="config_defaultAppPredictionService" translatable="false"></string>
+
+    <!-- The package name for the system's content suggestions service.
+         Provides suggestions for text and image selection regions in snapshots of apps and should
+         be able to classify the type of entities in those selections.
+
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         If no service with the specified name exists on the device, content suggestions wil be
+         disabled.
+         Example: "com.android.contentsuggestions/.ContentSuggestionsService"
+    -->
+    <string name="config_defaultContentSuggestionsService" translatable="false"></string>
+
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
 
@@ -3422,9 +3708,6 @@
          notification. If false, then the expand icon has to be clicked in order for the expand
          to occur. The expand button will have increased touch boundaries to accomodate this. -->
     <bool name="config_notificationHeaderClickableForExpand">false</bool>
-
-    <!-- Configuration for automotive -->
-    <bool name="enable_pbap_pce_profile">false</bool>
 
     <!-- Default data warning level in mb -->
     <integer name="default_data_warning_level_mb">2048</integer>
@@ -3476,6 +3759,9 @@
     <!-- URI for in call notification sound -->
     <string translatable="false" name="config_inCallNotificationSound">/product/media/audio/ui/InCallNotification.ogg</string>
 
+    <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
+    <integer translatable="false" name="config_autoGroupAtCount">4</integer>
+
     <!-- The OEM specified sensor type for the lift trigger to launch the camera app. -->
     <integer name="config_cameraLiftTriggerSensorType">-1</integer>
     <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
@@ -3487,8 +3773,6 @@
 
     <!-- Name of a font family to use for headlines. If empty, falls back to platform default -->
     <string name="config_headlineFontFamily" translatable="false"></string>
-    <!-- Name of a font family to use for headlines. Defaults to sans-serif-light -->
-    <string name="config_headlineFontFamilyLight" translatable="false">sans-serif-light</string>
     <!-- Allows setting custom fontFeatureSettings on specific text. -->
     <string name="config_headlineFontFeatureSettings" translatable="false"></string>
 
@@ -3503,7 +3787,7 @@
     <string-array translatable="false" name="config_batteryPackageTypeService"/>
 
     <!-- Flag indicating whether or not to enable night mode detection. -->
-    <bool name="config_enableNightMode">false</bool>
+    <bool name="config_enableNightMode">true</bool>
 
     <!-- Flag indicating that the actions buttons for a notification should be tinted with by the
          color supplied by the Notification.Builder if present. -->
@@ -3547,17 +3831,26 @@
     <dimen name="config_dialogCornerRadius">2dp</dimen>
     <!-- Corner radius of system buttons -->
     <dimen name="config_buttonCornerRadius">@dimen/control_corner_material</dimen>
+    <!-- Corner radius for bottom sheet system dialogs -->
+    <dimen name="config_bottomDialogCornerRadius">@dimen/config_dialogCornerRadius</dimen>
     <!-- Corner radius of system progress bars -->
     <dimen name="config_progressBarCornerRadius">@dimen/progress_bar_corner_material</dimen>
     <!-- Controls whether system buttons use all caps for text -->
     <bool name="config_buttonTextAllCaps">true</bool>
     <!-- Name of the font family used for system surfaces where the font should use medium weight -->
-    <string name="config_headlineFontFamilyMedium">@string/font_family_button_material</string>
+    <string name="config_headlineFontFamilyMedium" translateable="false">@string/font_family_button_material</string>
+    <!-- Name of a font family to use for body text. -->
+    <string name="config_bodyFontFamily" translatable="false">sans-serif</string>
+    <!-- Name of a font family to use for medium body text. -->
+    <string name="config_bodyFontFamilyMedium" translatable="false">sans-serif-medium</string>
+
+    <!-- Size of icon shown beside a preference locked by admin -->
+    <dimen name="config_restrictedIconSize">@dimen/restricted_icon_size_material</dimen>
 
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 
-    <!-- Package name that should be granted Notification Assistant access -->
-    <string name="config_defaultAssistantAccessPackage" translatable="false">android.ext.services</string>
+    <!-- Component name that should be granted Notification Assistant access -->
+    <string name="config_defaultAssistantAccessComponent" translatable="false">android.ext.services/android.ext.services.notification.Assistant</string>
 
     <bool name="config_supportBluetoothPersistedState">true</bool>
 
@@ -3586,11 +3879,11 @@
         <item>"wifi"</item>
     </string-array>
 
+    <!-- Default hyphenation frequency setting (0=NONE, 1=NORMAL, 2=FULL). -->
+    <item name="config_preferredHyphenationFrequency" format="integer" type="dimen">0</item>
+
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
-
-    <!-- Whether or not swipe up gesture is enabled by default -->
-    <bool name="config_swipe_up_gesture_default">false</bool>
 
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">false</bool>
@@ -3601,6 +3894,12 @@
 
     <!-- Whether or not we should show the option to show battery percentage -->
     <bool name="config_battery_percentage_setting_available">true</bool>
+
+    <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
+    <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
+
+    <!-- Config flag to track default disable threshold for Dynamic power savings enabled battery saver. -->
+    <integer name="config_dynamicPowerSavingsDefaultDisableThreshold">80</integer>
 
     <!-- Model of potentially misprovisioned devices. If none is specified in an overlay, an
          empty string is passed in. -->
@@ -3618,7 +3917,265 @@
     <!-- Pre-scale volume at volume step 3 for Absolute Volume -->
     <fraction name="config_prescaleAbsoluteVolume_index3">85%</fraction>
 
-    <!-- Component name for default assistant on this device -->
-    <string name="config_defaultAssistantComponentName"></string>
+    <!-- Whether or not the "SMS app service" feature is enabled -->
+    <bool name="config_useSmsAppService">true</bool>
 
+    <!-- Class name for the InputEvent compatibility processor override.
+         Empty string means use the default compatibility processor
+         (android.view.InputEventCompatProcessor). -->
+    <string name="config_inputEventCompatProcessorOverrideClassName" translatable="false"></string>
+
+    <!-- Component name for the default module metadata provider on this device -->
+    <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
+
+    <!-- This is the default launcher component to use on secondary displays that support system
+         decorations.
+         This launcher activity must support multiple instances and have corresponding launch mode
+         set in AndroidManifest.
+         {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
+    <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
+
+    <!-- Force secondary home launcher specified in config_secondaryHomeComponent always. If this is
+         not set, secondary home launcher can be replaced by user. -->
+    <bool name ="config_useSystemProvidedLauncherForSecondary">false</bool>
+
+    <!-- If device supports corner radius on windows.
+         This should be turned off on low-end devices to improve animation performance. -->
+    <bool name="config_supportsRoundedCornersOnWindows">true</bool>
+
+    <!-- If the sensor that skips media is available or not. -->
+    <bool name="config_skipSensorAvailable">false</bool>
+
+    <!-- If the sensor that silences alerts is available or not. -->
+    <bool name="config_silenceSensorAvailable">false</bool>
+
+    <!-- Enable Zram writeback feature to allow unused pages in zram be written to flash. -->
+    <bool name="config_zramWriteback">false</bool>
+
+    <!-- Whether cbrs is supported on the device or not -->
+    <bool translatable="false" name="config_cbrs_supported">false</bool>
+
+    <!-- Whether or not aware is enabled by default -->
+    <bool name="config_awareSettingAvailable">false</bool>
+
+    <!-- Display White-Balance -->
+
+    <!-- See AmbientSensor.AmbientBrightnessSensor.
+         The ambient brightness sensor rate (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceBrightnessSensorRate">250</integer>
+
+    <!-- See AmbientFilter.
+         How long ambient brightness changes are kept and taken into consideration
+         (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceBrightnessFilterHorizon">10000</integer>
+
+    <!-- See AmbientFilter.WeightedMovingAverageAmbientFilter.
+         Recent changes are prioritised by integrating their duration over y = x + intercept
+         (the higher it is, the less prioritised recent changes are). Must be a non-negative
+         number, or NaN to avoid this implementation. -->
+    <item name="config_displayWhiteBalanceBrightnessFilterIntercept" format="float" type="dimen">10.0</item>
+
+    <!-- See AmbientSensor.AmbientColorTemperatureSensor.
+         The ambient color temperature sensor name. -->
+    <string name="config_displayWhiteBalanceColorTemperatureSensorName">com.google.sensor.color</string>
+
+    <!-- See AmbientSensor.AmbientColorTemperatureSensor.
+         The ambient color temperature sensor rate (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureSensorRate">250</integer>
+
+    <!-- See AmbientFilter.
+         How long ambient color temperature changes are kept and taken into consideration
+         (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureFilterHorizon">10000</integer>
+
+    <!-- See AmbientFilter.WeightedMovingAverageAmbientFilter.
+         Recent changes are prioritised by integrating their duration over y = x + intercept
+         (the higher it is, the less prioritised recent changes are). Must be a non-negative
+         number, or NaN to avoid this implementation. -->
+    <item name="config_displayWhiteBalanceColorTemperatureFilterIntercept" format="float"
+            type="dimen">10.0</item>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The debounce time (in milliseconds) for increasing the screen color temperature, throttled
+         if time > lastTime + debounce. Must be non-negative. -->
+    <integer name="config_displayWhiteBalanceIncreaseDebounce">5000</integer>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The debounce time (in milliseconds) for decreasing the screen color tempearture, throttled
+         if time < lastTime - debounce. Must be non-negative. -->
+    <integer name="config_displayWhiteBalanceDecreaseDebounce">5000</integer>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The ambient color temperature values used to determine the threshold as the corresponding
+         value in config_displayWhiteBalance{Increase,Decrease}Threholds. Must be non-empty, the
+         same length as config_displayWhiteBalance{Increase,Decrease}Thresholds, and contain
+         non-negative, strictly increasing numbers.
+
+         For example, if:
+
+         - baseThresolds = [0, 100, 1000];
+         - increaseThresholds = [0.1, 0.15, 0.2];
+         - decreaseThresholds = [0.1, 0.05, 0.0];
+
+         Then, given the ambient color temperature INCREASED from X to Y (so X < Y):
+         - If 0 <= Y < 100, we require Y > (1 + 0.1) * X = 1.1X;
+         - If 100 <= Y < 1000, we require Y > (1 + 0.15) * X = 1.15X;
+         - If 1000 <= Y, we require Y > (1 + 0.2) * X = 1.2X.
+
+         Or, if the ambient color temperature DECREASED from X to Y (so X > Y):
+         - If 0 <= Y < 100, we require Y < (1 - 0.1) * X = 0.9X;
+         - If 100 <= Y < 1000, we require Y < (1 - 0.05) * X = 0.95X;
+         - If 1000 <= Y, we require Y < (1 - 0) * X = X.
+
+         NOTE: the numbers in this example are made up, and don't represent how actual base,
+               increase or decrease thresholds would look like. -->
+    <array name="config_displayWhiteBalanceBaseThresholds">
+        <item>0.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The increase threshold values, throttled if value < value * (1 + threshold). Must be
+         non-empty, the same length as config_displayWhiteBalanceBaseThresholds, and contain
+         non-negative numbers. -->
+    <array name="config_displayWhiteBalanceIncreaseThresholds">
+        <item>0.1</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The decrease threshold values, throttled if value > value * (1 - threshold). Must be
+         non-empty, the same length as config_displayWhiteBalanceBaseThresholds, and contain
+         non-negative numbers. -->
+    <array name="config_displayWhiteBalanceDecreaseThresholds">
+        <item>0.1</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient brightness threshold (in lux) beneath which we fall back to a fixed ambient
+         color temperature. -->
+    <item name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" format="float" type="dimen">10.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we fall back when the ambient brightness
+         drops beneath a certain threshold. -->
+    <item name="config_displayWhiteBalanceLowLightAmbientColorTemperature" format="float" type="dimen">6500.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         A float array containing a list of ambient color temperatures, in Kelvin. This array,
+         together with config_displayWhiteBalanceDisplayColorTemperatures, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient color temperature readings to a target color temperature for the display.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceDisplayColorTemperatures. -->
+    <array name="config_displayWhiteBalanceAmbientColorTemperatures">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         An array containing a list of display color temperatures, in Kelvin. See
+         config_displayWhiteBalanceAmbientColorTemperatures for additional details.
+         The same restrictions apply to this array. -->
+    <array name="config_displayWhiteBalanceDisplayColorTemperatures">
+    </array>
+
+    <!-- All of the paths defined for the batterymeter are defined on a 12x20 canvas, and must
+     be parsable by android.utill.PathParser -->
+    <string name="config_batterymeterPerimeterPath" translatable="false">
+		M3.5,2 v0 H1.33 C0.6,2 0,2.6 0,3.33 V13v5.67 C0,19.4 0.6,20 1.33,20 h9.33 C11.4,20 12,19.4 12,18.67 V13V3.33 C12,2.6 11.4,2 10.67,2 H8.5 V0 H3.5 z M2,18v-7V4h8v9v5H2L2,18z
+    </string>
+    <string name="config_batterymeterErrorPerimeterPath" translatable="false">@string/config_batterymeterPerimeterPath</string>
+    <string name="config_batterymeterFillMask" translatable="false">
+        M2,18 v-14 h8 v14 z
+    </string>
+    <string name="config_batterymeterBoltPath" translatable="false">
+        M5,17.5 V12 H3 L7,4.5 V10 h2 L5,17.5 z
+    </string>
+    <string name="config_batterymeterPowersavePath" translatable="false">
+        M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
+    </string>
+
+    <!-- A dual tone battery meter draws the perimeter path twice - once to define the shape
+     and a second time clipped to the fill level to indicate charge -->
+    <bool name="config_batterymeterDualTone">false</bool>
+
+    <!-- The default peak refresh rate for a given device. Change this value if you want to allow
+         for higher refresh rates to be automatically used out of the box -->
+    <integer name="config_defaultPeakRefreshRate">60</integer>
+
+    <!-- The type of the light sensor to be used by the display framework for things like
+         auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
+    <string name="config_displayLightSensorType" translatable="false" />
+
+    <!-- Whether or not to enable automatic heap dumps for the system server on debuggable builds. -->
+    <bool name="config_debugEnableAutomaticSystemServerHeapDumps">false</bool>
+
+    <!-- Trigger a heap dump if the system server pss usage exceeds this threshold. 400 MB -->
+    <integer name="config_debugSystemServerPssThresholdBytes">419430400</integer>
+
+    <!-- See DropBoxManagerService.
+         The minimum period in milliseconds between broadcasts for entries with low priority
+         dropbox tags. -->
+    <integer name="config_dropboxLowPriorityBroadcastRateLimitPeriod">2000</integer>
+
+    <!-- See DropBoxManagerService.
+         An array of dropbox entry tags to marked as low priority. Low priority broadcasts will be
+         rated limited to a period defined by config_dropboxLowPriorityBroadcastRateLimitPeriod
+         (high frequency broadcasts for the tag will be dropped) -->
+    <string-array name="config_dropboxLowPriorityTags" translatable="false">
+        <item>data_app_strictmode</item>
+        <item>data_app_wtf</item>
+        <item>keymaster</item>
+        <item>netstats</item>
+        <item>system_app_strictmode</item>
+        <item>system_app_wtf</item>
+        <item>system_server_strictmode</item>
+        <item>system_server_wtf</item>
+    </string-array>
+
+    <!-- Which binder services to include in incident reports containing restricted images. -->
+    <string-array name="config_restrictedImagesServices" translatable="false"/>
+
+    <!-- Messages that should not be shown to the user during face auth enrollment. This should be
+         used to hide messages that may be too chatty or messages that the user can't do much about.
+         Entries are defined in android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_enroll_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_enroll_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Messages that should not be shown to the user during face authentication, on keyguard.
+         This includes both lockscreen and bouncer. This should be used to hide messages that may be
+         too chatty or messages that the user can't do much about. Entries are defined in
+         android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_keyguard_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_keyguard_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Messages that should not be shown to the user during face authentication, on
+     BiometricPrompt. This should be used to hide messages that may be too chatty or messages that
+     the user can't do much about. Entries are defined in
+     android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_biometricprompt_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_biometricprompt_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- The component name for the default profile supervisor, which can be set as a profile owner
+    even after user setup is complete. The defined component should be used for supervision purposes
+    only. The component must be part of a system app. -->
+    <string name="config_defaultSupervisionProfileOwnerComponent" translatable="false"></string>
+
+    <!-- Whether to artificially interpret all signal strengths as
+         one bar higher than they actually are -->
+    <bool name="config_inflateSignalStrength">false</bool>
+
+    <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
+         grants, even if the UICC claims that the app should be privileged. See b/138150105 -->
+    <string-array name="config_restrictedPreinstalledCarrierApps" translatable="false"/>
+
+    <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
+    <integer name="config_maxShortcutTargetsPerApp">3</integer>
 </resources>

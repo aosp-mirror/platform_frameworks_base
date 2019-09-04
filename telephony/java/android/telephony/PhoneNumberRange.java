@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  */
 @SystemApi
 public final class PhoneNumberRange implements Parcelable {
-    public static final Creator<PhoneNumberRange> CREATOR = new Creator<PhoneNumberRange>() {
+    public static final @android.annotation.NonNull Creator<PhoneNumberRange> CREATOR = new Creator<PhoneNumberRange>() {
         @Override
         public PhoneNumberRange createFromParcel(Parcel in) {
             return new PhoneNumberRange(in);

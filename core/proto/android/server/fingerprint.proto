@@ -15,9 +15,9 @@
  */
 
 syntax = "proto2";
-package com.android.server.fingerprint;
+package com.android.server.biometrics.fingerprint;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "FingerprintServiceProto";
@@ -46,7 +46,7 @@ message FingerprintUserStatsProto {
     optional PerformanceStatsProto crypto = 4;
 }
 
-// A com.android.server.fingerprint.FingerpintService.PerformanceStats object.
+// A com.android.server.biometrics.fingerprint.FingerpintService.PerformanceStats object.
 message PerformanceStatsProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 

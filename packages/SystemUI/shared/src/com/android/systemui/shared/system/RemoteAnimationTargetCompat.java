@@ -20,6 +20,7 @@ import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
 
 /**
  * @see RemoteAnimationTarget
@@ -47,6 +48,8 @@ public class RemoteAnimationTargetCompat {
     public final boolean isNotInRecents;
     public final Rect contentInsets;
 
+    private final SurfaceControl mStartLeash;
+
     public RemoteAnimationTargetCompat(RemoteAnimationTarget app) {
         taskId = app.taskId;
         mode = app.mode;
@@ -59,6 +62,8 @@ public class RemoteAnimationTargetCompat {
         isNotInRecents = app.isNotInRecents;
         contentInsets = app.contentInsets;
         activityType = app.windowConfiguration.getActivityType();
+
+        mStartLeash = app.startLeash;
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {
@@ -68,5 +73,15 @@ public class RemoteAnimationTargetCompat {
             appsCompat[i] = new RemoteAnimationTargetCompat(apps[i]);
         }
         return appsCompat;
+    }
+
+    /**
+     * @see SurfaceControl#release()
+     */
+    public void release() {
+        leash.mSurfaceControl.release();
+        if (mStartLeash != null) {
+            mStartLeash.release();
+        }
     }
 }

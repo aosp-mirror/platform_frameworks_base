@@ -29,9 +29,13 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.annotation.UnsupportedAppUsage;
 import android.os.BaseBundle;
+import android.os.Debug;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
+import android.util.DebugUtils;
+import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
@@ -42,14 +46,18 @@ import java.util.Objects;
  * @hide
  */
 public class PackageUserState {
+    private static final boolean DEBUG = false;
+    private static final String LOG_TAG = "PackageUserState";
+
     public long ceDataInode;
     public boolean installed;
     public boolean stopped;
     public boolean notLaunched;
     public boolean hidden; // Is the app restricted by owner / admin
+    public int distractionFlags;
     public boolean suspended;
     public String suspendingPackage;
-    public String dialogMessage; // Message to show when a suspended package launch attempt is made
+    public SuspendDialogInfo dialogInfo;
     public PersistableBundle suspendedAppExtras;
     public PersistableBundle suspendedLauncherExtras;
     public boolean instantApp;
@@ -78,15 +86,17 @@ public class PackageUserState {
         installReason = PackageManager.INSTALL_REASON_UNKNOWN;
     }
 
+    @VisibleForTesting
     public PackageUserState(PackageUserState o) {
         ceDataInode = o.ceDataInode;
         installed = o.installed;
         stopped = o.stopped;
         notLaunched = o.notLaunched;
         hidden = o.hidden;
+        distractionFlags = o.distractionFlags;
         suspended = o.suspended;
         suspendingPackage = o.suspendingPackage;
-        dialogMessage = o.dialogMessage;
+        dialogInfo = o.dialogInfo;
         suspendedAppExtras = o.suspendedAppExtras;
         suspendedLauncherExtras = o.suspendedLauncherExtras;
         instantApp = o.instantApp;
@@ -130,12 +140,12 @@ public class PackageUserState {
         final boolean isSystemApp = componentInfo.applicationInfo.isSystemApp();
         final boolean matchUninstalled = (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0;
         if (!isAvailable(flags)
-                && !(isSystemApp && matchUninstalled)) return false;
-        if (!isEnabled(componentInfo, flags)) return false;
+                && !(isSystemApp && matchUninstalled)) return reportIfDebug(false, flags);
+        if (!isEnabled(componentInfo, flags)) return reportIfDebug(false, flags);
 
         if ((flags & MATCH_SYSTEM_ONLY) != 0) {
             if (!isSystemApp) {
-                return false;
+                return reportIfDebug(false, flags);
             }
         }
 
@@ -143,7 +153,16 @@ public class PackageUserState {
                 && !componentInfo.directBootAware;
         final boolean matchesAware = ((flags & MATCH_DIRECT_BOOT_AWARE) != 0)
                 && componentInfo.directBootAware;
-        return matchesUnaware || matchesAware;
+        return reportIfDebug(matchesUnaware || matchesAware, flags);
+    }
+
+    private boolean reportIfDebug(boolean result, int flags) {
+        if (DEBUG && !result) {
+            Slog.i(LOG_TAG, "No match!; flags: "
+                    + DebugUtils.flagsToString(PackageManager.class, "MATCH_", flags) + " "
+                    + Debug.getCaller());
+        }
+        return result;
     }
 
     /**
@@ -205,6 +224,9 @@ public class PackageUserState {
         if (hidden != oldState.hidden) {
             return false;
         }
+        if (distractionFlags != oldState.distractionFlags) {
+            return false;
+        }
         if (suspended != oldState.suspended) {
             return false;
         }
@@ -213,7 +235,7 @@ public class PackageUserState {
                     || !suspendingPackage.equals(oldState.suspendingPackage)) {
                 return false;
             }
-            if (!Objects.equals(dialogMessage, oldState.dialogMessage)) {
+            if (!Objects.equals(dialogInfo, oldState.dialogInfo)) {
                 return false;
             }
             if (!BaseBundle.kindofEquals(suspendedAppExtras,

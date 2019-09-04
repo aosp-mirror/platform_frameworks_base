@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeReason;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
@@ -47,13 +48,16 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
-import android.view.inputmethod.InputMethodManagerInternal;
+import android.util.StatsLog;
+import android.view.WindowManagerPolicyConstants.OnReason;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
@@ -74,7 +78,8 @@ import com.android.server.statusbar.StatusBarManagerInternal;
  * tell the system when we go to sleep so that it can lock the keyguard if needed.
  * </p>
  */
-final class Notifier {
+@VisibleForTesting
+public class Notifier {
     private static final String TAG = "PowerManagerNotifier";
 
     private static final boolean DEBUG = false;
@@ -133,6 +138,7 @@ final class Notifier {
     // broadcasted state over the course of reporting the transition asynchronously.
     private boolean mInteractive = true;
     private int mInteractiveChangeReason;
+    private long mInteractiveChangeStartTime; // In SystemClock.uptimeMillis()
     private boolean mInteractiveChanging;
 
     // The pending interactive state that we will eventually want to broadcast.
@@ -187,6 +193,8 @@ final class Notifier {
         try {
             mBatteryStats.noteInteractive(true);
         } catch (RemoteException ex) { }
+        StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
+                StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
     }
 
     /**
@@ -231,8 +239,13 @@ final class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockStartFromSource(tag, historyTag, workSource);
+                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
+                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             } else {
                 mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, ownerUid);
+                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        ownerUid, null, tag, historyTag,
+                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -249,8 +262,13 @@ final class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockFinishFromSource(tag, historyTag, workSource);
+                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
+                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             } else {
                 mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, ownerUid);
+                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        ownerUid, null, tag, historyTag,
+                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -356,7 +374,7 @@ final class Notifier {
      * which case it will assume that the state did not fully converge before the
      * next transition began and will recover accordingly.
      */
-    public void onWakefulnessChangeStarted(final int wakefulness, int reason) {
+    public void onWakefulnessChangeStarted(final int wakefulness, int reason, long eventTime) {
         final boolean interactive = PowerManagerInternal.isInteractive(wakefulness);
         if (DEBUG) {
             Slog.d(TAG, "onWakefulnessChangeStarted: wakefulness=" + wakefulness
@@ -388,10 +406,14 @@ final class Notifier {
             try {
                 mBatteryStats.noteInteractive(interactive);
             } catch (RemoteException ex) { }
+            StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
+                    interactive ? StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON :
+                            StatsLog.INTERACTIVE_STATE_CHANGED__STATE__OFF);
 
             // Handle early behaviors.
             mInteractive = interactive;
             mInteractiveChangeReason = reason;
+            mInteractiveChangeStartTime = eventTime;
             mInteractiveChanging = true;
             handleEarlyInteractiveChange();
         }
@@ -422,8 +444,8 @@ final class Notifier {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        // Note a SCREEN tron event is logged in PowerManagerService.
-                        mPolicy.startedWakingUp();
+                        final int why = translateOnReason(mInteractiveChangeReason);
+                        mPolicy.startedWakingUp(why);
                     }
                 });
 
@@ -452,12 +474,23 @@ final class Notifier {
      */
     private void handleLateInteractiveChange() {
         synchronized (mLock) {
+            final int interactiveChangeLatency =
+                    (int) (SystemClock.uptimeMillis() - mInteractiveChangeStartTime);
             if (mInteractive) {
                 // Finished waking up...
+                final int why = translateOnReason(mInteractiveChangeReason);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mPolicy.finishedWakingUp();
+                        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
+                        log.setType(MetricsEvent.TYPE_OPEN);
+                        log.setSubtype(why);
+                        log.setLatency(interactiveChangeLatency);
+                        log.addTaggedData(
+                                MetricsEvent.FIELD_SCREEN_WAKE_REASON, mInteractiveChangeReason);
+                        MetricsLogger.action(log);
+                        EventLogTags.writePowerScreenState(1, 0, 0, 0, interactiveChangeLatency);
+                        mPolicy.finishedWakingUp(why);
                     }
                 });
             } else {
@@ -481,8 +514,11 @@ final class Notifier {
                         LogMaker log = new LogMaker(MetricsEvent.SCREEN);
                         log.setType(MetricsEvent.TYPE_CLOSE);
                         log.setSubtype(why);
+                        log.setLatency(interactiveChangeLatency);
+                        log.addTaggedData(
+                                MetricsEvent.FIELD_SCREEN_SLEEP_REASON, mInteractiveChangeReason);
                         MetricsLogger.action(log);
-                        EventLogTags.writePowerScreenState(0, why, 0, 0, 0);
+                        EventLogTags.writePowerScreenState(0, why, 0, 0, interactiveChangeLatency);
                         mPolicy.finishedGoingToSleep(why);
                     }
                 });
@@ -503,6 +539,23 @@ final class Notifier {
                 return WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
             default:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_USER;
+        }
+    }
+
+    private static @OnReason int translateOnReason(@WakeReason int reason) {
+        switch (reason) {
+            case PowerManager.WAKE_REASON_POWER_BUTTON:
+            case PowerManager.WAKE_REASON_PLUGGED_IN:
+            case PowerManager.WAKE_REASON_GESTURE:
+            case PowerManager.WAKE_REASON_CAMERA_LAUNCH:
+            case PowerManager.WAKE_REASON_WAKE_KEY:
+            case PowerManager.WAKE_REASON_WAKE_MOTION:
+            case PowerManager.WAKE_REASON_LID:
+                return WindowManagerPolicy.ON_BECAUSE_OF_USER;
+            case PowerManager.WAKE_REASON_APPLICATION:
+                return WindowManagerPolicy.ON_BECAUSE_OF_APPLICATION;
+            default:
+                return WindowManagerPolicy.ON_BECAUSE_OF_UNKNOWN;
         }
     }
 
@@ -547,14 +600,16 @@ final class Notifier {
     /**
      * Called when the screen has turned on.
      */
-    public void onWakeUp(String reason, int reasonUid, String opPackageName, int opUid) {
+    public void onWakeUp(int reason, String details, int reasonUid, String opPackageName,
+            int opUid) {
         if (DEBUG) {
-            Slog.d(TAG, "onWakeUp: event=" + reason + ", reasonUid=" + reasonUid
+            Slog.d(TAG, "onWakeUp: reason=" + PowerManager.wakeReasonToString(reason)
+                    + ", details=" + details + ", reasonUid=" + reasonUid
                     + " opPackageName=" + opPackageName + " opUid=" + opUid);
         }
 
         try {
-            mBatteryStats.noteWakeUp(reason, reasonUid);
+            mBatteryStats.noteWakeUp(details, reasonUid);
             if (opPackageName != null) {
                 mAppOps.noteOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName);
             }
@@ -574,9 +629,9 @@ final class Notifier {
     }
 
     /**
-     * Called when wireless charging has started so as to provide user feedback (sound and visual).
+     * Called when wireless charging has started - to provide user feedback (sound and visual).
      */
-    public void onWirelessChargingStarted(int batteryLevel) {
+    public void onWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "onWirelessChargingStarted");
         }
@@ -585,13 +640,14 @@ final class Notifier {
         Message msg = mHandler.obtainMessage(MSG_WIRELESS_CHARGING_STARTED);
         msg.setAsynchronous(true);
         msg.arg1 = batteryLevel;
+        msg.arg2 = userId;
         mHandler.sendMessage(msg);
     }
 
     /**
-     * Called when wired charging has started so as to provide user feedback
+     * Called when wired charging has started - to provide user feedback
      */
-    public void onWiredChargingStarted() {
+    public void onWiredChargingStarted(@UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "onWiredChargingStarted");
         }
@@ -599,6 +655,7 @@ final class Notifier {
         mSuspendBlocker.acquire();
         Message msg = mHandler.obtainMessage(MSG_WIRED_CHARGING_STARTED);
         msg.setAsynchronous(true);
+        msg.arg1 = userId;
         mHandler.sendMessage(msg);
     }
 
@@ -735,12 +792,13 @@ final class Notifier {
     };
 
     /**
-     * Plays the wireless charging sound for both wireless and non-wireless charging
+     * If enabled, plays a sound and/or vibration when wireless or non-wireless charging has started
      */
-    private void playChargingStartedSound() {
+    private void playChargingStartedFeedback(@UserIdInt int userId) {
+        playChargingStartedVibration(userId);
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.CHARGING_STARTED_SOUND);
-        if (isChargingFeedbackEnabled() && soundPath != null) {
+        if (isChargingFeedbackEnabled(userId) && soundPath != null) {
             final Uri soundUri = Uri.parse("file://" + soundPath);
             if (soundUri != null) {
                 final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
@@ -752,17 +810,16 @@ final class Notifier {
         }
     }
 
-    private void showWirelessChargingStarted(int batteryLevel) {
-        playWirelessChargingVibration();
-        playChargingStartedSound();
+    private void showWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
+        playChargingStartedFeedback(userId);
         if (mStatusBarManagerInternal != null) {
             mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
         }
         mSuspendBlocker.release();
     }
 
-    private void showWiredChargingStarted() {
-        playChargingStartedSound();
+    private void showWiredChargingStarted(@UserIdInt int userId) {
+        playChargingStartedFeedback(userId);
         mSuspendBlocker.release();
     }
 
@@ -770,17 +827,17 @@ final class Notifier {
         mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
     }
 
-    private void playWirelessChargingVibration() {
-        final boolean vibrateEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CHARGING_VIBRATION_ENABLED, 0) != 0;
-        if (vibrateEnabled && isChargingFeedbackEnabled()) {
+    private void playChargingStartedVibration(@UserIdInt int userId) {
+        final boolean vibrateEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
+        if (vibrateEnabled && isChargingFeedbackEnabled(userId)) {
             mVibrator.vibrate(WIRELESS_CHARGING_VIBRATION_EFFECT, VIBRATION_ATTRIBUTES);
         }
     }
 
-    private boolean isChargingFeedbackEnabled() {
-        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
+    private boolean isChargingFeedbackEnabled(@UserIdInt int userId) {
+        final boolean enabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.CHARGING_SOUNDS_ENABLED, 1, userId) != 0;
         final boolean dndOff = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
                 == Settings.Global.ZEN_MODE_OFF;
@@ -802,7 +859,7 @@ final class Notifier {
                     sendNextBroadcast();
                     break;
                 case MSG_WIRELESS_CHARGING_STARTED:
-                    showWirelessChargingStarted(msg.arg1);
+                    showWirelessChargingStarted(msg.arg1, msg.arg2);
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
@@ -811,7 +868,7 @@ final class Notifier {
                     lockProfile(msg.arg1);
                     break;
                 case MSG_WIRED_CHARGING_STARTED:
-                    showWiredChargingStarted();
+                    showWiredChargingStarted(msg.arg1);
                     break;
             }
         }

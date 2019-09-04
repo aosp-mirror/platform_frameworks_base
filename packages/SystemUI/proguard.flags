@@ -10,27 +10,14 @@
   public void setGlowScale(float);
 }
 
+-keep class com.android.systemui.recents.OverviewProxyRecentsImpl
 -keep class com.android.systemui.statusbar.car.CarStatusBar
 -keep class com.android.systemui.statusbar.phone.StatusBar
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
 -keep class * extends com.android.systemui.SystemUI
-
--keepclassmembers class ** {
-    public void onBusEvent(**);
-    public void onInterprocessBusEvent(**);
-}
--keepclassmembers class ** extends **.EventBus$InterprocessEvent {
-    public <init>(android.os.Bundle);
-}
-
--keep class com.android.systemui.recents.views.TaskView {
-    public int getDim();
-    public void setDim(int);
-    public float getTaskProgress();
-    public void setTaskProgress(float);
-}
+-keep class * implements com.android.systemui.SystemUI$Injector
 
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
@@ -39,6 +26,12 @@
 -keep class ** extends androidx.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
 -keep class com.android.systemui.plugins.** {
-    public protected *;
+    *;
+}
+-keep class com.android.systemui.fragments.FragmentService$FragmentCreator {
+    *;
+}
+-keep class com.android.systemui.util.InjectionInflationController$ViewInstanceCreator {
+    *;
 }
 -keep class androidx.core.app.CoreComponentFactory

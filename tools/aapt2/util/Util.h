@@ -98,6 +98,12 @@ bool IsAndroidSplitName(const android::StringPiece& str);
 Maybe<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
                                               const android::StringPiece& class_name);
 
+// Retrieves the formatted name of aapt2.
+const char* GetToolName();
+
+// Retrieves the build fingerprint of aapt2.
+std::string GetToolFingerprint();
+
 template <typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(const T& a, const T& b) {
   if (a < b) {
@@ -196,6 +202,10 @@ inline size_t StringBuilder::Utf16Len() const {
 inline StringBuilder::operator bool() const {
   return error_.empty();
 }
+
+// Converts a UTF8 string into Modified UTF8
+std::string Utf8ToModifiedUtf8(const std::string& utf8);
+std::string ModifiedUtf8ToUtf8(const std::string& modified_utf8);
 
 // Converts a UTF8 string to a UTF16 string.
 std::u16string Utf8ToUtf16(const android::StringPiece& utf8);

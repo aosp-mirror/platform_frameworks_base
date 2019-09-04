@@ -49,6 +49,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -235,6 +236,8 @@ public class ListView extends AbsListView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ListView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.ListView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         final CharSequence[] entries = a.getTextArray(R.styleable.ListView_entries);
         if (entries != null) {
@@ -779,7 +782,7 @@ public class ListView extends AbsListView {
      * @return The view that is currently selected, if it happens to be in the
      *         range that we draw.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private View fillDown(int pos, int nextTop) {
         View selectedView = null;
 
@@ -814,7 +817,7 @@ public class ListView extends AbsListView {
      *
      * @return The view that is currently selected
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private View fillUp(int pos, int nextBottom) {
         View selectedView = null;
 
@@ -1487,7 +1490,7 @@ public class ListView extends AbsListView {
      * @return The selected view, or null if the selected view is outside the
      *         visible area.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private View fillSpecific(int position, int top) {
         boolean tempIsSelected = position == mSelectedPosition;
         View temp = makeAndAddView(position, top, true, mListPadding.left, tempIsSelected);
@@ -3637,6 +3640,7 @@ public class ListView extends AbsListView {
      * @return the current drawable drawn between list elements
      * @attr ref R.styleable#ListView_divider
      */
+    @InspectableProperty
     @Nullable
     public Drawable getDivider() {
         return mDivider;
@@ -3666,6 +3670,7 @@ public class ListView extends AbsListView {
     /**
      * @return Returns the height of the divider that will be drawn between each item in the list.
      */
+    @InspectableProperty
     public int getDividerHeight() {
         return mDividerHeight;
     }
@@ -3701,6 +3706,7 @@ public class ListView extends AbsListView {
      *
      * @see #setHeaderDividersEnabled(boolean)
      */
+    @InspectableProperty(name = "headerDividersEnabled")
     public boolean areHeaderDividersEnabled() {
         return mHeaderDividersEnabled;
     }
@@ -3724,6 +3730,7 @@ public class ListView extends AbsListView {
      *
      * @see #setFooterDividersEnabled(boolean)
      */
+    @InspectableProperty(name = "footerDividersEnabled")
     public boolean areFooterDividersEnabled() {
         return mFooterDividersEnabled;
     }

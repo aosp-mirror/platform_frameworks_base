@@ -36,8 +36,7 @@ public class PipAppOpsListener {
     private Handler mHandler;
     private IActivityManager mActivityManager;
     private AppOpsManager mAppOpsManager;
-
-    private PipMotionHelper mMotionHelper;
+    private Callback mCallback;
 
     private AppOpsManager.OnOpChangedListener mAppOpsChangedListener = new OnOpChangedListener() {
         @Override
@@ -52,7 +51,7 @@ public class PipAppOpsListener {
                     if (appInfo.packageName.equals(topPipActivityInfo.first.getPackageName()) &&
                             mAppOpsManager.checkOpNoThrow(OP_PICTURE_IN_PICTURE, appInfo.uid,
                                     packageName) != MODE_ALLOWED) {
-                        mHandler.post(() -> mMotionHelper.dismissPip());
+                        mHandler.post(() -> mCallback.dismissPip());
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -63,12 +62,12 @@ public class PipAppOpsListener {
     };
 
     public PipAppOpsListener(Context context, IActivityManager activityManager,
-            PipMotionHelper motionHelper) {
+            Callback callback) {
         mContext = context;
         mHandler = new Handler(mContext.getMainLooper());
         mActivityManager = activityManager;
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        mMotionHelper = motionHelper;
+        mCallback = callback;
     }
 
     public void onActivityPinned(String packageName) {
@@ -88,5 +87,11 @@ public class PipAppOpsListener {
 
     private void unregisterAppOpsListener() {
         mAppOpsManager.stopWatchingMode(mAppOpsChangedListener);
+    }
+
+    /** Callback for PipAppOpsListener to request changes to the PIP window. */
+    public interface Callback {
+        /** Dismisses the PIP window. */
+        void dismissPip();
     }
 }

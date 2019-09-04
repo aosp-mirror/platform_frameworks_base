@@ -80,7 +80,7 @@ public class GatewayInfo implements Parcelable {
     /**
      * The Parcelable interface.
      * */
-    public static final Parcelable.Creator<GatewayInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<GatewayInfo> CREATOR =
             new Parcelable.Creator<GatewayInfo> () {
 
         @Override

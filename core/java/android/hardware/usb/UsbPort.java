@@ -16,96 +16,45 @@
 
 package android.hardware.usb;
 
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_DETECTED;
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_DISABLED;
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED;
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED;
+import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
+import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
+import static android.hardware.usb.UsbPortStatus.DATA_ROLE_NONE;
+import static android.hardware.usb.UsbPortStatus.MODE_AUDIO_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.MODE_DEBUG_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.MODE_DFP;
+import static android.hardware.usb.UsbPortStatus.MODE_DUAL;
+import static android.hardware.usb.UsbPortStatus.MODE_NONE;
+import static android.hardware.usb.UsbPortStatus.MODE_UFP;
+import static android.hardware.usb.UsbPortStatus.POWER_ROLE_NONE;
+import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SINK;
+import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SOURCE;
+
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.hardware.usb.V1_0.Constants;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
 /**
  * Represents a physical USB port and describes its characteristics.
- * <p>
- * This object is immutable.
- * </p>
  *
  * @hide
  */
-public final class UsbPort implements Parcelable {
+@SystemApi
+public final class UsbPort {
     private final String mId;
     private final int mSupportedModes;
-
-    public static final int MODE_NONE = Constants.PortMode.NONE;
-    /**
-     * Mode bit: This USB port can act as a downstream facing port (host).
-     * <p>
-     * Implies that the port supports the {@link #POWER_ROLE_SOURCE} and {@link #DATA_ROLE_HOST}
-     * combination of roles (and possibly others as well).
-     * </p>
-     */
-    public static final int MODE_DFP = Constants.PortMode.DFP;
-
-    /**
-     * Mode bit: This USB port can act as an upstream facing port (device).
-     * <p>
-     * Implies that the port supports the {@link #POWER_ROLE_SINK} and {@link #DATA_ROLE_DEVICE}
-     * combination of roles (and possibly others as well).
-     * </p>
-     */
-    public static final int MODE_UFP = Constants.PortMode.UFP;
-
-    /**
-     * Mode bit: This USB port can act either as an downstream facing port (host) or as
-     * an upstream facing port (device).
-     * <p>
-     * Implies that the port supports the {@link #POWER_ROLE_SOURCE} and {@link #DATA_ROLE_HOST}
-     * combination of roles and the {@link #POWER_ROLE_SINK} and {@link #DATA_ROLE_DEVICE}
-     * combination of roles (and possibly others as well).
-     * </p>
-     */
-    public static final int MODE_DUAL = Constants.PortMode.DRP;
-
-    /**
-     * Mode bit: This USB port can support USB Type-C Audio accessory.
-     */
-    public static final int MODE_AUDIO_ACCESSORY =
-            android.hardware.usb.V1_1.Constants.PortMode_1_1.AUDIO_ACCESSORY;
-
-    /**
-     * Mode bit: This USB port can support USB Type-C debug accessory.
-     */
-    public static final int MODE_DEBUG_ACCESSORY =
-            android.hardware.usb.V1_1.Constants.PortMode_1_1.DEBUG_ACCESSORY;
-
-    /**
-     * Power role: This USB port does not have a power role.
-     */
-    public static final int POWER_ROLE_NONE = Constants.PortPowerRole.NONE;
-
-    /**
-     * Power role: This USB port can act as a source (provide power).
-     */
-    public static final int POWER_ROLE_SOURCE = Constants.PortPowerRole.SOURCE;
-
-    /**
-     * Power role: This USB port can act as a sink (receive power).
-     */
-    public static final int POWER_ROLE_SINK = Constants.PortPowerRole.SINK;
-
-    /**
-     * Power role: This USB port does not have a data role.
-     */
-    public static final int DATA_ROLE_NONE = Constants.PortDataRole.NONE;
-
-    /**
-     * Data role: This USB port can act as a host (access data services).
-     */
-    public static final int DATA_ROLE_HOST = Constants.PortDataRole.HOST;
-
-    /**
-     * Data role: This USB port can act as a device (offer data services).
-     */
-    public static final int DATA_ROLE_DEVICE = Constants.PortDataRole.DEVICE;
+    private final UsbManager mUsbManager;
+    private final int mSupportedContaminantProtectionModes;
+    private final boolean mSupportsEnableContaminantPresenceProtection;
+    private final boolean mSupportsEnableContaminantPresenceDetection;
 
     private static final int NUM_DATA_ROLES = Constants.PortDataRole.NUM_DATA_ROLES;
     /**
@@ -114,15 +63,30 @@ public final class UsbPort implements Parcelable {
     private static final int POWER_ROLE_OFFSET = Constants.PortPowerRole.NONE;
 
     /** @hide */
-    public UsbPort(String id, int supportedModes) {
+    public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes,
+            int supportedContaminantProtectionModes,
+            boolean supportsEnableContaminantPresenceProtection,
+            boolean supportsEnableContaminantPresenceDetection) {
+        Preconditions.checkNotNull(id);
+        Preconditions.checkFlagsArgument(supportedModes,
+                MODE_DFP | MODE_UFP | MODE_AUDIO_ACCESSORY | MODE_DEBUG_ACCESSORY);
+
+        mUsbManager = usbManager;
         mId = id;
         mSupportedModes = supportedModes;
+        mSupportedContaminantProtectionModes = supportedContaminantProtectionModes;
+        mSupportsEnableContaminantPresenceProtection =
+                supportsEnableContaminantPresenceProtection;
+        mSupportsEnableContaminantPresenceDetection =
+                supportsEnableContaminantPresenceDetection;
     }
 
     /**
      * Gets the unique id of the port.
      *
      * @return The unique id of the port; not intended for display.
+     *
+     * @hide
      */
     public String getId() {
         return mId;
@@ -134,23 +98,98 @@ public final class UsbPort implements Parcelable {
      * The actual mode of the port may vary depending on what is plugged into it.
      * </p>
      *
-     * @return The supported modes: one of {@link #MODE_DFP}, {@link #MODE_UFP}, or
-     * {@link #MODE_DUAL}.
+     * @return The supported modes: one of {@link UsbPortStatus#MODE_DFP},
+     * {@link UsbPortStatus#MODE_UFP}, or {@link UsbPortStatus#MODE_DUAL}.
+     *
+     * @hide
      */
     public int getSupportedModes() {
         return mSupportedModes;
     }
 
+   /**
+     * Gets the supported port proctection modes when the port is contaminated.
+     * <p>
+     * The actual mode of the port is decided by the hardware
+     * </p>
+     *
+     * @hide
+     */
+    public int getSupportedContaminantProtectionModes() {
+        return mSupportedContaminantProtectionModes;
+    }
+
+   /**
+     * Tells if UsbService can enable/disable contaminant presence protection.
+     *
+     * @hide
+     */
+    public boolean supportsEnableContaminantPresenceProtection() {
+        return mSupportsEnableContaminantPresenceProtection;
+    }
+
+   /**
+     * Tells if UsbService can enable/disable contaminant presence detection.
+     *
+     * @hide
+     */
+    public boolean supportsEnableContaminantPresenceDetection() {
+        return mSupportsEnableContaminantPresenceDetection;
+    }
+
+    /**
+     * Gets the status of this USB port.
+     *
+     * @return The status of the this port, or {@code null} if port is unknown.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @Nullable UsbPortStatus getStatus() {
+        return mUsbManager.getPortStatus(this);
+    }
+
+    /**
+     * Sets the desired role combination of the port.
+     * <p>
+     * The supported role combinations depend on what is connected to the port and may be
+     * determined by consulting
+     * {@link UsbPortStatus#isRoleCombinationSupported UsbPortStatus.isRoleCombinationSupported}.
+     * </p><p>
+     * Note: This function is asynchronous and may fail silently without applying
+     * the requested changes.  If this function does cause a status change to occur then
+     * a {@link UsbManager#ACTION_USB_PORT_CHANGED} broadcast will be sent.
+     * </p>
+     *
+     * @param powerRole The desired power role: {@link UsbPortStatus#POWER_ROLE_SOURCE} or
+     *                  {@link UsbPortStatus#POWER_ROLE_SINK}, or
+     *                  {@link UsbPortStatus#POWER_ROLE_NONE} if no power role.
+     * @param dataRole The desired data role: {@link UsbPortStatus#DATA_ROLE_HOST} or
+     *                 {@link UsbPortStatus#DATA_ROLE_DEVICE}, or
+     *                 {@link UsbPortStatus#DATA_ROLE_NONE} if no data role.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public void setRoles(@UsbPortStatus.UsbPowerRole int powerRole,
+            @UsbPortStatus.UsbDataRole int dataRole) {
+        UsbPort.checkRoles(powerRole, dataRole);
+
+        mUsbManager.setPortRoles(this, powerRole, dataRole);
+    }
+
+    /**
+     * @hide
+     **/
+    public void enableContaminantDetection(boolean enable) {
+        mUsbManager.enableContaminantDetection(this, enable);
+    }
     /**
      * Combines one power and one data role together into a unique value with
      * exactly one bit set.  This can be used to efficiently determine whether
      * a combination of roles is supported by testing whether that bit is present
      * in a bit-field.
      *
-     * @param powerRole The desired power role: {@link UsbPort#POWER_ROLE_SOURCE}
-     *                  or {@link UsbPort#POWER_ROLE_SINK}, or 0 if no power role.
-     * @param dataRole  The desired data role: {@link UsbPort#DATA_ROLE_HOST}
-     *                  or {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if no data role.
+     * @param powerRole The desired power role: {@link UsbPortStatus#POWER_ROLE_SOURCE}
+     *                  or {@link UsbPortStatus#POWER_ROLE_SINK}, or 0 if no power role.
+     * @param dataRole  The desired data role: {@link UsbPortStatus#DATA_ROLE_HOST}
+     *                  or {@link UsbPortStatus#DATA_ROLE_DEVICE}, or 0 if no data role.
      * @hide
      */
     public static int combineRolesAsBit(int powerRole, int dataRole) {
@@ -217,6 +256,22 @@ public final class UsbPort implements Parcelable {
     }
 
     /** @hide */
+    public static String contaminantPresenceStatusToString(int contaminantPresenceStatus) {
+        switch (contaminantPresenceStatus) {
+            case CONTAMINANT_DETECTION_NOT_SUPPORTED:
+                return "not-supported";
+            case CONTAMINANT_DETECTION_DISABLED:
+                return "disabled";
+            case CONTAMINANT_DETECTION_DETECTED:
+                return "detected";
+            case CONTAMINANT_DETECTION_NOT_DETECTED:
+                return "not detected";
+            default:
+                return Integer.toString(contaminantPresenceStatus);
+        }
+    }
+
+    /** @hide */
     public static String roleCombinationsToString(int combo) {
         StringBuilder result = new StringBuilder();
         result.append("[");
@@ -275,32 +330,11 @@ public final class UsbPort implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes) + "}";
+        return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes)
+                + "supportedContaminantProtectionModes=" + mSupportedContaminantProtectionModes
+                + "supportsEnableContaminantPresenceProtection="
+                + mSupportsEnableContaminantPresenceProtection
+                + "supportsEnableContaminantPresenceDetection="
+                + mSupportsEnableContaminantPresenceDetection;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mId);
-        dest.writeInt(mSupportedModes);
-    }
-
-    public static final Parcelable.Creator<UsbPort> CREATOR =
-            new Parcelable.Creator<UsbPort>() {
-                @Override
-                public UsbPort createFromParcel(Parcel in) {
-                    String id = in.readString();
-                    int supportedModes = in.readInt();
-                    return new UsbPort(id, supportedModes);
-                }
-
-                @Override
-                public UsbPort[] newArray(int size) {
-                    return new UsbPort[size];
-                }
-            };
 }

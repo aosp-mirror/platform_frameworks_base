@@ -23,5 +23,6 @@ import android.content.res.Configuration;
  */
 public interface ConfigurationContainerListener {
 
-    void onOverrideConfigurationChanged(Configuration overrideConfiguration);
+    /** {@see ConfigurationContainer#onRequestedOverrideConfigurationChanged} */
+    void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration);
 }

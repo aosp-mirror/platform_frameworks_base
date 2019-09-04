@@ -15,11 +15,14 @@
  */
 package android.os.strictmode;
 
+import android.annotation.TestApi;
+
 /**
  * See #{@link android.os.StrictMode.ThreadPolicy.Builder#detectExplicitGc()}.
  *
  * @hide
  */
+@TestApi
 public final class ExplicitGcViolation extends Violation {
     /** @hide */
     public ExplicitGcViolation() {

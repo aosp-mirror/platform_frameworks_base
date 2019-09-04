@@ -42,6 +42,13 @@ public class SELinux {
     private static final int SELINUX_ANDROID_RESTORECON_SKIP_SEHASH = 128;
 
     /**
+     * Get context associated with path by file_contexts.
+     * @param path path to the regular file to get the security context for.
+     * @return a String representing the security context or null on failure.
+     */
+    public static final native String fileSelabelLookup(String path);
+
+    /**
      * Determine whether SELinux is disabled or enabled.
      * @return a boolean indicating whether SELinux is enabled.
      */

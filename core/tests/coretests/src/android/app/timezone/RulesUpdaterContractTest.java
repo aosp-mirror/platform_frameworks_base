@@ -25,7 +25,8 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
-import android.support.test.filters.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

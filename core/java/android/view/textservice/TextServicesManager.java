@@ -16,16 +16,20 @@
 
 package android.view.textservice;
 
+import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 
+import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 
 import java.util.Locale;
@@ -68,22 +72,40 @@ public final class TextServicesManager {
     private static final boolean DBG = false;
 
     /**
-     * A compile time switch to control per-profile spell checker, which is not yet ready.
-     * @hide
+     * @deprecated Do not use. Just kept because of {@link UnsupportedAppUsage} in
+     * {@link #getInstance()}.
      */
-    public static final boolean DISABLE_PER_PROFILE_SPELL_CHECKER = true;
-
+    @Deprecated
     private static TextServicesManager sInstance;
 
     private final ITextServicesManager mService;
 
-    private TextServicesManager() throws ServiceNotFoundException {
+    @UserIdInt
+    private final int mUserId;
+
+    private TextServicesManager(@UserIdInt int userId) throws ServiceNotFoundException {
         mService = ITextServicesManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_SERVICES_MANAGER_SERVICE));
+        mUserId = userId;
     }
 
     /**
-     * Retrieve the global TextServicesManager instance, creating it if it doesn't already exist.
+     * The factory method of {@link TextServicesManager}.
+     *
+     * @param context {@link Context} from which {@link TextServicesManager} should be instantiated.
+     * @return {@link TextServicesManager} that is associated with {@link Context#getUserId()}.
+     * @throws ServiceNotFoundException When {@link TextServicesManager} is not available.
+     * @hide
+     */
+    @NonNull
+    public static TextServicesManager createInstance(@NonNull Context context)
+            throws ServiceNotFoundException {
+        return new TextServicesManager(context.getUserId());
+    }
+
+    /**
+     * @deprecated Do not use. Just kept because of {@link UnsupportedAppUsage} in
+     * {@link #getInstance()}.
      * @hide
      */
     @UnsupportedAppUsage
@@ -91,7 +113,7 @@ public final class TextServicesManager {
         synchronized (TextServicesManager.class) {
             if (sInstance == null) {
                 try {
-                    sInstance = new TextServicesManager();
+                    sInstance = new TextServicesManager(UserHandle.myUserId());
                 } catch (ServiceNotFoundException e) {
                     throw new IllegalStateException(e);
                 }
@@ -142,7 +164,7 @@ public final class TextServicesManager {
 
         final SpellCheckerInfo sci;
         try {
-            sci = mService.getCurrentSpellChecker(null);
+            sci = mService.getCurrentSpellChecker(mUserId, null);
         } catch (RemoteException e) {
             return null;
         }
@@ -180,9 +202,9 @@ public final class TextServicesManager {
         if (subtypeInUse == null) {
             return null;
         }
-        final SpellCheckerSession session = new SpellCheckerSession(sci, mService, listener);
+        final SpellCheckerSession session = new SpellCheckerSession(sci, this, listener);
         try {
-            mService.getSpellCheckerService(sci.getId(), subtypeInUse.getLocale(),
+            mService.getSpellCheckerService(mUserId, sci.getId(), subtypeInUse.getLocale(),
                     session.getTextServicesSessionListener(),
                     session.getSpellCheckerSessionListener(), bundle);
         } catch (RemoteException e) {
@@ -197,7 +219,7 @@ public final class TextServicesManager {
     @UnsupportedAppUsage
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
         try {
-            final SpellCheckerInfo[] retval = mService.getEnabledSpellCheckers();
+            final SpellCheckerInfo[] retval = mService.getEnabledSpellCheckers(mUserId);
             if (DBG) {
                 Log.d(TAG, "getEnabledSpellCheckers: " + (retval != null ? retval.length : "null"));
             }
@@ -214,7 +236,7 @@ public final class TextServicesManager {
     public SpellCheckerInfo getCurrentSpellChecker() {
         try {
             // Passing null as a locale for ICS
-            return mService.getCurrentSpellChecker(null);
+            return mService.getCurrentSpellChecker(mUserId, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -227,8 +249,7 @@ public final class TextServicesManager {
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
         try {
-            // Passing null as a locale until we support multiple enabled spell checker subtypes.
-            return mService.getCurrentSpellCheckerSubtype(null, allowImplicitlySelectedSubtype);
+            return mService.getCurrentSpellCheckerSubtype(mUserId, allowImplicitlySelectedSubtype);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -240,7 +261,15 @@ public final class TextServicesManager {
     @UnsupportedAppUsage
     public boolean isSpellCheckerEnabled() {
         try {
-            return mService.isSpellCheckerEnabled();
+            return mService.isSpellCheckerEnabled(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void finishSpellCheckerService(ISpellCheckerSessionListener listener) {
+        try {
+            mService.finishSpellCheckerService(mUserId, listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

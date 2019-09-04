@@ -325,6 +325,18 @@ public final class TelephonyPermissions {
         // if the calling package is not null then perform the DevicePolicyManager device /
         // profile owner and Appop checks.
         if (callingPackage != null) {
+            // Allow access to an app that has been granted the READ_DEVICE_IDENTIFIERS app op.
+            long token = Binder.clearCallingIdentity();
+            AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(
+                    Context.APP_OPS_SERVICE);
+            try {
+                if (appOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_READ_DEVICE_IDENTIFIERS, uid,
+                        callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                    return true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
             // Allow access to a device / profile owner app.
             DevicePolicyManager devicePolicyManager =
                     (DevicePolicyManager) context.getSystemService(

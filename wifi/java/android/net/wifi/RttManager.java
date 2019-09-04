@@ -293,7 +293,7 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<RttCapabilities> CREATOR =
+        public static final @android.annotation.NonNull Creator<RttCapabilities> CREATOR =
             new Creator<RttCapabilities>() {
             @Override
             public RttCapabilities createFromParcel(Parcel in) {
@@ -557,7 +557,7 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ParcelableRttParams> CREATOR =
+        public static final @android.annotation.NonNull Creator<ParcelableRttParams> CREATOR =
                 new Creator<ParcelableRttParams>() {
                     @Override
                     public ParcelableRttParams createFromParcel(Parcel in) {
@@ -860,7 +860,7 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ParcelableRttResults> CREATOR =
+        public static final @android.annotation.NonNull Creator<ParcelableRttResults> CREATOR =
                 new Creator<ParcelableRttResults>() {
                     @Override
                     public ParcelableRttResults createFromParcel(Parcel in) {
@@ -1160,7 +1160,7 @@ public class RttManager {
         }
 
         /** Implement {@link Parcelable} interface */
-        public static final Parcelable.Creator<ResponderConfig> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<ResponderConfig> CREATOR =
                 new Parcelable.Creator<ResponderConfig>() {
             @Override
             public ResponderConfig createFromParcel(Parcel in) {

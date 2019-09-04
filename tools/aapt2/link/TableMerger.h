@@ -35,6 +35,8 @@ namespace aapt {
 struct TableMergerOptions {
   // If true, resources in overlays can be added without previously having existed.
   bool auto_add_overlay = false;
+  // If true, resource overlays with conflicting visibility are not allowed.
+  bool strict_visibility = false;
 };
 
 // TableMerger takes resource tables and merges all packages within the tables that have the same
@@ -83,8 +85,8 @@ class TableMerger {
 
   bool MergeImpl(const Source& src, ResourceTable* src_table, bool overlay, bool allow_new);
 
-  bool DoMerge(const Source& src, ResourceTable* src_table, ResourceTablePackage* src_package,
-               bool mangle_package, bool overlay, bool allow_new_resources);
+  bool DoMerge(const Source& src, ResourceTablePackage* src_package, bool mangle_package,
+               bool overlay, bool allow_new_resources);
 
   std::unique_ptr<FileReference> CloneAndMangleFile(const std::string& package,
                                                     const FileReference& value);

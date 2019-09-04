@@ -16,6 +16,8 @@
 
 package com.android.systemui.usb;
 
+import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
+
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -37,8 +39,6 @@ import com.android.systemui.R;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 
 /* Activity for choosing an application for a USB device or accessory */
 public class UsbResolverActivity extends ResolverActivity {

@@ -29,7 +29,7 @@ import java.util.List;
  * @hide
  */
 public final class ClientRequestStats implements Parcelable {
-    public static final Parcelable.Creator<ClientRequestStats> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ClientRequestStats> CREATOR =
             new Parcelable.Creator<ClientRequestStats>() {
 
                 public ClientRequestStats createFromParcel(Parcel in) {

@@ -111,7 +111,7 @@ public final class MidiDeviceStatus implements Parcelable {
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<MidiDeviceStatus> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MidiDeviceStatus> CREATOR =
         new Parcelable.Creator<MidiDeviceStatus>() {
         public MidiDeviceStatus createFromParcel(Parcel in) {
             ClassLoader classLoader = MidiDeviceInfo.class.getClassLoader();

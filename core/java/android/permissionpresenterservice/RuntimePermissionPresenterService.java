@@ -16,22 +16,21 @@
 
 package android.permissionpresenterservice;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.permission.IRuntimePermissionPresenter;
 import android.content.pm.permission.RuntimePermissionPresentationInfo;
-import android.content.pm.permission.RuntimePermissionPresenter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteCallback;
-
-import com.android.internal.os.SomeArgs;
+import android.permission.PermissionControllerService;
 
 import java.util.List;
 
@@ -41,11 +40,13 @@ import java.util.List;
  * a single permission in the UI but may be composed of several individual
  * permissions.
  *
- * @see RuntimePermissionPresenter
  * @see RuntimePermissionPresentationInfo
  *
  * @hide
+ *
+ * @deprecated use {@link PermissionControllerService} instead
  */
+@Deprecated
 @SystemApi
 public abstract class RuntimePermissionPresenterService extends Service {
 
@@ -57,13 +58,16 @@ public abstract class RuntimePermissionPresenterService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.permissionpresenterservice.RuntimePermissionPresenterService";
 
+    private static final String KEY_RESULT =
+            "android.content.pm.permission.RuntimePermissionPresenter.key.result";
+
     // No need for locking - always set first and never modified
     private Handler mHandler;
 
     @Override
     public final void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        mHandler = new MyHandler(base.getMainLooper());
+        mHandler = new Handler(base.getMainLooper());
     }
 
     /**
@@ -71,79 +75,32 @@ public abstract class RuntimePermissionPresenterService extends Service {
      *
      * @param packageName The package for which to query.
      */
-    public abstract List<RuntimePermissionPresentationInfo> onGetAppPermissions(String packageName);
-
-    /**
-     * Revoke the permission {@code permissionName} for app {@code packageName}
-     *
-     * @param packageName The package for which to revoke
-     * @param permissionName The permission to revoke
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public abstract void onRevokeRuntimePermission(String packageName, String permissionName);
+    public abstract List<RuntimePermissionPresentationInfo> onGetAppPermissions(
+            @NonNull String packageName);
 
     @Override
     public final IBinder onBind(Intent intent) {
         return new IRuntimePermissionPresenter.Stub() {
             @Override
             public void getAppPermissions(String packageName, RemoteCallback callback) {
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = packageName;
-                args.arg2 = callback;
-                mHandler.obtainMessage(MyHandler.MSG_GET_APP_PERMISSIONS,
-                        args).sendToTarget();
-            }
+                checkNotNull(packageName, "packageName");
+                checkNotNull(callback, "callback");
 
-            @Override
-            public void revokeRuntimePermission(String packageName, String permissionName) {
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = packageName;
-                args.arg2 = permissionName;
-                mHandler.obtainMessage(MyHandler.MSG_REVOKE_APP_PERMISSION,
-                        args).sendToTarget();
+                mHandler.sendMessage(
+                        obtainMessage(RuntimePermissionPresenterService::getAppPermissions,
+                                RuntimePermissionPresenterService.this, packageName, callback));
             }
         };
     }
 
-    private final class MyHandler extends Handler {
-        public static final int MSG_GET_APP_PERMISSIONS = 1;
-        public static final int MSG_GET_APPS_USING_PERMISSIONS = 2;
-        public static final int MSG_REVOKE_APP_PERMISSION = 3;
-
-        public MyHandler(Looper looper) {
-            super(looper, null, false);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_GET_APP_PERMISSIONS: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    String packageName = (String) args.arg1;
-                    RemoteCallback callback = (RemoteCallback) args.arg2;
-                    args.recycle();
-                    List<RuntimePermissionPresentationInfo> permissions =
-                            onGetAppPermissions(packageName);
-                    if (permissions != null && !permissions.isEmpty()) {
-                        Bundle result = new Bundle();
-                        result.putParcelableList(RuntimePermissionPresenter.KEY_RESULT,
-                                permissions);
-                        callback.sendResult(result);
-                    } else {
-                        callback.sendResult(null);
-                    }
-                } break;
-                case MSG_REVOKE_APP_PERMISSION: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    String packageName = (String) args.arg1;
-                    String permissionName = (String) args.arg2;
-                    args.recycle();
-
-                    onRevokeRuntimePermission(packageName, permissionName);
-                } break;
-            }
+    private void getAppPermissions(@NonNull String packageName, @NonNull RemoteCallback callback) {
+        List<RuntimePermissionPresentationInfo> permissions = onGetAppPermissions(packageName);
+        if (permissions != null && !permissions.isEmpty()) {
+            Bundle result = new Bundle();
+            result.putParcelableList(KEY_RESULT, permissions);
+            callback.sendResult(result);
+        } else {
+            callback.sendResult(null);
         }
     }
 }

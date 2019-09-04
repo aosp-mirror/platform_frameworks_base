@@ -18,8 +18,6 @@ package android.test.mock;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
-import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -52,13 +50,13 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * A mock {@link android.content.pm.PackageManager} class.  All methods are non-functional and throw
@@ -159,7 +157,13 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public boolean isPermissionReviewModeEnabled() {
+    public boolean arePermissionsIndividuallyControlled() {
+        return false;
+    }
+
+    /** @hide */
+    @Override
+    public boolean isWirelessConsentModeEnabled() {
         return false;
     }
 
@@ -288,6 +292,27 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void updatePermissionFlags(String permissionName, String packageName,
             int flagMask, int flagValues, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public @NonNull Set<String> getWhitelistedRestrictedPermissions(
+            @NonNull String packageName, @PermissionWhitelistFlags int whitelistFlags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
         throw new UnsupportedOperationException();
     }
 
@@ -1097,6 +1122,14 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public boolean isUpgrade() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isDeviceUpgrading() {
         throw new UnsupportedOperationException();
     }
 

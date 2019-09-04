@@ -17,7 +17,7 @@
 package com.android.vpndialogs;
 
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 
 import android.content.Context;
@@ -79,7 +79,7 @@ public class AlwaysOnDisconnectedDialog extends AlertActivity
         getWindow().setCloseOnTouchOutside(false);
         getWindow().setType(TYPE_SYSTEM_ALERT);
         getWindow().addFlags(FLAG_ALT_FOCUSABLE_IM);
-        getWindow().addPrivateFlags(PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        getWindow().addPrivateFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
     }
 
     @Override

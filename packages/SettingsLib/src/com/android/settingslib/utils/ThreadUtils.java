@@ -20,6 +20,7 @@ import android.os.Looper;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class ThreadUtils {
 
@@ -59,12 +60,14 @@ public class ThreadUtils {
 
     /**
      * Posts runnable in background using shared background thread pool.
+     *
+     * @Return A future of the task that can be monitored for updates or cancelled.
      */
-    public static void postOnBackgroundThread(Runnable runnable) {
+    public static Future postOnBackgroundThread(Runnable runnable) {
         if (sSingleThreadExecutor == null) {
             sSingleThreadExecutor = Executors.newSingleThreadExecutor();
         }
-        sSingleThreadExecutor.execute(runnable);
+        return sSingleThreadExecutor.submit(runnable);
     }
 
     /**

@@ -227,7 +227,7 @@ public final class AdvertisingSetParameters implements Parcelable {
         dest.writeInt(mTxPowerLevel);
     }
 
-    public static final Parcelable.Creator<AdvertisingSetParameters> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AdvertisingSetParameters> CREATOR =
             new Creator<AdvertisingSetParameters>() {
                 @Override
                 public AdvertisingSetParameters[] newArray(int size) {

@@ -31,6 +31,14 @@ import android.content.Context;
  */
 public abstract class WebViewDatabase {
     /**
+     * @deprecated This class should not be constructed by applications, use {@link
+     * #getInstance(Context)} instead to fetch the singleton instance.
+     */
+    // TODO(ntfschr): mark this as @SystemApi after a year.
+    @Deprecated
+    public WebViewDatabase() {}
+
+    /**
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     protected static final String LOGTAG = "webviewdatabase";

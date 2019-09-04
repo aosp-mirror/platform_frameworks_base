@@ -30,8 +30,8 @@ android_test {
     test_suites: ["device-tests"],
 
     static_libs: [
-        "android-support-test",
-        "espresso-core",
+        "androidx.test.rules",
+        "androidx.test.espresso.core",
         "mockito-target-minus-junit4",
         "truth-prebuilt",
     ],

@@ -17,12 +17,15 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -35,29 +38,36 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.FileBridge;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.os.HandlerExecutor;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.ArraySet;
 import android.util.ExceptionUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Offers the ability to install, upgrade, and remove applications on the
@@ -68,7 +78,12 @@ import java.util.List;
  * {@link PackageInstaller.Session}, which any app can create. Once the session
  * is created, the installer can stream one or more APKs into place until it
  * decides to either commit or destroy the session. Committing may require user
- * intervention to complete the installation.
+ * intervention to complete the installation, unless the caller falls into one of the
+ * following categories, in which case the installation will complete automatically.
+ * <ul>
+ * <li>the device owner
+ * <li>the affiliated profile owner
+ * </ul>
  * <p>
  * Sessions can install brand new apps, upgrade existing apps, or add new splits
  * into an existing app.
@@ -86,6 +101,19 @@ import java.util.List;
  * <p>
  * The ApiDemos project contains examples of using this API:
  * <code>ApiDemos/src/com/example/android/apis/content/InstallApk*.java</code>.
+ * <p>
+ * On Android Q or above, an app installed notification will be posted
+ * by system after a new app is installed.
+ * To customize installer's notification icon, you should declare the following in the manifest
+ * &lt;application> as follows: </p>
+ * <pre>
+ * &lt;meta-data android:name="com.android.packageinstaller.notification.smallIcon"
+ * android:resource="@drawable/installer_notification_icon"/>
+ * </pre>
+ * <pre>
+ * &lt;meta-data android:name="com.android.packageinstaller.notification.color"
+ * android:resource="@color/installer_notification_color"/>
+ * </pre>
  */
 public class PackageInstaller {
     private static final String TAG = "PackageInstaller";
@@ -122,9 +150,17 @@ public class PackageInstaller {
     public static final String ACTION_SESSION_COMMITTED =
             "android.content.pm.action.SESSION_COMMITTED";
 
+    /**
+     * Broadcast Action: Send information about a staged install session when its state is updated.
+     * <p>
+     * The associated session information is defined in {@link #EXTRA_SESSION}.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SESSION_UPDATED =
+            "android.content.pm.action.SESSION_UPDATED";
+
     /** {@hide} */
-    public static final String
-            ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS";
+    public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
 
     /**
      * An integer session ID that an operation is working with.
@@ -353,12 +389,14 @@ public class PackageInstaller {
      */
     public @NonNull Session openSession(int sessionId) throws IOException {
         try {
-            return new Session(mInstaller.openSession(sessionId));
+            try {
+                return new Session(mInstaller.openSession(sessionId));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -446,6 +484,50 @@ public class PackageInstaller {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Return list of all staged install sessions.
+     */
+    public @NonNull List<SessionInfo> getStagedSessions() {
+        try {
+            // TODO: limit this to the mUserId?
+            return mInstaller.getStagedSessions().getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns an active staged session, or {@code null} if there is none.
+     *
+     * <p>Staged session is active iff:
+     * <ul>
+     *     <li>It is committed, i.e. {@link SessionInfo#isCommitted()} is {@code true}, and
+     *     <li>it is not applied, i.e. {@link SessionInfo#isStagedSessionApplied()} is {@code
+     *     false}, and
+     *     <li>it is not failed, i.e. {@link SessionInfo#isStagedSessionFailed()} is {@code false}.
+     * </ul>
+     *
+     * <p>In case of a multi-apk session, reasoning above is applied to the parent session, since
+     * that is the one that should been {@link Session#commit committed}.
+     */
+    public @Nullable SessionInfo getActiveStagedSession() {
+        final List<SessionInfo> stagedSessions = getStagedSessions();
+        for (SessionInfo s : stagedSessions) {
+            if (s.isStagedSessionApplied() || s.isStagedSessionFailed()) {
+                // Finalized session.
+                continue;
+            }
+            if (s.getParentSessionId() != SessionInfo.INVALID_ID) {
+                // Child session.
+                continue;
+            }
+            if (s.isCommitted()) {
+                return s;
+            }
+        }
+        return null;
     }
 
     /**
@@ -541,6 +623,35 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Install the given package, which already exists on the device, for the user for which this
+     * installer was created.
+     *
+     * <p>This will
+     * {@link PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set) whitelist
+     * all restricted permissions}.
+     *
+     * @param packageName The package to install.
+     * @param installReason Reason for install.
+     * @param statusReceiver Where to deliver the result.
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.INSTALL_EXISTING_PACKAGES})
+    public void installExistingPackage(@NonNull String packageName,
+            @InstallReason int installReason,
+            @Nullable IntentSender statusReceiver) {
+        Preconditions.checkNotNull(packageName, "packageName cannot be null");
+        try {
+            mInstaller.installExistingPackage(packageName,
+                    PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS, installReason,
+                    statusReceiver, mUserId, null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
     /** {@hide} */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)
@@ -612,8 +723,7 @@ public class PackageInstaller {
     }
 
     /** {@hide} */
-    private static class SessionCallbackDelegate extends IPackageInstallerCallback.Stub implements
-            Handler.Callback {
+    static class SessionCallbackDelegate extends IPackageInstallerCallback.Stub {
         private static final int MSG_SESSION_CREATED = 1;
         private static final int MSG_SESSION_BADGING_CHANGED = 2;
         private static final int MSG_SESSION_ACTIVE_CHANGED = 3;
@@ -621,63 +731,41 @@ public class PackageInstaller {
         private static final int MSG_SESSION_FINISHED = 5;
 
         final SessionCallback mCallback;
-        final Handler mHandler;
+        final Executor mExecutor;
 
-        public SessionCallbackDelegate(SessionCallback callback, Looper looper) {
+        SessionCallbackDelegate(SessionCallback callback, Executor executor) {
             mCallback = callback;
-            mHandler = new Handler(looper, this);
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            final int sessionId = msg.arg1;
-            switch (msg.what) {
-                case MSG_SESSION_CREATED:
-                    mCallback.onCreated(sessionId);
-                    return true;
-                case MSG_SESSION_BADGING_CHANGED:
-                    mCallback.onBadgingChanged(sessionId);
-                    return true;
-                case MSG_SESSION_ACTIVE_CHANGED:
-                    final boolean active = msg.arg2 != 0;
-                    mCallback.onActiveChanged(sessionId, active);
-                    return true;
-                case MSG_SESSION_PROGRESS_CHANGED:
-                    mCallback.onProgressChanged(sessionId, (float) msg.obj);
-                    return true;
-                case MSG_SESSION_FINISHED:
-                    mCallback.onFinished(sessionId, msg.arg2 != 0);
-                    return true;
-            }
-            return false;
+            mExecutor = executor;
         }
 
         @Override
         public void onSessionCreated(int sessionId) {
-            mHandler.obtainMessage(MSG_SESSION_CREATED, sessionId, 0).sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onCreated, mCallback,
+                    sessionId).recycleOnUse());
         }
 
         @Override
         public void onSessionBadgingChanged(int sessionId) {
-            mHandler.obtainMessage(MSG_SESSION_BADGING_CHANGED, sessionId, 0).sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onBadgingChanged,
+                    mCallback, sessionId).recycleOnUse());
         }
 
         @Override
         public void onSessionActiveChanged(int sessionId, boolean active) {
-            mHandler.obtainMessage(MSG_SESSION_ACTIVE_CHANGED, sessionId, active ? 1 : 0)
-                    .sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onActiveChanged,
+                    mCallback, sessionId, active).recycleOnUse());
         }
 
         @Override
         public void onSessionProgressChanged(int sessionId, float progress) {
-            mHandler.obtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, 0, progress)
-                    .sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onProgressChanged,
+                    mCallback, sessionId, progress).recycleOnUse());
         }
 
         @Override
         public void onSessionFinished(int sessionId, boolean success) {
-            mHandler.obtainMessage(MSG_SESSION_FINISHED, sessionId, success ? 1 : 0)
-                    .sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onFinished,
+                    mCallback, sessionId, success).recycleOnUse());
         }
     }
 
@@ -711,7 +799,7 @@ public class PackageInstaller {
     public void registerSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
         synchronized (mDelegates) {
             final SessionCallbackDelegate delegate = new SessionCallbackDelegate(callback,
-                    handler.getLooper());
+                    new HandlerExecutor(handler));
             try {
                 mInstaller.registerCallback(delegate, mUserId);
             } catch (RemoteException e) {
@@ -757,9 +845,17 @@ public class PackageInstaller {
      * If an APK included in this session is already defined by the existing
      * installation (for example, the same split name), the APK in this session
      * will replace the existing APK.
+     * <p>
+     * In such a case that multiple packages need to be committed simultaneously,
+     * multiple sessions can be referenced by a single multi-package session.
+     * This session is created with no package name and calling
+     * {@link SessionParams#setMultiPackage()}. The individual session IDs can be
+     * added with {@link #addChildSessionId(int)} and commit of the multi-package
+     * session will result in all child sessions being committed atomically.
      */
     public static class Session implements Closeable {
-        private IPackageInstallerSession mSession;
+        /** {@hide} */
+        protected final IPackageInstallerSession mSession;
 
         /** {@hide} */
         public Session(IPackageInstallerSession session) {
@@ -962,6 +1058,10 @@ public class PackageInstaller {
          * If the installer is the device owner or the affiliated profile owner, there will be no
          * user intervention.
          *
+         * @param statusReceiver Called when the state of the session changes. Intents
+         *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+         *                       individual status codes on how to handle them.
+         *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
          *
@@ -988,7 +1088,9 @@ public class PackageInstaller {
          * that new properties are added to the session with a new API revision. In this case the
          * callers need to be updated.
          *
-         * @param statusReceiver Callbacks called when the state of the session changes.
+         * @param statusReceiver Called when the state of the session changes. Intents
+         *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+         *                       individual status codes on how to handle them.
          *
          * @hide
          */
@@ -1062,6 +1164,85 @@ public class PackageInstaller {
                 throw e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * @return {@code true} if this session will commit more than one package when it is
+         * committed.
+         */
+        public boolean isMultiPackage() {
+            try {
+                return mSession.isMultiPackage();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * @return {@code true} if this session will be staged and applied at next reboot.
+         */
+        public boolean isStaged() {
+            try {
+                return mSession.isStaged();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * @return the session ID of the multi-package session that this belongs to or
+         * {@link SessionInfo#INVALID_ID} if it does not belong to a multi-package session.
+         */
+        public int getParentSessionId() {
+            try {
+                return mSession.getParentSessionId();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * @return the set of session IDs that will be committed atomically when this session is
+         * committed if this is a multi-package session or null if none exist.
+         */
+        @NonNull
+        public int[] getChildSessionIds() {
+            try {
+                return mSession.getChildSessionIds();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Adds a session ID to the set of sessions that will be committed atomically
+         * when this session is committed.
+         *
+         * <p>If the parent is staged or has rollback enabled, all children must have
+         * the same properties.
+         *
+         * @param sessionId the session ID to add to this multi-package session.
+         */
+        public void addChildSessionId(int sessionId) {
+            try {
+                mSession.addChildSessionId(sessionId);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Removes a session ID from the set of sessions that will be committed
+         * atomically when this session is committed.
+         *
+         * @param sessionId the session ID to remove from this multi-package session.
+         */
+        public void removeChildSessionId(int sessionId) {
+            try {
+                mSession.removeChildSessionId(sessionId);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -1089,6 +1270,11 @@ public class PackageInstaller {
          */
         public static final int MODE_INHERIT_EXISTING = 2;
 
+        /**
+         * Special constant to refer to all restricted permissions.
+         */
+        public static final @NonNull Set<String> RESTRICTED_PERMISSIONS_ALL = new ArraySet<>();
+
         /** {@hide} */
         public static final int UID_UNKNOWN = -1;
 
@@ -1097,7 +1283,7 @@ public class PackageInstaller {
         public int mode = MODE_INVALID;
         /** {@hide} */
         @UnsupportedAppUsage
-        public int installFlags;
+        public int installFlags = PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
         /** {@hide} */
         public int installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         /** {@hide} */
@@ -1130,7 +1316,15 @@ public class PackageInstaller {
         /** {@hide} */
         public String[] grantedRuntimePermissions;
         /** {@hide} */
+        public List<String> whitelistedRestrictedPermissions;
+        /** {@hide} */
         public String installerPackageName;
+        /** {@hide} */
+        public boolean isMultiPackage;
+        /** {@hide} */
+        public boolean isStaged;
+        /** {@hide} */
+        public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
 
         /**
          * Construct parameters for a new package install session.
@@ -1159,7 +1353,35 @@ public class PackageInstaller {
             abiOverride = source.readString();
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
+            whitelistedRestrictedPermissions = source.createStringArrayList();
             installerPackageName = source.readString();
+            isMultiPackage = source.readBoolean();
+            isStaged = source.readBoolean();
+            requiredInstalledVersionCode = source.readLong();
+        }
+
+        /** {@hide} */
+        public SessionParams copy() {
+            SessionParams ret = new SessionParams(mode);
+            ret.installFlags = installFlags;
+            ret.installLocation = installLocation;
+            ret.installReason = installReason;
+            ret.sizeBytes = sizeBytes;
+            ret.appPackageName = appPackageName;
+            ret.appIcon = appIcon;  // not a copy.
+            ret.appLabel = appLabel;
+            ret.originatingUri = originatingUri;  // not a copy, but immutable.
+            ret.originatingUid = originatingUid;
+            ret.referrerUri = referrerUri;  // not a copy, but immutable.
+            ret.abiOverride = abiOverride;
+            ret.volumeUuid = volumeUuid;
+            ret.grantedRuntimePermissions = grantedRuntimePermissions;
+            ret.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
+            ret.installerPackageName = installerPackageName;
+            ret.isMultiPackage = isMultiPackage;
+            ret.isStaged = isStaged;
+            ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
+            return ret;
         }
 
         /**
@@ -1173,7 +1395,8 @@ public class PackageInstaller {
          * @hide
          */
         public boolean areHiddenOptionsSet() {
-            return (installFlags & (PackageManager.INSTALL_ALLOW_DOWNGRADE
+            return (installFlags & (PackageManager.INSTALL_REQUEST_DOWNGRADE
+                    | PackageManager.INSTALL_ALLOW_DOWNGRADE
                     | PackageManager.INSTALL_DONT_KILL_APP
                     | PackageManager.INSTALL_INSTANT_APP
                     | PackageManager.INSTALL_FULL_APP
@@ -1246,8 +1469,6 @@ public class PackageInstaller {
         /**
          * Sets the UID that initiated the package installation. This is informational
          * and may be used as a signal for anti-malware purposes.
-         *
-         * @see Intent#EXTRA_ORIGINATING_UID
          */
         public void setOriginatingUid(int originatingUid) {
             this.originatingUid = originatingUid;
@@ -1271,6 +1492,7 @@ public class PackageInstaller {
          *
          * @hide
          */
+        @TestApi
         @SystemApi
         @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS)
         public void setGrantedRuntimePermissions(String[] permissions) {
@@ -1278,26 +1500,91 @@ public class PackageInstaller {
             this.grantedRuntimePermissions = permissions;
         }
 
-        /** {@hide} */
-        public void setInstallFlagsInternal() {
-            installFlags |= PackageManager.INSTALL_INTERNAL;
-            installFlags &= ~PackageManager.INSTALL_EXTERNAL;
+        /**
+         * Sets which restricted permissions to be whitelisted for the app. Whitelisting
+         * is not granting the permissions, rather it allows the app to hold permissions
+         * which are otherwise restricted. Whitelisting a non restricted permission has
+         * no effect.
+         *
+         * <p> Permissions can be hard restricted which means that the app cannot hold
+         * them or soft restricted where the app can hold the permission but in a weaker
+         * form. Whether a permission is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard
+         * restricted} or {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted}
+         * depends on the permission declaration. Whitelisting a hard restricted permission
+         * allows the app to hold that permission and whitelisting a soft restricted
+         * permission allows the app to hold the permission in its full, unrestricted form.
+         *
+         * <p> Permissions can also be immutably restricted which means that the whitelist
+         * state of the permission can be determined only at install time and cannot be
+         * changed on updated or at a later point via the package manager APIs.
+         *
+         * <p>Initially, all restricted permissions are whitelisted but you can change
+         * which ones are whitelisted by calling this method or the corresponding ones
+         * on the {@link PackageManager}.
+         *
+         * @see PackageManager#addWhitelistedRestrictedPermission(String, String, int)
+         * @see PackageManager#removeWhitelistedRestrictedPermission(String, String, int)
+         */
+        public void setWhitelistedRestrictedPermissions(@Nullable Set<String> permissions) {
+            if (permissions == RESTRICTED_PERMISSIONS_ALL) {
+                installFlags |= PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
+                whitelistedRestrictedPermissions = null;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
+                whitelistedRestrictedPermissions = (permissions != null)
+                        ? new ArrayList<>(permissions) : null;
+            }
+        }
+
+        /**
+         * Request that rollbacks be enabled or disabled for the given upgrade.
+         *
+         * <p>If the parent session is staged or has rollback enabled, all children sessions
+         * must have the same properties.
+         *
+         * @param enable set to {@code true} to enable, {@code false} to disable
+         * @hide
+         */
+        @SystemApi @TestApi
+        public void setEnableRollback(boolean enable) {
+            if (enable) {
+                installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
+            }
+        }
+
+        /**
+         * @deprecated use {@link #setRequestDowngrade(boolean)}.
+         * {@hide}
+         */
+        @SystemApi
+        @Deprecated
+        public void setAllowDowngrade(boolean allowDowngrade) {
+            setRequestDowngrade(allowDowngrade);
         }
 
         /** {@hide} */
         @SystemApi
-        public void setAllowDowngrade(boolean allowDowngrade) {
-            if (allowDowngrade) {
-                installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+        public void setRequestDowngrade(boolean requestDowngrade) {
+            if (requestDowngrade) {
+                installFlags |= PackageManager.INSTALL_REQUEST_DOWNGRADE;
             } else {
-                installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
+                installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
             }
         }
 
-        /** {@hide} */
-        public void setInstallFlagsExternal() {
-            installFlags |= PackageManager.INSTALL_EXTERNAL;
-            installFlags &= ~PackageManager.INSTALL_INTERNAL;
+        /**
+         * Require the given version of the package be installed.
+         * The install will only be allowed if the existing version code of
+         * the package installed on the device matches the given version code.
+         * Use {@link * PackageManager#VERSION_CODE_HIGHEST} to allow
+         * installation regardless of the currently installed package version.
+         *
+         * @hide
+         */
+        public void setRequiredInstalledVersionCode(long versionCode) {
+            requiredInstalledVersionCode = versionCode;
         }
 
         /** {@hide} */
@@ -1339,6 +1626,15 @@ public class PackageInstaller {
 
         /**
          * Set the reason for installing this package.
+         * <p>
+         * The install reason should be a pre-defined integer. The behavior is
+         * undefined if other values are used.
+         *
+         * @see PackageManager#INSTALL_REASON_UNKNOWN
+         * @see PackageManager#INSTALL_REASON_POLICY
+         * @see PackageManager#INSTALL_REASON_DEVICE_RESTORE
+         * @see PackageManager#INSTALL_REASON_DEVICE_SETUP
+         * @see PackageManager#INSTALL_REASON_USER
          */
         public void setInstallReason(@InstallReason int installReason) {
             this.installReason = installReason;
@@ -1367,6 +1663,52 @@ public class PackageInstaller {
             this.installerPackageName = installerPackageName;
         }
 
+        /**
+         * Set this session to be the parent of a multi-package install.
+         *
+         * A multi-package install session contains no APKs and only references other install
+         * sessions via ID. When a multi-package session is committed, all of its children
+         * are committed to the system in an atomic manner. If any children fail to install,
+         * all of them do, including the multi-package session.
+         */
+        public void setMultiPackage() {
+            this.isMultiPackage = true;
+        }
+
+        /**
+         * Set this session to be staged to be installed at reboot.
+         *
+         * Staged sessions are scheduled to be installed at next reboot. Staged sessions can also be
+         * multi-package. In that case, if any of the children sessions fail to install at reboot,
+         * all the other children sessions are aborted as well.
+         *
+         * <p>If the parent session is staged or has rollback enabled, all children sessions
+         * must have the same properties.
+         *
+         * {@hide}
+         */
+        @SystemApi @TestApi
+        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
+        public void setStaged() {
+            this.isStaged = true;
+        }
+
+        /**
+         * Set this session to be installing an APEX package.
+         *
+         * {@hide}
+         */
+        @SystemApi @TestApi
+        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
+        public void setInstallAsApex() {
+            installFlags |= PackageManager.INSTALL_APEX;
+        }
+
+        /** @hide */
+        public boolean getEnableRollback() {
+            return (installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1382,7 +1724,11 @@ public class PackageInstaller {
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
             pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
+            pw.printPair("whitelistedRestrictedPermissions", whitelistedRestrictedPermissions);
             pw.printPair("installerPackageName", installerPackageName);
+            pw.printPair("isMultiPackage", isMultiPackage);
+            pw.printPair("isStaged", isStaged);
+            pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.println();
         }
 
@@ -1407,7 +1753,11 @@ public class PackageInstaller {
             dest.writeString(abiOverride);
             dest.writeString(volumeUuid);
             dest.writeStringArray(grantedRuntimePermissions);
+            dest.writeStringList(whitelistedRestrictedPermissions);
             dest.writeString(installerPackageName);
+            dest.writeBoolean(isMultiPackage);
+            dest.writeBoolean(isStaged);
+            dest.writeLong(requiredInstalledVersionCode);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -1429,9 +1779,49 @@ public class PackageInstaller {
      */
     public static class SessionInfo implements Parcelable {
 
+        /**
+         * A session ID that does not exist or is invalid.
+         */
+        public static final int INVALID_ID = -1;
+        /** {@hide} */
+        private static final int[] NO_SESSIONS = {};
+
+        /** @hide */
+        @IntDef(prefix = { "STAGED_SESSION_" }, value = {
+                STAGED_SESSION_NO_ERROR,
+                STAGED_SESSION_VERIFICATION_FAILED,
+                STAGED_SESSION_ACTIVATION_FAILED,
+                STAGED_SESSION_UNKNOWN})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface StagedSessionErrorCode{}
+        /**
+         * Constant indicating that no error occurred during the preparation or the activation of
+         * this staged session.
+         */
+        public static final int STAGED_SESSION_NO_ERROR = 0;
+
+        /**
+         * Constant indicating that an error occurred during the verification phase (pre-reboot) of
+         * this staged session.
+         */
+        public static final int STAGED_SESSION_VERIFICATION_FAILED = 1;
+
+        /**
+         * Constant indicating that an error occurred during the activation phase (post-reboot) of
+         * this staged session.
+         */
+        public static final int STAGED_SESSION_ACTIVATION_FAILED = 2;
+
+        /**
+         * Constant indicating that an unknown error occurred while processing this staged session.
+         */
+        public static final int STAGED_SESSION_UNKNOWN = 3;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int sessionId;
+        /** {@hide} */
+        public int userId;
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String installerPackageName;
@@ -1476,8 +1866,33 @@ public class PackageInstaller {
         public Uri referrerUri;
         /** {@hide} */
         public String[] grantedRuntimePermissions;
+        /** {@hide}*/
+        public List<String> whitelistedRestrictedPermissions;
         /** {@hide} */
         public int installFlags;
+        /** {@hide} */
+        public boolean isMultiPackage;
+        /** {@hide} */
+        public boolean isStaged;
+        /** {@hide} */
+        public int parentSessionId = INVALID_ID;
+        /** {@hide} */
+        public int[] childSessionIds = NO_SESSIONS;
+
+        /** {@hide} */
+        public boolean isStagedSessionApplied;
+        /** {@hide} */
+        public boolean isStagedSessionReady;
+        /** {@hide} */
+        public boolean isStagedSessionFailed;
+        private int mStagedSessionErrorCode;
+        private String mStagedSessionErrorMessage;
+
+        /** {@hide} */
+        public boolean isCommitted;
+
+        /** {@hide} */
+        public long updatedMillis;
 
         /** {@hide} */
         @UnsupportedAppUsage
@@ -1487,6 +1902,7 @@ public class PackageInstaller {
         /** {@hide} */
         public SessionInfo(Parcel source) {
             sessionId = source.readInt();
+            userId = source.readInt();
             installerPackageName = source.readString();
             resolvedBaseCodePath = source.readString();
             progress = source.readFloat();
@@ -1505,7 +1921,22 @@ public class PackageInstaller {
             originatingUid = source.readInt();
             referrerUri = source.readParcelable(null);
             grantedRuntimePermissions = source.readStringArray();
+            whitelistedRestrictedPermissions = source.createStringArrayList();
+
             installFlags = source.readInt();
+            isMultiPackage = source.readBoolean();
+            isStaged = source.readBoolean();
+            parentSessionId = source.readInt();
+            childSessionIds = source.createIntArray();
+            if (childSessionIds == null) {
+                childSessionIds = NO_SESSIONS;
+            }
+            isStagedSessionApplied = source.readBoolean();
+            isStagedSessionReady = source.readBoolean();
+            isStagedSessionFailed = source.readBoolean();
+            mStagedSessionErrorCode = source.readInt();
+            mStagedSessionErrorMessage = source.readString();
+            isCommitted = source.readBoolean();
         }
 
         /**
@@ -1513,6 +1944,13 @@ public class PackageInstaller {
          */
         public int getSessionId() {
             return sessionId;
+        }
+
+        /**
+         * Return the user associated with this session.
+         */
+        public @NonNull UserHandle getUser() {
+            return new UserHandle(userId);
         }
 
         /**
@@ -1687,13 +2125,44 @@ public class PackageInstaller {
         }
 
         /**
+         * Get the value set in {@link SessionParams#setWhitelistedRestrictedPermissions(Set)}.
+         * Note that if all permissions are whitelisted this method returns {@link
+         * SessionParams#RESTRICTED_PERMISSIONS_ALL}.
+         *
+         * @hide
+         */
+        @TestApi
+        @SystemApi
+        public @NonNull Set<String> getWhitelistedRestrictedPermissions() {
+            if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS) != 0) {
+                return SessionParams.RESTRICTED_PERMISSIONS_ALL;
+            }
+            if (whitelistedRestrictedPermissions != null) {
+                return new ArraySet<>(whitelistedRestrictedPermissions);
+            }
+            return Collections.emptySet();
+        }
+
+        /**
          * Get the value set in {@link SessionParams#setAllowDowngrade(boolean)}.
+         *
+         * @deprecated use {@link #getRequestDowngrade()}.
+         * @hide
+         */
+        @SystemApi
+        @Deprecated
+        public boolean getAllowDowngrade() {
+            return getRequestDowngrade();
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setRequestDowngrade(boolean)}.
          *
          * @hide
          */
         @SystemApi
-        public boolean getAllowDowngrade() {
-            return (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+        public boolean getRequestDowngrade() {
+            return (installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0;
         }
 
         /**
@@ -1743,6 +2212,16 @@ public class PackageInstaller {
         }
 
         /**
+         * Return whether rollback is enabled or disabled for the given upgrade.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getEnableRollback() {
+            return (installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0;
+        }
+
+        /**
          * Get the value set in {@link SessionParams#setAllocateAggressive(boolean)}.
          *
          * @hide
@@ -1759,6 +2238,114 @@ public class PackageInstaller {
             return createDetailsIntent();
         }
 
+        /**
+         * Returns true if this session is a multi-package session containing references to other
+         * sessions.
+         */
+        public boolean isMultiPackage() {
+            return isMultiPackage;
+        }
+
+        /**
+         * Returns true if this session is a staged session which will be applied at next reboot.
+         */
+        public boolean isStaged() {
+            return isStaged;
+        }
+
+        /**
+         * Returns the parent multi-package session ID if this session belongs to one,
+         * {@link #INVALID_ID} otherwise.
+         */
+        public int getParentSessionId() {
+            return parentSessionId;
+        }
+
+        /**
+         * Returns the set of session IDs that will be committed when this session is commited if
+         * this session is a multi-package session.
+         */
+        @NonNull
+        public int[] getChildSessionIds() {
+            return childSessionIds;
+        }
+
+        private void checkSessionIsStaged() {
+            if (!isStaged) {
+                throw new IllegalStateException("Session is not marked as staged.");
+            }
+        }
+
+        /**
+         * Whether the staged session has been applied successfully, meaning that all of its
+         * packages have been activated and no further action is required.
+         * Only meaningful if {@code isStaged} is true.
+         */
+        public boolean isStagedSessionApplied() {
+            checkSessionIsStaged();
+            return isStagedSessionApplied;
+        }
+
+        /**
+         * Whether the staged session is ready to be applied at next reboot. Only meaningful if
+         * {@code isStaged} is true.
+         */
+        public boolean isStagedSessionReady() {
+            checkSessionIsStaged();
+            return isStagedSessionReady;
+        }
+
+        /**
+         * Whether something went wrong and the staged session is declared as failed, meaning that
+         * it will be ignored at next reboot. Only meaningful if {@code isStaged} is true.
+         */
+        public boolean isStagedSessionFailed() {
+            checkSessionIsStaged();
+            return isStagedSessionFailed;
+        }
+
+        /**
+         * If something went wrong with a staged session, clients can check this error code to
+         * understand which kind of failure happened. Only meaningful if {@code isStaged} is true.
+         */
+        public @StagedSessionErrorCode int getStagedSessionErrorCode() {
+            checkSessionIsStaged();
+            return mStagedSessionErrorCode;
+        }
+
+        /**
+         * Text description of the error code returned by {@code getStagedSessionErrorCode}, or
+         * empty string if no error was encountered.
+         */
+        public @NonNull String getStagedSessionErrorMessage() {
+            checkSessionIsStaged();
+            return mStagedSessionErrorMessage;
+        }
+
+        /** {@hide} */
+        public void setStagedSessionErrorCode(@StagedSessionErrorCode int errorCode,
+                                              String errorMessage) {
+            mStagedSessionErrorCode = errorCode;
+            mStagedSessionErrorMessage = errorMessage;
+        }
+
+        /**
+         * Returns {@code true} if {@link Session#commit(IntentSender)}} was called for this
+         * session.
+         */
+        public boolean isCommitted() {
+            return isCommitted;
+        }
+
+        /**
+         * The timestamp of the last update that occurred to the session, including changing of
+         * states in case of staged sessions.
+         */
+        @CurrentTimeMillisLong
+        public long getUpdatedMillis() {
+            return updatedMillis;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -1767,6 +2354,7 @@ public class PackageInstaller {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(sessionId);
+            dest.writeInt(userId);
             dest.writeString(installerPackageName);
             dest.writeString(resolvedBaseCodePath);
             dest.writeFloat(progress);
@@ -1785,7 +2373,18 @@ public class PackageInstaller {
             dest.writeInt(originatingUid);
             dest.writeParcelable(referrerUri, flags);
             dest.writeStringArray(grantedRuntimePermissions);
+            dest.writeStringList(whitelistedRestrictedPermissions);
             dest.writeInt(installFlags);
+            dest.writeBoolean(isMultiPackage);
+            dest.writeBoolean(isStaged);
+            dest.writeInt(parentSessionId);
+            dest.writeIntArray(childSessionIds);
+            dest.writeBoolean(isStagedSessionApplied);
+            dest.writeBoolean(isStagedSessionReady);
+            dest.writeBoolean(isStagedSessionFailed);
+            dest.writeInt(mStagedSessionErrorCode);
+            dest.writeString(mStagedSessionErrorMessage);
+            dest.writeBoolean(isCommitted);
         }
 
         public static final Parcelable.Creator<SessionInfo>

@@ -30,6 +30,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BlendMode;
 import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -105,8 +106,8 @@ public final class Icon implements Parcelable {
     private final int mType;
 
     private ColorStateList mTintList;
-    static final PorterDuff.Mode DEFAULT_TINT_MODE = Drawable.DEFAULT_TINT_MODE; // SRC_IN
-    private PorterDuff.Mode mTintMode = DEFAULT_TINT_MODE;
+    static final BlendMode DEFAULT_BLEND_MODE = Drawable.DEFAULT_BLEND_MODE; // SRC_IN
+    private BlendMode mBlendMode = Drawable.DEFAULT_BLEND_MODE;
 
     // To avoid adding unnecessary overhead, we have a few basic objects that get repurposed
     // based on the value of mType.
@@ -320,10 +321,10 @@ public final class Icon implements Parcelable {
      */
     public Drawable loadDrawable(Context context) {
         final Drawable result = loadDrawableInner(context);
-        if (result != null && (mTintList != null || mTintMode != DEFAULT_TINT_MODE)) {
+        if (result != null && (mTintList != null || mBlendMode != DEFAULT_BLEND_MODE)) {
             result.mutate();
             result.setTintList(mTintList);
-            result.setTintMode(mTintMode);
+            result.setTintBlendMode(mBlendMode);
         }
         return result;
     }
@@ -696,15 +697,26 @@ public final class Icon implements Parcelable {
      * @param mode a blending mode, as in {@link Drawable#setTintMode(PorterDuff.Mode)}, may be null
      * @return this same object, for use in chained construction
      */
-    public Icon setTintMode(PorterDuff.Mode mode) {
-        mTintMode = mode;
+    public @NonNull Icon setTintMode(@NonNull PorterDuff.Mode mode) {
+        mBlendMode = BlendMode.fromValue(mode.nativeInt);
+        return this;
+    }
+
+    /**
+     * Store a blending mode to use whenever this Icon is drawn.
+     *
+     * @param mode a blending mode, as in {@link Drawable#setTintMode(PorterDuff.Mode)}, may be null
+     * @return this same object, for use in chained construction
+     */
+    public @NonNull Icon setTintBlendMode(@NonNull BlendMode mode) {
+        mBlendMode = mode;
         return this;
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public boolean hasTint() {
-        return (mTintList != null) || (mTintMode != DEFAULT_TINT_MODE);
+        return (mTintList != null) || (mBlendMode != DEFAULT_BLEND_MODE);
     }
 
     /**
@@ -757,7 +769,7 @@ public final class Icon implements Parcelable {
                 sep = "|";
             }
         }
-        if (mTintMode != DEFAULT_TINT_MODE) sb.append(" mode=").append(mTintMode);
+        if (mBlendMode != DEFAULT_BLEND_MODE) sb.append(" mode=").append(mBlendMode);
         sb.append(")");
         return sb.toString();
     }
@@ -807,7 +819,7 @@ public final class Icon implements Parcelable {
         if (in.readInt() == 1) {
             mTintList = ColorStateList.CREATOR.createFromParcel(in);
         }
-        mTintMode = PorterDuff.intToMode(in.readInt());
+        mBlendMode = BlendMode.fromValue(in.readInt());
     }
 
     @Override
@@ -837,10 +849,10 @@ public final class Icon implements Parcelable {
             dest.writeInt(1);
             mTintList.writeToParcel(dest, flags);
         }
-        dest.writeInt(PorterDuff.modeToInt(mTintMode));
+        dest.writeInt(BlendMode.toValue(mBlendMode));
     }
 
-    public static final Parcelable.Creator<Icon> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Icon> CREATOR
             = new Parcelable.Creator<Icon>() {
         public Icon createFromParcel(Parcel in) {
             return new Icon(in);

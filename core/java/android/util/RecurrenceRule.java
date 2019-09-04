@@ -140,7 +140,7 @@ public class RecurrenceRule implements Parcelable {
         return false;
     }
 
-    public static final Parcelable.Creator<RecurrenceRule> CREATOR = new Parcelable.Creator<RecurrenceRule>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<RecurrenceRule> CREATOR = new Parcelable.Creator<RecurrenceRule>() {
         @Override
         public RecurrenceRule createFromParcel(Parcel source) {
             return new RecurrenceRule(source);

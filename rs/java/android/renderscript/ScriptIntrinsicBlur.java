@@ -62,6 +62,10 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
         if (ain.getType().getY() == 0) {
             throw new RSIllegalArgumentException("Input set to a 1D Allocation");
         }
+        Element e = ain.getElement();
+        if ((!e.isCompatible(Element.U8_4(mRS))) && (!e.isCompatible(Element.U8(mRS)))) {
+            throw new RSIllegalArgumentException("Unsupported element type.");
+        }
         mInput = ain;
         setVar(1, ain);
     }

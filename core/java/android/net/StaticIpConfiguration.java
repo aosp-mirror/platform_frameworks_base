@@ -283,7 +283,7 @@ public final class StaticIpConfiguration implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<StaticIpConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<StaticIpConfiguration> CREATOR =
         new Creator<StaticIpConfiguration>() {
             public StaticIpConfiguration createFromParcel(Parcel in) {
                 return readFromParcel(in);

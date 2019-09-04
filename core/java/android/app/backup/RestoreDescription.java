@@ -91,7 +91,7 @@ public class RestoreDescription implements Parcelable {
         out.writeInt(mDataType);
     }
 
-    public static final Parcelable.Creator<RestoreDescription> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<RestoreDescription> CREATOR
             = new Parcelable.Creator<RestoreDescription>() {
         public RestoreDescription createFromParcel(Parcel in) {
             final RestoreDescription unparceled = new RestoreDescription(in);

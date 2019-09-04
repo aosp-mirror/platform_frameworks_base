@@ -966,6 +966,7 @@ public class AlarmManager {
      *
      * @param millis time in milliseconds since the Epoch
      */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
     public void setTime(long millis) {
         try {
             mService.setTime(millis);
@@ -989,6 +990,7 @@ public class AlarmManager {
      * @param timeZone one of the Olson ids from the list returned by
      *     {@link java.util.TimeZone#getAvailableIDs}
      */
+    @RequiresPermission(android.Manifest.permission.SET_TIME_ZONE)
     public void setTimeZone(String timeZone) {
         if (TextUtils.isEmpty(timeZone)) {
             return;
@@ -1133,7 +1135,7 @@ public class AlarmManager {
             dest.writeParcelable(mShowIntent, flags);
         }
 
-        public static final Creator<AlarmClockInfo> CREATOR = new Creator<AlarmClockInfo>() {
+        public static final @android.annotation.NonNull Creator<AlarmClockInfo> CREATOR = new Creator<AlarmClockInfo>() {
             @Override
             public AlarmClockInfo createFromParcel(Parcel in) {
                 return new AlarmClockInfo(in);

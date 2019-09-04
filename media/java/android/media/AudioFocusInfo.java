@@ -16,8 +16,10 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,13 +29,14 @@ import java.util.Objects;
  * @hide
  * A class to encapsulate information about an audio focus owner or request.
  */
+@TestApi
 @SystemApi
 public final class AudioFocusInfo implements Parcelable {
 
-    private final AudioAttributes mAttributes;
+    private final @NonNull AudioAttributes mAttributes;
     private final int mClientUid;
-    private final String mClientId;
-    private final String mPackageName;
+    private final @NonNull String mClientId;
+    private final @NonNull String mPackageName;
     private final int mSdkTarget;
     private int mGainRequest;
     private int mLossReceived;
@@ -81,13 +84,21 @@ public final class AudioFocusInfo implements Parcelable {
      * The audio attributes for the audio focus request.
      * @return non-null {@link AudioAttributes}.
      */
-    public AudioAttributes getAttributes() { return mAttributes; }
+    public @NonNull AudioAttributes getAttributes() {
+        return mAttributes;
+    }
 
-    public int getClientUid() { return mClientUid; }
+    public int getClientUid() {
+        return mClientUid;
+    }
 
-    public String getClientId() { return mClientId; }
+    public @NonNull String getClientId() {
+        return mClientId;
+    }
 
-    public String getPackageName() { return mPackageName; }
+    public @NonNull String getPackageName() {
+        return mPackageName;
+    }
 
     /**
      * The type of audio focus gain request.
@@ -182,7 +193,7 @@ public final class AudioFocusInfo implements Parcelable {
         return true;
     }
 
-    public static final Parcelable.Creator<AudioFocusInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioFocusInfo> CREATOR
             = new Parcelable.Creator<AudioFocusInfo>() {
 
         public AudioFocusInfo createFromParcel(Parcel in) {

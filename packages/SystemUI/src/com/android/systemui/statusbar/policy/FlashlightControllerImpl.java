@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -24,19 +25,23 @@ import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
-
-import com.android.systemui.statusbar.policy.FlashlightController.FlashlightListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manages the flashlight.
  */
+@Singleton
 public class FlashlightControllerImpl implements FlashlightController {
 
     private static final String TAG = "FlashlightController";
@@ -45,6 +50,9 @@ public class FlashlightControllerImpl implements FlashlightController {
     private static final int DISPATCH_ERROR = 0;
     private static final int DISPATCH_CHANGED = 1;
     private static final int DISPATCH_AVAILABILITY_CHANGED = 2;
+
+    private static final String ACTION_FLASHLIGHT_CHANGED =
+        "com.android.settings.flashlight.action.FLASHLIGHT_CHANGED";
 
     private final CameraManager mCameraManager;
     private final Context mContext;
@@ -60,6 +68,7 @@ public class FlashlightControllerImpl implements FlashlightController {
     private String mCameraId;
     private boolean mTorchAvailable;
 
+    @Inject
     public FlashlightControllerImpl(Context context) {
         mContext = context;
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
@@ -206,6 +215,9 @@ public class FlashlightControllerImpl implements FlashlightController {
         public void onTorchModeUnavailable(String cameraId) {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(false);
+                Settings.Secure.putInt(
+                    mContext.getContentResolver(), Settings.Secure.FLASHLIGHT_AVAILABLE, 0);
+
             }
         }
 
@@ -214,6 +226,11 @@ public class FlashlightControllerImpl implements FlashlightController {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(true);
                 setTorchMode(enabled);
+                Settings.Secure.putInt(
+                    mContext.getContentResolver(), Settings.Secure.FLASHLIGHT_AVAILABLE, 1);
+                Settings.Secure.putInt(
+                    mContext.getContentResolver(), Secure.FLASHLIGHT_ENABLED, enabled ? 1 : 0);
+                mContext.sendBroadcast(new Intent(ACTION_FLASHLIGHT_CHANGED));
             }
         }
 

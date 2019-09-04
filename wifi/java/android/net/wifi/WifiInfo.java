@@ -16,6 +16,9 @@
 
 package android.net.wifi;
 
+import android.annotation.IntRange;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
@@ -93,10 +96,25 @@ public class WifiInfo implements Parcelable {
     private int mRssi;
 
     /**
-     * Link speed in Mbps
+     * The unit in which links speeds are expressed.
      */
     public static final String LINK_SPEED_UNITS = "Mbps";
     private int mLinkSpeed;
+
+    /**
+     * Constant for unknown link speed.
+     */
+    public static final int LINK_SPEED_UNKNOWN = -1;
+
+    /**
+     * Tx(transmit) Link speed in Mbps
+     */
+    private int mTxLinkSpeed;
+
+    /**
+     * Rx(receive) Link speed in Mbps
+     */
+    private int mRxLinkSpeed;
 
     /**
      * Frequency in MHz
@@ -109,7 +127,36 @@ public class WifiInfo implements Parcelable {
     @UnsupportedAppUsage
     private String mMacAddress = DEFAULT_MAC_ADDRESS;
 
+    /**
+     * Whether the network is ephemeral or not.
+     */
     private boolean mEphemeral;
+
+    /**
+     * Whether the network is trusted or not.
+     */
+    private boolean mTrusted;
+
+    /**
+     * OSU (Online Sign Up) AP for Passpoint R2.
+     */
+    private boolean mOsuAp;
+
+    /**
+     * Fully qualified domain name of a Passpoint configuration
+     */
+    private String mFqdn;
+
+    /**
+     * Name of Passpoint credential provider
+     */
+    private String mProviderFriendlyName;
+
+    /**
+     * If connected to a network suggestion or specifier, store the package name of the app,
+     * else null.
+     */
+    private String mNetworkSuggestionOrSpecifierPackageName;
 
     /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
@@ -173,7 +220,7 @@ public class WifiInfo implements Parcelable {
         mNetworkId = -1;
         mSupplicantState = SupplicantState.UNINITIALIZED;
         mRssi = INVALID_RSSI;
-        mLinkSpeed = -1;
+        mLinkSpeed = LINK_SPEED_UNKNOWN;
         mFrequency = -1;
     }
 
@@ -184,10 +231,16 @@ public class WifiInfo implements Parcelable {
         setSSID(null);
         setNetworkId(-1);
         setRssi(INVALID_RSSI);
-        setLinkSpeed(-1);
+        setLinkSpeed(LINK_SPEED_UNKNOWN);
+        setTxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
+        setRxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
         setFrequency(-1);
         setMeteredHint(false);
         setEphemeral(false);
+        setOsuAp(false);
+        setNetworkSuggestionOrSpecifierPackageName(null);
+        setFQDN(null);
+        setProviderFriendlyName(null);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -211,11 +264,19 @@ public class WifiInfo implements Parcelable {
             mNetworkId = source.mNetworkId;
             mRssi = source.mRssi;
             mLinkSpeed = source.mLinkSpeed;
+            mTxLinkSpeed = source.mTxLinkSpeed;
+            mRxLinkSpeed = source.mRxLinkSpeed;
             mFrequency = source.mFrequency;
             mIpAddress = source.mIpAddress;
             mMacAddress = source.mMacAddress;
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
+            mTrusted = source.mTrusted;
+            mNetworkSuggestionOrSpecifierPackageName =
+                    source.mNetworkSuggestionOrSpecifierPackageName;
+            mOsuAp = source.mOsuAp;
+            mFqdn = source.mFqdn;
+            mProviderFriendlyName = source.mProviderFriendlyName;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -235,14 +296,19 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the service set identifier (SSID) of the current 802.11 network.
+     * <p>
      * If the SSID can be decoded as UTF-8, it will be returned surrounded by double
-     * quotation marks. Otherwise, it is returned as a string of hex digits. The
-     * SSID may be &lt;unknown ssid&gt; if there is no network currently connected,
-     * or if the caller has insufficient permissions to access the SSID.
-     *
+     * quotation marks. Otherwise, it is returned as a string of hex digits.
+     * The SSID may be
+     * <lt>&lt;unknown ssid&gt;, if there is no network currently connected or if the caller has
+     * insufficient permissions to access the SSID.<lt>
+     * </p>
+     * <p>
      * Prior to {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method
      * always returned the SSID with no quotes around it.
-     * @return the SSID
+     * </p>
+     *
+     * @return the SSID.
      */
     public String getSSID() {
         if (mWifiSsid != null) {
@@ -271,7 +337,13 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Return the basic service set identifier (BSSID) of the current access point.
-     * The BSSID may be {@code null} if there is no network currently connected.
+     * <p>
+     * The BSSID may be
+     * <lt>{@code null}, if there is no network currently connected.</lt>
+     * <lt>{@code "02:00:00:00:00:00"}, if the caller has insufficient permissions to access the
+     * BSSID.<lt>
+     * </p>
+     *
      * @return the BSSID, in the form of a six-byte MAC address: {@code XX:XX:XX:XX:XX:XX}
      */
     public String getBSSID() {
@@ -303,8 +375,9 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the current link speed in {@link #LINK_SPEED_UNITS}.
-     * @return the link speed.
+     * @return the link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is unknown.
      * @see #LINK_SPEED_UNITS
+     * @see #LINK_SPEED_UNKNOWN
      */
     public int getLinkSpeed() {
         return mLinkSpeed;
@@ -313,7 +386,43 @@ public class WifiInfo implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage
     public void setLinkSpeed(int linkSpeed) {
-        this.mLinkSpeed = linkSpeed;
+        mLinkSpeed = linkSpeed;
+    }
+
+    /**
+     * Returns the current transmit link speed in Mbps.
+     * @return the Tx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is unknown.
+     * @see #LINK_SPEED_UNKNOWN
+     */
+    @IntRange(from = -1)
+    public int getTxLinkSpeedMbps() {
+        return mTxLinkSpeed;
+    }
+
+    /**
+     * Update the last transmitted packet bit rate in Mbps.
+     * @hide
+     */
+    public void setTxLinkSpeedMbps(int txLinkSpeed) {
+        mTxLinkSpeed = txLinkSpeed;
+    }
+
+    /**
+     * Returns the current receive link speed in Mbps.
+     * @return the Rx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is unknown.
+     * @see #LINK_SPEED_UNKNOWN
+     */
+    @IntRange(from = -1)
+    public int getRxLinkSpeedMbps() {
+        return mRxLinkSpeed;
+    }
+
+    /**
+     * Update the last received packet bit rate in Mbps.
+     * @hide
+     */
+    public void setRxLinkSpeedMbps(int rxLinkSpeed) {
+        mRxLinkSpeed = rxLinkSpeed;
     }
 
     /**
@@ -398,6 +507,68 @@ public class WifiInfo implements Parcelable {
         return mEphemeral;
     }
 
+    /** {@hide} */
+    public void setTrusted(boolean trusted) {
+        mTrusted = trusted;
+    }
+
+    /** {@hide} */
+    public boolean isTrusted() {
+        return mTrusted;
+    }
+
+    /** {@hide} */
+    public void setOsuAp(boolean osuAp) {
+        mOsuAp = osuAp;
+    }
+
+    /** {@hide} */
+    @SystemApi
+    public boolean isOsuAp() {
+        return mOsuAp;
+    }
+
+    /** {@hide} */
+    @SystemApi
+    public boolean isPasspointAp() {
+        return mFqdn != null && mProviderFriendlyName != null;
+    }
+
+    /** {@hide} */
+    public void setFQDN(@Nullable String fqdn) {
+        mFqdn = fqdn;
+    }
+
+    /**
+     * Returns the Fully Qualified Domain Name of the network if it is a Passpoint network.
+     */
+    public @Nullable String getPasspointFqdn() {
+        return mFqdn;
+    }
+
+    /** {@hide} */
+    public void setProviderFriendlyName(@Nullable String providerFriendlyName) {
+        mProviderFriendlyName = providerFriendlyName;
+    }
+
+    /**
+     * Returns the Provider Friendly Name of the network if it is a Passpoint network.
+     */
+    public @Nullable String getPasspointProviderFriendlyName() {
+        return mProviderFriendlyName;
+    }
+
+    /** {@hide} */
+    public void setNetworkSuggestionOrSpecifierPackageName(@Nullable String packageName) {
+        mNetworkSuggestionOrSpecifierPackageName = packageName;
+    }
+
+    /** {@hide} */
+    public @Nullable String getNetworkSuggestionOrSpecifierPackageName() {
+        return mNetworkSuggestionOrSpecifierPackageName;
+    }
+
+
     /** @hide */
     @UnsupportedAppUsage
     public void setNetworkId(int id) {
@@ -406,9 +577,13 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Each configured network has a unique small integer ID, used to identify
-     * the network when performing operations on the supplicant. This method
-     * returns the ID for the currently connected network.
-     * @return the network ID, or -1 if there is no currently connected network
+     * the network. This method returns the ID for the currently connected network.
+     * <p>
+     * The networkId may be {@code -1} if there is no currently connected network or if the caller
+     * has insufficient permissions to access the network ID.
+     * </p>
+     *
+     * @return the network ID.
      */
     public int getNetworkId() {
         return mNetworkId;
@@ -499,17 +674,19 @@ public class WifiInfo implements Parcelable {
         StringBuffer sb = new StringBuffer();
         String none = "<none>";
 
-        sb.append("SSID: ").append(mWifiSsid == null ? WifiSsid.NONE : mWifiSsid).
-            append(", BSSID: ").append(mBSSID == null ? none : mBSSID).
-            append(", MAC: ").append(mMacAddress == null ? none : mMacAddress).
-            append(", Supplicant state: ").
-            append(mSupplicantState == null ? none : mSupplicantState).
-            append(", RSSI: ").append(mRssi).
-            append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS).
-            append(", Frequency: ").append(mFrequency).append(FREQUENCY_UNITS).
-            append(", Net ID: ").append(mNetworkId).
-            append(", Metered hint: ").append(mMeteredHint).
-            append(", score: ").append(Integer.toString(score));
+        sb.append("SSID: ").append(mWifiSsid == null ? WifiSsid.NONE : mWifiSsid)
+                .append(", BSSID: ").append(mBSSID == null ? none : mBSSID)
+                .append(", MAC: ").append(mMacAddress == null ? none : mMacAddress)
+                .append(", Supplicant state: ")
+                .append(mSupplicantState == null ? none : mSupplicantState)
+                .append(", RSSI: ").append(mRssi)
+                .append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS)
+                .append(", Tx Link speed: ").append(mTxLinkSpeed).append(LINK_SPEED_UNITS)
+                .append(", Rx Link speed: ").append(mRxLinkSpeed).append(LINK_SPEED_UNITS)
+                .append(", Frequency: ").append(mFrequency).append(FREQUENCY_UNITS)
+                .append(", Net ID: ").append(mNetworkId)
+                .append(", Metered hint: ").append(mMeteredHint)
+                .append(", score: ").append(Integer.toString(score));
         return sb.toString();
     }
 
@@ -523,6 +700,8 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mNetworkId);
         dest.writeInt(mRssi);
         dest.writeInt(mLinkSpeed);
+        dest.writeInt(mTxLinkSpeed);
+        dest.writeInt(mRxLinkSpeed);
         dest.writeInt(mFrequency);
         if (mIpAddress != null) {
             dest.writeByte((byte)1);
@@ -540,6 +719,7 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mMacAddress);
         dest.writeInt(mMeteredHint ? 1 : 0);
         dest.writeInt(mEphemeral ? 1 : 0);
+        dest.writeInt(mTrusted ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
         dest.writeDouble(txSuccessRate);
@@ -550,17 +730,23 @@ public class WifiInfo implements Parcelable {
         dest.writeLong(rxSuccess);
         dest.writeDouble(rxSuccessRate);
         mSupplicantState.writeToParcel(dest, flags);
+        dest.writeInt(mOsuAp ? 1 : 0);
+        dest.writeString(mNetworkSuggestionOrSpecifierPackageName);
+        dest.writeString(mFqdn);
+        dest.writeString(mProviderFriendlyName);
     }
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<WifiInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiInfo> CREATOR =
         new Creator<WifiInfo>() {
             public WifiInfo createFromParcel(Parcel in) {
                 WifiInfo info = new WifiInfo();
                 info.setNetworkId(in.readInt());
                 info.setRssi(in.readInt());
                 info.setLinkSpeed(in.readInt());
+                info.setTxLinkSpeedMbps(in.readInt());
+                info.setRxLinkSpeedMbps(in.readInt());
                 info.setFrequency(in.readInt());
                 if (in.readByte() == 1) {
                     try {
@@ -574,6 +760,7 @@ public class WifiInfo implements Parcelable {
                 info.mMacAddress = in.readString();
                 info.mMeteredHint = in.readInt() != 0;
                 info.mEphemeral = in.readInt() != 0;
+                info.mTrusted = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
                 info.txSuccessRate = in.readDouble();
@@ -584,6 +771,10 @@ public class WifiInfo implements Parcelable {
                 info.rxSuccess = in.readLong();
                 info.rxSuccessRate = in.readDouble();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
+                info.mOsuAp = in.readInt() != 0;
+                info.mNetworkSuggestionOrSpecifierPackageName = in.readString();
+                info.mFqdn = in.readString();
+                info.mProviderFriendlyName = in.readString();
                 return info;
             }
 

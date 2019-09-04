@@ -3427,7 +3427,7 @@ public class ConnectivityServiceTest {
         testFactory.setScoreFilter(40);
 
         // Register the factory and expect it to receive the default request.
-        testFactory.expectAddRequestsWithScores(0); // default request score is 0, not served yet
+        testFactory.expectAddRequestsWithScores(0);
         testFactory.register();
         SparseArray<NetworkRequest> requests = testFactory.waitForNetworkRequests(1);
 

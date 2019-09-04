@@ -16,15 +16,16 @@
 
 package com.android.framework.permission.tests;
 
-import android.content.res.Configuration;
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.IWindowManager;
-import junit.framework.TestCase;
 
-import static android.view.Display.DEFAULT_DISPLAY;
+import junit.framework.TestCase;
 
 /**
  * TODO: Remove this. This is only a placeholder, need to implement this.
@@ -72,27 +73,6 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.updateOrientationFromAppTokens(new Configuration(),
-                    null /* freezeThisOneIfNeeded */, DEFAULT_DISPLAY);
-            fail("IWindowManager.updateOrientationFromAppTokens did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.setFocusedApp(null, false);
-            fail("IWindowManager.setFocusedApp did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
             mWm.prepareAppTransition(0, false);
             fail("IWindowManager.prepareAppTransition did not throw SecurityException as"
                     + " expected");
@@ -117,7 +97,7 @@ public class WindowManagerPermissionTests extends TestCase {
     public void testDISABLE_KEYGUARD() {
         Binder token = new Binder();
         try {
-            mWm.disableKeyguard(token, "foo");
+            mWm.disableKeyguard(token, "foo", UserHandle.myUserId());
             fail("IWindowManager.disableKeyguard did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -127,7 +107,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.reenableKeyguard(token);
+            mWm.reenableKeyguard(token, UserHandle.myUserId());
             fail("IWindowManager.reenableKeyguard did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {

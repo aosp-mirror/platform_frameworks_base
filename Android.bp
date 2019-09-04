@@ -222,6 +222,7 @@ java_defaults {
             "location/java",
             "lowpan/java",
             "media/java",
+            "media/apex/java",
             "media/mca/effect/java",
             "media/mca/filterfw/java",
             "media/mca/filterpacks/java",
@@ -245,6 +246,7 @@ java_library {
         "framework-protos",
         "game-driver-protos",
         "android.hidl.base-V1.0-java",
+        "android.hardware.cas-V1.1-java",
         "android.hardware.cas-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.health-V1.0-java-constants",
@@ -254,15 +256,22 @@ java_library {
         "android.hardware.radio-V1.3-java",
         "android.hardware.radio-V1.4-java",
         "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V1.0-java",
+        "android.hardware.thermal-V1.1-java",
+        "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb-V1.2-java-constants",
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
+        "android.hardware.vibrator-V1.3-java",
         "android.hardware.wifi-V1.0-java-constants",
+        "devicepolicyprotosnano",
 
+        "com.android.sysprop.apex",
         "PlatformProperties",
     ],
     sdk_version: "core_platform",
@@ -291,6 +300,7 @@ java_defaults {
     sdk_version: "core_platform",
     libs: [
         "ext",
+        "updatable_media_stubs",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -300,8 +310,6 @@ java_defaults {
     required: [
         // TODO: remove gps_debug when the build system propagates "required" properly.
         "gps_debug.conf",
-        // Loaded with System.loadLibrary by android.view.textclassifier
-        "libmedia2_jni",
     ],
 
     dxflags: [
@@ -309,6 +317,7 @@ java_defaults {
         "--multi-dex",
     ],
 
+    plugins: ["view-inspector-annotation-processor"],
 }
 
 filegroup {
@@ -330,6 +339,16 @@ filegroup {
     srcs: [
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
+        "core/java/android/os/IStatsPullerCallback.aidl",
+    ],
+    path: "core/java",
+}
+
+filegroup {
+    name: "libvibrator_aidl",
+    srcs: [
+        "core/java/android/os/IExternalVibrationController.aidl",
+        "core/java/android/os/IExternalVibratorService.aidl",
     ],
     path: "core/java",
 }
@@ -485,9 +504,9 @@ java_library_host {
     name: "platformprotos",
     srcs: [
         "cmds/am/proto/instrumentation_data.proto",
+        "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
-        "cmds/statsd/src/**/*.proto",
     ],
     proto: {
         include_dirs: ["external/protobuf/src"],
@@ -506,7 +525,10 @@ java_library {
         output_params: ["store_unknown_fields=true"],
         include_dirs: ["external/protobuf/src"],
     },
-
+    exclude_srcs: [
+        "core/proto/android/privacy.proto",
+        "core/proto/android/section.proto",
+    ],
     sdk_version: "current",
     srcs: [
         "core/proto/**/*.proto",
@@ -526,6 +548,10 @@ java_library {
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
     ],
+    exclude_srcs: [
+        "core/proto/android/privacy.proto",
+        "core/proto/android/section.proto",
+    ],
     // Protos have lots of MissingOverride and similar.
     errorprone: {
         javacflags: ["-XepDisableAllChecks"],
@@ -533,9 +559,9 @@ java_library {
 }
 
 // ====  c++ proto device library  ==============================
-cc_library {
-    name: "libplatformprotos",
-    host_supported: true,
+cc_defaults {
+    name: "libplatformprotos-defaults",
+
     proto: {
         export_proto_headers: true,
         include_dirs: ["external/protobuf/src"],
@@ -549,8 +575,13 @@ cc_library {
 
     srcs: [
         "core/proto/**/*.proto",
-        "libs/incident/**/*.proto",
     ],
+}
+
+cc_library {
+    name: "libplatformprotos",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: true,
 
     target: {
         host: {
@@ -562,12 +593,64 @@ cc_library {
             proto: {
                 type: "lite",
             },
+            shared_libs: [
+                "libprotobuf-cpp-lite",
+            ],
             shared: {
                 enabled: false,
             },
         },
     },
 }
+
+// This library is meant for vendor code that needs to output protobuf. It links
+// against the static version of libprotobuf-cpp-lite, for which we can not guarantee
+// binary compatibility.
+cc_library {
+    name: "libplatformprotos-static",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: false,
+
+    // This is okay because this library is only built as a static library.  The C++
+    // API is not guaranteed. The proto API is guaranteed to be stable via Metrics Council,
+    // but is not authorized to be used outside of debugging.
+    vendor_available: true,
+
+    target: {
+        android: {
+            proto: {
+                type: "lite",
+            },
+            static_libs: [
+                "libprotobuf-cpp-lite",
+            ],
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
+
+// This is the full proto version of libplatformprotos. It may only
+// be used by test code that is not shipped on the device.
+cc_library {
+    name: "libplatformprotos-test",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: false,
+
+    target: {
+        android: {
+            proto: {
+                type: "full",
+            },
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
 
 gensrcs {
     name: "gen-platform-proto-constants",
@@ -605,6 +688,7 @@ gensrcs {
 
     output_extension: "proto.h",
 }
+
 
 subdirs = [
     "cmds/*",
@@ -803,6 +887,7 @@ stubs_defaults {
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":core_public_api_files",
+        ":updatable-media-srcs",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
     ],
@@ -865,6 +950,7 @@ stubs_defaults {
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":core_public_api_files",
+        ":updatable-media-srcs",
     ],
     libs: ["framework-internal-utils"],
     local_sourcepaths: frameworks_base_subdirs,
@@ -1041,7 +1127,7 @@ droiddoc {
     ],
     proofread_file: "ds-docs-proofrerad.txt",
     args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
+        " -toroot / -yamlV2 -metalavaApiSince -samplegroup Admin " +
         " -samplegroup Background " +
         " -samplegroup Connectivity " +
         " -samplegroup Content " +
@@ -1352,6 +1438,26 @@ filegroup {
     name: "framework-annotation-nonnull-srcs",
     srcs: [
         "core/java/android/annotation/NonNull.java",
+    ],
+}
+
+filegroup {
+    name: "framework-media-annotation-srcs",
+    srcs: [
+        "core/java/android/annotation/CallbackExecutor.java",
+        "core/java/android/annotation/CallSuper.java",
+        "core/java/android/annotation/DrawableRes.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/LongDef.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/RequiresPermission.java",
+        "core/java/android/annotation/SdkConstant.java",
+        "core/java/android/annotation/StringDef.java",
+        "core/java/android/annotation/SystemApi.java",
+        "core/java/android/annotation/TestApi.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/com/android/internal/annotations/GuardedBy.java",
     ],
 }
 

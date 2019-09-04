@@ -33,19 +33,18 @@ import java.util.ArrayList;
 @TestApi
 public final class IncidentReportArgs implements Parcelable {
 
-    private static final int DEST_EXPLICIT = 100;
-    private static final int DEST_AUTO = 200;
-
     private final IntArray mSections = new IntArray();
     private final ArrayList<byte[]> mHeaders = new ArrayList<byte[]>();
     private boolean mAll;
-    private int mDest;
+    private int mPrivacyPolicy;
+    private String mReceiverPkg;
+    private String mReceiverCls;
 
     /**
      * Construct an incident report args with no fields.
      */
     public IncidentReportArgs() {
-        mDest = DEST_AUTO;
+        mPrivacyPolicy = IncidentManager.PRIVACY_POLICY_AUTO;
     }
 
     /**
@@ -76,7 +75,11 @@ public final class IncidentReportArgs implements Parcelable {
             out.writeByteArray(mHeaders.get(i));
         }
 
-        out.writeInt(mDest);
+        out.writeInt(mPrivacyPolicy);
+
+        out.writeString(mReceiverPkg);
+
+        out.writeString(mReceiverCls);
     }
 
     public void readFromParcel(Parcel in) {
@@ -94,10 +97,14 @@ public final class IncidentReportArgs implements Parcelable {
             mHeaders.add(in.createByteArray());
         }
 
-        mDest = in.readInt();
+        mPrivacyPolicy = in.readInt();
+
+        mReceiverPkg = in.readString();
+
+        mReceiverCls = in.readString();
     }
 
-    public static final Parcelable.Creator<IncidentReportArgs> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IncidentReportArgs> CREATOR
             = new Parcelable.Creator<IncidentReportArgs>() {
         public IncidentReportArgs createFromParcel(Parcel in) {
             return new IncidentReportArgs(in);
@@ -130,7 +137,9 @@ public final class IncidentReportArgs implements Parcelable {
         sb.append(", ");
         sb.append(mHeaders.size());
         sb.append(" headers), ");
-        sb.append("Dest enum value: ").append(mDest);
+        sb.append("privacy: ").append(mPrivacyPolicy);
+        sb.append("receiver pkg: ").append(mReceiverPkg);
+        sb.append("receiver cls: ").append(mReceiverCls);
         return sb.toString();
     }
 
@@ -146,16 +155,16 @@ public final class IncidentReportArgs implements Parcelable {
 
     /**
      * Set this incident report privacy policy spec.
-     * @hide
      */
-    public void setPrivacyPolicy(int dest) {
-        switch (dest) {
-            case DEST_EXPLICIT:
-            case DEST_AUTO:
-                mDest = dest;
+    public void setPrivacyPolicy(int privacyPolicy) {
+        switch (privacyPolicy) {
+            case IncidentManager.PRIVACY_POLICY_LOCAL:
+            case IncidentManager.PRIVACY_POLICY_EXPLICIT:
+            case IncidentManager.PRIVACY_POLICY_AUTO:
+                mPrivacyPolicy = privacyPolicy;
                 break;
             default:
-                mDest = DEST_AUTO;
+                mPrivacyPolicy = IncidentManager.PRIVACY_POLICY_AUTO;
         }
     }
 

@@ -22,7 +22,9 @@ cc_library_shared {
     name: "libwebviewchromium_plat_support",
 
     srcs: [
+        "draw_functor.cpp",
         "draw_gl_functor.cpp",
+        "functor_utils.cpp",
         "jni_entry_point.cpp",
         "graphics_utils.cpp",
         "graphic_buffer_impl.cpp",
@@ -36,6 +38,7 @@ cc_library_shared {
         "liblog",
         "libui",
         "libutils",
+        "libvulkan",
     ],
 
     // To remove warnings from skia header files

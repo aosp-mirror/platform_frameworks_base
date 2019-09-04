@@ -19,10 +19,13 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -720,6 +723,7 @@ public final class IpSecManager {
      * to create Network objects which are accessible to the Android system.
      * @hide
      */
+    @SystemApi
     public static final class IpSecTunnelInterface implements AutoCloseable {
         private final String mOpPackageName;
         private final IIpSecService mService;
@@ -746,6 +750,8 @@ public final class IpSecManager {
          * @param prefixLen length of the InetAddress prefix
          * @hide
          */
+        @SystemApi
+        @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void addAddress(@NonNull InetAddress address, int prefixLen) throws IOException {
             try {
@@ -767,6 +773,8 @@ public final class IpSecManager {
          * @param prefixLen length of the InetAddress prefix
          * @hide
          */
+        @SystemApi
+        @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void removeAddress(@NonNull InetAddress address, int prefixLen) throws IOException {
             try {
@@ -881,7 +889,9 @@ public final class IpSecManager {
      * @throws ResourceUnavailableException indicating that too many encapsulation sockets are open
      * @hide
      */
+    @SystemApi
     @NonNull
+    @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
     @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
     public IpSecTunnelInterface createIpSecTunnelInterface(@NonNull InetAddress localAddress,
             @NonNull InetAddress remoteAddress, @NonNull Network underlyingNetwork)
@@ -911,6 +921,8 @@ public final class IpSecManager {
      *         layer failure.
      * @hide
      */
+    @SystemApi
+    @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
     @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
     public void applyTunnelModeTransform(@NonNull IpSecTunnelInterface tunnel,
             @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {

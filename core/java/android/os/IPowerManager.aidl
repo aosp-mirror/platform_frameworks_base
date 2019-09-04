@@ -17,8 +17,9 @@
 
 package android.os;
 
-import android.os.WorkSource;
+import android.os.BatterySaverPolicyConfig;
 import android.os.PowerSaveState;
+import android.os.WorkSource;
 
 /** @hide */
 
@@ -33,6 +34,7 @@ interface IPowerManager
             String historyTag);
     void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
             int uidtoblame);
+    @UnsupportedAppUsage
     void releaseWakeLock(IBinder lock, int flags);
     void updateWakeLockUids(IBinder lock, in int[] uids);
     oneway void powerHint(int hintId, int data);
@@ -42,8 +44,7 @@ interface IPowerManager
 
     @UnsupportedAppUsage
     void userActivity(long time, int event, int flags);
-    @UnsupportedAppUsage
-    void wakeUp(long time, String reason, String opPackageName);
+    void wakeUp(long time, int reason, String details, String opPackageName);
     @UnsupportedAppUsage
     void goToSleep(long time, int reason, int flags);
     void nap(long time);
@@ -51,7 +52,11 @@ interface IPowerManager
     boolean isInteractive();
     boolean isPowerSaveMode();
     PowerSaveState getPowerSaveState(int serviceType);
-    boolean setPowerSaveMode(boolean mode);
+    boolean setPowerSaveModeEnabled(boolean mode);
+    boolean setDynamicPowerSaveHint(boolean powerSaveHint, int disableThreshold);
+    boolean setAdaptivePowerSavePolicy(in BatterySaverPolicyConfig config);
+    boolean setAdaptivePowerSaveEnabled(boolean enabled);
+    int getPowerSaveModeTrigger();
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();
 
@@ -61,6 +66,7 @@ interface IPowerManager
     void shutdown(boolean confirm, String reason, boolean wait);
     void crash(String message);
     int getLastShutdownReason();
+    int getLastSleepReason();
 
     void setStayOnSetting(int val);
     void boostScreenBrightness(long time);
@@ -73,4 +79,7 @@ interface IPowerManager
 
     // controls whether PowerManager should doze after the screen turns off or not
     void setDozeAfterScreenOff(boolean on);
+
+    // Forces the system to suspend even if there are held wakelocks.
+    boolean forceSuspend();
 }

@@ -93,6 +93,22 @@ public final class RemoteInput implements Parcelable {
     /** The user selected one of the choices from {@link #getChoices}. */
     public static final int SOURCE_CHOICE = 1;
 
+    /** @hide */
+    @IntDef(prefix = {"EDIT_CHOICES_BEFORE_SENDING_"},
+            value = {EDIT_CHOICES_BEFORE_SENDING_AUTO, EDIT_CHOICES_BEFORE_SENDING_DISABLED,
+                    EDIT_CHOICES_BEFORE_SENDING_ENABLED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EditChoicesBeforeSending {}
+
+    /** The platform will determine whether choices will be edited before being sent to the app. */
+    public static final int EDIT_CHOICES_BEFORE_SENDING_AUTO = 0;
+
+    /** Tapping on a choice should send the input immediately, without letting the user edit it. */
+    public static final int EDIT_CHOICES_BEFORE_SENDING_DISABLED = 1;
+
+    /** Tapping on a choice should let the user edit the input before it is sent to the app. */
+    public static final int EDIT_CHOICES_BEFORE_SENDING_ENABLED = 2;
+
     // Flags bitwise-ored to mFlags
     private static final int FLAG_ALLOW_FREE_FORM_INPUT = 0x1;
 
@@ -103,17 +119,25 @@ public final class RemoteInput implements Parcelable {
     private final CharSequence mLabel;
     private final CharSequence[] mChoices;
     private final int mFlags;
+    @EditChoicesBeforeSending private final int mEditChoicesBeforeSending;
     private final Bundle mExtras;
     private final ArraySet<String> mAllowedDataTypes;
 
     private RemoteInput(String resultKey, CharSequence label, CharSequence[] choices,
-            int flags, Bundle extras, ArraySet<String> allowedDataTypes) {
+            int flags, int editChoicesBeforeSending, Bundle extras,
+            ArraySet<String> allowedDataTypes) {
         this.mResultKey = resultKey;
         this.mLabel = label;
         this.mChoices = choices;
         this.mFlags = flags;
+        this.mEditChoicesBeforeSending = editChoicesBeforeSending;
         this.mExtras = extras;
         this.mAllowedDataTypes = allowedDataTypes;
+        if (getEditChoicesBeforeSending() == EDIT_CHOICES_BEFORE_SENDING_ENABLED
+                && !getAllowFreeFormInput()) {
+            throw new IllegalArgumentException(
+                    "setEditChoicesBeforeSending requires setAllowFreeFormInput");
+        }
     }
 
     /**
@@ -169,6 +193,15 @@ public final class RemoteInput implements Parcelable {
     }
 
     /**
+     * Gets whether tapping on a choice should let the user edit the input before it is sent to the
+     * app.
+     */
+    @EditChoicesBeforeSending
+    public int getEditChoicesBeforeSending() {
+        return mEditChoicesBeforeSending;
+    }
+
+    /**
      * Get additional metadata carried around with this remote input.
      */
     public Bundle getExtras() {
@@ -185,6 +218,8 @@ public final class RemoteInput implements Parcelable {
         private CharSequence mLabel;
         private CharSequence[] mChoices;
         private int mFlags = DEFAULT_FLAGS;
+        @EditChoicesBeforeSending
+        private int mEditChoicesBeforeSending = EDIT_CHOICES_BEFORE_SENDING_AUTO;
 
         /**
          * Create a builder object for {@link RemoteInput} objects.
@@ -269,7 +304,20 @@ public final class RemoteInput implements Parcelable {
          */
         @NonNull
         public Builder setAllowFreeFormInput(boolean allowFreeFormTextInput) {
-            setFlag(mFlags, allowFreeFormTextInput);
+            setFlag(FLAG_ALLOW_FREE_FORM_INPUT, allowFreeFormTextInput);
+            return this;
+        }
+
+        /**
+         * Specifies whether tapping on a choice should let the user edit the input before it is
+         * sent to the app. The default is {@link #EDIT_CHOICES_BEFORE_SENDING_AUTO}.
+         *
+         * It cannot be used if {@link #setAllowFreeFormInput} has been set to false.
+         */
+        @NonNull
+        public Builder setEditChoicesBeforeSending(
+                @EditChoicesBeforeSending int editChoicesBeforeSending) {
+            mEditChoicesBeforeSending = editChoicesBeforeSending;
             return this;
         }
 
@@ -312,8 +360,8 @@ public final class RemoteInput implements Parcelable {
          */
         @NonNull
         public RemoteInput build() {
-            return new RemoteInput(
-                    mResultKey, mLabel, mChoices, mFlags, mExtras, mAllowedDataTypes);
+            return new RemoteInput(mResultKey, mLabel, mChoices, mFlags, mEditChoicesBeforeSending,
+                    mExtras, mAllowedDataTypes);
         }
     }
 
@@ -322,6 +370,7 @@ public final class RemoteInput implements Parcelable {
         mLabel = in.readCharSequence();
         mChoices = in.readCharSequenceArray();
         mFlags = in.readInt();
+        mEditChoicesBeforeSending = in.readInt();
         mExtras = in.readBundle();
         mAllowedDataTypes = (ArraySet<String>) in.readArraySet(null);
     }
@@ -507,11 +556,12 @@ public final class RemoteInput implements Parcelable {
         out.writeCharSequence(mLabel);
         out.writeCharSequenceArray(mChoices);
         out.writeInt(mFlags);
+        out.writeInt(mEditChoicesBeforeSending);
         out.writeBundle(mExtras);
         out.writeArraySet(mAllowedDataTypes);
     }
 
-    public static final Creator<RemoteInput> CREATOR = new Creator<RemoteInput>() {
+    public static final @android.annotation.NonNull Creator<RemoteInput> CREATOR = new Creator<RemoteInput>() {
         @Override
         public RemoteInput createFromParcel(Parcel in) {
             return new RemoteInput(in);

@@ -20,8 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import android.content.pm.SharedLibraryInfo;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,14 +46,14 @@ public class ApplicationLoadersTest {
     }
 
     @Test
-    public void testGetNonExistentLib() {
+    public void testGetNonExistantLib() {
         ApplicationLoaders loaders = new ApplicationLoaders();
         assertEquals(null, loaders.getCachedNonBootclasspathSystemLib(
-                "/system/framework/nonexistentlib.jar", null, null, null));
+                "/system/framework/nonexistantlib.jar", null, null, null));
     }
 
     @Test
-    public void testCacheExistentLib() {
+    public void testCacheExistantLib() {
         ApplicationLoaders loaders = new ApplicationLoaders();
         SharedLibraryInfo libA = createLib(LIB_A);
 
@@ -92,7 +93,7 @@ public class ApplicationLoadersTest {
         ApplicationLoaders loaders = new ApplicationLoaders();
         SharedLibraryInfo libA = createLib(LIB_A);
 
-        // any other existent lib
+        // any other existant lib
         ClassLoader dep = ClassLoader.getSystemClassLoader();
         ArrayList<ClassLoader> sharedLibraries = new ArrayList<>();
         sharedLibraries.add(dep);

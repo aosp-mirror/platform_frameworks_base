@@ -21,38 +21,64 @@
     <!-- Toast message when Wi-Fi cannot scan for networks -->
     <string name="wifi_fail_to_scan">Can\'t scan for networks</string>
     <!-- Do not translate.  Concise terminology for wifi with WEP security -->
-    <string name="wifi_security_short_wep">WEP</string>
+    <string name="wifi_security_short_wep" translatable="false">WEP</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA security -->
-    <string name="wifi_security_short_wpa">WPA</string>
+    <string name="wifi_security_short_wpa" translatable="false">WPA</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2 security -->
-    <string name="wifi_security_short_wpa2">WPA2</string>
+    <string name="wifi_security_short_wpa2" translatable="false">WPA2</string>
     <!-- Do not translate.  Concise terminology for wifi with both WPA/WPA2 security -->
-    <string name="wifi_security_short_wpa_wpa2">WPA/WPA2</string>
+    <string name="wifi_security_short_wpa_wpa2" translatable="false">WPA/WPA2</string>
     <!-- Do not translate.  Concise terminology for wifi with unknown PSK type -->
-    <string name="wifi_security_short_psk_generic">@string/wifi_security_short_wpa_wpa2</string>
+    <string name="wifi_security_short_psk_generic" translatable="false">@string/wifi_security_short_wpa_wpa2</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_short_eap">802.1x</string>
+    <string name="wifi_security_short_eap" translatable="false">802.1x</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA 802.1x EAP security -->
+    <string name="wifi_security_short_eap_wpa" translatable="false">WPA-EAP</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
+    <string name="wifi_security_short_eap_wpa2_wpa3" translatable="false">RSN-EAP</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA3 security -->
+    <string name="wifi_security_short_sae" translatable="false">WPA3</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 transition security -->
+    <string name="wifi_security_short_psk_sae" translatable="false">WPA2/WPA3</string>
+    <!-- Do not translate.  Concise terminology for wifi with OWE security -->
+    <string name="wifi_security_short_owe" translatable="false">OWE</string>
+    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
+    <string name="wifi_security_short_eap_suiteb" translatable="false">Suite-B-192</string>
 
-    <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. -->
+    <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. [CHAR LIMIT=40] -->
     <string name="wifi_security_none">None</string>
 
     <!-- Do not translate.  Terminology for wifi with WEP security -->
-    <string name="wifi_security_wep">WEP</string>
+    <string name="wifi_security_wep" translatable="false">WEP</string>
     <!-- Do not translate.  Terminology for wifi with WPA security -->
-    <string name="wifi_security_wpa">WPA PSK</string>
+    <string name="wifi_security_wpa" translatable="false">WPA-Personal</string>
     <!-- Do not translate.  Terminology for wifi with WPA2 security -->
-    <string name="wifi_security_wpa2">WPA2 PSK</string>
+    <string name="wifi_security_wpa2" translatable="false">WPA2-Personal</string>
     <!-- Do not translate.  Terminology for wifi with both WPA/WPA2 security, or unknown -->
-    <string name="wifi_security_wpa_wpa2">WPA/WPA2 PSK</string>
+    <string name="wifi_security_wpa_wpa2" translatable="false">WPA/WPA2-Personal</string>
     <!-- Do not translate.  Terminology for wifi with unknown PSK type -->
-    <string name="wifi_security_psk_generic">@string/wifi_security_wpa_wpa2</string>
+    <string name="wifi_security_psk_generic" translatable="false">@string/wifi_security_wpa_wpa2</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_eap">802.1x EAP</string>
+    <string name="wifi_security_eap" translatable="false">WPA/WPA2/WPA3-Enterprise</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA 802.1x EAP security -->
+    <string name="wifi_security_eap_wpa" translatable="false">WPA-Enterprise</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
+    <string name="wifi_security_eap_wpa2_wpa3" translatable="false">WPA2/WPA3-Enterprise</string>
     <!-- Do not translate.  Concise terminology for Passpoint network -->
-    <string name="wifi_security_passpoint">Passpoint</string>
+    <string name="wifi_security_passpoint" translatable="false">Passpoint</string>
+    <!-- Do not translate.  Terminology for wifi with WPA3 security -->
+    <string name="wifi_security_sae" translatable="false">WPA3-Personal</string>
+    <!-- Do not translate.  Terminology for wifi with WPA2/WPA3 Transition mode security -->
+    <string name="wifi_security_psk_sae" translatable="false">WPA2/WPA3-Personal</string>
+    <!-- Do not translate.  Terminology for wifi with OWE security -->
+    <string name="wifi_security_owe" translatable="false">Enhanced Open</string>
+    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
+    <string name="wifi_security_eap_suiteb" translatable="false">WPA3-Enterprise 192-bit</string>
 
     <!-- Summary for the remembered network. -->
     <string name="wifi_remembered">Saved</string>
+    <!-- Summary for the disconnected network. [CHAR LIMIT=40] -->
+    <string name="wifi_disconnected">Disconnected</string>
     <!-- Status for networks disabled for unknown reason -->
     <string name="wifi_disabled_generic">Disabled</string>
     <!-- Status for networked disabled from a DNS or DHCP failure -->
@@ -87,8 +113,12 @@
     <string name="connected_via_network_scorer_default">Automatically connected via network rating provider</string>
     <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
     <string name="connected_via_passpoint">Connected via %1$s</string>
+    <!-- Status message of Wi-Fi when it is connected by a app (via suggestion or network request). [CHAR LIMIT=NONE] -->
+    <string name="connected_via_app">Connected via <xliff:g id="name" example="Wifi App">%1$s</xliff:g></string>
     <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
     <string name="available_via_passpoint">Available via %1$s</string>
+    <!-- Status message of OSU Provider network when not connected. [CHAR LIMIT=NONE] -->
+    <string name="tap_to_sign_up">Tap to sign up</string>
     <!-- Package name for Settings app-->
     <string name="settings_package" translatable="false">com.android.settings</string>
     <!-- Package name for Certinstaller app-->
@@ -113,6 +143,17 @@
     <string name="connected_via_carrier">Connected via %1$s</string>
     <!-- Status message of Wi-Fi when an available network is a carrier network. [CHAR LIMIT=NONE] -->
     <string name="available_via_carrier">Available via %1$s</string>
+
+    <!-- Status message of OSU Provider upon initiating provisioning flow [CHAR LIMIT=NONE] -->
+    <string name="osu_opening_provider">Opening <xliff:g id="passpointProvider" example="Passpoint Provider">%1$s</xliff:g></string>
+    <!-- Status message of OSU Provider when connection fails [CHAR LIMIT=NONE] -->
+    <string name="osu_connect_failed">Couldn\u2019t connect</string>
+    <!-- Status message of OSU Provider after user completes provisioning flow [CHAR LIMIT=NONE] -->
+    <string name="osu_completing_sign_up">Completing sign-up\u2026</string>
+    <!-- Status message of OSU Provider when sign up could not be completed [CHAR LIMIT=NONE] -->
+    <string name="osu_sign_up_failed">Couldn\u2019t complete sign-up. Tap to try again.</string>
+    <!-- Status message of OSU Provider on completing provisioning. [CHAR LIMIT=NONE] -->
+    <string name="osu_sign_up_complete">Sign-up complete. Connecting\u2026</string>
 
     <!-- Speed label for very slow network speed -->
     <string name="speed_label_very_slow">Very Slow</string>
@@ -161,8 +202,12 @@
 
     <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_battery_level">Active, <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level for untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_battery_level_untethered">Active, L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered">L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
 
@@ -313,6 +358,9 @@
     <string name="data_usage_uninstalled_apps">Removed apps</string>
     <!-- Title of data usage item that represents all uninstalled applications or removed users. [CHAR LIMIT=48] -->
     <string name="data_usage_uninstalled_apps_users">Removed apps and users</string>
+    <!-- Title of data usage item that represents system updates (OTAs). [CHAR LIMIT=48] -->
+    <string name="data_usage_ota">System updates</string>
+
 
     <!-- Tethering controls, item title to go into the tethering settings -->
     <!-- Tethering controls, item title to go into the tethering settings when only USB tethering is available [CHAR LIMIT=25]-->
@@ -505,8 +553,8 @@
     <string name="keep_screen_on_summary">Screen will never sleep while charging</string>
     <!-- Setting Checkbox title whether to enable Bluetooth HCI snoop log -->
     <string name="bt_hci_snoop_log">Enable Bluetooth HCI snoop log</string>
-    <!-- setting Checkbox summary whether to capture all Bluetooth HCI packets in a file -->
-    <string name="bt_hci_snoop_log_summary">Capture all Bluetooth HCI packets in a file (Toggle Bluetooth after changing this setting)</string>
+    <!-- setting Checkbox summary whether to capture all Bluetooth HCI packets in a file [CHAR_LIMIT=100] -->
+    <string name="bt_hci_snoop_log_summary">Capture Bluetooth packets. (Toggle Bluetooth after changing this setting)</string>
     <!-- setting Checkbox title whether to enable OEM unlock [CHAR_LIMIT=35] -->
     <string name="oem_unlock_enable">OEM unlocking</string>
     <!-- setting Checkbox summary whether to enable OEM unlock [CHAR_LIMIT=50] -->
@@ -530,8 +578,8 @@
     <string name="wifi_display_certification">Wireless display certification</string>
     <!-- Setting Checkbox title whether to enable WiFi Verbose Logging. [CHAR LIMIT=40] -->
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
-    <!-- Setting Checkbox title whether to enable connected MAC randomization -->
-    <string name="wifi_connected_mac_randomization">Connected MAC Randomization</string>
+    <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
+    <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -587,8 +635,8 @@
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
     <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
-    <!-- Setting Checkbox title whether to enable connected MAC randomization -->
-    <string name="wifi_connected_mac_randomization_summary">Randomize MAC address when connecting to Wi\u2011Fi networks</string>
+    <!-- Setting Checkbox summary whether to disable Wifi scan throttling [CHAR LIMIT=NONE] -->
+    <string name="wifi_scan_throttling_summary">Reduces battery drain &amp; improves network performance</string>
     <!-- Label indicating network has been manually marked as metered -->
     <string name="wifi_metered_label">Metered</string>
     <!-- Label indicating network has been manually marked as unmetered -->
@@ -704,9 +752,9 @@
     <string name="show_screen_updates_summary">Flash entire window surfaces when they update</string>
 
     <!-- UI debug setting: show where window updates happen with GPU rendering? [CHAR LIMIT=25] -->
-    <string name="show_hw_screen_updates">Show GPU view updates</string>
+    <string name="show_hw_screen_updates">Show view updates</string>
     <!-- UI debug setting: show GPU rendering screen updates summary [CHAR LIMIT=50] -->
-    <string name="show_hw_screen_updates_summary">Flash views inside windows when drawn with the GPU</string>
+    <string name="show_hw_screen_updates_summary">Flash views inside windows when drawn</string>
 
     <!-- UI debug setting: show when hardware layers get updated [CHAR LIMIT=25] -->
     <string name="show_hw_layers_updates">Show hardware layers updates</string>
@@ -742,11 +790,6 @@
     <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
     <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
 
-    <!-- UI debug setting: force hardware acceleration to render apps [CHAR LIMIT=25] -->
-    <string name="force_hw_ui">Force GPU rendering</string>
-    <!-- UI debug setting: force hardware acceleration summary [CHAR LIMIT=50] -->
-    <string name="force_hw_ui_summary">Force use of GPU for 2d drawing</string>
-
     <!-- UI debug setting: force anti-aliasing to render apps [CHAR LIMIT=25] -->
     <string name="force_msaa">Force 4x MSAA</string>
     <!-- UI debug setting: force anti-aliasing summary [CHAR LIMIT=50] -->
@@ -756,7 +799,7 @@
     <string name="show_non_rect_clip">Debug non-rectangular clip operations</string>
 
     <!-- UI debug setting: profile time taken by hardware acceleration to render apps [CHAR LIMIT=25] -->
-    <string name="track_frame_time">Profile GPU rendering</string>
+    <string name="track_frame_time">Profile HWUI rendering</string>
 
     <!-- UI debug setting: enable gpu debug layers [CHAR LIMIT=25] -->
     <string name="enable_gpu_debug_layers">Enable GPU debug layers</string>
@@ -826,6 +869,10 @@
     <string name="local_backup_password_toast_confirmation_mismatch">New password and confirmation don\u2019t match</string>
     <!-- Toast message shown when setting a new local backup password fails due to the user not supplying the correct existing password. The phrasing here is deliberately quite general. [CHAR LIMIT=80] -->
     <string name="local_backup_password_toast_validation_failure">Failure setting backup password</string>
+
+    <!-- [CHAR LIMIT=30] Location mode screen, temporary summary text to show as the status of a location
+      setting injected by an external app while the app is being queried for the actual value -->
+    <string name="loading_injected_setting_summary">Loading\u2026</string>
 
     <!-- Name of each color mode for the display. [CHAR LIMIT=40] -->
     <string-array name="color_mode_names">
@@ -915,8 +962,8 @@
     <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
     <string name="power_discharging_duration_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only_short"><xliff:g id="time_remaining">%1$s</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=20] Short label for estimated remaining duration of battery charging/discharging -->
+    <string name="power_remaining_duration_only_short"><xliff:g id="time_remaining">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=100] Label for enhanced estimated time that phone will run out of battery -->
     <string name="power_discharge_by_enhanced">Should last until about <xliff:g id="time">%1$s</xliff:g> based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
@@ -926,6 +973,10 @@
     <string name="power_discharge_by">Should last until about <xliff:g id="time">%1$s</xliff:g> (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
     <string name="power_discharge_by_only">Should last until about <xliff:g id="time">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=20] Label for estimated time that phone will run out of battery -->
+    <string name="power_discharge_by_only_short">Until <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=100] Extend the battery life past a certain time -->
+    <string name="power_suggestion_extend_battery">Extend battery life past <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
     <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>
@@ -972,11 +1023,6 @@
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
-
-    <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
-    <string name="enabled_by_admin">Enabled by admin</string>
-    <!-- Summary for switch preference to denote it is switched off [CHAR LIMIT=50] -->
-    <string name="disabled_by_admin">Disabled by admin</string>
 
     <!-- [CHAR LIMIT=25] Manage applications, text telling using an application is disabled. -->
     <string name="disabled">Disabled</string>
@@ -1036,8 +1082,6 @@
     <!-- Description for a custom screen zoom level. This shows the requested display
          density in raw pixels per inch rather than using a relative description. [CHAR LIMIT=24] -->
     <string name="screen_zoom_summary_custom">Custom (<xliff:g id="densityDpi" example="160">%d</xliff:g>)</string>
-    <!-- Label for Help and feedback menu item -->
-    <string name="help_feedback_label">Help &amp; feedback</string>
 
     <!-- Content description for drawer menu button [CHAR_LIMIT=30]-->
     <string name="content_description_menu_button">Menu</string>
@@ -1125,10 +1169,15 @@
     <string name="zen_mode_duration_settings_title">Duration</string>
     <!-- Do not disturb: Duration option to always prompt for the duration of dnd -->
     <string name="zen_mode_duration_always_prompt_title">Ask every time</string>
+    <!-- Do not disturb: Duration option to always have DND on until it is manually turned off [CHAR LIMIT=60] -->
+    <string name="zen_mode_forever">Until you turn off</string>
 
     <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
     <string name="time_unit_just_now">Just now</string>
 
     <!-- The notice header of Third-party licenses. not translatable -->
     <string name="notice_header" translatable="false"></string>
+
+    <!-- Name of the this device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name">This device</string>
 </resources>

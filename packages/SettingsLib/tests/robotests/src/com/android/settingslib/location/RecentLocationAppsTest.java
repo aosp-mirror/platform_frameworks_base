@@ -1,7 +1,8 @@
 package com.android.settingslib.location;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.isA;
+
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
@@ -15,21 +16,21 @@ import android.content.res.Resources;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
+import android.util.LongSparseLongArray;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class RecentLocationAppsTest {
 
     private static final int TEST_UID = 1234;
@@ -55,8 +56,6 @@ public class RecentLocationAppsTest {
     private int mTestUserId;
     private RecentLocationApps mRecentLocationApps;
 
-
-
     @Before
     public void setUp() throws NameNotFoundException {
         MockitoAnnotations.initMocks(this);
@@ -76,7 +75,8 @@ public class RecentLocationAppsTest {
 
         long[] testRequestTime = {ONE_MIN_AGO, TWENTY_THREE_HOURS_AGO, TWO_DAYS_AGO};
         List<PackageOps> appOps = createTestPackageOpsList(TEST_PACKAGE_NAMES, testRequestTime);
-        when(mAppOpsManager.getPackagesForOps(RecentLocationApps.LOCATION_OPS)).thenReturn(appOps);
+        when(mAppOpsManager.getPackagesForOps(RecentLocationApps.LOCATION_REQUEST_OPS)).thenReturn(
+                appOps);
         mockTestApplicationInfos(mTestUserId, TEST_PACKAGE_NAMES);
 
         mRecentLocationApps = new RecentLocationApps(mContext);
@@ -84,7 +84,7 @@ public class RecentLocationAppsTest {
 
     @Test
     public void testGetAppList_shouldFilterRecentApps() {
-        List<RecentLocationApps.Request> requests = mRecentLocationApps.getAppList();
+        List<RecentLocationApps.Request> requests = mRecentLocationApps.getAppList(true);
         // Only two of the apps have requested location within 15 min.
         assertThat(requests).hasSize(2);
         // Make sure apps are ordered by recency
@@ -108,11 +108,12 @@ public class RecentLocationAppsTest {
                 {ONE_MIN_AGO, TWENTY_THREE_HOURS_AGO, TWO_DAYS_AGO, ONE_MIN_AGO};
         List<PackageOps> appOps = createTestPackageOpsList(TEST_PACKAGE_NAMES, testRequestTime);
         appOps.add(androidSystemPackageOps);
-        when(mAppOpsManager.getPackagesForOps(RecentLocationApps.LOCATION_OPS)).thenReturn(appOps);
+        when(mAppOpsManager.getPackagesForOps(RecentLocationApps.LOCATION_REQUEST_OPS)).thenReturn(
+                appOps);
         mockTestApplicationInfos(
                 Process.SYSTEM_UID, RecentLocationApps.ANDROID_SYSTEM_PACKAGE_NAME);
 
-        List<RecentLocationApps.Request> requests = mRecentLocationApps.getAppList();
+        List<RecentLocationApps.Request> requests = mRecentLocationApps.getAppList(true);
         // Android OS shouldn't show up in the list of apps.
         assertThat(requests).hasSize(2);
         // Make sure apps are ordered by recency
@@ -134,7 +135,7 @@ public class RecentLocationAppsTest {
 
     private List<PackageOps> createTestPackageOpsList(String[] packageNameList, long[] time) {
         List<PackageOps> packageOpsList = new ArrayList<>();
-        for (int i = 0; i < packageNameList.length ; i++) {
+        for (int i = 0; i < packageNameList.length; i++) {
             PackageOps packageOps = createPackageOps(
                     packageNameList[i],
                     TEST_UID,
@@ -155,6 +156,13 @@ public class RecentLocationAppsTest {
     }
 
     private OpEntry createOpEntryWithTime(int op, long time, int duration) {
-        return new OpEntry(op, AppOpsManager.MODE_ALLOWED, time, 0L, duration, 0, "");
+        final LongSparseLongArray accessTimes = new LongSparseLongArray();
+        accessTimes.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
+                AppOpsManager.OP_FLAG_SELF), time);
+        final LongSparseLongArray durations = new LongSparseLongArray();
+        durations.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
+                AppOpsManager.OP_FLAG_SELF), duration);
+        return new OpEntry(op, false, AppOpsManager.MODE_ALLOWED, accessTimes,
+                null /*rejectTimes*/, durations, null /* proxyUids */, null /* proxyPackages */);
     }
 }

@@ -99,6 +99,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.util.SparseArray;
+import android.view.ContextThemeWrapper;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManager;
@@ -1467,11 +1468,13 @@ public class BugreportProgressService extends Service {
         void initialize(final Context context, BugreportInfo info) {
             final String dialogTitle =
                     context.getString(R.string.bugreport_info_dialog_title, info.id);
+            final Context themedContext = new ContextThemeWrapper(
+                    context, com.android.internal.R.style.Theme_DeviceDefault_DayNight);
             // First initializes singleton.
             if (mDialog == null) {
                 @SuppressLint("InflateParams")
                 // It's ok pass null ViewRoot on AlertDialogs.
-                final View view = View.inflate(context, R.layout.dialog_bugreport_info, null);
+                final View view = View.inflate(themedContext, R.layout.dialog_bugreport_info, null);
 
                 mInfoName = (EditText) view.findViewById(R.id.name);
                 mInfoTitle = (EditText) view.findViewById(R.id.title);
@@ -1488,7 +1491,7 @@ public class BugreportProgressService extends Service {
                     }
                 });
 
-                mDialog = new AlertDialog.Builder(context)
+                mDialog = new AlertDialog.Builder(themedContext)
                         .setView(view)
                         .setTitle(dialogTitle)
                         .setCancelable(true)

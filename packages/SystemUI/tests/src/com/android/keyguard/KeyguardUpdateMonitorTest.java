@@ -18,15 +18,33 @@ package com.android.keyguard;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.truth.Truth.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
+import android.os.UserManager;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -39,6 +57,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -52,74 +72,114 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RunWithLooper(setAsMainLooper = true)
 public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
+    @Mock
+    private KeyguardUpdateMonitor.StrongAuthTracker mStrongAuthTracker;
+    @Mock
+    private TrustManager mTrustManager;
+    @Mock
+    private FingerprintManager mFingerprintManager;
+    @Mock
+    private FaceManager mFaceManager;
+    @Mock
+    private BiometricManager mBiometricManager;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private UserManager mUserManager;
+    @Mock
+    private DevicePolicyManager mDevicePolicyManager;
     private TestableLooper mTestableLooper;
+    private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+        TestableContext context = spy(mContext);
+        when(mPackageManager.hasSystemFeature(anyString())).thenReturn(true);
+        when(context.getPackageManager()).thenReturn(mPackageManager);
+        doAnswer(invocation -> {
+            IBiometricEnabledOnKeyguardCallback callback = invocation.getArgument(0);
+            callback.onChanged(BiometricSourceType.FACE, true /* enabled */);
+            return null;
+        }).when(mBiometricManager).registerEnabledOnKeyguardCallback(any());
+        when(mFaceManager.isHardwareDetected()).thenReturn(true);
+        when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
+        when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
+        when(mUserManager.isPrimaryUser()).thenReturn(true);
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed()).thenReturn(true);
+        context.addMockSystemService(TrustManager.class, mTrustManager);
+        context.addMockSystemService(FingerprintManager.class, mFingerprintManager);
+        context.addMockSystemService(BiometricManager.class, mBiometricManager);
+        context.addMockSystemService(FaceManager.class, mFaceManager);
+        context.addMockSystemService(UserManager.class, mUserManager);
+        context.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
+
         mTestableLooper = TestableLooper.get(this);
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
     }
 
     @Test
     public void testIgnoresSimStateCallback_rebroadcast() {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
 
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
-
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
         Assert.assertTrue("onSimStateChanged not called",
-                keyguardUpdateMonitor.hasSimStateJustChanged());
+                mKeyguardUpdateMonitor.hasSimStateJustChanged());
 
         intent.putExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, true);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
         Assert.assertFalse("onSimStateChanged should have been skipped",
-                keyguardUpdateMonitor.hasSimStateJustChanged());
+                mKeyguardUpdateMonitor.hasSimStateJustChanged());
     }
 
     @Test
     public void testTelephonyCapable_BootInitState() {
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
     }
 
     @Test
     public void testTelephonyCapable_SimState_Absent() {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
-                , IccCardConstants.INTENT_VALUE_ICC_ABSENT);
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
-                , putPhoneInfo(intent,null, false));
+        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE,
+                IccCardConstants.INTENT_VALUE_ICC_ABSENT);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isTrue();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
+    }
+
+    @Test
+    public void testTelephonyCapable_SimState_CardIOError() {
+        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE,
+                IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
     }
 
     @Test
     public void testTelephonyCapable_SimInvalid_ServiceState_InService() {
         // SERVICE_STATE - IN_SERVICE, but SIM_STATE is invalid TelephonyCapable should be False
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_IN_SERVICE);
         state.fillInNotifierBundle(data);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, false));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
     }
 
     @Test
     public void testTelephonyCapable_SimValid_ServiceState_PowerOff() {
         // Simulate AirplaneMode case, SERVICE_STATE - POWER_OFF, check TelephonyCapable False
         // Only receive ServiceState callback IN_SERVICE -> OUT_OF_SERVICE -> POWER_OFF
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
                 , IccCardConstants.INTENT_VALUE_ICC_LOADED);
@@ -127,10 +187,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_POWER_OFF);
         state.fillInNotifierBundle(data);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, true));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isTrue();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
     }
 
     /* Normal SIM inserted flow
@@ -142,24 +202,20 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
      */
     @Test
     public void testTelephonyCapable_BootInitState_ServiceState_OutOfService() {
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
         state.fillInNotifierBundle(data);
         intent.putExtras(data);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, false));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
     }
 
     @Test
     public void testTelephonyCapable_BootInitState_SimState_NotReady() {
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
@@ -167,16 +223,14 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
                 , IccCardConstants.INTENT_VALUE_ICC_NOT_READY);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, false));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
     }
 
     @Test
     public void testTelephonyCapable_BootInitState_SimState_Ready() {
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
@@ -184,46 +238,40 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
                 , IccCardConstants.INTENT_VALUE_ICC_READY);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, false));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
     }
 
     @Test
     public void testTelephonyCapable_BootInitState_ServiceState_PowerOff() {
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_POWER_OFF);
         state.fillInNotifierBundle(data);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, false));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
     }
 
     @Test
     public void testTelephonyCapable_SimValid_ServiceState_InService() {
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_IN_SERVICE);
         state.fillInNotifierBundle(data);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, true));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isTrue();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
     }
 
     @Test
     public void testTelephonyCapable_SimValid_SimState_Loaded() {
-        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
-                new TestableKeyguardUpdateMonitor(getContext());
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_IN_SERVICE);
@@ -231,19 +279,86 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         Intent intentSimState = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         intentSimState.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
                 , IccCardConstants.INTENT_VALUE_ICC_LOADED);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intentSimState, data, true));
         mTestableLooper.processAllMessages();
         // Even SimState Loaded, still need ACTION_SERVICE_STATE_CHANGED turn on mTelephonyCapable
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
 
         Intent intentServiceState =  new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         intentSimState.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
                 , IccCardConstants.INTENT_VALUE_ICC_LOADED);
-        keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intentServiceState, data, true));
         mTestableLooper.processAllMessages();
-        assertThat(keyguardUpdateMonitor.mTelephonyCapable).isTrue();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
+    }
+
+    @Test
+    public void testTriesToAuthenticate_whenBouncer() {
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
+        mTestableLooper.processAllMessages();
+
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFaceManager).isHardwareDetected();
+        verify(mFaceManager).hasEnrolledTemplates(anyInt());
+    }
+
+    @Test
+    public void testTriesToAuthenticate_whenKeyguard() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void skipsAuthentication_whenEncryptedKeyguard() {
+        reset(mUserManager);
+        when(mUserManager.isUserUnlocked(anyInt())).thenReturn(false);
+
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any());
+    }
+
+    @Test
+    public void testTriesToAuthenticate_whenAssistant() {
+        mKeyguardUpdateMonitor.setKeyguardOccluded(true);
+        mKeyguardUpdateMonitor.setAssistantVisible(true);
+
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testOnFaceAuthenticated_skipsFaceWhenAuthenticated() {
+        mKeyguardUpdateMonitor.onFaceAuthenticated(KeyguardUpdateMonitor.getCurrentUser());
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
+        mTestableLooper.processAllMessages();
+
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any());
+    }
+
+    @Test
+    public void testGetUserCanSkipBouncer_whenFace() {
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        mKeyguardUpdateMonitor.onFaceAuthenticated(user);
+        assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
+    }
+
+    @Test
+    public void testGetUserCanSkipBouncer_whenFingerprint() {
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        mKeyguardUpdateMonitor.onFingerprintAuthenticated(user);
+        assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
+    }
+
+    @Test
+    public void testGetUserCanSkipBouncer_whenTrust() {
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */);
+        assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
     }
 
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
@@ -261,8 +376,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         protected TestableKeyguardUpdateMonitor(Context context) {
             super(context);
-            // Avoid race condition when unexpected broadcast could be received.
             context.unregisterReceiver(mBroadcastReceiver);
+            context.unregisterReceiver(mBroadcastAllReceiver);
+            mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;
         }
 
         public boolean hasSimStateJustChanged() {

@@ -26,34 +26,40 @@
 
     <LinearLayout
         android:id="@+id/keyguard_indication_area"
-        android:forceHasOverlappingRendering="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
         android:layout_gravity="bottom|center_horizontal"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-            android:id="@+id/keyguard_indication_enterprise_disclosure"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textStyle="italic"
-            android:textColor="?attr/wallpaperTextColorSecondary"
-            android:textSize="16sp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:visibility="gone" />
+        <include layout="@layout/left_docked_overlay" />
 
-        <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-            android:id="@+id/keyguard_indication_text"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textStyle="italic"
-            android:textColor="?attr/wallpaperTextColorSecondary"
-            android:textSize="16sp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:accessibilityLiveRegion="polite" />
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:orientation="vertical">
+
+            <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+                android:id="@+id/keyguard_indication_enterprise_disclosure"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
+                android:visibility="gone" />
+
+            <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+                android:id="@+id/keyguard_indication_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
+                android:accessibilityLiveRegion="polite" />
+
+        </LinearLayout>
+
+        <include layout="@layout/right_docked_overlay" />
 
     </LinearLayout>
 
@@ -78,19 +84,10 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|start"
-        android:src="@drawable/ic_phone_24dp"
+        android:src="@*android:drawable/ic_phone"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button"
         android:tint="?attr/wallpaperTextColor" />
-
-    <com.android.systemui.statusbar.phone.LockIcon
-        android:id="@+id/lock_icon"
-        android:layout_width="@dimen/keyguard_affordance_width"
-        android:layout_height="@dimen/keyguard_affordance_height"
-        android:layout_gravity="bottom|center_horizontal"
-        android:src="@drawable/ic_lock_24dp"
-        android:contentDescription="@string/accessibility_unlock_button"
-        android:scaleType="center" />
 
     <FrameLayout
         android:id="@+id/overlay_container"

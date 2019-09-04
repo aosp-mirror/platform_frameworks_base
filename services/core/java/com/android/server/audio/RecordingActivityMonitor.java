@@ -20,11 +20,11 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioSystem;
 import android.media.IRecordingConfigDispatcher;
 import android.media.MediaRecorder;
+import android.media.audiofx.AudioEffect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -33,7 +33,6 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,57 +49,171 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
     // playback configurations that do not contain uid/package name information.
     private boolean mHasPublicClients = false;
 
-    private HashMap<Integer, AudioRecordingConfiguration> mRecordConfigs =
-            new HashMap<Integer, AudioRecordingConfiguration>();
+    static final class RecordingState {
+        private final int mRiid;
+        private final RecorderDeathHandler mDeathHandler;
+        private boolean mIsActive;
+        private AudioRecordingConfiguration mConfig;
+
+        RecordingState(int riid, RecorderDeathHandler handler) {
+            mRiid = riid;
+            mDeathHandler = handler;
+        }
+
+        RecordingState(AudioRecordingConfiguration config) {
+            mRiid = AudioManager.RECORD_RIID_INVALID;
+            mDeathHandler = null;
+            mConfig = config;
+        }
+
+        int getRiid() {
+            return mRiid;
+        }
+
+        int getPortId() {
+            return mConfig != null ? mConfig.getClientPortId() : -1;
+        }
+
+        AudioRecordingConfiguration getConfig() {
+            return mConfig;
+        }
+
+        boolean hasDeathHandler() {
+            return mDeathHandler != null;
+        }
+
+        boolean isActiveConfiguration() {
+            return mIsActive && mConfig != null;
+        }
+
+        // returns true if status of an active recording has changed
+        boolean setActive(boolean active) {
+            if (mIsActive == active) return false;
+            mIsActive = active;
+            return mConfig != null;
+        }
+
+        // returns true if an active recording has been updated
+        boolean setConfig(AudioRecordingConfiguration config) {
+            if (config.equals(mConfig)) return false;
+            mConfig = config;
+            return mIsActive;
+        }
+
+        void dump(PrintWriter pw) {
+            pw.println("riid " + mRiid + "; active? " + mIsActive);
+            if (mConfig != null) {
+                mConfig.dump(pw);
+            } else {
+                pw.println("  no config");
+            }
+        }
+    }
+    private List<RecordingState> mRecordStates = new ArrayList<RecordingState>();
 
     private final PackageManager mPackMan;
 
     RecordingActivityMonitor(Context ctxt) {
         RecMonitorClient.sMonitor = this;
+        RecorderDeathHandler.sMonitor = this;
         mPackMan = ctxt.getPackageManager();
     }
 
     /**
      * Implementation of android.media.AudioSystem.AudioRecordingCallback
      */
-    public void onRecordingConfigurationChanged(int event, int uid, int session, int source,
-            int[] recordingInfo, String packName) {
+    public void onRecordingConfigurationChanged(int event, int riid, int uid, int session,
+                                                int source, int portId, boolean silenced,
+                                                int[] recordingInfo,
+                                                AudioEffect.Descriptor[] clientEffects,
+                                                AudioEffect.Descriptor[] effects,
+                                                int activeSource, String packName) {
+        final AudioRecordingConfiguration config = createRecordingConfiguration(
+                uid, session, source, recordingInfo,
+                portId, silenced, activeSource, clientEffects, effects);
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
+            // still want to log event, it just won't appear in recording configurations;
+            sEventLogger.log(new RecordingEvent(event, riid, config).printLog(TAG));
             return;
         }
-        final List<AudioRecordingConfiguration> configsSystem =
-                updateSnapshot(event, uid, session, source, recordingInfo);
-        if (configsSystem != null){
-            synchronized (mClients) {
-                // list of recording configurations for "public consumption". It is only computed if
-                // there are non-system recording activity listeners.
-                final List<AudioRecordingConfiguration> configsPublic = mHasPublicClients ?
-                        anonymizeForPublicConsumption(configsSystem) :
-                            new ArrayList<AudioRecordingConfiguration>();
-                final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
-                while (clientIterator.hasNext()) {
-                    final RecMonitorClient rmc = clientIterator.next();
-                    try {
-                        if (rmc.mIsPrivileged) {
-                            rmc.mDispatcherCb.dispatchRecordingConfigChange(configsSystem);
-                        } else {
-                            rmc.mDispatcherCb.dispatchRecordingConfigChange(configsPublic);
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Could not call dispatchRecordingConfigChange() on client", e);
+        dispatchCallbacks(updateSnapshot(event, riid, config));
+    }
+
+    /**
+     * Track a recorder provided by the client
+     */
+    public int trackRecorder(IBinder recorder) {
+        if (recorder == null) {
+            Log.e(TAG, "trackRecorder called with null token");
+            return AudioManager.RECORD_RIID_INVALID;
+        }
+        final int newRiid = AudioSystem.newAudioRecorderId();
+        RecorderDeathHandler handler = new RecorderDeathHandler(newRiid, recorder);
+        if (!handler.init()) {
+            // probably means that the AudioRecord has already died
+            return AudioManager.RECORD_RIID_INVALID;
+        }
+        synchronized (mRecordStates) {
+            mRecordStates.add(new RecordingState(newRiid, handler));
+        }
+        // a newly added record is inactive, no change in active configs is possible.
+        return newRiid;
+    }
+
+    /**
+     * Receive an event from the client about a tracked recorder
+     */
+    public void recorderEvent(int riid, int event) {
+        int configEvent = event == AudioManager.RECORDER_STATE_STARTED
+                ? AudioManager.RECORD_CONFIG_EVENT_START :
+                event == AudioManager.RECORDER_STATE_STOPPED
+                ? AudioManager.RECORD_CONFIG_EVENT_STOP : AudioManager.RECORD_CONFIG_EVENT_NONE;
+        if (riid == AudioManager.RECORD_RIID_INVALID
+                || configEvent == AudioManager.RECORD_CONFIG_EVENT_NONE) {
+            sEventLogger.log(new RecordingEvent(event, riid, null).printLog(TAG));
+            return;
+        }
+        dispatchCallbacks(updateSnapshot(configEvent, riid, null));
+    }
+
+    /**
+     * Stop tracking the recorder
+     */
+    public void releaseRecorder(int riid) {
+        dispatchCallbacks(updateSnapshot(AudioManager.RECORD_CONFIG_EVENT_RELEASE, riid, null));
+    }
+
+    private void dispatchCallbacks(List<AudioRecordingConfiguration> configs) {
+        if (configs == null) { // null means "no changes"
+            return;
+        }
+        synchronized (mClients) {
+            // list of recording configurations for "public consumption". It is only computed if
+            // there are non-system recording activity listeners.
+            final List<AudioRecordingConfiguration> configsPublic = mHasPublicClients
+                    ? anonymizeForPublicConsumption(configs) :
+                      new ArrayList<AudioRecordingConfiguration>();
+            for (RecMonitorClient rmc : mClients) {
+                try {
+                    if (rmc.mIsPrivileged) {
+                        rmc.mDispatcherCb.dispatchRecordingConfigChange(configs);
+                    } else {
+                        rmc.mDispatcherCb.dispatchRecordingConfigChange(configsPublic);
                     }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Could not call dispatchRecordingConfigChange() on client", e);
                 }
             }
         }
     }
 
     protected void dump(PrintWriter pw) {
-        // players
+        // recorders
         pw.println("\nRecordActivityMonitor dump time: "
                 + DateFormat.getTimeInstance().format(new Date()));
-        synchronized(mRecordConfigs) {
-            for (AudioRecordingConfiguration conf : mRecordConfigs.values()) {
-                conf.dump(pw);
+        synchronized (mRecordStates) {
+            for (RecordingState state : mRecordStates) {
+                state.dump(pw);
             }
         }
         pw.println("\n");
@@ -108,7 +221,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         sEventLogger.dump(pw);
     }
 
-    private ArrayList<AudioRecordingConfiguration> anonymizeForPublicConsumption(
+    private static ArrayList<AudioRecordingConfiguration> anonymizeForPublicConsumption(
             List<AudioRecordingConfiguration> sysConfigs) {
         ArrayList<AudioRecordingConfiguration> publicConfigs =
                 new ArrayList<AudioRecordingConfiguration>();
@@ -121,6 +234,32 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
 
     void initMonitor() {
         AudioSystem.setRecordingCallback(this);
+    }
+
+    void onAudioServerDied() {
+        // Remove all RecordingState entries that do not have a death handler (that means
+        // they are tracked by the Audio Server). If there were active entries among removed,
+        // dispatch active configuration changes.
+        List<AudioRecordingConfiguration> configs = null;
+        synchronized (mRecordStates) {
+            boolean configChanged = false;
+            for (Iterator<RecordingState> it = mRecordStates.iterator(); it.hasNext(); ) {
+                RecordingState state = it.next();
+                if (!state.hasDeathHandler()) {
+                    if (state.isActiveConfiguration()) {
+                        configChanged = true;
+                        sEventLogger.log(new RecordingEvent(
+                                        AudioManager.RECORD_CONFIG_EVENT_RELEASE,
+                                        state.getRiid(), state.getConfig()));
+                    }
+                    it.remove();
+                }
+            }
+            if (configChanged) {
+                configs = getActiveRecordingConfigurations(true /*isPrivileged*/);
+            }
+        }
+        dispatchCallbacks(configs);
     }
 
     void registerRecordingCallback(IRecordingConfigDispatcher rcdb, boolean isPrivileged) {
@@ -161,98 +300,161 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
     }
 
     List<AudioRecordingConfiguration> getActiveRecordingConfigurations(boolean isPrivileged) {
-        synchronized(mRecordConfigs) {
-            if (isPrivileged) {
-                return new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values());
-            } else {
-                final List<AudioRecordingConfiguration> configsPublic =
-                        anonymizeForPublicConsumption(
-                            new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values()));
-                return configsPublic;
+        List<AudioRecordingConfiguration> configs = new ArrayList<AudioRecordingConfiguration>();
+        synchronized (mRecordStates) {
+            for (RecordingState state : mRecordStates) {
+                if (state.isActiveConfiguration()) {
+                    configs.add(state.getConfig());
+                }
             }
         }
+        // AudioRecordingConfiguration objects never get updated. If config changes,
+        // the reference to the config is set in RecordingState.
+        if (!isPrivileged) {
+            configs = anonymizeForPublicConsumption(configs);
+        }
+        return configs;
+    }
+
+    /**
+     * Create a recording configuration from the provided parameters
+     * @param uid
+     * @param session
+     * @param source
+     * @param recordingFormat see
+     *     {@link AudioSystem.AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int,\
+     int, int, boolean, int[], AudioEffect.Descriptor[], AudioEffect.Descriptor[], int, String)}
+     *     for the definition of the contents of the array
+     * @param portId
+     * @param silenced
+     * @param activeSource
+     * @param clientEffects
+     * @param effects
+     * @return null a configuration object.
+     */
+    private AudioRecordingConfiguration createRecordingConfiguration(int uid,
+            int session, int source, int[] recordingInfo, int portId, boolean silenced,
+            int activeSource, AudioEffect.Descriptor[] clientEffects,
+            AudioEffect.Descriptor[] effects) {
+        final AudioFormat clientFormat = new AudioFormat.Builder()
+                .setEncoding(recordingInfo[0])
+                // FIXME this doesn't support index-based masks
+                .setChannelMask(recordingInfo[1])
+                .setSampleRate(recordingInfo[2])
+                .build();
+        final AudioFormat deviceFormat = new AudioFormat.Builder()
+                .setEncoding(recordingInfo[3])
+                // FIXME this doesn't support index-based masks
+                .setChannelMask(recordingInfo[4])
+                .setSampleRate(recordingInfo[5])
+                .build();
+        final int patchHandle = recordingInfo[6];
+        final String[] packages = mPackMan.getPackagesForUid(uid);
+        final String packageName;
+        if (packages != null && packages.length > 0) {
+            packageName = packages[0];
+        } else {
+            packageName = "";
+        }
+        return new AudioRecordingConfiguration(uid, session, source,
+                clientFormat, deviceFormat, patchHandle, packageName,
+                portId, silenced, activeSource, clientEffects, effects);
     }
 
     /**
      * Update the internal "view" of the active recording sessions
-     * @param event
-     * @param session
-     * @param source
-     * @param recordingFormat see
-     *     {@link AudioSystem.AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])}
-     *     for the definition of the contents of the array
+     * @param event RECORD_CONFIG_EVENT_...
+     * @param riid
+     * @param config
      * @return null if the list of active recording sessions has not been modified, a list
      *     with the current active configurations otherwise.
      */
-    private List<AudioRecordingConfiguration> updateSnapshot(int event, int uid, int session,
-            int source, int[] recordingInfo) {
-        final boolean configChanged;
-        final ArrayList<AudioRecordingConfiguration> configs;
-        synchronized(mRecordConfigs) {
-            switch (event) {
-            case AudioManager.RECORD_CONFIG_EVENT_STOP:
-                // return failure if an unknown recording session stopped
-                configChanged = (mRecordConfigs.remove(new Integer(session)) != null);
-                if (configChanged) {
-                    sEventLogger.log(new RecordingEvent(event, uid, session, source, null));
-                }
-                break;
-            case AudioManager.RECORD_CONFIG_EVENT_START:
-                final AudioFormat clientFormat = new AudioFormat.Builder()
-                        .setEncoding(recordingInfo[0])
-                        // FIXME this doesn't support index-based masks
-                        .setChannelMask(recordingInfo[1])
-                        .setSampleRate(recordingInfo[2])
-                        .build();
-                final AudioFormat deviceFormat = new AudioFormat.Builder()
-                        .setEncoding(recordingInfo[3])
-                        // FIXME this doesn't support index-based masks
-                        .setChannelMask(recordingInfo[4])
-                        .setSampleRate(recordingInfo[5])
-                        .build();
-                final int patchHandle = recordingInfo[6];
-                final Integer sessionKey = new Integer(session);
-
-                final String[] packages = mPackMan.getPackagesForUid(uid);
-                final String packageName;
-                if (packages != null && packages.length > 0) {
-                    packageName = packages[0];
+    private List<AudioRecordingConfiguration> updateSnapshot(
+            int event, int riid, AudioRecordingConfiguration config) {
+        List<AudioRecordingConfiguration> configs = null;
+        synchronized (mRecordStates) {
+            int stateIndex = -1;
+            if (riid != AudioManager.RECORD_RIID_INVALID) {
+                stateIndex = findStateByRiid(riid);
+            } else if (config != null) {
+                stateIndex = findStateByPortId(config.getClientPortId());
+            }
+            if (stateIndex == -1) {
+                if (event == AudioManager.RECORD_CONFIG_EVENT_START && config != null) {
+                    // First time registration for a recorder tracked by AudioServer.
+                    mRecordStates.add(new RecordingState(config));
+                    stateIndex = mRecordStates.size() - 1;
                 } else {
-                    packageName = "";
-                }
-                final AudioRecordingConfiguration updatedConfig =
-                        new AudioRecordingConfiguration(uid, session, source,
-                                clientFormat, deviceFormat, patchHandle, packageName);
-
-                if (mRecordConfigs.containsKey(sessionKey)) {
-                    if (updatedConfig.equals(mRecordConfigs.get(sessionKey))) {
-                        configChanged = false;
-                    } else {
-                        // config exists but has been modified
-                        mRecordConfigs.remove(sessionKey);
-                        mRecordConfigs.put(sessionKey, updatedConfig);
-                        configChanged = true;
+                    if (config == null) {
+                        // Records tracked by clients must be registered first via trackRecorder.
+                        Log.e(TAG, String.format(
+                                        "Unexpected event %d for riid %d", event, riid));
                     }
-                } else {
-                    mRecordConfigs.put(sessionKey, updatedConfig);
-                    configChanged = true;
+                    return configs;
                 }
-                if (configChanged) {
-                    sEventLogger.log(new RecordingEvent(event, uid, session, source, packageName));
-                }
-                break;
-            default:
-                Log.e(TAG, String.format("Unknown event %d for session %d, source %d",
-                        event, session, source));
-                configChanged = false;
+            }
+            final RecordingState state = mRecordStates.get(stateIndex);
+
+            boolean configChanged;
+            switch (event) {
+                case AudioManager.RECORD_CONFIG_EVENT_START:
+                    configChanged = state.setActive(true);
+                    if (config != null) {
+                        configChanged = state.setConfig(config) || configChanged;
+                    }
+                    break;
+                case AudioManager.RECORD_CONFIG_EVENT_UPDATE:
+                    // For this event config != null
+                    configChanged = state.setConfig(config);
+                    break;
+                case AudioManager.RECORD_CONFIG_EVENT_STOP:
+                    configChanged = state.setActive(false);
+                    if (!state.hasDeathHandler()) {
+                        // A recorder tracked by AudioServer has to be removed now so it
+                        // does not leak. It will be re-registered if recording starts again.
+                        mRecordStates.remove(stateIndex);
+                    }
+                    break;
+                case AudioManager.RECORD_CONFIG_EVENT_RELEASE:
+                    configChanged = state.isActiveConfiguration();
+                    mRecordStates.remove(stateIndex);
+                    break;
+                default:
+                    Log.e(TAG, String.format("Unknown event %d for riid %d / portid %d",
+                                    event, riid, state.getPortId()));
+                    configChanged = false;
             }
             if (configChanged) {
-                configs = new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values());
-            } else {
-                configs = null;
+                sEventLogger.log(new RecordingEvent(event, riid, state.getConfig()));
+                configs = getActiveRecordingConfigurations(true /*isPrivileged*/);
             }
         }
         return configs;
+    }
+
+    // riid is assumed to be valid
+    private int findStateByRiid(int riid) {
+        synchronized (mRecordStates) {
+            for (int i = 0; i < mRecordStates.size(); i++) {
+                if (mRecordStates.get(i).getRiid() == riid) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private int findStateByPortId(int portId) {
+        // Lookup by portId is unambiguous only for recordings managed by the Audio Server.
+        synchronized (mRecordStates) {
+            for (int i = 0; i < mRecordStates.size(); i++) {
+                if (!mRecordStates.get(i).hasDeathHandler()
+                        && mRecordStates.get(i).getPortId() == portId) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
     /**
@@ -291,28 +493,80 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         }
     }
 
+    private static final class RecorderDeathHandler implements IBinder.DeathRecipient {
+
+        // can afford to be static because only one RecordingActivityMonitor ever instantiated
+        static RecordingActivityMonitor sMonitor;
+
+        final int mRiid;
+        private final IBinder mRecorderToken;
+
+        RecorderDeathHandler(int riid, IBinder recorderToken) {
+            mRiid = riid;
+            mRecorderToken = recorderToken;
+        }
+
+        public void binderDied() {
+            sMonitor.releaseRecorder(mRiid);
+        }
+
+        boolean init() {
+            try {
+                mRecorderToken.linkToDeath(this, 0);
+                return true;
+            } catch (RemoteException e) {
+                Log.w(TAG, "Could not link to recorder death", e);
+                return false;
+            }
+        }
+    }
+
     /**
      * Inner class for recording event logging
      */
     private static final class RecordingEvent extends AudioEventLogger.Event {
         private final int mRecEvent;
+        private final int mRIId;
         private final int mClientUid;
         private final int mSession;
         private final int mSource;
         private final String mPackName;
 
-        RecordingEvent(int event, int uid, int session, int source, String packName) {
+        RecordingEvent(int event, int riid, AudioRecordingConfiguration config) {
             mRecEvent = event;
-            mClientUid = uid;
-            mSession = session;
-            mSource = source;
-            mPackName = packName;
+            mRIId = riid;
+            if (config != null) {
+                mClientUid = config.getClientUid();
+                mSession = config.getClientAudioSessionId();
+                mSource = config.getClientAudioSource();
+                mPackName = config.getClientPackageName();
+            } else {
+                mClientUid = -1;
+                mSession = -1;
+                mSource = -1;
+                mPackName = null;
+            }
+        }
+
+        private static String recordEventToString(int recEvent) {
+            switch (recEvent) {
+                case AudioManager.RECORD_CONFIG_EVENT_START:
+                    return "start";
+                case AudioManager.RECORD_CONFIG_EVENT_UPDATE:
+                    return "update";
+                case AudioManager.RECORD_CONFIG_EVENT_STOP:
+                    return "stop";
+                case AudioManager.RECORD_CONFIG_EVENT_RELEASE:
+                    return "release";
+                default:
+                    return "unknown (" + recEvent + ")";
+            }
         }
 
         @Override
         public String eventToString() {
-            return new StringBuilder("rec ").append(
-                        mRecEvent == AudioManager.RECORD_CONFIG_EVENT_START ? "start" : "stop ")
+            return new StringBuilder("rec ").append(recordEventToString(mRecEvent))
+                    .append(" riid:").append(mRIId)
                     .append(" uid:").append(mClientUid)
                     .append(" session:").append(mSession)
                     .append(" src:").append(MediaRecorder.toLogFriendlyAudioSource(mSource))
@@ -321,5 +575,5 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
     }
 
     private static final AudioEventLogger sEventLogger = new AudioEventLogger(50,
-            "recording activity as reported through AudioSystem.AudioRecordingCallback");
+            "recording activity received by AudioService");
 }

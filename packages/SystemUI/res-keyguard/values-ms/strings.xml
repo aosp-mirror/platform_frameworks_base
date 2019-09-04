@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Sentuh untuk menaip kata laluan"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Taip kata laluan untuk membuka kunci"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Taip PIN untuk membuka kunci"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Masukkan PIN anda"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Masukkan corak anda"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Masukkan kata laluan anda"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Kod PIN salah."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Kad Tidak Sah."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Sudah dicas"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Mengecas"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Mengecas dengan cepat"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Mengecas dengan perlahan"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Dicas penuh"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas Secara Wayarles"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas dengan cepat"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas dengan perlahan"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Sambungkan pengecas anda."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Tekan Menu untuk membuka kunci."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Rangkaian dikunci"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Kad SIM dikunci dengan PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Membuka kunci kad SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Bahagian PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Kata laluan peranti"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Bahagian PIN SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Bahagian PUK SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Penggera seterusnya ditetapkan pada <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"eSIM tidak dapat dilumpuhkan kerana ralat."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Kekunci Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Terlupa Corak"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Corak salah"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Kata Laluan salah"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Corak salah"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Kata laluan salah"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN salah"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">Cuba lagi dalam masa <xliff:g id="NUMBER">%d</xliff:g> saat.</item>
@@ -136,13 +141,94 @@
       <item quantity="other">Peranti tidak dibuka kuncinya selama <xliff:g id="NUMBER_1">%d</xliff:g> jam. Sahkan kata laluan.</item>
       <item quantity="one">Peranti tidak dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Sahkan kata laluan.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Tidak dikenali"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Masukkan PIN SIM, tinggal <xliff:g id="NUMBER_1">%d</xliff:g> percubaan lagi.</item>
-      <item quantity="one">Masukkan PIN SIM, tinggal <xliff:g id="NUMBER_0">%d</xliff:g> percubaan lagi sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti.</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Tidak dikenali"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Tidak dikenali"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Masukkan PIN SIM. Tinggal <xliff:g id="NUMBER_1">%d</xliff:g> percubaan lagi.</item>
+      <item quantity="one">Masukkan PIN SIM. Tinggal <xliff:g id="NUMBER_0">%d</xliff:g> percubaan lagi sebelum anda perlu menghubungi pembawa anda untuk membuka kunci peranti.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Tinggal <xliff:g id="_NUMBER_1">%d</xliff:g> percubaan sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.</item>
       <item quantity="one">Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Tinggal <xliff:g id="_NUMBER_0">%d</xliff:g> percubaan sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Pukul"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Pukul"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Dua bls"</item>
+    <item msgid="7389464214252023751">"Satu"</item>
+    <item msgid="8803180377002008046">"Dua"</item>
+    <item msgid="8614897059944644719">"Tiga"</item>
+    <item msgid="2293058674782619556">"Empat"</item>
+    <item msgid="4815402358455041664">"Lima"</item>
+    <item msgid="3325754778509665687">"Enam"</item>
+    <item msgid="5805551341866280575">"Tujuh"</item>
+    <item msgid="203334816668238610">"Lapan"</item>
+    <item msgid="4828052671464488923">"Sembilan"</item>
+    <item msgid="2233497913571137419">"Sepuluh"</item>
+    <item msgid="5621554266768657830">"Sebelas"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Pukul"</item>
+    <item msgid="8837126587669001578">"Satu"</item>
+    <item msgid="4294343372940455660">"Dua"</item>
+    <item msgid="7129166637707421536">"Tiga"</item>
+    <item msgid="7579404865008788673">"Empat"</item>
+    <item msgid="3873924689207380586">"Lima"</item>
+    <item msgid="4849565597850069377">"Enam"</item>
+    <item msgid="4404219424523572364">"Tujuh"</item>
+    <item msgid="8740481214764087329">"Lapan"</item>
+    <item msgid="1713216865806811237">"Sembilan"</item>
+    <item msgid="3508406095411245038">"Sepuluh"</item>
+    <item msgid="7161996337755311711">"Sebelas"</item>
+    <item msgid="4044549963329624197">"Dua belas"</item>
+    <item msgid="333373157917379088">"Tiga belas"</item>
+    <item msgid="2631202907124819385">"Empat belas"</item>
+    <item msgid="6472396076858033453">"Lima belas"</item>
+    <item msgid="8656981856181581643">"Enam belas"</item>
+    <item msgid="7289026608562030619">"Tujuh belas"</item>
+    <item msgid="3881477602692646573">"Lapan belas"</item>
+    <item msgid="3358129827772984226">"Sembilan belas"</item>
+    <item msgid="3308575407402865807">"Dua puluh"</item>
+    <item msgid="5346560955382229629">"Dua Puluh\nSatu"</item>
+    <item msgid="226750304761473436">"Dua Puluh\nDua"</item>
+    <item msgid="616811325336838734">"Dua Puluh\nTiga"</item>
+    <item msgid="616346116869053440">"Dua Puluh\nEmpat"</item>
+    <item msgid="4642996410384042830">"Dua Puluh\nLima"</item>
+    <item msgid="7506092849993571465">"Dua Puluh\nEnam"</item>
+    <item msgid="1915078191101042031">"Dua Puluh\nTujuh"</item>
+    <item msgid="4292378641900520252">"Dua Puluh\nLapan"</item>
+    <item msgid="5339513901773103696">"Dua Puluh\nSembilan"</item>
+    <item msgid="3574673250891657607">"Tiga puluh"</item>
+    <item msgid="5796923836589110940">"Tiga Puluh\nSatu"</item>
+    <item msgid="5859323597571702052">"Tiga Puluh\nDua"</item>
+    <item msgid="5133326723148876507">"Tiga Puluh\nTiga"</item>
+    <item msgid="2693999494655663096">"Tiga Puluh\nEmpat"</item>
+    <item msgid="3316754944962836197">"Tiga Puluh\nLima"</item>
+    <item msgid="816891008836796723">"Tiga Puluh\nEnam"</item>
+    <item msgid="9158890488666520078">"Tiga Puluh\nTujuh"</item>
+    <item msgid="1894769703213894011">"Tiga Puluh\nLapan"</item>
+    <item msgid="5638820345598572399">"Tiga Puluh\nSembilan"</item>
+    <item msgid="8838304023017895439">"Empat Puluh"</item>
+    <item msgid="1834742948932559597">"Empat Puluh\nSatu"</item>
+    <item msgid="6573707308847773944">"Empat Puluh\nDua"</item>
+    <item msgid="2450149950652678001">"Empat Puluh\nTiga"</item>
+    <item msgid="2874667401318178036">"Empat Puluh\nEmpat"</item>
+    <item msgid="3391101532763048862">"Empat Puluh\nLima"</item>
+    <item msgid="1671489330863254362">"Empat Puluh\nEnam"</item>
+    <item msgid="5916017359554531038">"Empat Puluh\nTujuh"</item>
+    <item msgid="8205413177993059967">"Empat Puluh\nLapan"</item>
+    <item msgid="6607867415142171302">"Empat Puluh\nSmbln"</item>
+    <item msgid="8358850748472089162">"Lima puluh"</item>
+    <item msgid="3551313125255080234">"Lima Puluh\nSatu"</item>
+    <item msgid="1559678130725716542">"Lima Puluh\nDua"</item>
+    <item msgid="431441994725492377">"Lima Puluh\nTiga"</item>
+    <item msgid="6345774640539623024">"Lima Puluh\nEmpat"</item>
+    <item msgid="8018192990793931120">"Lima Puluh\nLima"</item>
+    <item msgid="6187650843754604534">"Lima Puluh\nEnam"</item>
+    <item msgid="8727240174015993259">"Lima Puluh\nTujuh"</item>
+    <item msgid="848339003778952950">"Lima Puluh\nLapan"</item>
+    <item msgid="5798985802835423618">"Lima Puluh\nSembln"</item>
+  </string-array>
 </resources>

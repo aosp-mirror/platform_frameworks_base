@@ -64,7 +64,7 @@ final class NegationValidator extends InternalValidator {
         dest.writeParcelable(mValidator, flags);
     }
 
-    public static final Parcelable.Creator<NegationValidator> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NegationValidator> CREATOR =
             new Parcelable.Creator<NegationValidator>() {
         @Override
         public NegationValidator createFromParcel(Parcel parcel) {

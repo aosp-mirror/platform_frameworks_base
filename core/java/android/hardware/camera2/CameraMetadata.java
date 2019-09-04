@@ -116,7 +116,8 @@ public abstract class CameraMetadata<TKey> {
     public List<TKey> getKeys() {
         Class<CameraMetadata<TKey>> thisClass = (Class<CameraMetadata<TKey>>) getClass();
         return Collections.unmodifiableList(
-                getKeys(thisClass, getKeyClass(), this, /*filterTags*/null));
+                getKeys(thisClass, getKeyClass(), this, /*filterTags*/null,
+                    /*includeSynthetic*/ true));
     }
 
     /**
@@ -131,13 +132,14 @@ public abstract class CameraMetadata<TKey> {
      * Optionally, if {@code filterTags} is not {@code null}, then filter out any keys
      * whose native {@code tag} is not in {@code filterTags}. The {@code filterTags} array will be
      * sorted as a side effect.
+     * {@code includeSynthetic} Includes public syntenthic fields by default.
      * </p>
      */
      /*package*/ @SuppressWarnings("unchecked")
     <TKey> ArrayList<TKey> getKeys(
              Class<?> type, Class<TKey> keyClass,
              CameraMetadata<TKey> instance,
-             int[] filterTags) {
+             int[] filterTags, boolean includeSynthetic) {
 
         if (DEBUG) Log.v(TAG, "getKeysStatic for " + type);
 
@@ -168,7 +170,7 @@ public abstract class CameraMetadata<TKey> {
                 }
 
                 if (instance == null || instance.getProtected(key) != null) {
-                    if (shouldKeyBeAdded(key, field, filterTags)) {
+                    if (shouldKeyBeAdded(key, field, filterTags, includeSynthetic)) {
                         keyList.add(key);
 
                         if (DEBUG) {
@@ -215,7 +217,8 @@ public abstract class CameraMetadata<TKey> {
     }
 
     @SuppressWarnings("rawtypes")
-    private static <TKey> boolean shouldKeyBeAdded(TKey key, Field field, int[] filterTags) {
+    private static <TKey> boolean shouldKeyBeAdded(TKey key, Field field, int[] filterTags,
+            boolean includeSynthetic) {
         if (key == null) {
             throw new NullPointerException("key must not be null");
         }
@@ -249,8 +252,7 @@ public abstract class CameraMetadata<TKey> {
         if (field.getAnnotation(SyntheticKey.class) != null) {
             // This key is synthetic, so calling #getTag will throw IAE
 
-            // TODO: don't just assume all public+synthetic keys are always available
-            return true;
+            return includeSynthetic;
         }
 
         /*
@@ -426,6 +428,10 @@ public abstract class CameraMetadata<TKey> {
      * <p>If this is supported, {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} will
      * additionally return a min frame duration that is greater than
      * zero for each supported size-format combination.</p>
+     * <p>For camera devices with LOGICAL_MULTI_CAMERA capability, when the underlying active
+     * physical camera switches, exposureTime, sensitivity, and lens properties may change
+     * even if AE/AF is locked. However, the overall auto exposure and auto focus experience
+     * for users will be consistent. Refer to LOGICAL_MULTI_CAMERA capability for details.</p>
      *
      * @see CaptureRequest#BLACK_LEVEL_LOCK
      * @see CaptureRequest#CONTROL_AE_LOCK
@@ -483,6 +489,10 @@ public abstract class CameraMetadata<TKey> {
      * will accurately report the values applied by AWB in the result.</p>
      * <p>A given camera device may also support additional post-processing
      * controls, but this capability only covers the above list of controls.</p>
+     * <p>For camera devices with LOGICAL_MULTI_CAMERA capability, when underlying active
+     * physical camera switches, tonemap, white balance, and shading map may change even if
+     * awb is locked. However, the overall post-processing experience for users will be
+     * consistent. Refer to LOGICAL_MULTI_CAMERA capability for details.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES
@@ -537,6 +547,8 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link android.graphics.ImageFormat#PRIVATE } will be reprocessable into both
      *   {@link android.graphics.ImageFormat#YUV_420_888 } and
      *   {@link android.graphics.ImageFormat#JPEG } formats.</li>
+     * <li>For a MONOCHROME camera supporting Y8 format, {@link android.graphics.ImageFormat#PRIVATE } will be reprocessable into
+     *   {@link android.graphics.ImageFormat#Y8 }.</li>
      * <li>The maximum available resolution for PRIVATE streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
@@ -597,20 +609,21 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The camera device supports capturing high-resolution images at &gt;= 20 frames per
-     * second, in at least the uncompressed YUV format, when post-processing settings are set
-     * to FAST. Additionally, maximum-resolution images can be captured at &gt;= 10 frames
-     * per second.  Here, 'high resolution' means at least 8 megapixels, or the maximum
-     * resolution of the device, whichever is smaller.</p>
+     * second, in at least the uncompressed YUV format, when post-processing settings are
+     * set to FAST. Additionally, all image resolutions less than 24 megapixels can be
+     * captured at &gt;= 10 frames per second. Here, 'high resolution' means at least 8
+     * megapixels, or the maximum resolution of the device, whichever is smaller.</p>
      * <p>More specifically, this means that a size matching the camera device's active array
      * size is listed as a supported size for the {@link android.graphics.ImageFormat#YUV_420_888 } format in either {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } or {@link android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes },
      * with a minimum frame duration for that format and size of either &lt;= 1/20 s, or
-     * &lt;= 1/10 s, respectively; and the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
-     * lists at least one FPS range where the minimum FPS is &gt;= 1 / minimumFrameDuration
-     * for the maximum-size YUV_420_888 format.  If that maximum size is listed in {@link android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes },
+     * &lt;= 1/10 s if the image size is less than 24 megapixels, respectively; and
+     * the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry lists at least one FPS range
+     * where the minimum FPS is &gt;= 1 / minimumFrameDuration for the maximum-size
+     * YUV_420_888 format.  If that maximum size is listed in {@link android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes },
      * then the list of resolutions for YUV_420_888 from {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } contains at
      * least one resolution &gt;= 8 megapixels, with a minimum frame duration of &lt;= 1/20
      * s.</p>
-     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, then those can also be
+     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, {@link android.graphics.ImageFormat#Y8 }, then those can also be
      * captured at the same rate as the maximum-size YUV_420_888 resolution is.</p>
      * <p>If the device supports the PRIVATE_REPROCESSING capability, then the same guarantees
      * as for the YUV_420_888 format also apply to the {@link android.graphics.ImageFormat#PRIVATE } format.</p>
@@ -644,6 +657,8 @@ public abstract class CameraMetadata<TKey> {
      *   {@link android.graphics.ImageFormat#YUV_420_888 } and {@link android.graphics.ImageFormat#JPEG } formats.</li>
      * <li>The maximum available resolution for {@link android.graphics.ImageFormat#YUV_420_888 } streams (both input/output) will match the
      *   maximum available resolution of {@link android.graphics.ImageFormat#JPEG } streams.</li>
+     * <li>For a MONOCHROME camera with Y8 format support, all the requirements mentioned
+     *   above for YUV_420_888 apply for Y8 format as well.</li>
      * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
      * <li>Only the below controls are effective for reprocessing requests and will be present
      *   in capture results. The reprocess requests are from the original capture results
@@ -690,8 +705,8 @@ public abstract class CameraMetadata<TKey> {
      * <li>The {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} entry is listed by this device.</li>
      * <li>As of Android P, the {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} entry is listed by this device.</li>
      * <li>A LIMITED camera with only the DEPTH_OUTPUT capability does not have to support
-     *   normal YUV_420_888, JPEG, and PRIV-format outputs. It only has to support the DEPTH16
-     *   format.</li>
+     *   normal YUV_420_888, Y8, JPEG, and PRIV-format outputs. It only has to support the
+     *   DEPTH16 format.</li>
      * </ul>
      * <p>Generally, depth output operates at a slower frame rate than standard color capture,
      * so the DEPTH16 and DEPTH_POINT_CLOUD formats will commonly have a stall duration that
@@ -811,8 +826,23 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING = 10;
 
     /**
-     * <p>The camera device is a logical camera backed by two or more physical cameras that are
-     * also exposed to the application.</p>
+     * <p>The camera device is a logical camera backed by two or more physical cameras.</p>
+     * <p>In API level 28, the physical cameras must also be exposed to the application via
+     * {@link android.hardware.camera2.CameraManager#getCameraIdList }.</p>
+     * <p>Starting from API level 29, some or all physical cameras may not be independently
+     * exposed to the application, in which case the physical camera IDs will not be
+     * available in {@link android.hardware.camera2.CameraManager#getCameraIdList }. But the
+     * application can still query the physical cameras' characteristics by calling
+     * {@link android.hardware.camera2.CameraManager#getCameraCharacteristics }. Additionally,
+     * if a physical camera is hidden from camera ID list, the mandatory stream combinations
+     * for that physical camera must be supported through the logical camera using physical
+     * streams.</p>
+     * <p>Combinations of logical and physical streams, or physical streams from different
+     * physical cameras are not guaranteed. However, if the camera device supports
+     * {@link CameraDevice#isSessionConfigurationSupported },
+     * application must be able to query whether a stream combination involving physical
+     * streams is supported by calling
+     * {@link CameraDevice#isSessionConfigurationSupported }.</p>
      * <p>Camera application shouldn't assume that there are at most 1 rear camera and 1 front
      * camera in the system. For an application that switches between front and back cameras,
      * the recommendation is to switch between the first rear camera and the first front
@@ -835,43 +865,130 @@ public abstract class CameraMetadata<TKey> {
      * </li>
      * <li>The SENSOR_INFO_TIMESTAMP_SOURCE of the logical device and physical devices must be
      *   the same.</li>
-     * <li>The logical camera device must be LIMITED or higher device.</li>
+     * <li>The logical camera must be LIMITED or higher device.</li>
      * </ul>
-     * <p>Both the logical camera device and its underlying physical devices support the
-     * mandatory stream combinations required for their device levels.</p>
-     * <p>Additionally, for each guaranteed stream combination, the logical camera supports:</p>
+     * <p>A logical camera device's dynamic metadata may contain
+     * {@link CaptureResult#LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID android.logicalMultiCamera.activePhysicalId} to notify the application of the current
+     * active physical camera Id. An active physical camera is the physical camera from which
+     * the logical camera's main image data outputs (YUV or RAW) and metadata come from.
+     * In addition, this serves as an indication which physical camera is used to output to
+     * a RAW stream, or in case only physical cameras support RAW, which physical RAW stream
+     * the application should request.</p>
+     * <p>Logical camera's static metadata tags below describe the default active physical
+     * camera. An active physical camera is default if it's used when application directly
+     * uses requests built from a template. All templates will default to the same active
+     * physical camera.</p>
      * <ul>
-     * <li>For each guaranteed stream combination, the logical camera supports replacing one
-     *   logical {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888}
-     *   or raw stream with two physical streams of the same size and format, each from a
-     *   separate physical camera, given that the size and format are supported by both
-     *   physical cameras.</li>
-     * <li>If the logical camera doesn't advertise RAW capability, but the underlying physical
-     *   cameras do, the logical camera will support guaranteed stream combinations for RAW
-     *   capability, except that the RAW streams will be physical streams, each from a separate
-     *   physical camera. This is usually the case when the physical cameras have different
-     *   sensor sizes.</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE android.sensor.info.physicalSize}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1 android.sensor.calibrationTransform1}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2 android.sensor.calibrationTransform2}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM1 android.sensor.colorTransform1}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM2 android.sensor.colorTransform2}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_FORWARD_MATRIX1 android.sensor.forwardMatrix1}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_FORWARD_MATRIX2 android.sensor.forwardMatrix2}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_MAX_ANALOG_SENSITIVITY android.sensor.maxAnalogSensitivity}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_AVAILABLE_TEST_PATTERN_MODES android.sensor.availableTestPatternModes}</li>
+     * <li>{@link CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE android.lens.info.hyperfocalDistance}</li>
+     * <li>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance}</li>
+     * <li>{@link CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION android.lens.info.focusDistanceCalibration}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>
+     * <li>{@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}</li>
      * </ul>
-     * <p>Using physical streams in place of a logical stream of the same size and format will
-     * not slow down the frame rate of the capture, as long as the minimum frame duration
-     * of the physical and logical streams are the same.</p>
+     * <p>The field of view of all non-RAW physical streams must be the same or as close as
+     * possible to that of non-RAW logical streams. If the requested FOV is outside of the
+     * range supported by the physical camera, the physical stream for that physical camera
+     * will use either the maximum or minimum scaler crop region, depending on which one is
+     * closer to the requested FOV. For example, for a logical camera with wide-tele lens
+     * configuration where the wide lens is the default, if the logical camera's crop region
+     * is set to maximum, the physical stream for the tele lens will be configured to its
+     * maximum crop region. On the other hand, if the logical camera has a normal-wide lens
+     * configuration where the normal lens is the default, when the logical camera's crop
+     * region is set to maximum, the FOV of the logical streams will be that of the normal
+     * lens. The FOV of the physical streams for the wide lens will be the same as the
+     * logical stream, by making the crop region smaller than its active array size to
+     * compensate for the smaller focal length.</p>
+     * <p>Even if the underlying physical cameras have different RAW characteristics (such as
+     * size or CFA pattern), a logical camera can still advertise RAW capability. In this
+     * case, when the application configures a RAW stream, the camera device will make sure
+     * the active physical camera will remain active to ensure consistent RAW output
+     * behavior, and not switch to other physical cameras.</p>
+     * <p>The capture request and result metadata tags required for backward compatible camera
+     * functionalities will be solely based on the logical camera capabiltity. On the other
+     * hand, the use of manual capture controls (sensor or post-processing) with a
+     * logical camera may result in unexpected behavior when the HAL decides to switch
+     * between physical cameras with different characteristics under the hood. For example,
+     * when the application manually sets exposure time and sensitivity while zooming in,
+     * the brightness of the camera images may suddenly change because HAL switches from one
+     * physical camera to the other.</p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
+     * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
+     * @see CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @see CameraCharacteristics#LENS_POSE_REFERENCE
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CaptureResult#LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID
      * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+     * @see CameraCharacteristics#SENSOR_AVAILABLE_TEST_PATTERN_MODES
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1
+     * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2
+     * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM1
+     * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM2
+     * @see CameraCharacteristics#SENSOR_FORWARD_MATRIX1
+     * @see CameraCharacteristics#SENSOR_FORWARD_MATRIX2
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED
+     * @see CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION
+     * @see CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
+     * @see CameraCharacteristics#SENSOR_MAX_ANALOG_SENSITIVITY
+     * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
+     * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA = 11;
 
     /**
      * <p>The camera device is a monochrome camera that doesn't contain a color filter array,
-     * and the pixel values on U and V planes are all 128.</p>
+     * and for YUV_420_888 stream, the pixel values on U and V planes are all 128.</p>
+     * <p>A MONOCHROME camera must support the guaranteed stream combinations required for
+     * its device level and capabilities. Additionally, if the monochrome camera device
+     * supports Y8 format, all mandatory stream combination requirements related to {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888} apply
+     * to {@link android.graphics.ImageFormat#Y8 Y8} as well. There are no
+     * mandatory stream combination requirements with regard to
+     * {@link android.graphics.ImageFormat#Y8 Y8} for Bayer camera devices.</p>
+     * <p>Starting from Android Q, the SENSOR_INFO_COLOR_FILTER_ARRANGEMENT of a MONOCHROME
+     * camera will be either MONO or NIR.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME = 12;
+
+    /**
+     * <p>The camera device is capable of writing image data into a region of memory
+     * inaccessible to Android userspace or the Android kernel, and only accessible to
+     * trusted execution environments (TEE).</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA = 13;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -920,6 +1037,23 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      */
     public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB = 4;
+
+    /**
+     * <p>Sensor doesn't have any Bayer color filter.
+     * Such sensor captures visible light in monochrome. The exact weighting and
+     * wavelengths captured is not specified, but generally only includes the visible
+     * frequencies. This value implies a MONOCHROME camera.</p>
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO = 5;
+
+    /**
+     * <p>Sensor has a near infrared filter capturing light with wavelength between
+     * roughly 750nm and 1400nm, and the same filter covers the whole sensor array. This
+     * value implies a MONOCHROME camera.</p>
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR = 6;
 
     //
     // Enumeration values for CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE
@@ -1137,6 +1271,7 @@ public abstract class CameraMetadata<TKey> {
      * fire the flash for flash power metering during precapture, and then fire the flash
      * for the final capture, if a flash is available on the device and the AE mode is set to
      * enable the flash.</p>
+     * <p>Devices that initially shipped with Android version {@link android.os.Build.VERSION_CODES#Q Q} or newer will not include any LEGACY-level devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES

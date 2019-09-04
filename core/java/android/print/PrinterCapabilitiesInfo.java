@@ -646,7 +646,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<PrinterCapabilitiesInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrinterCapabilitiesInfo> CREATOR =
             new Parcelable.Creator<PrinterCapabilitiesInfo>() {
         @Override
         public PrinterCapabilitiesInfo createFromParcel(Parcel parcel) {

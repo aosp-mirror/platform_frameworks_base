@@ -9,6 +9,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
+ *
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -16,7 +17,7 @@
 
 package android.media;
 
-import android.media.session.ISessionController;
+import android.media.session.MediaSession;
 
 /**
  * AIDL for the MediaSessionService to report interesting events on remote playback
@@ -25,8 +26,8 @@ import android.media.session.ISessionController;
  * @hide
  */
 oneway interface IRemoteVolumeController {
-    void remoteVolumeChanged(ISessionController session, int flags);
+    void remoteVolumeChanged(in MediaSession.Token sessionToken, int flags);
     // sets the default session to use with the slider, replaces remoteSliderVisibility
     // on IVolumeController
-    void updateRemoteController(ISessionController session);
+    void updateRemoteController(in MediaSession.Token sessionToken);
 }

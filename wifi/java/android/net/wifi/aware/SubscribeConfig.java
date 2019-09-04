@@ -146,7 +146,7 @@ public final class SubscribeConfig implements Parcelable {
         dest.writeInt(mMaxDistanceMmSet ? 1 : 0);
     }
 
-    public static final Creator<SubscribeConfig> CREATOR = new Creator<SubscribeConfig>() {
+    public static final @android.annotation.NonNull Creator<SubscribeConfig> CREATOR = new Creator<SubscribeConfig>() {
         @Override
         public SubscribeConfig[] newArray(int size) {
             return new SubscribeConfig[size];
@@ -205,8 +205,10 @@ public final class SubscribeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(mServiceName, mServiceSpecificInfo, mMatchFilter, mSubscribeType,
-                mTtlSec, mEnableTerminateNotification, mMinDistanceMmSet, mMaxDistanceMmSet);
+        int result = Objects.hash(Arrays.hashCode(mServiceName),
+                Arrays.hashCode(mServiceSpecificInfo), Arrays.hashCode(mMatchFilter),
+                mSubscribeType, mTtlSec, mEnableTerminateNotification, mMinDistanceMmSet,
+                mMaxDistanceMmSet);
 
         if (mMinDistanceMmSet) {
             result = Objects.hash(result, mMinDistanceMm);

@@ -66,7 +66,7 @@ public final class GateKeeperResponse implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<GateKeeperResponse> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<GateKeeperResponse> CREATOR
             = new Parcelable.Creator<GateKeeperResponse>() {
         @Override
         public GateKeeperResponse createFromParcel(Parcel source) {

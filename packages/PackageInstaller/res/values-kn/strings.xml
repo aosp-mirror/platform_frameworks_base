@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="7488448184431507488">"ಪ್ಯಾಕೇಜ್ ಇನ್‌ಸ್ಟಾಲರ್‌‌"</string>
+    <string name="install" msgid="711829760615509273">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="done" msgid="6632441120016885253">"ಮುಗಿದಿದೆ"</string>
+    <string name="cancel" msgid="1018267193425558088">"ರದ್ದುಮಾಡಿ"</string>
+    <string name="installing" msgid="4921993079741206516">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="install_done" msgid="5987363587661783896">"ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"ನೀವು ಈ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಆ್ಯಪ್‌ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ನೀವು ಈ ಅಂತನಿರ್ಮಿತ ಆ್ಯಪ್‌ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ. ಇದಕ್ಕೆ ಯಾವುದೇ ವಿಶೇಷ ಪ್ರವೇಶದ ಅಗತ್ಯವಿಲ್ಲ."</string>
+    <string name="install_failed" msgid="5777824004474125469">"ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿಲ್ಲ."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಪ್ಯಾಕೇಜ್‌ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿರುವ ಆ್ಯಪ್‌ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ಯಾಕೇಜ್ ಜೊತೆಗೆ ಸಂಘರ್ಷವಾಗುತ್ತದೆ."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"ಆ್ಯಪ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಆಗದಿರುವ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಜೊತೆಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"ಈ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಟಿವಿ ಜೊತೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"ಆ್ಯಪ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಆಗದಿರುವ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಫೋನ್ ಜೊತೆಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಆಗದಿರುವ ಆ್ಯಪ್‌ ಅಮಾನ್ಯವಾಗಿರುವಂತೆ ತೋರುತ್ತದೆ."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ನಿಮ್ಮ ಟಿವಿಗೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="launch" msgid="3952550563999890101">"ತೆರೆಯಿರಿ"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಪರಿಚಿತ ಮೂಲಗಳ ಆ್ಯಪ್‌ಗಳ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ಈ ಬಳಕೆದಾರರು ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಈ ಬಳಕೆದಾರರನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
+    <string name="ok" msgid="7871959885003339302">"ಸರಿ"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"ಆ್ಯಪ್ ನಿರ್ವಹಿಸಿ"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ಸಂಗ್ರಹಣೆ ಖಾಲಿ ಇಲ್ಲ"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಕೊಂಚ ಸ್ಥಳವನ್ನು ಖಾಲಿ ಮಾಡಿ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"ಯಾವುದೇ ಆ್ಯಪ್ ಕಂಡುಬಂದಿಲ್ಲ"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಿರುವ ಆ್ಯಪ್‌ಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಯಾವುದೇ ಆ್ಯಪ್‌ ಕಂಡುಬಂದಿಲ್ಲ."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"ಈ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರಿಗೆ ನಿರ್ವಹಿಸಲು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"ದೋಷ"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"ಅಪ್‌ಡೇಟ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> ಎಂಬುದು ಕೆಳಗಿನ ಆ್ಯಪ್‌ನ ಭಾಗವಾಗಿದೆ:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ನೀವು "<b>"ಎಲ್ಲಾ"</b>" ಬಳಕೆದಾರರಿಗೂ ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ? ಸಾಧನದಲ್ಲಿನ "<b>"ಎಲ್ಲಾ"</b>" ಬಳಕೆದಾರರಿಂದ ಆ್ಯಪ್‌ ಮತ್ತು ಅದರ ಡೇಟಾವನ್ನು ತೆಗೆದುಹಾಕಲಾಗುವುದು."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> ಬಳಕೆದಾರರಿಗೆ ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ನೀವು ಬಯಸುವಿರಾ?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"ಈ ಆ್ಯಪ್‌ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ಈ ಆ್ಯಪ್‌ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಹೊಂದಿರುವವುಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ಈ ಸಾಧನದ ಎಲ್ಲಾ ಬಳಕೆದಾರರಿಗೆ ಇದು ಪರಿಣಾಮ ಬೀರುತ್ತದೆ."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"ಆ್ಯಪ್ ಡೇಟಾದಲ್ಲಿ <xliff:g id="SIZE">%1$s</xliff:g> ಇರಿಸಿಕೊಳ್ಳಿ."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"ಚಾಲನೆಯಲ್ಲಿರುವ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ವಿಫಲಗೊಂಡ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="uninstall_done" msgid="439354138387969269">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಪೂರ್ಣಗೊಂಡಿದೆ."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ವಿಫಲವಾಗಿದೆ."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆ ಯಶಸ್ವಿಯಾಗಿಲ್ಲ."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ಕೆಲವು ಬಳಕೆದಾರರು ಅಥವಾ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಈ ಆಪ್‌ ಅಗತ್ಯ ಮತ್ತು ಇತರರ ಸಾಧನದಿಂದ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"ಈ ಆ್ಯಪ್‌ಗೆ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌‌ನ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ಈ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಸಾಧನ ನಿರ್ವಾಹಕರಿಗೆ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"ಸಾಧನದ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="manage_users" msgid="1243995386982560813">"ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ಪ್ಯಾಕೇಜ್ ಪಾರ್ಸ್ ಮಾಡುವಲ್ಲಿ ಸಮಸ್ಯೆ ಕಂಡುಬಂದಿದೆ."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್/ಅನ್ಇನ್‌ಸ್ಟಾಲ್ ಕ್ರಿಯೆಗಳು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
+    <string name="message_staging" msgid="8032722385658438567">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಸಿದ್ಧವಿರುವ ಆ್ಯಪ್…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"ಅಪರಿಚಿತ"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಈ ಮೂಲದಿಂದ ಬಂದಿರುವ ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಅಪರಿಚಿತ ಮೂಲಗಳಿಂದ ಪಡೆದುಕೊಳ್ಳುವ ಆ್ಯಪ್‌‍‍ಗಳನ್ನು ನಿಮ್ಮ ಟಿವಿಯಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಅನುಮತಿಯಿಲ್ಲ."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಈ ಮೂಲದಿಂದ ಬಂದಿರುವ ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ನಿಮ್ಮ ಫೋನ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ನಿಮ್ಮ ಟಿವಿ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಟಿವಿಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"ಮುಂದುವರಿಸಿ"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"wear ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌/ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿರುವ ಕುರಿತು ಅಧಿಸೂಚನೆ"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆ"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" ಆ್ಯಪ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆ"</string>
+</resources>

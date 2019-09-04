@@ -20,17 +20,18 @@ import android.graphics.Paint;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
-import android.support.test.filters.LargeTest;
-import android.support.test.rule.ActivityTestRule;
 
-import java.util.Arrays;
-import java.util.Collection;
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 @LargeTest
 @RunWith(Parameterized.class)

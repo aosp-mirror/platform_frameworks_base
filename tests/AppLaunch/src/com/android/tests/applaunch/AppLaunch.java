@@ -30,16 +30,16 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.support.test.rule.logging.AtraceLogger;
 import android.test.InstrumentationTestCase;
 import android.test.InstrumentationTestRunner;
 import android.util.Log;
+
+import androidx.test.rule.logging.AtraceLogger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 /**
  * This test is intended to measure the time it takes for the apps to start.
  * Names of the applications are passed in command line, and the
@@ -77,6 +78,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String KEY_SIMPLEPERF_CMD = "simpleperf_cmd";
     private static final String KEY_SIMPLEPERF_APP = "simpleperf_app";
     private static final String KEY_CYCLE_CLEAN = "cycle_clean";
+    private static final String KEY_TRACE_ALL = "trace_all";
     private static final String KEY_TRACE_ITERATIONS = "trace_iterations";
     private static final String KEY_LAUNCH_DIRECTORY = "launch_directory";
     private static final String KEY_TRACE_DIRECTORY = "trace_directory";
@@ -110,7 +112,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String SUCCESS_MESSAGE = "Status: ok";
     private static final String TOTAL_TIME_MESSAGE = "TotalTime:";
     private static final String COMPILE_SUCCESS = "Success";
-    private static final String LAUNCH_ITERATION = "LAUNCH_ITERATION - %d";
+    private static final String LAUNCH_ITERATION = "LAUNCH_ITERATION-%d";
     private static final String TRACE_ITERATION = "TRACE_ITERATION-%d";
     private static final String LAUNCH_ITERATION_PREFIX = "LAUNCH_ITERATION";
     private static final String TRACE_ITERATION_PREFIX = "TRACE_ITERATION";
@@ -141,6 +143,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private String[] mCompilerFilters = null;
     private String mLastAppName = "";
     private boolean mCycleCleanUp = false;
+    private boolean mTraceAll = false;
     private boolean mIterationCycle = false;
     private long mCycleTime = 0;
     private StringBuilder mCycleTimes = new StringBuilder();
@@ -185,7 +188,8 @@ public class AppLaunch extends InstrumentationTestCase {
         if (null != launchDirectory && !launchDirectory.isEmpty()) {
             launchRootDir = new File(launchDirectory);
             if (!launchRootDir.exists() && !launchRootDir.mkdirs()) {
-                throw new IOException("Unable to create the destination directory");
+                throw new IOException("Unable to create the destination directory "
+                    + launchRootDir + ". Try disabling selinux.");
             }
         }
 
@@ -193,7 +197,8 @@ public class AppLaunch extends InstrumentationTestCase {
             File launchSubDir = new File(launchRootDir, LAUNCH_SUB_DIRECTORY);
 
             if (!launchSubDir.exists() && !launchSubDir.mkdirs()) {
-                throw new IOException("Unable to create the lauch file sub directory");
+                throw new IOException("Unable to create the lauch file sub directory "
+                    + launchSubDir + ". Try disabling selinux.");
             }
             File file = new File(launchSubDir, LAUNCH_FILE);
             FileOutputStream outputStream = new FileOutputStream(file);
@@ -293,18 +298,40 @@ public class AppLaunch extends InstrumentationTestCase {
                         // skip if the app has failures while launched first
                         continue;
                     }
-                    // In the "applaunch.txt" file app launches are referenced using
-                    // "LAUNCH_ITERATION - ITERATION NUM"
-                    launchResults = startApp(launch.getApp(), launch.getLaunchReason());
-                    if (launchResults.mLaunchTime < 0) {
-                        addLaunchResult(launch, new AppLaunchResult());
-                        // if it fails once, skip the rest of the launches
-                        continue;
-                    } else {
-                        mCycleTime += launchResults.mLaunchTime;
-                        addLaunchResult(launch, launchResults);
+                    AtraceLogger atraceLogger = null;
+                    if (mTraceAll) {
+                        Log.i(TAG, "Started tracing " + launch.getApp());
+                        atraceLogger = AtraceLogger
+                                .getAtraceLoggerInstance(getInstrumentation());
                     }
-                    sleep(POST_LAUNCH_IDLE_TIMEOUT);
+                    try {
+                        // Start the trace
+                        if (atraceLogger != null) {
+                            atraceLogger.atraceStart(traceCategoriesSet, traceBufferSize,
+                                    traceDumpInterval, rootTraceSubDir,
+                                    String.format("%s-%s-%s", launch.getApp(),
+                                            launch.getCompilerFilter(), launch.getLaunchReason()));
+                        }
+                        // In the "applaunch.txt" file app launches are referenced using
+                        // "LAUNCH_ITERATION - ITERATION NUM"
+                        launchResults = startApp(launch.getApp(), launch.getLaunchReason());
+                        if (launchResults.mLaunchTime < 0) {
+                            addLaunchResult(launch, new AppLaunchResult());
+                            // if it fails once, skip the rest of the launches
+                            continue;
+                        } else {
+                            mCycleTime += launchResults.mLaunchTime;
+                            addLaunchResult(launch, launchResults);
+                        }
+                        sleep(POST_LAUNCH_IDLE_TIMEOUT);
+                    } finally {
+                        // Stop the trace
+                        if (atraceLogger != null) {
+                            Log.i(TAG, "Stopped tracing " + launch.getApp());
+                            atraceLogger.atraceStop();
+                        }
+                    }
+
                 }
 
                 // App launch times for trace launch will not be used for final
@@ -531,6 +558,7 @@ public class AppLaunch extends InstrumentationTestCase {
         mLaunchOrder = args.getString(KEY_LAUNCH_ORDER, LAUNCH_ORDER_CYCLIC);
         mSimplePerfAppOnly = Boolean.parseBoolean(args.getString(KEY_SIMPLEPERF_APP));
         mCycleCleanUp = Boolean.parseBoolean(args.getString(KEY_CYCLE_CLEAN));
+        mTraceAll = Boolean.parseBoolean(args.getString(KEY_TRACE_ALL));
         mTrialLaunch = mTrialLaunch || Boolean.parseBoolean(args.getString(KEY_TRIAL_LAUNCH));
 
         if (mSimplePerfCmd != null && mSimplePerfAppOnly) {
@@ -795,6 +823,8 @@ public class AppLaunch extends InstrumentationTestCase {
                              BufferedWriter writer =
                                 new BufferedWriter(new OutputStreamWriter(stream))) {
                             String cmd = String.format(SIMPLEPERF_APP_CMD, packageName, launchCmd);
+                            // In the file, we need to escape any "$".
+                            cmd = cmd.replace("$", "\\$");
                             writer.write(cmd);
                         }
                         launchCmd = launchFile.getAbsolutePath();
@@ -836,6 +866,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 /* SAMPLE OUTPUT : Cold launch
                 Starting: Intent { cmp=com.google.android.calculator/com.android.calculator2.Calculator }
                 Status: ok
+                LaunchState: COLD
                 Activity: com.google.android.calculator/com.android.calculator2.Calculator
                 TotalTime: 357
                 WaitTime: 377
@@ -844,6 +875,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 Starting: Intent { cmp=com.google.android.calculator/com.android.calculator2.Calculator }
                 Warning: Activity not started, its current task has been brought to the front
                 Status: ok
+                LaunchState: HOT
                 Activity: com.google.android.calculator/com.android.calculator2.CalculatorGoogle
                 TotalTime: 60
                 WaitTime: 67

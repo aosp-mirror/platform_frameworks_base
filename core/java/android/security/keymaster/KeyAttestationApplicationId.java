@@ -55,7 +55,7 @@ public class KeyAttestationApplicationId implements Parcelable {
         dest.writeTypedArray(mAttestationPackageInfos, flags);
     }
 
-    public static final Parcelable.Creator<KeyAttestationApplicationId> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<KeyAttestationApplicationId> CREATOR
             = new Parcelable.Creator<KeyAttestationApplicationId>() {
         @Override
         public KeyAttestationApplicationId createFromParcel(Parcel source) {

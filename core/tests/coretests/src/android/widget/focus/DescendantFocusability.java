@@ -16,12 +16,12 @@
 
 package android.widget.focus;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import com.android.frameworks.coretests.R;
 
 public class DescendantFocusability extends Activity {
 

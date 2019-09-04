@@ -421,7 +421,7 @@ public final class Tag implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<Tag> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Tag> CREATOR =
             new Parcelable.Creator<Tag>() {
         @Override
         public Tag createFromParcel(Parcel in) {

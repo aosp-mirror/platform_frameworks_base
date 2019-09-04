@@ -40,7 +40,6 @@ public final class MapClientProfile implements LocalBluetoothProfile {
     private BluetoothMapClient mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
 
@@ -60,7 +59,6 @@ public final class MapClientProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothMapClient) proxy;
             // We just bound to the service, so refresh the UI for any connected MAP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -70,7 +68,7 @@ public final class MapClientProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "MapProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(MapClientProfile.this,
                         BluetoothProfile.STATE_CONNECTED);
@@ -82,7 +80,6 @@ public final class MapClientProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mProfileManager.callServiceDisconnectedListeners();
             mIsProfileReady=false;
         }
@@ -98,14 +95,12 @@ public final class MapClientProfile implements LocalBluetoothProfile {
         return BluetoothProfile.MAP_CLIENT;
     }
 
-    MapClientProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    MapClientProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new MapClientServiceListener(),
-                BluetoothProfile.MAP_CLIENT);
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new MapClientServiceListener(), BluetoothProfile.MAP_CLIENT);
     }
 
     public boolean accessProfileEnabled() {
@@ -200,12 +195,12 @@ public final class MapClientProfile implements LocalBluetoothProfile {
                 return R.string.bluetooth_map_profile_summary_connected;
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_cellphone;
+        return com.android.internal.R.drawable.ic_phone;
     }
 
     protected void finalize() {

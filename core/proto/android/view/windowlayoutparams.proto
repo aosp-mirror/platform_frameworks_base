@@ -18,7 +18,7 @@ syntax = "proto2";
 
 import "frameworks/base/core/proto/android/graphics/pixelformat.proto";
 import "frameworks/base/core/proto/android/view/display.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package android.view;
 option java_multiple_files = true;
@@ -63,7 +63,7 @@ message WindowLayoutParamsProto {
     }
     optional NeedsMenuState needs_menu_key = 22;
 
-    optional .android.view.DisplayProto.ColorMode color_mode = 23;
+    optional DisplayProto.ColorMode color_mode = 23;
     optional uint32 flags = 24;
     optional uint32 private_flags = 26;
     optional uint32 system_ui_visibility_flags = 27;

@@ -22,7 +22,37 @@
         android:minSdkVersion="1"
         android:targetSdkVersion="28" />
 
-    <application android:testOnly="true" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+    <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.STORAGE_INTERNAL" />
+    <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+    <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+
+    <!-- TODO: Remove largeHeap hack when memory leak is fixed (b/123984854) -->
+    <application android:debuggable="true"
+                 android:testOnly="true"
+                 android:largeHeap="true">
+        <uses-library android:name="android.test.mock" android:required="true" />
+        <uses-library android:name="android.test.runner" />
+
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityA" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityB" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
+        <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
+                  android:showWhenLocked="true" />
+    </application>
 
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"

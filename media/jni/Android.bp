@@ -25,7 +25,6 @@ cc_library_shared {
         "android_mtp_MtpDatabase.cpp",
         "android_mtp_MtpDevice.cpp",
         "android_mtp_MtpServer.cpp",
-        "midi/android_media_midi_MidiDevice.cpp",
     ],
 
     shared_libs: [
@@ -35,12 +34,10 @@ cc_library_shared {
         "libutils",
         "libbinder",
         "libmedia",
-        "libmediaextractor",
         "libmedia_jni_utils",
         "libmedia_omx",
         "libmediametrics",
         "libmediadrm",
-        "libmidi",
         "libhwui",
         "libui",
         "liblog",
@@ -84,9 +81,6 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
-        // Allow implicit fallthroughs in android_media_MediaScanner.cpp and
-        // android_mtp_MtpDatabase.cpp until they are fixed.
-        "-Wno-error=implicit-fallthrough",
     ],
 }
 
@@ -98,7 +92,7 @@ cc_library_shared {
 
     shared_libs: [
         "liblog",
-        "libmedia_omx",
+        "libgui",
         "libnativewindow",
         "libui",
         "libutils",
@@ -124,70 +118,61 @@ cc_library_shared {
     name: "libmedia2_jni",
 
     srcs: [
-        "android_media_Media2HTTPConnection.cpp",
-        "android_media_Media2HTTPService.cpp",
-        "android_media_MediaCrypto.cpp",
-        "android_media_Media2DataSource.cpp",
-        "android_media_MediaDrm.cpp",
+        "android_media_DataSourceCallback.cpp",
+        "android_media_MediaMetricsJNI.cpp",
         "android_media_MediaPlayer2.cpp",
         "android_media_SyncParams.cpp",
     ],
 
     shared_libs: [
-        "android.hardware.cas@1.0",  // for CasManager. VNDK???
-        "android.hardware.cas.native@1.0",  // CasManager. VNDK???
-        "libandroid",  // NDK
-        "libandroid_runtime",  // ???
-        "libaudioclient",  // for use of AudioTrack, AudioSystem. to be removed
-        "liblog",  // NDK
-        "libbinder",
-        "libdrmframework",  // for FileSource, MediaHTTP
-        "libgui",  // for VideoFrameScheduler
-        "libhidlallocatorutils",
-        "libhidlbase",  // VNDK???
-        "libmediandk",  // NDK
-        "libpowermanager",  // for JWakeLock. to be removed
-
-        "libutils",  // Have to use shared lib to make libandroid_runtime behave correctly.
-                     // Otherwise, AndroidRuntime::getJNIEnv() will return NULL.
-
-        "libcgrouprc", // LL-NDK
+        // NDK or LLNDK or NDK-compliant
+        "libandroid",
+        "libbinder_ndk",
+        "libcgrouprc",
+        "libmediandk",
+        "libmediametrics",
+        "libnativehelper_compat_libc++",
+        "liblog",
+        "libvndksupport",
     ],
 
-    header_libs: ["libhardware_headers"],
+    header_libs: [
+        "libhardware_headers",
+        "libnativewindow_headers",
+    ],
 
     static_libs: [
-        "libbacktrace",
+        // MediaCas
+        "android.hidl.allocator@1.0",
+        "android.hidl.memory@1.0",
+        "libhidlbase",
+        "libhidlmemory",
+        "libhidltransport",
+        "libbinderthreadstate",
+
+        // MediaPlayer2 implementation
         "libbase",
-        "libc_malloc_debug_backtrace",
         "libcrypto",
         "libcutils",
-        "libdexfile",
-        "liblzma",
         "libjsoncpp",
-        "libmedia_helper",
         "libmedia_player2_util",
-        "libmediadrm",
-        "libmediaextractor",
-        "libmediametrics",
         "libmediaplayer2",
+        "libmediaplayer2-protos",
+        "libmediandk_utils",
         "libmediautils",
-        "libnativehelper",
-        "libnetd_client",
         "libprocessgroup",
+        "libprotobuf-cpp-lite",
         "libstagefright_esds",
-        "libstagefright_foundation",
+        "libstagefright_foundation_without_imemory",
         "libstagefright_httplive",
         "libstagefright_id3",
         "libstagefright_mpeg2support",
         "libstagefright_nuplayer2",
         "libstagefright_player2",
-        "libstagefright_rtsp",
-        "libstagefright_timedtext",
-        "libunwindstack",
-        "libutilscallstack",
-        "libz",
-        "libziparchive",
+        "libstagefright_rtsp_player2",
+        "libstagefright_timedtext2",
+        "libutils",
+        "libmedia2_jni_core",
     ],
 
     group_static_libs: true,
@@ -206,9 +191,10 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
+        "-fvisibility=hidden",
     ],
 
-    ldflags: ["-Wl,--exclude-libs=ALL"],
+    ldflags: ["-Wl,--exclude-libs=ALL,-error-limit=0"],
 }
 
 subdirs = [

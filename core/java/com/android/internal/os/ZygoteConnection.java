@@ -19,26 +19,21 @@ package com.android.internal.os;
 import static android.system.OsConstants.F_SETFD;
 import static android.system.OsConstants.O_CLOEXEC;
 import static android.system.OsConstants.POLLIN;
-import static android.system.OsConstants.STDERR_FILENO;
-import static android.system.OsConstants.STDIN_FILENO;
-import static android.system.OsConstants.STDOUT_FILENO;
 
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
 
 import android.annotation.UnsupportedAppUsage;
-import android.metrics.LogMaker;
+import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalSocket;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructPollfd;
 import android.util.Log;
-
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import dalvik.system.VMRuntime;
 
@@ -52,6 +47,8 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A connection that can make spawn requests.
@@ -81,17 +78,16 @@ class ZygoteConnection {
      *
      * @param socket non-null; connected socket
      * @param abiList non-null; a list of ABIs this zygote supports.
-     * @throws IOException
+     * @throws IOException If obtaining the peer credentials fails
      */
     ZygoteConnection(LocalSocket socket, String abiList) throws IOException {
         mSocket = socket;
         this.abiList = abiList;
 
-        mSocketOutStream
-                = new DataOutputStream(socket.getOutputStream());
-
-        mSocketReader = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()), 256);
+        mSocketOutStream = new DataOutputStream(socket.getOutputStream());
+        mSocketReader =
+                new BufferedReader(
+                        new InputStreamReader(socket.getInputStream()), Zygote.SOCKET_BUFFER_SIZE);
 
         mSocket.setSoTimeout(CONNECTION_TIMEOUT_MILLIS);
 
@@ -123,15 +119,10 @@ class ZygoteConnection {
      * for by calling {@code ZygoteConnection.isClosedByPeer}.
      */
     Runnable processOneCommand(ZygoteServer zygoteServer) {
-        String args[];
-        ZygoteArguments parsedArgs = null;
-        FileDescriptor[] descriptors;
+        String[] args;
 
         try {
             args = Zygote.readArgumentList(mSocketReader);
-
-            // TODO (chriswailes): Remove this and add an assert.
-            descriptors = mSocket.getAncillaryFileDescriptors();
         } catch (IOException ex) {
             throw new IllegalStateException("IOException on command socket", ex);
         }
@@ -143,11 +134,11 @@ class ZygoteConnection {
             return null;
         }
 
-        int pid = -1;
+        int pid;
         FileDescriptor childPipeFd = null;
         FileDescriptor serverPipeFd = null;
 
-        parsedArgs = new ZygoteArguments(args);
+        ZygoteArguments parsedArgs = new ZygoteArguments(args);
 
         if (parsedArgs.mBootCompleted) {
             handleBootCompleted();
@@ -164,6 +155,10 @@ class ZygoteConnection {
             return null;
         }
 
+        if (parsedArgs.mUsapPoolStatusSpecified) {
+            return handleUsapPoolStatusChange(zygoteServer, parsedArgs.mUsapPoolEnabled);
+        }
+
         if (parsedArgs.mPreloadDefault) {
             handlePreload();
             return null;
@@ -175,14 +170,30 @@ class ZygoteConnection {
             return null;
         }
 
-        if (parsedArgs.mApiBlacklistExemptions != null) {
-            handleApiBlacklistExemptions(parsedArgs.mApiBlacklistExemptions);
+        if (canPreloadApp() && parsedArgs.mPreloadApp != null) {
+            byte[] rawParcelData = Base64.getDecoder().decode(parsedArgs.mPreloadApp);
+            Parcel appInfoParcel = Parcel.obtain();
+            appInfoParcel.unmarshall(rawParcelData, 0, rawParcelData.length);
+            appInfoParcel.setDataPosition(0);
+            ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(appInfoParcel);
+            appInfoParcel.recycle();
+            if (appInfo != null) {
+                handlePreloadApp(appInfo);
+            } else {
+                throw new IllegalArgumentException("Failed to deserialize --preload-app");
+            }
             return null;
         }
 
-        if (parsedArgs.mHiddenApiAccessLogSampleRate != -1) {
-            handleHiddenApiAccessLogSampleRate(parsedArgs.mHiddenApiAccessLogSampleRate);
-            return null;
+        if (parsedArgs.mApiBlacklistExemptions != null) {
+            return handleApiBlacklistExemptions(zygoteServer, parsedArgs.mApiBlacklistExemptions);
+        }
+
+        if (parsedArgs.mHiddenApiAccessLogSampleRate != -1
+                || parsedArgs.mHiddenApiAccessStatslogSampleRate != -1) {
+            return handleHiddenApiAccessLogSampleRate(zygoteServer,
+                    parsedArgs.mHiddenApiAccessLogSampleRate,
+                    parsedArgs.mHiddenApiAccessStatslogSampleRate);
         }
 
         if (parsedArgs.mPermittedCapabilities != 0 || parsedArgs.mEffectiveCapabilities != 0) {
@@ -217,7 +228,7 @@ class ZygoteConnection {
             }
         }
 
-        /**
+        /*
          * In order to avoid leaking descriptors to the Zygote child,
          * the native code must close the two Zygote socket descriptors
          * in the child process before it switches from Zygote-root to
@@ -243,8 +254,6 @@ class ZygoteConnection {
             fdsToClose[1] = fd.getInt$();
         }
 
-        fd = null;
-
         pid = Zygote.forkAndSpecialize(parsedArgs.mUid, parsedArgs.mGid, parsedArgs.mGids,
                 parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
                 parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
@@ -259,14 +268,13 @@ class ZygoteConnection {
                 IoUtils.closeQuietly(serverPipeFd);
                 serverPipeFd = null;
 
-                return handleChildProc(parsedArgs, descriptors, childPipeFd,
-                        parsedArgs.mStartChildZygote);
+                return handleChildProc(parsedArgs, childPipeFd, parsedArgs.mStartChildZygote);
             } else {
                 // In the parent. A pid < 0 indicates a failure and will be handled in
                 // handleParentProc.
                 IoUtils.closeQuietly(childPipeFd);
                 childPipeFd = null;
-                handleParentProc(pid, descriptors, serverPipeFd);
+                handleParentProc(pid, serverPipeFd);
                 return null;
             }
         } finally {
@@ -319,74 +327,95 @@ class ZygoteConnection {
         }
     }
 
-    private void handleApiBlacklistExemptions(String[] exemptions) {
+    private Runnable stateChangeWithUsapPoolReset(ZygoteServer zygoteServer,
+            Runnable stateChangeCode) {
         try {
-            ZygoteInit.setApiBlacklistExemptions(exemptions);
+            if (zygoteServer.isUsapPoolEnabled()) {
+                Log.i(TAG, "Emptying USAP Pool due to state change.");
+                Zygote.emptyUsapPool();
+            }
+
+            stateChangeCode.run();
+
+            if (zygoteServer.isUsapPoolEnabled()) {
+                Runnable fpResult =
+                        zygoteServer.fillUsapPool(
+                                new int[]{mSocket.getFileDescriptor().getInt$()});
+
+                if (fpResult != null) {
+                    zygoteServer.setForkChild();
+                    return fpResult;
+                } else {
+                    Log.i(TAG, "Finished refilling USAP Pool after state change.");
+                }
+            }
+
             mSocketOutStream.writeInt(0);
+
+            return null;
         } catch (IOException ioe) {
             throw new IllegalStateException("Error writing to command socket", ioe);
         }
     }
 
-    private static class HiddenApiUsageLogger implements VMRuntime.HiddenApiUsageLogger {
-
-        private final MetricsLogger mMetricsLogger = new MetricsLogger();
-        private static HiddenApiUsageLogger sInstance = new HiddenApiUsageLogger();
-        private int mHiddenApiAccessLogSampleRate = 0;
-
-        public static void setHiddenApiAccessLogSampleRate(int sampleRate) {
-            sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
-        }
-
-        public static HiddenApiUsageLogger getInstance() {
-            return HiddenApiUsageLogger.sInstance;
-        }
-
-        public void hiddenApiUsed(int sampledValue, String packageName, String signature,
-                int accessMethod, boolean accessDenied) {
-            if (sampledValue < mHiddenApiAccessLogSampleRate) {
-                logUsage(packageName, signature, accessMethod, accessDenied);
-            }
-        }
-
-        private void logUsage(String packageName, String signature, int accessMethod,
-                                  boolean accessDenied) {
-            int accessMethodMetric = HiddenApiUsageLogger.ACCESS_METHOD_NONE;
-            switch(accessMethod) {
-                case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_NONE;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_REFLECTION:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_REFLECTION;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_JNI:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_JNI;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_LINKING:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_LINKING;
-                    break;
-            }
-            LogMaker logMaker = new LogMaker(MetricsEvent.ACTION_HIDDEN_API_ACCESSED)
-                    .setPackageName(packageName)
-                    .addTaggedData(MetricsEvent.FIELD_HIDDEN_API_SIGNATURE, signature)
-                    .addTaggedData(MetricsEvent.FIELD_HIDDEN_API_ACCESS_METHOD,
-                        accessMethodMetric);
-            if (accessDenied) {
-                logMaker.addTaggedData(MetricsEvent.FIELD_HIDDEN_API_ACCESS_DENIED, 1);
-            }
-            mMetricsLogger.write(logMaker);
-        }
+    /**
+     * Makes the necessary changes to implement a new API blacklist exemption policy, and then
+     * responds to the system server, letting it know that the task has been completed.
+     *
+     * This necessitates a change to the internal state of the Zygote.  As such, if the USAP
+     * pool is enabled all existing USAPs have an incorrect API blacklist exemption list.  To
+     * properly handle this request the pool must be emptied and refilled.  This process can return
+     * a Runnable object that must be returned to ZygoteServer.runSelectLoop to be invoked.
+     *
+     * @param zygoteServer  The server object that received the request
+     * @param exemptions  The new exemption list.
+     * @return A Runnable object representing a new app in any USAPs spawned from here; the
+     *         zygote process will always receive a null value from this function.
+     */
+    private Runnable handleApiBlacklistExemptions(ZygoteServer zygoteServer, String[] exemptions) {
+        return stateChangeWithUsapPoolReset(zygoteServer,
+                () -> ZygoteInit.setApiBlacklistExemptions(exemptions));
     }
 
-    private void handleHiddenApiAccessLogSampleRate(int samplingRate) {
+    private Runnable handleUsapPoolStatusChange(ZygoteServer zygoteServer, boolean newStatus) {
         try {
-            ZygoteInit.setHiddenApiAccessLogSampleRate(samplingRate);
-            HiddenApiUsageLogger.setHiddenApiAccessLogSampleRate(samplingRate);
-            ZygoteInit.setHiddenApiUsageLogger(HiddenApiUsageLogger.getInstance());
-            mSocketOutStream.writeInt(0);
+            Runnable fpResult = zygoteServer.setUsapPoolStatus(newStatus, mSocket);
+
+            if (fpResult == null) {
+                mSocketOutStream.writeInt(0);
+            } else {
+                zygoteServer.setForkChild();
+            }
+
+            return fpResult;
         } catch (IOException ioe) {
             throw new IllegalStateException("Error writing to command socket", ioe);
         }
+    }
+
+    /**
+     * Changes the API access log sample rate for the Zygote and processes spawned from it.
+     *
+     * This necessitates a change to the internal state of the Zygote.  As such, if the USAP
+     * pool is enabled all existing USAPs have an incorrect API access log sample rate.  To
+     * properly handle this request the pool must be emptied and refilled.  This process can return
+     * a Runnable object that must be returned to ZygoteServer.runSelectLoop to be invoked.
+     *
+     * @param zygoteServer  The server object that received the request
+     * @param samplingRate  The new sample rate for regular logging
+     * @param statsdSamplingRate  The new sample rate for statslog logging
+     * @return A Runnable object representing a new app in any blastulas spawned from here; the
+     *         zygote process will always receive a null value from this function.
+     */
+    private Runnable handleHiddenApiAccessLogSampleRate(ZygoteServer zygoteServer,
+            int samplingRate, int statsdSamplingRate) {
+        return stateChangeWithUsapPoolReset(zygoteServer, () -> {
+            int maxSamplingRate = Math.max(samplingRate, statsdSamplingRate);
+            ZygoteInit.setHiddenApiAccessLogSampleRate(maxSamplingRate);
+            StatsdHiddenApiUsageLogger.setHiddenApiAccessLogSampleRates(
+                    samplingRate, statsdSamplingRate);
+            ZygoteInit.setHiddenApiUsageLogger(StatsdHiddenApiUsageLogger.getInstance());
+        });
     }
 
     protected void preload() {
@@ -403,7 +432,15 @@ class ZygoteConnection {
 
     protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
             String cacheKey) {
-        throw new RuntimeException("Zyogte does not support package preloading");
+        throw new RuntimeException("Zygote does not support package preloading");
+    }
+
+    protected boolean canPreloadApp() {
+        return false;
+    }
+
+    protected void handlePreloadApp(ApplicationInfo aInfo) {
+        throw new RuntimeException("Zygote does not support app preloading");
     }
 
     /**
@@ -429,36 +466,18 @@ class ZygoteConnection {
      * if successful or returning if failed.
      *
      * @param parsedArgs non-null; zygote args
-     * @param descriptors null-ok; new file descriptors for stdio if available.
      * @param pipeFd null-ok; pipe for communication back to Zygote.
      * @param isZygote whether this new child process is itself a new Zygote.
      */
-    private Runnable handleChildProc(ZygoteArguments parsedArgs, FileDescriptor[] descriptors,
+    private Runnable handleChildProc(ZygoteArguments parsedArgs,
             FileDescriptor pipeFd, boolean isZygote) {
-        /**
+        /*
          * By the time we get here, the native code has closed the two actual Zygote
          * socket connections, and substituted /dev/null in their place.  The LocalSocket
          * objects still need to be closed properly.
          */
 
         closeSocket();
-        if (descriptors != null) {
-            try {
-                Os.dup2(descriptors[0], STDIN_FILENO);
-                Os.dup2(descriptors[1], STDOUT_FILENO);
-                Os.dup2(descriptors[2], STDERR_FILENO);
-
-                for (FileDescriptor fd: descriptors) {
-                    IoUtils.closeQuietly(fd);
-                }
-            } catch (ErrnoException ex) {
-                Log.e(TAG, "Error reopening stdio", ex);
-            }
-        }
-
-        if (parsedArgs.mNiceName != null) {
-            Process.setArgV0(parsedArgs.mNiceName);
-        }
 
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -486,19 +505,11 @@ class ZygoteConnection {
      *
      * @param pid != 0; pid of child if &gt; 0 or indication of failed fork
      * if &lt; 0;
-     * @param descriptors null-ok; file descriptors for child's new stdio if
-     * specified.
      * @param pipeFd null-ok; pipe for communication with child.
      */
-    private void handleParentProc(int pid, FileDescriptor[] descriptors, FileDescriptor pipeFd) {
+    private void handleParentProc(int pid, FileDescriptor pipeFd) {
         if (pid > 0) {
             setChildPgid(pid);
-        }
-
-        if (descriptors != null) {
-            for (FileDescriptor fd: descriptors) {
-                IoUtils.closeQuietly(fd);
-            }
         }
 
         boolean usingWrapper = false;
@@ -509,11 +520,11 @@ class ZygoteConnection {
                 // bail) happens in a timely manner.
                 final int BYTES_REQUIRED = 4;  // Bytes in an int.
 
-                StructPollfd fds[] = new StructPollfd[] {
+                StructPollfd[] fds = new StructPollfd[] {
                         new StructPollfd()
                 };
 
-                byte data[] = new byte[BYTES_REQUIRED];
+                byte[] data = new byte[BYTES_REQUIRED];
 
                 int remainingSleepTime = WRAPPED_PID_TIMEOUT_MILLIS;
                 int dataIndex = 0;
@@ -527,7 +538,10 @@ class ZygoteConnection {
 
                     int res = android.system.Os.poll(fds, remainingSleepTime);
                     long endTime = System.nanoTime();
-                    int elapsedTimeMs = (int)((endTime - startTime) / 1000000l);
+                    int elapsedTimeMs =
+                            (int) TimeUnit.MILLISECONDS.convert(
+                                    endTime - startTime,
+                                    TimeUnit.NANOSECONDS);
                     remainingSleepTime = WRAPPED_PID_TIMEOUT_MILLIS - elapsedTimeMs;
 
                     if (res > 0) {

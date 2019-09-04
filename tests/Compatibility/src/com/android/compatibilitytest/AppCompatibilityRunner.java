@@ -16,7 +16,7 @@
 
 package com.android.compatibilitytest;
 
-import android.support.test.runner.AndroidJUnitRunner;
+import androidx.test.runner.AndroidJUnitRunner;
 
 // empty subclass to maintain backwards compatibility on host-side harness
 public class AppCompatibilityRunner extends AndroidJUnitRunner {}

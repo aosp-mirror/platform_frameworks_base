@@ -47,6 +47,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.Interpolator;
+import android.view.inspector.InspectableProperty;
 import android.widget.EdgeEffect;
 import android.widget.Scroller;
 
@@ -2784,6 +2785,9 @@ public class ViewPager extends ViewGroup {
          * Where to position the view page within the overall ViewPager
          * container; constants are defined in {@link android.view.Gravity}.
          */
+        @InspectableProperty(
+                name = "layout_gravity",
+                valueType = InspectableProperty.ValueType.GRAVITY)
         public int gravity;
 
         /**

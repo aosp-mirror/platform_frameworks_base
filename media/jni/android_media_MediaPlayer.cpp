@@ -39,7 +39,6 @@
 #include "utils/Errors.h"  // for status_t
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
-#include "android_media_BufferingParams.h"
 #include "android_media_MediaDataSource.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
@@ -94,7 +93,6 @@ struct fields_t {
 };
 static fields_t fields;
 
-static BufferingParams::fields_t gBufferingParamsFields;
 static PlaybackParams::fields_t gPlaybackParamsFields;
 static SyncParams::fields_t gSyncParamsFields;
 static VolumeShaperHelper::fields_t gVolumeShaperFields;
@@ -368,50 +366,6 @@ static void
 android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
 {
     setVideoSurface(env, thiz, jsurface, true /* mediaPlayerMustBeAlive */);
-}
-
-static jobject
-android_media_MediaPlayer_getBufferingParams(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
-    }
-
-    BufferingParams bp;
-    BufferingSettings &settings = bp.settings;
-    process_media_player_call(
-            env, thiz, mp->getBufferingSettings(&settings),
-            "java/lang/IllegalStateException", "unexpected error");
-    if (env->ExceptionCheck()) {
-        return nullptr;
-    }
-    ALOGV("getBufferingSettings:{%s}", settings.toString().string());
-
-    return bp.asJobject(env, gBufferingParamsFields);
-}
-
-static void
-android_media_MediaPlayer_setBufferingParams(JNIEnv *env, jobject thiz, jobject params)
-{
-    if (params == NULL) {
-        return;
-    }
-
-    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
-    }
-
-    BufferingParams bp;
-    bp.fillFromJobject(env, gBufferingParamsFields, params);
-    ALOGV("setBufferingParams:{%s}", bp.settings.toString().string());
-
-    process_media_player_call(
-            env, thiz, mp->setBufferingSettings(bp.settings),
-            "java/lang/IllegalStateException", "unexpected error");
 }
 
 static void
@@ -728,13 +682,9 @@ android_media_MediaPlayer_native_getMetrics(JNIEnv *env, jobject thiz)
         return (jobject) NULL;
     }
 
-    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
     item->readFromParcel(p);
-    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
-
-    // housekeeping
-    delete item;
-    item = NULL;
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 
     return mybundle;
 }
@@ -975,8 +925,6 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         env->GetMethodID(clazz, "getExclusionListAsString", "()Ljava/lang/String;");
 
     env->DeleteLocalRef(clazz);
-
-    gBufferingParamsFields.init(env);
 
     // Modular DRM
     FIND_CLASS(clazz, "android/media/MediaDrm$MediaDrmStateException");
@@ -1426,8 +1374,6 @@ static const JNINativeMethod gMethods[] = {
     {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setDataSource",      "(Landroid/media/MediaDataSource;)V",(void *)android_media_MediaPlayer_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
-    {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer_getBufferingParams},
-    {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer_setBufferingParams},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer_start},

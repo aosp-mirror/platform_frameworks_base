@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
@@ -343,7 +344,7 @@ public class TextureView extends View {
         properties (alpha, layer paint) affect all of the content of a TextureView. */
 
         if (canvas.isHardwareAccelerated()) {
-            DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+            RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
 
             TextureLayer layer = getTextureLayer();
             if (layer != null) {
@@ -351,7 +352,7 @@ public class TextureView extends View {
                 applyTransformMatrix();
 
                 mLayer.setLayerPaint(mLayerPaint); // ensure layer paint is up to date
-                displayListCanvas.drawTextureLayer(layer);
+                recordingCanvas.drawTextureLayer(layer);
             }
         }
     }

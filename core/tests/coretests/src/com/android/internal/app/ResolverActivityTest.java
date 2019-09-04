@@ -16,8 +16,36 @@
 
 package com.android.internal.app;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
+import static com.android.internal.app.ResolverDataProvider.createPackageManagerMockedInfo;
+import static com.android.internal.app.ResolverWrapperActivity.sOverrides;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
+
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.RelativeLayout;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.R;
+import com.android.internal.app.ResolverActivity.ActivityInfoPresentationGetter;
+import com.android.internal.app.ResolverActivity.ResolveInfoPresentationGetter;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.app.ResolverDataProvider.PackageManagerMockedInfo;
 import com.android.internal.widget.ResolverDrawerLayout;
 
 import org.junit.Before;
@@ -26,37 +54,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
-import android.content.Intent;
-import android.content.pm.ResolveInfo;
-import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
-import android.view.View;
-import android.widget.RelativeLayout;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import static android.os.SystemClock.sleep;
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static com.android.internal.app.ResolverWrapperActivity.sOverrides;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Resolver activity instrumentation tests
@@ -100,6 +99,49 @@ public class ResolverActivityTest {
                 .perform(click());
         waitForIdle();
         assertThat(chosen[0], is(toChoose));
+    }
+
+    @Test
+    public void setMaxHeight() throws Exception {
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        waitForIdle();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        final View resolverList = activity.findViewById(R.id.resolver_list);
+        final int initialResolverHeight = resolverList.getHeight();
+
+        activity.runOnUiThread(() -> {
+            ResolverDrawerLayout layout = (ResolverDrawerLayout)
+                    activity.findViewById(
+                            R.id.contentPanel);
+            ((ResolverDrawerLayout.LayoutParams) resolverList.getLayoutParams()).maxHeight
+                = initialResolverHeight - 1;
+            // Force a relayout
+            layout.invalidate();
+            layout.requestLayout();
+        });
+        waitForIdle();
+        assertThat("Drawer should be capped at maxHeight",
+            resolverList.getHeight() == (initialResolverHeight - 1));
+
+        activity.runOnUiThread(() -> {
+            ResolverDrawerLayout layout = (ResolverDrawerLayout)
+                    activity.findViewById(
+                            R.id.contentPanel);
+            ((ResolverDrawerLayout.LayoutParams) resolverList.getLayoutParams()).maxHeight
+                = initialResolverHeight + 1;
+            // Force a relayout
+            layout.invalidate();
+            layout.requestLayout();
+        });
+        waitForIdle();
+        assertThat("Drawer should not change height if its height is less than maxHeight",
+            resolverList.getHeight() == initialResolverHeight);
     }
 
     @Test
@@ -280,6 +322,50 @@ public class ResolverActivityTest {
         onView(withId(R.id.button_once)).perform(click());
         waitForIdle();
         assertThat(chosen[0], is(toChoose));
+    }
+
+    @Test
+    public void getActivityLabelAndSubLabel() throws Exception {
+        ActivityInfoPresentationGetter pg;
+        PackageManagerMockedInfo info;
+
+        info = createPackageManagerMockedInfo(false);
+        pg = new ActivityInfoPresentationGetter(
+                info.ctx, 0, info.activityInfo);
+        assertThat("Label should match app label", pg.getLabel().equals(
+                info.setAppLabel));
+        assertThat("Sublabel should match activity label if set",
+                pg.getSubLabel().equals(info.setActivityLabel));
+
+        info = createPackageManagerMockedInfo(true);
+        pg = new ActivityInfoPresentationGetter(
+                info.ctx, 0, info.activityInfo);
+        assertThat("With override permission label should match activity label if set",
+                pg.getLabel().equals(info.setActivityLabel));
+        assertThat("With override permission sublabel should be empty",
+                TextUtils.isEmpty(pg.getSubLabel()));
+    }
+
+    @Test
+    public void getResolveInfoLabelAndSubLabel() throws Exception {
+        ResolveInfoPresentationGetter pg;
+        PackageManagerMockedInfo info;
+
+        info = createPackageManagerMockedInfo(false);
+        pg = new ResolveInfoPresentationGetter(
+                info.ctx, 0, info.resolveInfo);
+        assertThat("Label should match app label", pg.getLabel().equals(
+                info.setAppLabel));
+        assertThat("Sublabel should match resolve info label if set",
+                pg.getSubLabel().equals(info.setResolveInfoLabel));
+
+        info = createPackageManagerMockedInfo(true);
+        pg = new ResolveInfoPresentationGetter(
+                info.ctx, 0, info.resolveInfo);
+        assertThat("With override permission label should match resolve info label if set",
+                pg.getLabel().equals(info.setResolveInfoLabel));
+        assertThat("With override permission sublabel should be empty",
+                TextUtils.isEmpty(pg.getSubLabel()));
     }
 
     private Intent createSendImageIntent() {

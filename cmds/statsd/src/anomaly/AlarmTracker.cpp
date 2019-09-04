@@ -78,8 +78,8 @@ void AlarmTracker::informAlarmsFired(
     }
     if (!mSubscriptions.empty()) {
         VLOG("AlarmTracker triggers the subscribers.");
-        triggerSubscribers(mAlarmConfig.id(), DEFAULT_METRIC_DIMENSION_KEY, mConfigKey,
-                           mSubscriptions);
+        triggerSubscribers(mAlarmConfig.id(), 0 /*metricId N/A*/, DEFAULT_METRIC_DIMENSION_KEY,
+                           0 /* metricValue N/A */, mConfigKey, mSubscriptions);
     }
     firedAlarms.erase(mInternalAlarm);
     mAlarmSec = findNextAlarmSec((timestampNs-1) / NS_PER_SEC + 1); // round up

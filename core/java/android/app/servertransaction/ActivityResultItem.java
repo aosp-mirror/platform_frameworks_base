@@ -88,7 +88,7 @@ public class ActivityResultItem extends ClientTransactionItem {
         mResultInfoList = in.createTypedArrayList(ResultInfo.CREATOR);
     }
 
-    public static final Parcelable.Creator<ActivityResultItem> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ActivityResultItem> CREATOR =
             new Parcelable.Creator<ActivityResultItem>() {
         public ActivityResultItem createFromParcel(Parcel in) {
             return new ActivityResultItem(in);

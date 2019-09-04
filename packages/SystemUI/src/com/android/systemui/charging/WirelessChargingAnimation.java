@@ -37,7 +37,7 @@ public class WirelessChargingAnimation {
 
     public static final long DURATION = 1133;
     private static final String TAG = "WirelessChargingView";
-    private static final boolean LOCAL_LOGV = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final WirelessChargingView mCurrentWirelessChargingView;
     private static WirelessChargingView mPreviousWirelessChargingView;
@@ -95,7 +95,6 @@ public class WirelessChargingAnimation {
         private final Handler mHandler;
 
         private int mGravity;
-
         private View mView;
         private View mNextView;
         private WindowManager mWM;
@@ -112,7 +111,7 @@ public class WirelessChargingAnimation {
             params.width = WindowManager.LayoutParams.MATCH_PARENT;
             params.format = PixelFormat.TRANSLUCENT;
 
-            params.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+            params.type = WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
             params.setTitle("Charging Animation");
             params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
@@ -151,20 +150,20 @@ public class WirelessChargingAnimation {
         }
 
         public void show() {
-            if (LOCAL_LOGV) Log.v(TAG, "SHOW: " + this);
+            if (DEBUG) Slog.d(TAG, "SHOW: " + this);
             mHandler.obtainMessage(SHOW).sendToTarget();
         }
 
         public void hide(long duration) {
             mHandler.removeMessages(HIDE);
 
-            if (LOCAL_LOGV) Log.v(TAG, "HIDE: " + this);
+            if (DEBUG) Slog.d(TAG, "HIDE: " + this);
             mHandler.sendMessageDelayed(Message.obtain(mHandler, HIDE), duration);
         }
 
         private void handleShow() {
-            if (LOCAL_LOGV) {
-                Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView + " mNextView="
+            if (DEBUG) {
+                Slog.d(TAG, "HANDLE SHOW: " + this + " mView=" + mView + " mNextView="
                         + mNextView);
             }
 
@@ -182,10 +181,10 @@ public class WirelessChargingAnimation {
                 mParams.hideTimeoutMilliseconds = DURATION;
 
                 if (mView.getParent() != null) {
-                    if (LOCAL_LOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
+                    if (DEBUG) Slog.d(TAG, "REMOVE! " + mView + " in " + this);
                     mWM.removeView(mView);
                 }
-                if (LOCAL_LOGV) Log.v(TAG, "ADD! " + mView + " in " + this);
+                if (DEBUG) Slog.d(TAG, "ADD! " + mView + " in " + this);
 
                 try {
                     if (mCallback != null) {
@@ -199,10 +198,10 @@ public class WirelessChargingAnimation {
         }
 
         private void handleHide() {
-            if (LOCAL_LOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
+            if (DEBUG) Slog.d(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
             if (mView != null) {
                 if (mView.getParent() != null) {
-                    if (LOCAL_LOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
+                    if (DEBUG) Slog.d(TAG, "REMOVE! " + mView + " in " + this);
                     if (mCallback != null) {
                         mCallback.onAnimationEnded();
                     }

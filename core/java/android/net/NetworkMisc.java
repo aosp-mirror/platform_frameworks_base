@@ -106,7 +106,7 @@ public class NetworkMisc implements Parcelable {
         out.writeInt(skip464xlat ? 1 : 0);
     }
 
-    public static final Creator<NetworkMisc> CREATOR = new Creator<NetworkMisc>() {
+    public static final @android.annotation.NonNull Creator<NetworkMisc> CREATOR = new Creator<NetworkMisc>() {
         @Override
         public NetworkMisc createFromParcel(Parcel in) {
             NetworkMisc networkMisc = new NetworkMisc();

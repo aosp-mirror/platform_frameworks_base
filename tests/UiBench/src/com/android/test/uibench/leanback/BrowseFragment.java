@@ -17,7 +17,7 @@ package com.android.test.uibench.leanback;
 
 import android.os.Bundle;
 
-public class BrowseFragment extends android.support.v17.leanback.app.BrowseSupportFragment {
+public class BrowseFragment extends androidx.leanback.app.BrowseSupportFragment {
 
     public BrowseFragment() {
     }

@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "android-base/macros.h"
@@ -57,6 +58,9 @@ FileType GetFileType(const std::string& path);
 // Appends a path to `base`, separated by the directory separator.
 void AppendPath(std::string* base, android::StringPiece part);
 
+// Concatenates the list of paths and separates each part with the directory separator.
+std::string BuildPath(std::vector<const android::StringPiece>&& args);
+
 // Makes all the directories in `path`. The last element in the path is interpreted as a directory.
 bool mkdirs(const std::string& path);
 
@@ -70,6 +74,9 @@ android::StringPiece GetFilename(const android::StringPiece& path);
 // of the path.
 android::StringPiece GetExtension(const android::StringPiece& path);
 
+// Returns whether or not the name of the file or directory is a hidden file name
+bool IsHidden(const android::StringPiece& path);
+
 // Converts a package name (com.android.app) to a path: com/android/app
 std::string PackageToPath(const android::StringPiece& package);
 
@@ -79,6 +86,10 @@ Maybe<android::FileMap> MmapPath(const std::string& path, std::string* out_error
 // Reads the file at path and appends each line to the outArgList vector.
 bool AppendArgsFromFile(const android::StringPiece& path, std::vector<std::string>* out_arglist,
                         std::string* out_error);
+
+// Reads the file at path and appends each line to the outargset set.
+bool AppendSetArgsFromFile(const android::StringPiece& path,
+                        std::unordered_set<std::string>* out_argset, std::string* out_error);
 
 // Filter that determines which resource files/directories are
 // processed by AAPT. Takes a pattern string supplied by the user.

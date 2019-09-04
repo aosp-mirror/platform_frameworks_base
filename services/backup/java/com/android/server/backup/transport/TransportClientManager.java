@@ -19,12 +19,15 @@ package com.android.server.backup.transport;
 import static com.android.server.backup.TransportManager.SERVICE_ACTION_TRANSPORT_HOST;
 import static com.android.server.backup.transport.TransportUtils.formatMessage;
 
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.transport.TransportUtils.Priority;
+
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -36,13 +39,16 @@ import java.util.WeakHashMap;
 public class TransportClientManager {
     private static final String TAG = "TransportClientManager";
 
+    private final @UserIdInt int mUserId;
     private final Context mContext;
     private final TransportStats mTransportStats;
     private final Object mTransportClientsLock = new Object();
     private int mTransportClientsCreated = 0;
     private Map<TransportClient, String> mTransportClientsCallerMap = new WeakHashMap<>();
 
-    public TransportClientManager(Context context, TransportStats transportStats) {
+    public TransportClientManager(@UserIdInt int userId, Context context,
+            TransportStats transportStats) {
+        mUserId = userId;
         mContext = context;
         mTransportStats = transportStats;
     }
@@ -89,6 +95,7 @@ public class TransportClientManager {
         synchronized (mTransportClientsLock) {
             TransportClient transportClient =
                     new TransportClient(
+                            mUserId,
                             mContext,
                             mTransportStats,
                             bindIntent,

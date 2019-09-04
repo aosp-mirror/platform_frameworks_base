@@ -36,7 +36,7 @@ public class ParcelableCallAnalytics implements Parcelable {
         public static final int RECEIVE_REMOTE_SESSION_MODIFY_REQUEST = 2;
         public static final int RECEIVE_REMOTE_SESSION_MODIFY_RESPONSE = 3;
 
-        public static final Parcelable.Creator<VideoEvent> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<VideoEvent> CREATOR =
                 new Parcelable.Creator<VideoEvent> () {
 
                     @Override
@@ -135,7 +135,7 @@ public class ParcelableCallAnalytics implements Parcelable {
         public static final int REQUEST_PULL = 500;
 
 
-        public static final Parcelable.Creator<AnalyticsEvent> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<AnalyticsEvent> CREATOR =
                 new Parcelable.Creator<AnalyticsEvent> () {
 
                     @Override
@@ -200,7 +200,7 @@ public class ParcelableCallAnalytics implements Parcelable {
 
         public static final int INVALID = 999999;
 
-        public static final Parcelable.Creator<EventTiming> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<EventTiming> CREATOR =
                 new Parcelable.Creator<EventTiming> () {
 
                     @Override
@@ -284,7 +284,7 @@ public class ParcelableCallAnalytics implements Parcelable {
 
     public static final int STILL_CONNECTED = -1;
 
-    public static final Parcelable.Creator<ParcelableCallAnalytics> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ParcelableCallAnalytics> CREATOR =
             new Parcelable.Creator<ParcelableCallAnalytics> () {
 
                 @Override

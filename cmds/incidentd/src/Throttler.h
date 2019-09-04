@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef THROTTLER_H
-#define THROTTLER_H
+#pragma once
+
+#include "Reporter.h"
 
 #include <utils/RefBase.h>
 
+#include <vector>
 #include <unistd.h>
 
 namespace android {
 namespace os {
 namespace incidentd {
+
 /**
  * This is a size-based throttler which prevents incidentd to take more data.
  */
@@ -33,8 +36,11 @@ public:
     ~Throttler();
 
     /**
-     * Asserts this before starting taking report.
+     * Return a batch containing reports, if any that should be executed.
+     * Those will be removed from 'queued'.
      */
+    sp<ReportBatch> filterBatch(const sp<ReportBatch>& queued);
+
     bool shouldThrottle();
 
     void addReportSize(size_t reportByteSize);
@@ -52,5 +58,3 @@ private:
 }  // namespace incidentd
 }  // namespace os
 }  // namespace android
-
-#endif  // THROTTLER_H

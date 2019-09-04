@@ -30,7 +30,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;ခေါင်းစဉ်မဲ့&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ဖုန်းနံပါတ်မရှိပါ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"မသိရ"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"အသံစာပို့စနစ်"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"အသံမေးလ်"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် မမှန်ကန်သောMMIကုတ်"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"သတ်မှတ်ခေါ်ဆိုနိုင်သောနံပါတ်များထံသာ ကန့်သတ်ထားသည်"</string>
@@ -77,15 +77,16 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ဝန်ဆောင်မှုအား ကန့်သတ်မထားပါ"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"သင်သည် ခေါ်ဆိုသူ ID ဆက်တင်ကို မပြောင်းလဲနိုင်ပါ။"</string>
-    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ဒေတာချိတ်ဆက်ရန် ဝန်ဆောင်မှု မရှိပါ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"အရေးပေါ်ဖုန်းခေါ်ခြင်းများ မရရှိနိုင်ပါ"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"မိုဘိုင်း ဒေတာဝန်ဆောင်မှု မရှိပါ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ဖုန်းဝန်ဆောင်မှု မရှိပါ"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ဖုန်း/အရေးပေါ် ဝန်ဆောင်မှုများမရရှိနိုင်ပါ"</string>
-    <string name="RestrictedStateContent" msgid="4278821484643362350">"သင်၏ ဒေသတွင် မိုဘိုင်းကွန်ရက် ယာယီမရရှိနိုင်ပါ"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ကွန်ရက်ကို ချိတ်ဆက်၍မရပါ"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"လိုင်းဖမ်းယူမှု ကောင်းမွန်စေရန် ဆက်တင်များ &gt; ကွန်ရက်နှင့် အင်တာနက် &gt; မိုဘိုင်းကွန်ရက်များ &gt; အသုံးပြုလိုသည့် ကွန်ရက်အမျိုးအစားတွင် ရွေးချယ်ထားသည့် အမျိုးအစားကို ပြောင်းကြည့်ပါ။"</string>
-    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi ခေါ်ဆိုမှုကို အသုံးပြုနေပါသည်"</string>
-    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"အရေးပေါ်ဖုန်းခေါ်ဆိုရန် မိုဘိုင်းကွန်ရက်ကို လိုအပ်သည်။"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"ဖုန်းခေါ်ဆိုခြင်း ဝန်ဆောင်မှု သို့မဟုတ် အရေးပေါ်ခေါ်ဆိုခြင်း မရနိုင်ပါ"</string>
+    <string name="RestrictedStateContent" msgid="6538703255570997248">"သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားသည်"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
+    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Wi‑Fi ဖြင့် အရေးပေါ်ခေါ်ဆိုမှုများ ပြုလုပ်၍မရပါ"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"သတိပေးချက်များ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"အဝင်ခေါ်ဆိုမှုအား ထပ်ဆင့်ပို့ခြင်း"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"အရေးပေါ် ပြန်လည်ခေါ်ဆိုနိုင်သောမုဒ်"</string>
@@ -120,20 +121,30 @@
     <string name="roamingText11" msgid="4154476854426920970">"ရုန်းမင်းစာတမ်းဖွင့်ရန်"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ရုန်းမင်းစာတမ်းပိတ်ထားရန်"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ဆားဗစ်အားရှာဖွေနေသည်"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi  ခေါ်ဆိုမှု"</string>
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Wi‑Fi ခေါ်ဆိုမှုကို စနစ်ထည့်သွင်း၍မရပါ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Wi-Fi အသုံးပြု၍ ဖုန်းခေါ်ရန်နှင့် မက်ဆေ့ဂျ်ပို့ရန်အတွက် သင့်ဝန်ဆောင်မှုပေးသူကို ဤဝန်ဆောင်မှုအား သတ်မှတ်ပေးရန် ဦးစွာတောင်းဆိုပါ။ ထို့နောက် ဆက်တင်ထဲသို့ သွား၍ Wi-Fi ဖြင့် ဖုန်းခေါ်ခြင်းကို ဖွင့်ရပါမည်။ (အမှားကုဒ်- <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7472393097168811593">"သင့်ဖုန်းကုမ္ပဏီနှင့် မှတ်ပုံတင်ပါ (အမှားကုဒ်− <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="7372514042696663278">"သင်၏ ဝန်ဆောင်မှုပေးသူဖြင့် Wi‑Fi ခေါ်ဆိုမှုကို မှတ်ပုံတင်ရာတွင် ပြဿနာရှိနေသည်− <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi  ခေါ်ဆိုမှု"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi ခေါ်ဆိုမှု | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ပိတ်ထားရသည်"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ဝိုင်ဖိုင်အား ပိုနှစ်သက်သော"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"မိုဘိုင်းကို အသုံးပြုလိုပါသည်"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ကြိုးမဲ့အင်တာနက် သာလျှင်"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -142,7 +153,7 @@
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="fcComplete" msgid="3118848230966886575">"ပုံစံကုတ်ပြီးဆုံးသည်"</string>
     <string name="fcError" msgid="3327560126588500777">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် တရားမဝင်သောပုံစံကုတ်"</string>
-    <string name="httpErrorOk" msgid="1191919378083472204">"အိုကေ"</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="7956392511146698522">"ကွန်ရက်အမှားအယွင်း ရှိပါသည်"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL ကို ရှာဖွေ့ မတွေ့ရှိပါ"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"ဆိုက် မှန်ကန်မှု စိစစ်ရေး စနစ်ကို ပံ့ပိုး မပေးပါ။"</string>
@@ -160,8 +171,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"တောင်းခံမှုများစွာကို ပြုလုပ်နေသည် အချိန်အနည်းငယ်အကြာတွင်ပြန်လည်လုပ်ပါ"</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> ဝင်ရာ အမှား"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"အလိုအလျောက် ထပ်တူလုပ်ခြင်း"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ထပ်တူ ကိုက်ညီခြင်း"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"ဖျက်ရန် <xliff:g id="CONTENT_TYPE">%s</xliff:g> များစွာရှိ"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"စင့်ခ်လုပ်၍ မရပါ"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"<xliff:g id="CONTENT_TYPE">%s</xliff:g> များစွာကို ဖျက်ရန် ကြိုးစားထားသည်။"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"တက်ဘလက်တွင် သိမ်းဆည်းသော နေရာ ကုန်သွားပါပြီ။ တချို့ ဖိုင်များ ဖျက်စီးခြင်းဖြင့် နေရာလွတ် ပြုလုပ်ပါ"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"သိုလှောင်ခန်း နေရာ ပြည့်နေပြီ။ နေရာ လွတ်လာရန် ဖိုင် အချို့ကို ဖျက်ပါ။"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"တီဗွီ၏ သိုလှောင်ရုံ ပြည့်နေ၏။ နေရာလွတ်ရရန် ဖိုင်တစ်ချို့အား ဖျက်ပစ်ပါ။"</string>
@@ -174,14 +185,13 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"သင်၏အလုပ်ပရိုဖိုင် စီမံခန့်ခွဲသူမှ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ဖြင့်"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"အလုပ်ပရိုဖိုင် ဖျက်ပြီးဖြစ်၏"</string>
-    <string name="work_profile_deleted_description" msgid="1100529432509639864">"စီမံခန့်ခွဲရန် အက်ပ်မရှိသောကြောင့် အလုပ်ပရိုဖိုင်ကို ဖျက်လိုက်ခြင်းဖြစ်သည်"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"အလုပ်ပရိုဖိုင် စီမံခန့်ခွဲရန်အက်ပ် မရှိပါ သို့မဟုတ် ပျက်စီးနေပါသည်။ ထို့ကြောင့် သင်၏ အလုပ်ပရိုဖိုင်နှင့် ဆက်စပ်နေသော ဒေတာများကို ဖျက်လိုက်ပါပြီ။ အကူအညီရယူရန် သင်၏စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ဤစက်ပစ္စည်းတွင် သင်၏ အလုပ်ပရိုဖိုင်မရှိတော့ပါ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"စကားဝှက်ထည့်သွင်းရန် ကြိုးစားသည့် အကြိမ်အရေအတွက် အလွန်များသွား၍ ဖြစ်ပါသည်"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"စက်ပစ္စည်းကို စီမံခန့်ခွဲထားပါသည်"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ဤစက်ပစ္စည်းကို သင်၏ အဖွဲ့အစည်းက စီမံပြီး ကွန်ရက်အသွားအလာကို စောင့်ကြည့်နိုင်ပါသည်။ ထပ်မံလေ့လာရန် တို့ပါ။"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"စီမံခန့်ခွဲရန် အက်ပ်ကို သုံး၍မရပါ။ သင်၏ စက်ပစ္စည်းအတွင်းရှိ အရာများကို ဖျက်လိုက်ပါမည်။\n\nမေးမြန်းစရာများရှိပါက အဖွဲ့အစည်း၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"စီမံခန့်ခွဲမှု အက်ပ်ကို သုံး၍မရပါ။ သင်၏ စက်ပစ္စည်းအတွင်းရှိ အရာများကို ဖျက်လိုက်ပါမည်\n\nမေးစရာများရှိပါက သင့်အဖွဲ့အစည်း၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> က ပုံနှိပ်ထုတ်ယူခြင်းကို ပိတ်ထားသည်။"</string>
     <string name="me" msgid="6545696007631404292">"ကျွန်ုပ်"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
@@ -220,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
     <string name="global_action_logout" msgid="935179188218826050">"သတ်မှတ်ပေးထားသည့်အချိန် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းအား ယူရန်"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"လက်ငင်းတုံ့ပြန်နိုင်သည့် အစီရင်ခံချက်"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"အခြေအနေတော်တော်များများတွင် ၎င်းကိုအသုံးပြုပါ။ ၎င်းသည် အစီရင်ခံစာကို မှတ်သားခြင်း၊ ပြဿနာအကြောင်း နောက်ထပ်အသေးစိတ်များကို ထည့်သွင်းခြင်းနှင့် မျက်နှာပြင်ပုံဖမ်းယူခြင်းတို့ကို ပြုလုပ်ခွင့်ပေးပါသည်။ ပေးပို့ရန် အလွန်ကြာပြီး အသုံးပြုခြင်းနည်းပါးသည့်အပိုင်းကို ၎င်းက ချန်ခဲ့နိုင်ပါသည်။"</string>
@@ -269,31 +280,52 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"အလုပ်ပရိုဖိုင်သို့ ပြောင်းရန်"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"အဆက်အသွယ်များ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"သင့် အဆက်အသွယ်များအား ဝင်ရောက်သုံးရန်"</string>
-    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား သင်၏အဆက်အသွယ်များကို သုံးခွင့်ပေးရန်"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏အဆက်အသွယ်များကို သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"တည်နေရာ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ဤစက်ပစ္စည်း၏ တည်နေရာကို ရယူရန်"</string>
-    <string name="permgrouprequest_location" msgid="8903573681261610809">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား ဤစက်ပစ္စည်း၏တည်နေရာကို သုံးခွင့်ပေးရန်"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဤစက်ပစ္စည်း၏တည်နေရာကို သုံးခွင့်ပေးလိုပါသလား။"</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ပြက္ခဒိန်"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
-    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား သင်၏ပြက္ခဒိန်ကို သုံးခွင့်ပေးရန်"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ပြက္ခဒိန်ကို သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
-    <string name="permgrouprequest_sms" msgid="605618939583628306">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား SMS မက်ဆေ့ဂျ်များကို ကြည့်ရှုခွင့်နှင့် ပို့ခွင့်ပေးရန်"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား SMS မက်ဆေ့ဂျ်များ ကြည့်ရှုခွင့်နှင့် ပို့ခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"သိုလှောင်မှုများ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအား ဝင်သုံးပါ"</string>
-    <string name="permgrouprequest_storage" msgid="7429669910547860218">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအားကို ဝင်သုံးခွင့်ပေးရန်"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များ ဝင်သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"မိုက်ခရိုဖုန်း"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"အသံဖမ်းခြင်း"</string>
-    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား အသံဖမ်းယူခွင့် ပေးရန်"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား အသံဖမ်းယူခွင့် ပေးလိုပါသလား။"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"လှုပ်ရှားမှုကို မှတ်သားပါ"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"လှုပ်ရှားမှုကို မှတ်သားခြင်း"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ကင်မရာ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
-    <string name="permgrouprequest_camera" msgid="810824326507258410">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား ဓာတ်ပုံနှင့် ဗီဒီယိုရိုက်ကူးခွင့် ပြုရန်"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဓာတ်ပုံနှင့် ဗီဒီယိုရိုက်ကူးခွင့် ပေးလိုပါသလား။"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ခေါ်ဆိုထားသော မှတ်တမ်းများ"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ဖုန်းခေါ်ဆိုထားသော မှတ်တမ်း ဖတ်ပြီး ရေးရန်"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ခေါ်ဆိုထားသော မှတ်တမ်းများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခွင့်နှင့် စီမံခွင့်ပေးရန်"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"ခန္ဓာကိုယ် အာရုံခံကိရိယာများ"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခွင့်နှင့် စီမံခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"စက်၏ အာရုံခံစနစ်များ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
-    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား သင်၏ အသက်ရှင်မှုလက္ခဏာ အာရုံခံကိရိယာ အချက်အလက်များကို သုံးခွင့်ပေးရန်"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ အရေးကြီးသောလက္ခဏာ အာရုံခံကိရိယာ ဒေတာများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"တေးဂီတ"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"သင့်တေးဂီတသို့ ဝင်သည်"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်တေးဂီတကို ဝင်ခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"ဓာတ်ပုံများနှင့် ဗီဒီယိုများ"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"သင့်ဓာတ်ပုံနှင့် ဗီဒီယိုများသို့ ဝင်သည်"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးတွင် ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင်အသုံးပြုနေသော ဝင်းဒိုးတွင် ပါရှိသည်များကို ကြည့်ရှုစစ်ဆေးသည်။"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"တို့ထိခြင်းဖြင့် ရှာဖွေမှုကို ဖွင့်ရန်"</string>
@@ -301,11 +333,11 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို စောင့်ကြည့်ရန်"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကဒ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ရန်"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါ။"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါသည်။"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"လက်ဟန်များ အသုံးပြုပါ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"တို့ခြင်း၊ ပွတ်ဆွဲခြင်း၊ နှင့် အခြား လက်ဟန်များကို အသုံးပြုနိုင်ပါသည်။"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"လက်ဗွေရာများ"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ကိရိယာ၏ လက်ဗွေအာရုံခံကိရိယာတွင် နှိပ်ထားသည်များကို မှတ်သားထားနိုင်သည်။"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"စက်ပစ္စည်း၏ လက်ဗွေအာရုံခံကိရိယာတွင် လုပ်ဆောင်ထားသည့် လက်ဟန်များကို မှတ်သားထားနိုင်သည်။"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"အခြေအနေပြဘားအား အလုပ်မလုပ်ခိုင်းရန်သို့မဟုတ် မွမ်းမံရန်"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"အက်ပ်အား အခြေအနေပြ ဘားကို ပိတ်ခွင့် သို့မဟတ် စနစ် အိုင်ကွန်များကို ထည့်ခြင်း ဖယ်ရှားခြင်း ပြုလုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"အခြေအနေပြ ဘားဖြစ်ပါစေ"</string>
@@ -356,6 +388,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"အပလီကေးရှင်းအား မှတ်ဉာဏ်ထဲတွင် ရေရှည်သိမ်းဆည်ထားရန် ခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် တခြားအပလီကေးရှင်းအများအတွက် မှတ်ဉာဏ်ရရှိမှု နည်းသွားနိုင်ပြီး တက်ဘလက်လည်း နှေးသွားနိုင်ပါသည်။"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"မှတ်ဉာဏ်တွင် ၎င်း၏အစိတ်အပိုင်းများကိုယ်တိုင် တည်မြဲနေစေရန် အက်ပ်အား ခွင့်ပြုပါ။ ဤနည်းဖြင့် တီဗွီကို နှေးစေသော အခြား အက်ပ်များ၏ မှတ်ဉာဏ်ကို ကန့်သတ်ထားနိုင်သည်။"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"အပလီကေးရှင်းအား မှတ်ဉာဏ်ထဲတွင် ရေရှည်သိမ်းဆည်ထားရန် ခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် တခြားအပလီကေးရှင်းအများအတွက် မှတ်ဉာဏ်ရရှိမှု နည်းသွားနိုင်ပြီး ဖုန်းလည်း နှေးသွားနိုင်ပါသည်။"</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"မျက်နှာစာ ဝန်ဆောင်မှုကို ဖွင့်ခြင်း"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"မျက်နှာစာဝန်ဆောင်မှုများကို အက်ပ်အား အသုံးပြုခွင့်ပေးသည်။"</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"အက်ပ်သိုလ​ှောင်မှု နေရာကို တိုင်းထွာခြင်း"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"အက်ပ်အား ၎င်း၏ ကုဒ်၊ ဒေတာ၊ နှင့် ကက်ရှ ဆိုက်များကို ရယူခွင့် ပြုသည်။"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"စနစ်အပြင်အဆင်အား မွမ်းမံခြင်း"</string>
@@ -369,9 +403,9 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"ထုတ်လွှင့်ခြင်းများ ပြီးဆုံးသည့်နောက် ဆက်လက်ရှိနေသည့်၊ တည်မြဲ ထုတ်လွှင့်မှုများပို့ရန် အက်ပ်အား ခွင့်ပြုပါ။ အလွန်အကျွံ လုပ်ဆောင်ပါက တီဗွီ နှေးသွားခြင်း သို့မဟုတ် မှတ်ဉာဏ်အသုံးများမှုကြောင့် မတည်မငြိမ်ဖြစ်ခြင်းများ ဖြစ်တတ်၏။"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"အက်ပ်အား ကြာရှည်ခံ ထုတ်လွှင့်မှု ပြုပါ။ ဤထုတ်လွှင့်မှုများဟာ ထုတ်လွှင့်မှု ပြီးဆုံးပြီးသွားတည့်တိုင် ကျန်နေမည် ဖြစ်ပါသည်။ အလွန်အကျွံသုံးခြင်းကြောင့် မှတ်ဉာဏ်အသုံးများပြီး ဖုန်းနှေးခြင်း၊ မတည်ငြိမ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"အဆက်အသွယ်များအား ဖတ်ခြင်း"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"အပလီကေးရှင်းအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်အကြိမ်ရေ၊ တခြားဆက်သွယ်မှုများစသည်ကဲ့သို့ သင့်တက်ဘလက်မှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက်ကို ဖတ်ခွင့်ပြုပါ။ ဤသို့ခွင့်ပြုခြင်းအားဖြင့် အပလီကေးရှင်းများကို သင့် အဆက်အသွယ်၏ အချက်မလက်များကို သိမ်းဆည်းရန် ခွင့်ပြုပြီး အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ထိုအချက်အလက်များ ကို သင် မသိစေပဲ ဖြန့်ဝေနိုင််မည် ဖြစ်ပါသည်။"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"တစ်ဦးတစ်​ယောက်ထံ သင်ခေါ်ထားသော၊ အီးမေးိပု့ထားသော၊ သို့မဟုတ် တစ်ခြားနည်းဖြင့် အဆက်အသွယ်ပြုထားသော အကြိမ်အရေအတွက် အပါအဝင်၊ သင့်တီဗွီတွင် သိမ်းထားသည့် အဆက်အသွယ်ဆိုင်ရာ အချက်အလက်များ ဖတ်ရန် အက်ပ်အား ခွင့်ပြုပါ။ ဤနည်းဖြင့် သင့် အဆက်အသွယ် အချက်အလက်များအား သိမ်းဆည်းရန် အက်ပ်အား ခွင့်ပြုထားခြင်းဖြစ်ပြီး၊  အဆက်အသွယ် အချက်အလက်များအား အန္တရာယ်ရှိသော အက်ပ်များက သင်မသိဘဲ ဝေမျှနိုင်သည်။"</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"အပလီကေးရှင်းအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်အကြိမ်ရေ၊ တခြားဆက်သွယ်မှုများစသည်ကဲ့သို့ သင့်ဖုန်းမှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက်ကို ဖတ်ခွင့်ပြုပါ။ ဤသို့ခွင့်ပြုခြင်းအားဖြင့် အပလီကေးရှင်းများကို သင့် အဆက်အသွယ်၏ အချက်မလက်များကို သိမ်းဆည်းရန် ခွင့်ပြုပြီး အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ထိုအချက်အလက်များ ကို သင် မသိစေပဲ ဖြန့်ဝေနိုင််မည် ဖြစ်ပါသည်။"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"အပလီကေးရှင်းအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်အကြိမ်ရေ၊ တခြားဆက်သွယ်မှုများစသည်ကဲ့သို့ သင့်တက်ဘလက်မှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက်ကို ဖတ်ခွင့်ပြုပါ။ ဤသို့ခွင့်ပြုခြင်းအားဖြင့် အပလီကေးရှင်းများကို သင့် အဆက်အသွယ်၏ အချက်မလက်များကို သိမ်းရန် ခွင့်ပြုပြီး အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ထိုအချက်အလက်များ ကို သင် မသိစေပဲ ဖြန့်ဝေနိုင််မည် ဖြစ်ပါသည်။"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"တစ်ဦးတစ်​ယောက်ထံ သင်ခေါ်ထားသော၊ အီးမေးိပု့ထားသော၊ သို့မဟုတ် တစ်ခြားနည်းဖြင့် အဆက်အသွယ်ပြုထားသော အကြိမ်အရေအတွက် အပါအဝင်၊ သင့်တီဗွီတွင် သိမ်းထားသည့် အဆက်အသွယ်ဆိုင်ရာ အချက်အလက်များ ဖတ်ရန် အက်ပ်အား ခွင့်ပြုပါ။ ဤနည်းဖြင့် သင့် အဆက်အသွယ် အချက်အလက်များအား သိမ်းရန် အက်ပ်အား ခွင့်ပြုထားခြင်းဖြစ်ပြီး၊  အဆက်အသွယ် အချက်အလက်များအား အန္တရာယ်ရှိသော အက်ပ်များက သင်မသိဘဲ ဝေမျှနိုင်သည်။"</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"အပလီကေးရှင်းအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်အကြိမ်ရေ၊ တခြားဆက်သွယ်မှုများစသည်ကဲ့သို့ သင့်ဖုန်းမှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက်ကို ဖတ်ခွင့်ပြုပါ။ ဤသို့ခွင့်ပြုခြင်းအားဖြင့် အပလီကေးရှင်းများကို သင့် အဆက်အသွယ်၏ အချက်မလက်များကို သိမ်းရန် ခွင့်ပြုပြီး အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ထိုအချက်အလက်များ ကို သင် မသိစေပဲ ဖြန့်ဝေနိုင််မည် ဖြစ်ပါသည်။"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"အဆက်အသွယ်များအား ပြင်ဆင်ခြင်း"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"အပလီကေးရှင်းအား သင့်တက်ဘလက်မှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက် (အထူးအဆက်အသွယ်များအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်ပို့သောအကြိမ်ရေ သို့ အခြားနည်းလမ်းဖြင့်ဆက်သွယ်မှုများ) ကို ပြင်ဆင်ခွင့်ပြုခြင်း။ ဒီခွင့်ပြုချက်က အပလီကေးရှင်းများအား အဆက်အသွယ် အချက်အလက်များ ဖျက်စီးခြင်း လုပ်ဆောင်စေနိုင်မှာ ဖြစ်ပါသည်။"</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"အထူးအဆက်အသွယ်များအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်ပို့သောအကြိမ်ရေ သို့ အခြားနည်းလမ်းဖြင့်ဆက်သွယ်မှုများ အပါအဝင်၊ သင့်တီဗွီတွင် သိမ်းဆည်းထားသော အဆက်အသွယ်များ၏ အချက်အလက်အား ပြင်ဆင်ရန် အပလီကေးရှင်းအား ခွင့်ပြုပါ။ ဤသို့ ခွင့်ပြုခြင်းသည် အဆက်အသွယ် အချက်အလက်များ ဖျက်ဆီးရန် အပလီကေးရှင်းများအား  ခွင့်ပြုခြင်းဖြစ်၏။"</string>
@@ -394,18 +428,22 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ဤအက်ပ်သည် သင့်ဖုန်းပေါ်ရှိ ပြက္ခဒိန်ဖြစ်ရပ်များကို ထည့်ခြင်း၊ ဖယ်ရှားခြင်း သို့မဟုတ် ပြောင်းလဲခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။ ဤအက်ပ်သည် ပြက္ခဒိန်ပိုင်ရှင်များမှ လာခြင်းဖြစ်နိုင်သည့် မက်ဆေ့ဂျ်များကို ပို့နိုင်ပြီး ပိုင်ရှင်များကို အသိမပေးဘဲ ဖြစ်ရပ်များကို ပြောင်းလဲနိုင်ပါသည်။"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"တည်နေရာပံ့ပိုးမှုညွှန်ကြားချက်အပိုအား ဝင်ရောက်ကြည့်ခြင်း"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"အက်ပ်အား တည်နေရာ စီမံပေးရေး ညွှန်ကြားချက် အပိုများကို ရယူခွင့်ပြုသည်။ သို့ဖြစ်၍ အက်ပ်သည် GPS သို့မဟုတ် အခြား တည်နေရာ ရင်းမြစ်ကို သုံးကြသူတို့၏ လုပ်ငန်းများကို ဝင်စွက်ခွင့် ပြုနိုင်သည်။"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"တိကျတဲ့ တည်နေရာ (GPS နှင့် ကွန်ရက် အခြေခံ)ကို ရယူသုံးရန်"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"ဤအက်ပ်သည် ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ GPS သို့မဟုတ် ကွန်ရက်တည်နေရာ အရင်းအမြစ်ပေါ် အခြေခံပြီး သင့်တည်နေရာအချက်အလက်ကို ရယူနိုင်ပါသည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်ဖုန်းပေါ်တွင် ရရှိနိုင်ရပါမည်။ ၎င်းသည် ဘက်ထရီကို ပိုမိုအသုံးပြုနိုင်ပါသည်။"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"အနီးစပ်ဆုံး တည်နေရာ (ကွန်ရက် အခြေခံ)ကို ရယူသုံးရန်"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ဤအက်ပ်သည် ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ ကွန်ရက်အရင်းအမြစ်ပေါ် အခြေခံပြီး သင့်တည်နေရာအချက်အလက်ကို ရယူနိုင်ပါသည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်တက်ဘလက်ပေါ်တွင် ရရှိနိုင်ရပါမည်။"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ဤအက်ပ်သည် ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ ကွန်ရက်အရင်းအမြစ်ပေါ် အခြေခံပြီး သင့်တည်နေရာအချက်အလက်ကို ရယူနိုင်ပါသည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်တီဗီပေါ်တွင် ရရှိနိုင်ရပါမည်။"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ဤအက်ပ်သည် ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ ကွန်ရက်အရင်းအမြစ်ပေါ် အခြေခံပြီး သင့်တည်နေရာအချက်အလက်ကို ရယူနိုင်ပါသည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်ဖုန်းပေါ်တွင် ရရှိနိုင်ရပါမည်။"</string>
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"မျက်နှာစာတွင်သာ တည်နေရာအတိအကျ အသုံးပြုခြင်း"</string>
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"မျက်နှာစာတွင် ဖွင့်ထားမှသာ ဤအက်ပ်က သင်၏တည်နေရာအတိအကျကို ရယူနိုင်ပါသည်။ သင်၏ဖုန်းတွင် အက်ပ်ကအသုံးပြုရန်အတွက် ဤတည်နေရာဝန်ဆောင်မှုများကို ဖွင့်ထားပြီး အသုံးပြု၍ ရပါမည်။ ၎င်းက ဘက်ထရီ ပိုကုန်နိုင်ပါသည်။"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"မျက်နှာစာတွင်သာ (ကွန်ရက် အခြေပြု) တည်နေရာခန့်မှန်း အသုံးပြုခြင်း"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"ဤအက်ပ်က ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ ကွန်ရက်ရင်းမြစ်များအပေါ် အခြေခံပြီး သင်၏တည်နေရာကို ရယူနိုင်သော်လည်း အက်ပ်ကို မျက်နှာစာတွင်ဖွင့်ထားမှ ရပါမည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်တက်ဘလက်ပေါ်တွင် ရရှိနိုင်ရပါမည်။"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"ဤအက်ပ်က ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ ကွန်ရက်ရင်းမြစ်များအပေါ် အခြေခံပြီး သင်၏တည်နေရာကို ရယူနိုင်သော်လည်း အက်ပ်ကို မျက်နှာစာတွင်ဖွင့်ထားမှ ရပါမည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်တီဗီပေါ်တွင် ရရှိနိုင်ရပါမည်။"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"ဤအက်ပ်က ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ ကွန်ရက်ရင်းမြစ်များအပေါ် အခြေခံပြီး သင်၏တည်နေရာကို ရယူနိုင်သော်လည်း အက်ပ်ကို မျက်နှာစာတွင်ဖွင့်ထားမှ ရပါမည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်ဖုန်းပေါ်တွင် ရရှိနိုင်ရပါမည်။"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"နောက်ခံတွင် တည်နေရာကို အသုံးပြုရန်"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ခန့်မှန်းခြေ သို့မဟုတ် တိကျသော တည်နေရာ ဝင်သုံးခွင့်အတွက် ၎င်းကို နောက်ဆက်တွဲ ခွင့်ပြုထားပါက နောက်ခံတွင် လုပ်ဆောင်နေစဉ် အက်ပ်က တည်နေရာကို ရယူအသုံးပြုနိုင်ပါသည်။"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"သင့်အသံအပြင်အဆင်အားပြောင်းခြင်း"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"အပလီကေးရှင်းအား အသံအတိုးအကျယ်နှင့် အထွက်ကို မည်သည့်စပီကာကို သုံးရန်စသည်ဖြင့် စက်တစ်ခုလုံးနှင့်ဆိုင်သော အသံဆိုင်ရာ ဆက်တင်များ ပြင်ဆင်ခွင့် ပြုရန်"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"အသံဖမ်းခြင်း"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"ဤအက်ပ်သည် မိုက်ခရိုဖုန်းကို အသုံးပြုပြီး အချိန်မရွေး အသံသွင်းနိုင်ပါသည်။"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM ထံသို့ ညွှန်ကြားချက်များကို ပို့ပါ"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"အက်ပ်အား ဆင်းမ်ကဒ်ဆီသို့ အမိန့်များ ပေးပို့ခွင့် ပြုခြင်း။ ဤခွင့်ပြုမှုမှာ အန္တရာယ်အလွန် ရှိပါသည်။"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားပါ"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"ဤအက်ပ်က သင်၏ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားနိုင်ပါသည်။"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ဓါတ်ပုံနှင့်ဗွီဒီယိုရိုက်ခြင်း"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"ဤအက်ပ်သည် ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်ပါသည်။"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"တုန်ခုန်မှုအား ထိန်းချုပ်ခြင်း"</string>
@@ -418,6 +456,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"အပလီကေးရှင်းအား ဖုန်းရဲ့ စွမ်းဆောင်ချက်များအား သုံးခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ဖုန်းနံပါတ်၊ စက်နံပါတ်၊ ဖုန်းခေါ်နေမှု ရှိမရှိနှင့် တဖက်မှ ဖုန်းနံပါတ် များအား သိရှိနိုင်ပါသည်"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ခေါ်ဆိုမှုများကို စနစ်မှတစ်ဆင့် ဖြတ်သန်းခွင့်ပြုပါ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ခေါ်ဆိုမှု အတွေ့အကြုံ ပိုမိုကောင်းမွန်လာစေရန်အတွက် အက်ပ်၏ ခေါ်ဆိုမှုအား စနစ်မှတစ်ဆင့် ဖြတ်သန်းရန် ခွင့်ပြုပါသည်။"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"စနစ်မှတစ်ဆင့် ခေါ်ဆိုမှုများကို ကြည့်ရှုထိန်းချုပ်ပါ။"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"စက်ပစ္စည်းပေါ်ရှိ လက်ရှိခေါ်ဆိုမှုများကို အက်ပ်အား ကြည့်ရှုထိန်းချုပ်ခွင့်ပြုသည်။ ၎င်းတွင် ခေါ်ဆိုမှုနံပါတ်များနှင့် ခေါ်ဆိုမှုအခြေအနေများကဲ့သို့သော အခြေအနေများ ပါဝင်သည်။"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"အခြားအက်ပ်မှ ဖုန်းခေါ်ဆိုမှုကို ဆက်လက်ပြုလုပ်ပါ"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"အခြားအက်ပ်တွင် စတင်ထားသည့် ဖုန်းခေါ်ဆိုမှုကို ဆက်လက်ပြုလုပ်ရန် ဤအက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ဖုန်းနံပါတ်များကို ဖတ်ရန်"</string>
@@ -478,10 +518,36 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"အက်ပ်အား တာတို စက်ကွင်း ဆက်သွယ်ရေး (NFC) တဲဂ်များ၊ ကဒ်များ နှင့် ဖတ်ကြသူတို့နှင့် ဆက်သွယ်ပြောဆိုခွင့် ပြုသည်။"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ဖန်သားပြင် သော့ချခြင်းအား မလုပ်နိုင်အောင် ပိတ်ရန်"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"အပလီကေးရှင်းအား သော့ချခြင်းနှင့် သက်ဆိုင်ရာ စကားဝှက်သတ်မှတ်ခြင်းများအား မသုံးနိုင်အောင် ပိတ်ခြင်းကို ခွင့်ပြုရန်။ ဥပမာ ဖုန်းလာလျှင် သော့ပိတ်ခြင်း ပယ်ဖျက်ခြင်း၊ ဖုန်းပြောပြီးလျှင် သော့ကို အလိုအလျောက် ပြန်ပိတ်ခြင်း"</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"ဇီဝဗေဒဆိုင်ရာ အချက်အလက်သုံး ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန်"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"အထောက်အထားစိစစ်ခြင်းအတွက် ဇီဝဗေဒဆိုင်ရာ သတင်းအချက်အလက်များသုံးသည့် ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"လက်ဗွေရာပစ္စည်းကို စီမံမည်"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"အသုံးပြုရန်အတွက် လက်ဗွေရာပုံစံများကို ပေါင်းထည့်ရန် သို့မဟုတ် ဖျက်ရန်နည်းလမ်းများကို အပ်ဖ်အား အသုံးပြုခွင့်ပြုသည်။"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"လက်ဗွေရာပစ္စည်းကို အသုံးပြုမည်"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"စစ်မှန်ကြောင်းအထောက်အထားပြသခြင်းအတွက် လက်ဗွေရာပစ္စည်းကို အသုံးပြုရန် အပ်ဖ်အားခွင့်ပြုသည်။"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"သင့်တေးဂီတ စုစည်းမှုကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"အက်ပ်အား သင့်တေးဂီတစုစည်းမှုကို ဖတ်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"သင့်တေးဂီတ စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"အက်ပ်အား သင့်တေးဂီတစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"သင့်ဗီဒီယို စုစည်းမှုကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"အက်ပ်အား သင့်ဗီဒီယိုစုစည်းမှုကို ဖတ်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"သင့်ဗီဒီယို စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"အက်ပ်အား သင့်ဗီဒီယိုစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"သင့်ဓာတ်ပုံ စုစည်းမှုကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"အက်ပ်အား သင့်ဓာတ်ပုံစုစည်းမှုကို ဖတ်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"သင့်ဓာတ်ပုံ စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"အက်ပ်အား သင့်ဓာတ်ပုံစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"သင့်မီဒီယာစုစည်းမှုမှ တည်နေရာများကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"အက်ပ်အား သင့်မီဒီယာစုစည်းမှုမှ တည်နေရာများကို ဖတ်ခွင့်ပေးသည်။"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"အပလီကေးရှင်း <xliff:g id="APP">%s</xliff:g> က အထောက်အထားစိစစ်လိုသည်။"</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိပါ"</string>
+    <string name="biometric_error_canceled" msgid="349665227864885880">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေရာဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ ရှင်းလင်းကာ ထပ်မံကြိုးစားပါ။"</string>
@@ -489,7 +555,9 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"လက်ညှိုးအလွန်နှေးကွေးစွာ ရွေ့ခဲ့သည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"အသိအမှတ်မပြုပါ"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"လက်ဗွေကို အထောက်အထား စိစစ်ပြီးပါပြီ"</string>
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ၊ အတည်ပြုရန်ကို နှိပ်ပါ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"လက်ဗွေရာ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"လက်ဗွေရာ သိုလှောင်၍မရပါ။ ကျေးဇူးပြု၍ ရှိပြီးလက်ဗွေရာအား ဖယ်ရှားပါ။"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"လက်ဗွေရာအချိန်ကုန် သွားပါသည်။ ထပ်မံကြိုးစားပါ။"</string>
@@ -499,25 +567,82 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"အကြိမ်အရေအတွက် အလွန်များနေပါပြီ။ လက်ဗွေဖတ်စနစ်ကို ပိတ်ထားပါသည်။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ပြန်ကြိုးစားပါ"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ဤစက်ပစ္စည်းတွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"လက်ဗွေ အိုင်ကွန်"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို စီမံပါ"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"အသုံးပြုရန်အတွက် မျက်နှာပုံစံထည့်ရန် (သို့) ဖျက်ရန်နည်းလမ်းကို အက်ပ်အား သုံးခွင့်ပြုသည်။"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"သင့်မျက်နှာကို ပြန်စာရင်းသွင်းပါ။"</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"ဆင်တူနေသည်၊ အမူအရာ ပြောင်းပါ။"</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ခေါင်းမတ်မတ်ထားပါ။"</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"မျက်နှာ စက်ပစ္စည်း မရနိုင်ပါ။"</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
+    <string name="face_error_no_space" msgid="8224993703466381314">"မျက်နှာကို သိမ်း၍မရပါ။"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"အသုံးပြုသူက မျက်နှာအထောက်အထားစိစစ်မှု မလုပ်တော့ပါ။"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ ပိတ်လိုက်ပါပြီ။"</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
+    <string name="face_name_template" msgid="7004562145809595384">"မျက်နှာ <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"မျက်နှာသင်္ကေတ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ထပ်တူပြုအဆင်အပြင်အားဖတ်ခြင်း"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"အပလီကေးရှင်းအား အကောင့်တစ်ခုအတွက် ထပ်တူညီအောင် လုပ်ဆောင်မှု ဆက်တင်အား ကြည့်ခွင့် ပြုပါ။ ဥပမာ People အက်ပ်က အကောင့်တစ်ခုနဲ့ ထပ်တူညီအောင် လုပ်ရန် ဆက်သွယ်ထားမှု ရှိမရှိ သိရှိနိုင်ခြင်း"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ထပ်တူညီအောင် လုပ်ခြင်းအား ပြုနိုင်၊ မပြုနိုင် အပြောင်းအလဲလုပ်ခြင်း"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"အကောင့်တစ်ခုအတွက် ထပ်တူညီအောင်လုပ်သော ဆက်တင်များကို ပြင်ရန် အက်ပ်ကို ခွင့်ပြုရန်။ ဥပမာ People အက်ပ်က အကောင့်တစ်ခုနှင့် ထပ်တူညီအောင် လုပ်ဆောင်ခြင်းအား ဖွင့်ရန် သုံးနိုင်သည်။"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ထပ်တူကူးခြင်း ကိန်းဂဏန်းအချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"အပလီကေးရှင်းအား အကောင့်တစ်ခု၏ ထပ်တူညီအောင် လုပ်ဆောင်မှု အခြေအနေ (ပြီးခဲ့သော အဖြစ်အပျက်၊ ဒေတာ ပမာဏ ပါဝင်မှု များအပါအဝင်)ကို ဖတ်ရှုခွင့် ပြုပါ။"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB သိုလှောင်မှုမှ အချက်အလက်များအား ဖတ်ခြင်း"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD ကဒ်မှ အချက်အလက်များအား ဖတ်ခြင်း"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"အပလီကေးရှင်းအား USB သိုလှောင်မှုပေါ်မှ ဒေတာများ ဖတ်ရှုခွင့်ပြုခြင်း"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"အပလီကေးရှင်းအား အက်စ်ဒီ ကဒ်ပေါ်မှ ဒေတာများ ဖတ်ရှုခွင့်ပြုခြင်း"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USBမှဒေတာအား ပြင် သို့ ဖျက်ရန်"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD ကဒ်ပေါ်မှ အချက်အလက်များအား ပြင်ဆင်ခြင်း သို့ ဖျက်ပစ်ခြင်း"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"အက်ပ်အား USB သိုလှောင်ခန်းသို့ ရေးခွင့် ပြုသည်။"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"အက်ပ်အား SD ကဒ်သို့ ရေးခွင့် ပြုသည်။"</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ဖတ်ခြင်း"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ဖတ်ရန် ခွင့်ပြုသည်။"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ပြုပြင်/ဖျက်ခြင်း"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်နှင့် လက်ခံနိုင်ရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"တယ်လီကွမ် ဆင်းမ် ချိတ်ဆက်မှုများကို မှတ်ပုံတင်ပါ"</string>
@@ -555,7 +680,7 @@
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM လက်မှတ်များကို ရယူသုံးခြင်း"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"အပလီကေးရှင်းတစ်ခုအား စီမံလုပ်ကိုင်ခွင့် DRM လက်မှတ်များ သုံးခွင့် ပြုသည်။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android ရဲ့ အလင်းတန်းထိုး လွှဲပြောင်းမှု အခြေအနေကို ရယူရန်"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ဒီအပလီကေးရှင်းအား အန်ဒရွိုက်၏ လက်ရှိ အလင်းတန်းထိုး လွှဲပြောင်းမှု အကြောင်း အချက်အလက်ကို ရယူခွင့် ပြုသည်"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ဒီအပလီကေးရှင်းအား Android၏ လက်ရှိ အလင်းတန်းထိုး လွှဲပြောင်းမှု အကြောင်း အချက်အလက်ကို ရယူခွင့် ပြုသည်"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM လက်မှတ်များ ဖယ်ရှားရန်"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"အပလီကေးရှင်းအား DRM လက်မှတ်များကို ဖယ်ရှားခွင့် ပြုသည်။  သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"စာပို့စာယူ ဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခုအား ပူးပေါင်းခွင့်ပြုရန်"</string>
@@ -593,7 +718,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"အပလီကေးရှင်းမှ သိမ်းဆည်းထားသော အရာများအား လျို့ဝှက် အသွင်းပြောင်းရန် လိုအပ်ခြင်း"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ကင်မရာအား ပိတ်ခြင်း"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"စက်မှ ကင်မရာအားလုံး အသုံးပြုမှုအား ကန့်သတ်ရန်"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့အား ပိတ်ထားပါ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင် လော့ခ်ချသည့် ဝန်ဆောင်မှုအချို့ ပိတ်ခြင်း"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့ အသုံးပြုမှုအား ကာကွယ်ပါ။"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"အိမ်"</item>
@@ -733,7 +858,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"မျက်မှာမှတ် သော့ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"တက်ပလက်ထဲတွင်း ဆင်းကဒ် မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"တီဗွီတွင် SIM ကဒ် မရှိပါ။"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"တီဗွီတွင် SIM ကတ် မရှိပါ။"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ဖုန်းထဲတွင် ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ဆင်းမ်ကဒ် ထည့်ပါ"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"ဆင်းမ်ကဒ် မရှိဘူး သို့မဟုတ် ဖတ်မရပါ။ ဆင်းမ်ကဒ် တစ်ခုကို ထည့်ပါ။"</string>
@@ -802,6 +927,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ပုံစံဖြင့် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ပင်နံပါတ်ဖြင့် သော့ဖွင့်ခြင်း"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"ဆင်းမ်ကဒ် ပင်နံပါတ်လော့ခ်ဖွင့်ပါ။"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"ဆင်းမ်ကဒ် Puk လော့ခ်ဖွင့်ပါ။"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"စကားဝှက်ဖြင့် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ပုံစံနေရာ"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ဘေးတိုက်ပွတ်ဆွဲရန် နေရာ"</string>
@@ -826,7 +953,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"အကြံပေးချက်- ဇူးမ်ဆွဲရန်နှင့် ဖြုတ်ရန် နှစ်ကြိမ်ဆက်တိုက် တို့ပါ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"အလိုအလျောက်ဖြည့်ပါ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"အလိုအလျောက်ဖြည့်ရန် သတ်မှတ်သည်"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"အလိုအလျောက်ဖြည့်ရန်"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> သုံးပြီး အလိုအလျောက်ဖြည့်ပါ"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -861,8 +988,15 @@
     <string name="save_password_never" msgid="8274330296785855105">"လုံးဝ မလုပ်ပါ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"သင့်ဆီမှာ ဒီစာမျက်နှာကို ဖွင့်ရန် ခွင့်ပြုချက် မရှိပါ။"</string>
     <string name="text_copied" msgid="4985729524670131385">"clipboardထံ စာသားအားကူးယူမည်"</string>
+    <string name="copied" msgid="8564151838171791598">"မိတ္တူကူးပြီးပါပြီ"</string>
     <string name="more_item_label" msgid="4650918923083320495">"နောက်ထပ်"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
+    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
+    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl+"</string>
+    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt+"</string>
+    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Shift+"</string>
+    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
+    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ဖျက်ရန်"</string>
@@ -967,7 +1101,7 @@
     <string name="VideoView_error_title" msgid="3534509135438353077">"ဗီဒီယို ပြဿနာ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ဒီဗိဒီယိုမှာ ဒီကိရိယာ ပေါ်မှာ ဖွင့်ကြည့်၍ မရနိုင်ပါ။"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ဒီဗီဒီယိုကို ပြသလို့ မရပါ"</string>
-    <string name="VideoView_error_button" msgid="2822238215100679592">"အိုကေ"</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"မွန်းတည့်"</string>
     <string name="Noon" msgid="3342127745230013127">"မွန်းတည့်"</string>
@@ -993,23 +1127,36 @@
     <string name="deleteText" msgid="6979668428458199034">"ဖျက်ရန်"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ထည့်သွင်းရန်နည်းလမ်း"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"စာတို လုပ်ဆောင်ချက်"</string>
-    <string name="email" msgid="4560673117055050403">"အီးမေးလ်"</string>
+    <string name="email" msgid="4560673117055050403">"အီးမေးလ်ပို့ရန်"</string>
+    <string name="email_desc" msgid="3638665569546416795">"ရွေးထားသည့် လိပ်စာသို့ အီးမေးလ်ပို့ရန်"</string>
     <string name="dial" msgid="1253998302767701559">"ခေါ်ဆိုရန်"</string>
-    <string name="map" msgid="6521159124535543457">"တည်နေရာ"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"ရွေးထားသည့် ဖုန်းနံပါတ်ကို ခေါ်ရန်"</string>
+    <string name="map" msgid="5441053548030107189">"မြေပုံဖွင့်ရန်"</string>
+    <string name="map_desc" msgid="1836995341943772348">"ရွေးထားသည့် လိပ်စာကို ရှာဖွေရန်"</string>
     <string name="browse" msgid="1245903488306147205">"ဖွင့်ရန်"</string>
-    <string name="sms" msgid="4560537514610063430">"SMS"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"ရွေးထားသည့် URL ကို ဖွင့်ရန်"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS ပို့ရန်"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"ရွေးထားသည့် ဖုန်းနံပါတ်ကို မက်ဆေ့ဂျ်ပို့ရန်"</string>
     <string name="add_contact" msgid="7867066569670597203">"ထည့်ရန်"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"အဆက်အသွယ်များသို့ ထည့်ရန်"</string>
     <string name="view_calendar" msgid="979609872939597838">"ကြည့်ရန်"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"အချိန်ဇယား"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"ရွေးထားသည့် အချိန်ကို ပြက္ခဒိန်တွင် ကြည့်ရန်"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"အစီအစဉ်ထည့်ရန်"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ရွေးထားသည့်အချိန်အတွက် အစီအစဉ်ပြုလုပ်ရန်"</string>
     <string name="view_flight" msgid="7691640491425680214">"ရှာရန်"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"ရွေးထားသည့် လေယာဉ်ခရီးစဉ်ကို ရှာရန်"</string>
+    <string name="translate" msgid="9218619809342576858">"ဘာသာပြန်ရန်"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"ရွေးထားသောစာသားကို ဘာသာပြန်ရန်"</string>
+    <string name="define" msgid="7394820043869954211">"အဓိပ္ပာယ်ဖွင့်ဆိုရန်"</string>
+    <string name="define_desc" msgid="7910883642444919726">"ရွေးထားသောစာသားကို အဓိပ္ပာယ်ဖွင့်ဆိုရန်"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"စနစ်အတွက် သိုလှောင်ခန်း မလုံလောက်ပါ။ သင့်ဆီမှာ နေရာလွတ် ၂၅၀ MB ရှိတာ စစ်ကြည့်ပြီး စတင်ပါ။"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> က အလုပ်လုပ်နေသည်။"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"နောက်ထပ်အချက်အလက်များကို ကြည့်ရန် သို့မဟုတ် အက်ပ်ကိုရပ်တန့်ရန် တို့ပါ။"</string>
-    <string name="ok" msgid="5970060430562524910">"အိုကေ"</string>
+    <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"မလုပ်တော့"</string>
-    <string name="yes" msgid="5362982303337969312">"အိုကေ"</string>
+    <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"မလုပ်တော့"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"သတိပြုရန်"</string>
     <string name="loading" msgid="7933681260296021180">"တင်နေ…"</string>
@@ -1021,10 +1168,13 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"...ဖြင့် ဖွင့်မည်"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ဖြင့် ဖွင့်မည်"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ဖွင့်ပါ"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"<xliff:g id="HOST">%1$s</xliff:g> လင့်ခ်များကို အ​ောက်ပါဖြင့် ဖွင့်ခွင့်ပေးပါ-"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="HOST">%1$s</xliff:g> လင့်ခ်များကို <xliff:g id="APPLICATION">%2$s</xliff:g> ဖြင့် ဖွင့်ခွင့်ပေးပါ"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ဖွင့်ခွင့်ပေးရန်"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"...နှင့် တည်းဖြတ်ရန်"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s နှင့် တည်းဖြတ်ရန်"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"တည်းဖြတ်ပါ"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"...နှင့် မျှဝေရန်"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"မျှဝေပါ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sနှင့် မျှဝေရန်"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"မျှဝေပါ"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ကိုအသုံးပြု၍ ပို့ပါ"</string>
@@ -1057,7 +1207,7 @@
     <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> သည်တုံ့ပြန်မှုမရှိပါ"</string>
     <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> သည်တုံ့ပြန်မှုမရှိပါ"</string>
     <string name="anr_process" msgid="6156880875555921105">"<xliff:g id="PROCESS">%1$s</xliff:g> လုပ်ဆောင်ချက်သည် တုံ့ပြန်မှုမရှိပါ"</string>
-    <string name="force_close" msgid="8346072094521265605">"အိုကေ"</string>
+    <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"သတင်းပို့ပါ"</string>
     <string name="wait" msgid="7147118217226317732">"စောင့်ဆိုင်းရန်"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"စာမျက်နှာမှာ ပြန်လည် တုံ့ပြန်မှု မရှိတော့ပါ။\n\nပိတ်လိုက်ချင်ပါသလား?"</string>
@@ -1074,33 +1224,38 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"အပ်ဒိတ်အတွက် စစ်ကြည့်ရန်"</string>
     <string name="smv_application" msgid="3307209192155442829">"app <xliff:g id="APPLICATION">%1$s</xliff:g> (လုပ်ငန်းစဉ် <xliff:g id="PROCESS">%2$s</xliff:g>) က ကိုယ်တိုင် ပြဌာန်းခဲ့သည့် StrictMode မူဝါဒကို ချိုးဖောက်ခဲ့သည်။"</string>
     <string name="smv_process" msgid="5120397012047462446">"ဤ<xliff:g id="PROCESS">%1$s</xliff:g>ဖြစ်စဥ်မှာ ကိုယ်တိုင်အကျိုးသက်ရောက်သော StrictModeမူဝါဒအား ချိုးဖောက်သည်"</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"အန်ဒရွိုက်ကို မွမ်းမံနေ…"</string>
-    <string name="android_start_title" msgid="8418054686415318207">"Android စတင်နေ…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"ဖုန်းကို အပ်ဒိတ်လုပ်နေသည်…"</string>
+    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"တက်ဘလက်ကို အပ်ဒိတ်လုပ်နေသည်…"</string>
+    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"စက်ပစ္စည်းကို အပ်ဒိတ်လုပ်နေသည်…"</string>
+    <string name="android_start_title" product="default" msgid="4536778526365907780">"ဖုန်း စတင်နေသည်…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android စတင်နေ…"</string>
+    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"တက်ဘလက် စတင်နေသည်…"</string>
+    <string name="android_start_title" product="device" msgid="7467484093260449437">"စက်ပစ္စည်း စတင်နေသည်…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"သိုလှောင်မှုအား ပြုပြင်ခြင်း။"</string>
-    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android အပ်ဒိတ်ကို အပြီးသတ်နေသည်…"</string>
-    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"အဆင့်မြှင့်တင်ခြင်း မပြီးဆုံးသေးသ၍ အချို့အက်ပ်များကို ကောင်းမွန်စွာအသုံးပြုနိုင်ဦးမည် မဟုတ်ပါ"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"စနစ်အပ်ဒိတ်ကို အပြီးသတ်နေသည်…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> ကို အဆင့်မြှင့်တင်နေပါသည်…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> ထဲက အက်ပ်<xliff:g id="NUMBER_1">%2$d</xliff:g>ကို ဆီလျော်အောင် လုပ်နေ"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> အားပြင်ဆင်နေသည်။"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"အက်ပ်များကို စတင်နေ"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"လုပ်ငန်းစနစ်ထည့်သွင်း၍ ပြန်လည်စတင်ရန် ပြီးပါပြီ"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> က အလုပ်လုပ်နေသည်"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"ဂိမ်းသို့ ပြန်သွားရန် တို့ပါ"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"ဂိမ်းကို ရွေးခြင်း"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"စွမ်းဆောင်ရည် ပိုမိုကောင်းမွန်စေရန် တစ်ကြိမ်လျှင် အောက်ပါဂိမ်းတစ်ခုကိုသာ ဖွင့်ပါ။"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> သို့ ပြန်သွားရန်"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> ကို ဖွင့်ရန်"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"မသိမ်းဘဲ <xliff:g id="OLD_APP">%1$s</xliff:g> ကို ပိတ်လိုက်ပါမည်"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> သိမ်းထားနိုင်မှု အကန့်အသတ် ကျော်လွန်နေ"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"သိမ်းဆည်းနိုင်မှု ပမာဏကျော်လွန်သွားပါပြီ။ မျှဝေရန် တို့ပါ"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"သိမ်းဆည်းနိုင်မှု ပမာဏကျော်လွန်သွားပါပြီ။ မျှဝေရန် တို့ပါ။"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"အရေးပေါ် သိမ်းထားပေးမှု ကို မျှဝေမလား။"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> လုပ်ဆောင်နိုင်မှုသည် <xliff:g id="SIZE">%2$s</xliff:g>ရှိသည့် သိမ်းထားနိုင်မှု ပမာဏထက်ကျော်လွန်သွားသည်။ စက်လုပ်ဆောင်ရည်မြင့်တင်ပေးသူနှင့် မျှဝေမှုလုပ်ရန်  အရေးပေါ်သိမ်းထားပေးမှု ရမည်။"</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"စာတိုအတွက် လုပ်ဆောင်ချက် ရေးပါ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ဖုန်းမြည်သံအတိုးအကျယ်"</string>
     <string name="volume_music" msgid="5421651157138628171">"မီဒီယာအသံအတိုးအကျယ်"</string>
@@ -1133,12 +1288,18 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"အများသုံး Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်ပါ"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"ဝန်ဆောင်မှုပေးသူ Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်ပါ"</string>
-    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"အများသုံး Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်နေသည်"</string>
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်နေသည်"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်ပြီးပါပြီ"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ကွန်ရက်အားလုံးကို ကြည့်ရန် တို့ပါ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ချိတ်ဆက်ရန်"</string>
-    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"ကွန်ရက်အားလုံး"</string>
+    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ကွန်ရက်အားလုံး"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yes"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ကို အလိုအလျောက်​ ပြန်ဖွင့်ပေးလိမ့်ပါမည်"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"သိမ်းဆည်းထားသည့် အရည်အသွေးမြင့်ကွန်ရက်များအနီးသို့ ရောက်ရှိသည့်အခါ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ပြန်မဖွင့်ပါနှင့်"</string>
@@ -1148,8 +1309,17 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ကွန်ယက်သို့ လက်မှတ်ထိုးဝင်ရန်"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi တွင် အင်တာနက်ချိတ်ဆက်မှု မရှိပါ"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"အခြားရွေးချယ်စရာများကိုကြည့်ရန် တို့ပါ"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ချိတ်ဆက်ထားသည်"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"သင်၏ဟော့စပေါ့ ဆက်တင်များ ပြောင်းလဲမှု"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"သင်၏ ဟော့စပေါ့လိုင်း ပြောင်းသွားပါပြီ။"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ဤစက်ပစ္စည်းသည် သင်၏ 5GHz သီးသန့်ရွေးချယ်မှုအတွက် ပံ့ပိုးမထားပါ။ ၎င်းအစား ဤစက်ပစ္စည်းသည် ရနိုင်သည့်အခါ 5GHz လိုင်းကို သုံးသွားပါမည်။"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ဖြင့် အင်တာနက် အသုံးမပြုနိုင်သည့်အချိန်တွင် စက်ပစ္စည်းသည် <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ကို သုံးပါသည်။ ဒေတာသုံးစွဲခ ကျသင့်နိုင်ပါသည်။"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> မှ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
@@ -1202,9 +1372,10 @@
     <string name="sim_done_button" msgid="827949989369963775">"ပြီးပါပြီ"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"ဆင်းမ်ကဒ် ထည့်ပါသည်"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"ပြန်စရန်"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"မိုဘိုင်းဝန်ဆောင်မှု စတင်ဖွင့်လှစ်ရန်"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"သင့်ဆင်းမ်ကဒ်အသစ်ကို စတင်အသုံးပြုရန် ဝန်ဆောင်မှုပေးသူအက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပါ"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"သင်၏ ဆင်းမ်ကဒ်အသစ်ကို စဖွင့်အသုံးပြုနိုင်ရန် <xliff:g id="APP_NAME">%1$s</xliff:g> အက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပါ"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"အက်ပ် ဒေါင်းလုဒ်လုပ်ရန်"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM အသစ်ထည့်သွင်းလိုက်ပါသည်"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"၎င်းကိုတပ်ဆင်ရန် တို့ပါ"</string>
@@ -1216,28 +1387,36 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> မှ ထောက်ပံ့သည်"</string>
     <string name="no_permissions" msgid="7283357728219338112">"ခွင့်ပြုချက်မလိုအပ်ပါ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"သင့်အတွက် ပိုက်ဆံကုန်ကျနိုင်ပါသည်"</string>
-    <string name="dlg_ok" msgid="7376953167039865701">"အိုကေ"</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_charging_notification_title" msgid="1595122345358177163">"ဤစက်ပစ္စည်းကို USB မှတစ်ဆင့် အားသွင်းနေသည်"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB မှတစ်ဆင့် ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ဖြင့် ဖိုင်လွှဲပြောင်းခြင်းကို ဖွင့်ထားသည်"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB မှတစ်ဆင့် PTP ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB မှတစ်ဆင့် မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးရန် ဖွင့်ထားသည်"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB မှတစ်ဆင့် MIDI ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
-    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB တွဲဖက်ပစ္စည်းမုဒ်ကို ဖွင့်ထားသည်"</string>
+    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"USB တွဲဖက်ပစ္စည်းကို ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်။ နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"အန်နာလော့ အသံကိရိယာကို တွေ့ထားပါသည်"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"တပ်ဆင်ထားသော ကိရိယာကို ဤဖုန်းနှင့် တွဲသုံး၍မရပါ။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားရှာပြင်စနစ် ချိတ်ဆက်ထားသည်"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB အမှားရှာပြင်စနစ် ပိတ်ရန် တို့ပါ။"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB အမှားရှာပြင်ခြင်းကို ပိတ်ရန် တို့ပါ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ပို့တ်တွင် အရည် သို့မဟုတ် အမှိုက်စ ရှိနေသည်"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ပို့တ်ကို အလိုအလျောက် ပိတ်ထားသည်။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ပို့တ်ကို စိတ်ချစွာ သုံးနိုင်ပါပြီ"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ဖုန်းသည် အရည် သို့မဟုတ် အမှိုက်စတို့ကို အာရုံခံသိရှိနိုင်တော့မည် မဟုတ်ပါ။"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ချွတ်ယွင်းချက် အစီရင်ခံစာပြုစုနေသည်..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို မျှဝေမလား။"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ချွတ်ယွင်းမှုအစီရင်ခံစာ မျှဝေနေသည်…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"ဤစက်ပစ္စည်းအတွက် ပြဿနာအဖြေရှာရာတွင် ကူညီရန် သင်၏စီမံခန့်ခွဲသူက ချွတ်ယွင်းချက်အစီရင်ခံစာကို တောင်းဆိုထားသည်။ အက်ပ်များနှင့် ဒေတာကို မျှဝေထားနိုင်ပါသည်။"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"မျှဝေပါ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ငြင်းပယ်ပါ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"ကီးဘုတ် ပြောင်းလဲရန်"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"ထည့်သွင်းရေး နည်းကို ရွေးရန်"</string>
     <string name="show_ime" msgid="2506087537466597099">"စက်၏ကီးဘုတ်ကိုအသုံးပြုနေစဉ် ၎င်းကိုမျက်နှာပြင်ပေါ်တွင် ထားပါ"</string>
     <string name="hardware" msgid="194658061510127999">"ပကတိအသွင်ကီးဘုတ်ပြရန်"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ရုပ်ပိုင်းဆိုင်ရာ အသွင်အပြင်ကို ပြင်ဆင်သတ်မှတ်ပါ"</string>
@@ -1248,34 +1427,36 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> သည် အခြားအက်ပ်များအပေါ်တွင် ပြပါသည်"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ကို အခြားအက်ပ်များပေါ်တွင် မြင်နေရပါသည်။"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ကို ဤဝန်ဆောင်မှုအား အသုံးမပြုစေလိုလျှင် ဆက်တင်ကို တို့၍ ဖွင့်ပြီး ၎င်းကို ပိတ်လိုက်ပါ။"</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ပိတ်ပါ"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ပြင်ဆင်နေသည်"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"အမှားအယွင်းများ စစ်ဆေးနေသည်"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> အသစ်တွေ့ရှိပါသည်"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ပိတ်ရန်"</string>
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> ကို စစ်နေသည်…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"လက်ရှိ အကြောင်းအရာကို ပြန်လည်သုံးသပ်နေသည်"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"<xliff:g id="NAME">%s</xliff:g> အသစ်"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"စနစ်ထည့်သွင်းရန် တို့ပါ"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ဓာတ်ပုံနှင့် မီဒီယာများ လွှဲပြောင်းရန်အတွက်"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"ပျက်စီးနေသော <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> ပျက်နေပါသည်။ ပြင်ရန် တို့ပါ။"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g> တွင် ပြဿနာရှိနေသည်"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"ပြင်ဆင်ရန်အတွက် ထိလိုက်ပါ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> ပျက်နေပါသည်။ ပြင်ရန် ရွေးချယ်ပါ။"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ပံ့ပိုးထားခြင်း မရှိသော <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ဤစက်ပစ္စည်းတွင် <xliff:g id="NAME">%s</xliff:g> ကိုအသုံးပြု၍မရပါ။ အသုံးပြု၍ရသော စနစ်ပုံစံသို့သတ်မှတ်ရန် တို့ပါ။"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"ဤစက်ပစ္စည်းတွင် <xliff:g id="NAME">%s</xliff:g> ကို ပံ့ပိုးမထားပါ။ ပံ့ပိုးသည့်ပုံစံတစ်ခုအဖြစ် စနစ်ထည့်သွင်းရန် ရွေးချယ်ပါ။"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> မမျှော်လင့်ဘဲ ဖယ်ရှားခဲ့သည်"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ဒေတာဆုံးရှုံးခြင်းမှ ကာကွယ်ရန် မဖယ်ရှားမှီ <xliff:g id="NAME">%s</xliff:g> ကိုဖြုတ်ပါ။"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ဖယ်ရှားလိုက်ပြီ"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ဖယ်ရှားလိုက်ပါပြီ; အသစ်တစ်ခု ထည့်သွင်းပါ"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ထုတ်နေဆဲ…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"အဖယ်ရှားပါနှင့်"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"အကြောင်းအရာ မဆုံးရှုံးစေရန် မီဒီယာကို မဖယ်ရှားမီ ဦးစွာထုတ်လိုက်ပါ"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> ဖယ်ရှားလိုက်ပါပြီ"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"အချို့လုပ်ဆောင်ချက်များ ကောင်းစွာ အလုပ်မလုပ်နိုင်ပါ။ သိုလှောင်ခန်းအသစ် ထည့်သွင်းပါ။"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> ကို ထုတ်နေသည်"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"မဖယ်ရှားပါနှင့်"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"စဖွင့်သတ်မှတ်"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ထုတ်မည်"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"စူးစမ်းရန်"</string>
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"မီဒီယာအထွက် ပြောင်းရန်"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ပျောက်နေသည်"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"ဤစက်ပစ္စည်းအား ပြန်ထည့်ရန်"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"စက်ပစ္စည်းကို ထပ်မံထည့်သွင်းပါ"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ရွှေ့နေစဉ်"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"ဒေတာများ ရွှေ့နေစဉ်"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ရွှေ့ပြီး၏"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> သို့ ဒေတာ ရွှေ့ခဲ့၏"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ဒေတာမရွှေ့နိုင်ပါ"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"မူရင်းနေရာတွင် ဒေတာ ကျန်ခဲ့၏"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"အကြောင်းအရာ လွှဲပြောင်းပြီးပါပြီ"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"အကြောင်းအရာကို <xliff:g id="NAME">%s</xliff:g> သို့ ရွှေ့ထားသည်"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"အကြောင်းအရာကို ရွှေ့၍မရပါ"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"အကြောင်းအရာကို ထပ်ဖယ်ကြည့်ပါ"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"ဖယ်ရှာပြီး"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ဖယ်ထုတ်ပြီး၏"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"စစ်ဆေးနေပါသည်…"</string>
@@ -1334,14 +1515,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်နေစဉ်…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်မှုရှိ"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"အမြဲပွင့်နေသော VPN မှ ချိတ်ဆက်မှုပြုတ်သွားပါပြီ"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"အမြဲတမ်းဖွင့်ထား VPN အမှား"</string>
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"အမြဲပွင့်နေသော VPN ကို ချိတ်ဆက်၍မရပါ"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"ကွန်ရက် သို့မဟုတ် VPN ဆက်တင်များကို ပြောင်းပါ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ဖိုင်ရွေးချယ်ရန်"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"မည်သည့်ဖိုင်ကိုမှမရွေးပါ"</string>
     <string name="reset" msgid="2448168080964209908">"ပြန်လည်သတ်မှတ်ရန်"</string>
     <string name="submit" msgid="1602335572089911941">"ပေးပို့ရန်"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"ကားထဲတွင်အသုံးပြုနိုင်သောစနစ် ရရှိနိုင်သည်"</string>
-    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"ကားမောင်းနှင်ခြင်းမုဒ်မှ ထွက်ရန် တို့ပါ။"</string>
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ကားမောင်းသည့်အက်ပ် ပွင့်နေပါသည်"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ကားမောင်းသည့်အက်ပ်မှ ထွက်ရန် တို့ပါ။"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"တဆင့်ပြန်လည်လွှင့်ခြင်း သို့မဟုတ် ဟော့စပေါ့ ဖွင့်ထားသည်"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"စနစ်ထည့်သွင်းရန် တို့ပါ။"</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးခြင်းအား ပိတ်ထားသည်"</string>
@@ -1356,8 +1537,7 @@
       <item quantity="one">ကိုက်ညီမှု 1 ခု</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ပြီးပါပြီ"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB သိုလှောင်မှု အချက်အလက်များ ဖျက်နေစဉ်…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ကဒ် အား ဖျက်နေစဉ်…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"မျှဝေထားသည့် သိုလှောင်ခန်းကို ဖျက်နေသည်…"</string>
     <string name="share" msgid="1778686618230011964">"မျှဝေခြင်း"</string>
     <string name="find" msgid="4808270900322985960">"ရှာဖွေရန်"</string>
     <string name="websearch" msgid="4337157977400211589">"ဝဘ်တွင် ရှာရန်"</string>
@@ -1413,28 +1593,25 @@
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s ၊ %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s ၊ %2$s ၊ %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"စက်တွင်းမျှဝေထားသည့် သိုလှောင်ခန်း"</string>
-    <string name="storage_sd_card" msgid="3282948861378286745">"SD ကဒ်"</string>
-    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD ကဒ်"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD ကတ်"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD ကတ်"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB ဒရိုက်ဗ်"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ဒရိုက်ဗ်"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USBဖြင့် သိမ်းဆည်း"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ပြင်ဆင်ရန်"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"ဒေတာအသုံးပြုမှုသတိပေးချက်"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"အသုံးပြုမှုနှင့် ဆက်တင်များကိုကြည့်ရန် တို့ပါ။"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ဒေတာ ကန့်သတ်ချက် ပြည့်မီသွားပြီ"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ဒေတာ ကန့်သတ်ချက် ပြည့်မီသွားပြီ"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"ဒေတာသတိပေးချက်"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"သင်ဒေတာ <xliff:g id="APP">%s</xliff:g> သုံးပြီးပါပြီ"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"မိုဘိုင်းဒေတာကန့်သတ်ချက်ပြည့်ပြီ"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ကြိုးမဲ့ ဒေတာ ကန့်သတ်ချက် ပြည့်မီသွားပြီ"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"ကျန် စက်ဝန်း အတွက် ဒေတာကို ဆိုင်းငံ့ထား"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"သတ်မှတ်ထားသော2G-3Gဒေတာအားကျော်လွန်နေသည်"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"သတ်မှတ်ထားသော4Gဒေတာအားကျော်လွန်နေသည်"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"သတ်မှတ်မိုဘိုင်းဒေတာထက်ကျော်နေ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"သတ်မှတ်ဝိုင်ဖိုင်ဒေတာထက်ကျော်နေ"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"သက်မှတ်နှုန်းထက် <xliff:g id="SIZE">%s</xliff:g> ကျော်နေပါသည်"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"ကျန်ရှိသက်တမ်းတစ်လျှောက် ဒေတာကို ခေတ္တရပ်ထားပါသည်"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"ဒေတာ ကန့်သတ်ချက် ကျော်သွားပါပြီ"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Wi-Fi ဒေတာကန့်သတ်ချက် ကျော်ပါပြီ"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"သင့်အတွက် သတ်မှတ်ထားသည့် ကန့်သတ်ချက်အပြင် <xliff:g id="SIZE">%s</xliff:g> သုံးထားပါသည်"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"နောက်ခံဒေတာ ကန့်သတ်ထားသည်"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"ကန့်သတ်ချက်ကိုဖယ်ရှားရန် တို့ပါ။"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ဒေတာသုံးစွဲမှု များပြားခြင်း"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"ပြီးခဲ့သည့်ရက်အနည်းငယ်က သင်၏ဒေတာသုံးစွဲမှုသည် ပုံမှန်ထက်ပိုများပါသည်။ သုံးစွဲမှုနှင့် ဆက်တင်များကိုကြည့်ရန် တို့ပါ။"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"မိုဘိုင်းဒေတာအသုံးပြုမှုမြင့်သည်"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"သင့်အက်ပ်များသည် ပုံမှန်ထက်မက ဒေတာများ သုံးထားသည်"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> သည် ပုံမှန်ထက်မက ဒေတာများ သုံးထားသည်"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"လုံခြံုမှုဆိုင်ရာ အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ဤအသိအမှတ်ပြုလက်မှတ်မှာ တရားဝင်သည်"</string>
     <string name="issued_to" msgid="454239480274921032">"ထုတ်ပေးသည်-"</string>
@@ -1457,6 +1634,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ဖုန်းခေါ်ဆိုမှုကို လက်ခံမလား?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"အမြဲတမ်း"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"တစ်ခါတည်း"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ဆက်တင်များ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s က အလုပ်ပရိုဖိုင်ကို မပံ့ပိုးပါ။"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"တက်ဘလက်"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"တီဗွီ"</string>
@@ -1484,6 +1662,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"အပေါ်မှ ထပ်သောအရာ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g>  dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", လုံခြုံသော"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> မှစတင်သော ဤနောက်ခံလုပ်ဆောင်ချက်ကို အနာဂတ် Q တည်ဆောက်ပုံများတွင် ပိတ်ထားပါမည်။ go/q-bg-block ကိုကြည့်ပါ။"</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> မှစတင်သော နောက်ခံလုပ်ဆောင်ချက်ကို ပိတ်ထားသည်။ go/q-bg-block ကိုကြည့်ပါ။"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ပုံဖော်မှုအား မေ့လျော့ခြင်း"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ပုံဆွဲအမှား"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"စကားဝှက်အမှား"</string>
@@ -1536,6 +1716,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"အရောင်ပြင်ဆင်ခြင်း"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ဖွင့်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ပိတ်လိုက်ပါသည်"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို သုံးရန် အသံအတိုးအလျှော့ ခလုတ်နှစ်ခုလုံးကို သုံးစက္ကန့်ကြာ ဖိထားပါ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့သည့်အခါ အသုံးပြုမည့် ဝန်ဆောင်မှုကို ရွေးချယ်ပါ−"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ဝန်ဆောင်မှုများကို ပြောင်းလဲရန် အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့၍ ထိထားပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ချဲ့ခြင်း"</string>
@@ -1586,9 +1767,9 @@
     <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"ဂျူနီယာ လီဂယ်လ်"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"လယ်ဂျာ"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"တက်ဘလွိုက်"</string>
-    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"အက္ခရာစဥ် အညွှန်း ကဒ် ၃x၅"</string>
-    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"အက္ခရာစဥ် အညွှန်း ကဒ် ၄x၆"</string>
-    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"အက္ခရာစဥ် အညွှန်း ကဒ် ၅x၈"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"အက္ခရာစဥ် အညွှန်း ကတ် ၃x၅"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"အက္ခရာစဥ် အညွှန်း ကတ် ၄x၆"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"အက္ခရာစဥ် အညွှန်း ကတ် ၅x၈"</string>
     <string name="mediasize_na_monarch" msgid="213639906956550754">"မိုနာချ့်"</string>
     <string name="mediasize_na_quarto" msgid="835778493593023223">"ကွာတို"</string>
     <string name="mediasize_na_foolscap" msgid="1573911237983677138">"ဖူးစကဒ်"</string>
@@ -1632,7 +1813,7 @@
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"အလျားလိုက် အရွယ်မသိ"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ဖျက်သိမ်းလိုက်ပြီး"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"အချက်အလက်များ ရိုက်ကူးစဉ် အမှားပေါ်နေ"</string>
-    <string name="reason_unknown" msgid="6048913880184628119">"အကြောင်းအရာ မသိရှိပါ"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"မသိပါ"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"စာထုတ်သောဆားဗစ်အားဖွင့်မထားပါ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ဆားဗစ် ထည့်သွင်းပြီး"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ထိတို့ခြင်းဖြင့် ဖွင့်ပါ"</string>
@@ -1650,7 +1831,7 @@
       <item quantity="one">1 စက္ကန့်အတွင်း ထပ်မံကြိုးစားပါ</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"မျက်နှာပြင်အပြည့် ကြည့်နေစဉ်"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"မျက်နှာပြင်အပြည့် ကြည့်နေသည်"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ရပါပြီ"</string>
     <string name="done_label" msgid="2093726099505892398">"ပြီးပါပြီ"</string>
@@ -1670,8 +1851,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"သင်၏ စီမံခန့်ခွဲသူက ထည့်သွင်းထားသည်"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
-    <string name="battery_saver_description" msgid="5394663545060026162">"ဘက်ထရီ သက်တမ်းကြာရှည်ခံရန်အတွက် ဘက်ထရီ အားထိန်းသည် သင့်စက်ပစ္စည်း၏ စွမ်းဆောင်ရည်၊ တုန်ခါမှု၊ တည်နေရာ ဝန်ဆောင်မှုများနှင့် နောက်ခံဒေတာ အများစုတို့ကို လျှော့ချပေးပါသည်။ စင့်ခ်လုပ်ခြင်းကို အားထားနေရသည့် အီးမေးလ်၊ စာပို့ခြင်းနှင့် အခြားအက်ပ်များကို သင်မဖွင့်မချင်း အပ်ဒိတ်လုပ်မည် မဟုတ်ပါ။\n\nသင့်စက်ပစ္စည်းကို အားသွင်းနေသည့်အခါ ဘက်ထရီ အားထိန်းကို အလိုအလျောက် ပိတ်လိုက်ပါမည်။"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမရှိစေရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင် မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' သည် စက်ဝန်ဆောင်မှုအချို့ကို ပိတ်ပြီး အက်ပ်များကို ကန့်သတ်ပေးပါသည်။ "<annotation id="url">"ပိုမို လေ့လာရန်"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"ဘက်ထရီသက်တမ်း တိုးလာစေရန် \'ဘက်ထရီအားထိန်း\' သည် အချို့သော စက်ပစ္စည်းဝန်ဆောင်မှုများကို ပိတ်ပြီး အက်ပ်များကို ကန့်သတ်ပေးပါသည်။"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1682,9 +1864,9 @@
       <item quantity="other">(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ထိ) %1$d မိနစ်အတွက်</item>
       <item quantity="one">(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> ထိ) ၁မိနစ်အတွက်</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">%1$d နာရီကြာ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>
-      <item quantity="one">တစ်နာရီကြာ (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> အထိ)</item>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
+      <item quantity="other">%1$d နာရီကြာ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ထိ)</item>
+      <item quantity="one">၁ နာရီကြာ (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> ထိ)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="other">(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ထိ) %1$d နာရီအတွက်</item>
@@ -1698,9 +1880,9 @@
       <item quantity="other">%d မိနစ်အတွက်</item>
       <item quantity="one">၁ မိနစ်အတွက်</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
       <item quantity="other">%d နာရီကြာ</item>
-      <item quantity="one">တစ်နာရီကြာ</item>
+      <item quantity="one">၁ နာရီကြာ</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="other">%d နာရီ အတွက်</item>
@@ -1716,20 +1898,21 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ကြားရက်ည"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊ တနင်္ဂနွေ"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ဖြစ်ရပ်"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"အစီအစဉ်"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"အိပ်နေချိန်"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> သည် အချို့အသံကို ပိတ်နေသည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေ၏။ အသေးစိတ်သိရန်အတွက် ပစ္စည်းထုတ်လုပ်သူအား ဆက်သွယ်ပါ။"</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"DIAL တောင်းဆိုချက်အရ USSD တောင်းဆိုချက်အား ပြင်ဆင်ထား၏။"</string>
-    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"SS တောင်းဆိုချက် အရ USSD တောင်းဆိုချက်အား ပြင်ဆင်ထား၏။"</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD တောင်းဆိုချက် အသစ်အရ USSD တောင်းဆိုချက်အား ပြင်ဆင်ထား၏။"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD တောင်းဆိုချက်အား Video DIAL တောင်းဆိုချက်သို့ ပြုပြင်ထားသည်။"</string>
-    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"DIAL တောင်းဆိုချက်အရ SS တောင်းဆိုချက်အား ပြင်ဆင်ထား၏။"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS တောင်းဆိုချက်အား Video DIAL တောင်းဆိုချက်သို့ ပြုပြင်ထားသည်။"</string>
-    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"USSD တောင်းဆိုချက်အရ SS တောင်းဆိုချက်အား ပြင်ဆင်ထား၏။"</string>
-    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS တောင်းဆိုချက်အရ SS တောင်းဆိုချက်အား ပြင်ဆင်ထား၏။"</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD တောင်းဆိုမှုကို ပုံမှန်ခေါ်ဆိုမှုသို့ ပြောင်းထားသည်"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD တောင်းဆိုမှုကို SS တောင်းဆိုမှုအဖြစ် ပြောင်းထားသည်"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"USSD တောင်းဆိုမှုအသစ်သို့ ပြောင်းထားသည်"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD တောင်းဆိုမှုကို ဗီဒီယိုခေါ်ဆိုမှုသို့ ပြောင်းထားသည်"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS တောင်းဆိုမှုကို ပုံမှန်ခေါ်ဆိုမှုသို့ ပြောင်းထားသည်"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS တောင်းဆိုမှုကို ဗီဒီယိုခေါ်ဆိုမှုသို့ ပြောင်းထားသည်"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS တောင်းဆိုမှုကို USSD တောင်းဆိုမှုအဖြစ် ပြောင်းထားသည်"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"SS တောင်းဆိုမှုအသစ်သို့ ပြောင်းထားသည်"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"အလုပ်ကိုယ်ရေးအချက်အလက်"</string>
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"သတိပေးထားသည်"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ချဲ့ရန်"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ခေါက်သိမ်းရန်"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"ချဲ့ခြင်းခလုတ်"</string>
@@ -1757,6 +1940,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ဘာသာစကားများအားလုံး"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ဒေသအားလုံး"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ရှာဖွေရန်"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"အက်ပ်ကို မရရှိနိုင်ပါ"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ကို လောလောဆယ် မရနိုင်ပါ။ ၎င်းကို <xliff:g id="APP_NAME_1">%2$s</xliff:g> က စီမံထားပါသည်။"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"ပိုမိုလေ့လာရန်"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"အလုပ်ပရိုဖိုင် ဖွင့်လိုသလား။"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"သင်၏ အလုပ်အက်ပ်၊ အကြောင်းကြားချက်၊ ဒေတာနှင့် အခြားအလုပ်ပရိုဖိုင် ဝန်ဆောင်မှုများကို ဖွင့်လိုက်ပါမည်"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ဖွင့်ပါ"</string>
@@ -1771,8 +1957,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"သင့်အလုပ်ပရိုဖိုင်ကို သော့ဖွင့်ရန် တို့ပါ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ဖိုင်များကိုကြည့်ရန် တို့ပါ"</string>
-    <string name="pin_target" msgid="3052256031352291362">"တွဲပါ"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"ဖြုတ်ပါ"</string>
     <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"သရုပ်ပြချက်ကို စတင်နေသည်…"</string>
@@ -1805,12 +1989,17 @@
       <item quantity="other">အော်တိုဖြည့်အကြံပြုချက် <xliff:g id="COUNT">%1$s</xliff:g> ခု</item>
       <item quantity="one">အော်တိုဖြည့်အကြံပြုချက် တစ်ခု</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> နှင့် <xliff:g id="TYPE_1">%2$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>၊ <xliff:g id="TYPE_1">%2$s</xliff:g>  နှင့် <xliff:g id="TYPE_2">%3$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"တွင် သိမ်းလိုပါသလား။"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"<xliff:g id="TYPE">%1$s</xliff:g> ကို "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"တွင် သိမ်းဆည်းလိုပါသလား။"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"<xliff:g id="TYPE_0">%1$s</xliff:g> နှင့် <xliff:g id="TYPE_1">%2$s</xliff:g> ကို "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"တွင် သိမ်းလိုပါသလား။"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"<xliff:g id="TYPE_0">%1$s</xliff:g>၊ <xliff:g id="TYPE_1">%2$s</xliff:g> နှင့် <xliff:g id="TYPE_2">%3$s</xliff:g> ကို "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"တွင် သိမ်းဆည်းလိုပါသလား။"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"တွင် အပ်ဒိတ်လုပ်လိုပါသလား။"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"<xliff:g id="TYPE">%1$s</xliff:g> ကို "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" တွင် အပ်ဒိတ်လုပ်လိုပါသလား။"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"<xliff:g id="TYPE_0">%1$s</xliff:g> နှင့် <xliff:g id="TYPE_1">%2$s</xliff:g> ကို "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"တွင် အပ်ဒိတ်လုပ်လိုပါသလား။"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"ဤအချက်အလက်များကို "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"တွင် အပ်ဒိတ်လုပ်လိုပါသလား- <xliff:g id="TYPE_0">%1$s</xliff:g>၊ <xliff:g id="TYPE_1">%2$s</xliff:g> နှင့် <xliff:g id="TYPE_2">%3$s</xliff:g>။"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"သိမ်းရန်"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"မလိုပါ"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"အပ်ဒိတ်လုပ်ရန်"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"စကားဝှက်"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"လိပ်စာ"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ခရက်တစ်ကတ်"</string>
@@ -1826,6 +2015,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"စကားသံအတွက် ဆင်းမ်ကို ထောက်ပံ့မထားပါ"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"စကားသံအတွက် ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"စကားသံအတွက် ဖုန်းကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ပေးမထားပါ"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ပေါ့ပ်အပ် ဝင်းဒိုး"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"အက်ပ်ဗားရှင်းကို အဆင့်နှိမ့်ထားသည် သို့မဟုတ် ဤဖြတ်လမ်းလင့်ခ်နှင့် သဟဇာတမဖြစ်ပါ"</string>
@@ -1838,7 +2031,61 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"အန္တရာယ်ရှိသော အက်ပ်ကို တွေ့ရှိထားသည်"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> သည် <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များကို ပြသလိုသည်"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"တည်းဖြတ်ရန်"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များ တုန်ခါပါမည်"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များကို အသံပိတ်ထားပါမည်"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"စနစ် အပြောင်းအလဲများ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"မနှောင့်ယှက်ရ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"အသစ်− \'မနှောင့်ယှက်ရ\' က အကြောင်းကြားချက်များကို ဖျောက်ထားသည်"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ပိုမိုလေ့လာရန်နှင့် ပြောင်းလဲရန် တို့ပါ။"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"ကြားဖြတ်ခြင်းများအတွက် သင်၏ အမူအကျင့်ဆက်တင်များကို စစ်ဆေးရန် တို့ပါ"</string>
+    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
+    <string name="notification_app_name_system" msgid="4205032194610042794">"စနစ်"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"ဆက်တင်များ"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"ကင်မရာ"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"မိုက်ခရိုဖုန်း"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"သင့်မျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များပေါ်တွင် ပြသခြင်း"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
+    <string name="mime_type_folder" msgid="7111951698626315204">"ဖိုင်တွဲ"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android အပလီကေးရှင်း"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ဖိုင်"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> ဖိုင်"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"အသံ"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> အသံ"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"ဗီဒီယို"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> ဗီဒီယို"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"ပုံ"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> ပုံ"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"မှတ်တမ်း"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> မှတ်တမ်း"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"စာရွက်စာတမ်း"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> စာရွက်စာတမ်း"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Spreadsheet"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> spreadsheet"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"တင်ပြမှု"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> တင်ပြမှု"</string>
+    <string name="car_loading_profile" msgid="3545132581795684027">"တင်နေသည်"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ဖိုင်</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ဖိုင်</item>
+    </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

@@ -17,8 +17,10 @@
 package com.android.server.backup.utils;
 
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
+import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
 import android.app.backup.BackupTransport;
@@ -28,19 +30,27 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.os.Process;
+import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.LocalServices;
 import com.android.server.backup.transport.TransportClient;
+
+import com.google.android.collect.Sets;
+
+import java.util.Set;
 
 /**
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
  */
 public class AppBackupUtils {
-
     private static final boolean DEBUG = false;
+    // Whitelist of system packages that are eligible for backup in non-system users.
+    private static final Set<String> systemPackagesWhitelistedForAllUsers =
+            Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME);
 
     /**
      * Returns whether app is eligible for backup.
@@ -54,15 +64,31 @@ public class AppBackupUtils {
      *     <li>it is the special shared-storage backup package used for 'adb backup'
      * </ol>
      */
-    public static boolean appIsEligibleForBackup(ApplicationInfo app, PackageManager pm) {
+    public static boolean appIsEligibleForBackup(ApplicationInfo app, int userId) {
+        return appIsEligibleForBackup(
+                app, LocalServices.getService(PackageManagerInternal.class), userId);
+    }
+
+    @VisibleForTesting
+    static boolean appIsEligibleForBackup(
+            ApplicationInfo app, PackageManagerInternal packageManager, int userId) {
         // 1. their manifest states android:allowBackup="false"
         if ((app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
             return false;
         }
 
-        // 2. they run as a system-level uid but do not supply their own backup agent
-        if ((app.uid < Process.FIRST_APPLICATION_UID) && (app.backupAgentName == null)) {
-            return false;
+        // 2. they run as a system-level uid
+        if (UserHandle.isCore(app.uid)) {
+            // and the backup is happening for non-system user on a non-whitelisted package.
+            if (userId != UserHandle.USER_SYSTEM
+                    && !systemPackagesWhitelistedForAllUsers.contains(app.packageName)) {
+                return false;
+            }
+
+            // or do not supply their own backup agent
+            if (app.backupAgentName == null) {
+                return false;
+            }
         }
 
         // 3. it is the special shared-storage backup package used for 'adb backup'
@@ -75,37 +101,38 @@ public class AppBackupUtils {
             return false;
         }
 
-        // Everything else checks out; the only remaining roadblock would be if the
-        // package were disabled
-        return !appIsDisabled(app, pm);
+        return !appIsDisabled(app, packageManager, userId);
     }
 
     /**
      * Returns whether an app is eligible for backup at runtime. That is, the app has to:
      * <ol>
-     *     <li>Return true for {@link #appIsEligibleForBackup(ApplicationInfo, PackageManager)}
+     *     <li>Return true for {@link #appIsEligibleForBackup(ApplicationInfo, int)}
      *     <li>Return false for {@link #appIsStopped(ApplicationInfo)}
-     *     <li>Return false for {@link #appIsDisabled(ApplicationInfo, PackageManager)}
+     *     <li>Return false for {@link #appIsDisabled(ApplicationInfo, int)}
      *     <li>Be eligible for the transport via
      *         {@link BackupTransport#isAppEligibleForBackup(PackageInfo, boolean)}
      * </ol>
      */
     public static boolean appIsRunningAndEligibleForBackupWithTransport(
-            @Nullable TransportClient transportClient, String packageName, PackageManager pm) {
+            @Nullable TransportClient transportClient,
+            String packageName,
+            PackageManager pm,
+            int userId) {
         try {
-            PackageInfo packageInfo = pm.getPackageInfo(packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES);
+            PackageInfo packageInfo = pm.getPackageInfoAsUser(packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES, userId);
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-            if (!appIsEligibleForBackup(applicationInfo, pm)
+            if (!appIsEligibleForBackup(applicationInfo, userId)
                     || appIsStopped(applicationInfo)
-                    || appIsDisabled(applicationInfo, pm)) {
+                    || appIsDisabled(applicationInfo, userId)) {
                 return false;
             }
             if (transportClient != null) {
                 try {
                     IBackupTransport transport =
                             transportClient.connectOrThrow(
-                                    "AppBackupUtils.appIsEligibleForBackupAtRuntime");
+                                    "AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport");
                     return transport.isAppEligibleForBackup(
                             packageInfo, AppBackupUtils.appGetsFullBackup(packageInfo));
                 } catch (Exception e) {
@@ -120,13 +147,22 @@ public class AppBackupUtils {
     }
 
     /** Avoid backups of 'disabled' apps. */
-    public static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
-        switch (pm.getApplicationEnabledSetting(app.packageName)) {
+    static boolean appIsDisabled(ApplicationInfo app, int userId) {
+        return appIsDisabled(app, LocalServices.getService(PackageManagerInternal.class), userId);
+    }
+
+    @VisibleForTesting
+    static boolean appIsDisabled(
+            ApplicationInfo app, PackageManagerInternal packageManager, int userId) {
+        int enabledSetting = packageManager.getApplicationEnabledState(app.packageName, userId);
+
+        switch (enabledSetting) {
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
                 return true;
-
+            case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                return !app.enabled;
             default:
                 return false;
         }
@@ -135,7 +171,14 @@ public class AppBackupUtils {
     /**
      * Checks if the app is in a stopped state.  This is not part of the general "eligible for
      * backup?" check because we *do* still need to restore data to apps in this state (e.g.
-     * newly-installing ones)
+     * newly-installing ones).
+     *
+     * <p>Reasons for such state:
+     * <ul>
+     *     <li>The app has been force-stopped.
+     *     <li>The app has been cleared.
+     *     <li>The app has just been installed.
+     * </ul>
      */
     public static boolean appIsStopped(ApplicationInfo app) {
         return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);

@@ -73,6 +73,8 @@ class ResourceTableBuilder {
                                  const ResourceId& id, std::unique_ptr<Value> value);
   ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
                                        Visibility::Level level, bool allow_new = false);
+  ResourceTableBuilder& SetOverlayable(const android::StringPiece& name,
+                                       const OverlayableItem& overlayable);
 
   StringPool* string_pool();
   std::unique_ptr<ResourceTable> Build();
@@ -206,6 +208,112 @@ class PostProcessingConfigurationBuilder {
   }
 
   configuration::PostProcessingConfiguration config_;
+};
+
+class ConfigDescriptionBuilder {
+ public:
+  ConfigDescriptionBuilder() = default;
+
+  ConfigDescriptionBuilder& setMcc(uint16_t mcc) {
+    config_.mcc = mcc;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setMnc(uint16_t mnc) {
+    config_.mnc = mnc;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setLanguage(uint16_t language) {
+    config_.language[0] = language >> 8;
+    config_.language[1] = language & 0xff;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setCountry(uint16_t country) {
+    config_.country[0] = country >> 8;
+    config_.country[1] = country & 0xff;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setOrientation(uint8_t orientation) {
+    config_.orientation = orientation;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setTouchscreen(uint8_t touchscreen) {
+    config_.touchscreen = touchscreen;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setDensity(uint16_t density) {
+    config_.density = density;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setKeyboard(uint8_t keyboard) {
+    config_.keyboard = keyboard;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setNavigation(uint8_t navigation) {
+    config_.navigation = navigation;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setInputFlags(uint8_t inputFlags) {
+    config_.inputFlags = inputFlags;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setInputPad0(uint8_t inputPad0) {
+    config_.inputPad0 = inputPad0;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setScreenWidth(uint16_t screenWidth) {
+    config_.screenWidth = screenWidth;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setScreenHeight(uint16_t screenHeight) {
+    config_.screenHeight = screenHeight;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setSdkVersion(uint16_t sdkVersion) {
+    config_.sdkVersion = sdkVersion;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setMinorVersion(uint16_t minorVersion) {
+    config_.minorVersion = minorVersion;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setScreenLayout(uint8_t screenLayout) {
+    config_.screenLayout = screenLayout;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setUiMode(uint8_t uiMode) {
+    config_.uiMode = uiMode;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setSmallestScreenWidthDp(uint16_t smallestScreenWidthDp) {
+    config_.smallestScreenWidthDp = smallestScreenWidthDp;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setScreenWidthDp(uint16_t screenWidthDp) {
+    config_.screenWidthDp = screenWidthDp;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setScreenHeightDp(uint16_t screenHeightDp) {
+    config_.screenHeightDp = screenHeightDp;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setScreenLayout2(uint8_t screenLayout2) {
+    config_.screenLayout2 = screenLayout2;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setColorMode(uint8_t colorMode) {
+    config_.colorMode = colorMode;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setScreenConfigPad2(uint16_t screenConfigPad2) {
+    config_.screenConfigPad2 = screenConfigPad2;
+    return *this;
+  }
+  android::ConfigDescription Build() {
+    return config_;
+  }
+
+ private:
+  android::ConfigDescription config_;
 };
 
 }  // namespace test

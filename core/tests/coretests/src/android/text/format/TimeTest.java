@@ -21,11 +21,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.filters.Suppress;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 import android.util.TimeFormatException;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -543,7 +543,7 @@ public final class Slice implements Parcelable {
         }
     }
 
-    public static final Creator<Slice> CREATOR = new Creator<Slice>() {
+    public static final @android.annotation.NonNull Creator<Slice> CREATOR = new Creator<Slice>() {
         @Override
         public Slice createFromParcel(Parcel in) {
             return new Slice(in);

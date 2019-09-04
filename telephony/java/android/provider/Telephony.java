@@ -282,6 +282,70 @@ public final class Telephony {
     }
 
     /**
+     * Columns in sms_changes table.
+     * @hide
+     */
+    public interface TextBasedSmsChangesColumns {
+        /**
+         * The {@code content://} style URL for this table.
+         * @hide
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://sms-changes");
+
+        /**
+         * Primary key.
+         * <P>Type: INTEGER (long)</P>
+         * @hide
+         */
+        public static final String ID = "_id";
+
+        /**
+         * Triggers on sms table create a row in this table for each update/delete.
+         * This column is the "_id" of the row from sms table that was updated/deleted.
+         * <P>Type: INTEGER (long)</P>
+         * @hide
+         */
+        public static final String ORIG_ROW_ID = "orig_rowid";
+
+        /**
+         * Triggers on sms table create a row in this table for each update/delete.
+         * This column is the "sub_id" of the row from sms table that was updated/deleted.
+         * @hide
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String SUB_ID = "sub_id";
+
+        /**
+         * The type of operation that created this row.
+         *    {@link #TYPE_UPDATE} = update op
+         *    {@link #TYPE_DELETE} = delete op
+         * @hide
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String TYPE = "type";
+
+        /**
+         * One of the possible values for the above column "type". Indicates it is an update op.
+         * @hide
+         */
+        public static final int TYPE_UPDATE = 0;
+
+        /**
+         * One of the possible values for the above column "type". Indicates it is a delete op.
+         * @hide
+         */
+        public static final int TYPE_DELETE = 1;
+
+        /**
+         * This column contains a non-null value only if the operation on sms table is an update op
+         * and the column "read" is changed by the update op.
+         * <P>Type: INTEGER (boolean)</P>
+         * @hide
+         */
+        public static final String NEW_READ_STATUS = "new_read_status";
+    }
+
+    /**
      * Contains all text-based SMS messages.
      */
     public static final class Sms implements BaseColumns, TextBasedSmsColumns {
@@ -836,6 +900,10 @@ public final class Telephony {
              * user whether they want to replace the current default
              * SMS application with the one specified in
              * {@link #EXTRA_PACKAGE_NAME}.
+             * <p>
+             * This is no longer supported since Q, please use
+             * {@link android.app.role.RoleManager#createRequestRoleIntent(String)} with
+             * {@link android.app.role.RoleManager#ROLE_SMS} instead.
              */
             @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
             public static final String ACTION_CHANGE_DEFAULT =
@@ -846,6 +914,10 @@ public final class Telephony {
              * extra for {@link #ACTION_CHANGE_DEFAULT}
              *
              * @see #ACTION_CHANGE_DEFAULT
+             * <p>
+             * This is no longer supported since Q, please use
+             * {@link android.app.role.RoleManager#createRequestRoleIntent(String)} with
+             * {@link android.app.role.RoleManager#ROLE_SMS} instead.
              */
             public static final String EXTRA_PACKAGE_NAME = "package";
 
@@ -4445,7 +4517,6 @@ public final class Telephony {
 
     /**
      * Contains carrier identification information for the current subscriptions.
-     * @see SubscriptionManager#getActiveSubscriptionIdList()
      */
     public static final class CarrierId implements BaseColumns {
         /**

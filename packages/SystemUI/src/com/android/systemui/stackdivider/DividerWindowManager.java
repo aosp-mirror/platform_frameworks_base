@@ -16,12 +16,6 @@
 
 package com.android.systemui.stackdivider;
 
-import android.content.Context;
-import android.graphics.PixelFormat;
-import android.os.Binder;
-import android.view.View;
-import android.view.WindowManager;
-
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -31,6 +25,12 @@ import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+
+import android.content.Context;
+import android.graphics.PixelFormat;
+import android.os.Binder;
+import android.view.View;
+import android.view.WindowManager;
 
 /**
  * Manages the window parameters of the docked stack divider.

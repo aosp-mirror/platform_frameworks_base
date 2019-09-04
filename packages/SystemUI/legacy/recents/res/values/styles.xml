@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2006 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="RecentsTheme" parent="@android:style/Theme.Material">
+        <!-- NoTitle -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- Misc -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:ambientShadowAlpha">0.35</item>
+    </style>
+
+    <!-- Recents theme -->
+    <style name="RecentsTheme.Wallpaper">
+        <item name="android:windowBackground">@*android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="clearAllStyle">@style/ClearAllButtonDefaultMargins</item>
+        <item name="clearAllBackgroundColor">@color/recents_clear_all_button_bg_dark_color</item>
+        <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
+        <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
+    </style>
+
+    <style name="RecentsTheme.Wallpaper.Light">
+        <item name="clearAllBackgroundColor">@color/recents_clear_all_button_bg_light_color</item>
+        <item name="wallpaperTextColor">@*android:color/primary_text_material_light</item>
+        <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
+    </style>
+
+    <!-- Performance optimized Recents theme (no wallpaper) -->
+    <style name="RecentsTheme.NoWallpaper">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="wallpaperTextColor">@android:color/white</item>
+        <item name="wallpaperTextColorSecondary">@android:color/white</item>
+    </style>
+
+  </resources>

@@ -40,6 +40,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
@@ -85,9 +86,10 @@ public final class JobStore {
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
 
     /** Threshold to adjust how often we want to write to the db. */
-    private static final int MAX_OPS_BEFORE_WRITE = 1;
+    private static final long JOB_PERSIST_DELAY = 2000L;
 
     final Object mLock;
+    final Object mWriteScheduleLock;    // used solely for invariants around write scheduling
     final JobSet mJobSet; // per-caller-uid and per-source-uid tracking
     final Context mContext;
 
@@ -95,7 +97,11 @@ public final class JobStore {
     private final long mXmlTimestamp;
     private boolean mRtcGood;
 
-    private int mDirtyOperations;
+    @GuardedBy("mWriteScheduleLock")
+    private boolean mWriteScheduled;
+
+    @GuardedBy("mWriteScheduleLock")
+    private boolean mWriteInProgress;
 
     private static final Object sSingletonLock = new Object();
     private final AtomicFile mJobsFile;
@@ -131,8 +137,8 @@ public final class JobStore {
      */
     private JobStore(Context context, Object lock, File dataDir) {
         mLock = lock;
+        mWriteScheduleLock = new Object();
         mContext = context;
-        mDirtyOperations = 0;
 
         File systemDir = new File(dataDir, "system");
         File jobDir = new File(systemDir, "job");
@@ -174,6 +180,7 @@ public final class JobStore {
     public void getRtcCorrectedJobsLocked(final ArrayList<JobStatus> toAdd,
             final ArrayList<JobStatus> toRemove) {
         final long elapsedNow = sElapsedRealtimeClock.millis();
+        final IActivityManager am = ActivityManager.getService();
 
         // Find the jobs that need to be fixed up, collecting them for post-iteration
         // replacement with their new versions
@@ -182,9 +189,11 @@ public final class JobStore {
             if (utcTimes != null) {
                 Pair<Long, Long> elapsedRuntimes =
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
-                toAdd.add(new JobStatus(job, job.getBaseHeartbeat(),
+                JobStatus newJob = new JobStatus(job, job.getBaseHeartbeat(),
                         elapsedRuntimes.first, elapsedRuntimes.second,
-                        0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime()));
+                        0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
+                newJob.prepareLocked(am);
+                toAdd.add(newJob);
                 toRemove.add(job);
             }
         });
@@ -319,19 +328,48 @@ public final class JobStore {
      * track incremental changes.
      */
     private void maybeWriteStatusToDiskAsync() {
-        mDirtyOperations++;
-        if (mDirtyOperations >= MAX_OPS_BEFORE_WRITE) {
-            if (DEBUG) {
-                Slog.v(TAG, "Writing jobs to disk.");
+        synchronized (mWriteScheduleLock) {
+            if (!mWriteScheduled) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Scheduling persist of jobs to disk.");
+                }
+                mIoHandler.postDelayed(mWriteRunnable, JOB_PERSIST_DELAY);
+                mWriteScheduled = mWriteInProgress = true;
             }
-            mIoHandler.removeCallbacks(mWriteRunnable);
-            mIoHandler.post(mWriteRunnable);
         }
     }
 
     @VisibleForTesting
     public void readJobMapFromDisk(JobSet jobSet, boolean rtcGood) {
         new ReadJobMapFromDiskRunnable(jobSet, rtcGood).run();
+    }
+
+    /**
+     * Wait for any pending write to the persistent store to clear
+     * @param maxWaitMillis Maximum time from present to wait
+     * @return {@code true} if I/O cleared as expected, {@code false} if the wait
+     *     timed out before the pending write completed.
+     */
+    @VisibleForTesting
+    public boolean waitForWriteToCompleteForTesting(long maxWaitMillis) {
+        final long start = SystemClock.uptimeMillis();
+        final long end = start + maxWaitMillis;
+        synchronized (mWriteScheduleLock) {
+            while (mWriteInProgress) {
+                final long now = SystemClock.uptimeMillis();
+                if (now >= end) {
+                    // still not done and we've hit the end; failure
+                    return false;
+                }
+                try {
+                    mWriteScheduleLock.wait(now - start + maxWaitMillis);
+                } catch (InterruptedException e) {
+                    // Spurious; keep waiting
+                    break;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -343,6 +381,16 @@ public final class JobStore {
         public void run() {
             final long startElapsed = sElapsedRealtimeClock.millis();
             final List<JobStatus> storeCopy = new ArrayList<JobStatus>();
+            // Intentionally allow new scheduling of a write operation *before* we clone
+            // the job set.  If we reset it to false after cloning, there's a window in
+            // which no new write will be scheduled but mLock is not held, i.e. a new
+            // job might appear and fail to be recognized as needing a persist.  The
+            // potential cost is one redundant write of an identical set of jobs in the
+            // rare case of that specific race, but by doing it this way we avoid quite
+            // a bit of lock contention.
+            synchronized (mWriteScheduleLock) {
+                mWriteScheduled = false;
+            }
             synchronized (mLock) {
                 // Clone the jobs so we can release the lock before writing.
                 mJobSet.forEachJob(null, (job) -> {
@@ -355,6 +403,10 @@ public final class JobStore {
             if (DEBUG) {
                 Slog.v(TAG, "Finished writing, took " + (sElapsedRealtimeClock.millis()
                         - startElapsed) + "ms");
+            }
+            synchronized (mWriteScheduleLock) {
+                mWriteInProgress = false;
+                mWriteScheduleLock.notifyAll();
             }
         }
 
@@ -399,7 +451,6 @@ public final class JobStore {
                 FileOutputStream fos = mJobsFile.startWrite(startTime);
                 fos.write(baos.toByteArray());
                 mJobsFile.finishWrite(fos);
-                mDirtyOperations = 0;
             } catch (IOException e) {
                 if (DEBUG) {
                     Slog.v(TAG, "Error writing out job data.", e);
@@ -995,38 +1046,6 @@ public final class JobStore {
                     ? Long.parseLong(val)
                     : JobStatus.NO_LATEST_RUNTIME;
             return Pair.create(earliestRunTimeRtc, latestRunTimeRtc);
-        }
-
-        /**
-         * Convenience function to read out and convert deadline and delay from xml into elapsed real
-         * time.
-         * @return A {@link android.util.Pair}, where the first value is the earliest elapsed runtime
-         * and the second is the latest elapsed runtime.
-         */
-        private Pair<Long, Long> buildExecutionTimesFromXml(XmlPullParser parser)
-                throws NumberFormatException {
-            // Pull out execution time data.
-            final long nowWallclock = sSystemClock.millis();
-            final long nowElapsed = sElapsedRealtimeClock.millis();
-
-            long earliestRunTimeElapsed = JobStatus.NO_EARLIEST_RUNTIME;
-            long latestRunTimeElapsed = JobStatus.NO_LATEST_RUNTIME;
-            String val = parser.getAttributeValue(null, "deadline");
-            if (val != null) {
-                long latestRuntimeWallclock = Long.parseLong(val);
-                long maxDelayElapsed =
-                        Math.max(latestRuntimeWallclock - nowWallclock, 0);
-                latestRunTimeElapsed = nowElapsed + maxDelayElapsed;
-            }
-            val = parser.getAttributeValue(null, "delay");
-            if (val != null) {
-                long earliestRuntimeWallclock = Long.parseLong(val);
-                long minDelayElapsed =
-                        Math.max(earliestRuntimeWallclock - nowWallclock, 0);
-                earliestRunTimeElapsed = nowElapsed + minDelayElapsed;
-
-            }
-            return Pair.create(earliestRunTimeElapsed, latestRunTimeElapsed);
         }
     }
 

@@ -191,7 +191,7 @@ public final class IpSecAlgorithm implements Parcelable {
     }
 
     /** Parcelable Creator */
-    public static final Parcelable.Creator<IpSecAlgorithm> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<IpSecAlgorithm> CREATOR =
             new Parcelable.Creator<IpSecAlgorithm>() {
                 public IpSecAlgorithm createFromParcel(Parcel in) {
                     final String name = in.readString();

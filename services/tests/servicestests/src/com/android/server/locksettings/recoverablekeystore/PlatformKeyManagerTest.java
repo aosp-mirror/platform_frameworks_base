@@ -24,14 +24,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.expectThrows;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.os.RemoteException;
+import android.security.GateKeeper;
+import android.security.keystore.AndroidKeyStoreSecretKey;
+import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.service.gatekeeper.IGateKeeperService;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -53,6 +60,8 @@ import java.security.KeyStore;
 import java.security.UnrecoverableKeyException;
 import java.util.List;
 
+import javax.crypto.KeyGenerator;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class PlatformKeyManagerTest {
@@ -60,10 +69,15 @@ public class PlatformKeyManagerTest {
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
     private static final int USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS = 15;
     private static final int USER_ID_FIXTURE = 42;
+    private static final long USER_SID = 4200L;
+    private static final String KEY_ALGORITHM = "AES";
+    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
+    private static final String TESTING_KEYSTORE_KEY_ALIAS = "testing-key-store-key-alias";
 
     @Mock private Context mContext;
     @Mock private KeyStoreProxy mKeyStoreProxy;
     @Mock private KeyguardManager mKeyguardManager;
+    @Mock private IGateKeeperService mGateKeeperService;
 
     @Captor private ArgumentCaptor<KeyStore.ProtectionParameter> mProtectionParameterCaptor;
     @Captor private ArgumentCaptor<KeyStore.Entry> mEntryArgumentCaptor;
@@ -74,18 +88,19 @@ public class PlatformKeyManagerTest {
     private PlatformKeyManager mPlatformKeyManager;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         Context context = InstrumentationRegistry.getTargetContext();
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
         mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
-        mPlatformKeyManager = new PlatformKeyManager(
-                mContext, mKeyStoreProxy, mRecoverableKeyStoreDb);
+        mPlatformKeyManager = new PlatformKeyManagerTestable(
+                mContext, mKeyStoreProxy, mRecoverableKeyStoreDb, mGateKeeperService);
 
         when(mContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
         when(mContext.getSystemServiceName(any())).thenReturn("test");
         when(mKeyguardManager.isDeviceSecure(USER_ID_FIXTURE)).thenReturn(true);
+        when(mGateKeeperService.getSecureUserId(USER_ID_FIXTURE)).thenReturn(USER_SID);
     }
 
     @After
@@ -192,8 +207,33 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertEquals(
-                USER_ID_FIXTURE,
+                USER_SID,
                 getDecryptKeyProtection().getBoundToSpecificSecureUserId());
+    }
+
+    @Test
+    public void init_doesNotCreateDecryptKeyIfNoSid() throws Exception {
+        when(mGateKeeperService.getSecureUserId(USER_ID_FIXTURE))
+                .thenReturn(GateKeeper.INVALID_SECURE_USER_ID);
+
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
+
+        verify(mKeyStoreProxy, never()).setEntry(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                any(),
+                any());
+    }
+
+    @Test
+    public void init_doesNotCreateDecryptKeyOnGateKeeperException() throws Exception {
+        when(mGateKeeperService.getSecureUserId(USER_ID_FIXTURE)).thenThrow(new RemoteException());
+
+        expectThrows(RemoteException.class, () -> mPlatformKeyManager.init(USER_ID_FIXTURE));
+
+        verify(mKeyStoreProxy, never()).setEntry(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                any(),
+                any());
     }
 
     @Test
@@ -259,6 +299,9 @@ public class PlatformKeyManagerTest {
         when(mKeyStoreProxy
                 .containsAlias("com.android.server.locksettings.recoverablekeystore/"
                         + "platform/42/1/encrypt")).thenReturn(true);
+        when(mKeyStoreProxy.getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                any())).thenReturn(generateAndroidKeyStoreKey());
 
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
@@ -281,6 +324,9 @@ public class PlatformKeyManagerTest {
         when(mKeyStoreProxy
                 .containsAlias("com.android.server.locksettings.recoverablekeystore/"
                         + "platform/42/2/decrypt")).thenReturn(true);
+        when(mKeyStoreProxy.getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                any())).thenReturn(generateAndroidKeyStoreKey());
 
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
@@ -352,6 +398,9 @@ public class PlatformKeyManagerTest {
         doThrow(new UnrecoverableKeyException()).when(mKeyStoreProxy).getKey(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
                 any());
+        when(mKeyStoreProxy.getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                any())).thenReturn(generateAndroidKeyStoreKey());
 
         when(mKeyStoreProxy
                 .containsAlias("com.android.server.locksettings.recoverablekeystore/"
@@ -535,5 +584,35 @@ public class PlatformKeyManagerTest {
                 any(),
                 mProtectionParameterCaptor.capture());
         return (KeyProtection) mProtectionParameterCaptor.getValue();
+    }
+
+    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(
+                KEY_ALGORITHM,
+                ANDROID_KEY_STORE_PROVIDER);
+        keyGenerator.init(new KeyGenParameterSpec.Builder(TESTING_KEYSTORE_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build());
+        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
+    }
+
+    class PlatformKeyManagerTestable extends PlatformKeyManager {
+        private IGateKeeperService mGateKeeperService;
+
+        PlatformKeyManagerTestable(
+                Context context,
+                KeyStoreProxy keyStoreProxy,
+                RecoverableKeyStoreDb database,
+                IGateKeeperService gateKeeperService) {
+            super(context, keyStoreProxy, database);
+            mGateKeeperService = gateKeeperService;
+        }
+
+        @Override
+        IGateKeeperService getGateKeeperService() {
+            return mGateKeeperService;
+        }
     }
 }

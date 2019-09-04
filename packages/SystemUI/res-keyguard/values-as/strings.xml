@@ -28,13 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"পাছৱৰ্ড লিখিবলৈ স্পৰ্শ কৰক"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"আনলক কৰিবলৈ পাছৱৰ্ড লিখক"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"আনলক কৰিবলৈ পিন লিখক"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"আপোনাৰ পিন দিয়ক"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"আপোনাৰ আৰ্হি দিয়ক"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"আপোনাৰ পাছৱর্ড দিয়ক"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ভুল পিন ক\'ড।"</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
-    <string name="keyguard_charged" msgid="2222329688813033109">"চ্চার্জ কৰা হ\'ল"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"চ্চার্জ কৰি থকা হৈছে"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"দ্ৰুত গতিৰে চ্চাৰ্জ কৰি থকা হৈছে"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"লাহে লাহে চ্চাৰ্জ হৈ আছে"</string>
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ব্যৱহাৰৰ অযোগ্য ছিম কাৰ্ড"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"পূৰ্ণৰূপে চ্চাৰ্জ হৈছে"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • বেঁতাৰৰ জৰিয়তে চ্চাৰ্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চ্চার্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • দ্ৰুত গতিৰে চ্চাৰ্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"আপোনাৰ চ্চার্জাৰ সংযোগ কৰক।"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"আনলক কৰিবলৈ মেনু টিপক।"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"নেটৱর্ক লক কৰা অৱস্থাত আছে"</string>
@@ -49,29 +52,27 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ছিম কার্ডখন PUKৰ দ্বাৰা লক কৰা হৈছে।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"ছিম কার্ড আনলক কৰি থকা হৈছে…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"পিনৰ ক্ষেত্ৰ"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"ডিভাইচৰ পাছৱৰ্ড"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ছিম পিনৰ ক্ষেত্ৰ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"ছিমৰ PUK ক্ষেত্ৰ"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"পৰৱৰ্তী এলাৰ্ম <xliff:g id="ALARM">%1$s</xliff:g> বজাত ছেট কৰা হৈছে"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"মচক"</string>
-    <!-- no translation found for disable_carrier_button_text (6914341927421916114) -->
-    <skip />
-    <!-- no translation found for error_disable_esim_title (4852978431156228006) -->
-    <skip />
-    <!-- no translation found for error_disable_esim_msg (676694908770135639) -->
-    <skip />
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"ই-ছিম অক্ষম কৰক"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"ই-ছিম অক্ষম কৰিব পৰা নাযায়"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"এটা আসোঁৱাহৰ কাৰণে ই-ছিম অক্ষম কৰিব পৰা নাযায়।"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"এণ্টাৰ বুটাম"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"আৰ্হি পাহৰিলে নেকি"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"ভুল আৰ্হি"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"ভুল পাছৱৰ্ড"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"ভুল আৰ্হি"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"ভুল পাছৱৰ্ড"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"ভুল পিন"</string>
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (4368805541257003755) -->
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> ছেকেণ্ডত আকৌ চেষ্টা কৰক।</item>
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> ছেকেণ্ডত আকৌ চেষ্টা কৰক।</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"আপোনাৰ আৰ্হি আঁকক"</string>
-    <!-- no translation found for kg_sim_pin_instructions (6389000973113699187) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions_multi (1643757228644271861) -->
-    <skip />
-    <!-- no translation found for kg_sim_lock_esim_instructions (4416732549172148542) -->
-    <skip />
+    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"ছিমৰ পিন দিয়ক।"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\"ৰ ছিমৰ পিন দিয়ক।"</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ম’বাইল সেৱা অবিহনে ডিভাইচ ব্যৱহাৰ কৰিবলৈ ই-ছিম অক্ষম কৰক।"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"পিন দিয়ক"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"পাছৱৰ্ড দিয়ক"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ছিমখন বর্তমান অক্ষম অৱস্থাত আছে। অব্যাহত ৰাখিবলৈ PUK ক\'ড লিখক। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।"</string>
@@ -113,7 +114,7 @@
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"ছিম পিনৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"ছিম PUKৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
-    <string name="kg_pin_accepted" msgid="7637293533973802143">"ক\'ড গ্ৰহণ কৰা হ\'ল!"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"ক\'ড গ্ৰহণ কৰা হ’ল!"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"কোনো সেৱা নাই।"</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ইনপুট পদ্ধতি সলনি কৰক"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"এয়াৰপ্লেন ম\'ড"</string>
@@ -126,8 +127,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"প্ৰ\'ফাইল সলনি কৰোঁতে আৰ্হি দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পিন দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"প্ৰ\'ফাইল সলনি কৰোঁতে পাছৱৰ্ড দিয়াটো বাধ্যতামূলক"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"প্ৰশাসকে ডিভাইচ লক কৰি ৰাখিছে"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"ডিভাইচটো মেনুৱেলভাৱে লক কৰা হৈছিল"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="one">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। আর্হি নিশ্চিত কৰক।</item>
@@ -141,7 +141,94 @@
       <item quantity="one">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পাছৱৰ্ড নিশ্চিত কৰক।</item>
       <item quantity="other">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পাছৱৰ্ড নিশ্চিত কৰক।</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"চিনাক্ত কৰিব পৰা নগ\'ল"</string>
-    <!-- no translation found for kg_password_default_pin_message (6203676909479972943) -->
-    <!-- no translation found for kg_password_default_puk_message (8744416410184198352) -->
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"চিনাক্ত কৰিব পৰা নাই"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"চিনাক্ত কৰিব পৰা নাই"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>
+      <item quantity="other">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+      <item quantity="one">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
+      <item quantity="other">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
+    </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"এতিয়া সময়"</annotation>\n"^1\n^2 হৈছে</item>
+      <item quantity="other">"<annotation name="color">"এতিয়া সময়"</annotation>\n"^1\n^2 হৈছে</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"বাৰ"</item>
+    <item msgid="7389464214252023751">"এক"</item>
+    <item msgid="8803180377002008046">"দুই"</item>
+    <item msgid="8614897059944644719">"তিনি"</item>
+    <item msgid="2293058674782619556">"চাৰি"</item>
+    <item msgid="4815402358455041664">"পাঁচ"</item>
+    <item msgid="3325754778509665687">"ছয়"</item>
+    <item msgid="5805551341866280575">"সাত"</item>
+    <item msgid="203334816668238610">"আঠ"</item>
+    <item msgid="4828052671464488923">"ন"</item>
+    <item msgid="2233497913571137419">"দহ"</item>
+    <item msgid="5621554266768657830">"এঘাৰ"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"বাজিছে"</item>
+    <item msgid="8837126587669001578">"এক"</item>
+    <item msgid="4294343372940455660">"দুই"</item>
+    <item msgid="7129166637707421536">"তিনি"</item>
+    <item msgid="7579404865008788673">"চাৰি"</item>
+    <item msgid="3873924689207380586">"পাঁচ"</item>
+    <item msgid="4849565597850069377">"ছয়"</item>
+    <item msgid="4404219424523572364">"সাত"</item>
+    <item msgid="8740481214764087329">"আঠ"</item>
+    <item msgid="1713216865806811237">"ন"</item>
+    <item msgid="3508406095411245038">"দহ"</item>
+    <item msgid="7161996337755311711">"এঘাৰ"</item>
+    <item msgid="4044549963329624197">"বাৰ"</item>
+    <item msgid="333373157917379088">"তেৰ"</item>
+    <item msgid="2631202907124819385">"চৈধ্য"</item>
+    <item msgid="6472396076858033453">"পোন্ধৰ"</item>
+    <item msgid="8656981856181581643">"ষোল্ল"</item>
+    <item msgid="7289026608562030619">"সোতৰ"</item>
+    <item msgid="3881477602692646573">"ওঠৰ"</item>
+    <item msgid="3358129827772984226">"ঊনৈছ"</item>
+    <item msgid="3308575407402865807">"বিছ"</item>
+    <item msgid="5346560955382229629">"একৈছ\n"</item>
+    <item msgid="226750304761473436">"বাইছ\n"</item>
+    <item msgid="616811325336838734">"তেইছ\n"</item>
+    <item msgid="616346116869053440">"চৌবিছ\n"</item>
+    <item msgid="4642996410384042830">"পঁচিছ\n"</item>
+    <item msgid="7506092849993571465">"ছাব্বিছ\n"</item>
+    <item msgid="1915078191101042031">"সাতাইছ\n"</item>
+    <item msgid="4292378641900520252">"আঠাইছ\n"</item>
+    <item msgid="5339513901773103696">"ঊনত্ৰিছ\n"</item>
+    <item msgid="3574673250891657607">"ত্ৰিছ"</item>
+    <item msgid="5796923836589110940">"একত্ৰিছ\n"</item>
+    <item msgid="5859323597571702052">"বত্ৰিছ\n"</item>
+    <item msgid="5133326723148876507">"তেত্ৰিছ\n"</item>
+    <item msgid="2693999494655663096">"চৌত্ৰিছ\n"</item>
+    <item msgid="3316754944962836197">"পঁইত্ৰিছ\n"</item>
+    <item msgid="816891008836796723">"ছয়ত্ৰিছ\n"</item>
+    <item msgid="9158890488666520078">"সাতত্ৰিছ\n"</item>
+    <item msgid="1894769703213894011">"আঠত্ৰিছ\n"</item>
+    <item msgid="5638820345598572399">"ঊনচল্লিছ\n"</item>
+    <item msgid="8838304023017895439">"চল্লিছ"</item>
+    <item msgid="1834742948932559597">"একচল্লিছ\n"</item>
+    <item msgid="6573707308847773944">"বিয়াল্লিছ\n"</item>
+    <item msgid="2450149950652678001">"তিয়াল্লিছ\n"</item>
+    <item msgid="2874667401318178036">"চৌৰাল্লিছ\n"</item>
+    <item msgid="3391101532763048862">"পঞ্চলিছ\n"</item>
+    <item msgid="1671489330863254362">"ছয়চল্লিছ\n"</item>
+    <item msgid="5916017359554531038">"সাতচল্লিছ\n"</item>
+    <item msgid="8205413177993059967">"আঠচল্লিছ\n"</item>
+    <item msgid="6607867415142171302">"ঊনপঞ্চাছ\n"</item>
+    <item msgid="8358850748472089162">"পঞ্চাছ"</item>
+    <item msgid="3551313125255080234">"একাৱন\n"</item>
+    <item msgid="1559678130725716542">"বাৱন\n"</item>
+    <item msgid="431441994725492377">"তেৱন\n"</item>
+    <item msgid="6345774640539623024">"চৌৱন\n"</item>
+    <item msgid="8018192990793931120">"পঁচপন\n"</item>
+    <item msgid="6187650843754604534">"ছাপন\n"</item>
+    <item msgid="8727240174015993259">"সাতাৱন\n"</item>
+    <item msgid="848339003778952950">"আঠাৱন\n"</item>
+    <item msgid="5798985802835423618">"ঊনষাঠি\n"</item>
+  </string-array>
 </resources>

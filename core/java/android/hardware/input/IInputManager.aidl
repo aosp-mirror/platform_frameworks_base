@@ -16,7 +16,7 @@
 
 package android.hardware.input;
 
-import android.app.IInputForwarder;
+import android.graphics.Rect;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
@@ -25,6 +25,7 @@ import android.hardware.input.TouchCalibration;
 import android.os.IBinder;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.InputMonitor;
 import android.view.PointerIcon;
 
 /** @hide */
@@ -84,6 +85,6 @@ interface IInputManager {
 
     void requestPointerCapture(IBinder windowToken, boolean enabled);
 
-    /** Create input forwarder to deliver touch events to owned display. */
-    IInputForwarder createInputForwarder(int displayId);
+    /** Create an input monitor for gestures. */
+    InputMonitor monitorGestureInput(String name, int displayId);
 }

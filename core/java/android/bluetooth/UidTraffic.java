@@ -95,7 +95,7 @@ public class UidTraffic implements Cloneable, Parcelable {
                 + mTxBytes + '}';
     }
 
-    public static final Creator<UidTraffic> CREATOR = new Creator<UidTraffic>() {
+    public static final @android.annotation.NonNull Creator<UidTraffic> CREATOR = new Creator<UidTraffic>() {
         @Override
         public UidTraffic createFromParcel(Parcel source) {
             return new UidTraffic(source);

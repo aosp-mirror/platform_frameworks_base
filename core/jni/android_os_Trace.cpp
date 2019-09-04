@@ -14,93 +14,83 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Trace"
-// #define LOG_NDEBUG 0
-
-#include <inttypes.h>
+#include <jni.h>
 
 #include <cutils/trace.h>
-#include <utils/String8.h>
 #include <log/log.h>
-
 #include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
-#include <nativehelper/ScopedStringChars.h>
+
+#include <array>
 
 namespace android {
 
-static void sanitizeString(String8& utf8Chars) {
-    size_t size = utf8Chars.size();
-    char* str = utf8Chars.lockBuffer(size);
-    for (size_t i = 0; i < size; i++) {
-        char c = str[i];
-        if (c == '\0' || c == '\n' || c == '|') {
-            str[i] = ' ';
+inline static void sanitizeString(char* str) {
+    while (*str) {
+        char c = *str;
+        if (c == '\n' || c == '|') {
+            *str = ' ';
         }
+        str++;
     }
-    utf8Chars.unlockBuffer();
 }
 
-static jlong android_os_Trace_nativeGetEnabledTags(JNIEnv* env, jclass clazz) {
+template<typename F>
+inline static void withString(JNIEnv* env, jstring jstr, F callback) {
+    // We need to handle the worst case of 1 character -> 4 bytes
+    // So make a buffer of size 4097 and let it hold a string with a maximum length
+    // of 1024. The extra last byte for the null terminator.
+    std::array<char, 4097> buffer;
+    // We have no idea of knowing how much data GetStringUTFRegion wrote, so null it out in
+    // advance so we can have a reliable null terminator
+    memset(buffer.data(), 0, buffer.size());
+    jsize size = std::min(env->GetStringLength(jstr), 1024);
+    env->GetStringUTFRegion(jstr, 0, size, buffer.data());
+    sanitizeString(buffer.data());
+
+    callback(buffer.data());
+}
+
+static jlong android_os_Trace_nativeGetEnabledTags(JNIEnv*, jclass) {
     return atrace_get_enabled_tags();
 }
 
-static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass clazz,
-        jlong tag, jstring nameStr, jint value) {
-    ScopedUtfChars name(env, nameStr);
-
-    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, name.c_str(), value);
-    atrace_int(tag, name.c_str(), value);
+static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass,
+        jlong tag, jstring nameStr, jlong value) {
+    withString(env, nameStr, [tag, value](char* str) {
+        atrace_int64(tag, str, value);
+    });
 }
 
-static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass clazz,
+static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass,
         jlong tag, jstring nameStr) {
-    ScopedStringChars jchars(env, nameStr);
-    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
-    sanitizeString(utf8Chars);
-
-    ALOGV("%s: %" PRId64 " %s", __FUNCTION__, tag, utf8Chars.string());
-    atrace_begin(tag, utf8Chars.string());
+    withString(env, nameStr, [tag](char* str) {
+        atrace_begin(tag, str);
+    });
 }
 
-static void android_os_Trace_nativeTraceEnd(JNIEnv* env, jclass clazz,
-        jlong tag) {
-
-    ALOGV("%s: %" PRId64, __FUNCTION__, tag);
+static void android_os_Trace_nativeTraceEnd(JNIEnv*, jclass, jlong tag) {
     atrace_end(tag);
 }
 
-static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass clazz,
+static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jint cookie) {
-    ScopedStringChars jchars(env, nameStr);
-    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
-    sanitizeString(utf8Chars);
-
-    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
-    atrace_async_begin(tag, utf8Chars.string(), cookie);
+    withString(env, nameStr, [tag, cookie](char* str) {
+        atrace_async_begin(tag, str, cookie);
+    });
 }
 
-static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass clazz,
+static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jint cookie) {
-    ScopedStringChars jchars(env, nameStr);
-    String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
-    sanitizeString(utf8Chars);
-
-    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
-    atrace_async_end(tag, utf8Chars.string(), cookie);
+    withString(env, nameStr, [tag, cookie](char* str) {
+        atrace_async_end(tag, str, cookie);
+    });
 }
 
-static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv* env,
-        jclass clazz, jboolean allowed) {
-    ALOGV("%s: %d", __FUNCTION__, allowed);
-
+static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv*, jclass, jboolean allowed) {
     atrace_set_debuggable(allowed);
 }
 
-static void android_os_Trace_nativeSetTracingEnabled(JNIEnv* env,
-        jclass clazz, jboolean enabled) {
-    ALOGV("%s: %d", __FUNCTION__, enabled);
-
+static void android_os_Trace_nativeSetTracingEnabled(JNIEnv*, jclass, jboolean enabled) {
     atrace_set_tracing_enabled(enabled);
 }
 
@@ -119,7 +109,7 @@ static const JNINativeMethod gTraceMethods[] = {
     // ----------- @FastNative  ----------------
 
     { "nativeTraceCounter",
-            "(JLjava/lang/String;I)V",
+            "(JLjava/lang/String;J)V",
             (void*)android_os_Trace_nativeTraceCounter },
     { "nativeTraceBegin",
             "(JLjava/lang/String;)V",

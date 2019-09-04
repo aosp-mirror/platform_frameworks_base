@@ -21,8 +21,6 @@ package android.os.statsd;
 option java_package = "com.android.internal.os";
 option java_outer_classname = "StatsdConfigProto";
 
-import "frameworks/base/cmds/statsd/src/perfetto/perfetto_config.proto";
-
 enum Position {
   POSITION_UNKNOWN = 0;
 
@@ -235,13 +233,19 @@ message GaugeMetric {
 
   enum SamplingType {
     RANDOM_ONE_SAMPLE = 1;
-    ALL_CONDITION_CHANGES = 2;
+    ALL_CONDITION_CHANGES = 2 [deprecated = true];
     CONDITION_CHANGE_TO_TRUE = 3;
+    FIRST_N_SAMPLES = 4;
   }
   optional SamplingType sampling_type = 9 [default = RANDOM_ONE_SAMPLE] ;
 
   optional int64 min_bucket_size_nanos = 10;
+
   optional int64 max_num_gauge_atoms_per_bucket = 11 [default = 10];
+
+  optional int32 max_pull_delay_sec = 13 [default = 10];
+
+  optional bool split_bucket_for_app_upgrade = 14 [default = true];
 }
 
 message ValueMetric {
@@ -263,12 +267,33 @@ message ValueMetric {
 
   enum AggregationType {
     SUM = 1;
+    MIN = 2;
+    MAX = 3;
+    AVG = 4;
   }
   optional AggregationType aggregation_type = 8 [default = SUM];
 
   optional int64 min_bucket_size_nanos = 10;
 
   optional bool use_absolute_value_on_reset = 11 [default = false];
+
+  optional bool use_diff = 12;
+
+  optional bool use_zero_default_base = 15 [default = false];
+
+  enum ValueDirection {
+      UNKNOWN = 0;
+      INCREASING = 1;
+      DECREASING = 2;
+      ANY = 3;
+  }
+  optional ValueDirection value_direction = 13 [default = INCREASING];
+
+  optional bool skip_zero_diff_output = 14 [default = true];
+
+  optional int32 max_pull_delay_sec = 16 [default = 10];
+
+  optional bool split_bucket_for_app_upgrade = 17 [default = true];
 }
 
 message Alert {
@@ -299,10 +324,23 @@ message IncidentdDetails {
     EXPLICIT = 1;
   }
   optional Destination dest = 2;
+
+  // Package name of the incident report receiver.
+  optional string receiver_pkg = 3;
+
+  // Class name of the incident report receiver.
+  optional string receiver_cls = 4;
+
+  optional string alert_description = 5;
 }
 
 message PerfettoDetails {
-  optional perfetto.protos.TraceConfig trace_config = 1;
+  // The |trace_config| field is a proto-encoded message of type
+  // perfetto.protos.TraceConfig defined in
+  // //external/perfetto/protos/perfetto/config/. On device,
+  // statsd doesn't need to deserialize the message as it's just
+  // passed binary-encoded to the perfetto cmdline client.
+  optional bytes trace_config = 1;
 }
 
 message BroadcastSubscriberDetails {
@@ -329,6 +367,30 @@ message Subscription {
   }
 
   optional float probability_of_informing = 7 [default = 1.1];
+
+  // This was used for perfprofd historically.
+  reserved 8;
+}
+
+enum ActivationType {
+  ACTIVATION_TYPE_UNKNOWN = 0;
+  ACTIVATE_IMMEDIATELY = 1;
+  ACTIVATE_ON_BOOT = 2;
+}
+
+message EventActivation {
+  optional int64 atom_matcher_id = 1;
+  optional int64 ttl_seconds = 2;
+  optional int64 deactivation_atom_matcher_id = 3;
+  optional ActivationType activation_type = 4;
+}
+
+message MetricActivation {
+  optional int64 metric_id = 1;
+
+  optional ActivationType activation_type = 3 [deprecated = true];
+
+  repeated EventActivation event_activation = 2;
 }
 
 message StatsdConfig {
@@ -367,6 +429,14 @@ message StatsdConfig {
   optional int64 ttl_in_seconds = 15;
 
   optional bool hash_strings_in_metric_report = 16 [default = true];
+
+  repeated MetricActivation metric_activation = 17;
+
+  optional bool version_strings_in_metric_report = 18;
+
+  optional bool installer_in_metric_report = 19;
+
+  optional bool persist_locally = 20 [default = false];
 
   // Field number 1000 is reserved for later use.
   reserved 1000;

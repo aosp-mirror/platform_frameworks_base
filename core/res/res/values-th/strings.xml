@@ -77,15 +77,16 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ไม่มีการนำเสนอบริการ"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"คุณไม่สามารถเปลี่ยนการตั้งค่าหมายเลขผู้โทร"</string>
-    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ไม่มีบริการอินเทอร์เน็ต"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"ไม่มีหมายเลขฉุกเฉิน"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"ไม่มีบริการเน็ตมือถือ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"หมายเลขฉุกเฉินไม่พร้อมใช้งาน"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ไม่มีบริการเสียง"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ไม่มีบริการเสียง/บริการฉุกเฉิน"</string>
-    <string name="RestrictedStateContent" msgid="4278821484643362350">"งดให้บริการชั่วคราวโดยเครือข่ายมือถือในตำแหน่งของคุณ"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"เข้าถึงเครือข่ายไม่ได้"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"ลองเปลี่ยนประเภทที่เลือกใน \"การตั้งค่า\" &gt; \"เครือข่ายและอินเทอร์เน็ต\" &gt; \"เครือข่ายมือถือ\" &gt; \"ประเภทเครือข่ายที่ต้องการ\" เพื่อให้การรับสัญญาณดีขึ้น"</string>
-    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"กำลังใช้งานการโทรผ่าน Wi-Fi"</string>
-    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"หมายเลขฉุกเฉินต้องใช้เครือข่ายมือถือ"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"ไม่มีบริการโทรสนทนาหรือการโทรหมายเลขฉุกเฉิน"</string>
+    <string name="RestrictedStateContent" msgid="6538703255570997248">"ปิดชั่วคราวโดยผู้ให้บริการ"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"ปิดชั่วคราวโดยผู้ให้บริการของซิม <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"เชื่อมต่อเครือข่ายมือถือไม่ได้"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"ลองเปลี่ยนเครือข่ายที่ต้องการ แตะเพื่อเปลี่ยน"</string>
+    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"โทรหาหมายเลขฉุกเฉินไม่ได้"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"โทรหาหมายเลขฉุกเฉินผ่าน Wi‑Fi ไม่ได้"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"การแจ้งเตือน"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"การโอนสาย"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"โหมดติดต่อกลับฉุกเฉิน"</string>
@@ -120,20 +121,30 @@
     <string name="roamingText11" msgid="4154476854426920970">"เปิดโรมมิ่งแบนเนอร์"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ปิดโรมมิ่งแบนเนอร์"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"กำลังค้นหาบริการ"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"การโทรผ่าน Wi-Fi"</string>
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"ตั้งค่าการโทรผ่าน Wi‑Fi ไม่ได้"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"หากต้องการโทรออกและส่งข้อความผ่าน Wi-Fi โปรดสอบถามผู้ให้บริการของคุณก่อนเพื่อตั้งค่าบริการนี้ แล้วเปิดการโทรผ่าน Wi-Fi อีกครั้งจากการตั้งค่า (รหัสข้อผิดพลาด: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7472393097168811593">"ลงทะเบียนกับผู้ให้บริการของคุณ (รหัสข้อผิดพลาด: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="7372514042696663278">"เกิดปัญหาในการลงทะเบียนการโทรผ่าน Wi‑Fi กับผู้ให้บริการของคุณ: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"กำลังเรียก Wi-Fi ของ %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"การโทรผ่าน Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"การโทรผ่าน WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"การโทรผ่าน WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"การโทรผ่าน Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"การโทรผ่าน Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"การโทรผ่าน Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ปิด"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ต้องการใช้ Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ต้องการใช้อินเทอร์เน็ตมือถือ"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi เท่านั้น"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -160,8 +171,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"กำลังประมวลผลคำขอมากเกินไป โปรดลองใหม่อีกครั้ง"</string>
     <string name="notification_title" msgid="8967710025036163822">"ข้อผิดพลาดในการลงชื่อเข้าใช้ <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"ซิงค์"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ซิงค์"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"มีการนำออก <xliff:g id="CONTENT_TYPE">%s</xliff:g> มากเกินไป"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"ซิงค์ไม่ได้"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"พยายามลบ <xliff:g id="CONTENT_TYPE">%s</xliff:g> หลายรายการเกินไป"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ที่จัดเก็บข้อมูลของแท็บเล็ตเต็ม ลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ที่เก็บข้อมูลนาฬิกาเต็ม โปรดลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"พื้นที่เก็บข้อมูลในทีวีเต็ม โปรดลบบางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
@@ -174,14 +185,13 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"โดยผู้ดูแลระบบโปรไฟล์งานของคุณ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"โดย <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"ลบโปรไฟล์งานแล้ว"</string>
-    <string name="work_profile_deleted_description" msgid="1100529432509639864">"ลบโปรไฟล์งานแล้วเนื่องจากไม่มีแอปผู้ดูแลระบบ"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"แอปผู้ดูแลระบบโปรไฟล์งานไม่มีอยู่หรือเสียหาย ระบบจึงทำการลบโปรไฟล์งานและข้อมูลที่เกี่ยวข้องของคุณออก โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"โปรไฟล์งานของคุณไม่สามารถใช้ในอุปกรณ์นี้อีกต่อไป"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"ลองป้อนรหัสผ่านหลายครั้งเกินไป"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"อุปกรณ์มีการจัดการ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"องค์กรของคุณจัดการอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย แตะเพื่อดูรายละเอียด"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ระบบจะลบข้อมูลในอุปกรณ์ของคุณ"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"ไม่สามารถใช้แอปผู้ดูแลระบบนี้ ขณะนี้ระบบจะลบข้อมูลในอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบขององค์กรหากมีคำถาม"</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"ใช้แอปผู้ดูแลระบบนี้ไม่ได้ ขณะนี้ระบบจะลบข้อมูลในอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบขององค์กรหากมีคำถาม"</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> ปิดใช้การพิมพ์แล้ว"</string>
     <string name="me" msgid="6545696007631404292">"ฉัน"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ตัวเลือกของแท็บเล็ต"</string>
@@ -220,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"รายงานข้อบกพร่อง"</string>
     <string name="global_action_logout" msgid="935179188218826050">"จบเซสชัน"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ภาพหน้าจอ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ใช้รายงานข้อบกพร่อง"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"การดำเนินการนี้จะรวบรวมข้อมูลเกี่ยวกับสถานะปัจจุบันของอุปกรณ์ของคุณ โดยจะส่งไปในรูปแบบข้อความอีเมล อาจใช้เวลาสักครู่ตั้งแต่เริ่มการสร้างรายงานข้อบกพร่องจนกระทั่งเสร็จสมบูรณ์ โปรดอดทนรอ"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"รายงานแบบอินเทอร์แอกทีฟ"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ใช้ตัวเลือกนี้ได้เกือบทุกสถานการณ์ โดยจะอนุญาตให้คุณติดตามความคืบหน้าของรายงาน ป้อนรายละเอียดเพิ่มเติมของปัญหา และถ่ายภาพหน้าจอ หัวข้อที่ใช้งานน้อยแต่ใช้เวลานานในการรายงานอาจถูกข้ามไป"</string>
@@ -269,35 +280,56 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"สลับไปใช้โปรไฟล์งาน"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"รายชื่อติดต่อ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"เข้าถึงรายชื่อติดต่อ"</string>
-    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรายชื่อติดต่อของคุณ"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรายชื่อติดต่อไหม"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ตำแหน่ง"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"เข้าถึงตำแหน่งของอุปกรณ์นี้"</string>
-    <string name="permgrouprequest_location" msgid="8903573681261610809">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงตำแหน่งของอุปกรณ์นี้"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงตำแหน่งของอุปกรณ์นี้ไหม"</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ปฏิทิน"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"เข้าถึงปฏิทิน"</string>
-    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงปฏิทินของคุณ"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงปฏิทินไหม"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ส่งและดูข้อความ SMS"</string>
-    <string name="permgrouprequest_sms" msgid="605618939583628306">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ส่งและดูข้อความ SMS"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ส่งและดูข้อความ SMS ไหม"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"พื้นที่เก็บข้อมูล"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"เข้าถึงรูปภาพ สื่อ และไฟล์บนอุปกรณ์ของคุณ"</string>
-    <string name="permgrouprequest_storage" msgid="7429669910547860218">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรูปภาพ สื่อ และไฟล์ในอุปกรณ์ของคุณ"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรูปภาพ สื่อ และไฟล์ในอุปกรณ์ไหม"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"บันทึกเสียง"</string>
-    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; บันทึกเสียง"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; บันทึกเสียงไหม"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"การจดจำกิจกรรม"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"จดจำกิจกรรม"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; จดจำกิจกรรมการเคลื่อนไหวร่างกายของคุณไหม"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"กล้องถ่ายรูป"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ถ่ายภาพและบันทึกวิดีโอ"</string>
-    <string name="permgrouprequest_camera" msgid="810824326507258410">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ถ่ายรูปและบันทึกวิดีโอ"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ถ่ายรูปและบันทึกวิดีโอไหม"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ประวัติการโทร"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"อ่านและเขียนประวัติการโทรของโทรศัพท์"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงประวัติการโทรในโทรศัพท์ไหม"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"โทรและจัดการการโทร"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; โทรและจัดการการโทร"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"เซ็นเซอร์ร่างกาย"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; โทรและจัดการการโทรไหม"</string>
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"เซ็นเซอร์ร่างกาย"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพของคุณ"</string>
-    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพของคุณ"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพไหม"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"เพลง"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"เข้าถึงเพลง"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงเพลงไหม"</string>
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"รูปภาพและวิดีโอ"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"เข้าถึงรูปภาพและวิดีโอ"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"เรียกข้อมูลเนื้อหาของหน้าต่าง"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"เปิด \"แตะเพื่อสำรวจ\""</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ระบบจะพูดออกเสียงรายการที่แตะและหน้าจอสามารถสำรวจได้ด้วยท่าทางสัมผัส"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ระบบจะพูดออกเสียงรายการที่แตะ และสำรวจหน้าจอได้ด้วยท่าทางสัมผัส"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"สังเกตข้อความที่คุณพิมพ์"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"รวมถึงข้อมูลส่วนบุคคล เช่น หมายเลขบัตรเครดิตและรหัสผ่าน"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ควบคุมการขยายการแสดงผล"</string>
@@ -305,7 +337,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ทำท่าทางสัมผัส"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"สามารถแตะ เลื่อน บีบ และทำท่าทางสัมผัสอื่นๆ"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ท่าทางสัมผัสลายนิ้วมือ"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"สามารถจับท่าทางสัมผัสที่เกิดขึ้นบนเซ็นเซอร์ลายนิ้วมือของอุปกรณ์"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"สามารถจับท่าทางสัมผัสที่เกิดขึ้นบนเซ็นเซอร์ลายนิ้วมือของอุปกรณ์"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ปิดการใช้งานหรือแก้ไขแถบสถานะ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"อนุญาตให้แอปพลิเคชันปิดใช้งานแถบสถานะหรือเพิ่มและนำไอคอนระบบออก"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"เป็นแถบสถานะ"</string>
@@ -356,6 +388,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"อนุญาตให้แอปทำให้บางส่วนของแอปนั้นอยู่ในหน่วยความจำเสมอ ซึ่งอาจจำกัดพื้นที่หน่วยความจำสำหรับแอปอื่นและทำให้ทีวีช้าลง"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้โทรศัพท์ทำงานช้าลง"</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"เรียกใช้บริการที่ใช้งานอยู่"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ใช้งานอยู่"</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"วัดพื้นที่เก็บข้อมูลของแอปพลิเคชัน"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"อนุญาตให้แอปพลิเคชันเรียกดูรหัส ข้อมูล และขนาดแคชของตน"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"แก้ไขการตั้งค่าระบบ"</string>
@@ -394,18 +428,22 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"แอปนี้สามารถเพิ่ม นำออก หรือเปลี่ยนกิจกรรมในปฏิทินบนโทรศัพท์ของคุณ แอปนี้สามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยไม่แจ้งให้เจ้าของทราบ"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"เข้าถึงคำสั่งของโปรแกรมแจ้งตำแหน่งพิเศษ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"อนุญาตให้แอปเข้าถึงคำสั่งของผู้ให้บริการตำแหน่งเพิ่มเติม ซึ่งอาจทำให้แอปสามารถแทรกแซงการทำงานของ GPS หรือต้นทางของตำแหน่งอื่นๆ ได้"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"เข้าถึงตำแหน่งที่แม่นยำ (อิงจาก GPS และเครือข่าย)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ การเปิดบริการนี้อาจเพิ่มการใช้แบตเตอรี่"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"เข้าถึงตำแหน่งโดยประมาณ (อิงจากเครือข่าย)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในแท็บเล็ตของคุณ"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในทีวีของคุณ"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ"</string>
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"เข้าถึงตำแหน่งที่แม่นยำเมื่ออยู่เบื้องหน้าเท่านั้น"</string>
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"แอปนี้รับตำแหน่งที่แม่นยำของคุณได้เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ ซึ่งอาจทำให้มีการใช้แบตเตอรี่มากขึ้น"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"เข้าถึงตำแหน่งโดยประมาณ (อิงตามเครือข่าย) เมื่อทำงานอยู่เบื้องหน้าเท่านั้น"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"แอปนี้รับตำแหน่งของคุณโดยอิงตามแหล่งที่มาของเครือข่าย เช่น เสาส่งสัญญาณมือถือและเครือข่าย Wi-Fi เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในแท็บเล็ตของคุณ"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"แอปนี้รับตำแหน่งของคุณโดยอิงตามแหล่งที่มาของเครือข่าย เช่น เสาส่งสัญญาณมือถือและเครือข่าย Wi-Fi เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในทีวีของคุณ"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"แอปนี้รับตำแหน่งของคุณโดยอิงตามแหล่งที่มาของเครือข่าย เช่น เสาส่งสัญญาณมือถือและเครือข่าย Wi-Fi เมื่อทำงานอยู่เบื้องหน้าเท่านั้น แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"เข้าถึงตำแหน่งในเบื้องหลัง"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"หากได้รับสิทธิ์นี้เพิ่มจากการเข้าถึงตำแหน่งโดยประมาณหรือตำแหน่งที่แม่นยำ แอปจะมีสิทธิ์เข้าถึงตำแหน่งระหว่างที่ทำงานในเบื้องหลังได้"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"เปลี่ยนการตั้งค่าเสียงของคุณ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"อนุญาตให้แอปพลิเคชันปรับเปลี่ยนการตั้งค่าเสียงทั้งหมดได้ เช่น ระดับเสียงและลำโพงที่จะใช้งาน"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"บันทึกเสียง"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"แอปนี้สามารถบันทึกเสียงด้วยไมโครโฟนได้ทุกเมื่อ"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ส่งคำสั่งไปยังซิม"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"อนุญาตให้แอปส่งคำสั่งไปยัง SIM ซึ่งอันตรายมาก"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"จดจำกิจกรรมการเคลื่อนไหวร่างกาย"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"แอปนี้จดจำกิจกรรมการเคลื่อนไหวร่างกายของคุณได้"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"แอปนี้สามารถถ่ายภาพและวิดีโอด้วยกล้องได้ทุกเมื่อ"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ควบคุมการสั่นเตือน"</string>
@@ -418,6 +456,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงฟีเจอร์โทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"กำหนดเส้นทางการโทรผ่านระบบ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"อนุญาตให้แอปกำหนดเส้นทางการโทรของแอปผ่านระบบเพื่อปรับปรุงประสบการณ์ในการโทร"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ดูและจัดการการติดต่อผ่านระบบ"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"อนุญาตให้แอปดูและจัดการการติดต่อในอุปกรณ์ ซึ่งรวมถึงข้อมูลอย่างเช่น หมายเลขที่ใช้ในการติดต่อและสถานะการติดต่อ"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ต่อสายจากแอปอื่น"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"อนุญาตให้แอปต่อสายที่เริ่มจากแอปอื่น"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"อ่านหมายเลขโทรศัพท์"</string>
@@ -478,10 +518,36 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ปิดใช้งานการล็อกหน้าจอของคุณ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"อนุญาตให้แอปพลิเคชันปิดใช้งานการล็อกปุ่มกดและการรักษาความปลอดภัยด้วยรหัสผ่านใดๆ ที่เกี่ยวข้อง ตัวอย่างเช่น โทรศัพท์ปิดใช้งานการล็อกปุ่มกดเมื่อรับสายเรียกเข้า จากนั้นจึงเปิดใช้งานการล็อกปุ่มกดใหม่หลังจากวางสาย"</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"ใช้ฮาร์ดแวร์ชีวมิติ"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"อนุญาตให้แอปใช้ฮาร์ดแวร์ชีวมิติเพื่อตรวจสอบสิทธิ์"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"จัดการฮาร์ดแวร์ลายนิ้วมือ"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"อนุญาตให้แอปเรียกใช้วิธีการเพื่อเพิ่มและลบเทมเพลตลายนิ้วมือสำหรับการใช้งาน"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ใช้ฮาร์ดแวร์ลายนิ้วมือ"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"อนุญาตให้แอปใช้ฮาร์ดแวร์ลายนิ้วมือเพื่อตรวจสอบสิทธิ์"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"อ่านคอลเล็กชันเพลงของคุณ"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"อนุญาตให้แอปอ่านคอลเล็กชันเพลงของคุณ"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"แก้ไขคอลเล็กชันเพลงของคุณ"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"อนุญาตให้แอปแก้ไขคอลเล็กชันเพลงของคุณ"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"อ่านคอลเล็กชันวิดีโอของคุณ"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"อนุญาตให้แอปอ่านคอลเล็กชันวิดีโอของคุณ"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"แก้ไขคอลเล็กชันวิดีโอของคุณ"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"อนุญาตให้แอปแก้ไขอ่านคอลเล็กชันวิดีโอของคุณ"</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"อ่านคอลเล็กชันรูปภาพของคุณ"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"อนุญาตให้แอปอ่านคอลเล็กชันรูปภาพของคุณ"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"แก้ไขคอลเล็กชันรูปภาพของคุณ"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"อนุญาตให้แอปแก้ไขคอลเล็กชันรูปภาพของคุณ"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"อ่านตำแหน่งจากคอลเล็กชันสื่อของคุณ"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"อนุญาตให้แอปอ่านตำแหน่งจากคอลเล็กชันสื่อของคุณ"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"แอปพลิเคชัน <xliff:g id="APP">%s</xliff:g> ต้องการตรวจสอบสิทธิ์"</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ฮาร์ดแวร์ไบโอเมตริกไม่พร้อมใช้งาน"</string>
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"ยกเลิกการตรวจสอบสิทธิ์แล้ว"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"ไม่รู้จัก"</string>
+    <string name="biometric_error_canceled" msgid="349665227864885880">"ยกเลิกการตรวจสอบสิทธิ์แล้ว"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ไม่ได้ตั้ง PIN, รูปแบบ หรือรหัสผ่าน"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ตรวจพบลายนิ้วมือเพียงบางส่วน โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ไม่สามารถประมวลผลลายนิ้วมือได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"เซ็นเซอร์ลายนิ้วมือไม่สะอาด โปรดทำความสะอาดและลองอีกครั้ง"</string>
@@ -489,7 +555,9 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ไม่รู้จัก"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"ตรวจสอบสิทธิ์ใบหน้าแล้ว โปรดกดยืนยัน"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ฮาร์ดแวร์ลายนิ้วมือไม่พร้อมใช้งาน"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ไม่สามารถเก็บลายนิ้วมือได้ โปรดนำลายนิ้วมือที่มีอยู่ออก"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"หมดเวลาใช้ลายนิ้วมือแล้ว โปรดลองอีกครั้ง"</string>
@@ -499,25 +567,82 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ลองหลายครั้งเกินไป ปิดใช้เซ็นเซอร์ลายนิ้วมือแล้ว"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ลองอีกครั้ง"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"ไม่มีลายนิ้วมือที่ลงทะเบียน"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"อุปกรณ์นี้ไม่มีเซ็นเซอร์ลายนิ้วมือ"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"อุปกรณ์นี้ไม่มีเซ็นเซอร์ลายนิ้วมือ"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"นิ้ว <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ไอคอนลายนิ้วมือ"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"จัดการฮาร์ดแวร์ตรวจสอบสิทธิ์ด้วยใบหน้า"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"อนุญาตให้แอปเรียกใช้วิธีเพิ่มและลบเทมเพลตใบหน้าสำหรับการใช้งาน"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ใช้ฮาร์ดแวร์ตรวจสอบสิทธิ์ด้วยใบหน้า"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"อนุญาตให้แอปใช้ฮาร์ดแวร์ตรวจสอบสิทธิ์ด้วยใบหน้าเพื่อตรวจสอบสิทธิ์"</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"โปรดลงทะเบียนใบหน้าอีกครั้ง"</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"ใกล้เคียงเกินไป โปรดเปลี่ยนท่าโพส"</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"โปรดตั้งศีรษะให้ตรง"</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"ฮาร์ดแวร์รู้จำใบหน้าไม่พร้อมใช้งาน"</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
+    <string name="face_error_no_space" msgid="8224993703466381314">"จัดเก็บข้อมูลใบหน้าไม่ได้"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ยกเลิกการดำเนินการกับใบหน้าแล้ว"</string>
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"ผู้ใช้ยกเลิกการตรวจสอบสิทธิ์ใบหน้า"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"ดำเนินการหลายครั้งเกินไป ลองอีกครั้งในภายหลัง"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ดำเนินการหลายครั้งเกินไป ปิดใช้การตรวจสอบสิทธิ์ด้วยใบหน้าแล้ว"</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
+    <string name="face_name_template" msgid="7004562145809595384">"ใบหน้า <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"ไอคอนใบหน้า"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"อนุญาตให้แอปพลิเคชันอ่านการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น การอนุญาตนี้สามารถระบุได้ว่าแอปพลิเคชัน People ซิงค์กับบัญชีหรือไม่"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"สลับระหว่างเปิดและปิดการซิงค์"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น สามารถใช้การอนุญาตเปิดใช้งานการซิงค์แอปพลิเคชัน People กับบัญชี"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"อ่านสถิติการซิงค์"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"อนุญาตให้แอปพลิเคชันอ่านสถานะการซิงค์ของบัญชี ซึ่งรวมถึงประวัติกิจกรรมการซิงค์และปริมาณข้อมูลที่ซิงค์"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"อ่านเนื้อหาในที่จัดเก็บ USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"อ่านเนื้อหาในการ์ด SD ของคุณ"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"อนุญาตให้แอปอ่านเนื้อหาในที่จัดเก็บข้อมูล USB"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"อนุญาตให้แอปอ่านเนื้อหาในการ์ด SD"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"แก้ไขหรือลบเนื้อหาใน USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"แก้ไขหรือลบเนื้อหาในการ์ด SD ของคุณ"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"อนุญาตให้แอปเขียนลงใน USB"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"อนุญาตให้แอปพลิเคชันเขียนลงบนการ์ด SD"</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"อ่านเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"อนุญาตให้แอปอ่านเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"แก้ไขหรือลบเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"อนุญาตให้แอปเขียนเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"โทร/รับสาย SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"อนุญาตให้แอปโทรและรับสาย SIP"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ลงทะเบียนการเชื่อมต่อซิมโทรคมนาคมใหม่"</string>
@@ -802,6 +927,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"การปลดล็อกด้วยรูปแบบ"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"การปลดล็อกด้วยใบหน้า"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"การปลดล็อกด้วย PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"การปลดล็อก PIN ของซิม"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"การปลดล็อก PUK ของซิม"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"การปลดล็อกด้วยรหัสผ่าน"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"พื้นที่สำหรับรูปแบบ"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"พื้นที่สำหรับการเลื่อน"</string>
@@ -826,7 +953,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"เคล็ดลับ: แตะสองครั้งเพื่อขยายและย่อ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ป้อนอัตโนมัติ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ค่าป้อนอัตโนมัติ"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"ป้อนอัตโนมัติ"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"ป้อนข้อความอัตโนมัติโดยใช้ <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -861,8 +988,15 @@
     <string name="save_password_never" msgid="8274330296785855105">"ไม่ต้องเลย"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"คุณไม่ได้รับอนุญาตให้เปิดหน้าเว็บนี้"</string>
     <string name="text_copied" msgid="4985729524670131385">"คัดลอกข้อความไปยังคลิปบอร์ด"</string>
+    <string name="copied" msgid="8564151838171791598">"คัดลอกแล้ว"</string>
     <string name="more_item_label" msgid="4650918923083320495">"เพิ่มเติม"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"เมนู+"</string>
+    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
+    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl+"</string>
+    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt+"</string>
+    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Shift+"</string>
+    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
+    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"Space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ลบ"</string>
@@ -994,14 +1128,27 @@
     <string name="inputMethod" msgid="1653630062304567879">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"การทำงานของข้อความ"</string>
     <string name="email" msgid="4560673117055050403">"อีเมล"</string>
+    <string name="email_desc" msgid="3638665569546416795">"ส่งอีเมลไปยังที่อยู่ที่เลือก"</string>
     <string name="dial" msgid="1253998302767701559">"โทร"</string>
-    <string name="map" msgid="6521159124535543457">"ค้นหา"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"โทรหาหมายเลขโทรศัพท์ที่เลือก"</string>
+    <string name="map" msgid="5441053548030107189">"แผนที่"</string>
+    <string name="map_desc" msgid="1836995341943772348">"หาที่อยู่ที่เลือก"</string>
     <string name="browse" msgid="1245903488306147205">"เปิด"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"เปิด URL ที่เลือก"</string>
     <string name="sms" msgid="4560537514610063430">"ข้อความ"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"ส่งข้อความไปยังหมายเลขโทรศัพท์ที่เลือก"</string>
     <string name="add_contact" msgid="7867066569670597203">"เพิ่ม"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"เพิ่มในรายชื่อติดต่อ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ดู"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"กำหนดการ"</string>
-    <string name="view_flight" msgid="7691640491425680214">"แทร็ก"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"ดูเวลาที่เลือกในปฏิทิน"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ตั้งเวลา"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ตั้งเวลากิจกรรมสำหรับเวลาที่เลือก"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ติดตาม"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"ติดตามเที่ยวบินที่เลือก"</string>
+    <string name="translate" msgid="9218619809342576858">"แปล"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"แปลข้อความที่เลือก"</string>
+    <string name="define" msgid="7394820043869954211">"หาความหมาย"</string>
+    <string name="define_desc" msgid="7910883642444919726">"หาความหมายข้อความที่เลือก"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"พื้นที่เก็บข้อมูลไม่เพียงพอสำหรับระบบ โปรดตรวจสอบว่าคุณมีพื้นที่ว่าง 250 MB แล้วรีสตาร์ท"</string>
@@ -1021,10 +1168,13 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"เปิดด้วย"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"เปิดด้วย %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"เปิด"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"ให้สิทธิ์ในการเปิดลิงก์ของ <xliff:g id="HOST">%1$s</xliff:g> โดยใช้"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"ให้สิทธิ์ในการเปิดลิงก์ของ <xliff:g id="HOST">%1$s</xliff:g> โดยใช้ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ให้สิทธิ์"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"แก้ไขด้วย"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"แก้ไขด้วย %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"แก้ไข"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"แชร์กับ"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"แชร์"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"แชร์กับ %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"แชร์"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ส่งโดยใช้"</string>
@@ -1074,33 +1224,38 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"ตรวจสอบอัปเดต"</string>
     <string name="smv_application" msgid="3307209192155442829">"แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> (กระบวนการ <xliff:g id="PROCESS">%2$s</xliff:g>) ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
     <string name="smv_process" msgid="5120397012047462446">"กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"กำลังอัปเกรด Android ..."</string>
-    <string name="android_start_title" msgid="8418054686415318207">"Android กำลังเริ่มต้น…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"โทรศัพท์กำลังอัปเดต…"</string>
+    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"แท็บเล็ตกำลังอัปเดต…"</string>
+    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"อุปกรณ์กำลังอัปเดต…"</string>
+    <string name="android_start_title" product="default" msgid="4536778526365907780">"โทรศัพท์กำลังเริ่มต้น…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android กำลังเริ่มต้น…"</string>
+    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"แท็บเล็ตกำลังเริ่มต้น…"</string>
+    <string name="android_start_title" product="device" msgid="7467484093260449437">"อุปกรณ์กำลังเริ่มต้น…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"กำลังเพิ่มประสิทธิภาพพื้นที่จัดเก็บข้อมูล"</string>
-    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"กำลังทำการอัปเดต Android ให้เสร็จสิ้น…"</string>
-    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"แอปบางแอปอาจทำงานไม่ถูกต้องจนกว่าจะอัปเกรดเสร็จ"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"กำลังอัปเดตระบบ…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"กำลังอัปเกรด <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"กำลังเพิ่มประสิทธิภาพแอปพลิเคชัน <xliff:g id="NUMBER_0">%1$d</xliff:g> จาก <xliff:g id="NUMBER_1">%2$d</xliff:g> รายการ"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"กำลังเตรียม <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"กำลังเริ่มต้นแอปพลิเคชัน"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"เสร็จสิ้นการบูต"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงาน"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"แตะเพื่อกลับไปที่เกม"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"เลือกเกม"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"เพื่อประสิทธิภาพที่ดีขึ้น คุณจะเปิดเกมได้ครั้งละ 1 เกมเท่านั้น"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"กลับไปที่ <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"เปิด <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> จะปิดโดยไม่บันทึก"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> เกินขีดจำกัดของหน่วยความจำ"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"รวบรวมฮีพดัมพ์แล้ว แตะเพื่อแชร์"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"รวบรวมฮีพดัมพ์แล้ว แตะเพื่อแชร์"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"แชร์ฮีพดัมพ์ไหม"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> มีขนาดเกิน <xliff:g id="SIZE">%2$s</xliff:g> ซึ่งเป็นขีดจำกัดของหน่วยความจำกระบวนการแล้ว ฮีพดัมพ์จะพร้อมให้คุณแชร์กับนักพัฒนาซอฟต์แวร์ โปรดระวัง ฮีพดัมพ์นี้สามารถเก็บข้อมูลส่วนบุคคลที่แอปพลิเคชันมีสิทธิ์เข้าถึงได้"</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"เลือกการทำงานกับข้อความ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ระดับความดังเสียงเรียกเข้า"</string>
     <string name="volume_music" msgid="5421651157138628171">"ระดับเสียงของสื่อ"</string>
@@ -1133,12 +1288,18 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"เชื่อมต่อเครือข่าย Wi‑Fi แบบเปิด"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"เชื่อมต่อเครือข่าย Wi‑Fi ของผู้ให้บริการ"</string>
-    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"กำลังเชื่อมต่อเครือข่าย Wi‑Fi แบบเปิด"</string>
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"กำลังเชื่อมต่อกับเครือข่าย Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"เชื่อมต่อเครือข่าย Wi-Fi แล้ว"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ไม่สามารถเชื่อมต่อเครือข่าย Wi‑Fi"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"แตะเพื่อดูเครือข่ายทั้งหมด"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"เชื่อมต่อ"</string>
-    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"เครือข่ายทั้งหมด"</string>
+    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"เครือข่ายทั้งหมด"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ใช่"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ไม่"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi จะเปิดโดยอัตโนมัติ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"เมื่อคุณอยู่ใกล้เครือข่ายคุณภาพสูงที่บันทึกไว้"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ไม่ต้องเปิดอีกครั้ง"</string>
@@ -1148,13 +1309,22 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ลงชื่อเข้าใช้เครือข่าย"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi เชื่อมต่ออินเทอร์เน็ตไม่ได้"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"แตะเพื่อดูตัวเลือก"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"เชื่อมต่อแล้ว"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"มีการเปลี่ยนแปลงการตั้งค่าฮอตสปอต"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ย่านความถี่ฮอตสปอตมีการเปลี่ยนแปลง"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"อุปกรณ์นี้ไม่รองรับค่ากำหนดของคุณเฉพาะสำหรับ 5 GHz เท่านั้น และจะใช้ย่านความถี่ 5 GHz แทน เมื่อใช้ได้"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"เปลี่ยนเป็น <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"อุปกรณ์จะใช้ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> เมื่อ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> เข้าถึงอินเทอร์เน็ตไม่ได้ โดยอาจมีค่าบริการ"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"เปลี่ยนจาก <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> เป็น <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="3979506840912951943">"อินเทอร์เน็ตมือถือ"</item>
+    <item msgid="3979506840912951943">"เน็ตมือถือ"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
     <item msgid="6862614801537202646">"บลูทูธ"</item>
     <item msgid="5447331121797802871">"อีเทอร์เน็ต"</item>
@@ -1204,6 +1374,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"รีสตาร์ท"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"เปิดใช้งานบริการมือถือ"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ดาวน์โหลดแอปผู้ให้บริการเพื่อเปิดใช้งานซิมอันใหม่"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"ดาวน์โหลดแอป <xliff:g id="APP_NAME">%1$s</xliff:g> เพื่อเปิดใช้งานซิมใหม่"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ดาวน์โหลดแอป"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"ใส่ซิมใหม่แล้ว"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"แตะเพื่อตั้งค่า"</string>
@@ -1222,21 +1393,29 @@
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"เปิดโหมด PTP ผ่าน USB"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"เปิดการเชื่อมต่ออินเทอร์เน็ตผ่าน USB"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"เปิดโหมด MIDI ผ่าน USB"</string>
-    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"เปิดโหมดอุปกรณ์เสริม USB"</string>
+    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"เชื่อมต่ออุปกรณ์เสริม USB แล้ว"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"กำลังชาร์จอุปกรณ์ที่เชื่อมต่อ แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ตรวจพบอุปกรณ์เสริมสำหรับเสียงแบบแอนะล็อก"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"อุปกรณ์ที่พ่วงไม่สามารถใช้งานร่วมกับโทรศัพท์นี้ แตะเพื่อเรียนรู้เพิ่มเติม"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"อุปกรณ์ที่พ่วงไม่สามารถใช้งานร่วมกับโทรศัพท์นี้ แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่องผ่าน USB แล้ว"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"แตะเพื่อปิดใช้การแก้ไขข้อบกพร่องของ USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"แตะเพื่อปิดการแก้ไขข้อบกพร่อง USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"เลือกเพื่อปิดใช้งานการแก้ไขข้อบกพร่อง USB"</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"มีของเหลวหรือฝุ่นละอองในพอร์ต USB"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"พอร์ต USB ปิดใช้โดยอัตโนมัติ แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"ใช้พอร์ต USB ได้อย่างปลอดภัย"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"โทรศัพท์ไม่ได้ตรวจจับของเหลวและฝุ่นละอองแล้ว"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"กำลังสร้างรายงานข้อบกพร่อง…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"แชร์รายงานข้อบกพร่องไหม"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"กำลังแชร์รายงานข้อบกพร่อง…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"ผู้ดูแลระบบของคุณขอรายงานข้อบกพร่องเพื่อช่วยในการแก้ปัญหาอุปกรณ์นี้ อาจมีการแชร์แอปและข้อมูล"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"แชร์"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ปฏิเสธ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"เปลี่ยนแป้นพิมพ์"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"เลือกวิธีการป้อนข้อมูล"</string>
     <string name="show_ime" msgid="2506087537466597099">"เปิดทิ้งไว้บนหน้าจอในระหว่างใช้งานแป้นพิมพ์จริง"</string>
     <string name="hardware" msgid="194658061510127999">"แสดงแป้นพิมพ์เสมือน"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"กำหนดค่าแป้นพิมพ์จริง"</string>
@@ -1247,34 +1426,36 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> แสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> กำลังแสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ปิด"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"กำลังเตรียม <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"กำลังตรวจหาข้อผิดพลาด"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ตรวจพบ <xliff:g id="NAME">%s</xliff:g> ใหม่"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ปิด"</string>
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"กำลังตรวจสอบ <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"กำลังตรวจสอบเนื้อหาปัจจุบัน"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"<xliff:g id="NAME">%s</xliff:g> ใหม่"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"แตะเพื่อตั้งค่า"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"สำหรับการโอนรูปภาพและสื่อ"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> เสียหาย"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> เสียหาย แตะเพื่อแก้ไข"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"ปัญหาเกี่ยวกับ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"แตะเพื่อแก้ไข"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> เสียหาย เลือกเพื่อแก้ไข"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ไม่สนับสนุน <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"อุปกรณ์นี้ไม่สนับสนุน <xliff:g id="NAME">%s</xliff:g> นี้ แตะเพื่อตั้งค่าในรูปแบบที่สนับสนุน"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"อุปกรณ์นี้ไม่รองรับ <xliff:g id="NAME">%s</xliff:g> นี้ เลือกเพื่อตั้งค่าในรูปแบบที่รองรับ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ถูกนำออกไปโดยไม่คาดคิด"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ยกเลิกการต่อเชื่อม <xliff:g id="NAME">%s</xliff:g> ก่อนนำออกเพื่อหลีกเลี่ยงข้อมูลสูญหาย"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"นำ <xliff:g id="NAME">%s</xliff:g> ออกแล้ว"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ถูกนำออก โปรดใส่ใหม่"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"ยังคงนำ <xliff:g id="NAME">%s</xliff:g> ออก…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ห้ามนำออก"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"ยกเลิกการต่อเชื่อมสื่อก่อนที่จะนำออกเพื่อหลีกเลี่ยงไม่ให้เนื้อหาสูญหาย"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"นำ <xliff:g id="NAME">%s</xliff:g> ออกแล้ว"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"ฟังก์ชันการทำงานบางอย่างอาจทำงานไม่ถูกต้อง โปรดใส่พื้นที่เก็บข้อมูลใหม่"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"กำลังยกเลิกการต่อเชื่อม <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"ห้ามนำออก"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ตั้งค่า"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"นำอุปกรณ์ออก"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"สำรวจ"</string>
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"เปลี่ยนเอาต์พุต"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"ไม่มี <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"เสียบอุปกรณ์นี้อีกครั้ง"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"ใส่อุปกรณ์อีกครั้ง"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"กำลังย้าย <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"กำลังย้ายข้อมูล"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ย้ายเสร็จสมบูรณ์แล้ว"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"ย้ายข้อมูลไปยัง <xliff:g id="NAME">%s</xliff:g> แล้ว"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ไม่สามารถย้ายข้อมูล"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ข้อมูลที่เหลืออยู่ในตำแหน่งเดิม"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"โอนเนื้อหาเรียบร้อยแล้ว"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"ย้ายเนื้อหาไปที่ <xliff:g id="NAME">%s</xliff:g> แล้ว"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"ย้ายเนื้อหาไม่ได้"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"ลองย้ายเนื้อหาอีกครั้ง"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"นำออกแล้ว"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"นำออกแล้ว"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"กำลังตรวจสอบ…"</string>
@@ -1333,14 +1514,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"กำลังเชื่อมต่อ VPN แบบเปิดตลอดเวลา…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"เชื่อมต่อ VPN แบบเปิดตลอดเวลาแล้ว"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"ยกเลิกการเชื่อมต่อกับ VPN แบบเปิดตลอดเวลาแล้ว"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"ข้อผิดพลาดของ VPN แบบเปิดตลอดเวลา"</string>
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"เชื่อมต่อ VPN แบบเปิดตลอดเวลาไม่ได้"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"เปลี่ยนเครือข่ายหรือการตั้งค่า VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"เลือกไฟล์"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ไม่ได้เลือกไฟล์ไว้"</string>
     <string name="reset" msgid="2448168080964209908">"รีเซ็ต"</string>
     <string name="submit" msgid="1602335572089911941">"ส่ง"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"เปิดการใช้งานโหมดรถยนต์"</string>
-    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"แตะเพื่อออกจากโหมดรถยนต์"</string>
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"แอปสำหรับการขับขี่ทำงานอยู่"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"แตะเพื่อออกจากแอปสำหรับการขับขี่"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"การปล่อยสัญญาณหรือฮอตสปอตทำงานอยู่"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"แตะเพื่อตั้งค่า"</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"ปิดใช้การเชื่อมต่ออินเทอร์เน็ตผ่านมือถือแล้ว"</string>
@@ -1355,8 +1536,7 @@
       <item quantity="one">ตรงกัน 1 รายการ</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"เสร็จสิ้น"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"กำลังลบที่จัดเก็บข้อมูล USB..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"กำลังลบการ์ด SD..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"กำลังลบพื้นที่เก็บข้อมูลที่แชร์…"</string>
     <string name="share" msgid="1778686618230011964">"แชร์"</string>
     <string name="find" msgid="4808270900322985960">"ค้นหา"</string>
     <string name="websearch" msgid="4337157977400211589">"ค้นเว็บ"</string>
@@ -1418,22 +1598,19 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"ไดรฟ์ USB ของ <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ที่เก็บข้อมูล USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"แก้ไข"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"การแจ้งเตือนการใช้อินเทอร์เน็ต"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"แตะเพื่อดูการใช้งานและการตั้งค่า"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"ถึงขีดจำกัดข้อมูล 2G-3G แล้ว"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"ถึงขีดจำกัดข้อมูล 4G แล้ว"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"เตือนปริมาณอินเทอร์เน็ต"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"คุณใช้อินเทอร์เน็ตไป <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"ถึงขีดจำกัดอินเทอร์เน็ตมือถือ"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ถึงขีดจำกัดข้อมูล Wi-Fi แล้ว"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"หยุดข้อมูลที่เหลือในรอบชั่วคราว"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"เกินขีดจำกัดข้อมูล 2G - 3G"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"เกินขีดจำกัดของข้อมูล 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"เกินขีดจำกัดข้อมูลมือถือ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"เกินขีดจำกัดข้อมูล WiFi แล้ว"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> เกินขีดจำกัดที่ระบุไว้"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดข้อมูลแบ็กกราวด์"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"หยุดใช้อินเทอร์เน็ตชั่วคราวสำหรับระยะเวลาที่เหลือในรอบบิล"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"เกินปริมาณเน็ตมือถือที่กำหนดไว้"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"เกินขีดจำกัดของข้อมูล Wi-Fi"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"คุณใช้อินเทอร์เน็ตเกินไป <xliff:g id="SIZE">%s</xliff:g> จากปริมาณที่กำหนดไว้"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"แตะเพื่อนำข้อจำกัดออก"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ปริมาณการใช้อินเทอร์เน็ตสูง"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"ปริมาณการใช้อินเทอร์เน็ตในช่วง 2-3 วันที่ผ่านมาสูงกว่าปกติ แตะเพื่อดูปริมาณการใช้และการตั้งค่า"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"ปริมาณการใช้เน็ตมือถือสูง"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"แอปของคุณใช้อินเทอร์เน็ตมากกว่าปกติ"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ใช้อินเทอร์เน็ตมากกว่าปกติ"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"ใบรับรองความปลอดภัย"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ใบรับรองนี้ใช้งานได้"</string>
     <string name="issued_to" msgid="454239480274921032">"ออกให้แก่:"</string>
@@ -1456,6 +1633,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"รับสายหรือไม่"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ทุกครั้ง"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"เฉพาะครั้งนี้"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"การตั้งค่า"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ไม่สนับสนุนโปรไฟล์งาน"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"แท็บเล็ต"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ทีวี"</string>
@@ -1483,6 +1661,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"การวางซ้อน #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ปลอดภัย"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"การเริ่มกิจกรรมในเบื้องหลังจาก <xliff:g id="PACKAGENAME">%1$s</xliff:g> นี้จะถูกบล็อกในบิวด์ Q ในอนาคต ดู go/q-bg-block"</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"บล็อกการเริ่มกิจกรรมในเบื้องหลังจาก <xliff:g id="PACKAGENAME">%1$s</xliff:g> แล้ว ดู go/q-bg-block"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ลืมรูปแบบใช่หรือไม่"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"รูปแบบไม่ถูกต้อง"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"รหัสผ่านไม่ถูกต้อง"</string>
@@ -1535,6 +1715,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"การปรับแก้สี"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ทางลัดการเข้าถึงเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ทางลัดการเข้าถึงปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่ม \"การเข้าถึงพิเศษ\":"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"หากต้องการเปลี่ยนฟีเจอร์ ให้แตะปุ่ม \"การเข้าถึงพิเศษ\" ค้างไว้"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"การขยาย"</string>
@@ -1669,8 +1850,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ติดตั้งโดยผู้ดูแลระบบ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ลบโดยผู้ดูแลระบบ"</string>
-    <string name="battery_saver_description" msgid="5394663545060026162">"เพื่อช่วยปรับปรุงอายุการใช้งานแบตเตอรี่ โหมดประหยัดแบตเตอรี่จะลดการทำงานของอุปกรณ์และจำกัดการสั่น บริการตำแหน่ง และข้อมูลแบ็กกราวด์ส่วนใหญ่ สำหรับอีเมล การรับส่งข้อความ และแอปอื่นๆ ที่ใช้การซิงค์จะไม่อัปเดตหากคุณไม่เปิดขึ้นมา\n\nโหมดประหยัดแบตเตอรี่จะปิดโดยอัตโนมัติขณะชาร์จอุปกรณ์"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลเครือข่ายมือถือในการทำงานเบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงข้อมูลเครือข่ายมือถือได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"โหมดประหยัดแบตเตอรี่จะปิดบางฟีเจอร์ในอุปกรณ์และจำกัดการใช้งานแอปเพื่อยืดอายุการใช้งานแบตเตอรี่ "<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"โหมดประหยัดแบตเตอรี่จะปิดบางฟีเจอร์ในอุปกรณ์และจำกัดการใช้งานแอปเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"เปิด"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1681,9 +1863,9 @@
       <item quantity="other">เป็นเวลา %1$d นาที (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">เป็นเวลา 1 นาที (จนถึง <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">ระยะเวลา %1$d ชั่วโมง (จนถึงเวลา <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">ระยะเวลา 1 ชั่วโมง (จนถึงเวลา <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
+      <item quantity="other">ระยะเวลา %1$d ชั่วโมง (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">ระยะเวลา 1 ชั่วโมง (จนถึง <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="other">เป็นเวลา %1$d ชม. (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1697,7 +1879,7 @@
       <item quantity="other">เป็นเวลา %d นาที</item>
       <item quantity="one">เป็นเวลา 1 นาที</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
       <item quantity="other">ระยะเวลา %d ชั่วโมง</item>
       <item quantity="one">ระยะเวลา 1 ชั่วโมง</item>
     </plurals>
@@ -1717,18 +1899,19 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"สุดสัปดาห์"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"กิจกรรม"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"นอนหลับ"</string>
-    <string name="muted_by" msgid="6147073845094180001">"ปิดเสียงโดย <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> กำลังปิดเสียงบางรายการ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง อุปกรณ์อาจทำงานไม่เสถียรจนกว่าคุณจะรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง โปรดติดต่อผู้ผลิตเพื่อขอรายละเอียดเพิ่มเติม"</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ DIAL"</string>
-    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ SS"</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ USSD ใหม่"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ Video DIAL"</string>
-    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ DIAL"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ Video DIAL"</string>
-    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ USSD"</string>
-    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ SS ใหม่"</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"คำขอ USSD เปลี่ยนเป็นการโทรปกติแล้ว"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"คำขอ USSD เปลี่ยนเป็นคำขอ SS แล้ว"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"เปลี่ยนเป็นคำขอ USSD ใหม่แล้ว"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"คำขอ USSD เปลี่ยนเป็นวิดีโอคอลแล้ว"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"คำขอ SS เปลี่ยนเป็นการโทรปกติแล้ว"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"คำขอ SS เปลี่ยนเป็นวิดีโอคอลแล้ว"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"คำขอ SS เปลี่ยนเป็นคำขอ USSD แล้ว"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"เปลี่ยนเป็นคำขอ SS ใหม่แล้ว"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"โปรไฟล์งาน"</string>
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"แจ้งเตือนแล้ว"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ขยาย"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ยุบ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"สลับการขยาย"</string>
@@ -1756,6 +1939,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ทุกภาษา"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ภูมิภาคทั้งหมด"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"แอปไม่พร้อมใช้งาน"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"เปิด <xliff:g id="APP_NAME_0">%1$s</xliff:g> ไม่ได้ในขณะนี้ แอปนี้จัดการโดย <xliff:g id="APP_NAME_1">%2$s</xliff:g>"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"เปิดโปรไฟล์งานไหม"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ระบบจะเปิดแอปงาน การแจ้งเตือน ข้อมูล และฟีเจอร์อื่นๆ ในโปรไฟล์งาน"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"เปิด"</string>
@@ -1770,8 +1956,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"แตะเพื่อปลดล็อกโปรไฟล์งาน"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"เชื่อมต่อ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"แตะเพื่อดูไฟล์"</string>
-    <string name="pin_target" msgid="3052256031352291362">"ปักหมุด"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"เลิกปักหมุด"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"กำลังเริ่มการสาธิต…"</string>
@@ -1804,12 +1988,17 @@
       <item quantity="other">คำแนะนำสำหรับการป้อนอัตโนมัติ <xliff:g id="COUNT">%1$s</xliff:g> รายการ</item>
       <item quantity="one">คำแนะนำสำหรับการป้อนอัตโนมัติ 1 รายการ</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"บันทึกไปยัง &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ใช่ไหม"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"บันทึก <xliff:g id="TYPE">%1$s</xliff:g> ไปยัง &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ใช่ไหม"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"บันทึก <xliff:g id="TYPE_0">%1$s</xliff:g> และ <xliff:g id="TYPE_1">%2$s</xliff:g> ไปยัง &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ใช่ไหม"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"บันทึก <xliff:g id="TYPE_0">%1$s</xliff:g> <xliff:g id="TYPE_1">%2$s</xliff:g> และ <xliff:g id="TYPE_2">%3$s</xliff:g> ไปยัง &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ใช่ไหม"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"บันทึกลงใน "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ไหม"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"บันทึก<xliff:g id="TYPE">%1$s</xliff:g>ลงใน "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ไหม"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"บันทึก<xliff:g id="TYPE_0">%1$s</xliff:g>และ<xliff:g id="TYPE_1">%2$s</xliff:g>ลงใน "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ไหม"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"บันทึก<xliff:g id="TYPE_0">%1$s</xliff:g> <xliff:g id="TYPE_1">%2$s</xliff:g> และ<xliff:g id="TYPE_2">%3$s</xliff:g>ลงใน "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ไหม"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"อัปเดตใน "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ไหม"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"อัปเดต<xliff:g id="TYPE">%1$s</xliff:g>ใน "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ไหม"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"อัปเดต<xliff:g id="TYPE_0">%1$s</xliff:g>และ<xliff:g id="TYPE_1">%2$s</xliff:g>ใน "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ไหม"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"อัปเดตข้อมูล<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> และ<xliff:g id="TYPE_2">%3$s</xliff:g> ใน "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ไหม"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"บันทึก"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"ไม่เป็นไร"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"อัปเดต"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"รหัสผ่าน"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"ที่อยู่"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"บัตรเครดิต"</string>
@@ -1825,6 +2014,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"ไม่มีการจัดสรรซิมสำหรับเสียง"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"ไม่อนุญาตให้ใช้ซิมสำหรับเสียง"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"ไม่อนุญาตให้ใช้โทรศัพท์สำหรับเสียง"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"ไม่อนุญาตให้ใช้ซิม <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"ไม่มีการจัดสรรซิม <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"ไม่อนุญาตให้ใช้ซิม <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"ไม่อนุญาตให้ใช้ซิม <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"หน้าต่างป๊อปอัป"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"มีการดาวน์เกรดเวอร์ชันของแอปหรือใช้กับทางลัดนี้ไม่ได้"</string>
@@ -1837,7 +2030,61 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"ตรวจพบแอปที่เป็นอันตราย"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> ต้องการแสดงส่วนต่างๆ ของ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"แก้ไข"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"สายเรียกเข้าและการแจ้งเตือนจะสั่น"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"สายเรียกเข้าและการแจ้งเตือนจะไม่ส่งเสียง"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"การเปลี่ยนแปลงระบบ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ห้ามรบกวน"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"ใหม่: โหมดห้ามรบกวนซ่อนการแจ้งเตือนไว้"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"แตะเพื่อดูข้อมูลเพิ่มเติมและเปลี่ยนแปลง"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"แตะเพื่อตรวจหาการรบกวนในการตั้งค่าพฤติกรรม"</string>
+    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
+    <string name="notification_app_name_system" msgid="4205032194610042794">"ระบบ"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"การตั้งค่า"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"กล้อง"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ไมโครโฟน"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"แสดงทับแอปอื่นๆ บนหน้าจอ"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"การแจ้งเตือนข้อมูลโหมดกิจวัตร"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"แบตเตอรี่อาจหมดก่อนการชาร์จปกติ"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"เปิดใช้งานโหมดประหยัดแบตเตอรี่แล้วเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
+    <string name="mime_type_folder" msgid="7111951698626315204">"โฟลเดอร์"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"ไฟล์แอปพลิเคชัน Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ไฟล์"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"ไฟล์ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"ไฟล์เสียง"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"ไฟล์เสียง <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"ไฟล์วิดีโอ"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"ไฟล์วิดีโอ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"ไฟล์รูปภาพ"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"ไฟล์รูปภาพ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"ไฟล์ที่เก็บถาวร"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"ไฟล์ที่เก็บถาวร <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"ไฟล์เอกสาร"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"ไฟล์เอกสาร <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"สเปรดชีต"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"ไฟล์สเปรดชีต <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"ไฟล์งานนำเสนอ"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"ไฟล์งานนำเสนอ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="car_loading_profile" msgid="3545132581795684027">"กำลังโหลด"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> และอีก <xliff:g id="COUNT_3">%d</xliff:g> ไฟล์</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> และอีก <xliff:g id="COUNT_1">%d</xliff:g> ไฟล์</item>
+    </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

@@ -216,6 +216,12 @@ public class TypedValue {
      * */
     public int density;
 
+    /**
+     * If the Value came from a style resource or a layout resource (set in an XML layout), this
+     * holds the corresponding style or layout resource id against which the attribute was resolved.
+     */
+    public int sourceResourceId;
+
     /* ------------------------------------------------------------ */
 
     /** Return the data for this value as a float.  Only use for values
@@ -230,6 +236,18 @@ public class TypedValue {
         1.0f*MANTISSA_MULT, 1.0f/(1<<7)*MANTISSA_MULT,
         1.0f/(1<<15)*MANTISSA_MULT, 1.0f/(1<<23)*MANTISSA_MULT
     };
+
+    /**
+     * Determine if a value is a color.
+     *
+     * This works by comparing {@link #type} to {@link #TYPE_FIRST_COLOR_INT}
+     * and {@link #TYPE_LAST_COLOR_INT}.
+     *
+     * @return true if this value is a color
+     */
+    public boolean isColorType() {
+        return (type >= TYPE_FIRST_COLOR_INT && type <= TYPE_LAST_COLOR_INT);
+    }
 
     /**
      * Retrieve the base value from a complex data integer.  This uses the 

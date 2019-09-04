@@ -36,6 +36,11 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
     private Configuration mConfiguration;
 
     @Override
+    public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
+        client.updatePendingActivityConfiguration(token, mConfiguration);
+    }
+
+    @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
@@ -81,7 +86,7 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final Creator<ActivityConfigurationChangeItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<ActivityConfigurationChangeItem> CREATOR =
             new Creator<ActivityConfigurationChangeItem>() {
         public ActivityConfigurationChangeItem createFromParcel(Parcel in) {
             return new ActivityConfigurationChangeItem(in);
