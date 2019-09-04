@@ -50,6 +50,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_INDIVIDUAL_ATTESTATION;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
 import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLED;
@@ -5816,6 +5817,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         idTypeToAttestationFlag.put(ID_TYPE_SERIAL, AttestationUtils.ID_TYPE_SERIAL);
         idTypeToAttestationFlag.put(ID_TYPE_IMEI, AttestationUtils.ID_TYPE_IMEI);
         idTypeToAttestationFlag.put(ID_TYPE_MEID, AttestationUtils.ID_TYPE_MEID);
+        idTypeToAttestationFlag.put(
+                ID_TYPE_INDIVIDUAL_ATTESTATION, AttestationUtils.USE_INDIVIDUAL_ATTESTATION);
 
         int numFlagsSet = Integer.bitCount(idAttestationFlags);
         // No flags are set - return null to indicate no device ID attestation information should

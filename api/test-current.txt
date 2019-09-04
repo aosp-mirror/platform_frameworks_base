@@ -2431,6 +2431,7 @@ package android.security.keystore {
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
+    field public static final int USE_INDIVIDUAL_ATTESTATION = 4; // 0x4
   }
 
   public class DeviceIdAttestationException extends java.lang.Exception {
