@@ -18017,19 +18017,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         // or packages running under the shared user of the removed
                         // package if revoking the permissions requested only by the removed
                         // package is successful and this causes a change in gids.
+                        boolean shouldKill = false;
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             final int userIdToKill = mSettings.updateSharedUserPermsLPw(deletedPs,
                                     userId);
-                            if (userIdToKill == UserHandle.USER_ALL
-                                    || userIdToKill >= UserHandle.USER_SYSTEM) {
-                                // If gids changed for this user, kill all affected packages.
-                                mHandler.post(() -> {
-                                    // This has to happen with no lock held.
-                                    killApplication(deletedPs.name, deletedPs.appId,
-                                            KILL_APP_REASON_GIDS_CHANGED);
-                                });
-                                break;
-                            }
+                            shouldKill |= userIdToKill == UserHandle.USER_ALL
+                                    || userIdToKill >= UserHandle.USER_SYSTEM;
+                        }
+                        // If gids changed, kill all affected packages.
+                        if (shouldKill) {
+                            mHandler.post(() -> {
+                                // This has to happen with no lock held.
+                                killApplication(deletedPs.name, deletedPs.appId,
+                                        KILL_APP_REASON_GIDS_CHANGED);
+                            });
                         }
                     }
                     clearPackagePreferredActivitiesLPw(
