@@ -118,7 +118,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_APP;
@@ -1664,11 +1663,10 @@ final class ActivityRecord extends ConfigurationContainer {
     @interface FinishRequest {}
 
     /**
-     * See {@link #finishIfPossible(int, Intent, String, boolean, boolean)}
+     * See {@link #finishIfPossible(int, Intent, String, boolean)}
      */
     @FinishRequest int finishIfPossible(String reason, boolean oomAdj) {
-        return finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason,
-                oomAdj, !PAUSE_IMMEDIATELY);
+        return finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason, oomAdj);
     }
 
     /**
@@ -1683,7 +1681,7 @@ final class ActivityRecord extends ConfigurationContainer {
      * request to finish it was not ignored.
      */
     @FinishRequest int finishIfPossible(int resultCode, Intent resultData, String reason,
-            boolean oomAdj, boolean pauseImmediately) {
+            boolean oomAdj) {
         if (DEBUG_RESULTS || DEBUG_STATES) {
             Slog.v(TAG_STATES, "Finishing activity r=" + this + ", result=" + resultCode
                     + ", data=" + resultData + ", reason=" + reason);
@@ -1768,7 +1766,8 @@ final class ActivityRecord extends ConfigurationContainer {
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
-                    stack.startPausingLocked(false, false, null, pauseImmediately);
+                    stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                            null /* resuming */);
                 }
 
                 if (endTask) {
@@ -2104,7 +2103,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 // TODO: If the callers to removeTask() changes such that we have multiple places
                 //       where we are destroying the task, move this back into removeTask()
                 mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
-                        !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY, reason);
+                        !REMOVE_FROM_RECENTS, reason);
             }
 
             // We must keep the task around until all activities are destroyed. The following

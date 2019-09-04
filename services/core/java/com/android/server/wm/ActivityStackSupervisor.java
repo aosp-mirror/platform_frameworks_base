@@ -200,10 +200,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     // Used to indicate that a task is removed it should also be removed from recents.
     static final boolean REMOVE_FROM_RECENTS = true;
 
-    // Used to indicate that pausing an activity should occur immediately without waiting for
-    // the activity callback indicating that it has completed pausing
-    static final boolean PAUSE_IMMEDIATELY = true;
-
     /** True if the docked stack is currently being resized. */
     private boolean mDockedStackResizing;
 
@@ -1778,30 +1774,19 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     /**
-     * See {@link #removeTaskByIdLocked(int, boolean, boolean, boolean)}
-     */
-    boolean removeTaskByIdLocked(int taskId, boolean killProcess, boolean removeFromRecents,
-            String reason) {
-        return removeTaskByIdLocked(taskId, killProcess, removeFromRecents, !PAUSE_IMMEDIATELY,
-                reason);
-    }
-
-    /**
      * Removes the task with the specified task id.
      *
      * @param taskId Identifier of the task to be removed.
      * @param killProcess Kill any process associated with the task if possible.
      * @param removeFromRecents Whether to also remove the task from recents.
-     * @param pauseImmediately Pauses all task activities immediately without waiting for the
-     *                         pause-complete callback from the activity.
      * @return Returns true if the given task was found and removed.
      */
     boolean removeTaskByIdLocked(int taskId, boolean killProcess, boolean removeFromRecents,
-            boolean pauseImmediately, String reason) {
+            String reason) {
         final TaskRecord tr =
                 mRootActivityContainer.anyTaskForId(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
         if (tr != null) {
-            tr.removeTaskActivitiesLocked(pauseImmediately, reason);
+            tr.removeTaskActivitiesLocked(reason);
             cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
             mService.getLockTaskController().clearLockedTask(tr);
             if (tr.isPersistable) {
@@ -1925,7 +1910,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Task was trimmed from the recent tasks list -- remove the active task record as well
             // since the user won't really be able to go back to it
             removeTaskByIdLocked(task.taskId, killProcess, false /* removeFromRecents */,
-                    !PAUSE_IMMEDIATELY, "recent-task-trimmed");
+                    "recent-task-trimmed");
         }
         task.removedFromRecents();
     }

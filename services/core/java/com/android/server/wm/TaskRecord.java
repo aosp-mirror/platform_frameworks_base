@@ -71,7 +71,6 @@ import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
@@ -702,7 +701,7 @@ class TaskRecord extends ConfigurationContainer {
                 && toStack.topRunningActivityLocked() != null) {
             // Pause the resumed activity on the target stack while re-parenting task on top of it.
             toStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                    null /* resuming */, false /* pauseImmediately */);
+                    null /* resuming */);
         }
 
         final int toStackWindowingMode = toStack.getWindowingMode();
@@ -1405,8 +1404,7 @@ class TaskRecord extends ConfigurationContainer {
      * Completely remove all activities associated with an existing
      * task starting at a specified index.
      */
-    final void performClearTaskAtIndexLocked(int activityNdx, boolean pauseImmediately,
-            String reason) {
+    final void performClearTaskAtIndexLocked(int activityNdx, String reason) {
         int numActivities = mActivities.size();
         for ( ; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
@@ -1419,8 +1417,8 @@ class TaskRecord extends ConfigurationContainer {
                 mActivities.remove(activityNdx);
                 --activityNdx;
                 --numActivities;
-            } else if (r.finishIfPossible(Activity.RESULT_CANCELED,
-                    null /* resultData */, reason, false /* oomAdj */, pauseImmediately)
+            } else if (r.finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason,
+                    false /* oomAdj */)
                     == FINISH_RESULT_REMOVED) {
                 --activityNdx;
                 --numActivities;
@@ -1433,7 +1431,7 @@ class TaskRecord extends ConfigurationContainer {
      */
     void performClearTaskLocked() {
         mReuseTask = true;
-        performClearTaskAtIndexLocked(0, !PAUSE_IMMEDIATELY, "clear-task-all");
+        performClearTaskAtIndexLocked(0, "clear-task-all");
         mReuseTask = false;
     }
 
@@ -1501,9 +1499,9 @@ class TaskRecord extends ConfigurationContainer {
         return null;
     }
 
-    void removeTaskActivitiesLocked(boolean pauseImmediately, String reason) {
+    void removeTaskActivitiesLocked(String reason) {
         // Just remove the entire task.
-        performClearTaskAtIndexLocked(0, pauseImmediately, reason);
+        performClearTaskAtIndexLocked(0, reason);
     }
 
     String lockTaskAuthToString() {
