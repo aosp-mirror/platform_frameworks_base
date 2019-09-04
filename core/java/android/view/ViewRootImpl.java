@@ -468,7 +468,6 @@ public final class ViewRootImpl implements ViewParent,
     private final UnhandledKeyManager mUnhandledKeyManager = new UnhandledKeyManager();
 
     boolean mWindowAttributesChanged = false;
-    int mWindowAttributesChangesFlag = 0;
 
     // These can be accessed by any thread, must be protected with a lock.
     // Surface can never be reassigned or cleared (use Surface.clear()).
@@ -865,7 +864,6 @@ public final class ViewRootImpl implements ViewParent,
 
                 mSoftInputMode = attrs.softInputMode;
                 mWindowAttributesChanged = true;
-                mWindowAttributesChangesFlag = WindowManager.LayoutParams.EVERYTHING_CHANGED;
                 mAttachInfo.mRootView = view;
                 mAttachInfo.mScalingRequired = mTranslator != null;
                 mAttachInfo.mApplicationScale =
@@ -1269,14 +1267,12 @@ public final class ViewRootImpl implements ViewParent,
             attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
 
-            mWindowAttributesChangesFlag = mWindowAttributes.copyFrom(attrs);
-            if ((mWindowAttributesChangesFlag
-                    & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
+            final int changes = mWindowAttributes.copyFrom(attrs);
+            if ((changes & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
                 // Recompute system ui visibility.
                 mAttachInfo.mRecomputeGlobalAttributes = true;
             }
-            if ((mWindowAttributesChangesFlag
-                    & WindowManager.LayoutParams.LAYOUT_CHANGED) != 0) {
+            if ((changes & WindowManager.LayoutParams.LAYOUT_CHANGED) != 0) {
                 // Request to update light center.
                 mAttachInfo.mNeedsUpdateLightCenter = true;
             }
@@ -2036,8 +2032,6 @@ public final class ViewRootImpl implements ViewParent,
                 mLastInCompatMode = true;
             }
         }
-
-        mWindowAttributesChangesFlag = 0;
 
         Rect frame = mWinFrame;
         if (mFirst) {
@@ -3313,14 +3307,19 @@ public final class ViewRootImpl implements ViewParent,
     public void requestTransparentRegion(View child) {
         // the test below should not fail unless someone is messing with us
         checkThread();
-        if (mView == child) {
+        if (mView != child) {
+            return;
+        }
+
+        if ((mView.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0) {
             mView.mPrivateFlags |= View.PFLAG_REQUEST_TRANSPARENT_REGIONS;
             // Need to make sure we re-evaluate the window attributes next
             // time around, to ensure the window has the correct format.
             mWindowAttributesChanged = true;
-            mWindowAttributesChangesFlag = 0;
-            requestLayout();
         }
+
+        // Always request layout to apply the latest transparent region.
+        requestLayout();
     }
 
     /**
