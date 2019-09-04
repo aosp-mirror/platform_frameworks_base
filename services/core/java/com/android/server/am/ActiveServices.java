@@ -829,6 +829,15 @@ public final class ActiveServices {
         }
     }
 
+    void killMisbehavingService(ServiceRecord r,
+            int appUid, int appPid, String localPackageName) {
+        synchronized (mAm) {
+            stopServiceLocked(r);
+            mAm.crashApplication(appUid, appPid, localPackageName, -1,
+                    "Bad notification for startForeground", true /*force*/);
+        }
+    }
+
     IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
         ServiceLookupResult r = retrieveServiceLocked(service, null, resolvedType, callingPackage,
                 Binder.getCallingPid(), Binder.getCallingUid(),
@@ -3930,7 +3939,7 @@ public final class ActiveServices {
     void serviceForegroundCrash(ProcessRecord app, CharSequence serviceRecord) {
         mAm.crashApplication(app.uid, app.pid, app.info.packageName, app.userId,
                 "Context.startForegroundService() did not then call Service.startForeground(): "
-                    + serviceRecord);
+                    + serviceRecord, false /*force*/);
     }
 
     void scheduleServiceTimeoutLocked(ProcessRecord proc) {

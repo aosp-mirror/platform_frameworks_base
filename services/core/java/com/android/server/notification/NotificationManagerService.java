@@ -926,7 +926,7 @@ public class NotificationManagerService extends SystemService {
                         () -> mAm.crashApplication(uid, initialPid, pkg, -1,
                             "Bad notification(tag=" + tag + ", id=" + id + ") posted from package "
                                 + pkg + ", crashing app(uid=" + uid + ", pid=" + initialPid + "): "
-                                + message));
+                                + message, true /* force */));
             }
         }
 
