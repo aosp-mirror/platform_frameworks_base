@@ -113,6 +113,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 
 import android.Manifest;
+import android.annotation.AppIdInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -12048,11 +12049,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
     }
 
-    private void killApplication(String pkgName, int appId, String reason) {
+    private void killApplication(String pkgName, @AppIdInt int appId, String reason) {
         killApplication(pkgName, appId, UserHandle.USER_ALL, reason);
     }
 
-    private void killApplication(String pkgName, int appId, int userId, String reason) {
+    private void killApplication(String pkgName, @AppIdInt int appId,
+            @UserIdInt int userId, String reason) {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
@@ -12427,7 +12429,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
-            boolean includeStopped, int appId, int[] userIds, int[] instantUserIds) {
+            boolean includeStopped, @AppIdInt int appId, int[] userIds, int[] instantUserIds) {
         if (ArrayUtils.isEmpty(userIds) && ArrayUtils.isEmpty(instantUserIds)) {
             return;
         }
@@ -18882,7 +18884,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * Remove entries from the keystore daemon. Will only remove it if the
      * {@code appId} is valid.
      */
-    private static void removeKeystoreDataIfNeeded(UserManagerInternal um, int userId, int appId) {
+    private static void removeKeystoreDataIfNeeded(UserManagerInternal um, @UserIdInt int userId,
+            @AppIdInt int appId) {
         if (appId < 0) {
             return;
         }
@@ -18968,7 +18971,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void getPackageSizeInfo(final String packageName, int userHandle,
+    public void getPackageSizeInfo(final String packageName, int userId,
             final IPackageStatsObserver observer) {
         throw new UnsupportedOperationException(
                 "Shame on you for calling the hidden API getPackageSizeInfo(). Shame!");
@@ -22473,24 +22476,24 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** Called by UserManagerService */
-    void cleanUpUser(UserManagerService userManager, int userHandle) {
+    void cleanUpUser(UserManagerService userManager, @UserIdInt int userId) {
         synchronized (mLock) {
-            mDirtyUsers.remove(userHandle);
-            mUserNeedsBadging.delete(userHandle);
-            mSettings.removeUserLPw(userHandle);
-            mPendingBroadcasts.remove(userHandle);
-            mInstantAppRegistry.onUserRemovedLPw(userHandle);
-            removeUnusedPackagesLPw(userManager, userHandle);
+            mDirtyUsers.remove(userId);
+            mUserNeedsBadging.delete(userId);
+            mSettings.removeUserLPw(userId);
+            mPendingBroadcasts.remove(userId);
+            mInstantAppRegistry.onUserRemovedLPw(userId);
+            removeUnusedPackagesLPw(userManager, userId);
         }
     }
 
     /**
-     * We're removing userHandle and would like to remove any downloaded packages
+     * We're removing userId and would like to remove any downloaded packages
      * that are no longer in use by any other user.
-     * @param userHandle the user being removed
+     * @param userId the user being removed
      */
     @GuardedBy("mLock")
-    private void removeUnusedPackagesLPw(UserManagerService userManager, final int userHandle) {
+    private void removeUnusedPackagesLPw(UserManagerService userManager, final int userId) {
         final boolean DEBUG_CLEAN_APKS = false;
         int [] users = userManager.getUserIds();
         Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
@@ -22514,7 +22517,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             } else {
                 for (int i = 0; i < users.length; i++) {
-                    if (users[i] != userHandle && ps.getInstalled(users[i])) {
+                    if (users[i] != userId && ps.getInstalled(users[i])) {
                         keep = true;
                         if (DEBUG_CLEAN_APKS) {
                             Slog.i(TAG, "  Keeping package " + packageName + " for user "
@@ -22530,7 +22533,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 //end run
                 mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
-                        userHandle, 0));
+                        userId, 0));
             }
         }
     }

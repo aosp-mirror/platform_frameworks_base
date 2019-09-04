@@ -6097,16 +6097,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         return ptw != null ? ptw.tag : null;
     }
 
-    private ProviderInfo getProviderInfoLocked(String authority, int userHandle, int pmFlags) {
+    private ProviderInfo getProviderInfoLocked(String authority, @UserIdInt int userId,
+            int pmFlags) {
         ProviderInfo pi = null;
-        ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userHandle);
+        ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userId);
         if (cpr != null) {
             pi = cpr.info;
         } else {
             try {
                 pi = AppGlobals.getPackageManager().resolveContentProvider(
-                        authority, PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags,
-                        userHandle);
+                        authority, PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags, userId);
             } catch (RemoteException ex) {
             }
         }
@@ -15296,11 +15296,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     intent.getAction());
                             final String[] packageNames = intent.getStringArrayExtra(
                                     Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                            final int userHandle = intent.getIntExtra(
+                            final int userIdExtra = intent.getIntExtra(
                                     Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
                             mAtmInternal.onPackagesSuspendedChanged(packageNames, suspended,
-                                    userHandle);
+                                    userIdExtra);
                             break;
                     }
                     break;
@@ -18019,7 +18019,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void killForegroundAppsForUser(int userHandle) {
+        public void killForegroundAppsForUser(@UserIdInt int userId) {
             synchronized (ActivityManagerService.this) {
                 final ArrayList<ProcessRecord> procs = new ArrayList<>();
                 final int NP = mProcessList.mProcessNames.getMap().size();
@@ -18034,7 +18034,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             continue;
                         }
                         if (app.removed
-                                || (app.userId == userHandle && app.hasForegroundActivities())) {
+                                || (app.userId == userId && app.hasForegroundActivities())) {
                             procs.add(app);
                         }
                     }
