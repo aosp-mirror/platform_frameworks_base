@@ -70,6 +70,7 @@ extern int register_android_graphics_fonts_Font(JNIEnv* env);
 extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
+extern int register_android_os_FileObserver(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv* env);
@@ -128,6 +129,7 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
     {"android.graphics.text.MeasuredText", REG_JNI(register_android_graphics_text_MeasuredText)},
 #ifdef __linux__
+    {"android.os.FileObserver", REG_JNI(register_android_os_FileObserver)},
     {"android.os.MessageQueue", REG_JNI(register_android_os_MessageQueue)},
 #endif
     {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
