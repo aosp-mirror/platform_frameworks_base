@@ -76,7 +76,7 @@ public class UserDetailView extends PseudoGridView {
                 UserSwitcherController.UserRecord item) {
             UserDetailItemView v = UserDetailItemView.convertOrInflate(
                     mContext, convertView, parent);
-            if ((v != convertView && !item.isCurrent) || item.isGuest) {
+            if (!item.isCurrent || item.isGuest) {
                 v.setOnClickListener(this);
             } else {
                 v.setOnClickListener(null);
