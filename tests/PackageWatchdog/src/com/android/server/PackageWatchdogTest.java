@@ -20,7 +20,6 @@ import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -65,8 +64,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-// TODO: Write test without using PackageWatchdog#getPackages. Just rely on
-// behavior of observers receiving crash notifications or not to determine if it's registered
 // TODO: Use Truth in tests.
 /**
  * Test PackageWatchdog.
@@ -213,73 +210,6 @@ public class PackageWatchdogTest {
         assertEquals(0, observer1.mHealthCheckFailedPackages.size());
         // We should have failed packages since observer2 hasn't expired
         assertEquals(1, observer2.mHealthCheckFailedPackages.size());
-    }
-
-    /**
-     * Test registration, unregistration, package expiry and duration reduction
-     */
-    @Test
-    public void testRegistration() throws Exception {
-        PackageWatchdog watchdog = createWatchdog();
-        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
-        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
-        TestObserver observer3 = new TestObserver(OBSERVER_NAME_3);
-
-        // Start observing for observer1 which will be unregistered
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
-        // Start observing for observer2 which will expire
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
-        // Start observing for observer3 which will have expiry duration reduced
-        watchdog.startObservingHealth(observer3, Arrays.asList(APP_A), LONG_DURATION);
-
-        // Verify packages observed at start
-        // 1
-        assertEquals(1, watchdog.getPackages(observer1).size());
-        assertTrue(watchdog.getPackages(observer1).contains(APP_A));
-        // 2
-        assertEquals(2, watchdog.getPackages(observer2).size());
-        assertTrue(watchdog.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog.getPackages(observer2).contains(APP_B));
-        // 3
-        assertEquals(1, watchdog.getPackages(observer3).size());
-        assertTrue(watchdog.getPackages(observer3).contains(APP_A));
-
-        // Then unregister observer1
-        watchdog.unregisterHealthObserver(observer1);
-
-        // Verify observer2 and observer3 left
-        // 1
-        assertNull(watchdog.getPackages(observer1));
-        // 2
-        assertEquals(2, watchdog.getPackages(observer2).size());
-        assertTrue(watchdog.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog.getPackages(observer2).contains(APP_B));
-        // 3
-        assertEquals(1, watchdog.getPackages(observer3).size());
-        assertTrue(watchdog.getPackages(observer3).contains(APP_A));
-
-        // Then advance time a little and run messages in Handlers so observer2 expires
-        moveTimeForwardAndDispatch(SHORT_DURATION);
-
-        // Verify observer3 left with reduced expiry duration
-        // 1
-        assertNull(watchdog.getPackages(observer1));
-        // 2
-        assertNull(watchdog.getPackages(observer2));
-        // 3
-        assertEquals(1, watchdog.getPackages(observer3).size());
-        assertTrue(watchdog.getPackages(observer3).contains(APP_A));
-
-        // Then advance time some more and run messages in Handlers so observer3 expires
-        moveTimeForwardAndDispatch(LONG_DURATION);
-
-        // Verify observer3 expired
-        // 1
-        assertNull(watchdog.getPackages(observer1));
-        // 2
-        assertNull(watchdog.getPackages(observer2));
-        // 3
-        assertNull(watchdog.getPackages(observer3));
     }
 
     /** Observing already observed package extends the observation time. */

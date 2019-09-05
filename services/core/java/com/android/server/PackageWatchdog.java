@@ -284,28 +284,6 @@ public class PackageWatchdog {
     }
 
     /**
-     * Returns packages observed by {@code observer}
-     *
-     * @return an empty set if {@code observer} has some packages observerd from a previous boot
-     * but has not registered itself in the current boot to receive notifications. Returns null
-     * if there are no active packages monitored from any boot.
-     */
-    @Nullable
-    public Set<String> getPackages(PackageHealthObserver observer) {
-        synchronized (mLock) {
-            for (int i = 0; i < mAllObservers.size(); i++) {
-                if (observer.getName().equals(mAllObservers.keyAt(i))) {
-                    if (observer.equals(mAllObservers.valueAt(i).mRegisteredObserver)) {
-                        return mAllObservers.valueAt(i).mPackages.keySet();
-                    }
-                    return Collections.emptySet();
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Called when a process fails either due to a crash or ANR.
      *
      * <p>For each package contained in the process, one registered observer with the least user
