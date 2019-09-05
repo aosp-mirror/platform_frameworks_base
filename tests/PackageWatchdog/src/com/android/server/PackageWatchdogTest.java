@@ -309,47 +309,31 @@ public class PackageWatchdogTest {
      * Test package observers are persisted and loaded on startup
      */
     @Test
-    public void testPersistence() throws Exception {
+    public void testPersistence() {
         PackageWatchdog watchdog1 = createWatchdog();
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog1.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog1.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
-
-        // Verify 2 observers are registered and saved internally
-        // 1
-        assertEquals(1, watchdog1.getPackages(observer1).size());
-        assertTrue(watchdog1.getPackages(observer1).contains(APP_A));
-        // 2
-        assertEquals(2, watchdog1.getPackages(observer2).size());
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_B));
-
         // Then advance time and run IO Handler so file is saved
         mTestLooper.dispatchAll();
-
         // Then start a new watchdog
         PackageWatchdog watchdog2 = createWatchdog();
-
-        // Verify the new watchdog loads observers on startup but nothing registered
-        assertEquals(0, watchdog2.getPackages(observer1).size());
-        assertEquals(0, watchdog2.getPackages(observer2).size());
-        // Verify random observer not saved returns null
-        assertNull(watchdog2.getPackages(new TestObserver(OBSERVER_NAME_3)));
-
-        // Then register observer1
+        // Then resume observer1 and observer2
         watchdog2.registerHealthObserver(observer1);
         watchdog2.registerHealthObserver(observer2);
+        raiseFatalFailure(watchdog2, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
+                new VersionedPackage(APP_B, VERSION_CODE)));
+        mTestLooper.dispatchAll();
 
-        // Verify 2 observers are registered after reload
-        // 1
-        assertEquals(1, watchdog1.getPackages(observer1).size());
-        assertTrue(watchdog1.getPackages(observer1).contains(APP_A));
-        // 2
-        assertEquals(2, watchdog1.getPackages(observer2).size());
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_B));
+        // We should receive failed packages as expected to ensure observers are persisted and
+        // resumed correctly
+        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
+        assertEquals(2, observer2.mHealthCheckFailedPackages.size());
+        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_B));
     }
 
     /**
