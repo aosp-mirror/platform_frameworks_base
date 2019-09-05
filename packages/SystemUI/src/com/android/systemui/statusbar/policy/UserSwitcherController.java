@@ -62,6 +62,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.phone.UnlockMethodCache;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -597,17 +598,19 @@ public class UserSwitcherController implements Dumpable {
 
         final UserSwitcherController mController;
         private final KeyguardMonitor mKeyguardMonitor;
+        private final UnlockMethodCache mUnlockMethodCache;
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
             mKeyguardMonitor = controller.mKeyguardMonitor;
+            mUnlockMethodCache = UnlockMethodCache.getInstance(controller.mContext);
             controller.addAdapter(new WeakReference<>(this));
         }
 
         public int getUserCount() {
             boolean secureKeyguardShowing = mKeyguardMonitor.isShowing()
                     && mKeyguardMonitor.isSecure()
-                    && !mKeyguardMonitor.canSkipBouncer();
+                    && !mUnlockMethodCache.canSkipBouncer();
             if (!secureKeyguardShowing) {
                 return mController.getUsers().size();
             }
@@ -629,7 +632,7 @@ public class UserSwitcherController implements Dumpable {
         public int getCount() {
             boolean secureKeyguardShowing = mKeyguardMonitor.isShowing()
                     && mKeyguardMonitor.isSecure()
-                    && !mKeyguardMonitor.canSkipBouncer();
+                    && !mUnlockMethodCache.canSkipBouncer();
             if (!secureKeyguardShowing) {
                 return mController.getUsers().size();
             }
