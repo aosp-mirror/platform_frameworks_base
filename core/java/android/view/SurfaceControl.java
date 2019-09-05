@@ -187,8 +187,7 @@ public final class SurfaceControl implements Parcelable {
 
     private static native void nativeSetInputWindowInfo(long transactionObj, long nativeObject,
             InputWindowHandle handle);
-    private static native void nativeTransferTouchFocus(long transactionObj, IBinder fromToken,
-            IBinder toToken);
+
     private static native boolean nativeGetProtectedContentSupport();
     private static native void nativeSetMetadata(long transactionObj, long nativeObject, int key,
             Parcel data);
@@ -2235,22 +2234,6 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setInputWindowInfo(SurfaceControl sc, InputWindowHandle handle) {
             sc.checkNotReleased();
             nativeSetInputWindowInfo(mNativeObject, sc.mNativeObject, handle);
-            return this;
-        }
-
-        /**
-         * Transfers touch focus from one window to another. It is possible for multiple windows to
-         * have touch focus if they support split touch dispatch
-         * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-         * method only transfers touch focus of the specified window without affecting
-         * other windows that may also have touch focus at the same time.
-         * @param fromToken The token of a window that currently has touch focus.
-         * @param toToken The token of the window that should receive touch focus in
-         * place of the first.
-         * @hide
-         */
-        public Transaction transferTouchFocus(IBinder fromToken, IBinder toToken) {
-            nativeTransferTouchFocus(mNativeObject, fromToken, toToken);
             return this;
         }
 
