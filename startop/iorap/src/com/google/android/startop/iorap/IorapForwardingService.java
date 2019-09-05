@@ -275,7 +275,8 @@ public class IorapForwardingService extends SystemService {
             Log.e(TAG, "connectToRemoteAndConfigure - null iorap remote. check for Log.wtf?");
             return false;
         }
-        invokeRemote( () -> mIorapRemote.setTaskListener(new RemoteTaskListener()) );
+        invokeRemote(mIorapRemote,
+            (IIorap remote) -> remote.setTaskListener(new RemoteTaskListener()) );
         registerInProcessListenersLocked();
 
         return true;
@@ -323,8 +324,9 @@ public class IorapForwardingService extends SystemService {
                         mSequenceId, intent));
             }
 
-            invokeRemote(() ->
-                    mIorapRemote.onAppLaunchEvent(RequestId.nextValueForSequence(),
+            invokeRemote(mIorapRemote,
+                (IIorap remote) ->
+                    remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
                         new AppLaunchEvent.IntentStarted(mSequenceId, intent))
             );
         }
@@ -335,8 +337,9 @@ public class IorapForwardingService extends SystemService {
                 Log.v(TAG, String.format("AppLaunchObserver#onIntentFailed(%d)", mSequenceId));
             }
 
-            invokeRemote(() ->
-                    mIorapRemote.onAppLaunchEvent(RequestId.nextValueForSequence(),
+            invokeRemote(mIorapRemote,
+                (IIorap remote) ->
+                    remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
                         new AppLaunchEvent.IntentFailed(mSequenceId))
             );
         }
@@ -349,8 +352,9 @@ public class IorapForwardingService extends SystemService {
                         mSequenceId, activity, temperature));
             }
 
-            invokeRemote(() ->
-                    mIorapRemote.onAppLaunchEvent(RequestId.nextValueForSequence(),
+            invokeRemote(mIorapRemote,
+                (IIorap remote) ->
+                    remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
                             new AppLaunchEvent.ActivityLaunched(mSequenceId, activity, temperature))
             );
         }
@@ -362,8 +366,9 @@ public class IorapForwardingService extends SystemService {
                         mSequenceId, activity));
             }
 
-            invokeRemote(() ->
-                    mIorapRemote.onAppLaunchEvent(RequestId.nextValueForSequence(),
+            invokeRemote(mIorapRemote,
+                (IIorap remote) ->
+                    remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
                             new AppLaunchEvent.ActivityLaunchCancelled(mSequenceId,
                                     activity)));
         }
@@ -375,8 +380,9 @@ public class IorapForwardingService extends SystemService {
                         mSequenceId, activity));
             }
 
-            invokeRemote(() ->
-                mIorapRemote.onAppLaunchEvent(RequestId.nextValueForSequence(),
+            invokeRemote(mIorapRemote,
+                (IIorap remote) ->
+                    remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
                         new AppLaunchEvent.ActivityLaunchFinished(mSequenceId, activity))
             );
         }
@@ -501,8 +507,8 @@ public class IorapForwardingService extends SystemService {
                 mRunningJobs.put(request, params);
             }
 
-            if (!invokeRemote( () ->
-                    mIorapRemote.onJobScheduledEvent(request,
+            if (!invokeRemote(mIorapRemote, (IIorap remote) ->
+                    remote.onJobScheduledEvent(request,
                             JobScheduledEvent.createIdleMaintenance(
                                     JobScheduledEvent.TYPE_START_JOB,
                                     params))
@@ -539,8 +545,8 @@ public class IorapForwardingService extends SystemService {
 
             // Notify iorapd to stop (abort) the job.
             if (wasTracking) {
-                invokeRemote(() ->
-                        mIorapRemote.onJobScheduledEvent(RequestId.nextValueForSequence(),
+                invokeRemote(mIorapRemote, (IIorap remote) ->
+                        remote.onJobScheduledEvent(RequestId.nextValueForSequence(),
                                 JobScheduledEvent.createIdleMaintenance(
                                         JobScheduledEvent.TYPE_STOP_JOB,
                                         params))
@@ -632,12 +638,17 @@ public class IorapForwardingService extends SystemService {
     /** Allow passing lambdas to #invokeRemote */
     private interface RemoteRunnable {
         // TODO: run(RequestId) ?
-        void run() throws RemoteException;
+        void run(IIorap iorap) throws RemoteException;
     }
 
-    private static boolean invokeRemote(RemoteRunnable r) {
+    // Always pass in the iorap directly here to avoid data race.
+    private static boolean invokeRemote(IIorap iorap, RemoteRunnable r) {
+       if (iorap == null) {
+         Log.w(TAG, "IIorap went to null in this thread, drop invokeRemote.");
+         return false;
+       }
        try {
-           r.run();
+           r.run(iorap);
            return true;
        } catch (RemoteException e) {
            // This could be a logic error (remote side returning error), which we need to fix.
