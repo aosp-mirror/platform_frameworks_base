@@ -13,6 +13,8 @@
  */
 package com.android.systemui.qs.tileimpl;
 
+import static com.android.systemui.qs.QSColorControllerKt.colorIcon;
+import static com.android.systemui.qs.QSColorControllerKt.overrideColor;
 import static com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH;
 
 import android.animation.ValueAnimator;
@@ -70,6 +72,9 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private final int mColorDisabled;
     private int mCircleColor;
     private int mBgSize;
+
+    private final boolean mQsColors = overrideColor();
+    private final boolean mQSIcons = colorIcon();
 
     public QSTileBaseView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -194,7 +199,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     }
 
     protected void handleStateChanged(QSTile.State state) {
-        int circleColor = getCircleColor(state.state);
+        int circleColor = getCircleColor(state.state, mQsColors ? state.colorActive : -1);
         boolean allowAnimations = animationsEnabled();
         if (circleColor != mCircleColor) {
             if (allowAnimations) {
@@ -239,10 +244,11 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         return mLocInScreen[1] >= -getHeight();
     }
 
-    private int getCircleColor(int state) {
+    private int getCircleColor(int state, int colorActive) {
         switch (state) {
             case Tile.STATE_ACTIVE:
-                return mColorActive;
+                int color = (colorActive == -1) ? mColorActive : colorActive;
+                return mQsColors && mQSIcons ? Utils.applyAlpha(0.5f, color) : color;
             case Tile.STATE_INACTIVE:
             case Tile.STATE_UNAVAILABLE:
                 return mColorDisabled;
@@ -250,6 +256,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
                 Log.e(TAG, "Invalid state " + state);
                 return 0;
         }
+    }
+
+    private int getCircleColor(int state) {
+        return getCircleColor(state, -1);
     }
 
     @Override

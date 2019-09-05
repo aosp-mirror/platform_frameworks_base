@@ -204,4 +204,6 @@
 
     <color name="GM2_yellow_500">#FFFBBC04</color>
     <color name="GM2_green_500">#FF34A853</color>
+    <color name="GM2_blue_500">#FF4285F4</color>
+
 </resources>
