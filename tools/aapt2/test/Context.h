@@ -81,6 +81,10 @@ class Context : public IAaptContext {
     return min_sdk_version_;
   }
 
+  void SetMinSdkVersion(int min_sdk_version) {
+    min_sdk_version_ = min_sdk_version;
+  }
+
  const std::set<std::string>& GetSplitNameDependencies() override {
     return split_name_dependencies_;
   }
