@@ -19,6 +19,7 @@ package android.permission;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.permission.IOnPermissionsChangeListener;
 
 /**
@@ -97,4 +98,6 @@ interface IPermissionManager {
             String packageName, int userId);
 
     boolean isPermissionRevokedByPolicy(String permName, String packageName, int userId);
+
+    List<SplitPermissionInfoParcelable> getSplitPermissions();
 }
