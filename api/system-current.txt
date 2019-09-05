@@ -521,18 +521,12 @@ package android.app {
   }
 
   public class Notification implements android.os.Parcelable {
-    method @Nullable public android.util.Pair<android.app.RemoteInput,android.app.Notification.Action> findRemoteInputActionPair(boolean);
-    method @NonNull public java.util.List<android.app.Notification.Action> getContextualActions();
     field public static final String CATEGORY_CAR_EMERGENCY = "car_emergency";
     field public static final String CATEGORY_CAR_INFORMATION = "car_information";
     field public static final String CATEGORY_CAR_WARNING = "car_warning";
     field @RequiresPermission(android.Manifest.permission.NOTIFICATION_DURING_SETUP) public static final String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
     field @RequiresPermission(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME) public static final String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";
     field public static final int FLAG_AUTOGROUP_SUMMARY = 1024; // 0x400
-  }
-
-  public static final class Notification.MessagingStyle.Message {
-    method @Nullable public static android.app.Notification.MessagingStyle.Message getMessageFromBundle(@NonNull android.os.Bundle);
   }
 
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
@@ -6708,10 +6702,6 @@ package android.service.notification {
     method public String getId();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.SnoozeCriterion> CREATOR;
-  }
-
-  public class StatusBarNotification implements android.os.Parcelable {
-    method public boolean isAppGroup();
   }
 
 }

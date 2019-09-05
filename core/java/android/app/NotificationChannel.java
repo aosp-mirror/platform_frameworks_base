@@ -710,6 +710,14 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Returns whether the user has chosen the sound of this channel.
+     * @see #getSound()
+     */
+    public boolean hasUserSetSound() {
+        return (mUserLockedFields & USER_LOCKED_SOUND) != 0;
+    }
+
+    /**
      * @hide
      */
     public void populateFromXmlForRestore(XmlPullParser parser, Context context) {

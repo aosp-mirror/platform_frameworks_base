@@ -31,6 +31,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BA
 
 import android.annotation.NonNull;
 import android.app.Notification;
+import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
@@ -545,21 +546,18 @@ public final class NotificationEntry {
         if (!ArrayUtils.isEmpty(replyTexts)) {
             return true;
         }
-        Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        if (messages != null && messages.length > 0) {
-            Parcelable message = messages[messages.length - 1];
-            if (message instanceof Bundle) {
-                Notification.MessagingStyle.Message lastMessage =
-                        Notification.MessagingStyle.Message.getMessageFromBundle(
-                                (Bundle) message);
-                if (lastMessage != null) {
-                    Person senderPerson = lastMessage.getSenderPerson();
-                    if (senderPerson == null) {
-                        return true;
-                    }
-                    Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
-                    return Objects.equals(user, senderPerson);
+        List<Message> messages = Message.getMessagesFromBundleArray(
+                extras.getParcelableArray(Notification.EXTRA_MESSAGES));
+        if (messages != null && !messages.isEmpty()) {
+            Message lastMessage = messages.get(messages.size() -1);
+
+            if (lastMessage != null) {
+                Person senderPerson = lastMessage.getSenderPerson();
+                if (senderPerson == null) {
+                    return true;
                 }
+                Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+                return Objects.equals(user, senderPerson);
             }
         }
         return false;

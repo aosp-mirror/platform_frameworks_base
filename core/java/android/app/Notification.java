@@ -3274,11 +3274,8 @@ public class Notification implements Parcelable
      *
      * @param requiresFreeform requires the remoteinput to allow freeform or not.
      * @return the result pair, {@code null} if no result is found.
-     *
-     * @hide
      */
     @Nullable
-    @SystemApi
     public Pair<RemoteInput, Action> findRemoteInputActionPair(boolean requiresFreeform) {
         if (actions == null) {
             return null;
@@ -3301,11 +3298,9 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Returns the actions that are contextual out of the actions in this notification.
-     *
-     * @hide
+     * Returns the actions that are contextual (that is, suggested because of the content of the
+     * notification) out of the actions in this notification.
      */
-    @SystemApi
     public @NonNull List<Notification.Action> getContextualActions() {
         if (actions == null) return Collections.emptyList();
 
@@ -7705,11 +7700,11 @@ public class Notification implements Parcelable
             }
 
             /**
-             * @return A list of messages read from the bundles.
-             *
-             * @hide
+             * Returns a list of messages read from the given bundle list, e.g.
+             * {@link #EXTRA_MESSAGES} or {@link #EXTRA_HISTORIC_MESSAGES}.
              */
-            public static List<Message> getMessagesFromBundleArray(Parcelable[] bundles) {
+            @NonNull
+            public static List<Message> getMessagesFromBundleArray(@Nullable Parcelable[] bundles) {
                 if (bundles == null) {
                     return new ArrayList<>();
                 }
@@ -7726,13 +7721,12 @@ public class Notification implements Parcelable
             }
 
             /**
-             * @return The message that is stored in the bundle or null if the message couldn't be
-             * resolved.
-             *
+             * Returns the message that is stored in the bundle (e.g. one of the values in the lists
+             * in {@link #EXTRA_MESSAGES} or {@link #EXTRA_HISTORIC_MESSAGES}) or null if the
+             * message couldn't be resolved.
              * @hide
              */
             @Nullable
-            @SystemApi
             public static Message getMessageFromBundle(@NonNull Bundle bundle) {
                 try {
                     if (!bundle.containsKey(KEY_TEXT) || !bundle.containsKey(KEY_TIMESTAMP)) {
