@@ -32,10 +32,12 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.Xml;
+
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -562,7 +564,7 @@ public class IntentFirewall {
 
         @Override
         public void onEvent(int event, String path) {
-            if (path.endsWith(".xml")) {
+            if (path != null && path.endsWith(".xml")) {
                 // we wait 250ms before taking any action on an event, in order to dedup multiple
                 // events. E.g. a delete event followed by a create event followed by a subsequent
                 // write+close event
