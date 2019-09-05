@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/condition/StateTracker.h"
+#include "src/condition/StateConditionTracker.h"
 #include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
@@ -50,7 +50,7 @@ void makeUidProcStateEvent(int32_t uid, int32_t state, LogEvent* event) {
     event->init();
 }
 
-TEST(StateTrackerTest, TestStateChange) {
+TEST(StateConditionTrackerTest, TestStateChange) {
     int uid1 = 111;
     int uid2 = 222;
 
@@ -60,7 +60,7 @@ TEST(StateTrackerTest, TestStateChange) {
     trackerNameIndexMap[StringToId("UidProcState")] = 0;
     vector<Matcher> primaryFields;
     primaryFields.push_back(getSimpleMatcher(kUidProcTag, 1));
-    StateTracker tracker(ConfigKey(12, 123), 123, 0, getUidProcStatePredicate(),
+    StateConditionTracker tracker(ConfigKey(12, 123), 123, 0, getUidProcStatePredicate(),
                          trackerNameIndexMap, primaryFields);
 
     LogEvent event(kUidProcTag, 0 /*timestamp*/);

@@ -113,7 +113,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       vector<int>& metricsWithActivation,
                       std::set<int64_t>& noReportMetricIds);
 
-bool isStateTracker(const SimplePredicate& simplePredicate, std::vector<Matcher>* primaryKeys);
+bool isStateConditionTracker(const SimplePredicate& simplePredicate, std::vector<Matcher>* primaryKeys);
 
 }  // namespace statsd
 }  // namespace os
