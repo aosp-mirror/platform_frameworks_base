@@ -129,7 +129,7 @@ public class RoleObserverTest extends UiServiceTestCase {
         mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {
-            mService.init(mock(Looper.class),
+            mService.init(mock(Looper.class), mock(RankingHandler.class),
                     mock(IPackageManager.class), mock(PackageManager.class),
                     mock(LightsManager.class),
                     mock(NotificationListeners.class), mock(NotificationAssistants.class),
