@@ -4497,18 +4497,27 @@ class ActivityStack extends ConfigurationContainer {
      *         then skip running tasks that match those types.
      */
     void getRunningTasks(List<TaskRecord> tasksOut, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed) {
+            @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed,
+            boolean crossUser) {
         boolean focusedStack = mRootActivityContainer.getTopDisplayFocusedStack() == this;
         boolean topTask = true;
+        int userId = UserHandle.getUserId(callingUid);
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.getTopActivity() == null) {
                 // Skip if there are no activities in the task
                 continue;
             }
-            if (!allowed && !task.isActivityTypeHome() && task.effectiveUid != callingUid) {
-                // Skip if the caller can't fetch this task
-                continue;
+            if (task.effectiveUid != callingUid) {
+                if (task.userId != userId && !crossUser) {
+                    // Skip if the caller does not have cross user permission
+                    continue;
+                }
+                if (!allowed && !task.isActivityTypeHome()) {
+                    // Skip if the caller isn't allowed to fetch this task, except for the home
+                    // task which we always return.
+                    continue;
+                }
             }
             if (ignoreActivityType != ACTIVITY_TYPE_UNDEFINED
                     && task.getActivityType() == ignoreActivityType) {

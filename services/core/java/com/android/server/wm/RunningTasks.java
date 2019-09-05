@@ -40,7 +40,7 @@ class RunningTasks {
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
             @WindowingMode int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
-            int callingUid, boolean allowed) {
+            int callingUid, boolean allowed, boolean crossUser) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -55,7 +55,7 @@ class RunningTasks {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 mTmpStackTasks.clear();
                 stack.getRunningTasks(mTmpStackTasks, ignoreActivityType, ignoreWindowingMode,
-                        callingUid, allowed);
+                        callingUid, allowed, crossUser);
                 mTmpSortedSet.addAll(mTmpStackTasks);
             }
         }

@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.Manifest.permission.BIND_VOICE_INTERACTION;
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
@@ -2508,15 +2510,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @WindowConfiguration.ActivityType int ignoreActivityType,
             @WindowConfiguration.WindowingMode int ignoreWindowingMode) {
         final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final boolean crossUser = isCrossUserAllowed(callingPid, callingUid);
         ArrayList<ActivityManager.RunningTaskInfo> list = new ArrayList<>();
 
         synchronized (mGlobalLock) {
             if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
 
-            final boolean allowed = isGetTasksAllowed("getTasks", Binder.getCallingPid(),
-                    callingUid);
+            final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
             mRootActivityContainer.getRunningTasks(maxNum, list, ignoreActivityType,
-                    ignoreWindowingMode, callingUid, allowed);
+                    ignoreWindowingMode, callingUid, allowed, crossUser);
         }
 
         return list;
@@ -3544,6 +3547,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     + " does not hold REAL_GET_TASKS; limiting output");
         }
         return allowed;
+    }
+
+    boolean isCrossUserAllowed(int pid, int uid) {
+        return checkPermission(INTERACT_ACROSS_USERS, pid, uid) == PERMISSION_GRANTED
+                || checkPermission(INTERACT_ACROSS_USERS_FULL, pid, uid) == PERMISSION_GRANTED;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
