@@ -1301,10 +1301,10 @@ public class RecentTasksTest extends ActivityTestsBase {
         @Override
         void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
                 int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
-                int callingUid, boolean allowed) {
+                int callingUid, boolean allowed, boolean crossUser) {
             mLastAllowed = allowed;
             super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, activityDisplays,
-                    callingUid, allowed);
+                    callingUid, allowed, crossUser);
         }
     }
 }
