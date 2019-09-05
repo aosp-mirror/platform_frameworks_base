@@ -284,19 +284,28 @@ public class WebViewClient {
             SAFE_BROWSING_THREAT_UNKNOWN,
             SAFE_BROWSING_THREAT_MALWARE,
             SAFE_BROWSING_THREAT_PHISHING,
-            SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE
+            SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE,
+            SAFE_BROWSING_THREAT_BILLING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SafeBrowsingThreat {}
 
-    /** The resource was blocked for an unknown reason */
+    /** The resource was blocked for an unknown reason. */
     public static final int SAFE_BROWSING_THREAT_UNKNOWN = 0;
-    /** The resource was blocked because it contains malware */
+    /** The resource was blocked because it contains malware. */
     public static final int SAFE_BROWSING_THREAT_MALWARE = 1;
-    /** The resource was blocked because it contains deceptive content */
+    /** The resource was blocked because it contains deceptive content. */
     public static final int SAFE_BROWSING_THREAT_PHISHING = 2;
-    /** The resource was blocked because it contains unwanted software */
+    /** The resource was blocked because it contains unwanted software. */
     public static final int SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE = 3;
+    /**
+     * The resource was blocked because it may trick the user into a billing agreement.
+     *
+     * <p>This constant is only used when targetSdkVersion is at least {@link
+     * android.os.Build.VERSION_CODES#Q}. Otherwise, {@link #SAFE_BROWSING_THREAT_UNKNOWN} is used
+     * instead.
+     */
+    public static final int SAFE_BROWSING_THREAT_BILLING = 4;
 
     /**
      * Report an error to the host application. These errors are unrecoverable

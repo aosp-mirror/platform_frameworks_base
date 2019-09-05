@@ -155,7 +155,10 @@ public abstract class VolumeProvider {
      * Listens for changes to the volume.
      * @hide
      */
-    public static abstract class Callback {
+    public abstract static class Callback {
+        /**
+         * Called when volume changed.
+         */
         public abstract void onVolumeChanged(VolumeProvider volumeProvider);
     }
 }

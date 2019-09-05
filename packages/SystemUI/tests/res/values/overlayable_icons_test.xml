@@ -1,0 +1,70 @@
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<resources>
+  <!-- overlayable_icons references all of the drawables in this package
+       that are being overlayed by resource overlays. If you remove/rename
+       any of these resources, you must also change the resource overlay icons.-->
+  <array name="overlayable_icons">
+    <item>@drawable/ic_alarm</item>
+    <item>@drawable/ic_alarm_dim</item>
+    <item>@drawable/ic_arrow_back</item>
+    <item>@drawable/ic_bluetooth_connected</item>
+    <item>@drawable/ic_brightness_thumb</item>
+    <item>@drawable/ic_camera</item>
+    <item>@drawable/ic_cast</item>
+    <item>@drawable/ic_cast_connected</item>
+    <item>@drawable/ic_close_white</item>
+    <item>@drawable/ic_data_saver</item>
+    <item>@drawable/ic_data_saver_off</item>
+    <item>@drawable/ic_drag_handle</item>
+    <item>@drawable/ic_headset</item>
+    <item>@drawable/ic_headset_mic</item>
+    <item>@drawable/ic_hotspot</item>
+    <item>@drawable/ic_info</item>
+    <item>@drawable/ic_info_outline</item>
+    <item>@drawable/ic_invert_colors</item>
+    <item>@drawable/ic_location</item>
+    <item>@drawable/ic_lockscreen_ime</item>
+    <item>@drawable/ic_notifications_alert</item>
+    <item>@drawable/ic_notifications_silence</item>
+    <item>@drawable/ic_power_low</item>
+    <item>@drawable/ic_power_saver</item>
+    <item>@drawable/ic_qs_bluetooth_connecting</item>
+    <item>@drawable/ic_qs_cancel</item>
+    <item>@drawable/ic_qs_no_sim</item>
+    <item>@drawable/ic_qs_wifi_0</item>
+    <item>@drawable/ic_qs_wifi_1</item>
+    <item>@drawable/ic_qs_wifi_2</item>
+    <item>@drawable/ic_qs_wifi_3</item>
+    <item>@drawable/ic_qs_wifi_4</item>
+    <item>@drawable/ic_qs_wifi_disconnected</item>
+    <item>@drawable/ic_screenshot_delete</item>
+    <item>@drawable/ic_settings</item>
+    <item>@drawable/ic_swap_vert</item>
+    <item>@drawable/ic_tune_black_16dp</item>
+    <item>@drawable/ic_volume_alarm_mute</item>
+    <item>@drawable/ic_volume_bt_sco</item>
+    <item>@drawable/ic_volume_media</item>
+    <item>@drawable/ic_volume_media_mute</item>
+    <item>@drawable/ic_volume_ringer</item>
+    <item>@drawable/ic_volume_ringer_mute</item>
+    <item>@drawable/ic_volume_ringer_vibrate</item>
+    <item>@drawable/ic_volume_voice</item>
+    <item>@drawable/stat_sys_managed_profile_status</item>
+    <item>@drawable/stat_sys_mic_none</item>
+    <item>@drawable/stat_sys_vpn_ic</item>
+  </array>
+</resources>

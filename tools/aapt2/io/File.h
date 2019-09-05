@@ -25,6 +25,7 @@
 
 #include "Source.h"
 #include "io/Data.h"
+#include "util/Files.h"
 #include "util/Util.h"
 
 namespace aapt {
@@ -103,6 +104,7 @@ class IFileCollection {
 
   virtual IFile* FindFile(const android::StringPiece& path) = 0;
   virtual std::unique_ptr<IFileCollectionIterator> Iterator() = 0;
+  virtual char GetDirSeparator() = 0;
 };
 
 }  // namespace io

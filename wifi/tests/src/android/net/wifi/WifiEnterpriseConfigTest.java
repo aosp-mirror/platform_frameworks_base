@@ -19,8 +19,8 @@ package android.net.wifi;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -28,14 +28,14 @@ import android.net.wifi.WifiEnterpriseConfig.Eap;
 import android.net.wifi.WifiEnterpriseConfig.Phase2;
 import android.os.Parcel;
 import android.security.Credentials;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-
 
 /**
  * Unit tests for {@link android.net.wifi.WifiEnterpriseConfig}.
@@ -422,5 +422,69 @@ public class WifiEnterpriseConfigTest {
         String password = "supersecret";
         mEnterpriseConfig.setPassword(password);
         assertFalse(mEnterpriseConfig.toString().contains(password));
+    }
+
+    /** Verifies that certificate ownership flag is set correctly */
+    @Test
+    public void testIsAppInstalledDeviceKeyAndCert() {
+        // First make sure that app didn't install anything
+        assertFalse(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
+        assertFalse(mEnterpriseConfig.isAppInstalledCaCert());
+
+        // Then app loads keys via the enterprise config API
+        PrivateKey clientKey = FakeKeys.RSA_KEY1;
+        X509Certificate cert0 = FakeKeys.CLIENT_CERT;
+        X509Certificate cert1 = FakeKeys.CA_CERT1;
+        X509Certificate[] clientChain = new X509Certificate[] {cert0, cert1};
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(clientKey, clientChain);
+        X509Certificate[] result = mEnterpriseConfig.getClientCertificateChain();
+        assertEquals(result.length, 2);
+        assertTrue(result[0] == cert0 && result[1] == cert1);
+        assertTrue(mEnterpriseConfig.getClientCertificate() == cert0);
+
+        // Make sure it is the owner now
+        assertTrue(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
+        assertFalse(mEnterpriseConfig.isAppInstalledCaCert());
+    }
+
+    /** Verifies that certificate ownership flag is set correctly */
+    @Test
+    public void testIsAppInstalledCaCert() {
+        // First make sure that app didn't install anything
+        assertFalse(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
+        assertFalse(mEnterpriseConfig.isAppInstalledCaCert());
+
+        // Then app loads CA cert via the enterprise config API
+        X509Certificate cert = FakeKeys.CA_CERT1;
+        mEnterpriseConfig.setCaCertificate(cert);
+        X509Certificate result = mEnterpriseConfig.getCaCertificate();
+        assertTrue(result == cert);
+
+        // Make sure it is the owner now
+        assertFalse(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
+        assertTrue(mEnterpriseConfig.isAppInstalledCaCert());
+    }
+
+    /** Verifies that certificate ownership flag is set correctly */
+    @Test
+    public void testIsAppInstalledCaCerts() {
+        // First make sure that app didn't install anything
+        assertFalse(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
+        assertFalse(mEnterpriseConfig.isAppInstalledCaCert());
+
+        // Then app loads CA cert via the enterprise config API
+        X509Certificate cert0 = FakeKeys.CA_CERT0;
+        X509Certificate cert1 = FakeKeys.CA_CERT1;
+        X509Certificate[] cert = new X509Certificate[] {cert0, cert1};
+
+        mEnterpriseConfig.setCaCertificates(cert);
+        X509Certificate[] result = mEnterpriseConfig.getCaCertificates();
+        assertEquals(result.length, 2);
+        assertTrue(result[0] == cert0 && result[1] == cert1);
+//        assertTrue(mEnterpriseConfig.getClientCertificate() == cert0);
+
+        // Make sure it is the owner now
+        assertFalse(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
+        assertTrue(mEnterpriseConfig.isAppInstalledCaCert());
     }
 }

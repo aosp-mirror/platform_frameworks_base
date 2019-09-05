@@ -330,7 +330,7 @@ public final class PrintServiceInfo implements Parcelable {
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<PrintServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrintServiceInfo> CREATOR =
             new Parcelable.Creator<PrintServiceInfo>() {
         @Override
         public PrintServiceInfo createFromParcel(Parcel parcel) {

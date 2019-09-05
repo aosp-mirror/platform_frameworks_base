@@ -70,4 +70,10 @@ public class DependencyTest extends SysuiTestCase {
         mDependency.onConfigurationChanged(null);
         verify(d).onConfigurationChanged(eq(null));
     }
+
+    @Test
+    public void testInitDependency() {
+        Dependency.clearDependencies();
+        Dependency.initDependencies(mContext);
+    }
 }

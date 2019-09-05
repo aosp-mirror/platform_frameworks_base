@@ -25,6 +25,8 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 
+import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+
 /**
  * The InputMethod interface represents an input method which can generate key
  * events and text, such as digital, email addresses, CJK characters, other
@@ -79,20 +81,51 @@ public interface InputMethod {
     public interface SessionCallback {
         public void sessionCreated(InputMethodSession session);
     }
-    
+
+    /**
+     * Called first thing after an input method is created, this supplies a
+     * unique token for the session it has with the system service as well as
+     * IPC endpoint to do some other privileged operations.
+     *
+     * @param token special token for the system to identify
+     *              {@link InputMethodService}
+     * @param displayId The id of the display that current IME shown.
+     *                  Used for {{@link #updateInputMethodDisplay(int)}}
+     * @param privilegedOperations IPC endpoint to do some privileged
+     *                             operations that are allowed only to the
+     *                             current IME.
+     * @hide
+     */
+    @MainThread
+    default void initializeInternal(IBinder token, int displayId,
+            IInputMethodPrivilegedOperations privilegedOperations) {
+        updateInputMethodDisplay(displayId);
+        attachToken(token);
+    }
+
     /**
      * Called first thing after an input method is created, this supplies a
      * unique token for the session it has with the system service.  It is
      * needed to identify itself with the service to validate its operations.
      * This token <strong>must not</strong> be passed to applications, since
      * it grants special priviledges that should not be given to applications.
-     * 
-     * <p>Note: to protect yourself from malicious clients, you should only
-     * accept the first token given to you.  Any after that may come from the
-     * client.
+     *
+     * <p>The system guarantees that this method is called back between
+     * {@link InputMethodService#onCreate()} and {@link InputMethodService#onDestroy()}
+     * at most once.
      */
     @MainThread
     public void attachToken(IBinder token);
+
+    /**
+     * Update context display according to given displayId.
+     *
+     * @param displayId The id of the display that need to update for context.
+     * @hide
+     */
+    @MainThread
+    default void updateInputMethodDisplay(int displayId) {
+    }
 
     /**
      * Bind a new application environment in to the input method, so that it
@@ -186,7 +219,7 @@ public interface InputMethod {
     @MainThread
     default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
             @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken) {
+            @NonNull IBinder startInputToken, boolean shouldPreRenderIme) {
         if (restarting) {
             restartInput(inputConnection, editorInfo);
         } else {

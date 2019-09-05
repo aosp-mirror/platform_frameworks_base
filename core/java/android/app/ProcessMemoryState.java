@@ -20,44 +20,30 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * The memory stats for a process.
+ * State (oom score) for processes known to activity manager.
  * {@hide}
  */
-public class ProcessMemoryState implements Parcelable {
-    public int uid;
-    public String processName;
-    public int oomScore;
-    public long pgfault;
-    public long pgmajfault;
-    public long rssInBytes;
-    public long cacheInBytes;
-    public long swapInBytes;
+public final class ProcessMemoryState implements Parcelable {
+    public final int uid;
+    public final int pid;
+    public final String processName;
+    public final int oomScore;
 
-    public ProcessMemoryState(int uid, String processName, int oomScore, long pgfault,
-                              long pgmajfault, long rssInBytes, long cacheInBytes,
-                              long swapInBytes) {
+    public ProcessMemoryState(int uid, int pid, String processName, int oomScore) {
         this.uid = uid;
+        this.pid = pid;
         this.processName = processName;
         this.oomScore = oomScore;
-        this.pgfault = pgfault;
-        this.pgmajfault = pgmajfault;
-        this.rssInBytes = rssInBytes;
-        this.cacheInBytes = cacheInBytes;
-        this.swapInBytes = swapInBytes;
     }
 
     private ProcessMemoryState(Parcel in) {
         uid = in.readInt();
+        pid = in.readInt();
         processName = in.readString();
         oomScore = in.readInt();
-        pgfault = in.readLong();
-        pgmajfault = in.readLong();
-        rssInBytes = in.readLong();
-        cacheInBytes = in.readLong();
-        swapInBytes = in.readLong();
     }
 
-    public static final Creator<ProcessMemoryState> CREATOR = new Creator<ProcessMemoryState>() {
+    public static final @android.annotation.NonNull Creator<ProcessMemoryState> CREATOR = new Creator<ProcessMemoryState>() {
         @Override
         public ProcessMemoryState createFromParcel(Parcel in) {
             return new ProcessMemoryState(in);
@@ -77,12 +63,8 @@ public class ProcessMemoryState implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(uid);
+        parcel.writeInt(pid);
         parcel.writeString(processName);
         parcel.writeInt(oomScore);
-        parcel.writeLong(pgfault);
-        parcel.writeLong(pgmajfault);
-        parcel.writeLong(rssInBytes);
-        parcel.writeLong(cacheInBytes);
-        parcel.writeLong(swapInBytes);
     }
 }

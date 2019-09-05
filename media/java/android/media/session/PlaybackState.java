@@ -19,17 +19,16 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.Nullable;
-import android.media.RemoteControlClient;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import java.util.ArrayList;
-import java.util.List;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Playback state for a {@link MediaSession}. This includes a state like
@@ -42,7 +41,7 @@ public final class PlaybackState implements Parcelable {
     /**
      * @hide
      */
-    @LongDef(flag=true, value={ACTION_STOP, ACTION_PAUSE, ACTION_PLAY, ACTION_REWIND,
+    @LongDef(flag = true, value = {ACTION_STOP, ACTION_PAUSE, ACTION_PLAY, ACTION_REWIND,
             ACTION_SKIP_TO_PREVIOUS, ACTION_SKIP_TO_NEXT, ACTION_FAST_FORWARD, ACTION_SET_RATING,
             ACTION_SEEK_TO, ACTION_PLAY_PAUSE, ACTION_PLAY_FROM_MEDIA_ID, ACTION_PLAY_FROM_SEARCH,
             ACTION_SKIP_TO_QUEUE_ITEM, ACTION_PLAY_FROM_URI, ACTION_PREPARE,
@@ -192,42 +191,42 @@ public final class PlaybackState implements Parcelable {
      * @see Builder#setState(int, long, float)
      * @see Builder#setState(int, long, float, long)
      */
-    public final static int STATE_NONE = 0;
+    public static final int STATE_NONE = 0;
 
     /**
      * State indicating this item is currently stopped.
      *
      * @see Builder#setState
      */
-    public final static int STATE_STOPPED = 1;
+    public static final int STATE_STOPPED = 1;
 
     /**
      * State indicating this item is currently paused.
      *
      * @see Builder#setState
      */
-    public final static int STATE_PAUSED = 2;
+    public static final int STATE_PAUSED = 2;
 
     /**
      * State indicating this item is currently playing.
      *
      * @see Builder#setState
      */
-    public final static int STATE_PLAYING = 3;
+    public static final int STATE_PLAYING = 3;
 
     /**
      * State indicating this item is currently fast forwarding.
      *
      * @see Builder#setState
      */
-    public final static int STATE_FAST_FORWARDING = 4;
+    public static final int STATE_FAST_FORWARDING = 4;
 
     /**
      * State indicating this item is currently rewinding.
      *
      * @see Builder#setState
      */
-    public final static int STATE_REWINDING = 5;
+    public static final int STATE_REWINDING = 5;
 
     /**
      * State indicating this item is currently buffering and will begin playing
@@ -235,7 +234,7 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_BUFFERING = 6;
+    public static final int STATE_BUFFERING = 6;
 
     /**
      * State indicating this item is currently in an error state. The error
@@ -243,7 +242,7 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_ERROR = 7;
+    public static final int STATE_ERROR = 7;
 
     /**
      * State indicating the class doing playback is currently connecting to a
@@ -253,21 +252,21 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_CONNECTING = 8;
+    public static final int STATE_CONNECTING = 8;
 
     /**
      * State indicating the player is currently skipping to the previous item.
      *
      * @see Builder#setState
      */
-    public final static int STATE_SKIPPING_TO_PREVIOUS = 9;
+    public static final int STATE_SKIPPING_TO_PREVIOUS = 9;
 
     /**
      * State indicating the player is currently skipping to the next item.
      *
      * @see Builder#setState
      */
-    public final static int STATE_SKIPPING_TO_NEXT = 10;
+    public static final int STATE_SKIPPING_TO_NEXT = 10;
 
     /**
      * State indicating the player is currently skipping to a specific item in
@@ -275,12 +274,12 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_SKIPPING_TO_QUEUE_ITEM = 11;
+    public static final int STATE_SKIPPING_TO_QUEUE_ITEM = 11;
 
     /**
      * Use this value for the position to indicate the position is not known.
      */
-    public final static long PLAYBACK_POSITION_UNKNOWN = -1;
+    public static final long PLAYBACK_POSITION_UNKNOWN = -1;
 
     private final int mState;
     private final long mPosition;
@@ -318,7 +317,7 @@ public final class PlaybackState implements Parcelable {
         mActions = in.readLong();
         mCustomActions = in.createTypedArrayList(CustomAction.CREATOR);
         mActiveItemId = in.readLong();
-        mErrorMessage = in.readCharSequence();
+        mErrorMessage = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mExtras = in.readBundle();
     }
 
@@ -353,7 +352,7 @@ public final class PlaybackState implements Parcelable {
         dest.writeLong(mActions);
         dest.writeTypedList(mCustomActions);
         dest.writeLong(mActiveItemId);
-        dest.writeCharSequence(mErrorMessage);
+        TextUtils.writeToParcel(mErrorMessage, dest, 0);
         dest.writeBundle(mExtras);
     }
 
@@ -481,162 +480,7 @@ public final class PlaybackState implements Parcelable {
         return mExtras;
     }
 
-    /**
-     * Get the {@link PlaybackState} state for the given
-     * {@link RemoteControlClient} state.
-     *
-     * @param rccState The state used by {@link RemoteControlClient}.
-     * @return The equivalent state used by {@link PlaybackState}.
-     * @hide
-     */
-    public static int getStateFromRccState(int rccState) {
-        switch (rccState) {
-            case RemoteControlClient.PLAYSTATE_BUFFERING:
-                return STATE_BUFFERING;
-            case RemoteControlClient.PLAYSTATE_ERROR:
-                return STATE_ERROR;
-            case RemoteControlClient.PLAYSTATE_FAST_FORWARDING:
-                return STATE_FAST_FORWARDING;
-            case RemoteControlClient.PLAYSTATE_NONE:
-                return STATE_NONE;
-            case RemoteControlClient.PLAYSTATE_PAUSED:
-                return STATE_PAUSED;
-            case RemoteControlClient.PLAYSTATE_PLAYING:
-                return STATE_PLAYING;
-            case RemoteControlClient.PLAYSTATE_REWINDING:
-                return STATE_REWINDING;
-            case RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS:
-                return STATE_SKIPPING_TO_PREVIOUS;
-            case RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS:
-                return STATE_SKIPPING_TO_NEXT;
-            case RemoteControlClient.PLAYSTATE_STOPPED:
-                return STATE_STOPPED;
-            default:
-                return -1;
-        }
-    }
-
-    /**
-     * Get the {@link RemoteControlClient} state for the given
-     * {@link PlaybackState} state.
-     *
-     * @param state The state used by {@link PlaybackState}.
-     * @return The equivalent state used by {@link RemoteControlClient}.
-     * @hide
-     */
-    public static int getRccStateFromState(int state) {
-        switch (state) {
-            case STATE_BUFFERING:
-                return RemoteControlClient.PLAYSTATE_BUFFERING;
-            case STATE_ERROR:
-                return RemoteControlClient.PLAYSTATE_ERROR;
-            case STATE_FAST_FORWARDING:
-                return RemoteControlClient.PLAYSTATE_FAST_FORWARDING;
-            case STATE_NONE:
-                return RemoteControlClient.PLAYSTATE_NONE;
-            case STATE_PAUSED:
-                return RemoteControlClient.PLAYSTATE_PAUSED;
-            case STATE_PLAYING:
-                return RemoteControlClient.PLAYSTATE_PLAYING;
-            case STATE_REWINDING:
-                return RemoteControlClient.PLAYSTATE_REWINDING;
-            case STATE_SKIPPING_TO_PREVIOUS:
-                return RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS;
-            case STATE_SKIPPING_TO_NEXT:
-                return RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS;
-            case STATE_STOPPED:
-                return RemoteControlClient.PLAYSTATE_STOPPED;
-            default:
-                return -1;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public static long getActionsFromRccControlFlags(int rccFlags) {
-        long actions = 0;
-        long flag = 1;
-        while (flag <= rccFlags) {
-            if ((flag & rccFlags) != 0) {
-                actions |= getActionForRccFlag((int) flag);
-            }
-            flag = flag << 1;
-        }
-        return actions;
-    }
-
-    /**
-     * @hide
-     */
-    public static int getRccControlFlagsFromActions(long actions) {
-        int rccFlags = 0;
-        long action = 1;
-        while (action <= actions && action < Integer.MAX_VALUE) {
-            if ((action & actions) != 0) {
-                rccFlags |= getRccFlagForAction(action);
-            }
-            action = action << 1;
-        }
-        return rccFlags;
-    }
-
-    private static long getActionForRccFlag(int flag) {
-        switch (flag) {
-            case RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS:
-                return ACTION_SKIP_TO_PREVIOUS;
-            case RemoteControlClient.FLAG_KEY_MEDIA_REWIND:
-                return ACTION_REWIND;
-            case RemoteControlClient.FLAG_KEY_MEDIA_PLAY:
-                return ACTION_PLAY;
-            case RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE:
-                return ACTION_PLAY_PAUSE;
-            case RemoteControlClient.FLAG_KEY_MEDIA_PAUSE:
-                return ACTION_PAUSE;
-            case RemoteControlClient.FLAG_KEY_MEDIA_STOP:
-                return ACTION_STOP;
-            case RemoteControlClient.FLAG_KEY_MEDIA_FAST_FORWARD:
-                return ACTION_FAST_FORWARD;
-            case RemoteControlClient.FLAG_KEY_MEDIA_NEXT:
-                return ACTION_SKIP_TO_NEXT;
-            case RemoteControlClient.FLAG_KEY_MEDIA_POSITION_UPDATE:
-                return ACTION_SEEK_TO;
-            case RemoteControlClient.FLAG_KEY_MEDIA_RATING:
-                return ACTION_SET_RATING;
-        }
-        return 0;
-    }
-
-    private static int getRccFlagForAction(long action) {
-        // We only care about the lower set of actions that can map to rcc
-        // flags.
-        int testAction = action < Integer.MAX_VALUE ? (int) action : 0;
-        switch (testAction) {
-            case (int) ACTION_SKIP_TO_PREVIOUS:
-                return RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS;
-            case (int) ACTION_REWIND:
-                return RemoteControlClient.FLAG_KEY_MEDIA_REWIND;
-            case (int) ACTION_PLAY:
-                return RemoteControlClient.FLAG_KEY_MEDIA_PLAY;
-            case (int) ACTION_PLAY_PAUSE:
-                return RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE;
-            case (int) ACTION_PAUSE:
-                return RemoteControlClient.FLAG_KEY_MEDIA_PAUSE;
-            case (int) ACTION_STOP:
-                return RemoteControlClient.FLAG_KEY_MEDIA_STOP;
-            case (int) ACTION_FAST_FORWARD:
-                return RemoteControlClient.FLAG_KEY_MEDIA_FAST_FORWARD;
-            case (int) ACTION_SKIP_TO_NEXT:
-                return RemoteControlClient.FLAG_KEY_MEDIA_NEXT;
-            case (int) ACTION_SEEK_TO:
-                return RemoteControlClient.FLAG_KEY_MEDIA_POSITION_UPDATE;
-            case (int) ACTION_SET_RATING:
-                return RemoteControlClient.FLAG_KEY_MEDIA_RATING;
-        }
-        return 0;
-    }
-
-    public static final Parcelable.Creator<PlaybackState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PlaybackState> CREATOR =
             new Parcelable.Creator<PlaybackState>() {
         @Override
         public PlaybackState createFromParcel(Parcel in) {
@@ -690,19 +534,19 @@ public final class PlaybackState implements Parcelable {
             return 0;
         }
 
-        public static final Parcelable.Creator<PlaybackState.CustomAction> CREATOR
-                = new Parcelable.Creator<PlaybackState.CustomAction>() {
+        public static final @android.annotation.NonNull Parcelable.Creator<PlaybackState.CustomAction> CREATOR =
+                new Parcelable.Creator<PlaybackState.CustomAction>() {
 
-            @Override
-            public PlaybackState.CustomAction createFromParcel(Parcel p) {
-                return new PlaybackState.CustomAction(p);
-            }
+                    @Override
+                    public PlaybackState.CustomAction createFromParcel(Parcel p) {
+                        return new PlaybackState.CustomAction(p);
+                    }
 
-            @Override
-            public PlaybackState.CustomAction[] newArray(int size) {
-                return new PlaybackState.CustomAction[size];
-            }
-        };
+                    @Override
+                    public PlaybackState.CustomAction[] newArray(int size) {
+                        return new PlaybackState.CustomAction[size];
+                    }
+                };
 
         /**
          * Returns the action of the {@link CustomAction}.
@@ -744,10 +588,7 @@ public final class PlaybackState implements Parcelable {
 
         @Override
         public String toString() {
-            return "Action:" +
-                    "mName='" + mName +
-                    ", mIcon=" + mIcon +
-                    ", mExtras=" + mExtras;
+            return "Action:" + "mName='" + mName + ", mIcon=" + mIcon + ", mExtras=" + mExtras;
         }
 
         /**

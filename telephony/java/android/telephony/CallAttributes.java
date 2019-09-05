@@ -143,7 +143,7 @@ public final class CallAttributes implements Parcelable {
         dest.writeParcelable(mCallQuality, flags);
     }
 
-    public static final Parcelable.Creator<CallAttributes> CREATOR = new Parcelable.Creator() {
+    public static final @android.annotation.NonNull Parcelable.Creator<CallAttributes> CREATOR = new Parcelable.Creator() {
         public CallAttributes createFromParcel(Parcel in) {
             return new CallAttributes(in);
         }

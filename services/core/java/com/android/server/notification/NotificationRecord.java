@@ -21,10 +21,8 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEUTRAL;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_POSITIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -49,7 +47,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -70,6 +67,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -93,9 +91,11 @@ import java.util.Objects;
 public final class NotificationRecord {
     static final String TAG = "NotificationRecord";
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final int MAX_LOGTAG_LENGTH = 35;
+    // the period after which a notification is updated where it can make sound
+    private static final int MAX_SOUND_DELAY_MS = 2000;
     final StatusBarNotification sbn;
     IActivityManager mAm;
+    UriGrantsManagerInternal mUgmInternal;
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
@@ -126,12 +126,16 @@ public final class NotificationRecord {
     private long mVisibleSinceMs;
 
     // The most recent update time, or the creation time if no updates.
-    private long mUpdateTimeMs;
+    @VisibleForTesting
+    final long mUpdateTimeMs;
 
     // The most recent interruption time, or the creation time if no updates. Differs from the
     // above value because updates are filtered based on whether they actually interrupted the
     // user
     private long mInterruptionTimeMs;
+
+    // The most recent time the notification made noise or buzzed the device, or -1 if it did not.
+    private long mLastAudiblyAlertedMs;
 
     // Is this record an update of an old record?
     public boolean isUpdate;
@@ -140,13 +144,18 @@ public final class NotificationRecord {
     private int mAuthoritativeRank;
     private String mGlobalSortKey;
     private int mPackageVisibility;
-    private int mUserImportance = IMPORTANCE_UNSPECIFIED;
+    private int mSystemImportance = IMPORTANCE_UNSPECIFIED;
+    private int mAssistantImportance = IMPORTANCE_UNSPECIFIED;
     private int mImportance = IMPORTANCE_UNSPECIFIED;
-    private CharSequence mImportanceExplanation = null;
+    // Field used in global sort key to bypass normal notifications
+    private int mCriticality = CriticalNotificationExtractor.NORMAL;
+    // A MetricsEvent.NotificationImportanceExplanation, tracking source of mImportance.
+    private int mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN;
+    // A MetricsEvent.NotificationImportanceExplanation for initial importance.
+    private int mInitialImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN;
 
     private int mSuppressedVisualEffects = 0;
     private String mUserExplanation;
-    private String mPeopleExplanation;
     private boolean mPreChannelsNotification = true;
     private Uri mSound;
     private long[] mVibration;
@@ -155,18 +164,26 @@ public final class NotificationRecord {
     private ArrayList<String> mPeopleOverride;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
     private boolean mShowBadge;
-    private LogMaker mLogMaker;
+    private boolean mAllowBubble;
     private Light mLight;
-    private String mGroupLogTag;
-    private String mChannelIdLogTag;
+    /**
+     * This list contains system generated smart actions from NAS, app-generated smart actions are
+     * stored in Notification.actions with isContextual() set to true.
+     */
+    private ArrayList<Notification.Action> mSystemGeneratedSmartActions;
+    private ArrayList<CharSequence> mSmartReplies;
 
     private final List<Adjustment> mAdjustments;
+    private String mAdjustmentIssuer;
     private final NotificationStats mStats;
     private int mUserSentiment;
     private boolean mIsInterruptive;
     private boolean mTextChanged;
     private boolean mRecordedInterruption;
     private int mNumberOfSmartRepliesAdded;
+    private int mNumberOfSmartActionsAdded;
+    private boolean mSuggestionsGeneratedByAssistant;
+    private boolean mEditChoicesBeforeSending;
     private boolean mHasSeenSmartReplies;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
@@ -181,6 +198,7 @@ public final class NotificationRecord {
         mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
                 .getPackageTargetSdkVersion(sbn.getPackageName());
         mAm = ActivityManager.getService();
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
         mCreationTimeMs = sbn.getPostTime();
@@ -193,7 +211,7 @@ public final class NotificationRecord {
         mSound = calculateSound();
         mVibration = calculateVibration();
         mAttributes = calculateAttributes();
-        mImportance = calculateImportance();
+        mImportance = calculateInitialImportance();
         mLight = calculateLights();
         mAdjustments = new ArrayList<>();
         mStats = new NotificationStats();
@@ -316,16 +334,20 @@ public final class NotificationRecord {
         return attributes;
     }
 
-    private int calculateImportance() {
+    private int calculateInitialImportance() {
         final Notification n = sbn.getNotification();
-        int importance = getChannel().getImportance();
-        int requestedImportance = IMPORTANCE_DEFAULT;
+        int importance = getChannel().getImportance();  // Post-channels notifications use this
+        mInitialImportanceExplanationCode = getChannel().hasUserSetImportance()
+                ? MetricsEvent.IMPORTANCE_EXPLANATION_USER
+                : MetricsEvent.IMPORTANCE_EXPLANATION_APP;
 
-        // Migrate notification flags to scores
+        // Migrate notification priority flag to a priority value.
         if (0 != (n.flags & Notification.FLAG_HIGH_PRIORITY)) {
             n.priority = Notification.PRIORITY_MAX;
         }
 
+        // Convert priority value to an importance value, used only for pre-channels notifications.
+        int requestedImportance = IMPORTANCE_DEFAULT;
         n.priority = NotificationManagerService.clamp(n.priority, Notification.PRIORITY_MIN,
                 Notification.PRIORITY_MAX);
         switch (n.priority) {
@@ -346,10 +368,11 @@ public final class NotificationRecord {
         stats.requestedImportance = requestedImportance;
         stats.isNoisy = mSound != null || mVibration != null;
 
+        // For pre-channels notifications, apply system overrides and then use requestedImportance
+        // as importance.
         if (mPreChannelsNotification
                 && (importance == IMPORTANCE_UNSPECIFIED
-                || (getChannel().getUserLockedFields()
-                & USER_LOCKED_IMPORTANCE) == 0)) {
+                || (!getChannel().hasUserSetImportance()))) {
             if (!stats.isNoisy && requestedImportance > IMPORTANCE_LOW) {
                 requestedImportance = IMPORTANCE_LOW;
             }
@@ -364,6 +387,8 @@ public final class NotificationRecord {
                 requestedImportance = IMPORTANCE_HIGH;
             }
             importance = requestedImportance;
+            mInitialImportanceExplanationCode =
+                    MetricsEvent.IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS;
         }
 
         stats.naturalImportance = importance;
@@ -414,6 +439,8 @@ public final class NotificationRecord {
         if (getAudioAttributes() != null) {
             getAudioAttributes().writeToProto(proto, NotificationRecordProto.AUDIO_ATTRIBUTES);
         }
+        proto.write(NotificationRecordProto.PACKAGE, sbn.getPackageName());
+        proto.write(NotificationRecordProto.DELEGATE_PACKAGE, sbn.getOpPkg());
 
         proto.end(token);
     }
@@ -434,6 +461,7 @@ public final class NotificationRecord {
         pw.println(prefix + this);
         prefix = prefix + "  ";
         pw.println(prefix + "uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
+        pw.println(prefix + "opPkg=" + sbn.getOpPkg());
         pw.println(prefix + "icon=" + iconStr);
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
         pw.println(prefix + "pri=" + notification.priority);
@@ -443,6 +471,8 @@ public final class NotificationRecord {
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "contentIntent=" + notification.contentIntent);
         pw.println(prefix + "deleteIntent=" + notification.deleteIntent);
+        pw.println(prefix + "number=" + notification.number);
+        pw.println(prefix + "groupAlertBehavior=" + notification.getGroupAlertBehavior());
 
         pw.print(prefix + "tickerText=");
         if (!TextUtils.isEmpty(notification.tickerText)) {
@@ -518,11 +548,13 @@ public final class NotificationRecord {
         pw.println(prefix + "mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "mPackageVisibility=" + mPackageVisibility);
-        pw.println(prefix + "mUserImportance="
-                + NotificationListenerService.Ranking.importanceToString(mUserImportance));
+        pw.println(prefix + "mSystemImportance="
+                + NotificationListenerService.Ranking.importanceToString(mSystemImportance));
+        pw.println(prefix + "mAsstImportance="
+                + NotificationListenerService.Ranking.importanceToString(mAssistantImportance));
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
-        pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
+        pw.println(prefix + "mImportanceExplanation=" + getImportanceExplanation());
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
@@ -593,6 +625,17 @@ public final class NotificationRecord {
                 mIsAppImportanceLocked, this.sbn.getNotification());
     }
 
+    public boolean hasAdjustment(String key) {
+        synchronized (mAdjustments) {
+            for (Adjustment adjustment : mAdjustments) {
+                if (adjustment.getSignals().containsKey(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void addAdjustment(Adjustment adjustment) {
         synchronized (mAdjustments) {
             mAdjustments.add(adjustment);
@@ -600,6 +643,7 @@ public final class NotificationRecord {
     }
 
     public void applyAdjustments() {
+        long now = System.currentTimeMillis();
         synchronized (mAdjustments) {
             for (Adjustment adjustment: mAdjustments) {
                 Bundle signals = adjustment.getSignals();
@@ -628,7 +672,25 @@ public final class NotificationRecord {
                                 Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
                     }
                 }
+                if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
+                    setSystemGeneratedSmartActions(
+                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
+                }
+                if (signals.containsKey(Adjustment.KEY_TEXT_REPLIES)) {
+                    setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_TEXT_REPLIES));
+                }
+                if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
+                    int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
+                    importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
+                    importance = Math.min(IMPORTANCE_HIGH, importance);
+                    setAssistantImportance(importance);
+                }
+                if (!signals.isEmpty() && adjustment.getIssuer() != null) {
+                    mAdjustmentIssuer = adjustment.getIssuer();
+                }
             }
+            // We have now gotten all the information out of the adjustments and can forget them.
+            mAdjustments.clear();
         }
     }
 
@@ -639,10 +701,6 @@ public final class NotificationRecord {
 
     public void setContactAffinity(float contactAffinity) {
         mContactAffinity = contactAffinity;
-        if (mImportance < IMPORTANCE_DEFAULT &&
-                mContactAffinity > ValidateNotificationPeople.VALID_CONTACT) {
-            setImportance(IMPORTANCE_DEFAULT, getPeopleExplanation());
-        }
     }
 
     public float getContactAffinity() {
@@ -680,11 +738,6 @@ public final class NotificationRecord {
         return mPackageVisibility;
     }
 
-    public void setUserImportance(int importance) {
-        mUserImportance = importance;
-        applyUserImportance();
-    }
-
     private String getUserExplanation() {
         if (mUserExplanation == null) {
             mUserExplanation = mContext.getResources().getString(
@@ -693,31 +746,56 @@ public final class NotificationRecord {
         return mUserExplanation;
     }
 
-    private String getPeopleExplanation() {
-        if (mPeopleExplanation == null) {
-            mPeopleExplanation = mContext.getResources().getString(
-                    com.android.internal.R.string.importance_from_person);
-        }
-        return mPeopleExplanation;
+    /**
+     * Sets the importance value the system thinks the record should have.
+     * e.g. bumping up foreground service notifications or people to people notifications.
+     */
+    public void setSystemImportance(int importance) {
+        mSystemImportance = importance;
+        // System importance is only changed in enqueue, so it's ok for us to calculate the
+        // importance directly instead of waiting for signal extractor.
+        calculateImportance();
     }
 
-    private void applyUserImportance() {
-        if (mUserImportance != IMPORTANCE_UNSPECIFIED) {
-            mImportance = mUserImportance;
-            mImportanceExplanation = getUserExplanation();
-        }
+    /**
+     * Sets the importance value the
+     * {@link android.service.notification.NotificationAssistantService} thinks the record should
+     * have.
+     */
+    public void setAssistantImportance(int importance) {
+        mAssistantImportance = importance;
+        // Unlike the system importance, the assistant importance can change on posted
+        // notifications, so don't calculateImportance() here, but wait for the signal extractors.
     }
 
-    public int getUserImportance() {
-        return mUserImportance;
+    /**
+     * Returns the importance set by the assistant, or IMPORTANCE_UNSPECIFIED if the assistant
+     * hasn't set it.
+     */
+    public int getAssistantImportance() {
+        return mAssistantImportance;
     }
 
-    public void setImportance(int importance, CharSequence explanation) {
-        if (importance != IMPORTANCE_UNSPECIFIED) {
-            mImportance = importance;
-            mImportanceExplanation = explanation;
+    /**
+     * Recalculates the importance of the record after fields affecting importance have changed,
+     * and records an explanation.
+     */
+    protected void calculateImportance() {
+        mImportance = calculateInitialImportance();
+        mImportanceExplanationCode = mInitialImportanceExplanationCode;
+
+        // Consider Notification Assistant and system overrides to importance. If both, system wins.
+        if (!getChannel().hasUserSetImportance()
+                && mAssistantImportance != IMPORTANCE_UNSPECIFIED
+                && !getChannel().isImportanceLockedByOEM()
+                && !getChannel().isImportanceLockedByCriticalDeviceFunction()) {
+            mImportance = mAssistantImportance;
+            mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_ASST;
         }
-        applyUserImportance();
+        if (mSystemImportance != IMPORTANCE_UNSPECIFIED) {
+            mImportance = mSystemImportance;
+            mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM;
+        }
     }
 
     public int getImportance() {
@@ -725,7 +803,20 @@ public final class NotificationRecord {
     }
 
     public CharSequence getImportanceExplanation() {
-        return mImportanceExplanation;
+        switch (mImportanceExplanationCode) {
+            case MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN:
+                return null;
+            case MetricsEvent.IMPORTANCE_EXPLANATION_APP:
+            case MetricsEvent.IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS:
+                return "app";
+            case MetricsEvent.IMPORTANCE_EXPLANATION_USER:
+                return "user";
+            case MetricsEvent.IMPORTANCE_EXPLANATION_ASST:
+                return "asst";
+            case MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM:
+                return "system";
+        }
+        return null;
     }
 
     public boolean setIntercepted(boolean intercept) {
@@ -733,8 +824,25 @@ public final class NotificationRecord {
         return mIntercept;
     }
 
+    /**
+     * Set to affect global sort key.
+     *
+     * @param criticality used in a string based sort thus 0 is the most critical
+     */
+    public void setCriticality(int criticality) {
+        mCriticality = criticality;
+    }
+
+    public int getCriticality() {
+        return mCriticality;
+    }
+
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public boolean isNewEnoughForAlerting(long now) {
+        return getFreshnessMs(now) <= MAX_SOUND_DELAY_MS;
     }
 
     public void setHidden(boolean hidden) {
@@ -873,33 +981,6 @@ public final class NotificationRecord {
 
     public void setOverrideGroupKey(String overrideGroupKey) {
         sbn.setOverrideGroupKey(overrideGroupKey);
-        mGroupLogTag = null;
-    }
-
-    private String getGroupLogTag() {
-        if (mGroupLogTag == null) {
-            mGroupLogTag = shortenTag(sbn.getGroup());
-        }
-        return mGroupLogTag;
-    }
-
-    private String getChannelIdLogTag() {
-        if (mChannelIdLogTag == null) {
-            mChannelIdLogTag = shortenTag(mChannel.getId());
-        }
-        return mChannelIdLogTag;
-    }
-
-    private String shortenTag(String longTag) {
-        if (longTag == null) {
-            return null;
-        }
-        if (longTag.length() < MAX_LOGTAG_LENGTH) {
-            return longTag;
-        } else {
-            return longTag.substring(0, MAX_LOGTAG_LENGTH - 8) + "-" +
-                    Integer.toHexString(longTag.hashCode());
-        }
     }
 
     public NotificationChannel getChannel() {
@@ -907,7 +988,7 @@ public final class NotificationRecord {
     }
 
     /**
-     * @see RankingHelper#getIsAppImportanceLocked(String, int)
+     * @see PreferencesHelper#getIsAppImportanceLocked(String, int)
      */
     public boolean getIsAppImportanceLocked() {
         return mIsAppImportanceLocked;
@@ -923,6 +1004,14 @@ public final class NotificationRecord {
 
     public void setShowBadge(boolean showBadge) {
         mShowBadge = showBadge;
+    }
+
+    public boolean canBubble() {
+        return mAllowBubble;
+    }
+
+    public void setAllowBubble(boolean allow) {
+        mAllowBubble = allow;
     }
 
     public boolean canShowBadge() {
@@ -964,6 +1053,10 @@ public final class NotificationRecord {
         }
     }
 
+    public void setAudiblyAlerted(boolean audiblyAlerted) {
+        mLastAudiblyAlertedMs = audiblyAlerted ? System.currentTimeMillis() : -1;
+    }
+
     public void setTextChanged(boolean textChanged) {
         mTextChanged = textChanged;
     }
@@ -978,6 +1071,11 @@ public final class NotificationRecord {
 
     public boolean isInterruptive() {
         return mIsInterruptive;
+    }
+
+    /** Returns the time the notification audibly alerted the user. */
+    public long getLastAudiblyAlertedMs() {
+        return mLastAudiblyAlertedMs;
     }
 
     protected void setPeopleOverride(ArrayList<String> people) {
@@ -1023,6 +1121,10 @@ public final class NotificationRecord {
         mStats.setDismissalSurface(surface);
     }
 
+    public void recordDismissalSentiment(@NotificationStats.DismissalSentiment int sentiment) {
+        mStats.setDismissalSentiment(sentiment);
+    }
+
     public void recordSnoozed() {
         mStats.setSnoozed();
     }
@@ -1039,12 +1141,67 @@ public final class NotificationRecord {
         return mNumberOfSmartRepliesAdded;
     }
 
+    public void setNumSmartActionsAdded(int noActions) {
+        mNumberOfSmartActionsAdded = noActions;
+    }
+
+    public int getNumSmartActionsAdded() {
+        return mNumberOfSmartActionsAdded;
+    }
+
+    public void setSuggestionsGeneratedByAssistant(boolean generatedByAssistant) {
+        mSuggestionsGeneratedByAssistant = generatedByAssistant;
+    }
+
+    public boolean getSuggestionsGeneratedByAssistant() {
+        return mSuggestionsGeneratedByAssistant;
+    }
+
+    public boolean getEditChoicesBeforeSending() {
+        return mEditChoicesBeforeSending;
+    }
+
+    public void setEditChoicesBeforeSending(boolean editChoicesBeforeSending) {
+        mEditChoicesBeforeSending = editChoicesBeforeSending;
+    }
+
     public boolean hasSeenSmartReplies() {
         return mHasSeenSmartReplies;
     }
 
     public void setSeenSmartReplies(boolean hasSeenSmartReplies) {
         mHasSeenSmartReplies = hasSeenSmartReplies;
+    }
+
+    /**
+     * Returns whether this notification has been visible and expanded at the same time.
+     */
+    public boolean hasBeenVisiblyExpanded() {
+        return stats.hasBeenVisiblyExpanded();
+    }
+
+    public void setSystemGeneratedSmartActions(
+            ArrayList<Notification.Action> systemGeneratedSmartActions) {
+        mSystemGeneratedSmartActions = systemGeneratedSmartActions;
+    }
+
+    public ArrayList<Notification.Action> getSystemGeneratedSmartActions() {
+        return mSystemGeneratedSmartActions;
+    }
+
+    public void setSmartReplies(ArrayList<CharSequence> smartReplies) {
+        mSmartReplies = smartReplies;
+    }
+
+    public ArrayList<CharSequence> getSmartReplies() {
+        return mSmartReplies;
+    }
+
+    /**
+     * Returns whether this notification was posted by a secondary app
+     */
+    public boolean isProxied() {
+        return !Objects.equals(sbn.getPackageName(), sbn.getOpPkg());
     }
 
     /**
@@ -1093,7 +1250,7 @@ public final class NotificationRecord {
         final long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException if caller can't grant
-            mAm.checkGrantUriPermission(sourceUid, null,
+            mUgmInternal.checkGrantUriPermission(sourceUid, null,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
@@ -1102,8 +1259,6 @@ public final class NotificationRecord {
                 mGrantableUris = new ArraySet<>();
             }
             mGrantableUris.add(uri);
-        } catch (RemoteException ignored) {
-            // Ignored because we're in same process
         } catch (SecurityException e) {
             if (!userOverriddenUri) {
                 if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
@@ -1118,33 +1273,50 @@ public final class NotificationRecord {
     }
 
     public LogMaker getLogMaker(long now) {
-        if (mLogMaker == null) {
-            // initialize fields that only change on update (so a new record)
-            mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
-                    .setPackageName(sbn.getPackageName())
-                    .addTaggedData(MetricsEvent.NOTIFICATION_ID, sbn.getId())
-                    .addTaggedData(MetricsEvent.NOTIFICATION_TAG, sbn.getTag())
-                    .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID, getChannelIdLogTag());
-        }
-        // reset fields that can change between updates, or are used by multiple logs
-        return mLogMaker
-                .clearCategory()
-                .clearType()
-                .clearSubtype()
-                .clearTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX)
+        LogMaker lm = sbn.getLogMaker()
                 .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE, mImportance)
-                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID, getGroupLogTag())
-                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY,
-                        sbn.getNotification().isGroupSummary() ? 1 : 0)
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, getExposureMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_INTERRUPTION_MILLIS,
                         getInterruptionMs(now));
+        // Record results of the calculateImportance() calculation if available.
+        if (mImportanceExplanationCode != MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN) {
+            lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION,
+                    mImportanceExplanationCode);
+            // To avoid redundancy, we log the initial importance information only if it was
+            // overridden.
+            if (((mImportanceExplanationCode == MetricsEvent.IMPORTANCE_EXPLANATION_ASST)
+                    || (mImportanceExplanationCode == MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM))
+                    && (stats.naturalImportance != IMPORTANCE_UNSPECIFIED)) {
+                // stats.naturalImportance is due to one of the 3 sources of initial importance.
+                lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION,
+                        mInitialImportanceExplanationCode);
+                lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL,
+                        stats.naturalImportance);
+            }
+        }
+        // Log Assistant override if present, whether or not importance calculation is complete.
+        if (mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
+            lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST,
+                        mAssistantImportance);
+        }
+        // Log the issuer of any adjustments that may have affected this notification. We only log
+        // the hash here as NotificationItem events are frequent, and the number of NAS
+        // implementations (and hence the chance of collisions) is low.
+        if (mAdjustmentIssuer != null) {
+            lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_ASSISTANT_SERVICE_HASH,
+                    mAdjustmentIssuer.hashCode());
+        }
+        return lm;
     }
 
     public LogMaker getLogMaker() {
         return getLogMaker(System.currentTimeMillis());
+    }
+
+    public LogMaker getItemLogMaker() {
+        return getLogMaker().setCategory(MetricsEvent.NOTIFICATION_ITEM);
     }
 
     @VisibleForTesting

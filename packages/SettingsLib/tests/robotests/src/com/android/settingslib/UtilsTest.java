@@ -20,13 +20,13 @@ import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static com.android.settingslib.Utils.STORAGE_MANAGER_ENABLED_PROPERTY;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -38,10 +38,8 @@ import android.media.AudioManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
+import android.telephony.ServiceState;
 import android.text.TextUtils;
-
-import com.android.settingslib.wrapper.LocationManagerWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,20 +48,18 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowAudioManager;
 import org.robolectric.shadows.ShadowSettings;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(shadows = {
-            UtilsTest.ShadowSecure.class,
-            UtilsTest.ShadowLocationManagerWrapper.class})
+@RunWith(RobolectricTestRunner.class)
+@Config(shadows = {UtilsTest.ShadowSecure.class, UtilsTest.ShadowLocationManager.class})
 public class UtilsTest {
     private static final double[] TEST_PERCENTAGES = {0, 0.4, 0.5, 0.6, 49, 49.3, 49.8, 50, 100};
     private static final String PERCENTAGE_0 = "0%";
@@ -72,10 +68,12 @@ public class UtilsTest {
     private static final String PERCENTAGE_50 = "50%";
     private static final String PERCENTAGE_100 = "100%";
 
-    private ShadowAudioManager mShadowAudioManager;
+    private AudioManager mAudioManager;
     private Context mContext;
     @Mock
     private LocationManager mLocationManager;
+    @Mock
+    private ServiceState mServiceState;
 
     @Before
     public void setUp() {
@@ -83,26 +81,7 @@ public class UtilsTest {
         mContext = spy(RuntimeEnvironment.application);
         when(mContext.getSystemService(Context.LOCATION_SERVICE)).thenReturn(mLocationManager);
         ShadowSecure.reset();
-        mShadowAudioManager = shadowOf(mContext.getSystemService(AudioManager.class));
-    }
-
-    @Test
-    public void testUpdateLocationMode_sendBroadcast() {
-        int currentUserId = ActivityManager.getCurrentUser();
-        Utils.updateLocationMode(
-                mContext,
-                Secure.LOCATION_MODE_OFF,
-                Secure.LOCATION_MODE_HIGH_ACCURACY,
-                currentUserId,
-                Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
-
-        verify(mContext).sendBroadcastAsUser(
-                argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
-                ArgumentMatchers.eq(UserHandle.of(currentUserId)),
-                ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
-        assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.LOCATION_CHANGER, Settings.Secure.LOCATION_CHANGER_UNKNOWN))
-                .isEqualTo(Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
+        mAudioManager = mContext.getSystemService(AudioManager.class);
     }
 
     @Test
@@ -192,8 +171,8 @@ public class UtilsTest {
         }
     }
 
-    @Implements(value = LocationManagerWrapper.class)
-    public static class ShadowLocationManagerWrapper {
+    @Implements(value = LocationManager.class)
+    public static class ShadowLocationManager {
 
         @Implementation
         public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
@@ -203,29 +182,105 @@ public class UtilsTest {
 
     @Test
     public void isAudioModeOngoingCall_modeInCommunication_returnTrue() {
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isTrue();
     }
 
     @Test
     public void isAudioModeOngoingCall_modeInCall_returnTrue() {
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isTrue();
     }
 
     @Test
     public void isAudioModeOngoingCall_modeRingtone_returnTrue() {
-        mShadowAudioManager.setMode(AudioManager.MODE_RINGTONE);
+        mAudioManager.setMode(AudioManager.MODE_RINGTONE);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isTrue();
     }
 
     @Test
     public void isAudioModeOngoingCall_modeNormal_returnFalse() {
-        mShadowAudioManager.setMode(AudioManager.MODE_NORMAL);
+        mAudioManager.setMode(AudioManager.MODE_NORMAL);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isFalse();
+    }
+
+    @Test
+    public void isInService_servicestateNull_returnFalse() {
+        assertThat(Utils.isInService(null)).isFalse();
+    }
+
+    @Test
+    public void isInService_voiceInService_returnTrue() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isTrue();
+    }
+
+    @Test
+    public void isInService_voiceOutOfServiceDataInService_returnTrue() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isTrue();
+    }
+
+    @Test
+    public void isInService_voiceOutOfServiceDataInServiceOnIwLan_returnFalse() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataNetworkType())
+                .thenReturn(ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isFalse();
+    }
+
+    @Test
+    public void isInService_voiceOutOfServiceDataOutOfService_returnFalse() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isFalse();
+    }
+
+    @Test
+    public void isInService_ServiceStatePowerOff_returnFalse() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+        assertThat(Utils.isInService(mServiceState)).isFalse();
+    }
+
+    @Test
+    public void getCombinedServiceState_servicestateNull_returnOutOfService() {
+        assertThat(Utils.getCombinedServiceState(null)).isEqualTo(
+                ServiceState.STATE_OUT_OF_SERVICE);
+    }
+
+    @Test
+    public void getCombinedServiceState_ServiceStatePowerOff_returnPowerOff() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_POWER_OFF);
+    }
+
+    @Test
+    public void getCombinedServiceState_voiceInService_returnInService() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_IN_SERVICE);
+    }
+
+    @Test
+    public void getCombinedServiceState_voiceOutOfServiceDataInService_returnInService() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_IN_SERVICE);
+    }
+
+    @Test
+    public void getCombinedServiceState_voiceOutOfServiceDataOutOfService_returnOutOfService() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_OUT_OF_SERVICE);
     }
 }

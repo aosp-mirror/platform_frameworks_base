@@ -407,7 +407,7 @@ public final class ResponderConfig implements Parcelable {
         dest.writeInt(preamble);
     }
 
-    public static final Creator<ResponderConfig> CREATOR = new Creator<ResponderConfig>() {
+    public static final @android.annotation.NonNull Creator<ResponderConfig> CREATOR = new Creator<ResponderConfig>() {
         @Override
         public ResponderConfig[] newArray(int size) {
             return new ResponderConfig[size];

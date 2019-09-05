@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2017, The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License")
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+    <dimen name="num_pad_margin_left">112dp</dimen>
+    <dimen name="num_pad_margin_right">144dp</dimen>
+    <dimen name="num_pad_key_width">80dp</dimen>
+    <dimen name="num_pad_key_height">80dp</dimen>
+    <dimen name="num_pad_key_margin_horizontal">@*android:dimen/car_padding_5</dimen>
+    <dimen name="num_pad_key_margin_bottom">@*android:dimen/car_padding_5</dimen>
+    <dimen name="pin_entry_height">@dimen/num_pad_key_height</dimen>
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="key_enter_margin_top">128dp</dimen>
+    <dimen name="keyguard_pattern_dimension">400dp</dimen>
+    <dimen name="password_field_width">350dp</dimen>
+    <dimen name="pin_pattern_pad_margin_vertical">0dp</dimen>
+</resources>

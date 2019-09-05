@@ -16,9 +16,16 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.UnsupportedAppUsage;
+import android.app.KeyguardManager;
+
 
 /**
  * Interface containing all of the biometric modality agnostic constants.
+ *
+ * NOTE: The error messages must be consistent between BiometricConstants, Biometric*Constants,
+ *       and the frameworks/support/biometric/.../BiometricConstants files.
+ *
  * @hide
  */
 public interface BiometricConstants {
@@ -26,6 +33,13 @@ public interface BiometricConstants {
     // Error messages from biometric hardware during initilization, enrollment, authentication or
     // removal.
     //
+
+    /**
+     * This was not added here since it would update BiometricPrompt API. But, is used in
+     * BiometricManager.
+     * @hide
+     */
+    int BIOMETRIC_SUCCESS = 0;
 
     /**
      * The hardware is unavailable. Try again later.
@@ -106,8 +120,23 @@ public interface BiometricConstants {
     int BIOMETRIC_ERROR_HW_NOT_PRESENT = 12;
 
     /**
+     * The user pressed the negative button. This is a placeholder that is currently only used
+     * by the support library.
      * @hide
      */
+    int BIOMETRIC_ERROR_NEGATIVE_BUTTON = 13;
+
+    /**
+     * The device does not have pin, pattern, or password set up. See
+     * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)} and
+     * {@link KeyguardManager#isDeviceSecure()}
+     */
+    int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
+
+    /**
+     * @hide
+     */
+    @UnsupportedAppUsage
     int BIOMETRIC_ERROR_VENDOR_BASE = 1000;
 
     //
@@ -161,5 +190,5 @@ public interface BiometricConstants {
     /**
      * @hide
      */
-    int BIOMETRICT_ACQUIRED_VENDOR_BASE = 1000;
+    int BIOMETRIC_ACQUIRED_VENDOR_BASE = 1000;
 }

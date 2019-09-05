@@ -23,14 +23,10 @@
 #include <utils/String8.h>
 #include <gui/Surface.h>
 
-// ToDo: Fix code to be warning free
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
-#pragma GCC diagnostic pop
 
 #include <android/native_window.h>
 
@@ -148,13 +144,16 @@ void SpriteController::doUpdateSprites() {
         }
     }
 
-    // Resize sprites if needed.
+    // Resize and/or reparent sprites if needed.
     SurfaceComposerClient::Transaction t;
     bool needApplyTransaction = false;
     for (size_t i = 0; i < numSprites; i++) {
         SpriteUpdate& update = updates.editItemAt(i);
+        if (update.state.surfaceControl == nullptr) {
+            continue;
+        }
 
-        if (update.state.surfaceControl != NULL && update.state.wantSurfaceVisible()) {
+        if (update.state.wantSurfaceVisible()) {
             int32_t desiredWidth = update.state.icon.bitmap.width();
             int32_t desiredHeight = update.state.icon.bitmap.height();
             if (update.state.surfaceWidth < desiredWidth
@@ -173,6 +172,12 @@ void SpriteController::doUpdateSprites() {
                     update.state.surfaceVisible = false;
                 }
             }
+        }
+
+        // If surface is a new one, we have to set right layer stack.
+        if (update.surfaceChanged || update.state.dirty & DIRTY_DISPLAY_ID) {
+            t.setLayerStack(update.state.surfaceControl, update.state.displayId);
+            needApplyTransaction = true;
         }
     }
     if (needApplyTransaction) {
@@ -240,7 +245,7 @@ void SpriteController::doUpdateSprites() {
         if (update.state.surfaceControl != NULL && (becomingVisible || becomingHidden
                 || (wantSurfaceVisibleAndDrawn && (update.state.dirty & (DIRTY_ALPHA
                         | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER
-                        | DIRTY_VISIBILITY | DIRTY_HOTSPOT))))) {
+                        | DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID))))) {
             needApplyTransaction = true;
 
             if (wantSurfaceVisibleAndDrawn
@@ -446,6 +451,15 @@ void SpriteController::SpriteImpl::setTransformationMatrix(
     if (mLocked.state.transformationMatrix != matrix) {
         mLocked.state.transformationMatrix = matrix;
         invalidateLocked(DIRTY_TRANSFORMATION_MATRIX);
+    }
+}
+
+void SpriteController::SpriteImpl::setDisplayId(int32_t displayId) {
+    AutoMutex _l(mController->mLock);
+
+    if (mLocked.state.displayId != displayId) {
+        mLocked.state.displayId = displayId;
+        invalidateLocked(DIRTY_DISPLAY_ID);
     }
 }
 

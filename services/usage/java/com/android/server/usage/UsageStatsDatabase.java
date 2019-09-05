@@ -25,6 +25,11 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
+
+import libcore.io.IoUtils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -32,26 +37,63 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provides an interface to query for UsageStat data from an XML database.
+ * Provides an interface to query for UsageStat data from a Protocol Buffer database.
+ *
+ * Prior to version 4, UsageStatsDatabase used XML to store Usage Stats data to disk.
+ * When the UsageStatsDatabase version is upgraded, the files on disk are migrated to the new
+ * version on init. The steps of migration are as follows:
+ * 1) Check if version upgrade breadcrumb exists on disk, if so skip to step 4.
+ * 2) Move current files to a timestamped backup directory.
+ * 3) Write a temporary breadcrumb file with some info about the backup directory.
+ * 4) Deserialize the backup files in the timestamped backup folder referenced by the breadcrumb.
+ * 5) Reserialize the data read from the file with the new version format and replace the old files
+ * 6) Repeat Step 3 and 4 for each file in the backup folder.
+ * 7) Update the version file with the new version and build fingerprint.
+ * 8) Delete the time stamped backup folder (unless flagged to be kept).
+ * 9) Delete the breadcrumb file.
+ *
+ * Performing the upgrade steps in this order, protects against unexpected shutdowns mid upgrade
+ *
+ * The backup directory will contain directories with timestamp names. If the upgrade breadcrumb
+ * exists on disk, it will contain a timestamp which will match one of the backup directories. The
+ * breadcrumb will also contain a version number which will denote how the files in the backup
+ * directory should be deserialized.
  */
-class UsageStatsDatabase {
-    private static final int CURRENT_VERSION = 3;
+public class UsageStatsDatabase {
+    private static final int DEFAULT_CURRENT_VERSION = 4;
+    /**
+     * Current version of the backup schema
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int BACKUP_VERSION = 4;
 
-    // Current version of the backup schema
-    static final int BACKUP_VERSION = 1;
+    @VisibleForTesting
+    static final int[] MAX_FILES_PER_INTERVAL_TYPE = new int[]{100, 50, 12, 10};
 
     // Key under which the payload blob is stored
     // same as UsageStatsBackupHelper.KEY_USAGE_STATS
     static final String KEY_USAGE_STATS = "usage_stats";
 
+    // Persist versioned backup files.
+    // Should be false, except when testing new versions
+    static final boolean KEEP_BACKUP_DIR = false;
 
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
@@ -63,22 +105,44 @@ class UsageStatsDatabase {
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
-    private final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
+    @VisibleForTesting
+    final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
     private final UnixCalendar mCal;
     private final File mVersionFile;
+    private final File mBackupsDir;
+    // If this file exists on disk, UsageStatsDatabase is in the middle of migrating files to a new
+    // version. If this file exists on boot, the upgrade was interrupted and needs to be picked up
+    // where it left off.
+    private final File mUpdateBreadcrumb;
+    // Current version of the database files schema
+    private int mCurrentVersion;
     private boolean mFirstUpdate;
     private boolean mNewUpdate;
 
-    public UsageStatsDatabase(File dir) {
-        mIntervalDirs = new File[] {
-                new File(dir, "daily"),
-                new File(dir, "weekly"),
-                new File(dir, "monthly"),
-                new File(dir, "yearly"),
+    /**
+     * UsageStatsDatabase constructor that allows setting the version number.
+     * This should only be used for testing.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public UsageStatsDatabase(File dir, int version) {
+        mIntervalDirs = new File[]{
+            new File(dir, "daily"),
+            new File(dir, "weekly"),
+            new File(dir, "monthly"),
+            new File(dir, "yearly"),
         };
+        mCurrentVersion = version;
         mVersionFile = new File(dir, "version");
+        mBackupsDir = new File(dir, "backups");
+        mUpdateBreadcrumb = new File(dir, "breadcrumb");
         mSortedStatFiles = new TimeSparseArray[mIntervalDirs.length];
         mCal = new UnixCalendar(0);
+    }
+
+    public UsageStatsDatabase(File dir) {
+        this(dir, DEFAULT_CURRENT_VERSION);
     }
 
     /**
@@ -154,7 +218,7 @@ class UsageStatsDatabase {
             try {
                 IntervalStats stats = new IntervalStats();
                 for (int i = start; i < fileCount - 1; i++) {
-                    UsageStatsXml.read(files.valueAt(i), stats);
+                    readLocked(files.valueAt(i), stats);
                     if (!checkinAction.checkin(stats)) {
                         return false;
                     }
@@ -186,6 +250,14 @@ class UsageStatsDatabase {
         return true;
     }
 
+    /** @hide */
+    @VisibleForTesting
+    void forceIndexFiles() {
+        synchronized (mLock) {
+            indexFilesLocked();
+        }
+    }
+
     private void indexFilesLocked() {
         final FilenameFilter backupFileFilter = new FilenameFilter() {
             @Override
@@ -193,7 +265,6 @@ class UsageStatsDatabase {
                 return !name.endsWith(BAK_SUFFIX);
             }
         };
-
         // Index the available usage stat files on disk.
         for (int i = 0; i < mSortedStatFiles.length; i++) {
             if (mSortedStatFiles[i] == null) {
@@ -206,14 +277,25 @@ class UsageStatsDatabase {
                 if (DEBUG) {
                     Slog.d(TAG, "Found " + files.length + " stat files for interval " + i);
                 }
-
-                for (File f : files) {
+                final int len = files.length;
+                for (int j = 0; j < len; j++) {
+                    final File f = files[j];
                     final AtomicFile af = new AtomicFile(f);
                     try {
-                        mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
+                        mSortedStatFiles[i].put(parseBeginTime(af), af);
                     } catch (IOException e) {
                         Slog.e(TAG, "failed to index file: " + f, e);
                     }
+                }
+
+                // only keep the max allowed number of files for each interval type.
+                final int toDelete = mSortedStatFiles[i].size() - MAX_FILES_PER_INTERVAL_TYPE[i];
+                if (toDelete > 0) {
+                    for (int j = 0; j < toDelete; j++) {
+                        mSortedStatFiles[i].valueAt(0).delete();
+                        mSortedStatFiles[i].removeAt(0);
+                    }
+                    Slog.d(TAG, "Deleted " + toDelete + " stat files for interval " + i);
                 }
             }
         }
@@ -252,14 +334,41 @@ class UsageStatsDatabase {
             version = 0;
         }
 
-        if (version != CURRENT_VERSION) {
-            Slog.i(TAG, "Upgrading from version " + version + " to " + CURRENT_VERSION);
-            doUpgradeLocked(version);
+        if (version != mCurrentVersion) {
+            Slog.i(TAG, "Upgrading from version " + version + " to " + mCurrentVersion);
+            if (!mUpdateBreadcrumb.exists()) {
+                try {
+                    doUpgradeLocked(version);
+                } catch (Exception e) {
+                    Slog.e(TAG,
+                            "Failed to upgrade from version " + version + " to " + mCurrentVersion,
+                            e);
+                    // Fallback to previous version.
+                    mCurrentVersion = version;
+                    return;
+                }
+            } else {
+                Slog.i(TAG, "Version upgrade breadcrumb found on disk! Continuing version upgrade");
+            }
         }
 
-        if (version != CURRENT_VERSION || mNewUpdate) {
+        if (mUpdateBreadcrumb.exists()) {
+            int previousVersion;
+            long token;
+            try (BufferedReader reader = new BufferedReader(
+                    new FileReader(mUpdateBreadcrumb))) {
+                token = Long.parseLong(reader.readLine());
+                previousVersion = Integer.parseInt(reader.readLine());
+            } catch (NumberFormatException | IOException e) {
+                Slog.e(TAG, "Failed read version upgrade breadcrumb");
+                throw new RuntimeException(e);
+            }
+            continueUpgradeLocked(previousVersion, token);
+        }
+
+        if (version != mCurrentVersion || mNewUpdate) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mVersionFile))) {
-                writer.write(Integer.toString(CURRENT_VERSION));
+                writer.write(Integer.toString(mCurrentVersion));
                 writer.write("\n");
                 writer.write(currentFingerprint);
                 writer.write("\n");
@@ -268,6 +377,15 @@ class UsageStatsDatabase {
                 Slog.e(TAG, "Failed to write new version");
                 throw new RuntimeException(e);
             }
+        }
+
+        if (mUpdateBreadcrumb.exists()) {
+            // Files should be up to date with current version. Clear the version update breadcrumb
+            mUpdateBreadcrumb.delete();
+        }
+
+        if (mBackupsDir.exists() && !KEEP_BACKUP_DIR) {
+            deleteDirectory(mBackupsDir);
         }
     }
 
@@ -287,6 +405,101 @@ class UsageStatsDatabase {
                 if (files != null) {
                     for (File f : files) {
                         f.delete();
+                    }
+                }
+            }
+        } else {
+            // Create a dir in backups based on current timestamp
+            final long token = System.currentTimeMillis();
+            final File backupDir = new File(mBackupsDir, Long.toString(token));
+            backupDir.mkdirs();
+            if (!backupDir.exists()) {
+                throw new IllegalStateException(
+                        "Failed to create backup directory " + backupDir.getAbsolutePath());
+            }
+            try {
+                Files.copy(mVersionFile.toPath(),
+                        new File(backupDir, mVersionFile.getName()).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to back up version file : " + mVersionFile.toString());
+                throw new RuntimeException(e);
+            }
+
+            for (int i = 0; i < mIntervalDirs.length; i++) {
+                final File backupIntervalDir = new File(backupDir, mIntervalDirs[i].getName());
+                backupIntervalDir.mkdir();
+
+                if (!backupIntervalDir.exists()) {
+                    throw new IllegalStateException(
+                            "Failed to create interval backup directory "
+                                    + backupIntervalDir.getAbsolutePath());
+                }
+                File[] files = mIntervalDirs[i].listFiles();
+                if (files != null) {
+                    for (int j = 0; j < files.length; j++) {
+                        final File backupFile = new File(backupIntervalDir, files[j].getName());
+                        if (DEBUG) {
+                            Slog.d(TAG, "Creating versioned (" + Integer.toString(thisVersion)
+                                    + ") backup of " + files[j].toString()
+                                    + " stat files for interval "
+                                    + i + " to " + backupFile.toString());
+                        }
+
+                        try {
+                            // Backup file should not already exist, but make sure it doesn't
+                            Files.move(files[j].toPath(), backupFile.toPath(),
+                                    StandardCopyOption.REPLACE_EXISTING);
+                        } catch (IOException e) {
+                            Slog.e(TAG, "Failed to back up file : " + files[j].toString());
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+
+            // Leave a breadcrumb behind noting that all the usage stats have been moved to a backup
+            BufferedWriter writer = null;
+            try {
+                writer = new BufferedWriter(new FileWriter(mUpdateBreadcrumb));
+                writer.write(Long.toString(token));
+                writer.write("\n");
+                writer.write(Integer.toString(thisVersion));
+                writer.write("\n");
+                writer.flush();
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to write new version upgrade breadcrumb");
+                throw new RuntimeException(e);
+            } finally {
+                IoUtils.closeQuietly(writer);
+            }
+        }
+    }
+
+    private void continueUpgradeLocked(int version, long token) {
+        final File backupDir = new File(mBackupsDir, Long.toString(token));
+
+        // Read each file in the backup according to the version and write to the interval
+        // directories in the current versions format
+        for (int i = 0; i < mIntervalDirs.length; i++) {
+            final File backedUpInterval = new File(backupDir, mIntervalDirs[i].getName());
+            File[] files = backedUpInterval.listFiles();
+            if (files != null) {
+                for (int j = 0; j < files.length; j++) {
+                    if (DEBUG) {
+                        Slog.d(TAG,
+                                "Upgrading " + files[j].toString() + " to version ("
+                                        + Integer.toString(
+                                        mCurrentVersion) + ") for interval " + i);
+                    }
+                    try {
+                        IntervalStats stats = new IntervalStats();
+                        readLocked(new AtomicFile(files[j]), stats, version);
+                        writeLocked(new AtomicFile(new File(mIntervalDirs[i],
+                                Long.toString(stats.beginTime))), stats, mCurrentVersion);
+                    } catch (Exception e) {
+                        // This method is called on boot, log the exception and move on
+                        Slog.e(TAG, "Failed to upgrade backup file : " + files[j].toString());
                     }
                 }
             }
@@ -357,7 +570,7 @@ class UsageStatsDatabase {
             try {
                 final AtomicFile f = mSortedStatFiles[intervalType].valueAt(fileCount - 1);
                 IntervalStats stats = new IntervalStats();
-                UsageStatsXml.read(f, stats);
+                readLocked(f, stats);
                 return stats;
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to read usage stats file", e);
@@ -369,7 +582,7 @@ class UsageStatsDatabase {
     /**
      * Figures out what to extract from the given IntervalStats object.
      */
-    interface StatCombiner<T> {
+    public interface StatCombiner<T> {
 
         /**
          * Implementations should extract interesting from <code>stats</code> and add it
@@ -379,8 +592,8 @@ class UsageStatsDatabase {
          * which means you should make a copy of the data before adding it to the
          * <code>accumulatedResult</code> list.
          *
-         * @param stats The {@link IntervalStats} object selected.
-         * @param mutable Whether or not the data inside the stats object is mutable.
+         * @param stats             The {@link IntervalStats} object selected.
+         * @param mutable           Whether or not the data inside the stats object is mutable.
          * @param accumulatedResult The list to which to add extracted data.
          */
         void combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
@@ -443,7 +656,7 @@ class UsageStatsDatabase {
                 }
 
                 try {
-                    UsageStatsXml.read(f, stats);
+                    readLocked(f, stats);
                     if (beginTime < stats.endTime) {
                         combiner.combine(stats, false, results);
                     }
@@ -523,14 +736,9 @@ class UsageStatsDatabase {
         File[] files = dir.listFiles();
         if (files != null) {
             for (File f : files) {
-                String path = f.getPath();
-                if (path.endsWith(BAK_SUFFIX)) {
-                    f = new File(path.substring(0, path.length() - BAK_SUFFIX.length()));
-                }
-
                 long beginTime;
                 try {
-                    beginTime = UsageStatsXml.parseBeginTime(f);
+                    beginTime = parseBeginTime(f);
                 } catch (IOException e) {
                     beginTime = 0;
                 }
@@ -542,18 +750,13 @@ class UsageStatsDatabase {
         }
     }
 
-    private static void pruneChooserCountsOlderThan(File dir, long expiryTime) {
+    private void pruneChooserCountsOlderThan(File dir, long expiryTime) {
         File[] files = dir.listFiles();
         if (files != null) {
             for (File f : files) {
-                String path = f.getPath();
-                if (path.endsWith(BAK_SUFFIX)) {
-                    f = new File(path.substring(0, path.length() - BAK_SUFFIX.length()));
-                }
-
                 long beginTime;
                 try {
-                    beginTime = UsageStatsXml.parseBeginTime(f);
+                    beginTime = parseBeginTime(f);
                 } catch (IOException e) {
                     beginTime = 0;
                 }
@@ -562,7 +765,7 @@ class UsageStatsDatabase {
                     try {
                         final AtomicFile af = new AtomicFile(f);
                         final IntervalStats stats = new IntervalStats();
-                        UsageStatsXml.read(af, stats);
+                        readLocked(af, stats);
                         final int pkgCount = stats.packageStats.size();
                         for (int i = 0; i < pkgCount; i++) {
                             UsageStats pkgStats = stats.packageStats.valueAt(i);
@@ -570,13 +773,125 @@ class UsageStatsDatabase {
                                 pkgStats.mChooserCounts.clear();
                             }
                         }
-                        UsageStatsXml.write(af, stats);
-                    } catch (IOException e) {
+                        writeLocked(af, stats);
+                    } catch (Exception e) {
                         Slog.e(TAG, "Failed to delete chooser counts from usage stats file", e);
                     }
                 }
             }
         }
+    }
+
+
+    private static long parseBeginTime(AtomicFile file) throws IOException {
+        return parseBeginTime(file.getBaseFile());
+    }
+
+    private static long parseBeginTime(File file) throws IOException {
+        String name = file.getName();
+
+        // Parse out the digits from the the front of the file name
+        for (int i = 0; i < name.length(); i++) {
+            final char c = name.charAt(i);
+            if (c < '0' || c > '9') {
+                // found first char that is not a digit.
+                name = name.substring(0, i);
+                break;
+            }
+        }
+
+        try {
+            return Long.parseLong(name);
+        } catch (NumberFormatException e) {
+            throw new IOException(e);
+        }
+    }
+
+    private void writeLocked(AtomicFile file, IntervalStats stats) throws IOException {
+        writeLocked(file, stats, mCurrentVersion);
+    }
+
+    private static void writeLocked(AtomicFile file, IntervalStats stats, int version)
+            throws IOException {
+        FileOutputStream fos = file.startWrite();
+        try {
+            writeLocked(fos, stats, version);
+            file.finishWrite(fos);
+            fos = null;
+        } finally {
+            // When fos is null (successful write), this will no-op
+            file.failWrite(fos);
+        }
+    }
+
+    private void writeLocked(OutputStream out, IntervalStats stats) throws IOException {
+        writeLocked(out, stats, mCurrentVersion);
+    }
+
+    private static void writeLocked(OutputStream out, IntervalStats stats, int version)
+            throws IOException {
+        switch (version) {
+            case 1:
+            case 2:
+            case 3:
+                UsageStatsXml.write(out, stats);
+                break;
+            case 4:
+                UsageStatsProto.write(out, stats);
+                break;
+            default:
+                throw new RuntimeException(
+                        "Unhandled UsageStatsDatabase version: " + Integer.toString(version)
+                                + " on write.");
+        }
+    }
+
+    private void readLocked(AtomicFile file, IntervalStats statsOut) throws IOException {
+        readLocked(file, statsOut, mCurrentVersion);
+    }
+
+    private static void readLocked(AtomicFile file, IntervalStats statsOut, int version)
+            throws IOException {
+        try {
+            FileInputStream in = file.openRead();
+            try {
+                statsOut.beginTime = parseBeginTime(file);
+                readLocked(in, statsOut, version);
+                statsOut.lastTimeSaved = file.getLastModifiedTime();
+            } finally {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // Empty
+                }
+            }
+        } catch (FileNotFoundException e) {
+            Slog.e(TAG, "UsageStatsDatabase", e);
+            throw e;
+        }
+    }
+
+    private void readLocked(InputStream in, IntervalStats statsOut) throws IOException {
+        readLocked(in, statsOut, mCurrentVersion);
+    }
+
+    private static void readLocked(InputStream in, IntervalStats statsOut, int version)
+            throws IOException {
+        switch (version) {
+            case 1:
+            case 2:
+            case 3:
+                UsageStatsXml.read(in, statsOut);
+                break;
+            case 4:
+                UsageStatsProto.read(in, statsOut);
+                break;
+            default:
+                throw new RuntimeException(
+                        "Unhandled UsageStatsDatabase version: " + Integer.toString(version)
+                                + " on read.");
+        }
+
     }
 
     /**
@@ -596,7 +911,7 @@ class UsageStatsDatabase {
                 mSortedStatFiles[intervalType].put(stats.beginTime, f);
             }
 
-            UsageStatsXml.write(f, stats);
+            writeLocked(f, stats);
             stats.lastTimeSaved = f.getLastModifiedTime();
         }
     }
@@ -604,40 +919,53 @@ class UsageStatsDatabase {
 
     /* Backup/Restore Code */
     byte[] getBackupPayload(String key) {
+        return getBackupPayload(key, BACKUP_VERSION);
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public byte[] getBackupPayload(String key, int version) {
         synchronized (mLock) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (KEY_USAGE_STATS.equals(key)) {
                 prune(System.currentTimeMillis());
                 DataOutputStream out = new DataOutputStream(baos);
                 try {
-                    out.writeInt(BACKUP_VERSION);
+                    out.writeInt(version);
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].size());
+
                     for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].size();
                             i++) {
                         writeIntervalStatsToStream(out,
-                                mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].valueAt(i));
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].valueAt(i),
+                                version);
                     }
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].size());
                     for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].size();
                             i++) {
                         writeIntervalStatsToStream(out,
-                                mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].valueAt(i));
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].valueAt(i),
+                                version);
                     }
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].size());
                     for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].size();
                             i++) {
                         writeIntervalStatsToStream(out,
-                                mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].valueAt(i));
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].valueAt(i),
+                                version);
                     }
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].size());
                     for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].size();
                             i++) {
                         writeIntervalStatsToStream(out,
-                                mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].valueAt(i));
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].valueAt(i),
+                                version);
                     }
                     if (DEBUG) Slog.i(TAG, "Written " + baos.size() + " bytes of data");
                 } catch (IOException ioe) {
@@ -650,7 +978,11 @@ class UsageStatsDatabase {
 
     }
 
-    void applyRestoredPayload(String key, byte[] payload) {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void applyRestoredPayload(String key, byte[] payload) {
         synchronized (mLock) {
             if (KEY_USAGE_STATS.equals(key)) {
                 // Read stats files for the current device configs
@@ -678,28 +1010,32 @@ class UsageStatsDatabase {
 
                     int fileCount = in.readInt();
                     for (int i = 0; i < fileCount; i++) {
-                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
+                                backupDataVersion);
                         stats = mergeStats(stats, dailyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_DAILY, stats);
                     }
 
                     fileCount = in.readInt();
                     for (int i = 0; i < fileCount; i++) {
-                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
+                                backupDataVersion);
                         stats = mergeStats(stats, weeklyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_WEEKLY, stats);
                     }
 
                     fileCount = in.readInt();
                     for (int i = 0; i < fileCount; i++) {
-                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
+                                backupDataVersion);
                         stats = mergeStats(stats, monthlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_MONTHLY, stats);
                     }
 
                     fileCount = in.readInt();
                     for (int i = 0; i < fileCount; i++) {
-                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
+                                backupDataVersion);
                         stats = mergeStats(stats, yearlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_YEARLY, stats);
                     }
@@ -722,22 +1058,23 @@ class UsageStatsDatabase {
         if (beingRestored == null) return null;
         beingRestored.activeConfiguration = onDevice.activeConfiguration;
         beingRestored.configurations.putAll(onDevice.configurations);
-        beingRestored.events = onDevice.events;
+        beingRestored.events.clear();
+        beingRestored.events.merge(onDevice.events);
         return beingRestored;
     }
 
-    private void writeIntervalStatsToStream(DataOutputStream out, AtomicFile statsFile)
+    private void writeIntervalStatsToStream(DataOutputStream out, AtomicFile statsFile, int version)
             throws IOException {
         IntervalStats stats = new IntervalStats();
         try {
-            UsageStatsXml.read(statsFile, stats);
+            readLocked(statsFile, stats);
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read usage stats file", e);
             out.writeInt(0);
             return;
         }
         sanitizeIntervalStatsForBackup(stats);
-        byte[] data = serializeIntervalStats(stats);
+        byte[] data = serializeIntervalStats(stats, version);
         out.writeInt(data.length);
         out.write(data);
     }
@@ -753,29 +1090,29 @@ class UsageStatsDatabase {
         if (stats == null) return;
         stats.activeConfiguration = null;
         stats.configurations.clear();
-        if (stats.events != null) stats.events.clear();
+        stats.events.clear();
     }
 
-    private static byte[] serializeIntervalStats(IntervalStats stats) {
+    private byte[] serializeIntervalStats(IntervalStats stats, int version) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
         try {
             out.writeLong(stats.beginTime);
-            UsageStatsXml.write(out, stats);
-        } catch (IOException ioe) {
+            writeLocked(out, stats, version);
+        } catch (Exception ioe) {
             Slog.d(TAG, "Serializing IntervalStats Failed", ioe);
             baos.reset();
         }
         return baos.toByteArray();
     }
 
-    private static IntervalStats deserializeIntervalStats(byte[] data) {
+    private IntervalStats deserializeIntervalStats(byte[] data, int version) {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream in = new DataInputStream(bais);
         IntervalStats stats = new IntervalStats();
         try {
             stats.beginTime = in.readLong();
-            UsageStatsXml.read(in, stats);
+            readLocked(in, stats, version);
         } catch (IOException ioe) {
             Slog.d(TAG, "DeSerializing IntervalStats Failed", ioe);
             stats = null;
@@ -802,5 +1139,49 @@ class UsageStatsDatabase {
             }
         }
         directory.delete();
+    }
+
+    /**
+     * print total number and list of stats files for each interval type.
+     * @param pw
+     */
+    public void dump(IndentingPrintWriter pw, boolean compact) {
+        synchronized (mLock) {
+            pw.println("UsageStatsDatabase:");
+            pw.increaseIndent();
+            for (int i = 0; i < mSortedStatFiles.length; i++) {
+                final TimeSparseArray<AtomicFile> files = mSortedStatFiles[i];
+                final int size = files.size();
+                pw.print(UserUsageStatsService.intervalToString(i));
+                pw.print(" stats files: ");
+                pw.print(size);
+                pw.println(", sorted list of files:");
+                pw.increaseIndent();
+                for (int f = 0; f < size; f++) {
+                    final long fileName = files.keyAt(f);
+                    if (compact) {
+                        pw.print(UserUsageStatsService.formatDateTime(fileName, false));
+                    } else {
+                        pw.printPair(Long.toString(fileName),
+                                UserUsageStatsService.formatDateTime(fileName, true));
+                    }
+                    pw.println();
+                }
+                pw.decreaseIndent();
+            }
+            pw.decreaseIndent();
+        }
+    }
+
+    IntervalStats readIntervalStatsForFile(int interval, long fileName) {
+        synchronized (mLock) {
+            final IntervalStats stats = new IntervalStats();
+            try {
+                readLocked(mSortedStatFiles[interval].get(fileName, null), stats);
+                return stats;
+            } catch (Exception e) {
+                return null;
+            }
+        }
     }
 }

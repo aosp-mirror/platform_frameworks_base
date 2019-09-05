@@ -99,9 +99,6 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
     flat_node->lineNumber = util::HostToDevice32(node->line_number);
     flat_node->comment.index = util::HostToDevice32(-1);
 
-    // Process plain strings to make sure they get properly escaped.
-    text = StringBuilder(true /*preserve_spaces*/).AppendText(text).to_string();
-
     ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
     AddString(text, kLowPriority, &flat_text->data);
     writer.Finish();

@@ -25,6 +25,12 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent" >
 
+    <FrameLayout
+        android:id="@+id/big_clock_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <include
         layout="@layout/keyguard_status_view"
         android:visibility="gone" />
@@ -37,6 +43,8 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
+        <include layout="@layout/dock_info_overlay" />
+
         <FrameLayout
             android:id="@+id/qs_frame"
             android:layout="@layout/qs_panel"
@@ -47,7 +55,7 @@
             android:clipChildren="false"
             systemui:viewType="com.android.systemui.plugins.qs.QS" />
 
-        <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
+        <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
             android:layout_marginTop="@dimen/notification_panel_margin_top"
             android:layout_width="@dimen/notification_panel_width"

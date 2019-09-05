@@ -37,8 +37,10 @@ public interface NotificationUpdateHandler {
      *
      * @param key Key identifying the notification to remove
      * @param ranking RankingMap to update with
+     * @param reason why the notification is being removed, e.g.
+     * {@link NotificationListenerService#REASON_CANCEL}.
      */
-    void removeNotification(String key, NotificationListenerService.RankingMap ranking);
+    void removeNotification(String key, NotificationListenerService.RankingMap ranking, int reason);
 
     /**
      * Update a given notification and the current notification ranking map.

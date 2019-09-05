@@ -121,6 +121,15 @@ public final class LocationRequestUnbundled {
         return delegate.getSmallestDisplacement();
     }
 
+    /**
+     * Returns true if location settings will be ignored in order to satisfy this request.
+     *
+     * @return true if location settings will be ignored in order to satisfy this request
+     */
+    public boolean isLocationSettingsIgnored() {
+        return delegate.isLocationSettingsIgnored();
+    }
+
     @Override
     public String toString() {
       return delegate.toString();

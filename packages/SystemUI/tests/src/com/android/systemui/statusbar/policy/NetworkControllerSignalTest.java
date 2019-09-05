@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -55,7 +56,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     @Test
     public void testNoIconWithoutMobile() {
         // Turn off mobile network support.
-        Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
@@ -117,7 +118,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     @Test
     public void testNoSimlessIconWithoutMobile() {
         // Turn off mobile network support.
-        Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
@@ -253,14 +254,14 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
             // Generate a list of subscriptions we will tell the NetworkController to use.
             SubscriptionInfo mockSubInfo = Mockito.mock(SubscriptionInfo.class);
-            Mockito.when(mockSubInfo.getSubscriptionId()).thenReturn(testSubscriptions[i]);
+            when(mockSubInfo.getSubscriptionId()).thenReturn(testSubscriptions[i]);
             subscriptions.add(mockSubInfo);
         }
         assertTrue(mNetworkController.hasCorrectMobileControllers(subscriptions));
 
         // Add a subscription that the NetworkController doesn't know about.
         SubscriptionInfo mockSubInfo = Mockito.mock(SubscriptionInfo.class);
-        Mockito.when(mockSubInfo.getSubscriptionId()).thenReturn(notTestSubscription);
+        when(mockSubInfo.getSubscriptionId()).thenReturn(notTestSubscription);
         subscriptions.add(mockSubInfo);
         assertFalse(mNetworkController.hasCorrectMobileControllers(subscriptions));
     }
@@ -290,8 +291,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             if (i != indexToSkipSubscription) {
                 // Generate a list of subscriptions we will tell the NetworkController to use.
                 SubscriptionInfo mockSubInfo = Mockito.mock(SubscriptionInfo.class);
-                Mockito.when(mockSubInfo.getSubscriptionId()).thenReturn(testSubscriptions[i]);
-                Mockito.when(mockSubInfo.getSimSlotIndex()).thenReturn(testSubscriptions[i]);
+                when(mockSubInfo.getSubscriptionId()).thenReturn(testSubscriptions[i]);
+                when(mockSubInfo.getSimSlotIndex()).thenReturn(testSubscriptions[i]);
                 subscriptions.add(mockSubInfo);
             }
         }
@@ -299,7 +300,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // We can only test whether unregister gets called if it thinks its in a listening
         // state.
         mNetworkController.mListening = true;
-        mNetworkController.setCurrentSubscriptions(subscriptions);
+        mNetworkController.setCurrentSubscriptionsLocked(subscriptions);
 
         for (int i = 0; i < testSubscriptions.length; i++) {
             if (i == indexToSkipController) {

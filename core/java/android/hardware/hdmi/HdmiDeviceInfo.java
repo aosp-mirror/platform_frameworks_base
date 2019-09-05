@@ -118,7 +118,7 @@ public class HdmiDeviceInfo implements Parcelable {
     /**
      * A helper class to deserialize {@link HdmiDeviceInfo} for a parcel.
      */
-    public static final Parcelable.Creator<HdmiDeviceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<HdmiDeviceInfo> CREATOR =
             new Parcelable.Creator<HdmiDeviceInfo>() {
                 @Override
                 public HdmiDeviceInfo createFromParcel(Parcel source) {

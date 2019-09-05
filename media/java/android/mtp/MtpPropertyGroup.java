@@ -46,10 +46,6 @@ class MtpPropertyGroup {
         }
     }
 
-    private final ContentProviderClient mProvider;
-    private final String mVolumeName;
-    private final Uri mUri;
-
     // list of all properties in this group
     private final Property[] mProperties;
 
@@ -59,11 +55,7 @@ class MtpPropertyGroup {
     private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
 
     // constructs a property group for a list of properties
-    public MtpPropertyGroup(ContentProviderClient provider, String volumeName, int[] properties) {
-        mProvider = provider;
-        mVolumeName = volumeName;
-        mUri = Files.getMtpObjectsUri(volumeName);
-
+    public MtpPropertyGroup(int[] properties) {
         int count = properties.length;
         ArrayList<String> columns = new ArrayList<>(count);
         columns.add(Files.FileColumns._ID);
@@ -139,10 +131,6 @@ class MtpPropertyGroup {
                 column = Audio.AudioColumns.ALBUM_ARTIST;
                 type = MtpConstants.TYPE_STR;
                 break;
-            case MtpConstants.PROPERTY_GENRE:
-                // genre requires a special query
-                type = MtpConstants.TYPE_STR;
-                break;
             case MtpConstants.PROPERTY_COMPOSER:
                 column = Audio.AudioColumns.COMPOSER;
                 type = MtpConstants.TYPE_STR;
@@ -176,52 +164,13 @@ class MtpPropertyGroup {
         }
     }
 
-    private String queryAudio(String path, String column) {
-        Cursor c = null;
-        try {
-            c = mProvider.query(Audio.Media.getContentUri(mVolumeName),
-                            new String [] { column },
-                            PATH_WHERE, new String[] {path}, null, null);
-            if (c != null && c.moveToNext()) {
-                return c.getString(0);
-            } else {
-                return "";
-            }
-        } catch (Exception e) {
-            return "";
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-    }
-
-    private String queryGenre(String path) {
-        Cursor c = null;
-        try {
-            c = mProvider.query(Audio.Genres.getContentUri(mVolumeName),
-                            new String [] { Audio.GenresColumns.NAME },
-                            PATH_WHERE, new String[] {path}, null, null);
-            if (c != null && c.moveToNext()) {
-                return c.getString(0);
-            } else {
-                return "";
-            }
-        } catch (Exception e) {
-            return "";
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-    }
-
     /**
      * Gets the values of the properties represented by this property group for the given
      * object and adds them to the given property list.
      * @return Response_OK if the operation succeeded.
      */
-    public int getPropertyList(MtpStorageManager.MtpObject object, MtpPropertyList list) {
+    public int getPropertyList(ContentProviderClient provider, String volumeName,
+            MtpStorageManager.MtpObject object, MtpPropertyList list) {
         Cursor c = null;
         int id = object.getId();
         String path = object.getPath().toString();
@@ -229,12 +178,16 @@ class MtpPropertyGroup {
             if (property.column != -1 && c == null) {
                 try {
                     // Look up the entry in MediaProvider only if one of those properties is needed.
-                    c = mProvider.query(mUri, mColumns,
+                    final Uri uri = MtpDatabase.getObjectPropertiesUri(object.getFormat(),
+                            volumeName);
+                    c = provider.query(uri, mColumns,
                             PATH_WHERE, new String[] {path}, null, null);
                     if (c != null && !c.moveToNext()) {
                         c.close();
                         c = null;
                     }
+                } catch (IllegalArgumentException e) {
+                    return MtpConstants.RESPONSE_INVALID_OBJECT_PROP_CODE;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Mediaprovider lookup failed");
                 }
@@ -289,20 +242,6 @@ class MtpPropertyGroup {
                         track = c.getInt(property.column);
                     list.append(id, property.code, MtpConstants.TYPE_UINT16,
                             track % 1000);
-                    break;
-                case MtpConstants.PROPERTY_ARTIST:
-                    list.append(id, property.code,
-                            queryAudio(path, Audio.AudioColumns.ARTIST));
-                    break;
-                case MtpConstants.PROPERTY_ALBUM_NAME:
-                    list.append(id, property.code,
-                            queryAudio(path, Audio.AudioColumns.ALBUM));
-                    break;
-                case MtpConstants.PROPERTY_GENRE:
-                    String genre = queryGenre(path);
-                    if (genre != null) {
-                        list.append(id, property.code, genre);
-                    }
                     break;
                 case MtpConstants.PROPERTY_AUDIO_WAVE_CODEC:
                 case MtpConstants.PROPERTY_AUDIO_BITRATE:

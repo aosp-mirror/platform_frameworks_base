@@ -39,6 +39,7 @@ import android.util.Slog;
 
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.PackageSetting;
 import com.android.server.pm.PackageSettingBase;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -186,6 +187,33 @@ public final class BasePermission {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
                 == PermissionInfo.PROTECTION_DANGEROUS;
     }
+
+    public boolean isRemoved() {
+        return perm != null && perm.info != null
+                && (perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0;
+    }
+
+    public boolean isSoftRestricted() {
+        return perm != null && perm.info != null
+                && (perm.info.flags & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0;
+    }
+
+    public boolean isHardRestricted() {
+        return perm != null && perm.info != null
+                && (perm.info.flags & PermissionInfo.FLAG_HARD_RESTRICTED) != 0;
+    }
+
+    public boolean isHardOrSoftRestricted() {
+        return perm != null && perm.info != null
+                && (perm.info.flags & (PermissionInfo.FLAG_HARD_RESTRICTED
+                | PermissionInfo.FLAG_SOFT_RESTRICTED)) != 0;
+    }
+
+    public boolean isImmutablyRestricted() {
+        return perm != null && perm.info != null
+                && (perm.info.flags & PermissionInfo.FLAG_IMMUTABLY_RESTRICTED) != 0;
+    }
+
     public boolean isSignature() {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE) ==
                 PermissionInfo.PROTECTION_SIGNATURE;
@@ -231,6 +259,22 @@ public final class BasePermission {
     public boolean isSystemTextClassifier() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER)
                 != 0;
+    }
+    public boolean isWellbeing() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_WELLBEING) != 0;
+    }
+    public boolean isDocumenter() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0;
+    }
+    public boolean isConfigurator() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_CONFIGURATOR)
+            != 0;
+    }
+    public boolean isIncidentReportApprover() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_INCIDENT_REPORT_APPROVER) != 0;
+    }
+    public boolean isAppPredictor() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0;
     }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
@@ -374,14 +418,16 @@ public final class BasePermission {
     }
 
     public void enforceDeclaredUsedAndRuntimeOrDevelopment(PackageParser.Package pkg) {
+        final PackageSetting pkgSetting = (PackageSetting) pkg.mExtras;
+        final PermissionsState permsState = pkgSetting.getPermissionsState();
         int index = pkg.requestedPermissions.indexOf(name);
-        if (index == -1) {
+        if (!permsState.hasRequestedPermission(name) && index == -1) {
             throw new SecurityException("Package " + pkg.packageName
                     + " has not requested permission " + name);
         }
         if (!isRuntime() && !isDevelopment()) {
             throw new SecurityException("Permission " + name
-                    + " is not a changeable permission type");
+                    + " requested by " + pkg.packageName + " is not a changeable permission type");
         }
     }
 

@@ -20,13 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.Set;
@@ -45,6 +46,7 @@ public class Account implements Parcelable {
 
     public final String name;
     public final String type;
+    private String mSafeName;
     @UnsupportedAppUsage
     private final @Nullable String accessId;
 
@@ -91,6 +93,12 @@ public class Account implements Parcelable {
     public Account(Parcel in) {
         this.name = in.readString();
         this.type = in.readString();
+        if (TextUtils.isEmpty(name)) {
+            throw new android.os.BadParcelableException("the name must not be empty: " + name);
+        }
+        if (TextUtils.isEmpty(type)) {
+            throw new android.os.BadParcelableException("the type must not be empty: " + type);
+        }
         this.accessId = in.readString();
         if (accessId != null) {
             synchronized (sAccessedAccounts) {
@@ -122,7 +130,7 @@ public class Account implements Parcelable {
         dest.writeString(accessId);
     }
 
-    public static final Creator<Account> CREATOR = new Creator<Account>() {
+    public static final @android.annotation.NonNull Creator<Account> CREATOR = new Creator<Account>() {
         public Account createFromParcel(Parcel source) {
             return new Account(source);
         }
@@ -134,5 +142,38 @@ public class Account implements Parcelable {
 
     public String toString() {
         return "Account {name=" + name + ", type=" + type + "}";
+    }
+
+    /**
+     * Return a string representation of the account that is safe to print
+     * to logs and other places where PII should be avoided.
+     * @hide
+     */
+    public String toSafeString() {
+        if (mSafeName == null) {
+            mSafeName = toSafeName(name, 'x');
+        }
+        return "Account {name=" + mSafeName + ", type=" + type + "}";
+    }
+
+    /**
+     * Given a name, replace all letter or digits with the replacement char.
+     * @param name The input name string.
+     * @param replacement the replacement character.
+     * @return the string after replacement.
+     * @hide
+     */
+    public static String toSafeName(String name, char replacement) {
+        final StringBuilder builder = new StringBuilder(64);
+        final int len = name.length();
+        for (int i = 0; i < len; i++) {
+            final char c = name.charAt(i);
+            if (Character.isLetterOrDigit(c)) {
+                builder.append(replacement);
+            } else {
+                builder.append(c);
+            }
+        }
+        return builder.toString();
     }
 }

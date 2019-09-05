@@ -17,8 +17,9 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "SoundPool"
 
+#include <chrono>
 #include <inttypes.h>
-
+#include <thread>
 #include <utils/Log.h>
 
 #define USE_SHARED_MEM_BUFFER
@@ -26,7 +27,6 @@
 #include <media/AudioTrack.h>
 #include "SoundPool.h"
 #include "SoundPoolThread.h"
-#include <media/AudioPolicyHelper.h>
 #include <media/NdkMediaCodec.h>
 #include <media/NdkMediaExtractor.h>
 #include <media/NdkMediaFormat.h>
@@ -513,7 +513,8 @@ Sample::~Sample()
 
 static status_t decode(int fd, int64_t offset, int64_t length,
         uint32_t *rate, int *numChannels, audio_format_t *audioFormat,
-        sp<MemoryHeapBase> heap, size_t *memsize) {
+        audio_channel_mask_t *channelMask, sp<MemoryHeapBase> heap,
+        size_t *memsize) {
 
     ALOGV("fd %d, offset %" PRId64 ", size %" PRId64, fd, offset, length);
     AMediaExtractor *ex = AMediaExtractor_new();
@@ -650,6 +651,10 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                 (void)AMediaFormat_delete(format);
                 return UNKNOWN_ERROR;
             }
+            if (!AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_MASK,
+                    (int32_t*) channelMask)) {
+                *channelMask = AUDIO_CHANNEL_NONE;
+            }
             (void)AMediaFormat_delete(format);
             *memsize = written;
             return OK;
@@ -665,12 +670,13 @@ status_t Sample::doLoad()
     uint32_t sampleRate;
     int numChannels;
     audio_format_t format;
+    audio_channel_mask_t channelMask;
     status_t status;
     mHeap = new MemoryHeapBase(kDefaultHeapSize);
 
     ALOGV("Start decode");
     status = decode(mFd, mOffset, mLength, &sampleRate, &numChannels, &format,
-                                 mHeap, &mSize);
+                    &channelMask, mHeap, &mSize);
     ALOGV("close(%d)", mFd);
     ::close(mFd);
     mFd = -1;
@@ -697,6 +703,7 @@ status_t Sample::doLoad()
     mSampleRate = sampleRate;
     mNumChannels = numChannels;
     mFormat = format;
+    mChannelMask = channelMask;
     mState = READY;
     return NO_ERROR;
 
@@ -739,7 +746,8 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         // initialize track
         size_t afFrameCount;
         uint32_t afSampleRate;
-        audio_stream_type_t streamType = audio_attributes_to_stream_type(mSoundPool->attributes());
+        audio_stream_type_t streamType =
+                AudioSystem::attributesToStreamType(*mSoundPool->attributes());
         if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
             afFrameCount = kDefaultFrameCount;
         }
@@ -781,7 +789,11 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
             // wrong audio audio buffer size  (mAudioBufferSize)
             unsigned long toggle = mToggle ^ 1;
             void *userData = (void *)((unsigned long)this | toggle);
-            audio_channel_mask_t channelMask = audio_channel_out_mask_from_count(numChannels);
+            audio_channel_mask_t sampleChannelMask = sample->channelMask();
+            // When sample contains a not none channel mask, use it as is.
+            // Otherwise, use channel count to calculate channel mask.
+            audio_channel_mask_t channelMask = sampleChannelMask != AUDIO_CHANNEL_NONE
+                    ? sampleChannelMask : audio_channel_out_mask_from_count(numChannels);
 
             // do not create a new audio track if current track is compatible with sample parameters
     #ifdef USE_SHARED_MEM_BUFFER
@@ -956,6 +968,12 @@ bool SoundChannel::doStop_l()
     if (mState != IDLE) {
         setVolume_l(0, 0);
         ALOGV("stop");
+        // Since we're forcibly halting the previously playing content,
+        // we sleep here to ensure the volume is ramped down before we stop the track.
+        // Ideally the sleep time is the mixer period, or an approximation thereof
+        // (Fast vs Normal tracks are different).
+        // TODO: consider pausing instead of stop here.
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
         mAudioTrack->stop();
         mPrevSampleID = mSample->sampleID();
         mSample.clear();

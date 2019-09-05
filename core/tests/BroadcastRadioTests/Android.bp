@@ -20,8 +20,8 @@ android_test {
     // sdk_version: "current"
     platform_apis: true,
     static_libs: [
-        "compatibility-device-util",
-        "android-support-test",
+        "compatibility-device-util-axt",
+        "androidx.test.rules",
         "testng",
     ],
     libs: ["android.test.base"],

@@ -18,6 +18,8 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.net.Uri;
+import android.os.Bundle;
+import android.telephony.IFinancialSmsCallback;
 import com.android.internal.telephony.SmsRawData;
 
 /**
@@ -551,6 +553,32 @@ interface ISms {
      * @param intent PendingIntent to be sent when an SMS is received containing the token.
      */
     String createAppSpecificSmsToken(int subId, String callingPkg, in PendingIntent intent);
+
+    /**
+     * Create an app-only incoming SMS request for the calling package.
+     *
+     * If an incoming text contains the token returned by this method the provided
+     * <code>PendingIntent</code> will be sent containing the SMS data.
+     *
+     * @param subId the SIM id.
+     * @param callingPkg the package name of the calling app.
+     * @param prefixes the caller provided prefixes
+     * @param intent PendingIntent to be sent when a SMS is received containing the token and one
+     *   of the prefixes
+     */
+    String createAppSpecificSmsTokenWithPackageInfo(
+            int subId, String callingPkg, String prefixes, in PendingIntent intent);
+
+    /**
+     * Get sms inbox messages for the calling financial app.
+     *
+     * @param subId the SIM id.
+     * @param callingPkg the package name of the calling app.
+     * @param params parameters to filter the sms messages.
+     * @param callback the callback interface to deliver the result.
+     */
+    void getSmsMessagesForFinancialApp(
+        int subId, String callingPkg, in Bundle params, in IFinancialSmsCallback callback);
 
     /**
      * Check if the destination is a possible premium short code.

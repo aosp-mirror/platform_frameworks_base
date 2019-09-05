@@ -19,8 +19,9 @@ package com.android.frameworks.perftests.am.tests;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.perftests.am.util.Constants;
 import com.android.frameworks.perftests.am.util.TargetPackageUtils;

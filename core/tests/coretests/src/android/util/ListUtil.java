@@ -20,12 +20,10 @@ import android.app.Instrumentation;
 import android.view.KeyEvent;
 import android.widget.ListView;
 
-
 /**
  * Various useful stuff for instrumentation testing listview.
  */
 public class ListUtil {
-
 
     private final ListView mListView;
     private final Instrumentation mInstrumentation;

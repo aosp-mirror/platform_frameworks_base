@@ -48,6 +48,8 @@ Landroid/os/WorkSource;->updateLocked(Landroid/os/WorkSource;ZZ)Z
 Landroid/service/carrier/ICarrierMessagingCallback$Stub;-><init>()V
 Landroid/service/carrier/ICarrierMessagingService;->filterSms(Landroid/service/carrier/MessagePdu;Ljava/lang/String;IILandroid/service/carrier/ICarrierMessagingCallback;)V
 Landroid/telephony/CarrierMessagingServiceManager;-><init>()V
+Landroid/view/IGraphicsStats$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/view/IGraphicsStats$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/IGraphicsStats;
 Landroid/view/IWindowManager;->setInTouchMode(Z)V
 Landroid/view/IWindowManager;->showStrictModeViolation(Z)V
 Lcom/android/internal/R$styleable;->AndroidManifestActivityAlias:[I

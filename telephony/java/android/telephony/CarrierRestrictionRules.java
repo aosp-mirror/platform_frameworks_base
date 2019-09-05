@@ -310,7 +310,7 @@ public final class CarrierRestrictionRules implements Parcelable {
     /**
      * {@link Parcelable.Creator}
      */
-    public static final Creator<CarrierRestrictionRules> CREATOR =
+    public static final @android.annotation.NonNull Creator<CarrierRestrictionRules> CREATOR =
             new Creator<CarrierRestrictionRules>() {
         @Override
         public CarrierRestrictionRules createFromParcel(Parcel in) {

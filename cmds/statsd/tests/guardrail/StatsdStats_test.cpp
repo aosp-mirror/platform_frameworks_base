@@ -126,12 +126,19 @@ TEST(StatsdStatsTest, TestSubStats) {
     stats.noteBroadcastSent(key);
 
     // data drop -> 1
-    stats.noteDataDropped(key);
+    stats.noteDataDropped(key, 123);
 
     // dump report -> 3
     stats.noteMetricsReportSent(key, 0);
     stats.noteMetricsReportSent(key, 0);
     stats.noteMetricsReportSent(key, 0);
+
+    // activation_time_sec -> 2
+    stats.noteActiveStatusChanged(key, true);
+    stats.noteActiveStatusChanged(key, true);
+
+    // deactivation_time_sec -> 1
+    stats.noteActiveStatusChanged(key, false);
 
     vector<uint8_t> output;
     stats.dumpStats(&output, true);  // Dump and reset stats
@@ -142,8 +149,12 @@ TEST(StatsdStatsTest, TestSubStats) {
     const auto& configReport = report.config_stats(0);
     EXPECT_EQ(2, configReport.broadcast_sent_time_sec_size());
     EXPECT_EQ(1, configReport.data_drop_time_sec_size());
+    EXPECT_EQ(1, configReport.data_drop_bytes_size());
+    EXPECT_EQ(123, configReport.data_drop_bytes(0));
     EXPECT_EQ(3, configReport.dump_report_time_sec_size());
     EXPECT_EQ(3, configReport.dump_report_data_size_size());
+    EXPECT_EQ(2, configReport.activation_time_sec_size());
+    EXPECT_EQ(1, configReport.deactivation_time_sec_size());
     EXPECT_EQ(1, configReport.annotation_size());
     EXPECT_EQ(123, configReport.annotation(0).field_int64());
     EXPECT_EQ(456, configReport.annotation(0).field_int32());
@@ -216,8 +227,6 @@ TEST(StatsdStatsTest, TestAtomLog) {
     stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 1);
     stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 2);
     stats.noteAtomLogged(android::util::APP_CRASH_OCCURRED, now + 3);
-    // pulled event, should ignore
-    stats.noteAtomLogged(android::util::WIFI_BYTES_TRANSFER, now + 4);
 
     vector<uint8_t> output;
     stats.dumpStats(&output, false);
@@ -242,6 +251,111 @@ TEST(StatsdStatsTest, TestAtomLog) {
     EXPECT_TRUE(sensorAtomGood);
 }
 
+TEST(StatsdStatsTest, TestNonPlatformAtomLog) {
+    StatsdStats stats;
+    time_t now = time(nullptr);
+    int newAtom1 = android::util::kMaxPushedAtomId + 1;
+    int newAtom2 = android::util::kMaxPushedAtomId + 2;
+
+    stats.noteAtomLogged(newAtom1, now + 1);
+    stats.noteAtomLogged(newAtom1, now + 2);
+    stats.noteAtomLogged(newAtom2, now + 3);
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    bool good = report.ParseFromArray(&output[0], output.size());
+    EXPECT_TRUE(good);
+
+    EXPECT_EQ(2, report.atom_stats_size());
+    bool newAtom1Good = false;
+    bool newAtom2Good = false;
+
+    for (const auto& atomStats : report.atom_stats()) {
+        if (atomStats.tag() == newAtom1 && atomStats.count() == 2) {
+            newAtom1Good = true;
+        }
+        if (atomStats.tag() == newAtom2 && atomStats.count() == 1) {
+            newAtom2Good = true;
+        }
+    }
+
+    EXPECT_TRUE(newAtom1Good);
+    EXPECT_TRUE(newAtom2Good);
+}
+
+TEST(StatsdStatsTest, TestPullAtomStats) {
+    StatsdStats stats;
+
+    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 3333L);
+    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 2222L);
+    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 4444L);
+
+    stats.notePull(android::util::DISK_SPACE);
+    stats.notePullTime(android::util::DISK_SPACE, 1111L);
+    stats.notePullDelay(android::util::DISK_SPACE, 1111L);
+    stats.notePull(android::util::DISK_SPACE);
+    stats.notePullTime(android::util::DISK_SPACE, 3333L);
+    stats.notePullDelay(android::util::DISK_SPACE, 3335L);
+    stats.notePull(android::util::DISK_SPACE);
+    stats.notePullFromCache(android::util::DISK_SPACE);
+    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, true);
+    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, false);
+    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, true);
+
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    bool good = report.ParseFromArray(&output[0], output.size());
+    EXPECT_TRUE(good);
+
+    EXPECT_EQ(1, report.pulled_atom_stats_size());
+
+    EXPECT_EQ(android::util::DISK_SPACE, report.pulled_atom_stats(0).atom_id());
+    EXPECT_EQ(3, report.pulled_atom_stats(0).total_pull());
+    EXPECT_EQ(1, report.pulled_atom_stats(0).total_pull_from_cache());
+    EXPECT_EQ(2222L, report.pulled_atom_stats(0).min_pull_interval_sec());
+    EXPECT_EQ(2222L, report.pulled_atom_stats(0).average_pull_time_nanos());
+    EXPECT_EQ(3333L, report.pulled_atom_stats(0).max_pull_time_nanos());
+    EXPECT_EQ(2223L, report.pulled_atom_stats(0).average_pull_delay_nanos());
+    EXPECT_EQ(3335L, report.pulled_atom_stats(0).max_pull_delay_nanos());
+    EXPECT_EQ(2L, report.pulled_atom_stats(0).registered_count());
+    EXPECT_EQ(1L, report.pulled_atom_stats(0).unregistered_count());
+}
+
+TEST(StatsdStatsTest, TestAtomMetricsStats) {
+    StatsdStats stats;
+    time_t now = time(nullptr);
+    // old event, we get it from the stats buffer. should be ignored.
+    stats.noteBucketDropped(1000L);
+
+    stats.noteBucketBoundaryDelayNs(1000L, -1L);
+    stats.noteBucketBoundaryDelayNs(1000L, -10L);
+    stats.noteBucketBoundaryDelayNs(1000L, 2L);
+
+    stats.noteBucketBoundaryDelayNs(1001L, 1L);
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    bool good = report.ParseFromArray(&output[0], output.size());
+    EXPECT_TRUE(good);
+
+    EXPECT_EQ(2, report.atom_metric_stats().size());
+
+    auto atomStats = report.atom_metric_stats(0);
+    EXPECT_EQ(1000L, atomStats.metric_id());
+    EXPECT_EQ(1L, atomStats.bucket_dropped());
+    EXPECT_EQ(-10L, atomStats.min_bucket_boundary_delay_ns());
+    EXPECT_EQ(2L, atomStats.max_bucket_boundary_delay_ns());
+
+    auto atomStats2 = report.atom_metric_stats(1);
+    EXPECT_EQ(1001L, atomStats2.metric_id());
+    EXPECT_EQ(0L, atomStats2.bucket_dropped());
+    EXPECT_EQ(0L, atomStats2.min_bucket_boundary_delay_ns());
+    EXPECT_EQ(1L, atomStats2.max_bucket_boundary_delay_ns());
+}
 
 TEST(StatsdStatsTest, TestAnomalyMonitor) {
     StatsdStats stats;
@@ -270,14 +384,18 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
         stats.noteDataDropped(key, timestamps[i]);
         stats.noteBroadcastSent(key, timestamps[i]);
         stats.noteMetricsReportSent(key, 0, timestamps[i]);
+        stats.noteActiveStatusChanged(key, true, timestamps[i]);
+        stats.noteActiveStatusChanged(key, false, timestamps[i]);
     }
 
     int32_t newTimestamp = 10000;
 
     // now it should trigger removing oldest timestamp
-    stats.noteDataDropped(key, 10000);
+    stats.noteDataDropped(key, 123, 10000);
     stats.noteBroadcastSent(key, 10000);
     stats.noteMetricsReportSent(key, 0, 10000);
+    stats.noteActiveStatusChanged(key, true, 10000);
+    stats.noteActiveStatusChanged(key, false, 10000);
 
     EXPECT_TRUE(stats.mConfigStats.find(key) != stats.mConfigStats.end());
     const auto& configStats = stats.mConfigStats[key];
@@ -286,16 +404,23 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     EXPECT_EQ(maxCount, configStats->broadcast_sent_time_sec.size());
     EXPECT_EQ(maxCount, configStats->data_drop_time_sec.size());
     EXPECT_EQ(maxCount, configStats->dump_report_stats.size());
+    EXPECT_EQ(maxCount, configStats->activation_time_sec.size());
+    EXPECT_EQ(maxCount, configStats->deactivation_time_sec.size());
 
     // the oldest timestamp is the second timestamp in history
     EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
-    EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
-    EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
+    EXPECT_EQ(1, configStats->data_drop_bytes.front());
+    EXPECT_EQ(1, configStats->dump_report_stats.front().first);
+    EXPECT_EQ(1, configStats->activation_time_sec.front());
+    EXPECT_EQ(1, configStats->deactivation_time_sec.front());
 
     // the last timestamp is the newest timestamp.
     EXPECT_EQ(newTimestamp, configStats->broadcast_sent_time_sec.back());
     EXPECT_EQ(newTimestamp, configStats->data_drop_time_sec.back());
+    EXPECT_EQ(123, configStats->data_drop_bytes.back());
     EXPECT_EQ(newTimestamp, configStats->dump_report_stats.back().first);
+    EXPECT_EQ(newTimestamp, configStats->activation_time_sec.back());
+    EXPECT_EQ(newTimestamp, configStats->deactivation_time_sec.back());
 }
 
 TEST(StatsdStatsTest, TestSystemServerCrash) {
@@ -318,6 +443,47 @@ TEST(StatsdStatsTest, TestSystemServerCrash) {
     EXPECT_TRUE(report.ParseFromArray(&output[0], output.size()));
     EXPECT_EQ(maxCount, (int)report.system_restart_sec_size());
     EXPECT_EQ(StatsdStats::kMaxSystemServerRestarts + 1, report.system_restart_sec(maxCount - 1));
+}
+
+TEST(StatsdStatsTest, TestActivationBroadcastGuardrailHit) {
+    StatsdStats stats;
+    int uid1 = 1;
+    int uid2 = 2;
+    stats.noteActivationBroadcastGuardrailHit(uid1, 10);
+    stats.noteActivationBroadcastGuardrailHit(uid1, 20);
+
+    // Test that we only keep 20 timestamps.
+    for (int i = 0; i < 100; i++) {
+        stats.noteActivationBroadcastGuardrailHit(uid2, i);
+    }
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    EXPECT_TRUE(report.ParseFromArray(&output[0], output.size()));
+
+    EXPECT_EQ(2, report.activation_guardrail_stats_size());
+    bool uid1Good = false;
+    bool uid2Good = false;
+    for (const auto& guardrailTimes : report.activation_guardrail_stats()) {
+        if (uid1 == guardrailTimes.uid()) {
+            uid1Good = true;
+            EXPECT_EQ(2, guardrailTimes.guardrail_met_sec_size());
+            EXPECT_EQ(10, guardrailTimes.guardrail_met_sec(0));
+            EXPECT_EQ(20, guardrailTimes.guardrail_met_sec(1));
+        } else if (uid2 == guardrailTimes.uid()) {
+            int maxCount = StatsdStats::kMaxTimestampCount;
+            uid2Good = true;
+            EXPECT_EQ(maxCount, guardrailTimes.guardrail_met_sec_size());
+            for (int i = 0; i < maxCount; i++) {
+                EXPECT_EQ(100 - maxCount + i, guardrailTimes.guardrail_met_sec(i));
+            }
+        } else {
+            FAIL() << "Unexpected uid.";
+        }
+    }
+    EXPECT_TRUE(uid1Good);
+    EXPECT_TRUE(uid2Good);
 }
 
 }  // namespace statsd

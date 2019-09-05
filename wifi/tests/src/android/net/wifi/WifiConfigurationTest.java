@@ -18,21 +18,27 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
-import android.os.Parcel;
 import android.net.MacAddress;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
-import android.net.wifi.WifiInfo;
+import android.os.Parcel;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+
 /**
  * Unit tests for {@link android.net.wifi.WifiConfiguration}.
  */
+@SmallTest
 public class WifiConfigurationTest {
 
     @Before
@@ -52,6 +58,10 @@ public class WifiConfigurationTest {
         String cookie = "C O.o |<IE";
         WifiConfiguration config = new WifiConfiguration();
         config.setPasspointManagementObjectTree(cookie);
+        config.trusted = false;
+        config.updateIdentifier = "1234";
+        config.fromWifiNetworkSpecifier = true;
+        config.fromWifiNetworkSuggestion = true;
         MacAddress macBeforeParcel = config.getOrCreateRandomizedMacAddress();
         Parcel parcelW = Parcel.obtain();
         config.writeToParcel(parcelW, 0);
@@ -66,6 +76,10 @@ public class WifiConfigurationTest {
         // lacking a useful config.equals, check two fields near the end.
         assertEquals(cookie, reconfig.getMoTree());
         assertEquals(macBeforeParcel, reconfig.getOrCreateRandomizedMacAddress());
+        assertEquals(config.updateIdentifier, reconfig.updateIdentifier);
+        assertFalse(reconfig.trusted);
+        assertTrue(config.fromWifiNetworkSpecifier);
+        assertTrue(config.fromWifiNetworkSuggestion);
 
         Parcel parcelWW = Parcel.obtain();
         reconfig.writeToParcel(parcelWW, 0);
@@ -154,7 +168,10 @@ public class WifiConfigurationTest {
     @Test
     public void testIsOpenNetwork_NotOpen_HasAuthType() {
         for (int keyMgmt = 0; keyMgmt < WifiConfiguration.KeyMgmt.strings.length; keyMgmt++) {
-            if (keyMgmt == WifiConfiguration.KeyMgmt.NONE) continue;
+            if (keyMgmt == WifiConfiguration.KeyMgmt.NONE
+                    || keyMgmt == WifiConfiguration.KeyMgmt.OWE) {
+                continue;
+            }
             WifiConfiguration config = new WifiConfiguration();
             config.allowedKeyManagement.clear();
             config.allowedKeyManagement.set(keyMgmt);
@@ -237,5 +254,141 @@ public class WifiConfigurationTest {
         MacAddress defaultMac = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
         config.setRandomizedMacAddress(null);
         assertEquals(defaultMac, config.getRandomizedMacAddress());
+    }
+
+    /**
+     * Verifies that updateIdentifier should be copied for copy constructor.
+     */
+    @Test
+    public void testUpdateIdentifierForCopyConstructor() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.updateIdentifier = "1234";
+        WifiConfiguration copyConfig = new WifiConfiguration(config);
+
+        assertEquals(config.updateIdentifier, copyConfig.updateIdentifier);
+    }
+
+    /**
+     * Verifies that the serialization/de-serialization for softap config works.
+     */
+    @Test
+    public void testSoftApConfigBackupAndRestore() throws Exception {
+        WifiConfiguration config = new WifiConfiguration();
+        config.SSID = "TestAP";
+        config.apBand = WifiConfiguration.AP_BAND_5GHZ;
+        config.apChannel = 40;
+        config.allowedKeyManagement.set(KeyMgmt.WPA2_PSK);
+        config.preSharedKey = "TestPsk";
+        config.hiddenSSID = true;
+
+        byte[] data = config.getBytesForBackup();
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        DataInputStream in = new DataInputStream(bais);
+        WifiConfiguration restoredConfig = WifiConfiguration.getWifiConfigFromBackup(in);
+
+        assertEquals(config.SSID, restoredConfig.SSID);
+        assertEquals(config.preSharedKey, restoredConfig.preSharedKey);
+        assertEquals(config.getAuthType(), restoredConfig.getAuthType());
+        assertEquals(config.apBand, restoredConfig.apBand);
+        assertEquals(config.apChannel, restoredConfig.apChannel);
+        assertEquals(config.hiddenSSID, restoredConfig.hiddenSSID);
+    }
+
+
+    /**
+     * Verifies that getKeyIdForCredentials returns the expected string for Enterprise networks
+     * @throws Exception
+     */
+    @Test
+    public void testGetKeyIdForCredentials() throws Exception {
+        WifiConfiguration config = new WifiConfiguration();
+        final String mSsid = "TestAP";
+        config.SSID = mSsid;
+
+        // Test various combinations
+        // EAP with TLS
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        String keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_WPA_EAP_TLS_NULL");
+
+        // EAP with TTLS & MSCHAPv2
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TTLS);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.MSCHAPV2);
+        keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_WPA_EAP_TTLS_MSCHAPV2");
+
+        // Suite-B 192 with PWD & GTC
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SUITE_B_192);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.PWD);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.GTC);
+        keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_SUITE_B_192_PWD_GTC");
+
+        // IEEE8021X with SIM
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.SIM);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_IEEE8021X_SIM_NULL");
+
+        // Try calling this method with non-Enterprise network, expect an exception
+        boolean exceptionThrown = false;
+        try {
+            config.allowedKeyManagement.clear();
+            config.allowedKeyManagement.set(KeyMgmt.WPA2_PSK);
+            config.preSharedKey = "TestPsk";
+            keyId = config.getKeyIdForCredentials(config);
+        } catch (IllegalStateException e) {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+    }
+
+    /**
+     * Verifies that getSsidAndSecurityTypeString returns the correct String for networks of
+     * various different security types
+     */
+    @Test
+    public void testGetSsidAndSecurityTypeString() {
+        WifiConfiguration config = new WifiConfiguration();
+        final String mSsid = "TestAP";
+        config.SSID = mSsid;
+
+        // Test various combinations
+        config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WPA_PSK],
+                config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WPA_EAP],
+                config.getSsidAndSecurityTypeString());
+
+        config.wepKeys[0] = "TestWep";
+        config.allowedKeyManagement.clear();
+        assertEquals(mSsid + "WEP", config.getSsidAndSecurityTypeString());
+
+        config.wepKeys[0] = null;
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.OWE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.OWE], config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SAE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.SAE], config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SUITE_B_192);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.SUITE_B_192],
+                config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.NONE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.NONE], config.getSsidAndSecurityTypeString());
     }
 }

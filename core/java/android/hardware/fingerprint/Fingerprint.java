@@ -15,7 +15,6 @@
  */
 package android.hardware.fingerprint;
 
-import android.annotation.UnsupportedAppUsage;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,67 +23,39 @@ import android.os.Parcelable;
  * Container for fingerprint metadata.
  * @hide
  */
-public final class Fingerprint extends BiometricAuthenticator.BiometricIdentifier {
-    private CharSequence mName;
+public final class Fingerprint extends BiometricAuthenticator.Identifier {
     private int mGroupId;
-    private int mFingerId;
-    private long mDeviceId; // physical device this is associated with
 
     public Fingerprint(CharSequence name, int groupId, int fingerId, long deviceId) {
-        mName = name;
+        super(name, fingerId, deviceId);
         mGroupId = groupId;
-        mFingerId = fingerId;
-        mDeviceId = deviceId;
     }
 
     private Fingerprint(Parcel in) {
-        mName = in.readString();
+        super(in.readString(), in.readInt(), in.readLong());
         mGroupId = in.readInt();
-        mFingerId = in.readInt();
-        mDeviceId = in.readLong();
     }
-
-    /**
-     * Gets the human-readable name for the given fingerprint.
-     * @return name given to finger
-     */
-    @UnsupportedAppUsage
-    public CharSequence getName() { return mName; }
-
-    /**
-     * Gets the device-specific finger id.  Used by Settings to map a name to a specific
-     * fingerprint template.
-     * @return device-specific id for this finger
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public int getFingerId() { return mFingerId; }
 
     /**
      * Gets the group id specified when the fingerprint was enrolled.
      * @return group id for the set of fingerprints this one belongs to.
-     * @hide
      */
-    public int getGroupId() { return mGroupId; }
-
-    /**
-     * Device this fingerprint belongs to.
-     * @hide
-     */
-    public long getDeviceId() { return mDeviceId; }
+    public int getGroupId() {
+        return mGroupId;
+    }
 
     public int describeContents() {
         return 0;
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mName.toString());
+        out.writeString(getName().toString());
+        out.writeInt(getBiometricId());
+        out.writeLong(getDeviceId());
         out.writeInt(mGroupId);
-        out.writeInt(mFingerId);
-        out.writeLong(mDeviceId);
     }
 
-    public static final Parcelable.Creator<Fingerprint> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Fingerprint> CREATOR
             = new Parcelable.Creator<Fingerprint>() {
         public Fingerprint createFromParcel(Parcel in) {
             return new Fingerprint(in);

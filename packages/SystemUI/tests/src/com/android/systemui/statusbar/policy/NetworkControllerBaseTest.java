@@ -45,11 +45,13 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
+import android.testing.TestableResources;
 import android.util.Log;
 
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
@@ -76,6 +78,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected static final int DEFAULT_QS_SIGNAL_STRENGTH = DEFAULT_LEVEL;
     protected static final int DEFAULT_ICON = TelephonyIcons.ICON_3G;
     protected static final int DEFAULT_QS_ICON = TelephonyIcons.ICON_3G;
+    protected static final String NO_DATA_STRING = "Data disabled";
+    protected static final String NOT_DEFAULT_DATA_STRING = "Not default data";
 
     protected NetworkControllerImpl mNetworkController;
     protected MobileSignalController mMobileSignalController;
@@ -113,6 +117,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
+        TestableResources res = mContext.getOrCreateTestableResources();
+        res.addOverride(R.string.cell_data_off_content_description, NO_DATA_STRING);
+        res.addOverride(R.string.not_default_data_content_description, NOT_DEFAULT_DATA_STRING);
+
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
         mMockSm = mock(SubscriptionManager.class);
@@ -122,6 +130,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
         when(mMockCm.getDefaultNetworkCapabilitiesForUser(0)).thenReturn(
                 new NetworkCapabilities[] { mNetCapabilities });
+        when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
@@ -392,12 +401,21 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
             boolean qsVisible, int qsIcon, int qsTypeIcon, boolean dataIn, boolean dataOut,
             boolean cutOut) {
+        verifyLastMobileDataIndicators(
+                visible, icon, typeIcon, qsVisible, qsIcon, qsTypeIcon, dataIn, dataOut, cutOut,
+                null);
+    }
+
+    protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
+            boolean qsVisible, int qsIcon, int qsTypeIcon, boolean dataIn, boolean dataOut,
+            boolean cutOut, String typeContentDescription) {
         ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<IconState> qsIconArg = ArgumentCaptor.forClass(IconState.class);
         ArgumentCaptor<Integer> qsTypeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Boolean> dataInArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Boolean> dataOutArg = ArgumentCaptor.forClass(Boolean.class);
+        ArgumentCaptor<String> typeContentDescriptionArg = ArgumentCaptor.forClass(String.class);
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
                 iconArg.capture(),
@@ -406,12 +424,17 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 qsTypeIconArg.capture(),
                 dataInArg.capture(),
                 dataOutArg.capture(),
-                anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
+                typeContentDescriptionArg.capture(),
+                anyString(), anyBoolean(), anyInt(), anyBoolean());
 
         IconState iconState = iconArg.getValue();
 
-        int state = SignalDrawable.getState(icon, SignalStrength.NUM_SIGNAL_STRENGTH_BINS,
-                cutOut);
+        int numSignalStrengthBins = SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
+        if (mMobileSignalController.mInflateSignalStrengths) {
+            numSignalStrengthBins++;
+            icon++;
+        }
+        int state = SignalDrawable.getState(icon, numSignalStrengthBins, cutOut);
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Signal icon in status bar", state, iconState.icon);
         assertEquals("Visibility in status bar", visible, iconState.visible);
@@ -424,9 +447,18 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 (boolean) dataInArg.getValue());
         assertEquals("Data direction out in quick settings", dataOut,
                 (boolean) dataOutArg.getValue());
+        if (typeContentDescription != null) { // Only check if it was provided
+            assertEquals("Type content description", typeContentDescription,
+                    typeContentDescriptionArg.getValue());
+        }
     }
 
-   protected void assertNetworkNameEquals(String expected) {
+    protected void assertNetworkNameEquals(String expected) {
        assertEquals("Network name", expected, mMobileSignalController.getState().networkName);
-   }
+    }
+
+    protected void assertDataNetworkNameEquals(String expected) {
+        assertEquals("Data network name", expected, mNetworkController.getMobileDataNetworkName());
+    }
+
 }

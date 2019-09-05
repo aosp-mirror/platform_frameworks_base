@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.IntRange;
 import android.annotation.StringDef;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -70,6 +71,8 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     private static final String DEFAULT_LEVEL_CALCULATION_METHOD = LEVEL_CALCULATION_METHOD_RSSI;
 
     private int mRssi; // in dBm [-113, 51] or CellInfo.UNAVAILABLE if unknown
+
+    @UnsupportedAppUsage
     private int mBitErrorRate; // bit error rate (0-7, 99) as defined in TS 27.007 8.5 or
                                // CellInfo.UNAVAILABLE if unknown
     private int mRscp; // in dBm [-120, -24]
@@ -330,7 +333,7 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Parcelable.Creator<CellSignalStrengthWcdma> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CellSignalStrengthWcdma> CREATOR =
             new Parcelable.Creator<CellSignalStrengthWcdma>() {
         @Override
         public CellSignalStrengthWcdma createFromParcel(Parcel in) {

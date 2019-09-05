@@ -19,15 +19,13 @@ package android.os;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.provider.Settings;
-import android.service.dreams.IDreamManager;
 import android.service.dreams.DreamService;
-import android.support.test.filters.MediumTest;
-import android.support.test.filters.SmallTest;
+import android.service.dreams.IDreamManager;
 import android.test.ActivityInstrumentationTestCase2;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
 
 /**
  * Tests dream aspects of PowerManager.

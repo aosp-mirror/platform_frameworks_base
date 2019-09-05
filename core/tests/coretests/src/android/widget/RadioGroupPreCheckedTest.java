@@ -16,12 +16,13 @@
 
 package android.widget;
 
-import com.android.frameworks.coretests.R;
-
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercises {@link android.widget.RadioGroup}'s check feature.

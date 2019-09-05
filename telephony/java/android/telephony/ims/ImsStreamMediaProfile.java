@@ -230,7 +230,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
         mIsReceivingRttAudio = in.readBoolean();
     }
 
-    public static final Creator<ImsStreamMediaProfile> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsStreamMediaProfile> CREATOR =
             new Creator<ImsStreamMediaProfile>() {
         @Override
         public ImsStreamMediaProfile createFromParcel(Parcel in) {

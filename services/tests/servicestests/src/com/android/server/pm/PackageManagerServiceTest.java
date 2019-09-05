@@ -112,4 +112,24 @@ public class PackageManagerServiceTest {
         // TODO: test that sendApplicationHiddenForUser() actually fills in
         // broadcastUsers
     }
+
+    @Test
+    public void testPartitions() throws Exception {
+        String[] partitions = { "system", "vendor", "odm", "oem", "product", "product_services" };
+        String[] appdir = { "app", "priv-app" };
+        for (int i = 0; i < partitions.length; i++) {
+            for (int j = 0; j < appdir.length; j++) {
+                String canonical = new File("/" + partitions[i]).getCanonicalPath();
+                String path = String.format("%s/%s/A.apk", canonical, appdir[j]);
+
+                Assert.assertEquals(j == 1 && i != 3,
+                    PackageManagerService.locationIsPrivileged(path));
+
+                Assert.assertEquals(i == 1 || i == 2, PackageManagerService.locationIsVendor(path));
+                Assert.assertEquals(i == 3, PackageManagerService.locationIsOem(path));
+                Assert.assertEquals(i == 4, PackageManagerService.locationIsProduct(path));
+                Assert.assertEquals(i == 5, PackageManagerService.locationIsProductServices(path));
+            }
+        }
+    }
 }

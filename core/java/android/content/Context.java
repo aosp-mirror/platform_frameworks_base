@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.AttrRes;
+import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.ColorRes;
@@ -69,6 +70,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManager.AutofillClient;
+import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
 
 import com.android.internal.compat.IPlatformCompat;
@@ -234,7 +236,9 @@ public abstract class Context {
             BIND_ALLOW_OOM_MANAGEMENT,
             BIND_WAIVE_PRIORITY,
             BIND_IMPORTANT,
-            BIND_ADJUST_WITH_ACTIVITY
+            BIND_ADJUST_WITH_ACTIVITY,
+            BIND_NOT_PERCEPTIBLE,
+            BIND_INCLUDE_CAPABILITIES
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlags {}
@@ -329,13 +333,51 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
-     * Flag for {@link #bindService}: If binding from something better than perceptible,
-     * still set the adjust below perceptible. This would be used for bound services that can
-     * afford to be evicted when under extreme memory pressure, but should be restarted as soon
-     * as possible.
+     * Flag for {@link #bindService}: If binding from an app that is visible or user-perceptible,
+     * lower the target service's importance to below the perceptible level. This allows
+     * the system to (temporarily) expunge the bound process from memory to make room for more
+     * important user-perceptible processes.
+     */
+    public static final int BIND_NOT_PERCEPTIBLE = 0x00000100;
+
+    /**
+     * Flag for {@link #bindService}: If binding from an app that has specific capabilities
+     * due to its foreground state such as an activity or foreground service, then this flag will
+     * allow the bound app to get the same capabilities, as long as it has the required permissions
+     * as well.
+     */
+    public static final int BIND_INCLUDE_CAPABILITIES = 0x000001000;
+
+    /***********    Public flags above this line ***********/
+    /***********    Hidden flags below this line ***********/
+
+    /**
+     * Flag for {@link #bindService}: This flag is intended to be used only by the system to adjust
+     * the scheduling policy for IMEs (and any other out-of-process user-visible components that
+     * work closely with the top app) so that UI hosted in such services can have the same
+     * scheduling policy (e.g. SCHED_FIFO when it is enabled and TOP_APP_PRIORITY_BOOST otherwise)
+     * as the actual top-app.
      * @hide
      */
-    public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
+    public static final int BIND_SCHEDULE_LIKE_TOP_APP = 0x00080000;
+
+    /**
+     * Flag for {@link #bindService}: allow background activity starts from the bound service's
+     * process.
+     * This flag is only respected if the caller is holding
+     * {@link android.Manifest.permission#START_ACTIVITIES_FROM_BACKGROUND}.
+     * @hide
+     */
+    public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 0x00100000;
+
+    /**
+     * @hide Flag for {@link #bindService}: the service being bound to represents a
+     * protected system component, so must have association restrictions applied to it.
+     * That is, a system config must have one or more allow-association tags limiting
+     * which packages it can interact with.  If it does not have any such association
+     * restrictions, a default empty set will be created.
+     */
+    public static final int BIND_RESTRICT_ASSOCIATIONS = 0x00200000;
 
     /**
      * @hide Flag for {@link #bindService}: allows binding to a service provided
@@ -391,7 +433,7 @@ public abstract class Context {
      * invisible background activities.  This will impact the number of
      * recent activities the user can switch between without having them
      * restart.  There is no guarantee this will be respected, as the system
-     * tries to balance such requests from one app vs. the importantance of
+     * tries to balance such requests from one app vs. the importance of
      * keeping other apps around.
      */
     public static final int BIND_VISIBLE = 0x10000000;
@@ -426,6 +468,15 @@ public abstract class Context {
      * </p>
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
+
+    /**
+     * These bind flags reduce the strength of the binding such that we shouldn't
+     * consider it as pulling the process up to the level of the one that is bound to it.
+     * @hide
+     */
+    public static final int BIND_REDUCTION_FLAGS =
+            Context.BIND_ALLOW_OOM_MANAGEMENT | Context.BIND_WAIVE_PRIORITY
+                    | Context.BIND_NOT_PERCEPTIBLE | Context.BIND_NOT_VISIBLE;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "RECEIVER_VISIBLE_" }, value = {
@@ -684,7 +735,8 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(int[])
      */
-    public final TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
+    @NonNull
+    public final TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(attrs);
     }
 
@@ -695,8 +747,9 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(int, int[])
      */
-    public final TypedArray obtainStyledAttributes(
-            @StyleRes int resid, @StyleableRes int[] attrs) throws Resources.NotFoundException {
+    @NonNull
+    public final TypedArray obtainStyledAttributes(@StyleRes int resid,
+            @NonNull @StyleableRes int[] attrs) throws Resources.NotFoundException {
         return getTheme().obtainStyledAttributes(resid, attrs);
     }
 
@@ -707,8 +760,9 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
+    @NonNull
     public final TypedArray obtainStyledAttributes(
-            AttributeSet set, @StyleableRes int[] attrs) {
+            @Nullable AttributeSet set, @NonNull @StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(set, attrs, 0, 0);
     }
 
@@ -719,8 +773,9 @@ public abstract class Context {
      *
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
-    public final TypedArray obtainStyledAttributes(
-            AttributeSet set, @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
+    @NonNull
+    public final TypedArray obtainStyledAttributes(@Nullable AttributeSet set,
+            @NonNull @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
             @StyleRes int defStyleRes) {
         return getTheme().obtainStyledAttributes(
             set, attrs, defStyleAttr, defStyleRes);
@@ -734,17 +789,26 @@ public abstract class Context {
     /** Return the name of this application's package. */
     public abstract String getPackageName();
 
-    /** @hide Return the name of the base context this context is derived from. */
+    /**
+     * @hide Return the name of the base context this context is derived from.
+     * This is the same as {@link #getOpPackageName()} except in
+     * cases where system components are loaded into other app processes, in which
+     * case {@link #getOpPackageName()} will be the name of the primary package in
+     * that process (so that app ops uid verification will work with the name).
+     */
     @UnsupportedAppUsage
     public abstract String getBasePackageName();
 
-    /** @hide Return the package name that should be used for app ops calls from
-     * this context.  This is the same as {@link #getBasePackageName()} except in
-     * cases where system components are loaded into other app processes, in which
-     * case this will be the name of the primary package in that process (so that app
-     * ops uid verification will work with the name). */
-    @UnsupportedAppUsage
-    public abstract String getOpPackageName();
+    /**
+     * Return the package name that should be used for {@link android.app.AppOpsManager} calls from
+     * this context, so that app ops manager's uid verification will work with the name.
+     * <p>
+     * This is not generally intended for third party application developers.
+     */
+    @NonNull
+    public String getOpPackageName() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
@@ -2909,8 +2973,9 @@ public abstract class Context {
      * @param flags Operation options for the binding.  May be 0,
      *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
      *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
-     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, or
-     *          {@link #BIND_WAIVE_PRIORITY}.
+     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, {@link #BIND_WAIVE_PRIORITY}.
+     *          {@link #BIND_IMPORTANT}, or
+     *          {@link #BIND_ADJUST_WITH_ACTIVITY}.
      * @return {@code true} if the system is in the process of bringing up a
      *         service that your client has permission to bind to; {@code false}
      *         if the system couldn't find the service or if your client doesn't
@@ -2926,9 +2991,63 @@ public abstract class Context {
      * @see #BIND_AUTO_CREATE
      * @see #BIND_DEBUG_UNBIND
      * @see #BIND_NOT_FOREGROUND
+     * @see #BIND_ABOVE_CLIENT
+     * @see #BIND_ALLOW_OOM_MANAGEMENT
+     * @see #BIND_WAIVE_PRIORITY
+     * @see #BIND_IMPORTANT
+     * @see #BIND_ADJUST_WITH_ACTIVITY
      */
     public abstract boolean bindService(@RequiresPermission Intent service,
             @NonNull ServiceConnection conn, @BindServiceFlags int flags);
+
+    /**
+     * Same as {@link #bindService(Intent, ServiceConnection, int)} with executor to control
+     * ServiceConnection callbacks.
+     * @param executor Callbacks on ServiceConnection will be called on executor. Must use same
+     *      instance for the same instance of ServiceConnection.
+     */
+    public boolean bindService(@RequiresPermission @NonNull Intent service,
+            @BindServiceFlags int flags, @NonNull @CallbackExecutor Executor executor,
+            @NonNull ServiceConnection conn) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Variation of {@link #bindService} that, in the specific case of isolated
+     * services, allows the caller to generate multiple instances of a service
+     * from a single component declaration.  In other words, you can use this to bind
+     * to a service that has specified {@link android.R.attr#isolatedProcess} and, in
+     * addition to the existing behavior of running in an isolated process, you can
+     * also through the arguments here have the system bring up multiple concurrent
+     * processes hosting their own instances of that service.  The <var>instanceName</var>
+     * you provide here identifies the different instances, and you can use
+     * {@link #updateServiceGroup(ServiceConnection, int, int)} to tell the system how it
+     * should manage each of these instances.
+     *
+     * @param service Identifies the service to connect to.  The Intent must
+     *      specify an explicit component name.
+     * @param flags Operation options for the binding as per {@link #bindService}.
+     * @param instanceName Unique identifier for the service instance.  Each unique
+     *      name here will result in a different service instance being created.  Identifiers
+     *      must only contain ASCII letters, digits, underscores, and periods.
+     * @return Returns success of binding as per {@link #bindService}.
+     * @param executor Callbacks on ServiceConnection will be called on executor.
+     *      Must use same instance for the same instance of ServiceConnection.
+     * @param conn Receives information as the service is started and stopped.
+     *      This must be a valid ServiceConnection object; it must not be null.
+     *
+     * @throws SecurityException If the caller does not have permission to access the service
+     * @throws IllegalArgumentException If the instanceName is invalid.
+     *
+     * @see #bindService
+     * @see #updateServiceGroup
+     * @see android.R.attr#isolatedProcess
+     */
+    public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
+            @BindServiceFlags int flags, @NonNull String instanceName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull ServiceConnection conn) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
@@ -2944,7 +3063,7 @@ public abstract class Context {
     }
 
     /**
-     * Same as {@link #bindService(Intent, ServiceConnection, int, UserHandle)}, but with an
+     * Same as {@link #bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)}, but with an
      * explicit non-null Handler to run the ServiceConnection callbacks on.
      *
      * @hide
@@ -2953,6 +3072,44 @@ public abstract class Context {
     @UnsupportedAppUsage(trackingBug = 136728678)
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * For a service previously bound with {@link #bindService} or a related method, change
+     * how the system manages that service's process in relation to other processes.  This
+     * doesn't modify the original bind flags that were passed in when binding, but adjusts
+     * how the process will be managed in some cases based on those flags.  Currently only
+     * works on isolated processes (will be ignored for non-isolated processes).
+     *
+     * <p>Note that this call does not take immediate effect, but will be applied the next
+     * time the impacted process is adjusted for some other reason.  Typically you would
+     * call this before then calling a new {@link #bindIsolatedService} on the service
+     * of interest, with that binding causing the process to be shuffled accordingly.</p>
+     *
+     * @param conn The connection interface previously supplied to bindService().  This
+     *             parameter must not be null.
+     * @param group A group to put this connection's process in.  Upon calling here, this
+     *              will override any previous group that was set for that process.  The group
+     *              tells the system about processes that are logically grouped together, so
+     *              should be managed as one unit of importance (such as when being considered
+     *              a recently used app).  All processes in the same app with the same group
+     *              are considered to be related.  Supplying 0 reverts to the default behavior
+     *              of not grouping.
+     * @param importance Additional importance of the processes within a group.  Upon calling
+     *                   here, this will override any previous importance that was set for that
+     *                   process.  The most important process is 0, and higher values are
+     *                   successively less important.  You can view this as describing how
+     *                   to order the processes in an array, with the processes at the end of
+     *                   the array being the least important.  This value has no meaning besides
+     *                   indicating how processes should be ordered in that array one after the
+     *                   other.  This provides a way to fine-tune the system's process killing,
+     *                   guiding it to kill processes at the end of the array first.
+     *
+     * @see #bindIsolatedService
+     */
+    public void updateServiceGroup(@NonNull ServiceConnection conn, int group,
+            int importance) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -3010,6 +3167,7 @@ public abstract class Context {
             //@hide: COUNTRY_DETECTOR,
             SEARCH_SERVICE,
             SENSOR_SERVICE,
+            SENSOR_PRIVACY_SERVICE,
             STORAGE_SERVICE,
             STORAGE_STATS_SERVICE,
             WALLPAPER_SERVICE,
@@ -3035,6 +3193,8 @@ public abstract class Context {
             NSD_SERVICE,
             AUDIO_SERVICE,
             FINGERPRINT_SERVICE,
+            //@hide: FACE_SERVICE,
+            BIOMETRIC_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
@@ -3048,6 +3208,7 @@ public abstract class Context {
             APPWIDGET_SERVICE,
             //@hide: VOICE_INTERACTION_MANAGER_SERVICE,
             //@hide: BACKUP_SERVICE,
+            ROLLBACK_SERVICE,
             DROPBOX_SERVICE,
             //@hide: DEVICE_IDLE_CONTROLLER,
             DEVICE_POLICY_SERVICE,
@@ -3062,9 +3223,12 @@ public abstract class Context {
             //@hide: HDMI_CONTROL_SERVICE,
             INPUT_SERVICE,
             DISPLAY_SERVICE,
+            //@hide COLOR_DISPLAY_SERVICE,
             USER_SERVICE,
             RESTRICTIONS_SERVICE,
             APP_OPS_SERVICE,
+            ROLE_SERVICE,
+            //@hide ROLE_CONTROLLER_SERVICE,
             CAMERA_SERVICE,
             //@hide: PLATFORM_COMPAT_SERVICE,
             PRINT_SERVICE,
@@ -3087,11 +3251,13 @@ public abstract class Context {
             //@hide: CONTEXTHUB_SERVICE,
             SYSTEM_HEALTH_SERVICE,
             //@hide: INCIDENT_SERVICE,
+            //@hide: INCIDENT_COMPANION_SERVICE,
             //@hide: STATS_COMPANION_SERVICE,
             COMPANION_DEVICE_SERVICE,
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
+            PERMISSION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3172,15 +3338,20 @@ public abstract class Context {
      *
      * <p>Note: Instant apps, for which {@link PackageManager#isInstantApp()} returns true,
      * don't have access to the following system services: {@link #DEVICE_POLICY_SERVICE},
-     * {@link #FINGERPRINT_SERVICE}, {@link #SHORTCUT_SERVICE}, {@link #USB_SERVICE},
-     * {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE}, {@link #WIFI_SERVICE},
-     * {@link #WIFI_AWARE_SERVICE}. For these services this method will return <code>null</code>.
-     * Generally, if you are running as an instant app you should always check whether the result
-     * of this method is null.
+     * {@link #FINGERPRINT_SERVICE}, {@link #KEYGUARD_SERVICE}, {@link #SHORTCUT_SERVICE},
+     * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
+     * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
+     * return <code>null</code>.  Generally, if you are running as an instant app you should always
+     * check whether the result of this method is {@code null}.
+     *
+     * <p>Note: When implementing this method, keep in mind that new services can be added on newer
+     * Android releases, so if you're looking for just the explicit names mentioned above, make sure
+     * to return {@code null} when you don't recognize the name &mdash; if you throw a
+     * {@link RuntimeException} exception instead, you're app might break on new Android releases.
      *
      * @param name The name of the desired service.
      *
-     * @return The service or null if the name does not exist.
+     * @return The service or {@code null} if the name does not exist.
      *
      * @see #WINDOW_SERVICE
      * @see android.view.WindowManager
@@ -3256,7 +3427,9 @@ public abstract class Context {
      * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
      * {@link android.app.usage.NetworkStatsManager}.
-     * </p><p>
+     * </p>
+     *
+     * <p>
      * Note: System services obtained via this API may be closely associated with
      * the Context in which they are obtained from.  In general, do not share the
      * service objects between various different contexts (Activities, Applications,
@@ -3265,14 +3438,16 @@ public abstract class Context {
      *
      * <p>Note: Instant apps, for which {@link PackageManager#isInstantApp()} returns true,
      * don't have access to the following system services: {@link #DEVICE_POLICY_SERVICE},
-     * {@link #FINGERPRINT_SERVICE}, {@link #SHORTCUT_SERVICE}, {@link #USB_SERVICE},
-     * {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE}, {@link #WIFI_SERVICE},
-     * {@link #WIFI_AWARE_SERVICE}. For these services this method will return <code>null</code>.
-     * Generally, if you are running as an instant app you should always check whether the result
-     * of this method is null.
+     * {@link #FINGERPRINT_SERVICE}, {@link #KEYGUARD_SERVICE}, {@link #SHORTCUT_SERVICE},
+     * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
+     * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
+     * return {@code null}. Generally, if you are running as an instant app you should always
+     * check whether the result of this method is {@code null}.
+     * </p>
      *
      * @param serviceClass The class of the desired service.
-     * @return The service or null if the class is not a supported system service.
+     * @return The service or {@code null} if the class is not a supported system service. Note:
+     * <b>never</b> throw a {@link RuntimeException} if the name is not supported.
      */
     @SuppressWarnings("unchecked")
     public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) {
@@ -3359,6 +3534,26 @@ public abstract class Context {
      * @see android.app.ActivityManager
      */
     public static final String ACTIVITY_SERVICE = "activity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.ActivityTaskManager} for interacting with the global system state.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.ActivityTaskManager
+     * @hide
+     */
+    public static final String ACTIVITY_TASK_SERVICE = "activity_task";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.UriGrantsManager} for interacting with the global system state.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.UriGrantsManager
+     * @hide
+     */
+    public static final String URI_GRANTS_SERVICE = "uri_grants";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -3454,6 +3649,18 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.hardware.SensorPrivacyManager} for accessing sensor privacy
+     * functions.
+     *
+     * @see #getSystemService(String)
+     * @see android.hardware.SensorPrivacyManager
+     *
+     * @hide
+     */
+    public static final String SENSOR_PRIVACY_SERVICE = "sensor_privacy";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.os.storage.StorageManager} for accessing system storage
      * functions.
      *
@@ -3495,9 +3702,11 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.app.StatusBarManager
+     *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
@@ -3639,10 +3848,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.net.wifi.rtt.WifiRttManager} for ranging devices with wifi
-     *
-     * Note: this is a replacement for WIFI_RTT_SERVICE above. It will
-     * be renamed once final implementation in place.
+     * android.net.wifi.rtt.WifiRttManager} for ranging devices with wifi.
      *
      * @see #getSystemService(String)
      * @see android.net.wifi.rtt.WifiRttManager
@@ -3706,6 +3912,38 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.face.FaceManager} for handling management
+     * of face authentication.
+     *
+     * @hide
+     * @see #getSystemService
+     * @see android.hardware.face.FaceManager
+     */
+    public static final String FACE_SERVICE = "face";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.iris.IrisManager} for handling management
+     * of iris authentication.
+     *
+     * @hide
+     * @see #getSystemService
+     * @see android.hardware.iris.IrisManager
+     */
+    public static final String IRIS_SERVICE = "iris";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.biometrics.BiometricManager} for handling management
+     * of face authentication.
+     *
+     * @see #getSystemService
+     * @see android.hardware.biometrics.BiometricManager
+     */
+    public static final String BIOMETRIC_SERVICE = "biometric";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.MediaRouter} for controlling and managing
      * routing of media.
      *
@@ -3803,6 +4041,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link com.android.server.attention.AttentionManagerService} for attention services.
+     *
+     * @see #getSystemService(String)
+     * @see android.server.attention.AttentionManagerService
+     * @hide
+     */
+    public static final String ATTENTION_SERVICE = "attention";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.inputmethod.InputMethodManager} for accessing input
      * methods.
      *
@@ -3844,6 +4092,33 @@ public abstract class Context {
     public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
+     * Official published name of the content capture service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @TestApi
+    public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
+
+    /**
+     * Used for getting content selections and classifications for task snapshots.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
+
+    /**
+     * Official published name of the app prediction service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String APP_PREDICTION_SERVICE = "app_prediction";
+
+    /**
      * Use with {@link #getSystemService(String)} to access the
      * {@link com.android.server.voiceinteraction.SoundTriggerService}.
      *
@@ -3852,6 +4127,23 @@ public abstract class Context {
      */
     public static final String SOUND_TRIGGER_SERVICE = "soundtrigger";
 
+    /**
+     * Official published name of the (internal) permission service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final String PERMISSION_SERVICE = "permission";
+
+    /**
+     * Official published name of the (internal) permission controller service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
@@ -3863,6 +4155,17 @@ public abstract class Context {
      */
     @SystemApi
     public static final String BACKUP_SERVICE = "backup";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.content.rollback.RollbackManager} for communicating
+     * with the rollback manager
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi @TestApi
+    public static final String ROLLBACK_SERVICE = "rollback";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -3949,6 +4252,18 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.debug.AdbManager} for access to ADB debug functions.
+     *
+     * @see #getSystemService(String)
+     * @see android.debug.AdbManager
+     *
+     * @hide
+     */
+    public static final String ADB_SERVICE = "adb";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.hardware.SerialManager} for access to serial ports.
      *
      * @see #getSystemService(String)
@@ -3990,6 +4305,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.display.ColorDisplayManager} for controlling color transforms.
+     *
+     * @see #getSystemService(String)
+     * @see android.hardware.display.ColorDisplayManager
+     * @hide
+     */
+    public static final String COLOR_DISPLAY_SERVICE = "color_display";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.UserManager} for managing users on devices that support multiple users.
      *
      * @see #getSystemService(String)
@@ -4025,6 +4350,25 @@ public abstract class Context {
      * @see android.app.AppOpsManager
      */
     public static final String APP_OPS_SERVICE = "appops";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.app.role.RoleManager}
+     * for managing roles.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.role.RoleManager
+     */
+    public static final String ROLE_SERVICE = "role";
+
+    /**
+     * Official published name of the (internal) role controller service.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.role.RoleControllerService
+     *
+     * @hide
+     */
+    public static final String ROLE_CONTROLLER_SERVICE = "role_controller";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -4169,6 +4513,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.ThermalService} for accessing the thermal service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String THERMAL_SERVICE = "thermalservice";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.ShortcutManager} for accessing the launcher shortcut service.
      *
      * @see #getSystemService(String)
@@ -4216,6 +4569,13 @@ public abstract class Context {
     public static final String INCIDENT_SERVICE = "incident";
 
     /**
+     * Service to assist incidentd and dumpstated in reporting status to the user
+     * and in confirming authorization to take an incident report or bugreport
+     * @hide
+     */
+    public static final String INCIDENT_COMPANION_SERVICE = "incidentcompanion";
+
+    /**
      * Service to assist statsd in obtaining general stats.
      * @hide
      */
@@ -4241,8 +4601,7 @@ public abstract class Context {
      * @see android.os.BugreportManager
      * @hide
      */
-    // TODO: Expose API when the implementation is more complete.
-    // @SystemApi
+    @SystemApi @TestApi
     public static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
@@ -4254,6 +4613,16 @@ public abstract class Context {
      * @hide
      */
     public static final String OVERLAY_SERVICE = "overlay";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {android.os.IIdmap2} for managing idmap files (used by overlay
+     * packages).
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String IDMAP_SERVICE = "idmap";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -4302,6 +4671,12 @@ public abstract class Context {
     public static final String TIME_DETECTOR_SERVICE = "time_detector";
 
     /**
+     * Binder service name for {@link AppBindingService}.
+     * @hide
+     */
+    public static final String APP_BINDING_SERVICE = "app_binding";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.telephony.ims.RcsMessageManager}.
      * @hide
@@ -4310,11 +4685,10 @@ public abstract class Context {
 
      /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.os.DynamicAndroidManager}.
+     * {@link android.os.image.DynamicSystemManager}.
      * @hide
      */
-    @SystemApi
-    public static final String DYNAMIC_ANDROID_SERVICE = "dynamic_android";
+    public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -4817,6 +5191,7 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @TestApi
     public Context createPackageContextAsUser(
             String packageName, @CreatePackageOptions int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {
@@ -4975,10 +5350,20 @@ public abstract class Context {
     public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
+     * @return Returns the {@link Display} object this context is associated with.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public abstract Display getDisplay();
+
+    /**
+     * Gets the display ID.
+     *
+     * @return display ID associated with this {@link Context}.
+     * @hide
+     */
+    @TestApi
+    public abstract int getDisplayId();
 
     /**
      * @hide
@@ -5066,16 +5451,50 @@ public abstract class Context {
     /**
      * @hide
      */
-    public boolean isAutofillCompatibilityEnabled() {
-        return false;
+    @Nullable
+    public ContentCaptureClient getContentCaptureClient() {
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    public final boolean isAutofillCompatibilityEnabled() {
+        final AutofillOptions options = getAutofillOptions();
+        return options != null && options.compatModeEnabled;
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public AutofillOptions getAutofillOptions() {
+        return null;
     }
 
     /**
      * @hide
      */
     @TestApi
-    public void setAutofillCompatibilityEnabled(
-            @SuppressWarnings("unused") boolean autofillCompatEnabled) {
+    public void setAutofillOptions(@SuppressWarnings("unused") @Nullable AutofillOptions options) {
+    }
+
+    /**
+     * Gets the Content Capture options for this context, or {@code null} if it's not whitelisted.
+     *
+     * @hide
+     */
+    @Nullable
+    public ContentCaptureOptions getContentCaptureOptions() {
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setContentCaptureOptions(
+            @SuppressWarnings("unused") @Nullable ContentCaptureOptions options) {
     }
 
     /**

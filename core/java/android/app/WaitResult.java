@@ -16,11 +16,14 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information returned after waiting for an activity start.
@@ -28,11 +31,43 @@ import java.io.PrintWriter;
  * @hide
  */
 public class WaitResult implements Parcelable {
+
+    /**
+     * The state at which a launch sequence had started.
+     *
+     * @see <a href="https://developer.android.com/topic/performance/vitals/launch-time"App startup
+     * time</a>
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"LAUNCH_STATE_"}, value = {
+            LAUNCH_STATE_COLD,
+            LAUNCH_STATE_WARM,
+            LAUNCH_STATE_HOT
+    })
+    public @interface LaunchState {
+    }
+
+    /**
+     * Cold launch sequence: a new process has started.
+     */
+    public static final int LAUNCH_STATE_COLD = 1;
+
+    /**
+     * Warm launch sequence: process reused, but activity has to be created.
+     */
+    public static final int LAUNCH_STATE_WARM = 2;
+
+    /**
+     * Hot launch sequence: process reused, activity brought-to-top.
+     */
+    public static final int LAUNCH_STATE_HOT = 3;
+
     public static final int INVALID_DELAY = -1;
     public int result;
     public boolean timeout;
     public ComponentName who;
     public long totalTime;
+    public @LaunchState int launchState;
 
     public WaitResult() {
     }
@@ -48,9 +83,10 @@ public class WaitResult implements Parcelable {
         dest.writeInt(timeout ? 1 : 0);
         ComponentName.writeToParcel(who, dest);
         dest.writeLong(totalTime);
+        dest.writeInt(launchState);
     }
 
-    public static final Parcelable.Creator<WaitResult> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<WaitResult> CREATOR
             = new Parcelable.Creator<WaitResult>() {
         @Override
         public WaitResult createFromParcel(Parcel source) {
@@ -68,6 +104,7 @@ public class WaitResult implements Parcelable {
         timeout = source.readInt() != 0;
         who = ComponentName.readFromParcel(source);
         totalTime = source.readLong();
+        launchState = source.readInt();
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -76,5 +113,19 @@ public class WaitResult implements Parcelable {
         pw.println(prefix + "  timeout=" + timeout);
         pw.println(prefix + "  who=" + who);
         pw.println(prefix + "  totalTime=" + totalTime);
+        pw.println(prefix + "  launchState=" + launchState);
+    }
+
+    public static String launchStateToString(@LaunchState int type) {
+        switch (type) {
+            case LAUNCH_STATE_COLD:
+                return "COLD";
+            case LAUNCH_STATE_WARM:
+                return "WARM";
+            case LAUNCH_STATE_HOT:
+                return "HOT";
+            default:
+                return "UNKNOWN (" + type + ")";
+        }
     }
 }

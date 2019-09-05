@@ -30,8 +30,10 @@ interface BoundsAnimationTarget {
      *
      * @param schedulePipModeChangedCallback whether or not to schedule the PiP mode changed
      * callbacks
+     * @return whether to continue the animation
      */
-    void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate);
+    boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate,
+            @BoundsAnimationController.AnimationType int animationType);
 
     /**
      * @return Whether the animation should be paused waiting for the windows to draw before
@@ -52,6 +54,9 @@ interface BoundsAnimationTarget {
      */
     boolean setPinnedStackSize(Rect stackBounds, Rect taskBounds);
 
+    /** Sets the alpha of the animation target */
+    boolean setPinnedStackAlpha(float alpha);
+
     /**
      * Callback for the target to inform it that the animation has ended, so it can do some
      * necessary cleanup.
@@ -65,4 +70,9 @@ interface BoundsAnimationTarget {
      */
     void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
             boolean moveToFullscreen);
+
+    /** @return True if the target is attached to the window hierarchy. */
+    default boolean isAttached() {
+        return true;
+    }
 }

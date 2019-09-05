@@ -23,8 +23,11 @@ import android.service.pm.PackageServiceDumpProto;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.ArrayUtils;
+
+import libcore.util.EmptyArray;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -64,29 +67,31 @@ public final class SharedUserSetting extends SettingBase {
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(PackageServiceDumpProto.SharedUserProto.USER_ID, userId);
+        proto.write(PackageServiceDumpProto.SharedUserProto.UID, userId);
         proto.write(PackageServiceDumpProto.SharedUserProto.NAME, name);
         proto.end(token);
     }
 
-    void removePackage(PackageSetting packageSetting) {
-        if (packages.remove(packageSetting)) {
-            // recalculate the pkgFlags for this shared user if needed
-            if ((this.pkgFlags & packageSetting.pkgFlags) != 0) {
-                int aggregatedFlags = uidFlags;
-                for (PackageSetting ps : packages) {
-                    aggregatedFlags |= ps.pkgFlags;
-                }
-                setFlags(aggregatedFlags);
-            }
-            if ((this.pkgPrivateFlags & packageSetting.pkgPrivateFlags) != 0) {
-                int aggregatedPrivateFlags = uidPrivateFlags;
-                for (PackageSetting ps : packages) {
-                    aggregatedPrivateFlags |= ps.pkgPrivateFlags;
-                }
-                setPrivateFlags(aggregatedPrivateFlags);
-            }
+    boolean removePackage(PackageSetting packageSetting) {
+        if (!packages.remove(packageSetting)) {
+            return false;
         }
+        // recalculate the pkgFlags for this shared user if needed
+        if ((this.pkgFlags & packageSetting.pkgFlags) != 0) {
+            int aggregatedFlags = uidFlags;
+            for (PackageSetting ps : packages) {
+                aggregatedFlags |= ps.pkgFlags;
+            }
+            setFlags(aggregatedFlags);
+        }
+        if ((this.pkgPrivateFlags & packageSetting.pkgPrivateFlags) != 0) {
+            int aggregatedPrivateFlags = uidPrivateFlags;
+            for (PackageSetting ps : packages) {
+                aggregatedPrivateFlags |= ps.pkgPrivateFlags;
+            }
+            setPrivateFlags(aggregatedPrivateFlags);
+        }
+        return true;
     }
 
     void addPackage(PackageSetting packageSetting) {
@@ -143,4 +148,34 @@ public final class SharedUserSetting extends SettingBase {
         }
     }
 
+    /** Returns userIds which doesn't have any packages with this sharedUserId */
+    public int[] getNotInstalledUserIds() {
+        int[] excludedUserIds = null;
+        for (PackageSetting ps : packages) {
+            final int[] userIds = ps.getNotInstalledUserIds();
+            if (excludedUserIds == null) {
+                excludedUserIds = userIds;
+            } else {
+                for (int userId : excludedUserIds) {
+                    if (!ArrayUtils.contains(userIds, userId)) {
+                        excludedUserIds = ArrayUtils.removeInt(excludedUserIds, userId);
+                    }
+                }
+            }
+        }
+        return excludedUserIds == null ? EmptyArray.INT : excludedUserIds;
+    }
+
+    /** Updates all fields in this shared user setting from another. */
+    public SharedUserSetting updateFrom(SharedUserSetting sharedUser) {
+        copyFrom(sharedUser);
+        this.userId = sharedUser.userId;
+        this.uidFlags = sharedUser.uidFlags;
+        this.uidPrivateFlags = sharedUser.uidPrivateFlags;
+        this.seInfoTargetSdkVersion = sharedUser.seInfoTargetSdkVersion;
+        this.packages.clear();
+        this.packages.addAll(sharedUser.packages);
+        this.signaturesChanged = sharedUser.signaturesChanged;
+        return this;
+    }
 }

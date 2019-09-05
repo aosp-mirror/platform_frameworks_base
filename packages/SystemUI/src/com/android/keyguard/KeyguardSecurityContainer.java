@@ -19,19 +19,34 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Rect;
+import android.metrics.LogMaker;
 import android.os.UserHandle;
-import androidx.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.VisibleForTesting;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringAnimation;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.Dependency;
+import com.android.systemui.SystemUIFactory;
+import com.android.systemui.util.InjectionInflationController;
 
 public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -41,16 +56,46 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private static final int USER_TYPE_WORK_PROFILE = 2;
     private static final int USER_TYPE_SECONDARY_USER = 3;
 
+    // Bouncer is dismissed due to no security.
+    private static final int BOUNCER_DISMISS_NONE_SECURITY = 0;
+    // Bouncer is dismissed due to pin, password or pattern entered.
+    private static final int BOUNCER_DISMISS_PASSWORD = 1;
+    // Bouncer is dismissed due to biometric (face, fingerprint or iris) authenticated.
+    private static final int BOUNCER_DISMISS_BIOMETRIC = 2;
+    // Bouncer is dismissed due to extended access granted.
+    private static final int BOUNCER_DISMISS_EXTENDED_ACCESS = 3;
+    // Bouncer is dismissed due to sim card unlock code entered.
+    private static final int BOUNCER_DISMISS_SIM = 4;
+
+    // Make the view move slower than the finger, as if the spring were applying force.
+    private static final float TOUCH_Y_MULTIPLIER = 0.25f;
+    // How much you need to drag the bouncer to trigger an auth retry (in dps.)
+    private static final float MIN_DRAG_SIZE = 10;
+    // How much to scale the default slop by, to avoid accidental drags.
+    private static final float SLOP_SCALE = 2f;
+
     private KeyguardSecurityModel mSecurityModel;
     private LockPatternUtils mLockPatternUtils;
 
     private KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private boolean mIsVerifyUnlockOnly;
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
+    private KeyguardSecurityView mCurrentSecurityView;
     private SecurityCallback mSecurityCallback;
     private AlertDialog mAlertDialog;
+    private InjectionInflationController mInjectionInflationController;
+    private boolean mSwipeUpToRetry;
 
+    private final ViewConfiguration mViewConfiguration;
+    private final SpringAnimation mSpringAnimation;
+    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final KeyguardUpdateMonitor mUpdateMonitor;
+
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private float mLastTouchY = -1;
+    private int mActivePointerId = -1;
+    private boolean mIsDragging;
+    private float mStartTouchY = -1;
 
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
@@ -65,6 +110,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
          */
         public void finish(boolean strongAuth, int targetUserId);
         public void reset();
+        public void onCancelClicked();
     }
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs) {
@@ -80,6 +126,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mSecurityModel = new KeyguardSecurityModel(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
+        mInjectionInflationController =  new InjectionInflationController(
+            SystemUIFactory.getInstance().getRootComponent());
+        mViewConfiguration = ViewConfiguration.get(context);
     }
 
     public void setSecurityCallback(SecurityCallback callback) {
@@ -91,6 +141,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             getSecurityView(mCurrentSecuritySelection).onResume(reason);
         }
+        updateBiometricRetry();
     }
 
     @Override
@@ -102,6 +153,95 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             getSecurityView(mCurrentSecuritySelection).onPause();
         }
+    }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                int pointerIndex = event.getActionIndex();
+                mStartTouchY = event.getY(pointerIndex);
+                mActivePointerId = event.getPointerId(pointerIndex);
+                mVelocityTracker.clear();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (mIsDragging) {
+                    return true;
+                }
+                if (!mSwipeUpToRetry) {
+                    return false;
+                }
+                // Avoid dragging the pattern view
+                if (mCurrentSecurityView.disallowInterceptTouch(event)) {
+                    return false;
+                }
+                int index = event.findPointerIndex(mActivePointerId);
+                float touchSlop = mViewConfiguration.getScaledTouchSlop() * SLOP_SCALE;
+                if (mCurrentSecurityView != null && index != -1
+                        && mStartTouchY - event.getY(index) > touchSlop) {
+                    mIsDragging = true;
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mIsDragging = false;
+                break;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        final int action = event.getActionMasked();
+        switch (action) {
+            case MotionEvent.ACTION_MOVE:
+                mVelocityTracker.addMovement(event);
+                int pointerIndex = event.findPointerIndex(mActivePointerId);
+                float y = event.getY(pointerIndex);
+                if (mLastTouchY != -1) {
+                    float dy = y - mLastTouchY;
+                    setTranslationY(getTranslationY() + dy * TOUCH_Y_MULTIPLIER);
+                }
+                mLastTouchY = y;
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mActivePointerId = -1;
+                mLastTouchY = -1;
+                mIsDragging = false;
+                startSpringAnimation(mVelocityTracker.getYVelocity());
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                int index = event.getActionIndex();
+                int pointerId = event.getPointerId(index);
+                if (pointerId == mActivePointerId) {
+                    // This was our active pointer going up. Choose a new
+                    // active pointer and adjust accordingly.
+                    final int newPointerIndex = index == 0 ? 1 : 0;
+                    mLastTouchY = event.getY(newPointerIndex);
+                    mActivePointerId = event.getPointerId(newPointerIndex);
+                }
+                break;
+        }
+        if (action == MotionEvent.ACTION_UP) {
+            if (-getTranslationY() > TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    MIN_DRAG_SIZE, getResources().getDisplayMetrics())) {
+                mUpdateMonitor.requestFaceAuth();
+            }
+        }
+        return true;
+    }
+
+    private void startSpringAnimation(float startVelocity) {
+        mSpringAnimation
+            .setStartVelocity(startVelocity)
+            .animateToFinalPosition(0);
     }
 
     public void startAppearAnimation() {
@@ -116,6 +256,18 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     onFinishRunnable);
         }
         return false;
+    }
+
+    /**
+     * Enables/disables swipe up to retry on the bouncer.
+     */
+    private void updateBiometricRetry() {
+        SecurityMode securityMode = getSecurityMode();
+        int userId = KeyguardUpdateMonitor.getCurrentUser();
+        mSwipeUpToRetry = mUpdateMonitor.isUnlockWithFacePossible(userId)
+                && securityMode != SecurityMode.SimPin
+                && securityMode != SecurityMode.SimPuk
+                && securityMode != SecurityMode.None;
     }
 
     public CharSequence getTitle() {
@@ -136,7 +288,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (view == null && layoutId != 0) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
             if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
-            View v = inflater.inflate(layoutId, mSecurityViewFlipper, false);
+            View v = mInjectionInflationController.injectable(inflater)
+                    .inflate(layoutId, mSecurityViewFlipper, false);
             mSecurityViewFlipper.addView(v);
             updateSecurityView(v);
             view = (KeyguardSecurityView)v;
@@ -165,6 +318,14 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mLockPatternUtils = utils;
         mSecurityModel.setLockPatternUtils(utils);
         mSecurityViewFlipper.setLockPatternUtils(mLockPatternUtils);
+    }
+
+    @Override
+    protected boolean fitSystemWindows(Rect insets) {
+        // Consume bottom insets because we're setting the padding locally (for IME and navbar.)
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), insets.bottom);
+        insets.bottom = 0;
+        return false;
     }
 
     private void showDialog(String title, String message) {
@@ -318,12 +479,18 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         boolean finish = false;
         boolean strongAuth = false;
-        if (mUpdateMonitor.getUserCanSkipBouncer(targetUserId)) {
+        int eventSubtype = -1;
+        if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
             finish = true;
+            eventSubtype = BOUNCER_DISMISS_EXTENDED_ACCESS;
+        } else if (mUpdateMonitor.getUserUnlockedWithBiometric(targetUserId)) {
+            finish = true;
+            eventSubtype = BOUNCER_DISMISS_BIOMETRIC;
         } else if (SecurityMode.None == mCurrentSecuritySelection) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
             if (SecurityMode.None == securityMode) {
                 finish = true; // no security required
+                eventSubtype = BOUNCER_DISMISS_NONE_SECURITY;
             } else {
                 showSecurityScreen(securityMode); // switch to the alternate security view
             }
@@ -334,6 +501,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 case PIN:
                     strongAuth = true;
                     finish = true;
+                    eventSubtype = BOUNCER_DISMISS_PASSWORD;
                     break;
 
                 case SimPin:
@@ -343,6 +511,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     if (securityMode == SecurityMode.None && mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser())) {
                         finish = true;
+                        eventSubtype = BOUNCER_DISMISS_SIM;
                     } else {
                         showSecurityScreen(securityMode);
                     }
@@ -353,6 +522,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     showPrimarySecurityScreen(false);
                     break;
             }
+        }
+        if (eventSubtype != -1) {
+            mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
+                    .setType(MetricsEvent.TYPE_DISMISS).setSubtype(eventSubtype));
         }
         if (finish) {
             mSecurityCallback.finish(strongAuth, targetUserId);
@@ -396,6 +569,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         mCurrentSecuritySelection = securityMode;
+        mCurrentSecurityView = newView;
         mSecurityCallback.onSecurityModeChanged(securityMode,
                 securityMode != SecurityMode.None && newView.needsInput());
     }
@@ -426,7 +600,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
-            KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             if (success) {
                 StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
                     StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
@@ -436,10 +609,16 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);
                 KeyguardSecurityContainer.this.reportFailedUnlockAttempt(userId, timeoutMs);
             }
+            mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
+                    .setType(success ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_FAILURE));
         }
 
         public void reset() {
             mSecurityCallback.reset();
+        }
+
+        public void onCancelClicked() {
+            mSecurityCallback.onCancelClicked();
         }
     };
 
@@ -491,6 +670,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         return mCurrentSecuritySelection;
     }
 
+    public KeyguardSecurityView getCurrentSecurityView() {
+        return mCurrentSecurityView;
+    }
+
     public void verifyUnlock() {
         mIsVerifyUnlockOnly = true;
         showSecurityScreen(getSecurityMode());
@@ -533,9 +716,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
     }
 
-    public void showMessage(CharSequence message, int color) {
+    public void showMessage(CharSequence message, ColorStateList colorState) {
         if (mCurrentSecuritySelection != SecurityMode.None) {
-            getSecurityView(mCurrentSecuritySelection).showMessage(message, color);
+            getSecurityView(mCurrentSecuritySelection).showMessage(message, colorState);
         }
     }
 

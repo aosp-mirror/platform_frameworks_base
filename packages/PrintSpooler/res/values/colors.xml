@@ -18,8 +18,6 @@
 
     <color name="print_preview_scrim_color">#99000000</color>
 
-    <color name="print_preview_background_color">#F2F1F2</color>
-
     <color name="unselected_page_background_color">#C0C0C0</color>
 
     <color name="material_grey_500">#ffa3a3a3</color>

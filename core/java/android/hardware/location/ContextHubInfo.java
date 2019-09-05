@@ -16,6 +16,7 @@
 package android.hardware.location;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.os.Parcel;
@@ -269,6 +270,34 @@ public class ContextHubInfo implements Parcelable {
         return retVal;
     }
 
+    @Override
+    public boolean equals(@Nullable Object object) {
+        if (object == this) {
+            return true;
+        }
+
+        boolean isEqual = false;
+        if (object instanceof ContextHubInfo) {
+            ContextHubInfo other = (ContextHubInfo) object;
+            isEqual = (other.getId() == mId)
+                    && other.getName().equals(mName)
+                    && other.getVendor().equals(mVendor)
+                    && other.getToolchain().equals(mToolchain)
+                    && (other.getToolchainVersion() == mToolchainVersion)
+                    && (other.getStaticSwVersion() == getStaticSwVersion())
+                    && (other.getChrePlatformId() == mChrePlatformId)
+                    && (other.getPeakMips() == mPeakMips)
+                    && (other.getStoppedPowerDrawMw() == mStoppedPowerDrawMw)
+                    && (other.getSleepPowerDrawMw() == mSleepPowerDrawMw)
+                    && (other.getPeakPowerDrawMw() == mPeakPowerDrawMw)
+                    && (other.getMaxPacketLengthBytes() == mMaxPacketLengthBytes)
+                    && Arrays.equals(other.getSupportedSensors(), mSupportedSensors)
+                    && Arrays.equals(other.getMemoryRegions(), mMemoryRegions);
+        }
+
+        return isEqual;
+    }
+
     private ContextHubInfo(Parcel in) {
         mId = in.readInt();
         mName = in.readString();
@@ -318,7 +347,7 @@ public class ContextHubInfo implements Parcelable {
         out.writeTypedArray(mMemoryRegions, flags);
     }
 
-    public static final Parcelable.Creator<ContextHubInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ContextHubInfo> CREATOR
             = new Parcelable.Creator<ContextHubInfo>() {
         public ContextHubInfo createFromParcel(Parcel in) {
             return new ContextHubInfo(in);

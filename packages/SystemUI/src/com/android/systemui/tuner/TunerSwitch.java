@@ -3,8 +3,9 @@ package com.android.systemui.tuner;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.provider.Settings;
-import androidx.preference.SwitchPreference;
 import android.util.AttributeSet;
+
+import androidx.preference.SwitchPreference;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;

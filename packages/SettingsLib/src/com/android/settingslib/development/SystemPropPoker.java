@@ -21,9 +21,10 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 
 public class SystemPropPoker  {
     private static final String TAG = "SystemPropPoker";

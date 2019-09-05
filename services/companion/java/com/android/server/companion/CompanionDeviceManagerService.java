@@ -23,7 +23,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
-import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -39,6 +38,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -72,7 +72,9 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -84,6 +86,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -158,6 +161,23 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     @Override
     public void onStart() {
         publishBinderService(Context.COMPANION_DEVICE_SERVICE, mImpl);
+    }
+
+    @Override
+    public void onUnlockUser(int userHandle) {
+        Set<Association> associations = readAllAssociations(userHandle);
+        if (associations == null || associations.isEmpty()) {
+            return;
+        }
+        Set<String> companionAppPackages = new HashSet<>();
+        for (Association association : associations) {
+            companionAppPackages.add(association.companionAppPackage);
+        }
+        ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                ActivityTaskManagerInternal.class);
+        if (atmInternal != null) {
+            atmInternal.setCompanionAppPackages(userHandle, companionAppPackages);
+        }
     }
 
     @Override
@@ -289,7 +309,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             String packageTitle = BidiFormatter.getInstance().unicodeWrap(
                     getPackageInfo(callingPackage, userId)
                             .applicationInfo
-                            .loadSafeLabel(getContext().getPackageManager())
+                            .loadSafeLabel(getContext().getPackageManager(),
+                                    PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
+                                    PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE)
                             .toString());
             long identity = Binder.clearCallingIdentity();
             try {
@@ -516,6 +539,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             if (size(old) == size(associations)) return;
 
             Set<Association> finalAssociations = associations;
+            Set<String> companionAppPackages = new HashSet<>();
+            for (Association association : finalAssociations) {
+                companionAppPackages.add(association.companionAppPackage);
+            }
+
             file.write((out) -> {
                 XmlSerializer xml = Xml.newSerializer();
                 try {
@@ -539,6 +567,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 }
 
             });
+            ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                    ActivityTaskManagerInternal.class);
+            atmInternal.setCompanionAppPackages(userId, companionAppPackages);
         }
     }
 

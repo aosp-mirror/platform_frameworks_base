@@ -225,7 +225,7 @@ public final class RadioMetadata implements Parcelable {
             out.writeInt(mTimezoneOffsetMinutes);
         }
 
-        public static final Parcelable.Creator<Clock> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<Clock> CREATOR
                 = new Parcelable.Creator<Clock>() {
             public Clock createFromParcel(Parcel in) {
                 return new Clock(in);
@@ -427,7 +427,7 @@ public final class RadioMetadata implements Parcelable {
         return NATIVE_KEY_MAPPING.get(nativeKey, null);
     }
 
-    public static final Parcelable.Creator<RadioMetadata> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RadioMetadata> CREATOR =
             new Parcelable.Creator<RadioMetadata>() {
                 @Override
                 public RadioMetadata createFromParcel(Parcel in) {

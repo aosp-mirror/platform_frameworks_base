@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,6 +25,7 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -36,8 +38,13 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 /**
@@ -131,13 +138,6 @@ public final class MediaDrm implements AutoCloseable {
 
     private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
 
-    private EventHandler mEventHandler;
-    private EventHandler mOnKeyStatusChangeEventHandler;
-    private EventHandler mOnExpirationUpdateEventHandler;
-    private OnEventListener mOnEventListener;
-    private OnKeyStatusChangeListener mOnKeyStatusChangeListener;
-    private OnExpirationUpdateListener mOnExpirationUpdateListener;
-
     private long mNativeContext;
 
     /**
@@ -168,7 +168,8 @@ public final class MediaDrm implements AutoCloseable {
      * @param uuid The UUID of the crypto scheme.
      */
     public static final boolean isCryptoSchemeSupported(@NonNull UUID uuid) {
-        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), null);
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), null,
+                SECURITY_LEVEL_UNKNOWN);
     }
 
     /**
@@ -181,7 +182,25 @@ public final class MediaDrm implements AutoCloseable {
      */
     public static final boolean isCryptoSchemeSupported(
             @NonNull UUID uuid, @NonNull String mimeType) {
-        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), mimeType);
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid),
+                mimeType, SECURITY_LEVEL_UNKNOWN);
+    }
+
+    /**
+     * Query if the given scheme identified by its UUID is supported on
+     * this device, and whether the DRM plugin is able to handle the
+     * media container format specified by mimeType at the requested
+     * security level.
+     *
+     * @param uuid The UUID of the crypto scheme.
+     * @param mimeType The MIME type of the media container, e.g. "video/mp4"
+     *   or "video/webm"
+     * @param securityLevel the security level requested
+     */
+    public static final boolean isCryptoSchemeSupported(
+            @NonNull UUID uuid, @NonNull String mimeType, @SecurityLevel int securityLevel) {
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), mimeType,
+                securityLevel);
     }
 
     private static final byte[] getByteArrayFromUUID(@NonNull UUID uuid) {
@@ -198,7 +217,20 @@ public final class MediaDrm implements AutoCloseable {
     }
 
     private static final native boolean isCryptoSchemeSupportedNative(
-            @NonNull byte[] uuid, @Nullable String mimeType);
+            @NonNull byte[] uuid, @Nullable String mimeType, @SecurityLevel int securityLevel);
+
+    private Handler createHandler() {
+        Looper looper;
+        Handler handler;
+        if ((looper = Looper.myLooper()) != null) {
+            handler = new Handler(looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            handler = new Handler(looper);
+        } else {
+            handler = null;
+        }
+        return handler;
+    }
 
     /**
      * Instantiate a MediaDrm object
@@ -209,15 +241,6 @@ public final class MediaDrm implements AutoCloseable {
      * specified scheme UUID
      */
     public MediaDrm(@NonNull UUID uuid) throws UnsupportedSchemeException {
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else {
-            mEventHandler = null;
-        }
-
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
@@ -272,6 +295,45 @@ public final class MediaDrm implements AutoCloseable {
     }
 
     /**
+     * Thrown when an error occurs in any method that has a session context.
+     */
+    public static final class SessionException extends RuntimeException {
+        public SessionException(int errorCode, @Nullable String detailMessage) {
+            super(detailMessage);
+            mErrorCode = errorCode;
+        }
+
+        /**
+         * The SessionException has an unknown error code.
+         */
+        public static final int ERROR_UNKNOWN = 0;
+
+        /**
+         * This indicates that apps using MediaDrm sessions are
+         * temporarily exceeding the capacity of available crypto
+         * resources. The app should retry the operation later.
+         */
+        public static final int ERROR_RESOURCE_CONTENTION = 1;
+
+        /** @hide */
+        @IntDef({
+            ERROR_RESOURCE_CONTENTION,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface SessionErrorCode {}
+
+        /**
+         * Retrieve the error code associated with the SessionException
+         */
+        @SessionErrorCode
+        public int getErrorCode() {
+            return mErrorCode;
+        }
+
+        private final int mErrorCode;
+    }
+
+    /**
      * Register a callback to be invoked when a session expiration update
      * occurs.  The app's OnExpirationUpdateListener will be notified
      * when the expiration time of the keys in the session have changed.
@@ -282,15 +344,30 @@ public final class MediaDrm implements AutoCloseable {
      */
     public void setOnExpirationUpdateListener(
             @Nullable OnExpirationUpdateListener listener, @Nullable Handler handler) {
-        if (listener != null) {
-            Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
-            if (looper != null) {
-                if (mEventHandler == null || mEventHandler.getLooper() != looper) {
-                    mEventHandler = new EventHandler(this, looper);
-                }
-            }
-        }
-        mOnExpirationUpdateListener = listener;
+        setListenerWithHandler(EXPIRATION_UPDATE, handler, listener,
+                this::createOnExpirationUpdateListener);
+    }
+    /**
+     * Register a callback to be invoked when a session expiration update
+     * occurs.
+     *
+     * @see #setOnExpirationUpdateListener(OnExpirationUpdateListener, Handler)
+     *
+     * @param executor the executor through which the listener should be invoked
+     * @param listener the callback that will be run.
+     */
+    public void setOnExpirationUpdateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnExpirationUpdateListener listener) {
+        setListenerWithExecutor(EXPIRATION_UPDATE, executor, listener,
+                this::createOnExpirationUpdateListener);
+    }
+
+    /**
+     * Clear the {@link OnExpirationUpdateListener}.
+     */
+    public void clearOnExpirationUpdateListener() {
+        clearGenericListener(EXPIRATION_UPDATE);
     }
 
     /**
@@ -324,15 +401,31 @@ public final class MediaDrm implements AutoCloseable {
      */
     public void setOnKeyStatusChangeListener(
             @Nullable OnKeyStatusChangeListener listener, @Nullable Handler handler) {
-        if (listener != null) {
-            Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
-            if (looper != null) {
-                if (mEventHandler == null || mEventHandler.getLooper() != looper) {
-                    mEventHandler = new EventHandler(this, looper);
-                }
-            }
-        }
-        mOnKeyStatusChangeListener = listener;
+        setListenerWithHandler(KEY_STATUS_CHANGE, handler, listener,
+                this::createOnKeyStatusChangeListener);
+    }
+
+    /**
+     * Register a callback to be invoked when the state of keys in a session
+     * change.
+     *
+     * @see #setOnKeyStatusChangeListener(OnKeyStatusChangeListener, Handler)
+     *
+     * @param listener the callback that will be run when key status changes.
+     * @param executor the executor on which the listener should be invoked.
+     */
+    public void setOnKeyStatusChangeListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnKeyStatusChangeListener listener) {
+        setListenerWithExecutor(KEY_STATUS_CHANGE, executor, listener,
+                this::createOnKeyStatusChangeListener);
+    }
+
+    /**
+     * Clear the {@link OnKeyStatusChangeListener}.
+     */
+    public void clearOnKeyStatusChangeListener() {
+        clearGenericListener(KEY_STATUS_CHANGE);
     }
 
     /**
@@ -357,6 +450,65 @@ public final class MediaDrm implements AutoCloseable {
                 @NonNull MediaDrm md, @NonNull byte[] sessionId,
                 @NonNull List<KeyStatus> keyInformation,
                 boolean hasNewUsableKey);
+    }
+
+    /**
+     * Register a callback to be invoked when session state has been
+     * lost. This event can occur on devices that are not capable of
+     * retaining crypto session state across device suspend/resume
+     * cycles.  When this event occurs, the session must be closed and
+     * a new session opened to resume operation.
+     *
+     * @param listener the callback that will be run, or {@code null} to unregister the
+     *     previously registered callback.
+     * @param handler the handler on which the listener should be invoked, or
+     *     {@code null} if the listener should be invoked on the calling thread's looper.
+     */
+    public void setOnSessionLostStateListener(
+            @Nullable OnSessionLostStateListener listener, @Nullable Handler handler) {
+        setListenerWithHandler(SESSION_LOST_STATE, handler, listener,
+                this::createOnSessionLostStateListener);
+    }
+
+    /**
+     * Register a callback to be invoked when session state has been
+     * lost.
+     *
+     * @see #setOnSessionLostStateListener(OnSessionLostStateListener, Handler)
+     *
+     * @param listener the callback that will be run.
+     * @param executor the executor on which the listener should be invoked.
+     */
+    public void setOnSessionLostStateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @Nullable OnSessionLostStateListener listener) {
+        setListenerWithExecutor(SESSION_LOST_STATE, executor, listener,
+                this::createOnSessionLostStateListener);
+    }
+
+    /**
+     * Clear the {@link OnSessionLostStateListener}.
+     */
+    public void clearOnSessionLostStateListener() {
+        clearGenericListener(SESSION_LOST_STATE);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the
+     * session state has been lost and is now invalid
+     */
+    public interface OnSessionLostStateListener
+    {
+        /**
+         * Called when session state has lost state, to inform the app
+         * about the condition so it can close the session and open a new
+         * one to resume operation.
+         *
+         * @param md the MediaDrm object on which the event occurred
+         * @param sessionId the DRM session ID on which the event occurred
+         */
+        void onSessionLostState(
+                @NonNull MediaDrm md, @NonNull byte[] sessionId);
     }
 
     /**
@@ -400,6 +552,13 @@ public final class MediaDrm implements AutoCloseable {
          */
         public static final int STATUS_INTERNAL_ERROR = 4;
 
+        /**
+         * The key is not yet usable to decrypt media because the start
+         * time is in the future. The key will become usable when
+         * its start time is reached.
+         */
+        public static final int STATUS_USABLE_IN_FUTURE = 5;
+
         /** @hide */
         @IntDef({
             STATUS_USABLE,
@@ -407,6 +566,7 @@ public final class MediaDrm implements AutoCloseable {
             STATUS_OUTPUT_NOT_ALLOWED,
             STATUS_PENDING,
             STATUS_INTERNAL_ERROR,
+            STATUS_USABLE_IN_FUTURE,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface KeyStatusCode {}
@@ -418,9 +578,6 @@ public final class MediaDrm implements AutoCloseable {
 
         /**
          * Returns the status code for the key
-         * @return one of {@link #STATUS_USABLE}, {@link #STATUS_EXPIRED},
-         * {@link #STATUS_OUTPUT_NOT_ALLOWED}, {@link #STATUS_PENDING}
-         * or {@link #STATUS_INTERNAL_ERROR}.
          */
         @KeyStatusCode
         public int getStatusCode() { return mStatusCode; }
@@ -435,12 +592,48 @@ public final class MediaDrm implements AutoCloseable {
     /**
      * Register a callback to be invoked when an event occurs
      *
+     * @see #setOnEventListener(OnEventListener, Handler)
+     *
      * @param listener the callback that will be run.  Use {@code null} to
      *        stop receiving event callbacks.
      */
     public void setOnEventListener(@Nullable OnEventListener listener)
     {
-        mOnEventListener = listener;
+        setOnEventListener(listener, null);
+    }
+
+    /**
+     * Register a callback to be invoked when an event occurs
+     *
+     * @param listener the callback that will be run.  Use {@code null} to
+     *        stop receiving event callbacks.
+     * @param handler the handler on which the listener should be invoked, or
+     *        null if the listener should be invoked on the calling thread's looper.
+     */
+
+    public void setOnEventListener(@Nullable OnEventListener listener, @Nullable Handler handler)
+    {
+        setListenerWithHandler(DRM_EVENT, handler, listener, this::createOnEventListener);
+    }
+
+    /**
+     * Register a callback to be invoked when an event occurs
+     *
+     * @see #setOnEventListener(OnEventListener)
+     *
+     * @param executor the executor through which the listener should be invoked
+     * @param listener the callback that will be run.
+     */
+    public void setOnEventListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OnEventListener listener) {
+        setListenerWithExecutor(DRM_EVENT, executor, listener, this::createOnEventListener);
+    }
+
+    /**
+     * Clear the {@link OnEventListener}.
+     */
+    public void clearOnEventListener() {
+        clearGenericListener(DRM_EVENT);
     }
 
     /**
@@ -516,80 +709,114 @@ public final class MediaDrm implements AutoCloseable {
     private static final int DRM_EVENT = 200;
     private static final int EXPIRATION_UPDATE = 201;
     private static final int KEY_STATUS_CHANGE = 202;
+    private static final int SESSION_LOST_STATE = 203;
 
-    private class EventHandler extends Handler
-    {
-        private MediaDrm mMediaDrm;
+    // Use ConcurrentMap to support concurrent read/write to listener settings.
+    // ListenerWithExecutor is immutable so we shouldn't need further locks.
+    private final Map<Integer, ListenerWithExecutor> mListenerMap = new ConcurrentHashMap<>();
 
-        public EventHandler(@NonNull MediaDrm md, @NonNull Looper looper) {
-            super(looper);
-            mMediaDrm = md;
+    // called by old-style set*Listener APIs using Handlers; listener & handler are Nullable
+    private <T> void setListenerWithHandler(int what, Handler handler, T listener,
+            Function<T, Consumer<ListenerArgs>> converter) {
+        if (listener == null) {
+            clearGenericListener(what);
+        } else {
+            handler = handler == null ? createHandler() : handler;
+            final HandlerExecutor executor = new HandlerExecutor(handler);
+            setGenericListener(what, executor, listener, converter);
         }
+    }
 
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            if (mMediaDrm.mNativeContext == 0) {
-                Log.w(TAG, "MediaDrm went away with unhandled events");
-                return;
+    // called by new-style set*Listener APIs using Executors; listener & executor must be NonNull
+    private <T> void setListenerWithExecutor(int what, Executor executor, T listener,
+            Function<T, Consumer<ListenerArgs>> converter) {
+        if (executor == null || listener == null) {
+            final String errMsg = String.format("executor %s listener %s", executor, listener);
+            throw new IllegalArgumentException(errMsg);
+        }
+        setGenericListener(what, executor, listener, converter);
+    }
+
+    private <T> void setGenericListener(int what, Executor executor, T listener,
+            Function<T, Consumer<ListenerArgs>> converter) {
+        mListenerMap.put(what, new ListenerWithExecutor(executor, converter.apply(listener)));
+    }
+
+    private void clearGenericListener(int what) {
+        mListenerMap.remove(what);
+    }
+
+    private Consumer<ListenerArgs> createOnEventListener(OnEventListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            if (sessionId.length == 0) {
+                sessionId = null;
             }
-            switch(msg.what) {
-
-            case DRM_EVENT:
-                if (mOnEventListener != null) {
-                    if (msg.obj != null && msg.obj instanceof Parcel) {
-                        Parcel parcel = (Parcel)msg.obj;
-                        byte[] sessionId = parcel.createByteArray();
-                        if (sessionId.length == 0) {
-                            sessionId = null;
-                        }
-                        byte[] data = parcel.createByteArray();
-                        if (data.length == 0) {
-                            data = null;
-                        }
-
-                        Log.i(TAG, "Drm event (" + msg.arg1 + "," + msg.arg2 + ")");
-                        mOnEventListener.onEvent(mMediaDrm, sessionId, msg.arg1, msg.arg2, data);
-                    }
-                }
-                return;
-
-            case KEY_STATUS_CHANGE:
-                if (mOnKeyStatusChangeListener != null) {
-                    if (msg.obj != null && msg.obj instanceof Parcel) {
-                        Parcel parcel = (Parcel)msg.obj;
-                        byte[] sessionId = parcel.createByteArray();
-                        if (sessionId.length > 0) {
-                            List<KeyStatus> keyStatusList = keyStatusListFromParcel(parcel);
-                            boolean hasNewUsableKey = (parcel.readInt() != 0);
-
-                            Log.i(TAG, "Drm key status changed");
-                            mOnKeyStatusChangeListener.onKeyStatusChange(mMediaDrm, sessionId,
-                                    keyStatusList, hasNewUsableKey);
-                        }
-                    }
-                }
-                return;
-
-            case EXPIRATION_UPDATE:
-                if (mOnExpirationUpdateListener != null) {
-                    if (msg.obj != null && msg.obj instanceof Parcel) {
-                        Parcel parcel = (Parcel)msg.obj;
-                        byte[] sessionId = parcel.createByteArray();
-                        if (sessionId.length > 0) {
-                            long expirationTime = parcel.readLong();
-
-                            Log.i(TAG, "Drm key expiration update: " + expirationTime);
-                            mOnExpirationUpdateListener.onExpirationUpdate(mMediaDrm, sessionId,
-                                    expirationTime);
-                        }
-                    }
-                }
-                return;
-
-            default:
-                Log.e(TAG, "Unknown message type " + msg.what);
-                return;
+            byte[] data = args.parcel.createByteArray();
+            if (data.length == 0) {
+                data = null;
             }
+
+            Log.i(TAG, "Drm event (" + args.arg1 + "," + args.arg2 + ")");
+            listener.onEvent(this, sessionId, args.arg1, args.arg2, data);
+        };
+    }
+
+    private Consumer<ListenerArgs> createOnKeyStatusChangeListener(
+            OnKeyStatusChangeListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            if (sessionId.length > 0) {
+                List<KeyStatus> keyStatusList = keyStatusListFromParcel(args.parcel);
+                boolean hasNewUsableKey = (args.parcel.readInt() != 0);
+
+                Log.i(TAG, "Drm key status changed");
+                listener.onKeyStatusChange(this, sessionId, keyStatusList, hasNewUsableKey);
+            }
+        };
+    }
+
+    private Consumer<ListenerArgs> createOnExpirationUpdateListener(
+            OnExpirationUpdateListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            if (sessionId.length > 0) {
+                long expirationTime = args.parcel.readLong();
+
+                Log.i(TAG, "Drm key expiration update: " + expirationTime);
+                listener.onExpirationUpdate(this, sessionId, expirationTime);
+            }
+        };
+    }
+
+    private Consumer<ListenerArgs> createOnSessionLostStateListener(
+            OnSessionLostStateListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            Log.i(TAG, "Drm session lost state event: ");
+            listener.onSessionLostState(this, sessionId);
+        };
+    }
+
+    private static class ListenerArgs {
+        private final Parcel parcel;
+        private final int arg1;
+        private final int arg2;
+
+        public ListenerArgs(Parcel parcel, int arg1, int arg2) {
+            this.parcel = parcel;
+            this.arg1 = arg1;
+            this.arg2 = arg2;
+        }
+    }
+
+    private static class ListenerWithExecutor {
+        private final Consumer<ListenerArgs> mConsumer;
+        private final Executor mExecutor;
+
+        public ListenerWithExecutor(Executor executor, Consumer<ListenerArgs> consumer) {
+            this.mExecutor = executor;
+            this.mConsumer = consumer;
         }
     }
 
@@ -622,9 +849,29 @@ public final class MediaDrm implements AutoCloseable {
         if (md == null) {
             return;
         }
-        if (md.mEventHandler != null) {
-            Message m = md.mEventHandler.obtainMessage(what, eventType, extra, obj);
-            md.mEventHandler.sendMessage(m);
+        switch (what) {
+            case DRM_EVENT:
+            case EXPIRATION_UPDATE:
+            case KEY_STATUS_CHANGE:
+            case SESSION_LOST_STATE:
+                ListenerWithExecutor listener  = md.mListenerMap.get(what);
+                if (listener != null) {
+                    final Runnable command = () -> {
+                        if (md.mNativeContext == 0) {
+                            Log.w(TAG, "MediaDrm went away with unhandled events");
+                            return;
+                        }
+                        if (obj != null && obj instanceof Parcel) {
+                            Parcel p = (Parcel)obj;
+                            listener.mConsumer.accept(new ListenerArgs(p, eventType, extra));
+                        }
+                    };
+                    listener.mExecutor.execute(command);
+                }
+                break;
+            default:
+                Log.e(TAG, "Unknown message type " + what);
+                break;
         }
     }
 
@@ -654,13 +901,7 @@ public final class MediaDrm implements AutoCloseable {
      * can be queried using {@link #getSecurityLevel}. A session
      * ID is returned.
      *
-     * @param level the new security level, one of
-     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO},
-     * {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
-     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO},
-     * {@link #SECURITY_LEVEL_HW_SECURE_DECODE} or
-     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}.
-     *
+     * @param level the new security level
      * @throws NotProvisionedException if provisioning is needed
      * @throws ResourceBusyException if required resources are in use
      * @throws IllegalArgumentException if the requested security level is
@@ -790,9 +1031,6 @@ public final class MediaDrm implements AutoCloseable {
 
         /**
          * Get the type of the request
-         * @return one of {@link #REQUEST_TYPE_INITIAL},
-         * {@link #REQUEST_TYPE_RENEWAL}, {@link #REQUEST_TYPE_RELEASE},
-         * {@link #REQUEST_TYPE_NONE} or {@link #REQUEST_TYPE_UPDATE}
          */
         @RequestType
         public int getRequestType() { return mRequestType; }
@@ -979,6 +1217,86 @@ public final class MediaDrm implements AutoCloseable {
             throws DeniedByServerException;
 
     /**
+     * The keys in an offline license allow protected content to be played even
+     * if the device is not connected to a network. Offline licenses are stored
+     * on the device after a key request/response exchange when the key request
+     * KeyType is OFFLINE. Normally each app is responsible for keeping track of
+     * the keySetIds it has created. If an app loses the keySetId for any stored
+     * licenses that it created, however, it must be able to recover the stored
+     * keySetIds so those licenses can be removed when they expire or when the
+     * app is uninstalled.
+     * <p>
+     * This method returns a list of the keySetIds for all offline licenses.
+     * The offline license keySetId may be used to query the status of an
+     * offline license with {@link #getOfflineLicenseState} or remove it with
+     * {@link #removeOfflineLicense}.
+     *
+     * @return a list of offline license keySetIds
+     */
+    @NonNull
+    public native List<byte[]> getOfflineLicenseKeySetIds();
+
+    /**
+     * Normally offline licenses are released using a key request/response
+     * exchange using {@link #getKeyRequest} where the key type is
+     * KEY_TYPE_RELEASE, followed by {@link #provideKeyResponse}. This allows
+     * the server to cryptographically confirm that the license has been removed
+     * and then adjust the count of offline licenses allocated to the device.
+     * <p>
+     * In some exceptional situations it may be necessary to directly remove
+     * offline licenses without notifying the server, which may be performed
+     * using this method.
+     *
+     * @param keySetId the id of the offline license to remove
+     * @throws IllegalArgumentException if the keySetId does not refer to an
+     * offline license.
+     */
+    public native void removeOfflineLicense(@NonNull byte[] keySetId);
+
+    /**
+     * Offline license state is unknown, an error occurred while trying
+     * to access it.
+     */
+    public static final int OFFLINE_LICENSE_STATE_UNKNOWN = 0;
+
+    /**
+     * Offline license is usable, the keys may be used for decryption.
+     */
+    public static final int OFFLINE_LICENSE_STATE_USABLE = 1;
+
+    /**
+     * Offline license is released, the keys have been marked for
+     * release using {@link #getKeyRequest} with KEY_TYPE_RELEASE but
+     * the key response has not been received.
+     */
+    public static final int OFFLINE_LICENSE_STATE_RELEASED = 2;
+
+    /** @hide */
+    @IntDef({
+        OFFLINE_LICENSE_STATE_UNKNOWN,
+        OFFLINE_LICENSE_STATE_USABLE,
+        OFFLINE_LICENSE_STATE_RELEASED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OfflineLicenseState {}
+
+    /**
+     * Request the state of an offline license. An offline license may be usable
+     * or inactive. The keys in a usable offline license are available for
+     * decryption. When the offline license state is inactive, the keys have
+     * been marked for release using {@link #getKeyRequest} with
+     * KEY_TYPE_RELEASE but the key response has not been received. The keys in
+     * an inactive offline license are not usable for decryption.
+     *
+     * @param keySetId selects the offline license
+     * @return the offline license state
+     * @throws IllegalArgumentException if the keySetId does not refer to an
+     * offline license.
+     */
+    @OfflineLicenseState
+    public native int getOfflineLicenseState(@NonNull byte[] keySetId);
+
+    /**
      * Secure stops are a way to enforce limits on the number of concurrent
      * streams per subscriber across devices. They provide secure monitoring of
      * the lifetime of content decryption keys in MediaDrm sessions.
@@ -1058,9 +1376,21 @@ public final class MediaDrm implements AutoCloseable {
         removeAllSecureStops();;
     }
 
+    /**
+     * @deprecated Not of any use for application development;
+     * please note that the related integer constants remain supported:
+     * {@link #HDCP_LEVEL_UNKNOWN},
+     * {@link #HDCP_NONE},
+     * {@link #HDCP_V1},
+     * {@link #HDCP_V2},
+     * {@link #HDCP_V2_1},
+     * {@link #HDCP_V2_2},
+     * {@link #HDCP_V2_3}
+     */
+    @Deprecated
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HDCP_LEVEL_UNKNOWN, HDCP_NONE, HDCP_V1, HDCP_V2,
-                        HDCP_V2_1, HDCP_V2_2, HDCP_NO_DIGITAL_OUTPUT})
+                        HDCP_V2_1, HDCP_V2_2, HDCP_V2_3, HDCP_NO_DIGITAL_OUTPUT})
     public @interface HdcpLevel {}
 
 
@@ -1096,6 +1426,11 @@ public final class MediaDrm implements AutoCloseable {
     public static final int HDCP_V2_2 = 5;
 
     /**
+     *  HDCP version 2.3 Type 1.
+     */
+    public static final int HDCP_V2_3 = 6;
+
+    /**
      * No digital output, implicitly secure
      */
     public static final int HDCP_NO_DIGITAL_OUTPUT = Integer.MAX_VALUE;
@@ -1110,9 +1445,7 @@ public final class MediaDrm implements AutoCloseable {
      * enforcing compliance with HDCP requirements. Trusted enforcement of
      * HDCP policies must be handled by the DRM system.
      * <p>
-     * @return one of {@link #HDCP_LEVEL_UNKNOWN}, {@link #HDCP_NONE},
-     * {@link #HDCP_V1}, {@link #HDCP_V2}, {@link #HDCP_V2_1}, {@link #HDCP_V2_2}
-     * or {@link #HDCP_NO_DIGITAL_OUTPUT}.
+     * @return the connected HDCP level
      */
     @HdcpLevel
     public native int getConnectedHdcpLevel();
@@ -1123,9 +1456,7 @@ public final class MediaDrm implements AutoCloseable {
      * that may be connected. If multiple HDCP-capable interfaces are present,
      * it indicates the highest of the maximum HDCP levels of all interfaces.
      * <p>
-     * @return one of {@link #HDCP_LEVEL_UNKNOWN}, {@link #HDCP_NONE},
-     * {@link #HDCP_V1}, {@link #HDCP_V2}, {@link #HDCP_V2_1}, {@link #HDCP_V2_2}
-     * or {@link #HDCP_NO_DIGITAL_OUTPUT}.
+     * @return the maximum supported HDCP level
      */
     @HdcpLevel
     public native int getMaxHdcpLevel();
@@ -1149,7 +1480,17 @@ public final class MediaDrm implements AutoCloseable {
     /**
      * Security level indicates the robustness of the device's DRM
      * implementation.
+     *
+     * @deprecated Not of any use for application development;
+     * please note that the related integer constants remain supported:
+     * {@link #SECURITY_LEVEL_UNKNOWN},
+     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO},
+     * {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
+     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO},
+     * {@link #SECURITY_LEVEL_HW_SECURE_DECODE},
+     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}
      */
+    @Deprecated
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SECURITY_LEVEL_UNKNOWN, SECURITY_LEVEL_SW_SECURE_CRYPTO,
             SECURITY_LEVEL_SW_SECURE_DECODE, SECURITY_LEVEL_HW_SECURE_CRYPTO,
@@ -1192,17 +1533,18 @@ public final class MediaDrm implements AutoCloseable {
     public static final int SECURITY_LEVEL_HW_SECURE_ALL = 5;
 
     /**
-     * The maximum security level supported by the device. This is the default
-     * security level when a session is opened.
+     * Indicates that the maximum security level supported by the device should
+     * be used when opening a session. This is the default security level
+     * selected when a session is opened.
      * @hide
      */
     public static final int SECURITY_LEVEL_MAX = 6;
 
     /**
-     * The maximum security level supported by the device. This is the default
-     * security level when a session is opened.
+     * Returns a value that may be passed as a parameter to {@link #openSession(int)}
+     * requesting that the session be opened at the maximum security level of
+     * the device.
      */
-    @SecurityLevel
     public static final int getMaxSecurityLevel() {
         return SECURITY_LEVEL_MAX;
     }
@@ -1214,10 +1556,7 @@ public final class MediaDrm implements AutoCloseable {
      * time a session is opened using {@link #openSession}.
      * @param sessionId the session to query.
      * <p>
-     * @return one of {@link #SECURITY_LEVEL_UNKNOWN},
-     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO}, {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
-     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO}, {@link #SECURITY_LEVEL_HW_SECURE_DECODE} or
-     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}.
+     * @return the security level of the session
      */
     @SecurityLevel
     public native int getSecurityLevel(@NonNull byte[] sessionId);
@@ -1262,13 +1601,13 @@ public final class MediaDrm implements AutoCloseable {
      * {@link #PROPERTY_DESCRIPTION}, {@link #PROPERTY_ALGORITHMS}
      */
     @NonNull
-    public native String getPropertyString(@NonNull @StringProperty String propertyName);
+    public native String getPropertyString(@NonNull String propertyName);
 
     /**
      * Set a MediaDrm String property value, given the property name string
      * and new value for the property.
      */
-    public native void setPropertyString(@NonNull @StringProperty String propertyName,
+    public native void setPropertyString(@NonNull String propertyName,
             @NonNull String value);
 
     /**
@@ -1290,14 +1629,14 @@ public final class MediaDrm implements AutoCloseable {
      * Standard fields names are {@link #PROPERTY_DEVICE_UNIQUE_ID}
      */
     @NonNull
-    public native byte[] getPropertyByteArray(@ArrayProperty String propertyName);
+    public native byte[] getPropertyByteArray(String propertyName);
 
     /**
     * Set a MediaDrm byte array property value, given the property name string
     * and new value for the property.
     */
-    public native void setPropertyByteArray(@NonNull @ArrayProperty
-            String propertyName, @NonNull byte[] value);
+    public native void setPropertyByteArray(
+            @NonNull String propertyName, @NonNull byte[] value);
 
     private static final native void setCipherAlgorithmNative(
             @NonNull MediaDrm drm, @NonNull byte[] sessionId, @NonNull String algorithm);
@@ -1528,7 +1867,7 @@ public final class MediaDrm implements AutoCloseable {
                 // this should never happen as mWrappedKey is initialized in
                 // JNI after construction of the KeyRequest object. The check
                 // is needed here to guarantee @NonNull annotation.
-                throw new RuntimeException("Cerfificate is not initialized");
+                throw new RuntimeException("Certificate is not initialized");
             }
             return mWrappedKey;
         }
@@ -1543,7 +1882,7 @@ public final class MediaDrm implements AutoCloseable {
                 // this should never happen as mCertificateData is initialized in
                 // JNI after construction of the KeyRequest object. The check
                 // is needed here to guarantee @NonNull annotation.
-                throw new RuntimeException("Cerfificate is not initialized");
+                throw new RuntimeException("Certificate is not initialized");
             }
             return mCertificateData;
         }

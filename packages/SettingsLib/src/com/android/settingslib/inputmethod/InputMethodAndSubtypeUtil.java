@@ -25,17 +25,17 @@ import android.content.res.Configuration;
 import android.icu.text.ListFormatter;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.TwoStatePreference;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.TwoStatePreference;
+
 import com.android.internal.app.LocaleHelper;
-import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,6 +49,7 @@ public class InputMethodAndSubtypeUtil {
     private static final boolean DEBUG = false;
     private static final String TAG = "InputMethdAndSubtypeUtl";
 
+    private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final char INPUT_METHOD_SEPARATER = ':';
     private static final char INPUT_METHOD_SUBTYPE_SEPARATER = ';';
     private static final int NOT_A_SUBTYPE_ID = -1;
@@ -61,7 +62,7 @@ public class InputMethodAndSubtypeUtil {
 
     // InputMethods and subtypes are saved in the settings as follows:
     // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
-    private static String buildInputMethodsAndSubtypesString(
+    public static String buildInputMethodsAndSubtypesString(
             final HashMap<String, HashSet<String>> imeToSubtypesMap) {
         final StringBuilder builder = new StringBuilder();
         for (final String imi : imeToSubtypesMap.keySet()) {
@@ -106,7 +107,7 @@ public class InputMethodAndSubtypeUtil {
     }
 
     // Needs to modify InputMethodManageService if you want to change the format of saved string.
-    private static HashMap<String, HashSet<String>> getEnabledInputMethodsAndSubtypeList(
+    static HashMap<String, HashSet<String>> getEnabledInputMethodsAndSubtypeList(
             ContentResolver resolver) {
         final String enabledInputMethodsStr = Settings.Secure.getString(
                 resolver, Settings.Secure.ENABLED_INPUT_METHODS);
@@ -116,7 +117,7 @@ public class InputMethodAndSubtypeUtil {
         return parseInputMethodsAndSubtypesString(enabledInputMethodsStr);
     }
 
-    private static HashMap<String, HashSet<String>> parseInputMethodsAndSubtypesString(
+    public static HashMap<String, HashSet<String>> parseInputMethodsAndSubtypesString(
             final String inputMethodsAndSubtypesString) {
         final HashMap<String, HashSet<String>> subtypesMap = new HashMap<>();
         if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
@@ -176,9 +177,9 @@ public class InputMethodAndSubtypeUtil {
                     ((TwoStatePreference) pref).isChecked()
                     : enabledIMEsAndSubtypesMap.containsKey(imiId);
             final boolean isCurrentInputMethod = imiId.equals(currentInputMethodId);
-            final boolean systemIme = InputMethodUtils.isSystemIme(imi);
+            final boolean systemIme = imi.isSystem();
             if ((!hasHardKeyboard && InputMethodSettingValuesWrapper.getInstance(
-                    context.getActivity()).isAlwaysCheckedIme(imi, context.getActivity()))
+                    context.getActivity()).isAlwaysCheckedIme(imi))
                     || isImeChecked) {
                 if (!enabledIMEsAndSubtypesMap.containsKey(imiId)) {
                     // imiId has just been enabled
@@ -416,5 +417,20 @@ public class InputMethodAndSubtypeUtil {
             return Locale.getDefault();
         }
         return configurationLocale;
+    }
+
+    public static boolean isValidNonAuxAsciiCapableIme(InputMethodInfo imi) {
+        if (imi.isAuxiliaryIme()) {
+            return false;
+        }
+        final int subtypeCount = imi.getSubtypeCount();
+        for (int i = 0; i < subtypeCount; ++i) {
+            final InputMethodSubtype subtype = imi.getSubtypeAt(i);
+            if (SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())
+                    && subtype.isAsciiCapable()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

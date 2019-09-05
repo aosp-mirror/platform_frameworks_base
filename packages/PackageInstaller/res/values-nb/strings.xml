@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="7488448184431507488">"Pakkeinstallasjon"</string>
+    <string name="install" msgid="711829760615509273">"Installer"</string>
+    <string name="done" msgid="6632441120016885253">"Ferdig"</string>
+    <string name="cancel" msgid="1018267193425558088">"Avbryt"</string>
+    <string name="installing" msgid="4921993079741206516">"Installerer …"</string>
+    <string name="installing_app" msgid="1165095864863849422">"Installerer <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
+    <string name="install_done" msgid="5987363587661783896">"Appen er installert."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"Ønsker du å installere denne appen?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"Vil du installere en oppdatering for denne eksisterende appen? Du mister ikke de eksisterende dataene dine."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Vil du installere en oppdatering for denne innebygde appen? Du mister ikke de eksisterende dataene dine."</string>
+    <string name="install_failed" msgid="5777824004474125469">"Appen ble ikke installert."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"Pakken er blokkert fra å bli installert."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"Appen ble ikke installert fordi pakken er i konflikt med en eksisterende pakke."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"Appen ble ikke installert fordi appen ikke er kompatibel med nettbrettet ditt."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Denne appen er ikke kompatibel med TV-en din."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"Appen ble ikke installert fordi appen ikke er kompatibel med telefonen din."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Appen ble ikke installert fordi pakken ser ut til å være ugyldig."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"<xliff:g id="APP_NAME">%1$s</xliff:g> kunne ikke installeres på nettbrettet ditt."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> kunne ikke installeres på TV-en."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> kunne ikke installeres på telefonen din."</string>
+    <string name="launch" msgid="3952550563999890101">"Åpne"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Administratoren din tillater ikke installering av apper som er hentet fra ukjente kilder"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ukjente apper kan ikke installeres av denne brukeren"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Brukeren har ikke tillatelse til å installere apper"</string>
+    <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Administrer apper"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Tom for plass"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> kunne ikke installeres. Frigjør plass og prøv på nytt."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Appen ble ikke funnet"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Finner ikke appen i listen over installerte apper."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Ikke tillatt"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Denne brukeren har ikke tillatelse til å utføre denne avinstalleringen."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"Feil"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"Kunne ikke avinstallere appen."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"Avinstaller appen"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"Avinstaller oppdateringen"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> er del av følgende app:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Vil du avinstallere denne appen?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Vil du avinstallere denne appen for "<b>"alle"</b>" brukere? Appen og tilhørende data blir fjernet fra "<b>"alle"</b>" brukere på enheten."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Ønsker du å avinstallere denne appen for brukeren <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Vil du erstatte denne appen med den opprinnelige versjonen? Alle dataene fjernes."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vil du erstatte denne appen med den opprinnelige versjonen? Alle dataene fjernes. Dette påvirker alle som bruker denne enheten – også personer med jobbprofiler."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Fjern også <xliff:g id="SIZE">%1$s</xliff:g> med tilknyttede mediefiler."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"Behold <xliff:g id="SIZE">%1$s</xliff:g> med appdata."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"Avinstalleringer som er i gang"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mislykkede avinstalleringer"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"Avinstallerer …"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"Avinstallerer <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"Avinstalleringen er fullført."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"Avinstallerte <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"Avinstalleringen mislyktes."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"Kunne ikke avinstallere <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan ikke avinstallere den aktive appen for enhetsadministrator"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan ikke avinstallere den aktive appen for enhetsadministrator for <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Appen er nødvendig for noen brukere eller profiler, og er avinstallert for andre"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Denne appen er nødvendig for profilen din og kan ikke avinstalleres."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Denne appen kreves av enhetsadministratoren din og kan ikke avinstalleres."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Administrer apper for enhetsadministrator"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Administrer brukere"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> kunne ikke installeres."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Det oppsto et problem med analysen av pakken."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Handlinger for å installere og avinstallere støttes ikke på Wear."</string>
+    <string name="message_staging" msgid="8032722385658438567">"Klargjør appen …"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"Ukjent"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Nettbrettet ditt har ikke tillatelse til å installere ukjente apper fra denne kilden, for å ivareta sikkerheten din."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"TV-en din har ikke tillatelse til å installere ukjente apper fra denne kilden, for å ivareta sikkerheten din."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Telefonen din har ikke tillatelse til å installere ukjente apper fra denne kilden, for å ivareta sikkerheten din."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonen din og de personlige dataene dine er mer sårbare for angrep fra ukjente apper. Når du installerer denne appen, samtykker du i at du er ansvarlig for eventuelle skader på telefonen eller tap av data som kan skyldes bruk av appen"</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Nettbrettet ditt og de personlige dataene dine er mer sårbare for angrep fra ukjente apper. Når du installerer denne appen, samtykker du i at du er ansvarlig for eventuelle skader på nettbrettet eller tap av data som kan skyldes bruk av appen."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV-en din og de personlige dataene dine er mer sårbare for angrep fra ukjente apper. Når du installerer denne appen, samtykker du i at du er ansvarlig for eventuelle skader på TV-en eller tap av data som kan skyldes bruk av appen."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"Fortsett"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Innstillinger"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Installerer/avinstallerer Wear-apper"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Varsel om at appen er installert"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Installert"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"«<xliff:g id="APPNAME">%1$s</xliff:g>» er installert"</string>
+</resources>

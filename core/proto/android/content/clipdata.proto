@@ -21,13 +21,13 @@ option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/content/clipdescription.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // An android.content.ClipData object.
 message ClipDataProto {
     option (.android.msg_privacy).dest = DEST_LOCAL;
 
-    optional android.content.ClipDescriptionProto description = 1;
+    optional ClipDescriptionProto description = 1;
 
     // Custom dump of an android.graphics.Bitmap object.
     message Icon {
@@ -46,8 +46,8 @@ message ClipDataProto {
             string html_text = 1;
             string text = 2;
             string uri = 3;
-            android.content.IntentProto intent = 4;
-            bool nothing = 5;
+            IntentProto intent = 4;
+            bool nothing = 5 [ (.android.privacy).dest = DEST_AUTOMATIC ];
         }
     }
     repeated Item items = 3;

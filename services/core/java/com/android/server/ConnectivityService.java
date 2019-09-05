@@ -20,6 +20,7 @@ import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.NETID_UNSET;
+import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
@@ -2810,7 +2811,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             switch (msg.what) {
                 default:
                     return false;
-                case android.net.NetworkFactory.EVENT_UNFULFILLABLE_REQUEST: {
+                case NetworkFactory.EVENT_UNFULFILLABLE_REQUEST: {
                     handleReleaseNetworkRequest((NetworkRequest) msg.obj, msg.sendingUid,
                             /* callOnUnavailable */ true);
                     break;
@@ -7013,6 +7014,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                 }
             }
+        }
+
+        // restore private DNS settings to default mode (opportunistic)
+        if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS)) {
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OPPORTUNISTIC);
         }
 
         Settings.Global.putString(mContext.getContentResolver(),

@@ -168,7 +168,7 @@ public final class MacAddress implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<MacAddress> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MacAddress> CREATOR =
             new Parcelable.Creator<MacAddress>() {
                 public MacAddress createFromParcel(Parcel in) {
                     return new MacAddress(in.readLong());
@@ -408,6 +408,21 @@ public final class MacAddress implements Parcelable {
             out[i] = (byte) in[i];
         }
         return out;
+    }
+
+    /**
+     * Checks if this MAC Address matches the provided range.
+     *
+     * @param baseAddress MacAddress representing the base address to compare with.
+     * @param mask MacAddress representing the mask to use during comparison.
+     * @return true if this MAC Address matches the given range.
+     *
+     * @hide
+     */
+    public boolean matches(@NonNull MacAddress baseAddress, @NonNull MacAddress mask) {
+        Preconditions.checkNotNull(baseAddress);
+        Preconditions.checkNotNull(mask);
+        return (mAddr & mask.mAddr) == (baseAddress.mAddr & mask.mAddr);
     }
 
     /**

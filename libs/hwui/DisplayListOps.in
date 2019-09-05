@@ -1,0 +1,51 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+X(Flush) 
+X(Save) 
+X(Restore) 
+X(SaveLayer)
+X(SaveBehind)
+X(Concat) 
+X(SetMatrix) 
+X(Translate)
+X(ClipPath) 
+X(ClipRect) 
+X(ClipRRect) 
+X(ClipRegion)
+X(DrawPaint)
+X(DrawBehind)
+X(DrawPath) 
+X(DrawRect) 
+X(DrawRegion) 
+X(DrawOval) 
+X(DrawArc)
+X(DrawRRect) 
+X(DrawDRRect) 
+X(DrawAnnotation) 
+X(DrawDrawable) 
+X(DrawPicture)
+X(DrawImage) 
+X(DrawImageNine) 
+X(DrawImageRect) 
+X(DrawImageLattice)
+X(DrawTextBlob)
+X(DrawPatch) 
+X(DrawPoints) 
+X(DrawVertices) 
+X(DrawAtlas) 
+X(DrawShadowRec)
+X(DrawVectorDrawable)

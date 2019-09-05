@@ -576,10 +576,27 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean bindService(Intent service, int flags, Executor executor,
+            ServiceConnection conn) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean bindIsolatedService(Intent service, int flags, String instanceName,
+            Executor executor, ServiceConnection conn) {
+        throw new UnsupportedOperationException();
+    }
+
     /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateServiceGroup(ServiceConnection conn, int group, int importance) {
         throw new UnsupportedOperationException();
     }
 
@@ -769,6 +786,12 @@ public class MockContext extends Context {
     /** @hide */
     @Override
     public Display getDisplay() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public int getDisplayId() {
         throw new UnsupportedOperationException();
     }
 

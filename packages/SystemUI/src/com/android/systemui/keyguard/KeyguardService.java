@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -33,8 +35,6 @@ import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIApplication;
-
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";

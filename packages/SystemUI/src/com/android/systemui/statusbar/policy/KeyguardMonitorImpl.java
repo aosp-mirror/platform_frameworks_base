@@ -16,19 +16,27 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 
+import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         implements KeyguardMonitor {
 
-    private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
+    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
 
     private final Context mContext;
     private final CurrentUserTracker mUserTracker;
@@ -45,7 +53,11 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     private long mKeyguardFadingAwayDelay;
     private long mKeyguardFadingAwayDuration;
     private boolean mKeyguardGoingAway;
+    private boolean mLaunchTransitionFadingAway;
 
+    /**
+     */
+    @Inject
     public KeyguardMonitorImpl(Context context) {
         mContext = context;
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
@@ -59,7 +71,8 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     @Override
-    public void addCallback(Callback callback) {
+    public void addCallback(@NonNull Callback callback) {
+        Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
         mCallbacks.add(callback);
         if (mCallbacks.size() != 0 && !mListening) {
             mListening = true;
@@ -71,7 +84,8 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     @Override
-    public void removeCallback(Callback callback) {
+    public void removeCallback(@NonNull Callback callback) {
+        Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
         if (mCallbacks.remove(callback) && mCallbacks.size() == 0 && mListening) {
             mListening = false;
             mKeyguardUpdateMonitor.removeCallback(this);
@@ -123,7 +137,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
 
     private void notifyKeyguardChanged() {
         // Copy the list to allow removal during callback.
-        new ArrayList<Callback>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
+        new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
     }
 
     public void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
@@ -157,7 +171,21 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         return mKeyguardFadingAwayDuration;
     }
 
+    @Override
+    public long calculateGoingToFullShadeDelay() {
+        return mKeyguardFadingAwayDelay + mKeyguardFadingAwayDuration;
+    }
+
     public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
         mKeyguardGoingAway = keyguardGoingAway;
+    }
+
+    public void setLaunchTransitionFadingAway(boolean fadingAway) {
+        mLaunchTransitionFadingAway = fadingAway;
+    }
+
+    @Override
+    public boolean isLaunchTransitionFadingAway() {
+        return mLaunchTransitionFadingAway;
     }
 }

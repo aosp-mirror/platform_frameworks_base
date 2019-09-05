@@ -109,7 +109,7 @@ public final class RadioAccessSpecifier implements Parcelable {
         return mChannels == null ? null : mChannels.clone();
     }
 
-    public static final Parcelable.Creator<RadioAccessSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RadioAccessSpecifier> CREATOR =
             new Parcelable.Creator<RadioAccessSpecifier> (){
                 @Override
                 public RadioAccessSpecifier createFromParcel(Parcel in) {

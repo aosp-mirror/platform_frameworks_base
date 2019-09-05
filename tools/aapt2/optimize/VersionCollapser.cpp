@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "ResourceTable.h"
+#include "trace/TraceBuffer.h"
 
 using android::ConfigDescription;
 
@@ -144,6 +145,7 @@ static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
 }
 
 bool VersionCollapser::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_NAME("VersionCollapser::Consume");
   const int min_sdk = context->GetMinSdkVersion();
   for (auto& package : table->packages) {
     for (auto& type : package->types) {

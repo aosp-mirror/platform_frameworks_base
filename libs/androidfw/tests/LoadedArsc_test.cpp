@@ -22,12 +22,14 @@
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 #include "data/libclient/R.h"
+#include "data/overlayable/R.h"
 #include "data/sparse/R.h"
 #include "data/styles/R.h"
 
 namespace app = com::android::app;
 namespace basic = com::android::basic;
 namespace libclient = com::android::libclient;
+namespace overlayable = com::android::overlayable;
 namespace sparse = com::android::sparse;
 
 using ::android::base::ReadFileToString;
@@ -273,10 +275,51 @@ TEST(LoadedArscTest, LoadOverlay) {
   ASSERT_THAT(LoadedPackage::GetEntry(type_spec->types[0], 0x0000), NotNull());
 }
 
-// structs with size fields (like Res_value, ResTable_entry) should be
-// backwards and forwards compatible (aka checking the size field against
-// sizeof(Res_value) might not be backwards compatible.
-TEST(LoadedArscTest, LoadingShouldBeForwardsAndBackwardsCompatible) { ASSERT_TRUE(false); }
+TEST(LoadedArscTest, LoadOverlayable) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
+                                      "resources.arsc", &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(StringPiece(contents), nullptr /*loaded_idmap*/, false /*system*/,
+                       false /*load_as_shared_library*/);
+
+  ASSERT_THAT(loaded_arsc, NotNull());
+  const LoadedPackage* package = loaded_arsc->GetPackageById(
+      get_package_id(overlayable::R::string::not_overlayable));
+
+  const OverlayableInfo* info = package->GetOverlayableInfo(
+      overlayable::R::string::not_overlayable);
+  ASSERT_THAT(info, IsNull());
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable1);
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->name, Eq("OverlayableResources1"));
+  EXPECT_THAT(info->actor, Eq("overlay://theme"));
+  EXPECT_THAT(info->policy_flags, Eq(ResTable_overlayable_policy_header::POLICY_PUBLIC));
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable2);
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->name, Eq("OverlayableResources1"));
+  EXPECT_THAT(info->actor, Eq("overlay://theme"));
+  EXPECT_THAT(info->policy_flags,
+              Eq(ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION
+                 | ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION));
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable3);
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->name, Eq("OverlayableResources2"));
+  EXPECT_THAT(info->actor, Eq("overlay://com.android.overlayable"));
+  EXPECT_THAT(info->policy_flags,
+              Eq(ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION
+                 | ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION));
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable4);
+  EXPECT_THAT(info->name, Eq("OverlayableResources1"));
+  EXPECT_THAT(info->actor, Eq("overlay://theme"));
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->policy_flags, Eq(ResTable_overlayable_policy_header::POLICY_PUBLIC));
+}
 
 TEST(LoadedArscTest, ResourceIdentifierIterator) {
   std::string contents;
@@ -288,7 +331,7 @@ TEST(LoadedArscTest, ResourceIdentifierIterator) {
 
   const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
   ASSERT_EQ(1u, packages.size());
-  EXPECT_EQ(std::string("com.android.basic"), packages[0]->GetPackageName());
+  ASSERT_EQ(std::string("com.android.basic"), packages[0]->GetPackageName());
 
   const auto& loaded_package = packages[0];
   auto iter = loaded_package->begin();
@@ -325,5 +368,28 @@ TEST(LoadedArscTest, ResourceIdentifierIterator) {
   ASSERT_EQ(0x7f070003u, *iter++);
   ASSERT_EQ(end, iter);
 }
+
+TEST(LoadedArscTest, GetOverlayableMap) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
+                                      "resources.arsc", &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
+  ASSERT_EQ(1u, packages.size());
+  ASSERT_EQ(std::string("com.android.overlayable"), packages[0]->GetPackageName());
+
+  const auto map = packages[0]->GetOverlayableMap();
+  ASSERT_EQ(2, map.size());
+  ASSERT_EQ(map.at("OverlayableResources1"), "overlay://theme");
+  ASSERT_EQ(map.at("OverlayableResources2"), "overlay://com.android.overlayable");
+}
+
+// structs with size fields (like Res_value, ResTable_entry) should be
+// backwards and forwards compatible (aka checking the size field against
+// sizeof(Res_value) might not be backwards compatible.
+// TEST(LoadedArscTest, LoadingShouldBeForwardsAndBackwardsCompatible) { ASSERT_TRUE(false); }
 
 }  // namespace android

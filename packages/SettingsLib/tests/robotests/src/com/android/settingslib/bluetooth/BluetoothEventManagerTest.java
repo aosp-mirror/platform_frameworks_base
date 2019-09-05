@@ -16,14 +16,21 @@
 package com.android.settingslib.bluetooth;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
+import android.content.IntentFilter;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 
 import org.junit.Before;
@@ -45,6 +52,8 @@ public class BluetoothEventManagerTest {
     private BluetoothCallback mBluetoothCallback;
     @Mock
     private CachedBluetoothDevice mCachedBluetoothDevice;
+    @Mock
+    private BluetoothDevice mBluetoothDevice;
 
     private Context mContext;
     private Intent mIntent;
@@ -56,7 +65,30 @@ public class BluetoothEventManagerTest {
         mContext = RuntimeEnvironment.application;
 
         mBluetoothEventManager = new BluetoothEventManager(mLocalAdapter,
-                mCachedDeviceManager, mContext);
+                mCachedDeviceManager, mContext, /* handler= */ null, /* userHandle= */ null);
+        when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedBluetoothDevice);
+    }
+
+    @Test
+    public void ifUserHandleIsNull_registerReceiverIsCalled() {
+        Context mockContext = mock(Context.class);
+        BluetoothEventManager eventManager =
+                new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mockContext,
+                        /* handler= */ null, /* userHandle= */ null);
+
+        verify(mockContext).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class),
+                eq(null), eq(null));
+    }
+
+    @Test
+    public void ifUserHandleSpecified_registerReceiverAsUserIsCalled() {
+        Context mockContext = mock(Context.class);
+        BluetoothEventManager eventManager =
+                new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mockContext,
+                        /* handler= */ null, UserHandle.ALL);
+
+        verify(mockContext).registerReceiverAsUser(any(BroadcastReceiver.class), eq(UserHandle.ALL),
+                any(IntentFilter.class), eq(null), eq(null));
     }
 
     /**
@@ -98,8 +130,68 @@ public class BluetoothEventManagerTest {
 
         verify(mBluetoothCallback).onProfileConnectionStateChanged(mCachedBluetoothDevice,
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
+    }
 
-        verify(mCachedDeviceManager).onProfileConnectionStateChanged(mCachedBluetoothDevice,
-                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
+    @Test
+    public void dispatchAclConnectionStateChanged_aclDisconnected_shouldDispatchCallback() {
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback).onAclConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothAdapter.STATE_DISCONNECTED);
+    }
+
+    @Test
+    public void dispatchAclConnectionStateChanged_aclConnected_shouldDispatchCallback() {
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback).onAclConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothAdapter.STATE_CONNECTED);
+    }
+
+    @Test
+    public void dispatchAclConnectionStateChanged_aclDisconnected_shouldNotCallbackSubDevice() {
+        when(mCachedDeviceManager.isSubDevice(mBluetoothDevice)).thenReturn(true);
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback, never()).onAclConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothAdapter.STATE_DISCONNECTED);
+    }
+
+    @Test
+    public void dispatchAclConnectionStateChanged_aclConnected_shouldNotCallbackSubDevice() {
+        when(mCachedDeviceManager.isSubDevice(mBluetoothDevice)).thenReturn(true);
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback, never()).onAclConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothAdapter.STATE_CONNECTED);
+    }
+
+    @Test
+    public void dispatchAclConnectionStateChanged_findDeviceReturnNull_shouldNotDispatchCallback() {
+        when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(null);
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback, never()).onAclConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothAdapter.STATE_CONNECTED);
     }
 }

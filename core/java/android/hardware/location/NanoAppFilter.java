@@ -141,7 +141,7 @@ public class NanoAppFilter implements Parcelable {
                 + ", vendorMask: " + mAppIdVendorMask;
     }
 
-    public static final Parcelable.Creator<NanoAppFilter> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NanoAppFilter> CREATOR
             = new Parcelable.Creator<NanoAppFilter>() {
         public NanoAppFilter createFromParcel(Parcel in) {
             return new NanoAppFilter(in);

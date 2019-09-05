@@ -5,7 +5,7 @@ rm -rf /tmp/plugin_classes/
 mkdir /tmp/plugin_classes
 
 # Compile the jar
-javac -cp $ANDROID_BUILD_TOP/out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar:$ANDROID_BUILD_TOP/out/target/common/obj/JAVA_LIBRARIES/core-all_intermediates/classes.jar `find src -name *.java` -d /tmp/plugin_classes/
+javac -cp $ANDROID_BUILD_TOP/out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar:$ANDROID_BUILD_TOP/out/target/common/obj/JAVA_LIBRARIES/core-all_intermediates/classes.jar `find ../plugin*/src -name *.java` -d /tmp/plugin_classes/
 echo "" >> /tmp/plugin_classes/manifest.txt
 jar cvfm SystemUIPluginLib.jar /tmp/plugin_classes/manifest.txt -C /tmp/plugin_classes .
 

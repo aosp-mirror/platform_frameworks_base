@@ -125,7 +125,7 @@ public class ResultReceiver implements Parcelable {
         mReceiver = IResultReceiver.Stub.asInterface(in.readStrongBinder());
     }
     
-    public static final Parcelable.Creator<ResultReceiver> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ResultReceiver> CREATOR
             = new Parcelable.Creator<ResultReceiver>() {
         public ResultReceiver createFromParcel(Parcel in) {
             return new ResultReceiver(in);

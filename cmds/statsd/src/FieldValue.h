@@ -32,7 +32,7 @@ const int32_t kLastBitMask = 0x80;
 const int32_t kClearLastBitDeco = 0x7f;
 const int32_t kClearAllPositionMatcherMask = 0xffff00ff;
 
-enum Type { UNKNOWN, INT, LONG, FLOAT, STRING };
+enum Type { UNKNOWN, INT, LONG, FLOAT, DOUBLE, STRING, STORAGE };
 
 int32_t getEncodedField(int32_t pos[], int32_t depth, bool includeDepth);
 
@@ -212,7 +212,7 @@ public:
  * the result is equal to the Matcher Field. That's a bit wise AND operation + check if 2 ints are
  * equal. Nothing can beat the performance of this matching algorithm.
  *
- * TODO: ADD EXAMPLE HERE.
+ * TODO(b/110561213): ADD EXAMPLE HERE.
  */
 struct Matcher {
     Matcher(const Field& matcher, int32_t mask) : mMatcher(matcher), mMask(mask){};
@@ -283,9 +283,19 @@ struct Value {
         type = FLOAT;
     }
 
+    Value(double v) {
+        double_value = v;
+        type = DOUBLE;
+    }
+
     Value(const std::string& v) {
         str_value = v;
         type = STRING;
+    }
+
+    Value(const std::vector<uint8_t>& v) {
+        storage_value = v;
+        type = STORAGE;
     }
 
     void setInt(int32_t v) {
@@ -298,20 +308,36 @@ struct Value {
         type = LONG;
     }
 
+    void setFloat(float v) {
+        float_value = v;
+        type = FLOAT;
+    }
+
+    void setDouble(double v) {
+        double_value = v;
+        type = DOUBLE;
+    }
+
     union {
         int32_t int_value;
         int64_t long_value;
         float float_value;
+        double double_value;
     };
     std::string str_value;
+    std::vector<uint8_t> storage_value;
 
     Type type;
 
     std::string toString() const;
 
+    bool isZero() const;
+
     Type getType() const {
         return type;
     }
+
+    double getDouble() const;
 
     Value(const Value& from);
 
@@ -319,6 +345,11 @@ struct Value {
     bool operator!=(const Value& that) const;
 
     bool operator<(const Value& that) const;
+    bool operator>(const Value& that) const;
+    bool operator>=(const Value& that) const;
+    Value operator-(const Value& that) const;
+    Value& operator+=(const Value& that);
+    Value& operator=(const Value& that);
 };
 
 /**
@@ -354,6 +385,9 @@ bool HasPositionANY(const FieldMatcher& matcher);
 bool HasPositionALL(const FieldMatcher& matcher);
 
 bool isAttributionUidField(const FieldValue& value);
+
+/* returns uid if the field is uid field, or -1 if the field is not a uid field */
+int getUidIfExists(const FieldValue& value);
 
 void translateFieldMatcher(const FieldMatcher& matcher, std::vector<Matcher>* output);
 

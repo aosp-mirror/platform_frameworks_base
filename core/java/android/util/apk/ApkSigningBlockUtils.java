@@ -332,7 +332,7 @@ final class ApkSigningBlockUtils {
         try {
             byte[] expectedRootHash = parseVerityDigestAndVerifySourceLength(expectedDigest,
                     apk.length(), signatureInfo);
-            ApkVerityBuilder.ApkVerityResult verity = ApkVerityBuilder.generateApkVerity(apk,
+            VerityBuilder.VerityResult verity = VerityBuilder.generateApkVerityTree(apk,
                     signatureInfo, new ByteBufferFactory() {
                         @Override
                         public ByteBuffer create(int capacity) {
@@ -344,26 +344,6 @@ final class ApkSigningBlockUtils {
             }
         } catch (DigestException | IOException | NoSuchAlgorithmException e) {
             throw new SecurityException("Error during verification", e);
-        }
-    }
-
-    /**
-     * Generates the fsverity header and hash tree to be used by kernel for the given apk. This
-     * method does not check whether the root hash exists in the Signing Block or not.
-     *
-     * <p>The output is stored in the {@link ByteBuffer} created by the given {@link
-     * ByteBufferFactory}.
-     *
-     * @return the root hash of the generated hash tree.
-     */
-    public static byte[] generateApkVerity(String apkPath, ByteBufferFactory bufferFactory,
-            SignatureInfo signatureInfo)
-            throws IOException, SignatureNotFoundException, SecurityException, DigestException,
-                   NoSuchAlgorithmException {
-        try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
-            ApkVerityBuilder.ApkVerityResult result = ApkVerityBuilder.generateApkVerity(apk,
-                    signatureInfo, bufferFactory);
-            return result.rootHash;
         }
     }
 

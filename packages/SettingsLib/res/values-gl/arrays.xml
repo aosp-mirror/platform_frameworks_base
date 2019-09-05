@@ -58,6 +58,11 @@
     <item msgid="3878793616631049349">"Utiliza a comprobación HDCP só para contido DRM"</item>
     <item msgid="45075631231212732">"Utilizar sempre a comprobación HDCP"</item>
   </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"Opción desactivada"</item>
+    <item msgid="1969681323976948639">"Está activado o filtrado"</item>
+    <item msgid="8719029132154020716">"Opción activada"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (predeterminado)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
@@ -71,7 +76,7 @@
     <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="7065842274271279580">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
     <item msgid="686685526567131661">"AAC"</item>
     <item msgid="5254942598247222737">"Audio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -81,7 +86,7 @@
     <item msgid="3304843301758635896">"Desactivar códecs opcionais"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="5062108632402595000">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"AAC"</item>
     <item msgid="7848030269621918608">"Audio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -91,38 +96,38 @@
     <item msgid="741805482892725657">"Desactiva os códecs opcionais"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="3093023430402746802">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="8895532488906185219">"44,1 kHz"</item>
     <item msgid="2909915718994807056">"48,0 kHz"</item>
     <item msgid="3347287377354164611">"88,2 kHz"</item>
     <item msgid="1234212100239985373">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="3214516120190965356">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="4482862757811638365">"44,1 kHz"</item>
     <item msgid="354495328188724404">"48,0 kHz"</item>
     <item msgid="7329816882213695083">"88,2 kHz"</item>
     <item msgid="6967397666254430476">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="2684127272582591429">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="5618929009984956469">"16 bits/mostra"</item>
     <item msgid="3412640499234627248">"24 bits/mostra"</item>
     <item msgid="121583001492929387">"32 bits/mostra"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="1081159789834584363">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="4726688794884191540">"16 bits/mostra"</item>
     <item msgid="305344756485516870">"24 bits/mostra"</item>
     <item msgid="244568657919675099">"32 bits/mostra"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="5226878858503393706">"Usar selección sistema (predeterminado)"</item>
+    <item msgid="5226878858503393706">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="4106832974775067314">"Mono"</item>
     <item msgid="5571632958424639155">"Estéreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"Usa selección sistema (predeterminado)"</item>
+    <item msgid="4118561796005528173">"Usar selección do sistema (predeterminado)"</item>
     <item msgid="8900559293912978337">"Mono"</item>
     <item msgid="8883739882299884241">"Estéreo"</item>
   </string-array>
@@ -137,6 +142,12 @@
     <item msgid="4327143584633311908">"Calidade equilibrada do audio e da conexión"</item>
     <item msgid="4681409244565426925">"Optimizado para a calidade da conexión"</item>
     <item msgid="364670732877872677">"Máxima (taxa de bits adaptable)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", activo"</item>
+    <item msgid="8962366465966010158">", activo (contido multimedia)"</item>
+    <item msgid="4046665544396189228">", activo (teléfono)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Desactivado"</item>
@@ -175,7 +186,7 @@
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animación desactivada"</item>
     <item msgid="6624864048416710414">"Escala de animación 0,5x"</item>
-    <item msgid="2219332261255416635">"Escala de animación 1x"</item>
+    <item msgid="2219332261255416635">"Escala de animación de 1x"</item>
     <item msgid="3544428804137048509">"Escala de animación 1,5x"</item>
     <item msgid="3110710404225974514">"Escala de animación 2x"</item>
     <item msgid="4402738611528318731">"Escala de animación 5x"</item>
@@ -184,11 +195,11 @@
   <string-array name="transition_animation_scale_entries">
     <item msgid="8464255836173039442">"Animación desactivada"</item>
     <item msgid="3375781541913316411">"Escala de animación 0,5x"</item>
-    <item msgid="1991041427801869945">"Escala da animación de 1x"</item>
+    <item msgid="1991041427801869945">"Escala de animación de 1x"</item>
     <item msgid="4012689927622382874">"Escala de animación 1,5x"</item>
     <item msgid="3289156759925947169">"Escala de animación 2x"</item>
-    <item msgid="7705857441213621835">"Escala da animación de 5x"</item>
-    <item msgid="6660750935954853365">"Escala da animación de 10x"</item>
+    <item msgid="7705857441213621835">"Escala de animación de 5x"</item>
+    <item msgid="6660750935954853365">"Escala de animación de 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6039901060648228241">"Animación desactivada"</item>
@@ -196,22 +207,22 @@
     <item msgid="4394388961370833040">"Escala de animación de 1x"</item>
     <item msgid="8125427921655194973">"Escala de animación de 1,5x"</item>
     <item msgid="3334024790739189573">"Escala de animación de 2x"</item>
-    <item msgid="3170120558236848008">"Escala da animación de 5x"</item>
+    <item msgid="3170120558236848008">"Escala de animación de 5x"</item>
     <item msgid="1069584980746680398">"Escala de animación de 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="1606809880904982133">"Ningunha"</item>
-    <item msgid="9033194758688161545">"480 p"</item>
-    <item msgid="1025306206556583600">"480 p (seguro)"</item>
-    <item msgid="1853913333042744661">"720 p"</item>
-    <item msgid="3414540279805870511">"720 p (seguro)"</item>
-    <item msgid="9039818062847141551">"1080 p"</item>
-    <item msgid="4939496949750174834">"1080 p (seguro)"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (seguro)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (seguro)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (seguro)"</item>
     <item msgid="1833612718524903568">"4K"</item>
     <item msgid="238303513127879234">"4K (seguro)"</item>
     <item msgid="3547211260846843098">"4K (mellorado)"</item>
     <item msgid="5411365648951414254">"4K (mellorado e seguro)"</item>
-    <item msgid="1311305077526792901">"720 p, 1080 p (pantalla dual)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (pantalla dual)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="3191973083884253830">"Ningún"</item>

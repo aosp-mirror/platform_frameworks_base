@@ -162,7 +162,7 @@ public class UsbInterface implements Parcelable {
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<UsbInterface> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UsbInterface> CREATOR =
         new Parcelable.Creator<UsbInterface>() {
         public UsbInterface createFromParcel(Parcel in) {
             int id = in.readInt();

@@ -26,9 +26,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="64dp"
-            android:paddingTop="28dp"
+            android:paddingTop="12dp"
+            android:textAppearance="?android:attr/textAppearanceButton"
             android:gravity="top|center_horizontal"
             android:textColor="?attr/wallpaperTextColor"
-            android:textSize="16sp"
             android:text="@string/empty_shade_text"/>
 </com.android.systemui.statusbar.EmptyShadeView>

@@ -28,3 +28,15 @@ void ATrace_beginSection(const char* sectionName) {
 void ATrace_endSection() {
     atrace_end(ATRACE_TAG_APP);
 }
+
+void ATrace_beginAsyncSection(const char* sectionName, int32_t cookie) {
+	atrace_async_begin(ATRACE_TAG_APP, sectionName, cookie);
+}
+
+void ATrace_endAsyncSection(const char* sectionName, int32_t cookie) {
+	atrace_async_end(ATRACE_TAG_APP, sectionName, cookie);
+}
+
+void ATrace_setCounter(const char* counterName, int64_t counterValue) {
+	atrace_int64(ATRACE_TAG_APP, counterName, counterValue);
+}

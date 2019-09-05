@@ -65,7 +65,13 @@ import java.util.Map;
  * @attr ref android.R.styleable#KeyboardView_keyTextColor
  * @attr ref android.R.styleable#KeyboardView_verticalCorrection
  * @attr ref android.R.styleable#KeyboardView_popupLayout
+ *
+ * @deprecated This class is deprecated because this is just a convenient UI widget class that
+ *             application developers can re-implement on top of existing public APIs.  If you have
+ *             already depended on this class, consider copying the implementation from AOSP into
+ *             your project or re-implementing a similar widget by yourselves
  */
+@Deprecated
 public class KeyboardView extends View implements View.OnClickListener {
 
     /**

@@ -323,7 +323,7 @@ public final class IpSecConfig implements Parcelable {
         return strBuilder.toString();
     }
 
-    public static final Parcelable.Creator<IpSecConfig> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<IpSecConfig> CREATOR =
             new Parcelable.Creator<IpSecConfig>() {
                 public IpSecConfig createFromParcel(Parcel in) {
                     return new IpSecConfig(in);

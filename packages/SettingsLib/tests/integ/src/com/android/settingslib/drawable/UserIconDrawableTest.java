@@ -18,12 +18,18 @@ package com.android.settingslib.drawable;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.ColorInt;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 
-import com.android.settingslib.R;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,9 +43,29 @@ public class UserIconDrawableTest {
     public void getConstantState_shouldNotBeNull() {
         final Bitmap b = BitmapFactory.decodeResource(
                 InstrumentationRegistry.getTargetContext().getResources(),
-                R.drawable.ic_mode_edit);
+                com.android.internal.R.drawable.ic_mode_edit);
         mDrawable = new UserIconDrawable(100 /* size */).setIcon(b).bake();
-
         assertThat(mDrawable.getConstantState()).isNotNull();
+    }
+
+    @Test
+    public void setTintList_shouldBeApplied() {
+        @ColorInt final int targetColor = Color.BLUE;
+        final PorterDuff.Mode mode = Mode.SRC_OVER;
+
+        final Bitmap b = Bitmap.createBitmap(1, 1, Config.ARGB_8888);
+        UserIconDrawable drawable = new UserIconDrawable().setIcon(b);
+        drawable.setBounds(0, 0, 100, 100);
+
+        int[][] stateSet = new int[][] { {} };
+        int[] colors = new int[] { targetColor };
+        drawable.setTintList(new ColorStateList(stateSet, colors));
+        drawable.setTintMode(mode);
+
+        Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.draw(canvas);
+
+        assertThat(bitmap.getPixel(0, 0)).isEqualTo(Color.BLUE);
     }
 }

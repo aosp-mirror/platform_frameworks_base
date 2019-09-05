@@ -318,7 +318,7 @@ public final class MifareClassic extends BasicTagTechnology {
      * <p>Successful authentication of a sector with key A enables other
      * I/O operations on that sector. The set of operations granted by key A
      * key depends on the ACL bits set in that sector. For more information
-     * see the MIFARE Classic specification on {@see http://www.nxp.com}.
+     * see the MIFARE Classic specification on <a href="http://www.nxp.com">http://www.nxp.com</a>.
      *
      * <p>A failed authentication attempt causes an implicit reconnection to the
      * tag, so authentication to other sectors will be lost.
@@ -345,7 +345,7 @@ public final class MifareClassic extends BasicTagTechnology {
      * <p>Successful authentication of a sector with key B enables other
      * I/O operations on that sector. The set of operations granted by key B
      * depends on the ACL bits set in that sector. For more information
-     * see the MIFARE Classic specification on {@see http://www.nxp.com}.
+     * see the MIFARE Classic specification on <a href="http://www.nxp.com">http://www.nxp.com</a>.
      *
      * <p>A failed authentication attempt causes an implicit reconnection to the
      * tag, so authentication to other sectors will be lost.

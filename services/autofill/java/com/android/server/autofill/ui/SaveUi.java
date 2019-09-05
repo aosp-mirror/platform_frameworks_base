@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.autofill.BatchUpdates;
 import android.service.autofill.CustomDescription;
+import android.service.autofill.InternalOnClickAction;
 import android.service.autofill.InternalTransformation;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
@@ -43,6 +44,7 @@ import android.text.Html;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -70,9 +72,11 @@ import java.util.ArrayList;
  */
 final class SaveUi {
 
-    private static final String TAG = "AutofillSaveUi";
+    private static final String TAG = "SaveUi";
 
-    private static final int THEME_ID =
+    private static final int THEME_ID_LIGHT =
+            com.android.internal.R.style.Theme_DeviceDefault_Light_Autofill_Save;
+    private static final int THEME_ID_DARK =
             com.android.internal.R.style.Theme_DeviceDefault_Autofill_Save;
 
     public interface OnSaveListener {
@@ -82,18 +86,19 @@ final class SaveUi {
     }
 
     /**
-     * Wrapper that guarantees that only one callback is triggered by ignoring further calls after
+     * Wrapper that guarantees that only one callback action (either {@link #onSave()} or
+     * {@link #onCancel(IntentSender)}) is triggered by ignoring further calls after
      * it's destroyed.
      *
      * <p>It's needed becase {@link #onCancel(IntentSender)} is always called when the Save UI
      * dialog is dismissed.
      */
-    private class OneTimeListener implements OnSaveListener {
+    private class OneActionThenDestroyListener implements OnSaveListener {
 
         private final OnSaveListener mRealListener;
         private boolean mDone;
 
-        OneTimeListener(OnSaveListener realListener) {
+        OneActionThenDestroyListener(OnSaveListener realListener) {
             mRealListener = realListener;
         }
 
@@ -131,7 +136,7 @@ final class SaveUi {
 
     private final @NonNull Dialog mDialog;
 
-    private final @NonNull OneTimeListener mListener;
+    private final @NonNull OneActionThenDestroyListener mListener;
 
     private final @NonNull OverlayControl mOverlayControl;
 
@@ -141,6 +146,7 @@ final class SaveUi {
     private final String mServicePackageName;
     private final ComponentName mComponentName;
     private final boolean mCompatMode;
+    private final int mThemeId;
 
     private boolean mDestroyed;
 
@@ -149,15 +155,17 @@ final class SaveUi {
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
-           boolean compatMode) {
+           boolean nightMode, boolean isUpdate, boolean compatMode) {
+        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi= pendingUi;
-        mListener = new OneTimeListener(listener);
+        mListener = new OneActionThenDestroyListener(listener);
         mOverlayControl = overlayControl;
         mServicePackageName = servicePackageName;
         mComponentName = componentName;
         mCompatMode = compatMode;
 
-        context = new ContextThemeWrapper(context, THEME_ID);
+        context = new ContextThemeWrapper(context, mThemeId);
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
@@ -184,21 +192,29 @@ final class SaveUi {
 
         switch (types.size()) {
             case 1:
-                mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_type,
+                mTitle = Html.fromHtml(context.getString(
+                        isUpdate ? R.string.autofill_update_title_with_type
+                                : R.string.autofill_save_title_with_type,
                         types.valueAt(0), serviceLabel), 0);
                 break;
             case 2:
-                mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_2types,
+                mTitle = Html.fromHtml(context.getString(
+                        isUpdate ? R.string.autofill_update_title_with_2types
+                                : R.string.autofill_save_title_with_2types,
                         types.valueAt(0), types.valueAt(1), serviceLabel), 0);
                 break;
             case 3:
-                mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_3types,
+                mTitle = Html.fromHtml(context.getString(
+                        isUpdate ? R.string.autofill_update_title_with_3types
+                                : R.string.autofill_save_title_with_3types,
                         types.valueAt(0), types.valueAt(1), types.valueAt(2), serviceLabel), 0);
                 break;
             default:
                 // Use generic if more than 3 or invalid type (size 0).
                 mTitle = Html.fromHtml(
-                        context.getString(R.string.autofill_save_title, serviceLabel), 0);
+                        context.getString(isUpdate ? R.string.autofill_update_title
+                                : R.string.autofill_save_title, serviceLabel),
+                        0);
         }
         titleView.setText(mTitle);
 
@@ -233,10 +249,13 @@ final class SaveUi {
         }
         noButton.setOnClickListener((v) -> mListener.onCancel(info.getNegativeActionListener()));
 
-        final View yesButton = view.findViewById(R.id.autofill_save_yes);
+        final TextView yesButton = view.findViewById(R.id.autofill_save_yes);
+        if (isUpdate) {
+            yesButton.setText(R.string.autofill_update_yes);
+        }
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
-        mDialog = new Dialog(context, THEME_ID);
+        mDialog = new Dialog(context, mThemeId);
         mDialog.setContentView(view);
 
         // Dialog can be dismissed when touched outside, but the negative listener should not be
@@ -278,6 +297,9 @@ final class SaveUi {
         // First apply the unconditional transformations (if any) to the templates.
         final ArrayList<Pair<Integer, InternalTransformation>> transformations =
                 customDescription.getTransformations();
+        if (sVerbose) {
+            Slog.v(TAG, "applyCustomDescription(): transformations = " + transformations);
+        }
         if (transformations != null) {
             if (!InternalTransformation.batchApply(valueFinder, template, transformations)) {
                 Slog.w(TAG, "could not apply main transformations on custom description");
@@ -285,50 +307,51 @@ final class SaveUi {
             }
         }
 
-        final RemoteViews.OnClickHandler handler = new RemoteViews.OnClickHandler() {
-            @Override
-            public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                    Intent intent) {
-                final LogMaker log =
-                        newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
-                // We need to hide the Save UI before launching the pending intent, and
-                // restore back it once the activity is finished, and that's achieved by
-                // adding a custom extra in the activity intent.
-                final boolean isValid = isValidLink(pendingIntent, intent);
-                if (!isValid) {
-                    log.setType(MetricsEvent.TYPE_UNKNOWN);
-                    mMetricsLogger.write(log);
-                    return false;
-                }
-                if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
-                final IBinder token = mPendingUi.getToken();
-                intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-                try {
-                    mPendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
-                            intent);
-                    mPendingUi.setState(PendingUi.STATE_PENDING);
-                    if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
-                    hide();
-                    log.setType(MetricsEvent.TYPE_OPEN);
-                    mMetricsLogger.write(log);
-                    return true;
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "error triggering pending intent: " + intent);
-                    log.setType(MetricsEvent.TYPE_FAILURE);
-                    mMetricsLogger.write(log);
-                    return false;
-                }
+        final RemoteViews.OnClickHandler handler = (view, pendingIntent, response) -> {
+            Intent intent = response.getLaunchOptions(view).first;
+            final LogMaker log =
+                    newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
+            // We need to hide the Save UI before launching the pending intent, and
+            // restore back it once the activity is finished, and that's achieved by
+            // adding a custom extra in the activity intent.
+            final boolean isValid = isValidLink(pendingIntent, intent);
+            if (!isValid) {
+                log.setType(MetricsEvent.TYPE_UNKNOWN);
+                mMetricsLogger.write(log);
+                return false;
+            }
+            if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
+            final IBinder token = mPendingUi.getToken();
+            intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+            try {
+                mPendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
+                        intent);
+                mPendingUi.setState(PendingUi.STATE_PENDING);
+                if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
+                hide();
+                log.setType(MetricsEvent.TYPE_OPEN);
+                mMetricsLogger.write(log);
+                return true;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "error triggering pending intent: " + intent);
+                log.setType(MetricsEvent.TYPE_FAILURE);
+                mMetricsLogger.write(log);
+                return false;
             }
         };
 
         try {
             // Create the remote view peer.
-            template.setApplyTheme(THEME_ID);
-            final View customSubtitleView = template.apply(context, null, handler);
+            final View customSubtitleView = template.applyWithTheme(
+                    context, null, handler, mThemeId);
 
-            // And apply batch updates (if any).
+            // Apply batch updates (if any).
             final ArrayList<Pair<InternalValidator, BatchUpdates>> updates =
                     customDescription.getUpdates();
+            if (sVerbose) {
+                Slog.v(TAG, "applyCustomDescription(): view = " + customSubtitleView
+                        + " updates=" + updates);
+            }
             if (updates != null) {
                 final int size = updates.size();
                 if (sDebug) Slog.d(TAG, "custom description has " + size + " batch updates");
@@ -361,6 +384,35 @@ final class SaveUi {
                             return false;
                         }
                         template.reapply(context, customSubtitleView);
+                    }
+                }
+            }
+
+            // Apply click actions (if any).
+            final SparseArray<InternalOnClickAction> actions = customDescription.getActions();
+            if (actions != null) {
+                final int size = actions.size();
+                if (sDebug) Slog.d(TAG, "custom description has " + size + " actions");
+                if (!(customSubtitleView instanceof ViewGroup)) {
+                    Slog.w(TAG, "cannot apply actions because custom description root is not a "
+                            + "ViewGroup: " + customSubtitleView);
+                } else {
+                    final ViewGroup rootView = (ViewGroup) customSubtitleView;
+                    for (int i = 0; i < size; i++) {
+                        final int id = actions.keyAt(i);
+                        final InternalOnClickAction action = actions.valueAt(i);
+                        final View child = rootView.findViewById(id);
+                        if (child == null) {
+                            Slog.w(TAG, "Ignoring action " + action + " for view " + id
+                                    + " because it's not on " + rootView);
+                            continue;
+                        }
+                        child.setOnClickListener((v) -> {
+                            if (sVerbose) {
+                                Slog.v(TAG, "Applying " + action + " after " + v + " was clicked");
+                            }
+                            action.onClick(rootView);
+                        });
                     }
                 }
             }
@@ -513,7 +565,18 @@ final class SaveUi {
         pw.print(prefix); pw.print("service: "); pw.println(mServicePackageName);
         pw.print(prefix); pw.print("app: "); pw.println(mComponentName.toShortString());
         pw.print(prefix); pw.print("compat mode: "); pw.println(mCompatMode);
-
+        pw.print(prefix); pw.print("theme id: "); pw.print(mThemeId);
+        switch (mThemeId) {
+            case THEME_ID_DARK:
+                pw.println(" (dark)");
+                break;
+            case THEME_ID_LIGHT:
+                pw.println(" (light)");
+                break;
+            default:
+                pw.println("(UNKNOWN_MODE)");
+                break;
+        }
         final View view = mDialog.getWindow().getDecorView();
         final int[] loc = view.getLocationOnScreen();
         pw.print(prefix); pw.print("coordinates: ");

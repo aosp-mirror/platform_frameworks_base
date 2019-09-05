@@ -249,7 +249,7 @@ public final class EuiccRulesAuthTable implements Parcelable {
         mPolicyRuleFlags = source.createIntArray();
     }
 
-    public static final Creator<EuiccRulesAuthTable> CREATOR =
+    public static final @android.annotation.NonNull Creator<EuiccRulesAuthTable> CREATOR =
             new Creator<EuiccRulesAuthTable>() {
                 @Override
                 public EuiccRulesAuthTable createFromParcel(Parcel source) {

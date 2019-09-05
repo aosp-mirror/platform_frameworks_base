@@ -18,18 +18,17 @@ package com.android.printservice.recommendation.util;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.Preconditions;
 
 import com.android.printservice.recommendation.PrintServicePlugin;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -55,9 +54,9 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
         boolean matchesCriteria(NsdServiceInfo nsdServiceInfo);
     }
 
-    /** Printer identifiers of the mPrinters found. */
+    /** Printers found. */
     @GuardedBy("mLock")
-    private final @NonNull HashSet<InetAddress> mPrinters;
+    private final @NonNull PrinterHashMap mPrinters;
 
     /** Service types discovered by this plugin */
     private final @NonNull HashSet<String> mServiceTypes;
@@ -97,7 +96,7 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
         mPrinterFilter = Preconditions.checkNotNull(printerFilter, "printerFilter");
 
         mResolveQueue = NsdResolveQueue.getInstance();
-        mPrinters = new HashSet<>();
+        mPrinters = new PrinterHashMap();
     }
 
     /**
@@ -107,6 +106,12 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
         return (NsdManager) mContext.getSystemService(Context.NSD_SERVICE);
     }
 
+    private void onChanged() {
+        if (mCallback != null) {
+            mCallback.onChanged(mPrinters.getPrinterAddresses());
+        }
+    }
+
     /**
      * Start the discovery.
      *
@@ -114,7 +119,8 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
      */
     public void start(@NonNull PrintServicePlugin.PrinterDiscoveryCallback callback) {
         mCallback = callback;
-        mCallback.onChanged(new ArrayList<>(mPrinters));
+
+        onChanged();
 
         for (String serviceType : mServiceTypes) {
             DiscoveryListenerMultiplexer.addListener(getNDSManager(), serviceType, this);
@@ -167,11 +173,12 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
 
                     @Override
                     public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                        if (mPrinterFilter.matchesCriteria(serviceInfo)) {
+                        if (!TextUtils.isEmpty(PrinterHashMap.getKey(serviceInfo))
+                                && mPrinterFilter.matchesCriteria(serviceInfo)) {
                             if (mCallback != null) {
-                                boolean added = mPrinters.add(serviceInfo.getHost());
-                                if (added) {
-                                    mCallback.onChanged(new ArrayList<>(mPrinters));
+                                NsdServiceInfo old = mPrinters.addPrinter(serviceInfo);
+                                if (!Objects.equals(old, serviceInfo)) {
+                                    onChanged();
                                 }
                             }
                         }
@@ -181,26 +188,9 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
 
     @Override
     public void onServiceLost(NsdServiceInfo serviceInfo) {
-        mResolveQueue.resolve(getNDSManager(), serviceInfo,
-                new NsdManager.ResolveListener() {
-                    @Override
-                    public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        Log.w(LOG_TAG, "Service lost: Could not resolve " + serviceInfo + ": "
-                                + errorCode);
-                    }
-
-                    @Override
-                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                        if (mPrinterFilter.matchesCriteria(serviceInfo)) {
-                            if (mCallback != null) {
-                                boolean removed = mPrinters.remove(serviceInfo.getHost());
-
-                                if (removed) {
-                                    mCallback.onChanged(new ArrayList<>(mPrinters));
-                                }
-                            }
-                        }
-                    }
-                });
+        NsdServiceInfo oldAddress = mPrinters.removePrinter(serviceInfo);
+        if (oldAddress != null) {
+            onChanged();
+        }
     }
 }

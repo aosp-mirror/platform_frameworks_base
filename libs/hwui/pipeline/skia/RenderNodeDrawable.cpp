@@ -21,9 +21,24 @@
 #include "SkiaPipeline.h"
 #include "utils/TraceUtils.h"
 
+#include <optional>
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
+
+RenderNodeDrawable::RenderNodeDrawable(RenderNode* node, SkCanvas* canvas, bool composeLayer,
+                                       bool inReorderingSection)
+        : mRenderNode(node)
+        , mRecordedTransform(canvas->getTotalMatrix())
+        , mComposeLayer(composeLayer)
+        , mInReorderingSection(inReorderingSection) {}
+
+RenderNodeDrawable::~RenderNodeDrawable() {
+    // Just here to move the destructor into the cpp file where we can access RenderNode.
+
+    // TODO: Detangle the header nightmare.
+}
 
 void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas,
                                                      const SkiaDisplayList& displayList,
@@ -100,22 +115,36 @@ void RenderNodeDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
+class MarkDraw {
+public:
+    explicit MarkDraw(SkCanvas& canvas, RenderNode& node) : mCanvas(canvas), mNode(node) {
+        if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
+            mNode.markDrawStart(mCanvas);
+        }
+    }
+    ~MarkDraw() {
+        if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
+            mNode.markDrawEnd(mCanvas);
+        }
+    }
+
+private:
+    SkCanvas& mCanvas;
+    RenderNode& mNode;
+};
+
 void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     RenderNode* renderNode = mRenderNode.get();
-    if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
-        SkRect dimensions = SkRect::MakeWH(renderNode->getWidth(), renderNode->getHeight());
-        canvas->drawAnnotation(dimensions, renderNode->getName(), nullptr);
-    }
+    MarkDraw _marker{*canvas, *renderNode};
 
     // We only respect the nothingToDraw check when we are composing a layer. This
     // ensures that we paint the layer even if it is not currently visible in the
     // event that the properties change and it becomes visible.
     if ((mProjectedDisplayList == nullptr && !renderNode->isRenderable()) ||
-            (renderNode->nothingToDraw() && mComposeLayer)) {
+        (renderNode->nothingToDraw() && mComposeLayer)) {
         return;
     }
 
-    SkASSERT(renderNode->getDisplayList()->isSkiaDL());
     SkiaDisplayList* displayList = (SkiaDisplayList*)renderNode->getDisplayList();
 
     SkAutoCanvasRestore acr(canvas, true);
@@ -130,9 +159,9 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
             LOG_ALWAYS_FATAL_IF(!mProjectedDisplayList->mProjectedOutline);
             const bool shouldClip = mProjectedDisplayList->mProjectedOutline->getPath();
             SkAutoCanvasRestore acr2(canvas, shouldClip);
-            canvas->setMatrix(mProjectedDisplayList->mProjectedReceiverParentMatrix);
+            canvas->setMatrix(mProjectedDisplayList->mParentMatrix);
             if (shouldClip) {
-                clipOutline(*mProjectedDisplayList->mProjectedOutline, canvas, nullptr);
+                canvas->clipPath(*mProjectedDisplayList->mProjectedOutline->getPath());
             }
             drawBackwardsProjectedNodes(canvas, *mProjectedDisplayList);
         }
@@ -144,10 +173,10 @@ static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultip
                             SkPaint* paint) {
     paint->setFilterQuality(kLow_SkFilterQuality);
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
-        properties.xferMode() != SkBlendMode::kSrcOver || properties.colorFilter() != nullptr) {
+        properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
         paint->setBlendMode(properties.xferMode());
-        paint->setColorFilter(sk_ref_sp(properties.colorFilter()));
+        paint->setColorFilter(sk_ref_sp(properties.getColorFilter()));
         return true;
     }
     return false;
@@ -159,9 +188,9 @@ public:
 
 protected:
     bool onFilter(SkTCopyOnFirstWrite<SkPaint>* paint, Type t) const override {
-        SkTLazy<SkPaint> defaultPaint;
+        std::optional<SkPaint> defaultPaint;
         if (!*paint) {
-            paint->init(*defaultPaint.init());
+            paint->init(defaultPaint.emplace());
         }
         paint->writable()->setAlpha((uint8_t)(*paint)->getAlpha() * mAlpha);
         return true;
@@ -188,9 +217,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
         setViewProperties(properties, canvas, &alphaMultiplier);
     }
     SkiaDisplayList* displayList = (SkiaDisplayList*)mRenderNode->getDisplayList();
-    if (displayList->containsProjectionReceiver()) {
-        displayList->mProjectedReceiverParentMatrix = canvas->getTotalMatrix();
-    }
+    displayList->mParentMatrix = canvas->getTotalMatrix();
 
     // TODO should we let the bound of the drawable do this for us?
     const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
@@ -208,8 +235,8 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             // we need to restrict the portion of the surface drawn to the size of the renderNode.
             SkASSERT(renderNode->getLayerSurface()->width() >= bounds.width());
             SkASSERT(renderNode->getLayerSurface()->height() >= bounds.height());
-            canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot().get(),
-                    bounds, bounds, &paint);
+            canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot().get(), bounds,
+                                  bounds, &paint);
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {
                 renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;
@@ -306,6 +333,6 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
     }
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

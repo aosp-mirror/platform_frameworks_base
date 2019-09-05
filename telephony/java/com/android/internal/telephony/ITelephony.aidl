@@ -1021,7 +1021,7 @@ interface ITelephony {
     /**
      * Similar to above, but check for the package whose name is pkgName.
      */
-    int checkCarrierPrivilegesForPackage(String pkgName);
+    int checkCarrierPrivilegesForPackage(int subId, String pkgName);
 
     /**
      * Similar to above, but check across all phones.
@@ -1378,9 +1378,14 @@ interface ITelephony {
             in PhoneAccountHandle phoneAccountHandle, boolean enabled);
 
     /**
-     * Returns a list of packages that have carrier privileges.
+     * Returns a list of packages that have carrier privileges for the specific phone.
      */
-    List<String> getPackagesWithCarrierPrivileges();
+    List<String> getPackagesWithCarrierPrivileges(int phoneId);
+
+     /**
+      * Returns a list of packages that have carrier privileges.
+      */
+    List<String> getPackagesWithCarrierPrivilegesForAllPhones();
 
     /**
      * Return the application ID for the app type.
@@ -1722,7 +1727,7 @@ interface ITelephony {
      * (also any country or carrier overlays) to be loaded when using a test SIM with a call box.
      */
     void setCarrierTestOverride(int subId, String mccmnc, String imsi, String iccid, String gid1,
-            String gid2, String plmn, String spn);
+            String gid2, String plmn, String spn, String carrierPrivilegeRules, String apn);
 
     /**
      * A test API to return installed carrier id list version.
@@ -1766,11 +1771,11 @@ interface ITelephony {
      */
     void setDefaultSmsApp(int userId, String packageName);
 
-     /**
-      * Return the modem radio power state for slot index.
-      *
-      */
-     int getRadioPowerState(int slotIdex, String callingPackage);
+    /**
+     * Return the modem radio power state for slot index.
+     *
+     */
+    int getRadioPowerState(int slotIndex, String callingPackage);
 
     // IMS specific AIDL commands, see ImsMmTelManager.java
 

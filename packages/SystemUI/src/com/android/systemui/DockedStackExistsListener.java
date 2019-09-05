@@ -14,7 +14,6 @@
 
 package com.android.systemui;
 
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IDockedStackListener;

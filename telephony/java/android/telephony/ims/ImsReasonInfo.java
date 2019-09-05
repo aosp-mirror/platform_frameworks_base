@@ -1189,7 +1189,7 @@ public final class ImsReasonInfo implements Parcelable {
         out.writeString(mExtraMessage);
     }
 
-    public static final Creator<ImsReasonInfo> CREATOR = new Creator<ImsReasonInfo>() {
+    public static final @android.annotation.NonNull Creator<ImsReasonInfo> CREATOR = new Creator<ImsReasonInfo>() {
         @Override
         public ImsReasonInfo createFromParcel(Parcel in) {
             return new ImsReasonInfo(in);

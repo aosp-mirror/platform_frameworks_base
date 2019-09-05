@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -41,8 +40,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.IntPair;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -63,19 +62,18 @@ public class AccessibilityManagerTest {
     private MessageCapturingHandler mHandler;
     private Instrumentation mInstrumentation;
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mHandler = new MessageCapturingHandler(null);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
     }
+
+    @After
+    public void tearDown() {
+        mHandler.removeAllMessages();
+    }
+
 
     private AccessibilityManager createManager(boolean enabled) throws Exception {
         long serviceReturnValue = IntPair.of(

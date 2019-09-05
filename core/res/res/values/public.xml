@@ -1067,7 +1067,8 @@
   <public type="id" name="inputExtractEditText" id="0x01020025" />
 
   <!-- View ID of the {@link android.inputmethodservice.KeyboardView} within
-        an input method's input area. -->
+       an input method's input area.
+       {@deprecated Use Copy this definition into your own application project.} -->
   <public type="id" name="keyboardView" id="0x01020026" />
   <!-- View ID of a {@link android.view.View} to close a popup keyboard -->
   <public type="id" name="closeButton" id="0x01020027" />
@@ -1082,6 +1083,7 @@
   <public type="style" name="Theme.InputMethod" id="0x01030054" />
   <public type="style" name="Theme.NoDisplay" id="0x01030055" />
   <public type="style" name="Animation.InputMethod" id="0x01030056" />
+  <!-- {@deprecated Use Copy this definition into your own application project.} -->
   <public type="style" name="Widget.KeyboardView" id="0x01030057" />
   <public type="style" name="ButtonBar" id="0x01030058" />
   <public type="style" name="Theme.Panel" id="0x01030059" />
@@ -2887,6 +2889,99 @@
 
   <!-- ===============================================================
        Resources added in version Q of the platform
+       =============================================================== -->
+    <eat-comment />
+
+    <public type="attr" name="packageType" id="0x01010587" />
+    <public type="attr" name="opticalInsetLeft" id="0x01010588" />
+    <public type="attr" name="opticalInsetTop" id="0x01010589" />
+    <public type="attr" name="opticalInsetRight" id="0x0101058a" />
+    <public type="attr" name="opticalInsetBottom" id="0x0101058b" />
+    <public type="attr" name="forceDarkAllowed" id="0x0101058c" />
+    <!-- @hide @SystemApi -->
+    <public type="attr" name="supportsAmbientMode" id="0x0101058d" />
+    <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
+    <public type="attr" name="usesNonSdkApi" id="0x0101058e" />
+    <public type="attr" name="nonInteractiveUiTimeout" id="0x0101058f" />
+    <public type="attr" name="isLightTheme" id="0x01010590" />
+    <public type="attr" name="isSplitRequired" id="0x01010591" />
+    <public type="attr" name="textLocale" id="0x01010592" />
+    <public type="attr" name="settingsSliceUri" id="0x01010593" />
+    <public type="attr" name="shell" id="0x01010594" />
+    <public type="attr" name="interactiveUiTimeout" id="0x01010595" />
+    <public type="attr" name="supportsMultipleDisplays" id="0x01010596" />
+    <public type="attr" name="useAppZygote" id="0x01010597" />
+    <public type="attr" name="selectionDividerHeight" id="0x01010598" />
+    <public type="attr" name="foregroundServiceType" id="0x01010599" />
+    <public type="attr" name="hasFragileUserData" id="0x0101059a" />
+    <public type="attr" name="minAspectRatio" id="0x0101059b" />
+    <public type="attr" name="inheritShowWhenLocked" id="0x0101059c" />
+    <public type="attr" name="zygotePreloadName" id="0x0101059d" />
+    <public type="attr" name="useEmbeddedDex" id="0x0101059e" />
+    <public type="attr" name="forceUriPermissions" id="0x0101059f" />
+    <!-- @hide @SystemApi -->
+    <public type="attr" name="allowClearUserDataOnFailedRestore" id="0x01010600" />
+    <public type="attr" name="allowAudioPlaybackCapture" id="0x01010601" />
+    <public type="attr" name="secureElementName" id="0x01010602" />
+    <public type="attr" name="requestLegacyExternalStorage" id="0x01010603" />
+    <public type="attr" name="enforceStatusBarContrast" id="0x01010604" />
+    <public type="attr" name="enforceNavigationBarContrast" id="0x01010605" />
+    <public type="attr" name="identifier" id="0x01010606" />
+
+    <!-- @hide @SystemApi -->
+    <public type="drawable" name="ic_info" id="0x010800b4" />
+
+    <!-- @hide @SystemApi -->
+    <public type="style" name="Theme.DeviceDefault.DocumentsUI" id="0x010302e2" />
+    <public type="style" name="Theme.DeviceDefault.DayNight" id="0x010302e3" />
+    <public type="style" name="ThemeOverlay.DeviceDefault.Accent.DayNight" id="0x010302e4" />
+
+    <public type="id" name="accessibilityActionPageUp" id="0x01020046" />
+    <public type="id" name="accessibilityActionPageDown" id="0x01020047" />
+    <public type="id" name="accessibilityActionPageLeft" id="0x01020048" />
+    <public type="id" name="accessibilityActionPageRight" id="0x01020049" />
+
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_helpPackageNameKey" id="0x0104001b" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_helpPackageNameValue" id="0x0104001c" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_helpIntentExtraKey" id="0x0104001d" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_helpIntentNameKey" id="0x0104001e" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_feedbackIntentExtraKey" id="0x0104001f" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_feedbackIntentNameKey" id="0x01040020" />
+    <!-- @hide @SystemApi @TestApi -->
+    <public type="string" name="config_defaultAssistant" id="0x01040021" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_defaultBrowser" id="0x01040022" />
+    <!-- @hide @SystemApi @TestApi -->
+    <public type="string" name="config_defaultDialer" id="0x01040023" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_defaultSms" id="0x01040024" />
+
+    <!-- @hide @SystemApi -->
+    <public type="bool" name="config_sendPackageName" id="0x01110000" />
+    <!-- @hide @SystemApi -->
+    <public type="bool" name="config_showDefaultAssistant" id="0x01110001" />
+    <!-- @hide @SystemApi -->
+    <public type="bool" name="config_showDefaultEmergency" id="0x01110002" />
+    <!-- @hide @SystemApi -->
+    <public type="bool" name="config_showDefaultHome" id="0x01110003" />
+    <!-- @hide @TestApi -->
+    <public type="bool" name="config_perDisplayFocusEnabled" id="0x01110004" />
+
+    <!-- @hide @SystemApi -->
+    <public type="dimen" name="config_restrictedIconSize" id="0x01050007" />
+
+    <!-- @hide @SystemApi -->
+    <public type="color" name="system_notification_accent_color" id="0x0106001c" />
+
+
+  <!-- ===============================================================
+       Resources added in version R of the platform
 
        NOTE: add <public> elements within a <public-group> like so:
 
@@ -2902,21 +2997,28 @@
        =============================================================== -->
   <eat-comment />
 
-    <public-group type="attr" first-id="0x01010587">
+    <public-group type="attr" first-id="0x01010607">
     </public-group>
 
-    <public-group type="attr" first-id="0x0101058d">
-        <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
-        <public name="usesNonSdkApi" />
+    <public-group type="drawable" first-id="0x010800b5">
     </public-group>
 
-    <public-group type="style" first-id="0x010302e2">
+    <public-group type="style" first-id="0x010302e5">
     </public-group>
 
-    <public-group type="id" first-id="0x01020046">
+    <public-group type="id" first-id="0x0102004a">
     </public-group>
 
-    <public-group type="string" first-id="0x0104001b">
+    <public-group type="string" first-id="0x01040025">
+    </public-group>
+
+    <public-group type="bool" first-id="0x01110005">
+    </public-group>
+
+    <public-group type="dimen" first-id="0x01050008">
+    </public-group>
+
+    <public-group type="color" first-id="0x0106001d">
     </public-group>
 
   <!-- ===============================================================

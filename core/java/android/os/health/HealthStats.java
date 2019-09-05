@@ -16,7 +16,7 @@
 
 package android.os.health;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -127,7 +127,7 @@ public class HealthStats {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public HealthStats(Parcel in) {
         int count;
 

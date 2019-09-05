@@ -20,18 +20,17 @@
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
+#include <ui/GraphicTypes.h>
 
 #include <mutex>
 #include <thread>
 
 #include <log/log.h>
 
-#include <GLES2/gl2.h>
-
 namespace android {
 namespace uirenderer {
 
-static constexpr android::DisplayInfo sDummyDisplay {
+static constexpr android::DisplayInfo sDummyDisplay{
         1080,   // w
         1920,   // h
         320.0,  // xdpi
@@ -42,46 +41,110 @@ static constexpr android::DisplayInfo sDummyDisplay {
         false,  // secure?
         0,      // appVsyncOffset
         0,      // presentationDeadline
+        1080,   // viewportW
+        1920,   // viewportH
 };
 
-static DeviceInfo* sDeviceInfo = nullptr;
-static std::once_flag sInitializedFlag;
-
-const DeviceInfo* DeviceInfo::get() {
-    LOG_ALWAYS_FATAL_IF(!sDeviceInfo, "DeviceInfo not yet initialized.");
-    return sDeviceInfo;
+DeviceInfo* DeviceInfo::get() {
+        static DeviceInfo sDeviceInfo;
+        return &sDeviceInfo;
 }
 
-void DeviceInfo::initialize() {
-    std::call_once(sInitializedFlag, []() {
-        sDeviceInfo = new DeviceInfo();
-        sDeviceInfo->load();
-    });
-}
-
-void DeviceInfo::initialize(int maxTextureSize) {
-    std::call_once(sInitializedFlag, [maxTextureSize]() {
-        sDeviceInfo = new DeviceInfo();
-        sDeviceInfo->mDisplayInfo = DeviceInfo::queryDisplayInfo();
-        sDeviceInfo->mMaxTextureSize = maxTextureSize;
-    });
-}
-
-void DeviceInfo::load() {
-    mDisplayInfo = queryDisplayInfo();
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
-}
-
-DisplayInfo DeviceInfo::queryDisplayInfo() {
+static DisplayInfo QueryDisplayInfo() {
     if (Properties::isolatedProcess) {
         return sDummyDisplay;
     }
 
+    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
+    LOG_ALWAYS_FATAL_IF(token == nullptr,
+                        "Failed to get display info because internal display is disconnected");
+
     DisplayInfo displayInfo;
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &displayInfo);
+    status_t status = SurfaceComposerClient::getDisplayInfo(token, &displayInfo);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
     return displayInfo;
+}
+
+static float QueryMaxRefreshRate() {
+    if (Properties::isolatedProcess) {
+        return sDummyDisplay.fps;
+    }
+
+    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
+    LOG_ALWAYS_FATAL_IF(token == nullptr,
+                        "Failed to get display info because internal display is disconnected");
+
+    Vector<DisplayInfo> configs;
+    configs.reserve(10);
+    status_t status = SurfaceComposerClient::getDisplayConfigs(token, &configs);
+    LOG_ALWAYS_FATAL_IF(status, "Failed to getDisplayConfigs, error %d", status);
+    LOG_ALWAYS_FATAL_IF(configs.size() == 0, "getDisplayConfigs returned 0 configs?");
+    float max = 0.0f;
+    for (auto& info : configs) {
+        max = std::max(max, info.fps);
+    }
+    return max;
+}
+
+static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkColorType* colorType) {
+    if (Properties::isolatedProcess) {
+        *colorSpace = SkColorSpace::MakeSRGB();
+        *colorType = SkColorType::kN32_SkColorType;
+        return;
+    }
+    ui::Dataspace defaultDataspace, wcgDataspace;
+    ui::PixelFormat defaultPixelFormat, wcgPixelFormat;
+    status_t status =
+        SurfaceComposerClient::getCompositionPreference(&defaultDataspace, &defaultPixelFormat,
+                                                        &wcgDataspace, &wcgPixelFormat);
+    LOG_ALWAYS_FATAL_IF(status, "Failed to get composition preference, error %d", status);
+    switch (wcgDataspace) {
+        case ui::Dataspace::DISPLAY_P3:
+            *colorSpace = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
+            break;
+        case ui::Dataspace::V0_SCRGB:
+            *colorSpace = SkColorSpace::MakeSRGB();
+            break;
+        case ui::Dataspace::V0_SRGB:
+            // when sRGB is returned, it means wide color gamut is not supported.
+            *colorSpace = SkColorSpace::MakeSRGB();
+            break;
+        default:
+            LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
+    }
+    switch (wcgPixelFormat) {
+        case ui::PixelFormat::RGBA_8888:
+            *colorType = SkColorType::kN32_SkColorType;
+            break;
+        case ui::PixelFormat::RGBA_FP16:
+            *colorType = SkColorType::kRGBA_F16_SkColorType;
+            break;
+        default:
+            LOG_ALWAYS_FATAL("Unreachable: unsupported pixel format.");
+    }
+}
+
+DeviceInfo::DeviceInfo() : mMaxRefreshRate(QueryMaxRefreshRate()) {
+#if HWUI_NULL_GPU
+        mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
+#else
+        mMaxTextureSize = -1;
+#endif
+    mDisplayInfo = QueryDisplayInfo();
+    queryWideColorGamutPreference(&mWideColorSpace, &mWideColorType);
+}
+
+int DeviceInfo::maxTextureSize() const {
+    LOG_ALWAYS_FATAL_IF(mMaxTextureSize < 0, "MaxTextureSize has not been initialized yet.");
+    return mMaxTextureSize;
+}
+
+void DeviceInfo::setMaxTextureSize(int maxTextureSize) {
+    DeviceInfo::get()->mMaxTextureSize = maxTextureSize;
+}
+
+void DeviceInfo::onDisplayConfigChanged() {
+    mDisplayInfo = QueryDisplayInfo();
 }
 
 } /* namespace uirenderer */

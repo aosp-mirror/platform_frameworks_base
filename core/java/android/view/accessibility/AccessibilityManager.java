@@ -21,10 +21,14 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -51,6 +56,8 @@ import android.view.accessibility.AccessibilityEvent.EventType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -114,6 +121,39 @@ public final class AccessibilityManager {
     public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
             "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
 
+    /**
+     * Annotations for content flag of UI.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "FLAG_CONTENT_" }, value = {
+            FLAG_CONTENT_ICONS,
+            FLAG_CONTENT_TEXT,
+            FLAG_CONTENT_CONTROLS
+    })
+    public @interface ContentFlag {}
+
+    /**
+     * Use this flag to indicate the content of a UI that times out contains icons.
+     *
+     * @see #getRecommendedTimeoutMillis(int, int)
+     */
+    public static final int FLAG_CONTENT_ICONS = 1;
+
+    /**
+     * Use this flag to indicate the content of a UI that times out contains text.
+     *
+     * @see #getRecommendedTimeoutMillis(int, int)
+     */
+    public static final int FLAG_CONTENT_TEXT = 2;
+
+    /**
+     * Use this flag to indicate the content of a UI that times out contains interactive controls.
+     *
+     * @see #getRecommendedTimeoutMillis(int, int)
+     */
+    public static final int FLAG_CONTENT_CONTROLS = 4;
+
     @UnsupportedAppUsage
     static final Object sInstanceSync = new Object();
 
@@ -134,14 +174,17 @@ public final class AccessibilityManager {
 
     final Handler.Callback mCallback;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     boolean mIsEnabled;
 
     int mRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
+    int mInteractiveUiTimeout;
+    int mNonInteractiveUiTimeout;
+
     boolean mIsTouchExplorationEnabled;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
 
     AccessibilityPolicy mAccessibilityPolicy;
@@ -202,6 +245,7 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @TestApi
     public interface AccessibilityServicesStateChangeListener {
 
         /**
@@ -298,7 +342,9 @@ public final class AccessibilityManager {
         }
 
         @Override
-        public void notifyServicesStateChanged() {
+        public void notifyServicesStateChanged(long updatedUiTimeout) {
+            updateUiTimeout(updatedUiTimeout);
+
             final ArrayMap<AccessibilityServicesStateChangeListener, Handler> listeners;
             synchronized (mLock) {
                 if (mServicesStateChangeListeners.isEmpty()) {
@@ -771,6 +817,7 @@ public final class AccessibilityManager {
      *                for a callback on the process's main handler.
      * @hide
      */
+    @TestApi
     public void addAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener, @Nullable Handler handler) {
         synchronized (mLock) {
@@ -786,6 +833,7 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @TestApi
     public void removeAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
         synchronized (mLock) {
@@ -800,7 +848,7 @@ public final class AccessibilityManager {
         if (mRequestPreparerLists == null) {
             mRequestPreparerLists = new SparseArray<>(1);
         }
-        int id = preparer.getView().getAccessibilityViewId();
+        int id = preparer.getAccessibilityViewId();
         List<AccessibilityRequestPreparer> requestPreparerList = mRequestPreparerLists.get(id);
         if (requestPreparerList == null) {
             requestPreparerList = new ArrayList<>(1);
@@ -816,7 +864,7 @@ public final class AccessibilityManager {
         if (mRequestPreparerLists == null) {
             return;
         }
-        int viewId = preparer.getView().getAccessibilityViewId();
+        int viewId = preparer.getAccessibilityViewId();
         List<AccessibilityRequestPreparer> requestPreparerList = mRequestPreparerLists.get(viewId);
         if (requestPreparerList != null) {
             requestPreparerList.remove(preparer);
@@ -824,6 +872,38 @@ public final class AccessibilityManager {
                 mRequestPreparerLists.remove(viewId);
             }
         }
+    }
+
+    /**
+     * Get the recommended timeout for changes to the UI needed by this user. Controls should remain
+     * on the screen for at least this long to give users time to react. Some users may need
+     * extra time to review the controls, or to reach them, or to activate assistive technology
+     * to activate the controls automatically.
+     * <p>
+     * Use the combination of content flags to indicate contents of UI. For example, use
+     * {@code FLAG_CONTENT_ICONS | FLAG_CONTENT_TEXT} for message notification which contains
+     * icons and text, or use {@code FLAG_CONTENT_TEXT | FLAG_CONTENT_CONTROLS} for button dialog
+     * which contains text and button controls.
+     * <p/>
+     *
+     * @param originalTimeout The timeout appropriate for users with no accessibility needs.
+     * @param uiContentFlags The combination of flags {@link #FLAG_CONTENT_ICONS},
+     *                       {@link #FLAG_CONTENT_TEXT} or {@link #FLAG_CONTENT_CONTROLS} to
+     *                       indicate the contents of UI.
+     * @return The recommended UI timeout for the current user in milliseconds.
+     */
+    public int getRecommendedTimeoutMillis(int originalTimeout, @ContentFlag int uiContentFlags) {
+        boolean hasControls = (uiContentFlags & FLAG_CONTENT_CONTROLS) != 0;
+        boolean hasIconsOrText = (uiContentFlags & FLAG_CONTENT_ICONS) != 0
+                || (uiContentFlags & FLAG_CONTENT_TEXT) != 0;
+        int recommendedTimeout = originalTimeout;
+        if (hasControls) {
+            recommendedTimeout = Math.max(recommendedTimeout, mInteractiveUiTimeout);
+        }
+        if (hasIconsOrText) {
+            recommendedTimeout = Math.max(recommendedTimeout, mNonInteractiveUiTimeout);
+        }
+        return recommendedTimeout;
     }
 
     /**
@@ -921,6 +1001,36 @@ public final class AccessibilityManager {
             return service.sendFingerprintGesture(keyCode);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * Returns accessibility window id from window token. Accessibility window id is the one
+     * returned from AccessibilityWindowInfo.getId(). Only available for the system process.
+     *
+     * @param windowToken Window token to find accessibility window id.
+     * @return Accessibility window id for the window token.
+     *   AccessibilityWindowInfo.UNDEFINED_WINDOW_ID if accessibility window id not available for
+     *   the token.
+     * @hide
+     */
+    @SystemApi
+    public int getAccessibilityWindowId(@Nullable IBinder windowToken) {
+        if (windowToken == null) {
+            return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        }
+
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+            }
+        }
+        try {
+            return service.getAccessibilityWindowId(windowToken);
+        } catch (RemoteException e) {
+            return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         }
     }
 
@@ -1036,6 +1146,9 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void performAccessibilityShortcut() {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -1054,9 +1167,10 @@ public final class AccessibilityManager {
     /**
      * Notifies that the accessibility button in the system's navigation area has been clicked
      *
+     * @param displayId The logical display id.
      * @hide
      */
-    public void notifyAccessibilityButtonClicked() {
+    public void notifyAccessibilityButtonClicked(int displayId) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1065,7 +1179,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.notifyAccessibilityButtonClicked();
+            service.notifyAccessibilityButtonClicked(displayId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while dispatching accessibility button click", re);
         }
@@ -1119,6 +1233,30 @@ public final class AccessibilityManager {
         }
     }
 
+    /**
+     * Get the component name of the service currently assigned to the accessibility shortcut.
+     *
+     * @return The flattened component name
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @Nullable
+    public String getAccessibilityShortcutService() {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+        }
+        if (service != null) {
+            try {
+                return service.getAccessibilityShortcutService();
+            } catch (RemoteException re) {
+                re.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);
@@ -1139,6 +1277,7 @@ public final class AccessibilityManager {
             final long userStateAndRelevantEvents = service.addClient(mClient, mUserId);
             setStateLocked(IntPair.first(userStateAndRelevantEvents));
             mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
+            updateUiTimeout(service.getRecommendedTimeoutMillis());
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
@@ -1209,6 +1348,17 @@ public final class AccessibilityManager {
             listeners.valueAt(i).post(() ->
                     listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
+    }
+
+    /**
+     * Update interactive and non-interactive UI timeout.
+     *
+     * @param uiTimeout A pair of {@code int}s. First integer for interactive one, and second
+     *                  integer for non-interactive one.
+     */
+    private void updateUiTimeout(long uiTimeout) {
+        mInteractiveUiTimeout = IntPair.first(uiTimeout);
+        mNonInteractiveUiTimeout = IntPair.second(uiTimeout);
     }
 
     /**

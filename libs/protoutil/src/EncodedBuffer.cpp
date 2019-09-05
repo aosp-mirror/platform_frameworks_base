@@ -208,6 +208,63 @@ EncodedBuffer::writeHeader(uint32_t fieldId, uint8_t wireType)
     return writeRawVarint32((fieldId << FIELD_ID_SHIFT) | wireType);
 }
 
+status_t
+EncodedBuffer::writeRaw(uint8_t const* buf, size_t size)
+{
+    while (size > 0) {
+        uint8_t* target = writeBuffer();
+        if (target == NULL) {
+            return -ENOMEM;
+        }
+        size_t chunk = currentToWrite();
+        if (chunk > size) {
+            chunk = size;
+        }
+        memcpy(target, buf, chunk);
+        size -= chunk;
+        buf += chunk;
+        mWp.move(chunk);
+    }
+    return NO_ERROR;
+}
+
+status_t
+EncodedBuffer::writeRaw(const sp<ProtoReader>& reader)
+{
+    status_t err;
+    uint8_t const* buf;
+    while ((buf = reader->readBuffer()) != nullptr) {
+        size_t amt = reader->currentToRead();
+        err = writeRaw(buf, amt);
+        reader->move(amt);
+        if (err != NO_ERROR) {
+            return err;
+        }
+    }
+    return NO_ERROR;
+}
+
+status_t
+EncodedBuffer::writeRaw(const sp<ProtoReader>& reader, size_t size)
+{
+    status_t err;
+    uint8_t const* buf;
+    while (size > 0 && (buf = reader->readBuffer()) != nullptr) {
+        size_t amt = reader->currentToRead();
+        if (size < amt) {
+            amt = size;
+        }
+        err = writeRaw(buf, amt);
+        reader->move(amt);
+        size -= amt;
+        if (err != NO_ERROR) {
+            return err;
+        }
+    }
+    return size == 0 ? NO_ERROR : NOT_ENOUGH_DATA;
+}
+
+
 /******************************** Edit APIs ************************************************/
 EncodedBuffer::Pointer*
 EncodedBuffer::ep()
@@ -283,66 +340,63 @@ EncodedBuffer::copy(size_t srcPos, size_t size)
 }
 
 /********************************* Read APIs ************************************************/
-EncodedBuffer::iterator
-EncodedBuffer::begin() const
+sp<ProtoReader>
+EncodedBuffer::read()
 {
-    return EncodedBuffer::iterator(*this);
+    return new EncodedBuffer::Reader(this);
 }
 
-EncodedBuffer::iterator::iterator(const EncodedBuffer& buffer)
+EncodedBuffer::Reader::Reader(const sp<EncodedBuffer>& buffer)
         :mData(buffer),
-         mRp(buffer.mChunkSize)
+         mRp(buffer->mChunkSize)
 {
 }
 
-size_t
-EncodedBuffer::iterator::size() const
+EncodedBuffer::Reader::~Reader() {
+}
+
+ssize_t
+EncodedBuffer::Reader::size() const
 {
-    return mData.size();
+    return (ssize_t)mData->size();
 }
 
 size_t
-EncodedBuffer::iterator::bytesRead() const
+EncodedBuffer::Reader::bytesRead() const
 {
     return mRp.pos();
 }
 
-EncodedBuffer::Pointer*
-EncodedBuffer::iterator::rp()
-{
-    return &mRp;
-}
-
 uint8_t const*
-EncodedBuffer::iterator::readBuffer()
+EncodedBuffer::Reader::readBuffer()
 {
-    return hasNext() ? const_cast<uint8_t const*>(mData.at(mRp)) : NULL;
+    return hasNext() ? const_cast<uint8_t const*>(mData->at(mRp)) : NULL;
 }
 
 size_t
-EncodedBuffer::iterator::currentToRead()
+EncodedBuffer::Reader::currentToRead()
 {
-    return (mData.mWp.index() > mRp.index()) ?
-            mData.mChunkSize - mRp.offset() :
-            mData.mWp.offset() - mRp.offset();
+    return (mData->mWp.index() > mRp.index()) ?
+            mData->mChunkSize - mRp.offset() :
+            mData->mWp.offset() - mRp.offset();
 }
 
 bool
-EncodedBuffer::iterator::hasNext()
+EncodedBuffer::Reader::hasNext()
 {
-    return mRp.pos() < mData.mWp.pos();
+    return mRp.pos() < mData->mWp.pos();
 }
 
 uint8_t
-EncodedBuffer::iterator::next()
+EncodedBuffer::Reader::next()
 {
-    uint8_t res = *(mData.at(mRp));
+    uint8_t res = *(mData->at(mRp));
     mRp.move();
     return res;
 }
 
 uint64_t
-EncodedBuffer::iterator::readRawVarint()
+EncodedBuffer::Reader::readRawVarint()
 {
     uint64_t val = 0, shift = 0;
     while (true) {
@@ -352,6 +406,12 @@ EncodedBuffer::iterator::readRawVarint()
         shift += 7;
     }
     return val;
+}
+
+void
+EncodedBuffer::Reader::move(size_t amt)
+{
+    mRp.move(amt);
 }
 
 } // util

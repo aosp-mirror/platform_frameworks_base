@@ -29,8 +29,9 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManager;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 
 /**
  * A utility class to enable the downward swipe on the lockscreen to go to the full shade and expand
@@ -65,7 +66,7 @@ public class DragDownHelper implements Gefingerpoken {
         mCallback = callback;
         mDragDownCallback = dragDownCallback;
         mHost = host;
-        mFalsingManager = FalsingManager.getInstance(context);
+        mFalsingManager = FalsingManagerFactory.getInstance(context);
     }
 
     @Override
@@ -128,10 +129,11 @@ public class DragDownHelper implements Gefingerpoken {
                 }
                 return true;
             case MotionEvent.ACTION_UP:
-                if (!isFalseTouch() && mDragDownCallback.onDraggedDown(mStartingChild,
+                if (!mFalsingManager.isUnlockingDisabled() && !isFalseTouch()
+                        && mDragDownCallback.onDraggedDown(mStartingChild,
                         (int) (y - mInitialTouchY))) {
                     if (mStartingChild == null) {
-                        mDragDownCallback.setEmptyDragAmount(0f);
+                        cancelExpansion();
                     } else {
                         mCallback.setUserLockedChild(mStartingChild, false);
                         mStartingChild = null;
@@ -206,11 +208,8 @@ public class DragDownHelper implements Gefingerpoken {
         ValueAnimator anim = ValueAnimator.ofFloat(mLastHeight, 0);
         anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mDragDownCallback.setEmptyDragAmount((Float) animation.getAnimatedValue());
-            }
+        anim.addUpdateListener(animation -> {
+            mDragDownCallback.setEmptyDragAmount((Float) animation.getAnimatedValue());
         });
         anim.start();
     }

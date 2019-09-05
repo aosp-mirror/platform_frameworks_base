@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -27,18 +28,15 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
 
 import com.android.internal.widget.LockPatternUtils;
 
-import java.lang.Override;
-
 /**
  * Subclass of the current view flipper that allows us to overload dispatchTouchEvent() so
- * we can emulate {@link WindowManager.LayoutParams#FLAG_SLIPPERY} within a view hierarchy.
- *
+ * we can emulate {@link android.view.WindowManager.LayoutParams#FLAG_SLIPPERY} within a view
+ * hierarchy.
  */
 public class KeyguardSecurityViewFlipper extends ViewFlipper implements KeyguardSecurityView {
     private static final String TAG = "KeyguardSecurityViewFlipper";
@@ -139,10 +137,10 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     @Override
-    public void showMessage(CharSequence message, int color) {
+    public void showMessage(CharSequence message, ColorStateList colorState) {
         KeyguardSecurityView ksv = getSecurityView();
         if (ksv != null) {
-            ksv.showMessage(message, color);
+            ksv.showMessage(message, colorState);
         }
     }
 

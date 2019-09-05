@@ -172,14 +172,39 @@
     <assign-permission name="android.permission.DUMP" uid="incidentd" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="incidentd" />
     <assign-permission name="android.permission.INTERACT_ACROSS_USERS" uid="incidentd" />
+    <assign-permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL" uid="incidentd" />
 
     <assign-permission name="android.permission.ACCESS_LOWPAN_STATE" uid="lowpan" />
     <assign-permission name="android.permission.MANAGE_LOWPAN_INTERFACES" uid="lowpan" />
 
+    <assign-permission name="android.permission.BATTERY_STATS" uid="statsd" />
     <assign-permission name="android.permission.DUMP" uid="statsd" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="statsd" />
     <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
+
+    <split-permission name="android.permission.ACCESS_FINE_LOCATION">
+        <new-permission name="android.permission.ACCESS_COARSE_LOCATION" />
+    </split-permission>
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE">
+        <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+    </split-permission>
+    <split-permission name="android.permission.READ_CONTACTS"
+                      targetSdk="16">
+        <new-permission name="android.permission.READ_CALL_LOG" />
+    </split-permission>
+    <split-permission name="android.permission.WRITE_CONTACTS"
+                      targetSdk="16">
+        <new-permission name="android.permission.WRITE_CALL_LOG" />
+    </split-permission>
+    <split-permission name="android.permission.ACCESS_FINE_LOCATION"
+                      targetSdk="29">
+        <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    </split-permission>
+    <split-permission name="android.permission.ACCESS_COARSE_LOCATION"
+                      targetSdk="29">
+        <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    </split-permission>
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->
@@ -187,15 +212,18 @@
     <library name="android.test.base"
             file="/system/framework/android.test.base.jar" />
     <library name="android.test.mock"
-            file="/system/framework/android.test.mock.jar" />
+            file="/system/framework/android.test.mock.jar"
+            dependency="android.test.base" />
     <library name="android.test.runner"
-            file="/system/framework/android.test.runner.jar" />
+            file="/system/framework/android.test.runner.jar"
+            dependency="android.test.base:android.test.mock" />
 
     <!-- In BOOT_JARS historically, and now added to legacy applications. -->
     <library name="android.hidl.base-V1.0-java"
             file="/system/framework/android.hidl.base-V1.0-java.jar" />
     <library name="android.hidl.manager-V1.0-java"
-            file="/system/framework/android.hidl.manager-V1.0-java.jar" />
+            file="/system/framework/android.hidl.manager-V1.0-java.jar"
+            dependency="android.hidl.base-V1.0-java" />
 
     <!-- These are the standard packages that are white-listed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->

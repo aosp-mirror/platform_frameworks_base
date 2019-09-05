@@ -9,14 +9,19 @@ package com.android.location.provider {
   public abstract class LocationProviderBase {
     ctor public LocationProviderBase(String, com.android.location.provider.ProviderPropertiesUnbundled);
     method public android.os.IBinder getBinder();
-    method public abstract void onDisable();
-    method public void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
-    method public abstract void onEnable();
-    method public abstract int onGetStatus(android.os.Bundle);
-    method public abstract long onGetStatusUpdateTime();
-    method public boolean onSendExtraCommand(String, android.os.Bundle);
-    method public abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
-    method public final void reportLocation(android.location.Location);
+    method public boolean isEnabled();
+    method @Deprecated protected void onDisable();
+    method @Deprecated protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
+    method @Deprecated protected void onEnable();
+    method @Deprecated protected int onGetStatus(android.os.Bundle);
+    method @Deprecated protected long onGetStatusUpdateTime();
+    method protected void onInit();
+    method protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
+    method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
+    method public void reportLocation(android.location.Location);
+    method public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
+    method public void setEnabled(boolean);
+    method public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
     field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
     field public static final String FUSED_PROVIDER = "fused";
   }
@@ -26,6 +31,7 @@ package com.android.location.provider {
     method public long getInterval();
     method public int getQuality();
     method public float getSmallestDisplacement();
+    method public boolean isLocationSettingsIgnored();
     field public static final int ACCURACY_BLOCK = 102; // 0x66
     field public static final int ACCURACY_CITY = 104; // 0x68
     field public static final int ACCURACY_FINE = 100; // 0x64
@@ -42,6 +48,7 @@ package com.android.location.provider {
     method public long getInterval();
     method public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
     method public boolean getReportLocation();
+    method public boolean isLocationSettingsIgnored();
   }
 
 }

@@ -42,6 +42,9 @@ public final class SQLiteGlobal {
     /** @hide */
     public static final String SYNC_MODE_FULL = "FULL";
 
+    /** @hide */
+    static final String WIPE_CHECK_FILE_SUFFIX = "-wipecheck";
+
     private static final Object sLock = new Object();
 
     private static int sDefaultPageSize;
@@ -85,16 +88,6 @@ public final class SQLiteGlobal {
         return SystemProperties.get("debug.sqlite.journalmode",
                 Resources.getSystem().getString(
                 com.android.internal.R.string.db_default_journal_mode));
-    }
-
-    /**
-     * Returns true if compatibility WAL mode is supported. In this mode, only
-     * database journal mode is changed. Connection pool will use at most one connection.
-     */
-    public static boolean isCompatibilityWalSupported() {
-        return SystemProperties.getBoolean("debug.sqlite.compatibility_wal_supported",
-                Resources.getSystem().getBoolean(
-                        com.android.internal.R.bool.db_compatibility_wal_supported));
     }
 
     /**
@@ -181,4 +174,8 @@ public final class SQLiteGlobal {
                         com.android.internal.R.integer.db_wal_truncate_size));
     }
 
+    /** @hide */
+    public static boolean checkDbWipe() {
+        return false;
+    }
 }

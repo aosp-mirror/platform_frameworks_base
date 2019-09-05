@@ -53,7 +53,7 @@
                 android:layout_marginTop="@dimen/notification_progress_margin_top"
                 android:layout_marginBottom="6dp"/>
             <com.android.internal.widget.ImageFloatingTextView android:id="@+id/big_text"
-                style="@style/Widget.Material.Notification.Text"
+                style="@style/Widget.DeviceDefault.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/notification_text_margin_top"

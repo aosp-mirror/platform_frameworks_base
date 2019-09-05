@@ -24,7 +24,7 @@
 
     <style name="BorderlessButton">
         <item name="android:padding">12dp</item>
-        <item name="android:background">@drawable/btn_borderless_rect</item>
+        <item name="android:background">@*android:drawable/btn_borderless_rect</item>
         <item name="android:gravity">center</item>
     </style>
 </resources>

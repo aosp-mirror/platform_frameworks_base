@@ -82,6 +82,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -406,6 +407,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
+                StatsLog.write_non_chained(StatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, null,
+                        powerState);
             }
         }
 
@@ -416,6 +419,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
+                StatsLog.write_non_chained(StatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, null,
+                        powerState);
             }
         }
 
@@ -1857,6 +1862,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         return ruleName;
     }
 
+    @GuardedBy("mRulesLock")
     private @NonNull SparseIntArray getUidFirewallRulesLR(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_STANDBY:

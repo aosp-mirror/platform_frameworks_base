@@ -199,7 +199,7 @@ public class Preconditions {
     }
 
     /**
-     * Ensures that that the argument numeric value is non-negative.
+     * Ensures that that the argument numeric value is non-negative (greater than or equal to 0).
      *
      * @param value a numeric int value
      * @param errorMessage the exception message to use if the check fails
@@ -216,7 +216,7 @@ public class Preconditions {
     }
 
     /**
-     * Ensures that that the argument numeric value is non-negative.
+     * Ensures that that the argument numeric value is non-negative (greater than or equal to 0).
      *
      * @param value a numeric int value
      *
@@ -232,7 +232,7 @@ public class Preconditions {
     }
 
     /**
-     * Ensures that that the argument numeric value is non-negative.
+     * Ensures that that the argument numeric value is non-negative (greater than or equal to 0).
      *
      * @param value a numeric long value
      * @return the validated numeric value
@@ -247,7 +247,7 @@ public class Preconditions {
     }
 
     /**
-     * Ensures that that the argument numeric value is non-negative.
+     * Ensures that that the argument numeric value is non-negative (greater than or equal to 0).
      *
      * @param value a numeric long value
      * @param errorMessage the exception message to use if the check fails
@@ -263,7 +263,7 @@ public class Preconditions {
     }
 
     /**
-     * Ensures that that the argument numeric value is positive.
+     * Ensures that that the argument numeric value is positive (greater than 0).
      *
      * @param value a numeric int value
      * @param errorMessage the exception message to use if the check fails
@@ -271,6 +271,36 @@ public class Preconditions {
      * @throws IllegalArgumentException if {@code value} was not positive
      */
     public static int checkArgumentPositive(final int value, final String errorMessage) {
+        if (value <= 0) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+
+        return value;
+    }
+
+    /**
+     * Ensures that the argument floating point value is non-negative (greater than or equal to 0).
+     * @param value a floating point value
+     * @param errorMessage the exteption message to use if the check fails
+     * @return the validated numeric value
+     * @throws IllegalArgumentException if {@code value} was negative
+     */
+    public static float checkArgumentNonNegative(final float value, final String errorMessage) {
+        if (value < 0) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+
+        return value;
+    }
+
+    /**
+     * Ensures that the argument floating point value is positive (greater than 0).
+     * @param value a floating point value
+     * @param errorMessage the exteption message to use if the check fails
+     * @return the validated numeric value
+     * @throws IllegalArgumentException if {@code value} was not positive
+     */
+    public static float checkArgumentPositive(final float value, final String errorMessage) {
         if (value <= 0) {
             throw new IllegalArgumentException(errorMessage);
         }

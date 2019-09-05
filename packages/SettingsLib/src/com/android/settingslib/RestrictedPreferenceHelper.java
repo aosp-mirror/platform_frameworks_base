@@ -16,19 +16,18 @@
 
 package com.android.settingslib;
 
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceViewHolder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.View;
 import android.widget.TextView;
 
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 
 /**
  * Helper class for managing settings preferences that can be disabled
@@ -63,7 +62,7 @@ public class RestrictedPreferenceHelper {
             }
             mAttrUserRestriction = data == null ? null : data.toString();
             // If the system has set the user restriction, then we shouldn't add the padlock.
-            if (RestrictedLockUtils.hasBaseUserRestriction(mContext, mAttrUserRestriction,
+            if (RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext, mAttrUserRestriction,
                     UserHandle.myUserId())) {
                 mAttrUserRestriction = null;
                 return;
@@ -134,7 +133,7 @@ public class RestrictedPreferenceHelper {
      * @param userId user to check the restriction for.
      */
     public void checkRestrictionAndSetDisabled(String userRestriction, int userId) {
-        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                 userRestriction, userId);
         setDisabledByAdmin(admin);
     }

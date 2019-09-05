@@ -44,7 +44,7 @@ public class TvStreamConfig implements Parcelable {
      */
     private int mGeneration;
 
-    public static final Parcelable.Creator<TvStreamConfig> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TvStreamConfig> CREATOR =
             new Parcelable.Creator<TvStreamConfig>() {
         @Override
         public TvStreamConfig createFromParcel(Parcel source) {

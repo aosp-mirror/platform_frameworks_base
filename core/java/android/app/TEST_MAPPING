@@ -1,0 +1,41 @@
+{
+    "imports": [
+        {
+            "path": "frameworks/base/services/core/java/com/android/server/am"
+        },
+        {
+            "path": "frameworks/base/services/core/java/com/android/server/wm"
+        }
+    ],
+    "presubmit": [
+        {
+            "name": "CtsFragmentTestCases"
+        },
+        {
+            "name": "CtsFragmentTestCasesSdk26"
+        },
+        {
+            "file_patterns": ["(/|^)AppOpsManager.java"],
+            "name": "CtsAppOpsTestCases"
+        },
+        {
+            "file_patterns": ["(/|^)AppOpsManager.java"],
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.appop"
+                }
+            ]
+        }
+    ],
+    "postsubmit": [
+        {
+            "file_patterns": ["(/|^)ActivityThreadClientTest.java"],
+            "name": "FrameworksMockingCoreTests"
+        },
+        {
+            "file_patterns": ["(/|^)ActivityThreadTest.java"],
+            "name": "FrameworksCoreTests"
+        }
+    ]
+}

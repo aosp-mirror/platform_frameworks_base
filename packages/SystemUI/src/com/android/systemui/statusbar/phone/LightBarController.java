@@ -16,35 +16,37 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.WallpaperColors;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.View;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Controls how light status bar flag applies to the icons.
  */
+@Singleton
 public class LightBarController implements BatteryController.BatteryStateChangeCallback, Dumpable {
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
-    private final DarkIconDispatcher mStatusBarIconController;
+    private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
-    private FingerprintUnlockController mFingerprintUnlockController;
+    private BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
     private int mSystemUiVisibility;
@@ -77,10 +79,15 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Rect mLastDockedBounds = new Rect();
     private boolean mQsCustomizing;
 
-    public LightBarController(Context ctx) {
+    private boolean mDirectReplying;
+    private boolean mNavbarColorManagedByIme;
+
+    @Inject
+    public LightBarController(Context ctx, DarkIconDispatcher darkIconDispatcher,
+            BatteryController batteryController) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
-        mStatusBarIconController = Dependency.get(DarkIconDispatcher.class);
-        mBatteryController = Dependency.get(BatteryController.class);
+        mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
+        mBatteryController = batteryController;
         mBatteryController.addCallback(this);
     }
 
@@ -89,14 +96,14 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         updateNavigation();
     }
 
-    public void setFingerprintUnlockController(
-            FingerprintUnlockController fingerprintUnlockController) {
-        mFingerprintUnlockController = fingerprintUnlockController;
+    public void setBiometricUnlockController(
+            BiometricUnlockController biometricUnlockController) {
+        mBiometricUnlockController = biometricUnlockController;
     }
 
     public void onSystemUiVisibilityChanged(int fullscreenStackVis, int dockedStackVis,
             int mask, Rect fullscreenStackBounds, Rect dockedStackBounds, boolean sbModeChanged,
-            int statusBarMode) {
+            int statusBarMode, boolean navbarColorManagedByIme) {
         int oldFullscreen = mFullscreenStackVisibility;
         int newFullscreen = (oldFullscreen & ~mask) | (fullscreenStackVis & mask);
         int diffFullscreen = newFullscreen ^ oldFullscreen;
@@ -118,12 +125,13 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         mFullscreenStackVisibility = newFullscreen;
         mDockedStackVisibility = newDocked;
         mLastStatusBarMode = statusBarMode;
+        mNavbarColorManagedByIme = navbarColorManagedByIme;
         mLastFullscreenBounds.set(fullscreenStackBounds);
         mLastDockedBounds.set(dockedStackBounds);
     }
 
     public void onNavigationVisibilityChanged(int vis, int mask, boolean nbModeChanged,
-            int navigationBarMode) {
+            int navigationBarMode, boolean navbarColorManagedByIme) {
         int oldVis = mSystemUiVisibility;
         int newVis = (oldVis & ~mask) | (vis & mask);
         int diffVis = newVis ^ oldVis;
@@ -132,26 +140,39 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             boolean last = mNavigationLight;
             mHasLightNavigationBar = isLight(vis, navigationBarMode,
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            mNavigationLight = mHasLightNavigationBar && !mForceDarkForScrim && !mQsCustomizing;
+            mNavigationLight = mHasLightNavigationBar
+                    && (mDirectReplying && mNavbarColorManagedByIme || !mForceDarkForScrim)
+                    && !mQsCustomizing;
             if (mNavigationLight != last) {
                 updateNavigation();
             }
         }
         mSystemUiVisibility = newVis;
         mLastNavigationBarMode = navigationBarMode;
+        mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
     private void reevaluate() {
         onSystemUiVisibilityChanged(mFullscreenStackVisibility,
                 mDockedStackVisibility, 0 /* mask */, mLastFullscreenBounds, mLastDockedBounds,
-                true /* sbModeChange*/, mLastStatusBarMode);
+                true /* sbModeChange*/, mLastStatusBarMode, mNavbarColorManagedByIme);
         onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */, true /* nbModeChanged */,
-                mLastNavigationBarMode);
+                mLastNavigationBarMode, mNavbarColorManagedByIme);
     }
 
     public void setQsCustomizing(boolean customizing) {
         if (mQsCustomizing == customizing) return;
         mQsCustomizing = customizing;
+        reevaluate();
+    }
+
+    /**
+     * Sets whether the direct-reply is in use or not.
+     * @param directReplying {@code true} when the direct-reply is in-use.
+     */
+    public void setDirectReplying(boolean directReplying) {
+        if (mDirectReplying == directReplying) return;
+        mDirectReplying = directReplying;
         reevaluate();
     }
 
@@ -178,12 +199,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     }
 
     private boolean animateChange() {
-        if (mFingerprintUnlockController == null) {
+        if (mBiometricUnlockController == null) {
             return false;
         }
-        int unlockMode = mFingerprintUnlockController.getMode();
-        return unlockMode != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
-                && unlockMode != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
+        int unlockMode = mBiometricUnlockController.getMode();
+        return unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
+                && unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
     }
 
     private void updateStatus(Rect fullscreenStackBounds, Rect dockedStackBounds) {
@@ -256,7 +277,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         pw.print(" mLastNavigationBarMode="); pw.println(mLastNavigationBarMode);
 
         pw.print(" mForceDarkForScrim="); pw.print(mForceDarkForScrim);
-        pw.print(" mQsCustomizing="); pw.println(mQsCustomizing);
+        pw.print(" mQsCustomizing="); pw.print(mQsCustomizing);
+        pw.print(" mDirectReplying="); pw.println(mDirectReplying);
+        pw.print(" mNavbarColorManagedByIme="); pw.println(mNavbarColorManagedByIme);
 
         pw.println();
 

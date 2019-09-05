@@ -800,7 +800,7 @@ public final class SearchableInfo implements Parcelable {
     /**
      * Support for parcelable and aidl operations.
      */
-    public static final Parcelable.Creator<SearchableInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<SearchableInfo> CREATOR
     = new Parcelable.Creator<SearchableInfo>() {
         public SearchableInfo createFromParcel(Parcel in) {
             return new SearchableInfo(in);

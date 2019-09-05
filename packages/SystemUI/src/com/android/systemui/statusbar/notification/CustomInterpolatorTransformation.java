@@ -17,15 +17,10 @@
 package com.android.systemui.statusbar.notification;
 
 import android.view.View;
-import android.view.animation.Interpolator;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
-
-import static com.android.systemui.statusbar.TransformableView.TRANSFORMING_VIEW_TITLE;
-import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
 /**
  * A custom transformation that modifies the interpolator

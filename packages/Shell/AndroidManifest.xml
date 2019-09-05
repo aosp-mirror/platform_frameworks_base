@@ -22,8 +22,10 @@
         android:sharedUserId="android.uid.shell"
         >
 
-    <!-- Standard permissions granted to the shell. -->
+        <!-- Standard permissions granted to the shell. -->
+    <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
@@ -51,10 +53,13 @@
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
+    <uses-permission android:name="android.permission.REMOVE_TASKS" />
     <uses-permission android:name="android.permission.SET_ANIMATION_SCALE" />
     <uses-permission android:name="android.permission.SET_PREFERRED_APPLICATIONS" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
     <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
     <!-- Development tool permissions granted to the shell. -->
@@ -81,9 +86,12 @@
     <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
     <uses-permission android:name="android.permission.DELETE_CACHE_FILES" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.MANAGE_ROLLBACKS" />
+    <uses-permission android:name="android.permission.TEST_MANAGE_ROLLBACKS" />
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
+    <uses-permission android:name="android.permission.POWER_SAVER" />
     <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
     <uses-permission android:name="android.permission.BACKUP" />
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
@@ -92,6 +100,7 @@
     <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS" />
+    <uses-permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS" />
     <uses-permission android:name="android.permission.SET_KEYBOARD_LAYOUT" />
     <uses-permission android:name="android.permission.GET_DETAILED_TASKS" />
     <uses-permission android:name="android.permission.SET_SCREEN_COMPATIBILITY" />
@@ -127,10 +136,14 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
+    <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
     <uses-permission android:name="android.permission.ACTIVITY_EMBEDDING" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="android.permission.MANAGE_AUTO_FILL" />
+    <uses-permission android:name="android.permission.MANAGE_CONTENT_CAPTURE" />
+    <uses-permission android:name="android.permission.MANAGE_CONTENT_SUGGESTIONS" />
+    <uses-permission android:name="android.permission.MANAGE_APP_PREDICTIONS" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.SET_TIME" />
@@ -138,8 +151,11 @@
     <uses-permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS" />
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
     <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+    <uses-permission android:name="android.permission.STATUS_BAR" />
     <!-- Permission needed to rename bugreport notifications (so they're not shown as Shell) -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
+    <uses-permission android:name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
     <!-- Permission needed to hold a wakelock in dumpstate.cpp (drop_root_user()) -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Permission needed to enable/disable overlays -->
@@ -151,26 +167,47 @@
     <uses-permission android:name="android.permission.MANAGE_SENSORS" />
     <uses-permission android:name="android.permission.MANAGE_AUDIO_POLICY" />
     <uses-permission android:name="android.permission.MANAGE_CAMERA" />
-    <!-- Permission needed to enable/disable Bluetooth/Wifi when on permission review mode -->
-    <uses-permission
-        android:name="android.permission.MANAGE_BLUETOOTH_WHEN_PERMISSION_REVIEW_REQUIRED" />
-    <uses-permission
-        android:name="android.permission.MANAGE_WIFI_WHEN_PERMISSION_REVIEW_REQUIRED" />
-    <uses-permission android:name="android.permission.WATCH_APPOPS" />
+    <!-- Permission needed to enable/disable Bluetooth/Wifi -->
+    <uses-permission android:name="android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED" />
+    <uses-permission android:name="android.permission.MANAGE_WIFI_WHEN_WIRELESS_CONSENT_REQUIRED" />
+    <!-- Permission needed to invoke DynamicSystem (AOT) -->
+    <uses-permission android:name="android.permission.INSTALL_DYNAMIC_SYSTEM" />
+
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
+    <uses-permission android:name="android.permission.SUSPEND_APPS" />
+    <uses-permission android:name="android.permission.OBSERVE_APP_USAGE" />
+    <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
+    <!-- Permission needed to wipe the device for Test Harness Mode -->
+    <uses-permission android:name="android.permission.ENABLE_TEST_HARNESS_MODE" />
+
+    <uses-permission android:name="android.permission.MANAGE_APPOPS" />
 
     <!-- Permission needed to run network tests in CTS -->
     <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
     <!-- Permission needed to test tcp keepalive offload. -->
     <uses-permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
 
+    <!-- Permission needed to run keyguard manager tests in CTS -->
+    <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
+
+    <!-- Permission needed to test wallpaper component -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_COMPONENT" />
+
     <!-- Permission required to test ContentResolver caching. -->
     <uses-permission android:name="android.permission.CACHE_CONTENT" />
 
+    <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
+    <uses-permission android:name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE" />
+    
+    <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
+
     <application android:label="@string/app_label"
-                 android:defaultToDeviceProtectedStorage="true"
-                 android:directBootAware="true">
+                android:theme="@android:style/Theme.DeviceDefault.DayNight"
+                android:defaultToDeviceProtectedStorage="true"
+                android:directBootAware="true">
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.shell"
@@ -195,7 +232,6 @@
 
         <activity
             android:name=".BugreportWarningActivity"
-            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />

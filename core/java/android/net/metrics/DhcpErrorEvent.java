@@ -94,7 +94,7 @@ public final class DhcpErrorEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<DhcpErrorEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<DhcpErrorEvent> CREATOR
         = new Parcelable.Creator<DhcpErrorEvent>() {
         public DhcpErrorEvent createFromParcel(Parcel in) {
             return new DhcpErrorEvent(in);

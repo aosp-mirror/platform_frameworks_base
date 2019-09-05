@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -27,26 +29,33 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
+import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.R;
+import com.android.systemui.util.Utils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
-import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 
 /** Platform implementation of the cast controller. **/
+@Singleton
 public class CastControllerImpl implements CastController {
     private static final String TAG = "CastController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
+    @GuardedBy("mCallbacks")
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final MediaRouter mMediaRouter;
     private final ArrayMap<String, RouteInfo> mRoutes = new ArrayMap<>();
@@ -58,9 +67,11 @@ public class CastControllerImpl implements CastController {
     private boolean mCallbackRegistered;
     private MediaProjectionInfo mProjection;
 
+    @Inject
     public CastControllerImpl(Context context) {
         mContext = context;
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mMediaRouter.setRouterGroupId(MediaRouter.MIRRORING_GROUP_ID);
         mProjectionManager = (MediaProjectionManager)
                 context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mProjection = mProjectionManager.getActiveProjectionInfo();
@@ -72,7 +83,7 @@ public class CastControllerImpl implements CastController {
         pw.println("CastController state:");
         pw.print("  mDiscovering="); pw.println(mDiscovering);
         pw.print("  mCallbackRegistered="); pw.println(mCallbackRegistered);
-        pw.print("  mCallbacks.size="); pw.println(mCallbacks.size());
+        pw.print("  mCallbacks.size="); synchronized (mCallbacks) {pw.println(mCallbacks.size());}
         pw.print("  mRoutes.size="); pw.println(mRoutes.size());
         for (int i = 0; i < mRoutes.size(); i++) {
             final RouteInfo route = mRoutes.valueAt(i);
@@ -83,7 +94,9 @@ public class CastControllerImpl implements CastController {
 
     @Override
     public void addCallback(Callback callback) {
-        mCallbacks.add(callback);
+        synchronized (mCallbacks) {
+            mCallbacks.add(callback);
+        }
         fireOnCastDevicesChanged(callback);
         synchronized (mDiscoveringLock) {
             handleDiscoveryChangeLocked();
@@ -92,7 +105,9 @@ public class CastControllerImpl implements CastController {
 
     @Override
     public void removeCallback(Callback callback) {
-        mCallbacks.remove(callback);
+        synchronized (mCallbacks) {
+            mCallbacks.remove(callback);
+        }
         synchronized (mDiscoveringLock) {
             handleDiscoveryChangeLocked();
         }
@@ -117,10 +132,16 @@ public class CastControllerImpl implements CastController {
             mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
                     MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
             mCallbackRegistered = true;
-        } else if (mCallbacks.size() != 0) {
-            mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
-                    MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
-            mCallbackRegistered = true;
+        } else {
+            boolean hasCallbacks = false;
+            synchronized (mCallbacks) {
+                hasCallbacks = mCallbacks.isEmpty();
+            }
+            if (!hasCallbacks) {
+                mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
+                        MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
+                mCallbackRegistered = true;
+            }
         }
     }
 
@@ -130,8 +151,31 @@ public class CastControllerImpl implements CastController {
     }
 
     @Override
-    public Set<CastDevice> getCastDevices() {
-        final ArraySet<CastDevice> devices = new ArraySet<CastDevice>();
+    public List<CastDevice> getCastDevices() {
+        final ArrayList<CastDevice> devices = new ArrayList<>();
+        synchronized(mRoutes) {
+            for (RouteInfo route : mRoutes.values()) {
+                final CastDevice device = new CastDevice();
+                device.id = route.getTag().toString();
+                final CharSequence name = route.getName(mContext);
+                device.name = name != null ? name.toString() : null;
+                final CharSequence description = route.getDescription();
+                device.description = description != null ? description.toString() : null;
+
+                int statusCode = route.getStatusCode();
+                if (statusCode == RouteInfo.STATUS_CONNECTING) {
+                    device.state = CastDevice.STATE_CONNECTING;
+                } else if (route.isSelected() || statusCode == RouteInfo.STATUS_CONNECTED) {
+                    device.state = CastDevice.STATE_CONNECTED;
+                } else {
+                    device.state = CastDevice.STATE_DISCONNECTED;
+                }
+
+                device.tag = route;
+                devices.add(device);
+            }
+        }
+
         synchronized (mProjectionLock) {
             if (mProjection != null) {
                 final CastDevice device = new CastDevice();
@@ -141,24 +185,9 @@ public class CastControllerImpl implements CastController {
                 device.state = CastDevice.STATE_CONNECTED;
                 device.tag = mProjection;
                 devices.add(device);
-                return devices;
             }
         }
-        synchronized(mRoutes) {
-            for (RouteInfo route : mRoutes.values()) {
-                final CastDevice device = new CastDevice();
-                device.id = route.getTag().toString();
-                final CharSequence name = route.getName(mContext);
-                device.name = name != null ? name.toString() : null;
-                final CharSequence description = route.getDescription();
-                device.description = description != null ? description.toString() : null;
-                device.state = route.isConnecting() ? CastDevice.STATE_CONNECTING
-                        : route.isSelected() ? CastDevice.STATE_CONNECTED
-                        : CastDevice.STATE_DISCONNECTED;
-                device.tag = route;
-                devices.add(device);
-            }
-        }
+
         return devices;
     }
 
@@ -207,6 +236,10 @@ public class CastControllerImpl implements CastController {
 
     private String getAppName(String packageName) {
         final PackageManager pm = mContext.getPackageManager();
+        if (Utils.isHeadlessRemoteDisplayProvider(pm, packageName)) {
+            return "";
+        }
+
         try {
             final ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
             if (appInfo != null) {
@@ -248,11 +281,16 @@ public class CastControllerImpl implements CastController {
         }
     }
 
-    private void fireOnCastDevicesChanged() {
-        for (Callback callback : mCallbacks) {
-            fireOnCastDevicesChanged(callback);
+    @VisibleForTesting
+    void fireOnCastDevicesChanged() {
+        synchronized (mCallbacks) {
+            for (Callback callback : mCallbacks) {
+                fireOnCastDevicesChanged(callback);
+            }
+
         }
     }
+
 
     private void fireOnCastDevicesChanged(Callback callback) {
         callback.onCastDevicesChanged();

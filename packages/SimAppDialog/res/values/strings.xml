@@ -32,4 +32,6 @@
     <string name="install_carrier_app_defer_action">Not now</string>
     <!-- Name of the button for downloading the carrier app [CHAR LIMIT=25] -->
     <string name="install_carrier_app_download_action">Download app</string>
+    <!-- Empty placeholder string for an illustration content description that is supplied via resource overlay. [DO NOT TRANSLATE] -->
+    <string name="install_carrier_app_image_content_description" translatable="false" />
 </resources>

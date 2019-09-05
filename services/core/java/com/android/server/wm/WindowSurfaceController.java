@@ -18,35 +18,30 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
+import static android.view.SurfaceControl.METADATA_OWNER_UID;
+import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.IBinder;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.Trace;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowContentFrameStats;
-import android.view.Surface.OutOfResourcesException;
 
-import android.util.Slog;
-
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 class WindowSurfaceController {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowSurfaceController" : TAG_WM;
@@ -61,6 +56,7 @@ class WindowSurfaceController {
     private float mSurfaceY = 0;
     private int mSurfaceW = 0;
     private int mSurfaceH = 0;
+    private Rect mSurfaceCrop = new Rect(0, 0, -1, -1);
 
     // Initialize to the identity matrix.
     private float mLastDsdx = 1;
@@ -106,10 +102,11 @@ class WindowSurfaceController {
         final SurfaceControl.Builder b = win.makeSurface()
                 .setParent(win.getSurfaceControl())
                 .setName(name)
-                .setSize(w, h)
+                .setBufferSize(w, h)
                 .setFormat(format)
                 .setFlags(flags)
-                .setMetadata(windowType, ownerUid);
+                .setMetadata(METADATA_WINDOW_TYPE, windowType)
+                .setMetadata(METADATA_OWNER_UID, ownerUid);
         mSurfaceControl = b.build();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -165,7 +162,7 @@ class WindowSurfaceController {
         }
         try {
             if (mSurfaceControl != null) {
-                mSurfaceControl.destroy();
+                mSurfaceControl.remove();
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error destroying surface in: " + this, e);
@@ -175,26 +172,15 @@ class WindowSurfaceController {
         }
     }
 
-    void disconnectInTransaction() {
-        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-            Slog.i(TAG, "Disconnecting client: " + this);
-        }
-
-        try {
-            if (mSurfaceControl != null) {
-                mSurfaceControl.disconnect();
-            }
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error disconnecting surface in: " + this, e);
-        }
-    }
-
     void setCropInTransaction(Rect clipRect, boolean recoveringMemory) {
         if (SHOW_TRANSACTIONS) logSurface(
                 "CROP " + clipRect.toShortString(), null);
         try {
             if (clipRect.width() > 0 && clipRect.height() > 0) {
-                mSurfaceControl.setWindowCrop(clipRect);
+                if (!clipRect.equals(mSurfaceCrop)) {
+                    mSurfaceControl.setWindowCrop(clipRect);
+                    mSurfaceCrop.set(clipRect);
+                }
                 mHiddenForCrop = false;
                 updateVisibility();
             } else {
@@ -216,28 +202,16 @@ class WindowSurfaceController {
                 "CLEAR CROP", null);
         try {
             Rect clipRect = new Rect(0, 0, -1, -1);
+            if (mSurfaceCrop.equals(clipRect)) {
+                return;
+            }
             mSurfaceControl.setWindowCrop(clipRect);
+            mSurfaceCrop.set(clipRect);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error setting clearing crop of " + this, e);
             if (!recoveringMemory) {
                 mAnimator.reclaimSomeSurfaceMemory("crop", true);
             }
-        }
-    }
-
-    void setFinalCropInTransaction(Rect clipRect) {
-        if (SHOW_TRANSACTIONS) logSurface(
-                "FINAL CROP " + clipRect.toShortString(), null);
-        try {
-            mSurfaceControl.setFinalCrop(clipRect);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error disconnecting surface in: " + this, e);
-        }
-    }
-
-    void setLayerStackInTransaction(int layerStack) {
-        if (mSurfaceControl != null) {
-            mSurfaceControl.setLayerStack(layerStack);
         }
     }
 
@@ -313,7 +287,7 @@ class WindowSurfaceController {
         }
     }
 
-    boolean setSizeInTransaction(int width, int height, boolean recoveringMemory) {
+    boolean setBufferSizeInTransaction(int width, int height, boolean recoveringMemory) {
         final boolean surfaceResized = mSurfaceW != width || mSurfaceH != height;
         if (surfaceResized) {
             mSurfaceW = width;
@@ -322,7 +296,7 @@ class WindowSurfaceController {
             try {
                 if (SHOW_TRANSACTIONS) logSurface(
                         "SIZE " + width + "x" + height, null);
-                mSurfaceControl.setSize(width, height);
+                mSurfaceControl.setBufferSize(width, height);
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
                 // as running out of memory), don't take down the
@@ -413,6 +387,28 @@ class WindowSurfaceController {
         }
     }
 
+    void setColorSpaceAgnostic(boolean agnostic) {
+        if (SHOW_TRANSACTIONS) {
+            logSurface("isColorSpaceAgnostic=" + agnostic, null);
+        }
+
+        if (mSurfaceControl == null) {
+            return;
+        }
+        if (SHOW_LIGHT_TRANSACTIONS) {
+            Slog.i(TAG, ">>> OPEN TRANSACTION setColorSpaceAgnosticLocked");
+        }
+        mService.openSurfaceTransaction();
+        try {
+            mSurfaceControl.setColorSpaceAgnostic(agnostic);
+        } finally {
+            mService.closeSurfaceTransaction("setColorSpaceAgnostic");
+            if (SHOW_LIGHT_TRANSACTIONS) {
+                Slog.i(TAG, "<<< CLOSE TRANSACTION setColorSpaceAgnosticLocked");
+            }
+        }
+    }
+
     void getContainerRect(Rect rect) {
         mAnimator.getContainerRect(rect);
     }
@@ -494,8 +490,8 @@ class WindowSurfaceController {
         return mSurfaceControl.getHandle();
     }
 
-    void getSurface(Surface outSurface) {
-        outSurface.copyFrom(mSurfaceControl);
+    void getSurfaceControl(SurfaceControl outSurfaceControl) {
+        outSurfaceControl.copyFrom(mSurfaceControl);
     }
 
     int getLayer() {

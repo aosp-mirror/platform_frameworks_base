@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import dalvik.system.VMRuntime;
+
 /**
  * A listener class for monitoring changes in specific telephony states
  * on the device, including service state, signal strength, message
@@ -402,8 +404,12 @@ public class PhoneStateListener {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Integer subId) {
         this(subId, Looper.myLooper());
+        if (subId != null && VMRuntime.getRuntime().getTargetSdkVersion()
+                >= Build.VERSION_CODES.Q) {
+            throw new IllegalArgumentException("PhoneStateListener with subId: "
+                    + subId + " is not supported, use default constructor");
+        }
     }
-
     /**
      * Create a PhoneStateListener for the Phone using the specified subscription
      * and non-null Looper.
@@ -412,6 +418,11 @@ public class PhoneStateListener {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Integer subId, Looper looper) {
         this(subId, new HandlerExecutor(new Handler(looper)));
+        if (subId != null && VMRuntime.getRuntime().getTargetSdkVersion()
+                >= Build.VERSION_CODES.Q) {
+            throw new IllegalArgumentException("PhoneStateListener with subId: "
+                    + subId + " is not supported, use default constructor");
+        }
     }
 
     /**

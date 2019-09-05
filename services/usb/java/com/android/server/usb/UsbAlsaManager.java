@@ -35,7 +35,9 @@ import com.android.server.usb.descriptors.UsbDescriptorParser;
 import libcore.io.IoUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * UsbAlsaManager manages USB audio and MIDI devices.
@@ -43,6 +45,10 @@ import java.util.HashMap;
 public final class UsbAlsaManager {
     private static final String TAG = UsbAlsaManager.class.getSimpleName();
     private static final boolean DEBUG = false;
+
+    // Flag to turn on/off multi-peripheral select mode
+    // Set to true to have single-device-only mode
+    private static final boolean mIsSingleMode = true;
 
     private static final String ALSA_DIRECTORY = "/dev/snd/";
 
@@ -56,6 +62,50 @@ public final class UsbAlsaManager {
     // ALSA device when we are notified that its associated USB device has been removed.
     private final ArrayList<UsbAlsaDevice> mAlsaDevices = new ArrayList<UsbAlsaDevice>();
     private UsbAlsaDevice mSelectedDevice;
+
+    //
+    // Device Blacklist
+    //
+    // This exists due to problems with Sony game controllers which present as an audio device
+    // even if no headset is connected and have no way to set the volume on the unit.
+    // Handle this by simply declining to use them as an audio device.
+    private static final int USB_VENDORID_SONY = 0x054C;
+    private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT1 = 0x05C4;
+    private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT2 = 0x09CC;
+
+    private static final int USB_BLACKLIST_OUTPUT = 0x0001;
+    private static final int USB_BLACKLIST_INPUT  = 0x0002;
+
+    private static class BlackListEntry {
+        final int mVendorId;
+        final int mProductId;
+        final int mFlags;
+
+        BlackListEntry(int vendorId, int productId, int flags) {
+            mVendorId = vendorId;
+            mProductId = productId;
+            mFlags = flags;
+        }
+    }
+
+    static final List<BlackListEntry> sDeviceBlacklist = Arrays.asList(
+            new BlackListEntry(USB_VENDORID_SONY,
+                    USB_PRODUCTID_PS4CONTROLLER_ZCT1,
+                    USB_BLACKLIST_OUTPUT),
+            new BlackListEntry(USB_VENDORID_SONY,
+                    USB_PRODUCTID_PS4CONTROLLER_ZCT2,
+                    USB_BLACKLIST_OUTPUT));
+
+    private static boolean isDeviceBlacklisted(int vendorId, int productId, int flags) {
+        for (BlackListEntry entry : sDeviceBlacklist) {
+            if (entry.mVendorId == vendorId && entry.mProductId == productId) {
+                // see if the type flag is set
+                return (entry.mFlags & flags) != 0;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * List of connected MIDI devices
@@ -84,10 +134,11 @@ public final class UsbAlsaManager {
      */
     private synchronized void selectAlsaDevice(UsbAlsaDevice alsaDevice) {
         if (DEBUG) {
-            Slog.d(TAG, "selectAlsaDevice " + alsaDevice);
+            Slog.d(TAG, "selectAlsaDevice() " + alsaDevice);
         }
 
-        if (mSelectedDevice != null) {
+        // This must be where an existing USB audio device is deselected.... (I think)
+        if (mIsSingleMode && mSelectedDevice != null) {
             deselectAlsaDevice();
         }
 
@@ -104,9 +155,15 @@ public final class UsbAlsaManager {
 
         mSelectedDevice = alsaDevice;
         alsaDevice.start();
+        if (DEBUG) {
+            Slog.d(TAG, "selectAlsaDevice() - done.");
+        }
     }
 
     private synchronized void deselectAlsaDevice() {
+        if (DEBUG) {
+            Slog.d(TAG, "deselectAlsaDevice() mSelectedDevice " + mSelectedDevice);
+        }
         if (mSelectedDevice != null) {
             mSelectedDevice.stop();
             mSelectedDevice = null;
@@ -133,7 +190,7 @@ public final class UsbAlsaManager {
 
     /* package */ UsbAlsaDevice selectDefaultDevice() {
         if (DEBUG) {
-            Slog.d(TAG, "UsbAudioManager.selectDefaultDevice()");
+            Slog.d(TAG, "selectDefaultDevice()");
         }
 
         if (mAlsaDevices.size() > 0) {
@@ -168,8 +225,12 @@ public final class UsbAlsaManager {
         }
 
         // Add it to the devices list
-        boolean hasInput = parser.hasInput();
-        boolean hasOutput = parser.hasOutput();
+        boolean hasInput = parser.hasInput()
+                && !isDeviceBlacklisted(usbDevice.getVendorId(), usbDevice.getProductId(),
+                        USB_BLACKLIST_INPUT);
+        boolean hasOutput = parser.hasOutput()
+                && !isDeviceBlacklisted(usbDevice.getVendorId(), usbDevice.getProductId(),
+                        USB_BLACKLIST_OUTPUT);
         if (DEBUG) {
             Slog.d(TAG, "hasInput: " + hasInput + " hasOutput:" + hasOutput);
         }
@@ -230,6 +291,8 @@ public final class UsbAlsaManager {
             }
         }
 
+        logDevices("deviceAdded()");
+
         if (DEBUG) {
             Slog.d(TAG, "deviceAdded() - done");
         }
@@ -254,6 +317,9 @@ public final class UsbAlsaManager {
             Slog.i(TAG, "USB MIDI Device Removed: " + usbMidiDevice);
             IoUtils.closeQuietly(usbMidiDevice);
         }
+
+        logDevices("usbDeviceRemoved()");
+
     }
 
    /* package */ void setPeripheralMidiState(boolean enabled, int card, int device) {
@@ -296,6 +362,7 @@ public final class UsbAlsaManager {
     /**
      * Dump the USB alsa state.
      */
+    // invoked with "adb shell dumpsys usb"
     public void dump(DualDumpOutputStream dump, String idName, long id) {
         long token = dump.start(idName, id);
 
@@ -314,29 +381,26 @@ public final class UsbAlsaManager {
         dump.end(token);
     }
 
-/*
     public void logDevicesList(String title) {
-      if (DEBUG) {
-          for (HashMap.Entry<UsbDevice,UsbAlsaDevice> entry : mAudioDevices.entrySet()) {
-              Slog.i(TAG, "UsbDevice-------------------");
-              Slog.i(TAG, "" + (entry != null ? entry.getKey() : "[none]"));
-              Slog.i(TAG, "UsbAlsaDevice--------------");
-              Slog.i(TAG, "" + entry.getValue());
-          }
-      }
+        if (DEBUG) {
+            Slog.i(TAG, title + "----------------");
+            for (UsbAlsaDevice alsaDevice : mAlsaDevices) {
+                Slog.i(TAG, "  -->");
+                Slog.i(TAG, "" + alsaDevice);
+                Slog.i(TAG, "  <--");
+            }
+            Slog.i(TAG, "----------------");
+        }
     }
-*/
 
     // This logs a more terse (and more readable) version of the devices list
-/*
     public void logDevices(String title) {
-      if (DEBUG) {
-          Slog.i(TAG, title);
-          for (HashMap.Entry<UsbDevice,UsbAlsaDevice> entry : mAudioDevices.entrySet()) {
-              Slog.i(TAG, entry.getValue().toShortString());
-          }
-      }
+        if (DEBUG) {
+            Slog.i(TAG, title + "----------------");
+            for (UsbAlsaDevice alsaDevice : mAlsaDevices) {
+                Slog.i(TAG, alsaDevice.toShortString());
+            }
+            Slog.i(TAG, "----------------");
+        }
     }
-*/
-
 }

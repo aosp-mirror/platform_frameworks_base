@@ -19,29 +19,40 @@
     android:id="@+id/quick_qs_status_icons"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="14dp"
-    android:layout_marginStart="@dimen/status_bar_padding_start"
-    android:layout_marginEnd="@dimen/status_bar_padding_end"
+    android:paddingTop="@dimen/qs_header_top_padding"
+    android:paddingBottom="@dimen/qs_header_bottom_padding"
+    android:paddingStart="@dimen/status_bar_padding_start"
+    android:paddingEnd="@dimen/status_bar_padding_end"
     android:layout_below="@id/quick_status_bar_system_icons"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:minHeight="20dp" >
+    android:minHeight="20dp"
+    android:clickable="false"
+    android:focusable="true"
+    android:theme="@style/QSHeaderTheme">
 
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
+        android:layout_gravity="start|center_vertical"
         android:gravity="center_vertical"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.QS.TileLabel"
+        android:textAppearance="@style/TextAppearance.QS.Status"
         systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:paddingEnd="@dimen/signal_cluster_battery_padding" />
+
+    <com.android.systemui.BatteryMeterView
+        android:id="@+id/batteryRemainingIcon"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        systemui:textAppearance="@style/TextAppearance.QS.Status"
+        android:paddingEnd="2dp" />
 
 </LinearLayout>

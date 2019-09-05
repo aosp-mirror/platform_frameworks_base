@@ -28,7 +28,7 @@
                  android:allowBackup="false">
 
         <activity android:name=".ConfirmDialog"
-                  android:theme="@android:style/Theme.Material.Light.Dialog.Alert">
+                  android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -36,7 +36,7 @@
         </activity>
 
         <activity android:name=".ManageDialog"
-                  android:theme="@android:style/Theme.Material.Light.Dialog.Alert"
+                  android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:noHistory="true"
                   android:excludeFromRecents="true"
                   android:permission="android.permission.NETWORK_SETTINGS"
@@ -45,7 +45,7 @@
 
         <activity android:name=".AlwaysOnDisconnectedDialog"
                   android:label="@string/always_on_disconnected_title"
-                  android:theme="@android:style/Theme.Material.Light.Dialog.Alert"
+                  android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:noHistory="true"
                   android:excludeFromRecents="true"
                   android:permission="android.permission.NETWORK_SETTINGS"

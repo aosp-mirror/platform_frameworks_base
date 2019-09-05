@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources.Theme;
@@ -35,15 +36,17 @@ import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 
 /**
@@ -126,7 +129,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private boolean mDropDownDismissedOnCompletion = true;
 
     private int mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-    private boolean mOpenBefore;
+    private MyWatcher mAutoCompleteTextWatcher;
 
     private Validator mValidator = null;
 
@@ -227,6 +230,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context,  R.styleable.AutoCompleteTextView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         if (popupTheme != null) {
             mPopupContext = new ContextThemeWrapper(context, popupTheme);
@@ -245,6 +250,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (mPopupContext != context) {
             pa = mPopupContext.obtainStyledAttributes(
                     attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
+            saveAttributeDataForStyleable(context, R.styleable.AutoCompleteTextView,
+                    attrs, a, defStyleAttr, defStyleRes);
         } else {
             pa = a;
         }
@@ -302,7 +309,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         setFocusable(true);
 
-        addTextChangedListener(new MyWatcher());
+        mAutoCompleteTextWatcher = new MyWatcher();
+        addTextChangedListener(mAutoCompleteTextWatcher);
 
         mPassThroughClickListener = new PassThroughClickListener();
         super.setOnClickListener(mPassThroughClickListener);
@@ -362,27 +370,33 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_completionHint
      */
+    @InspectableProperty
     public CharSequence getCompletionHint() {
         return mHintText;
     }
 
     /**
-     * <p>Returns the current width for the auto-complete drop down list. This can
-     * be a fixed width, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill the screen, or
-     * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
+     * Returns the current width for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @return the width for the drop down list
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
      */
+    @InspectableProperty
     public int getDropDownWidth() {
         return mPopup.getWidth();
     }
 
     /**
-     * <p>Sets the current width for the auto-complete drop down list. This can
-     * be a fixed width, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill the screen, or
-     * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
+     * Sets the current width for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @param width the width to use
      *
@@ -393,24 +407,27 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     /**
-     * <p>Returns the current height for the auto-complete drop down list. This can
-     * be a fixed height, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill
-     * the screen, or {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the height
-     * of the drop down's content.</p>
+     * <p>Returns the current height for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @return the height for the drop down list
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
      */
+    @InspectableProperty
     public int getDropDownHeight() {
         return mPopup.getHeight();
     }
 
     /**
-     * <p>Sets the current height for the auto-complete drop down list. This can
-     * be a fixed height, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill
-     * the screen, or {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the height
-     * of the drop down's content.</p>
+     * Sets the current height for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @param height the height to use
      *
@@ -452,6 +469,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#PopupWindow_popupBackground
      */
+    @InspectableProperty(name = "popupBackground")
     public Drawable getDropDownBackground() {
         return mPopup.getBackground();
     }
@@ -496,6 +514,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
+    @InspectableProperty
     public int getDropDownVerticalOffset() {
         return mPopup.getVerticalOffset();
     }
@@ -518,6 +537,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
+    @InspectableProperty
     public int getDropDownHorizontalOffset() {
         return mPopup.getHorizontalOffset();
     }
@@ -610,6 +630,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_completionThreshold
      */
+    @InspectableProperty(name = "completionThreshold")
     public int getThreshold() {
         return mThreshold;
     }
@@ -859,45 +880,66 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         return getText().length() >= mThreshold;
     }
 
-    /**
-     * This is used to watch for edits to the text view.  Note that we call
-     * to methods on the auto complete text view class so that we can access
-     * private vars without going through thunks.
-     */
+
+
+    /** This is used to watch for edits to the text view. */
     private class MyWatcher implements TextWatcher {
-        public void afterTextChanged(Editable s) {
-            doAfterTextChanged();
-        }
+        private boolean mOpenBefore;
+
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            doBeforeTextChanged();
+            if (mBlockCompletion) return;
+
+            // when text is changed, inserted or deleted, we attempt to show
+            // the drop down
+            mOpenBefore = isPopupShowing();
+            if (DEBUG) Log.v(TAG, "before text changed: open=" + mOpenBefore);
         }
+
+        public void afterTextChanged(Editable s) {
+            if (mBlockCompletion) return;
+
+            // if the list was open before the keystroke, but closed afterwards,
+            // then something in the keystroke processing (an input filter perhaps)
+            // called performCompletion() and we shouldn't do any more processing.
+            if (DEBUG) {
+                Log.v(TAG, "after text changed: openBefore=" + mOpenBefore
+                        + " open=" + isPopupShowing());
+            }
+
+            if (mOpenBefore && !isPopupShowing()) return;
+
+            refreshAutoCompleteResults();
+        }
+
         public void onTextChanged(CharSequence s, int start, int before, int count) {
         }
     }
 
-    @UnsupportedAppUsage
+    /**
+     * This function is deprecated. Please use {@link #refreshAutoCompleteResults} instead.
+     * Note: Remove {@link #mAutoCompleteTextWatcher} after removing this function.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     void doBeforeTextChanged() {
-        if (mBlockCompletion) return;
-
-        // when text is changed, inserted or deleted, we attempt to show
-        // the drop down
-        mOpenBefore = isPopupShowing();
-        if (DEBUG) Log.v(TAG, "before text changed: open=" + mOpenBefore);
+        mAutoCompleteTextWatcher.beforeTextChanged(null, 0, 0, 0);
     }
 
-    @UnsupportedAppUsage
+    /**
+     * This function is deprecated. Please use {@link #refreshAutoCompleteResults} instead.
+     * Note: Remove {@link #mAutoCompleteTextWatcher} after removing this function.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     void doAfterTextChanged() {
-        if (mBlockCompletion) return;
+        mAutoCompleteTextWatcher.afterTextChanged(null);
+    }
 
-        // if the list was open before the keystroke, but closed afterwards,
-        // then something in the keystroke processing (an input filter perhaps)
-        // called performCompletion() and we shouldn't do any more processing.
-        if (DEBUG) Log.v(TAG, "after text changed: openBefore=" + mOpenBefore
-                + " open=" + isPopupShowing());
-        if (mOpenBefore && !isPopupShowing()) {
-            return;
-        }
-
+    /**
+     * Refreshes the auto complete results. You usually shouldn't have to manually refresh the
+     * AutoCompleteResults as this is done automatically whenever the text changes. However if the
+     * results are not available and have to be fetched, you can call this function after fetching
+     * the results.
+     */
+    public final void refreshAutoCompleteResults() {
         // the drop down is shown only when a minimum number of characters
         // was typed in the text view
         if (enoughToFilter()) {
@@ -1158,7 +1200,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Closes the drop down if present on screen.</p>
      */
     public void dismissDropDown() {
-        InputMethodManager imm = InputMethodManager.peekInstance();
+        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (imm != null) {
             imm.displayCompletions(this, null);
         }
@@ -1191,9 +1233,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * Ensures that the drop down is not obscuring the IME.
      * @param visible whether the ime should be in front. If false, the ime is pushed to
      * the background.
+     *
+     * This method is deprecated. Please use the following methods instead.
+     * Use {@link #setInputMethodMode} to ensure that the drop down is not obscuring the IME.
+     * Use {@link #showDropDown()} to show the drop down immediately
+     * A combination of {@link #isDropDownAlwaysVisible()} and {@link #enoughToFilter()} to decide
+     * whether to manually trigger {@link #showDropDown()} or not.
+     *
      * @hide internal used only here and SearchDialog
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768913)
     public void ensureImeVisible(boolean visible) {
         mPopup.setInputMethodMode(visible
                 ? ListPopupWindow.INPUT_METHOD_NEEDED : ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
@@ -1203,11 +1252,47 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     /**
-     * @hide internal used only here and SearchDialog
+     * This method is deprecated. Please use {@link #getInputMethodMode()} instead.
+     *
+     * @hide This API is not being used and can be removed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean isInputMethodNotNeeded() {
         return mPopup.getInputMethodMode() == ListPopupWindow.INPUT_METHOD_NOT_NEEDED;
+    }
+
+    /**
+     * The valid input method modes for the {@link AutoCompleteTextView}:
+     *
+     * {@hide}
+     */
+    @IntDef({ListPopupWindow.INPUT_METHOD_FROM_FOCUSABLE,
+            ListPopupWindow.INPUT_METHOD_NEEDED,
+            ListPopupWindow.INPUT_METHOD_NOT_NEEDED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InputMethodMode {}
+
+    /**
+     * Returns the input method mode used by the auto complete dropdown.
+     */
+    public @InputMethodMode int getInputMethodMode() {
+        return mPopup.getInputMethodMode();
+    }
+
+    /**
+     * Use this method to specify when the IME should be displayed. This function can be used to
+     * prevent the dropdown from obscuring the IME.
+     *
+     * @param mode speficies the input method mode. use one of the following values:
+     *
+     * {@link ListPopupWindow#INPUT_METHOD_FROM_FOCUSABLE} IME Displayed if the auto-complete box is
+     * focusable.
+     * {@link ListPopupWindow#INPUT_METHOD_NEEDED} Always display the IME.
+     * {@link ListPopupWindow#INPUT_METHOD_NOT_NEEDED}. The auto-complete suggestions are always
+     * displayed, even if the suggestions cover/hide the input method.
+     */
+    public void setInputMethodMode(@InputMethodMode int mode) {
+        mPopup.setInputMethodMode(mode);
     }
 
     /**
@@ -1247,7 +1332,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private void buildImeCompletions() {
         final ListAdapter adapter = mAdapter;
         if (adapter != null) {
-            InputMethodManager imm = InputMethodManager.peekInstance();
+            InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
             if (imm != null) {
                 final int count = Math.min(adapter.getCount(), 20);
                 CompletionInfo[] completions = new CompletionInfo[count];

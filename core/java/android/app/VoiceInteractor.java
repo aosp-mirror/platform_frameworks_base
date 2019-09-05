@@ -16,11 +16,13 @@
 
 package android.app;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -29,15 +31,20 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.Log;
+
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * Interface for an {@link Activity} to interact with the user through voice.  Use
@@ -67,10 +74,15 @@ public final class VoiceInteractor {
 
     static final Request[] NO_REQUESTS = new Request[0];
 
-    final IVoiceInteractor mInteractor;
+    /** @hide */
+    public static final String KEY_CANCELLATION_SIGNAL = "key_cancellation_signal";
+    /** @hide */
+    public static final String KEY_KILL_SIGNAL = "key_kill_signal";
 
-    Context mContext;
-    Activity mActivity;
+    @Nullable IVoiceInteractor mInteractor;
+
+    @Nullable Context mContext;
+    @Nullable Activity mActivity;
     boolean mRetaining;
 
     final HandlerCaller mHandlerCaller;
@@ -189,13 +201,20 @@ public final class VoiceInteractor {
         }
 
         @Override
-        public void deliverCancel(IVoiceInteractorRequest request) throws RemoteException {
+        public void deliverCancel(IVoiceInteractorRequest request) {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOO(
                     MSG_CANCEL_RESULT, request, null));
+        }
+
+        @Override
+        public void destroy() {
+            mHandlerCaller.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    VoiceInteractor::destroy, VoiceInteractor.this));
         }
     };
 
     final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<>();
+    final ArrayMap<Runnable, Executor> mOnDestroyCallbacks = new ArrayMap<>();
 
     static final int MSG_CONFIRMATION_RESULT = 1;
     static final int MSG_PICK_OPTION_RESULT = 2;
@@ -500,7 +519,7 @@ public final class VoiceInteractor {
                 dest.writeBundle(mExtras);
             }
 
-            public static final Parcelable.Creator<Option> CREATOR
+            public static final @android.annotation.NonNull Parcelable.Creator<Option> CREATOR
                     = new Parcelable.Creator<Option>() {
                 public Option createFromParcel(Parcel in) {
                     return new Option(in);
@@ -869,7 +888,7 @@ public final class VoiceInteractor {
             dest.writeCharSequence(mVisualPrompt);
         }
 
-        public static final Creator<Prompt> CREATOR
+        public static final @android.annotation.NonNull Creator<Prompt> CREATOR
                 = new Creator<Prompt>() {
             public Prompt createFromParcel(Parcel in) {
                 return new Prompt(in);
@@ -887,6 +906,11 @@ public final class VoiceInteractor {
         mContext = context;
         mActivity = activity;
         mHandlerCaller = new HandlerCaller(context, looper, mHandlerCallerCallback, true);
+        try {
+            mInteractor.setKillCallback(new KillCallback(this));
+        } catch (RemoteException e) {
+            /* ignore */
+        }
     }
 
     Request pullRequest(IVoiceInteractorRequest request, boolean complete) {
@@ -957,6 +981,29 @@ public final class VoiceInteractor {
         mActivity = null;
     }
 
+    void destroy() {
+        final int requestCount = mActiveRequests.size();
+        for (int i = requestCount - 1; i >= 0; i--) {
+            final Request request = mActiveRequests.valueAt(i);
+            mActiveRequests.removeAt(i);
+            request.cancel();
+        }
+
+        final int callbackCount = mOnDestroyCallbacks.size();
+        for (int i = callbackCount - 1; i >= 0; i--) {
+            final Runnable callback = mOnDestroyCallbacks.keyAt(i);
+            final Executor executor = mOnDestroyCallbacks.valueAt(i);
+            executor.execute(callback);
+            mOnDestroyCallbacks.removeAt(i);
+        }
+
+        // destroyed now
+        mInteractor = null;
+        if (mActivity != null) {
+            mActivity.setVoiceInteractor(null);
+        }
+    }
+
     public boolean submitRequest(Request request) {
         return submitRequest(request, null);
     }
@@ -973,6 +1020,10 @@ public final class VoiceInteractor {
      * @return Returns true of the request was successfully submitted, else false.
      */
     public boolean submitRequest(Request request, String name) {
+        if (isDestroyed()) {
+            Log.w(TAG, "Cannot interact with a destroyed voice interactor");
+            return false;
+        }
         try {
             if (request.mRequestInterface != null) {
                 throw new IllegalStateException("Given " + request + " is already active");
@@ -997,6 +1048,10 @@ public final class VoiceInteractor {
      * Return all currently active requests.
      */
     public Request[] getActiveRequests() {
+        if (isDestroyed()) {
+            Log.w(TAG, "Cannot interact with a destroyed voice interactor");
+            return null;
+        }
         synchronized (mActiveRequests) {
             final int N = mActiveRequests.size();
             if (N <= 0) {
@@ -1018,6 +1073,10 @@ public final class VoiceInteractor {
      * @return Returns the active request with that name, or null if there was none.
      */
     public Request getActiveRequest(String name) {
+        if (isDestroyed()) {
+            Log.w(TAG, "Cannot interact with a destroyed voice interactor");
+            return null;
+        }
         synchronized (mActiveRequests) {
             final int N = mActiveRequests.size();
             for (int i=0; i<N; i++) {
@@ -1040,12 +1099,74 @@ public final class VoiceInteractor {
      * @return Array of booleans indicating whether each command is supported or not.
      */
     public boolean[] supportsCommands(String[] commands) {
+        if (isDestroyed()) {
+            Log.w(TAG, "Cannot interact with a destroyed voice interactor");
+            return new boolean[commands.length];
+        }
         try {
             boolean[] res = mInteractor.supportsCommands(mContext.getOpPackageName(), commands);
             if (DEBUG) Log.d(TAG, "supportsCommands: cmds=" + commands + " res=" + res);
             return res;
         } catch (RemoteException e) {
             throw new RuntimeException("Voice interactor has died", e);
+        }
+    }
+
+    /**
+     * @return whether the voice interactor is destroyed. You should not interact
+     * with a destroyed voice interactor.
+     */
+    public boolean isDestroyed() {
+        return mInteractor == null;
+    }
+
+    /**
+     * Registers a callback to be called when the VoiceInteractor is destroyed.
+     *
+     * @param executor Executor on which to run the callback.
+     * @param callback The callback to run.
+     * @return whether the callback was registered.
+     */
+    public boolean registerOnDestroyedCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Runnable callback) {
+        Preconditions.checkNotNull(executor);
+        Preconditions.checkNotNull(callback);
+        if (isDestroyed()) {
+            Log.w(TAG, "Cannot interact with a destroyed voice interactor");
+            return false;
+        }
+        mOnDestroyCallbacks.put(callback, executor);
+        return true;
+    }
+
+    /**
+     * Unregisters a previously registered onDestroy callback
+     *
+     * @param callback The callback to remove.
+     * @return whether the callback was unregistered.
+     */
+    public boolean unregisterOnDestroyedCallback(@NonNull Runnable callback) {
+        Preconditions.checkNotNull(callback);
+        if (isDestroyed()) {
+            Log.w(TAG, "Cannot interact with a destroyed voice interactor");
+            return false;
+        }
+        return mOnDestroyCallbacks.remove(callback) != null;
+    }
+
+    /**
+     * Notifies the assist framework that the direct actions supported by the app changed.
+     */
+    public void notifyDirectActionsChanged() {
+        if (isDestroyed()) {
+            Log.w(TAG, "Cannot interact with a destroyed voice interactor");
+            return;
+        }
+        try {
+            mInteractor.notifyDirectActionsChanged(mActivity.getTaskId(),
+                    mActivity.getAssistToken());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Voice interactor has died", e);
         }
     }
 
@@ -1065,5 +1186,22 @@ public final class VoiceInteractor {
         writer.print(prefix); writer.print("  mInteractor=");
         writer.println(mInteractor.asBinder());
         writer.print(prefix); writer.print("  mActivity="); writer.println(mActivity);
+    }
+
+    private static final class KillCallback extends ICancellationSignal.Stub {
+        private final WeakReference<VoiceInteractor> mInteractor;
+
+        KillCallback(VoiceInteractor interactor) {
+            mInteractor= new WeakReference<>(interactor);
+        }
+
+        @Override
+        public void cancel() {
+            final VoiceInteractor voiceInteractor = mInteractor.get();
+            if (voiceInteractor != null) {
+                voiceInteractor.mHandlerCaller.getHandler().sendMessage(PooledLambda
+                        .obtainMessage(VoiceInteractor::destroy, voiceInteractor));
+            }
+        }
     }
 }

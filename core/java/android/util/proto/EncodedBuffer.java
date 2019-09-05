@@ -147,6 +147,14 @@ public final class EncodedBuffer {
         return mReadableSize;
     }
 
+    /**
+     * Returns the buffer size
+     * @return the buffer size
+     */
+    public int getSize() {
+        return ((mBufferCount - 1) * mChunkSize) + mWriteIndex;
+    }
+
     //
     // Reading from the read position.
     //

@@ -16,16 +16,17 @@
 
 package android.widget.touchmode;
 
-import android.widget.layout.linear.LLOfButtons1;
-import android.widget.layout.linear.LLOfButtons2;
 import static android.util.TouchModeFlexibleAsserts.assertInTouchModeAfterClick;
-import static android.util.TouchModeFlexibleAsserts.assertNotInTouchModeAfterKey;
 import static android.util.TouchModeFlexibleAsserts.assertInTouchModeAfterTap;
+import static android.util.TouchModeFlexibleAsserts.assertNotInTouchModeAfterKey;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
+import android.widget.layout.linear.LLOfButtons1;
+import android.widget.layout.linear.LLOfButtons2;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 /**
  * Tests that the touch mode changes from various events, and that the state

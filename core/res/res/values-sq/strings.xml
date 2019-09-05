@@ -77,15 +77,16 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e pakufizuar!"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Shërbimi nuk është përgatitur."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nuk mund ta ndryshosh cilësimin e ID-së së telefonuesit."</string>
-    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Nuk ka shërbim për të dhënat"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Asnjë telefonatë urgjence"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Nuk ka shërbim të të dhënave celulare"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Telefonatat e urgjencës nuk ofrohen"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Nuk ka shërbim zanor"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nuk ka shërbim zanor/urgjence"</string>
-    <string name="RestrictedStateContent" msgid="4278821484643362350">"Përkohësisht nuk ofrohet nga rrjeti celular në vendndodhjen tënde"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Rrjeti i paarritshëm"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Për të përmirësuar marrjen e sinjalit, provo të ndryshosh llojin e zgjedhur te Cilësimet &gt; Rrjeti dhe interneti &gt; Rrjetet celulare &gt; Lloji i preferuar i rrjetit."</string>
-    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Telefonata me Wi‑Fi është aktive"</string>
-    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Telefonatat e urgjencës kërkojnë një rrjet celular."</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Nuk ka shërbim zanore ose telefonata urgjence"</string>
+    <string name="RestrictedStateContent" msgid="6538703255570997248">"Çaktivizuar përkohësisht nga operatori yt celular"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Çaktivizuar përkohësisht nga operatori yt celular për kartën SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Rrjeti celular është i paarritshëm"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Provo të ndryshosh rrjetin e preferuar. Trokit për ta ndryshuar."</string>
+    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Telefonatat e urgjencës nuk ofrohen"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Nuk mund të kryhen telefonata urgjence me Wi‑Fi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Sinjalizimet"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Transferimi i telefonatave"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modaliteti i \"Kthimit të telefonatës së urgjencës\""</string>
@@ -120,20 +121,30 @@
     <string name="roamingText11" msgid="4154476854426920970">"Lajmëruesi i roaming-ut është i aktivizuar"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Lajmëruesi i roaming-ut është i çaktivizuar"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Po kërkon për shërbim"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Telefonatë me Wi-Fi"</string>
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Telefonata me Wi-Fi nuk mund të konfigurohej"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Për të bërë telefonata dhe për të dërguar mesazhe nëpërmjet Wi-Fi, në fillim kërkoji operatorit celular të konfigurojë këtë shërbim. Më pas aktivizo përsëri telefonatat me Wi-Fi nga \"Cilësimet\". (Kodi i gabimit: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7472393097168811593">"Regjistrohu me operatorin tënd celular (kodi i gabimit: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="7372514042696663278">"Problem gjatë regjistrimit të telefonatave me Wi‑Fi me operatorin tënd celular: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Telefonatat me Wi-Fi nga %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Telefonatë me Wi-Fi në <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Telefonatë me WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Telefonatë me WLAN në <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi në <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Telefonatë me Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi në <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Telefonatë me Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Telefonatë me WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Çaktivizuar"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferohet Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferohet rrjeti celular"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Vetëm Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nuk u transferua"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -160,8 +171,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Po përpunohen shumë kërkesa. Provo sërish më vonë."</string>
     <string name="notification_title" msgid="8967710025036163822">"Gabim identifikimi për <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinkronizo"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkronizo"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Shumë fshirje <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Nuk mund të sinkronizohet"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"U përpoqe të fshish shumë <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Hapësira ruajtëse e tabletit është plot. Fshi disa skedarë për të liruar hapësirë."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Hapësira ruajtëse e orës është plot. Fshi disa skedarë për të liruar hapësirë."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Hapësira ruajtëse e televizorit është plot. Fshi disa skedarë për të liruar hapësirë."</string>
@@ -174,14 +185,13 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Nga administratori i profilit tënd të punës"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Nga <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Profili i punës u fshi"</string>
-    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Profili i punës u fshi për shkak të mungesës së aplikacionit të administratorit"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto me administratorin për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Shumë përpjekje për fjalëkalimin"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Pajisja është e menaxhuar"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit. Trokit për detaje."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Pajisja do të spastrohet"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Aplikacioni i administratorit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"Aplikacioni i administratorit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Unë"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opsionet e tabletit"</string>
@@ -220,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Raporti i defekteve në kod"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Jepi fund sesionit"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Pamja e ekranit"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Merr raportin e defekteve në kod"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Ky funksion mundëson mbledhjen e informacioneve mbi gjendjen aktuale të pajisjes për ta dërguar si mesazh mail-i. Do të duhet pak kohë nga nisja e raportit të defekteve në kod. Faleminderit për durimin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktiv"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Përdore këtë në shumicën e rrethanave. Të lejon të gjurmosh progresin e raportit dhe të fusësh më shumë detaje rreth problemit dhe të regjistrosh pamje të ekranit. Mund të fshijë disa seksione që përdoren më pak të cilat kërkojnë shumë kohë për t\'u raportuar."</string>
@@ -269,31 +280,52 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Kalo te profili i punës"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktet"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"qasu te kontaktet e tua"</string>
-    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te kontaktet e tua"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te kontaktet e tua?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vendndodhja"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"qaset te vendndodhja e kësaj pajisjeje"</string>
-    <string name="permgrouprequest_location" msgid="8903573681261610809">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te vendndodhja e kësaj pajisjeje"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te vendndodhja e kësaj pajisjeje?"</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasje te kalendari yt"</string>
-    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te kalendari yt"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te kalendari yt?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
-    <string name="permgrouprequest_sms" msgid="605618939583628306">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të dërgojë dhe të shikojë mesazhe SMS"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të dërgojë dhe të shikojë mesazhet SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qasjen te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
-    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te fotografitë, media dhe skedarët në pajisjen tënde"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Të lejohet apl. &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; që të ketë qasje te fotografitë, media dhe skedarët në pajisjen tënde?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
-    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të regjistrojë audio"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të regjistrojë audio?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Njohja e aktivitetit"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"njih aktivitetin"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të njohë aktivitetin tënd fizik?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"bëj fotografi dhe regjistro video"</string>
-    <string name="permgrouprequest_camera" msgid="810824326507258410">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; që shkrepë fotografi dhe të regjistrojë video"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të nxjerrë fotografi dhe të regjistrojë video?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Evidencat e telefonatave"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lexo dhe shkruaj evidencën e telefonatave"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dëshiron të lejosh që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje në evidencat e tua të telefonatave?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"kryej dhe menaxho telefonata"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të kryejë dhe të menaxhojë telefonata"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensorët e trupit"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të kryejë dhe të menaxhojë telefonata?"</string>
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Sensorët e trupit"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"qasu tek të dhënat e sensorëve rreth shenjave të tua jetësore"</string>
-    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te të dhënat e sensorëve rreth shenjave të tua jetësore"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te të dhënat e sensorëve rreth shenjave të tua jetësore?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Muzika"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"qasu te muzika jote"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te muzika jote?"</string>
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Fotografitë dhe videot"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"qasu te fotografitë dhe videot e tua"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Nxjerrë përmbajtjen e dritares"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekton përmbajtjen e dritares me të cilën po ndërvepron."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizojë funksionin \"Eksploro me prekje\""</string>
@@ -305,7 +337,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Kryen gjeste"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mund të trokasë, rrëshqasë, bashkojë gishtat dhe kryejë gjeste të tjera."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gjestet e gjurmës së gishtit"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Mund të kapë gjestet e kryera në sensorin e gjurmës së gishtit të pajisjeve."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Mund të regjistrojë gjestet e kryera në sensorin e gjurmës së gishtit të pajisjes."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"të bëhet shiriti i statusit"</string>
@@ -356,6 +388,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Lejon aplikacionin të zaptojë një pjesë të qëndrueshme në kujtesë. Kjo mund të kufizojë kujtesën e disponueshme për aplikacionet e tjera duke e ngadalësuar tabletin."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Lejon aplikacionin të zaptojë një pjesë të qëndrueshme në kujtesë. Kjo mund të kufizojë kujtesën e disponueshme për aplikacionet e tjera duke e ngadalësuar televizorin."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Lejon aplikacionin të zaptojë një pjesë të qëndrueshme në kujtesë. Kjo mund të kufizojë kujtesën e disponueshme për aplikacionet e tjera duke e ngadalësuar telefonin."</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"ekzekuto shërbimin në plan të parë"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Lejon aplikacionin të përdorë shërbimet në plan të parë."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"mat hapësirën ruajtëse të aplikacionit"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Lejon aplikacionin të gjejë kodin e tij, të dhënat dhe madhësitë e memorieve të përkohshme."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"modifiko cilësimet e sistemit"</string>
@@ -394,18 +428,22 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në telefonin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qasje në komandat shtesë të ofruesit të vendndodhjes"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Lejon aplikacionin të ketë qasje në komandat shtesë të ofruesit për vendndodhjen. Kjo mund ta lejojë aplikacionin të ndërhyjë në operacionin e GPS-së apo të burimeve të tjera për vendndodhjen."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"qasu te vendndodhja e përpiktë (në bazë të GPS-së dhe rrjetit)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë. Kjo mund të rritë konsumin e baterisë."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"qasu te vendndodhja e përafërt (bazuar në rrjet)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në tabletin tënd që aplikacioni të mund t\'i përdorë."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në televizorin tënd që aplikacioni të mund t\'i përdorë."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"qasu në vendndodhjen e saktë vetëm në plan të parë"</string>
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ky aplikacion mund të marrë vendndodhjen tënde të saktë në çdo kohë kur është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë. Kjo gjë mund të rritë konsumin e baterisë."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"qasu te vendndodhja e përafërt (bazuar te rrjeti) vetëm në plan të parë"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në tabletin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në televizorin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në telefonin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"qasje te vendndodhja në sfond"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Nëse kjo jepet përveç qasjes te vendndodhja e përafërt ose të saktë, aplikacioni mund të qaset te vendndodhja ndërkohë që ekzekutohet në sfond."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ndrysho cilësimet e audios"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lejon aplikacionin të modifikojë cilësimet globale të audios siç është volumi dhe se cili altoparlant përdoret për daljen."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"regjistro audio"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Ky aplikacion mund të regjistrojë audio me mikrofonin në çdo kohë."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"dërgo komanda te karta SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lejon aplikacionin t\'i dërgojë komanda kartës SIM. Kjo është shumë e rrezikshme."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"njih aktivitetin fizik"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ky aplikacion mund të njohë aktivitetin tënd fizik."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"bëj fotografi dhe video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ky aplikacion mund të nxjerrë fotografi dhe të regjistrojë video me kamerën tënde në çdo kohë."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrollo dridhjen"</string>
@@ -418,6 +456,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lejon aplikacionin të hyjë në funksionet telefonike të pajisjes. Kjo leje i mundëson aplikacionit të përcaktojë numrin e telefonit dhe ID-të e pajisjes, nëse një telefonatë është aktive apo nëse numri në distancë është i lidhur me një telefonatë."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kalon telefonatat përmes sistemit"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lejon që aplikacioni të kalojë telefonatat përmes sistemit për të përmirësuar përvojën e telefonatës."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Shiko dhe kontrollo telefonatat nëpërmjet sistemit."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Lejon që aplikacioni të shikojë dhe të kontrollojë telefonatat në vazhdim në pajisje. Kjo përfshin informacione si p.sh. numrat e telefonatave për telefonatat dhe gjendjen e telefonatave."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"vazhdo një telefonatë nga një aplikacion tjetër"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Lejon që aplikacioni të vazhdojë një telefonatë që është nisur në një aplikacion tjetër."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lexo numrat e telefonit"</string>
@@ -478,10 +518,36 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lejon aplikacionin të komunikojë me etiketimet e \"Komunikimit të fushës së afërt (NFC)\", kartat dhe lexuesit."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"çaktivizo kyçjen e ekranit"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lejon aplikacionin të çaktivizojë kyçjen e tasteve dhe çdo mbrojtje të lidhur me fjalëkalimin. Për shembull, telefoni çaktivizon kyçjen e tasteve kur merr një telefonatë hyrëse, pastaj riaktivizon kyçjen e tasteve kur mbaron telefonata."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"përdor harduerin biometrik"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"E lejon aplikacionin që të përdorë harduerin biometrik për vërtetimin"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"të menaxhojë harduerin e gjurmës së gishtit"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"E lejon aplikacionin që të aktivizojë metoda për të shtuar dhe për të fshirë shabllonet e gjurmës së gishtit për përdorim."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"përdor harduerin e gjurmës së gishtit"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"E lejon aplikacionin që të përdorë harduerin e gjurmës së gishtit për verifikim"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"lexo koleksionin tënd të muzikës"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Lejon aplikacionin të lexojë koleksionin tënd të muzikës"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"modifiko koleksionin tënd të muzikës"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Lejon aplikacionin të modifikojë koleksionin tënd të muzikës."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"lexo koleksionin tënd të videove"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Lejon aplikacionin të lexojë koleksionin tënd të videove."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"modifiko koleksionin tënd të videove"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Lejon aplikacionin të modifikojë koleksionin tënd të videove."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"lexo koleksionin tënd të fotografive"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Lejon aplikacionin të lexojë koleksionin tënd të fotografive."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"modifiko koleksionin tënd të fotografive"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Lejon aplikacionin të modifikojë koleksionin tënd të fotografive."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"lexo vendndodhjet nga koleksioni yt i medias"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Lejon aplikacionin të lexojë vendndodhjet nga koleksioni yt i medias."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikacioni <xliff:g id="APP">%s</xliff:g> dëshiron të vërtetojë."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Nuk ofrohet harduer biometrik"</string>
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Vërtetimi u anulua"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Nuk njihet"</string>
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Vërtetimi u anulua"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Nuk është vendosur kod PIN, motiv ose fjalëkalim"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"U zbulua një gjurmë gishti e pjesshme. Provo përsëri."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Gjurma e gishtit nuk mund të përpunohej. Provo përsëri."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensori i gjurmës së gishtit nuk është i pastër. Pastroje dhe provo përsëri."</string>
@@ -489,7 +555,9 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Gishti lëvizi shumë ngadalë. Provo përsëri."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nuk njihet"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Gjurma e gishtit u vërtetua"</string>
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Fytyra u vërtetua"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Fytyra u vërtetua, shtyp \"Konfirmo\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardueri i gjurmës së gishtit nuk mundësohet."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Gjurma e gishtit nuk mund të ruhet. Hiq një gjurmë gishti ekzistuese."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Koha e veprimit për gjurmën e gishtit skadoi. Provo përsëri."</string>
@@ -499,25 +567,82 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Shumë përpjekje. Sensori i gjurmës së gishtit u çaktivizua."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Provo përsëri."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nuk ka asnjë gjurmë gishti të regjistruar."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Kjo pajisje nuk ka një sensor të gjurmës së gishtit"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Kjo pajisje nuk ka një sensor të gjurmës së gishtit."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Gishti <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona e gjurmës së gishtit"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"menaxho harduerin për vërtetimin e fytyrës"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"përdor harduerin për vërtetimin e fytyrës"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Lejon aplikacionin të përdorë harduer vërtetimi të fytyrës për procesin e vërtetimit"</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Regjistroje përsëri fytyrën tënde."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Tepër e ngjashme, ndrysho pozën"</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Drejtoje kokën vertikalisht"</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Nuk ka harduer për fytyrën."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
+    <string name="face_error_no_space" msgid="8224993703466381314">"Fytyra nuk mund të ruhet."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Veprimi me fytyrën u anulua."</string>
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Vërtetimi me fytyrë u anulua nga përdoruesi."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Shumë përpjekje. Provo sërish më vonë."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Shumë përpjekje. Vërtetimi për fytyrën joaktiv."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
+    <string name="face_name_template" msgid="7004562145809595384">"Fytyra <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ikona e fytyrës"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lexo cilësimet e sinkronizimit"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lejon aplikacionin të lexojë cilësimet e sinkronizimit për një llogari. Për shembull, kjo mund të përcaktojë nëse aplikacioni \"Kontaktet\" është i sinkronizuar me një llogari."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ndiz ose fik sinkronizimin"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Lejon një aplikacion të modifikojë cilësimet e sinkronizimit për një llogari. Për shembull, kjo mund të përdoret për të mundësuar sinkronizimin e aplikacionit \"Kontaktet\" me një llogari."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lexo statistikat e sinkronizimit"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Lejon një aplikacion të lexojë statistikat e sinkronizimit për një llogari, përfshirë historikun e ngjarjeve të sinkronizimit dhe se sa të dhëna janë sinkronizuar."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lexo përmbajtjet e USB-së"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lexo përmbajtjet e kartës tënde SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Lejon aplikacionin të lexojë përmbajtjet e USB-së tënde."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Lejon aplikacionin të lexojë përmbajtjet e kartës SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifiko ose fshi përmbajtjet e USB-së"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifiko ose fshi përmbajtjet e kartës SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Lejon aplikacionin të shkruajë në hapësirën ruajtëse të USB-së."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Lejon aplikacionin të shkruajë në kartën SD."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"lexo përmbajtjet e hapësirës ruajtëse të ndarë"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Lejon aplikacionin të lexojë përmbajtjet e hapësirës ruajtëse të ndarë."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"modifiko ose fshi përmbajtjet e hapësirës ruajtëse të ndarë"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Lejon që aplikacioni të shkruajë përmbajtjet e hapësirës ruajtëse të ndarë."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"bëj/merr telefonata SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Lejon aplikacionin të kryejë dhe të marrë telefonata SIP."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"regjistro lidhje të reja telekomunikimi të kartës SIM"</string>
@@ -593,7 +718,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Kërko që të dhënat e ruajtura të aplikacionit të enkriptohen."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Çaktivizo kamerat"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Parandalo përdorimin e të gjitha kamerave të pajisjes."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Çaktivizo disa funksione të kyçjes së ekranit"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Çaktivizimin e disa funksioneve të kyçjes së ekranit"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Parandalo përdorimin e disa funksioneve të kyçjes së ekranit."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Shtëpia"</item>
@@ -802,6 +927,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Shkyçje me motiv."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Shkyçje me fytyrë."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Shkyçje me PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Shkyçja e kartës SIM me kodin PIN"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Shkyçja e kartës SIM me kodin PUK"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Shkyçja e fjalëkalimit."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zona e motivit."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Zonën e rrëshqitjes."</string>
@@ -826,7 +953,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Këshillë! Trokit dy herë për të zmadhuar dhe zvogëluar."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Plotësim automatik"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Konfiguro plotësuesin automatik"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Plotësim automatik"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Plotëso automatikisht me <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -861,8 +988,15 @@
     <string name="save_password_never" msgid="8274330296785855105">"Asnjëherë"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Nuk ke leje për ta hapur këtë faqe."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teksti u kopjua në kujtesën e fragmenteve."</string>
+    <string name="copied" msgid="8564151838171791598">"U kopjua"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Më shumë"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menyja+"</string>
+    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
+    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl+"</string>
+    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt+"</string>
+    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Shift+"</string>
+    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
+    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Funksioni+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"hapësirë"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"fshi"</string>
@@ -994,14 +1128,27 @@
     <string name="inputMethod" msgid="1653630062304567879">"Metoda e hyrjes"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Veprimet e tekstit"</string>
     <string name="email" msgid="4560673117055050403">"Dërgo mail"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Dërgo email tek adresa e zgjedhur"</string>
     <string name="dial" msgid="1253998302767701559">"Telefono"</string>
-    <string name="map" msgid="6521159124535543457">"Gjej vendndodhjen"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Telefono në numrin e zgjedhur të telefonit"</string>
+    <string name="map" msgid="5441053548030107189">"Hap hartën"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Gjej adresën e zgjedhur"</string>
     <string name="browse" msgid="1245903488306147205">"Hap"</string>
-    <string name="sms" msgid="4560537514610063430">"Mesazh"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Hap URL-në e zgjedhur"</string>
+    <string name="sms" msgid="4560537514610063430">"Dërgo mesazh"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Dërgo mesazh te numri i zgjedhur i telefonit"</string>
     <string name="add_contact" msgid="7867066569670597203">"Shto"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Shto te kontaktet"</string>
     <string name="view_calendar" msgid="979609872939597838">"Shiko"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Orari"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Pjesë muzikore"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Shiko kohën e zgjedhur në kalendar"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Planifiko"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planifiko ngjarjen për kohën e zgjedhur"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Monitoro"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Monitoro fluturimin e zgjedhur"</string>
+    <string name="translate" msgid="9218619809342576858">"Përkthe"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Përkthe tekstin e zgjedhur"</string>
+    <string name="define" msgid="7394820043869954211">"Përkufizo"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Përkufizo tekstin e zgjedhur"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Hapësira ruajtëse po mbaron"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Disa funksione të sistemit mund të mos punojnë"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që të kesh 250 MB hapësirë të lirë dhe pastaj të rifillosh."</string>
@@ -1021,10 +1168,13 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Hap me"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Hap me %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Hap"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Jep qasje për të hapur lidhjet e <xliff:g id="HOST">%1$s</xliff:g> me"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Jep qasje për të hapur lidhjet e <xliff:g id="HOST">%1$s</xliff:g> me <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Jep qasje"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Redakto me"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Redakto me %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Redakto"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Shpërnda publikisht me"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Ndaj"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Shpërnda publikisht me %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Ndaj"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Dërgo me"</string>
@@ -1074,33 +1224,38 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Kliko për përditësim"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i ashpër\" (StrictMode)."</string>
     <string name="smv_process" msgid="5120397012047462446">"Procesi <xliff:g id="PROCESS">%1$s</xliff:g> ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i rreptë\" (StrictMode)"</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"\"Androidi\" po përditësohet…"</string>
-    <string name="android_start_title" msgid="8418054686415318207">"\"Androidi\" po fillon…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Telefoni po përditësohet…"</string>
+    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Tableti po përditësohet…"</string>
+    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Pajisja po përditësohet…"</string>
+    <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefoni po niset…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"\"Androidi\" po fillon…"</string>
+    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Tableti po niset…"</string>
+    <string name="android_start_title" product="device" msgid="7467484093260449437">"Pajisja po niset…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Po përshtat ruajtjen."</string>
-    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Përditësimi i Android po përfundon…"</string>
-    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Disa aplikacione mund të mos funksionojnë si duhet deri sa të përfundojë përmirësimi"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"Po përfundon përditësimi i sistemit…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> po përmirësohet…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Po përshtat aplikacionin <xliff:g id="NUMBER_0">%1$d</xliff:g> nga gjithsej <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Po përgatit <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Aplikacionet e fillimit."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Po përfundon nisjen."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> është në punë"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Trokit për t\'u kthyer te loja"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Zgjidh një lojë"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Për një cilësi më të mirë funksionimi, vetëm një nga këto lojëra mund të hapet në të njëjtën kohë."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Kthehu prapa te <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Hap <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> do të mbyllet pa u ruajtur"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e memories"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Stiva e skedarëve fiktivë është mbledhur; trokit për t\'i ndarë"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Stiva e skedarëve fiktivë është mbledhur. Trokit për t\'i ndarë."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Të ndahet stiva e skedarëve fiktivë?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories së procesit me <xliff:g id="SIZE">%2$s</xliff:g>. Mundësohet stivimi e skedarëve fiktivë në mënyrë që t\'i ndani me zhvilluesit e tyre. Bëni kujdes pasi stiva e skedarëve fiktivë mund të përmbajë ndonjë informacion tëndin personal ku aplikacioni ka qasje."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Zgjidh një veprim për tekstin"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumi i ziles"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volumi i medias"</string>
@@ -1133,12 +1288,18 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Lidhu me rrjetin e hapur Wi‑Fi"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Lidhu me rrjetin Wi‑Fi të operatorit"</string>
-    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Po lidhet me rrjetin e hapur Wi‑Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Po lidhet me rrjetin Wi‑Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Lidhur me rrjetin e hapur Wi‑Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Nuk mund të lidhet me rrjetin Wi‑Fi"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trokit për të parë të gjitha rrjetet"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Lidhu"</string>
-    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Të gjitha rrjetet"</string>
+    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Të gjitha rrjetet"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Po"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Jo"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi do të aktivizohet automatikisht"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kur ndodhesh pranë një rrjeti të ruajtur me cilësi të lartë"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Mos e aktivizo përsëri"</string>
@@ -1148,8 +1309,17 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Identifikohu në rrjet"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nuk ka qasje në internet"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trokit për opsionet"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Lidhur"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ndryshimet në cilësimet e zonës së qasjes për internet"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Brezi yt i zonës së qasjes për internet ka ndryshuar."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kjo pajisje nuk e mbështet preferencën për vetëm 5 GHz. Përkundrazi, pajisja do të përdorë brezin 5 GHz nëse ka."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Kaloi te <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Pajisja përdor <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kur <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nuk ka qasje në internet. Mund të zbatohen tarifa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Kaloi nga <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> te <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1205,6 +1375,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Rifillo"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktivizo shërbimin celular"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Shkarko aplikacionin e operatorit celular për të aktivizuar kartën e re SIM"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Shkarko aplikacionin <xliff:g id="APP_NAME">%1$s</xliff:g> për të aktivizuar kartën tënde të re SIM"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Shkarko aplikacionin"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Është futur kartë e re SIM"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Trokit për ta konfiguruar"</string>
@@ -1223,21 +1394,29 @@
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"PTP nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"Ndarja e internetit nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"MIDI nëpërmjet USB-së u aktivizua"</string>
-    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Modaliteti i aksesorit me USB u aktivizua"</string>
+    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"Aksesori i USB-së u lidh"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Trokit për më shumë opsione."</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Pajisja e lidhur po ngarkohet. Trokit për opsione të tjera."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"U zbulua aksesor i audios analoge"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Pajisja e bashkuar nuk është e pajtueshme me këtë telefon. Trokit për të mësuar më shumë."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Trokit për të çaktivizuar korrigjimin e gabimeve të USB-së."</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Trokit për të çaktivizuar korrigjimin e USB-së"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Përzgjidhe për të çaktivizuar korrigjimin e gabimeve të USB-së"</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lëngje ose papastërti në portën e USB-së"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Porta e USB-së është çaktivizuar automatikisht. Trokit për të mësuar më shumë."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Nuk ka rrezik të përdoret porta e USB-së"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefoni nuk i dallon më lëngjet apo papastërtitë."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Po ndan raportin e defekteve në kod..."</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administratori kërkoi një raport të defekteve në kod për të ndihmuar me zgjidhjen e problemeve. Aplikacioni dhe të dhënat mund të ndahen."</string>
-    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SHPËRNDA"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SHPËRNDAJ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REFUZO"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Ndërro tastierë"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Zgjidh metodën e hyrjes"</string>
     <string name="show_ime" msgid="2506087537466597099">"Mbaje në ekran ndërsa tastiera fizike është aktive"</string>
     <string name="hardware" msgid="194658061510127999">"Shfaq tastierën virtuale"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfiguro tastierën fizike"</string>
@@ -1248,34 +1427,36 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> afishohet mbi aplikacionet e tjera"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> shfaqet mbi apl. e tjera"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Nëse nuk dëshiron që <xliff:g id="NAME">%s</xliff:g> ta përdorë këtë funksion, trokit për të hapur cilësimet dhe për ta çaktivizuar."</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ÇAKTIVIZO"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Po përgatit <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Po kontrollon për gabime"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"U zbulua karta e re <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Çaktivizo"</string>
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> po kontrollohet…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Përmbajtja aktuale po rishikohet"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"<xliff:g id="NAME">%s</xliff:g> e re"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Trokit për ta konfiguruar"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Për transferimin e fotografive dhe skedarëve të tjerë"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> e dëmtuar"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> është dëmtuar. Trokit për ta rregulluar."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Problem me <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Trokit për ta rregulluar"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> është dëmtuar. Zgjidh për ta rregulluar."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> nuk mbështetet"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Kjo pajisje nuk e mbështet këtë <xliff:g id="NAME">%s</xliff:g>. Trokit për ta konfiguruar në një format të mbështetur."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Kjo pajisje nuk e mbështet këtë <xliff:g id="NAME">%s</xliff:g>. Përzgjidhe për ta konfiguruar në një format të mbështetur."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> u hoq papritur"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Shkëput <xliff:g id="NAME">%s</xliff:g> para se ta heqësh për të shmangur humbjen e të dhënave"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Është hequr <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> është hequr; fut një të re"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Ende duke nxjerrë <xliff:g id="NAME">%s</xliff:g>..."</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Mos e hiq"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Nxirr median para se ta heqësh për të shmangur humbjen e përmbajtjes"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> u hoq"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Disa funksionalitete mund të mos funksionojnë si duhet. Fut një hapësirë ruajtëse të re."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> po nxirret"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Mos e hiq"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfiguro"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Nxirr"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Eksploro"</string>
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Ndrysho daljen"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> mungon"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"Fute përsëri këtë pajisje"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Fut përsëri pajisjen"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Po zhvendos <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Po zhvendos të dhënat"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Zhvendosja përfundoi"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Të dhënat u zhvendosën te <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Të dhënat nuk mund të zhvendoseshin"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"U lanë të dhëna në vendndodhjen origjinale"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Transferimi i përmbajtjes u krye"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Përmbajtja u zhvendos te <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Përmbajtja s\'mund të zhvendosej"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Provo ta zhvendosësh përsëri përmbajtjen"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"E hequr"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"E nxjerrë"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Po kontrollon..."</string>
@@ -1334,14 +1515,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Po lidh VPN-në për aktivizim të përhershëm…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN e lidhur në mënyrë të përhershme"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Shkëputur nga VPN-ja gjithmonë e aktivizuar"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Gabimi VPN-je për aktivizimin e përhershëm"</string>
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Nuk mund të lidhej me VPN-në gjithmonë të aktivizuar"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Ndrysho rrjetin ose cilësimet e VPN-së"</string>
     <string name="upload_file" msgid="2897957172366730416">"Zgjidh skedarin"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nuk u zgjodh asnjë skedar"</string>
     <string name="reset" msgid="2448168080964209908">"Rivendos"</string>
     <string name="submit" msgid="1602335572089911941">"Dërgo"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modaliteti \"në makinë\" është i aktivizuar"</string>
-    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Trokit për të dalë nga modaliteti \"në makinë\"."</string>
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplikacioni i drejtimit të makinës është në ekzekutim"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Trokit për të dalë nga aplikacioni i drejtimit të makinës."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Lidhja e çiftimit ose ajo e qasjes në zona publike interneti është aktive"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Trokit për ta konfiguruar."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Lidhja e çiftimit është çaktivizuar"</string>
@@ -1356,9 +1537,8 @@
       <item quantity="one">1 përputhje</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"U krye!"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Po fshin USB-në..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Po fshin kartën SD…"</string>
-    <string name="share" msgid="1778686618230011964">"Shpërnda"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Po fshin hapësirën ruajtëse të brendshme…"</string>
+    <string name="share" msgid="1778686618230011964">"Shpërndaj"</string>
     <string name="find" msgid="4808270900322985960">"Gjej"</string>
     <string name="websearch" msgid="4337157977400211589">"Kërkim në internet"</string>
     <string name="find_next" msgid="5742124618942193978">"Gjej tjetrën"</string>
@@ -1419,22 +1599,19 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-ja nga <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Hapësira ruajtëse e USB-së"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redakto"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Sinjalizimi i të dhënave"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Trokit për të parë përdorimin dhe cilësimet."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Kufiri i të dhënave 2G-3G u arrit"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Kufiri i të dhënave 4G u arrit"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Paralajmërim për të dhënat"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"Ke përdorur <xliff:g id="APP">%s</xliff:g> nga të dhënat"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"U arrit kufiri i të dhënave"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"U arrit kufiri i të dhënave Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Të dhënat u ndaluan për pjesën e mbetur të ciklit"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kufiri i të dhënave 2G-3G u tejkalua"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kufiri i të dhënave 4G u tejkalua"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Kufiri i të dhënave celulare u tejkalua"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Kufiri i të dhënave Wi-Fi u tejkalua"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> mbi kufirin e përcaktuar."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Të dhënat u ndërprenë për pjesën e mbetur të ciklit"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Mbi kufirin e të dhënave celulare"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Mbi kufirin e të dhënave të Wi-Fi"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"Ke kaluar <xliff:g id="SIZE">%s</xliff:g> mbi kufirin tënd të caktuar"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Të dhënat e sfondit janë të kufizuara"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Trokit për të hequr kufizimin."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Përdorim i madh të dhënash"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Përdorimi i të dhënave të tua gjatë ditëve të fundit është më i madh se normalisht. Trokit për të parë përdorimin dhe cilësimet."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Përdorim i lartë i të dhënave celulare"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Aplikacionet e tua kanë përdorur më shumë të dhëna se zakonisht"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ka përdorur më shumë të dhëna se zakonisht"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikatë sigurie"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certifikata është e vlefshme."</string>
     <string name="issued_to" msgid="454239480274921032">"Lëshuar për:"</string>
@@ -1457,6 +1634,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Dëshiron ta pranosh telefonatën?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Gjithmonë"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Vetëm një herë"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Cilësimet"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s nuk e mbështet profilin e punës"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Televizori"</string>
@@ -1484,6 +1662,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Mbivendosja #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", i sigurt"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Kjo nisje e aktivitetit në sfond nga <xliff:g id="PACKAGENAME">%1$s</xliff:g> do të bllokohet në ndërtimet e ardhshme të Q. Shiko në go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Nisja e aktivitetit në sfond nga <xliff:g id="PACKAGENAME">%1$s</xliff:g> u bllokua. Shiko në go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Harrova motivin"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Motivi është i gabuar"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Fjalëkalim i gabuar"</string>
@@ -1536,6 +1716,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Korrigjimi i ngjyrës"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Shkurtorja e qasshmërisë e aktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Shkurtorja e qasshmërisë e çaktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Shtyp dhe mbaj shtypur të dy butonat e volumit për tre sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Zgjidh një funksion për ta përdorur kur troket butonin e \"Qasshmërisë\":"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Për të ndryshuar funksionet, prek dhe mbaj butonin e \"Qasshmërisë\"."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zmadhimi"</string>
@@ -1670,7 +1851,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instaluar nga administratori"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Fshirë nga administratori"</string>
-    <string name="battery_saver_description" msgid="5394663545060026162">"Për të përmirësuar jetëgjatësinë e baterisë, \"Kursyesi i baterisë\" ul rendimentin e pajisjes sate si dhe kufizon dridhjet, shërbimet e vendndodhjes dhe shumicën e të dhënave në sfond. Email-i, mesazhet dhe aplikacionet e tjera që mbështeten te sinkronizimi mund të mos përditësohen nëse nuk i hap.\n\n\"Kursyesi i baterisë\" çaktivizohet automatikisht kur pajisja është në ngarkim."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Për të zgjatur jetëgjatësinë e baterisë sate, \"Kursyesi i baterisë\" çaktivizon disa funksione të pajisjes dhe kufizon aplikacionet. "<annotation id="url">"Mëso më shumë"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Për të zgjatur jetëgjatësinë e baterisë sate, \"Kursyesi i baterisë\" çaktivizon disa funksione të pajisjes dhe kufizon aplikacionet."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivizo"</string>
@@ -1682,9 +1864,9 @@
       <item quantity="other">Për %1$d minutë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Për 1 minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
       <item quantity="other">Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Për një orë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="one">Për 1 orë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="other">Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1698,9 +1880,9 @@
       <item quantity="other">Për %d minuta</item>
       <item quantity="one">Për 1 minutë</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
       <item quantity="other">Për %d orë</item>
-      <item quantity="one">Për një orë</item>
+      <item quantity="one">Për 1 orë</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="other">Për %d orë</item>
@@ -1718,18 +1900,19 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fundjava"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Ngjarje"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Në gjumë"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Lënë në heshtje nga <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> po çaktivizon disa tinguj"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Ka një problem të brendshëm me pajisjen tënde. Ajo mund të jetë e paqëndrueshme derisa të rivendosësh të dhënat në gjendje fabrike."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Ka një problem të brendshëm me pajisjen tënde. Kontakto prodhuesin tënd për detaje."</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"Kërkesa USSD është modifikuar në kërkesën DIAL."</string>
-    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"Kërkesa USSD është modifikuar në kërkesën SS."</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"Kërkesa USSD është modifikuar në kërkesën e re USSD."</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"Kërkesa USSD është modifikuar në kërkesën Video DIAL."</string>
-    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Kërkesa SS është e modifikuar në kërkesën DIAL."</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"Kërkesa SS është e modifikuar në kërkesën Video DIAL."</string>
-    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Kërkesa SS është modifikuar në kërkesën USSD."</string>
-    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Kërkesa SS është e modifikuar në kërkesën e re SS."</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Kërkesa USSD u ndryshua në telefonatë të rregullt"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"Kërkesa USSD u ndryshua në kërkesë SS"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"U ndryshua në kërkesë të re USSD"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"Kërkesa USSD u ndryshua në telefonatë me video"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"Kërkesa SS u ndryshua në telefonatë të rregullt"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"Kërkesa SS u ndryshua në telefonatë me video"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Kërkesa SS u ndryshua në kërkesë USSD"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"U ndryshua në kërkesë të re SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profili i punës"</string>
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Sinjalizuar"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Zgjero"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Palos"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"aktivizo zgjerimin"</string>
@@ -1745,7 +1928,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> të zgjedhura</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> i zgjedhur</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="5929663562028088222">"E pakategorizuar"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"E pakategorizuara"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ke caktuar rëndësinë e këtyre njoftimeve."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Është i rëndësishëm për shkak të personave të përfshirë."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Dëshiron të lejosh <xliff:g id="APP">%1$s</xliff:g> që të krijojë një përdorues të ri me <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
@@ -1757,6 +1940,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Të gjitha gjuhët"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Të gjitha rajonet"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Kërko"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Aplikacioni nuk ofrohet"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> nuk ofrohet në këtë moment. Kjo menaxhohet nga <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Mëso më shumë"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Të aktivizohet profili i punës?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikacionet e punës, njoftimet, të dhënat e tua dhe funksionet e tjera të profilit të punës do të aktivizohen"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivizo"</string>
@@ -1771,8 +1957,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Trokit për ta shkyçur profilin e punës"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"U lidh me <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Trokit për të parë skedarët"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Gozhdo"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Zhgozhdo"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacioni mbi aplikacionin"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Po nis demonstrimin..."</string>
@@ -1805,12 +1989,17 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> sugjerime për plotësim automatik</item>
       <item quantity="one">Një sugjerim për plotësim automatik</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Të ruhet te &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Të ruhet <xliff:g id="TYPE">%1$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Të ruhen <xliff:g id="TYPE_0">%1$s</xliff:g> dhe <xliff:g id="TYPE_1">%2$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Të ruhen <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Të ruhet te "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Të ruhet <xliff:g id="TYPE">%1$s</xliff:g> te "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Të ruhet <xliff:g id="TYPE_0">%1$s</xliff:g> dhe <xliff:g id="TYPE_1">%2$s</xliff:g> te "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Të ruhet <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> te "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Të përditësohet në "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Të përditësohet <xliff:g id="TYPE">%1$s</xliff:g> në "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Të përditësohet <xliff:g id="TYPE_0">%1$s</xliff:g> dhe <xliff:g id="TYPE_1">%2$s</xliff:g> në "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Të përditësohen këta artikuj në "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Ruaj"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Jo, faleminderit"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Përditëso"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"fjalëkalimi"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adresa"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"karta e kreditit"</string>
@@ -1826,6 +2015,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Karta SIM nuk është e përgatitur për zërin"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Karta SIM nuk lejohet për zërin"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefoni nuk lejohet për zërin"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"Karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g> nuk lejohet"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"Karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g> nuk është përgatitur"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g> nuk lejohet"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g> nuk lejohet"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Dritare kërcyese"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Versioni i aplikacionit u ul ose nuk është në përputhje me këtë shkurtore"</string>
@@ -1838,7 +2031,61 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"U gjet aplikacion i dëmshëm"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> dëshiron të shfaqë pjesë të <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Modifiko"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Do të lëshojë dridhje për telefonatat dhe njoftimet"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Do të hiqet zëri për telefonatat dhe njoftimet"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Ndryshimet e sistemit"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Mos shqetëso"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"E re: Modaliteti \"Mos shqetëso\" po fsheh njoftimet"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Trokit për të mësuar më shumë dhe për të ndryshuar."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Mos shqetëso\" ka ndryshuar"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Trokit për të kontrolluar cilësimet e sjelljes për ndërprerjet"</string>
+    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Trokit për të shënuar atë që është bllokuar"</string>
+    <string name="notification_app_name_system" msgid="4205032194610042794">"Sistemi"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"Cilësimet"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofoni"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"po shfaqet mbi aplikacionet e tjera në ekranin tënd"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"\"Kursyesi i baterisë\" u aktivizua për të zgjatur jetëgjatësinë e baterisë"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
+    <string name="mime_type_folder" msgid="7111951698626315204">"Dosje"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Aplikacion i Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Skedar"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"Skedar <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Audio"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"Audio <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Video"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"Video <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Imazh"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"Imazh <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Arkiv"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"Arkiv <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Dokument"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"Dokument <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Fletëllogaritëse"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"Fletëllogaritëse <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Prezantim"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"Prezantim <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="car_loading_profile" msgid="3545132581795684027">"Po ngarkohet"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skedarë</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> skedar</item>
+    </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

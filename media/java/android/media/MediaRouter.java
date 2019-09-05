@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
@@ -343,6 +344,16 @@ public class MediaRouter {
             updatePresentationDisplays(displayId);
         }
 
+        public void setRouterGroupId(String groupId) {
+            if (mClient != null) {
+                try {
+                    mMediaRouterService.registerClientGroupId(mClient, groupId);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to register group ID of the client.", ex);
+                }
+            }
+        }
+
         public Display[] getAllPresentationDisplays() {
             return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
         }
@@ -355,6 +366,21 @@ public class MediaRouter {
                         && route.mPresentationDisplay.getDisplayId() == changedDisplayId)) {
                     dispatchRoutePresentationDisplayChanged(route);
                 }
+            }
+        }
+
+        void updateSelectedRouteForId(String routeId) {
+            RouteInfo selectedRoute = isBluetoothA2dpOn()
+                    ? mBluetoothA2dpRoute : mDefaultAudioVideo;
+            final int count = mRoutes.size();
+            for (int i = 0; i < count; i++) {
+                final RouteInfo route = mRoutes.get(i);
+                if (TextUtils.equals(route.mGlobalRouteId, routeId)) {
+                    selectedRoute = route;
+                }
+            }
+            if (selectedRoute != mSelectedRoute) {
+                selectRouteStatic(selectedRoute.mSupportedTypes, selectedRoute, false);
             }
         }
 
@@ -612,8 +638,19 @@ public class MediaRouter {
                                         && mSelectedRoute != mBluetoothA2dpRoute)) {
                             return;
                         }
-                        Log.v(TAG, "onRestoreRoute() : route=" + mSelectedRoute);
+                        if (DEBUG) {
+                            Log.d(TAG, "onRestoreRoute() : route=" + mSelectedRoute);
+                        }
                         mSelectedRoute.select();
+                    }
+                });
+            }
+
+            @Override
+            public void onSelectedRouteChanged(String routeId) {
+                mHandler.post(() -> {
+                    if (Client.this == mClient) {
+                        updateSelectedRouteForId(routeId);
                     }
                 });
             }
@@ -725,6 +762,13 @@ public class MediaRouter {
      * @hide Future API ported from support library.  Revisit this later.
      */
     public static final int AVAILABILITY_FLAG_IGNORE_DEFAULT_ROUTE = 1 << 0;
+
+    /**
+     * The route group id used for sharing the selected mirroring device.
+     * System UI and Settings use this to synchronize their mirroring status.
+     * @hide
+     */
+    public static final String MIRRORING_GROUP_ID = "android.media.mirroring_group";
 
     // Maps application contexts
     static final HashMap<Context, MediaRouter> sRouters = new HashMap<Context, MediaRouter>();
@@ -843,6 +887,25 @@ public class MediaRouter {
 
         // It doesn't look like we can find a matching route right now.
         return false;
+    }
+
+    /**
+     * Sets the group ID of the router.
+     * Media routers with the same ID acts as if they were a single media router.
+     * For example, if a media router selects a route, the selected route of routers
+     * with the same group ID will be changed automatically.
+     *
+     * Two routers in a group are supposed to use the same route types.
+     *
+     * System UI and Settings use this to synchronize their mirroring status.
+     * Do not set the router group id unless it's necessary.
+     *
+     * {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY} permission is required to
+     * call this method.
+     * @hide
+     */
+    public void setRouterGroupId(@Nullable String groupId) {
+        sStatic.setRouterGroupId(groupId);
     }
 
     /**
@@ -969,19 +1032,6 @@ public class MediaRouter {
                 && (route == btRoute || route == sStatic.mDefaultAudioVideo)) {
             try {
                 sStatic.mAudioService.setBluetoothA2dpOn(route == btRoute);
-                // TODO: Remove the following logging when no longer needed.
-                if (route != btRoute) {
-                    StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
-                    StringBuffer sb = new StringBuffer();
-                    // callStack[3] is the caller of this method.
-                    for (int i = 3; i < callStack.length; i++) {
-                        StackTraceElement caller = callStack[i];
-                        sb.append(caller.getClassName() + "." + caller.getMethodName()
-                                + ":" + caller.getLineNumber()).append("  ");
-                    }
-                    Log.w(TAG, "Default route is selected while a BT route is available: pkgName="
-                            + sStatic.mPackageName + ", callers=" + sb.toString());
-                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error changing Bluetooth A2DP state", e);
             }
@@ -1068,7 +1118,9 @@ public class MediaRouter {
     }
 
     static void addRouteStatic(RouteInfo info) {
-        Log.v(TAG, "Adding route: " + info);
+        if (DEBUG) {
+            Log.d(TAG, "Adding route: " + info);
+        }
         final RouteCategory cat = info.getCategory();
         if (!sStatic.mCategories.contains(cat)) {
             sStatic.mCategories.add(cat);
@@ -1123,7 +1175,9 @@ public class MediaRouter {
     }
 
     static void removeRouteStatic(RouteInfo info) {
-        Log.v(TAG, "Removing route: " + info);
+        if (DEBUG) {
+            Log.d(TAG, "Removing route: " + info);
+        }
         if (sStatic.mRoutes.remove(info)) {
             final RouteCategory removingCat = info.getCategory();
             final int count = sStatic.mRoutes.size();
@@ -2364,8 +2418,7 @@ public class MediaRouter {
                 return;
             }
             if (mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
-                @VolumeProvider.ControlType int volumeControl =
-                        VolumeProvider.VOLUME_CONTROL_FIXED;
+                int volumeControl = VolumeProvider.VOLUME_CONTROL_FIXED;
                 switch (mVolumeHandling) {
                     case RemoteControlClient.PLAYBACK_VOLUME_VARIABLE:
                         volumeControl = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
@@ -2391,8 +2444,7 @@ public class MediaRouter {
 
         class SessionVolumeProvider extends VolumeProvider {
 
-            public SessionVolumeProvider(@VolumeProvider.ControlType int volumeControl,
-                    int maxVolume, int currentVolume) {
+            SessionVolumeProvider(int volumeControl, int maxVolume, int currentVolume) {
                 super(volumeControl, maxVolume, currentVolume);
             }
 

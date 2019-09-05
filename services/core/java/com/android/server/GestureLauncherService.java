@@ -35,6 +35,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MutableBoolean;
@@ -356,6 +357,12 @@ public class GestureLauncherService extends SystemService {
 
     public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
             MutableBoolean outLaunched) {
+        if (event.isLongPress()) {
+            // Long presses are sent as a second key down. If the long press threshold is set lower
+            // than the double tap of sequence interval thresholds, this could cause false double
+            // taps or consecutive taps, so we want to ignore the long press event.
+            return false;
+        }
         boolean launched = false;
         boolean intercept = false;
         long powerTapInterval;
@@ -398,26 +405,35 @@ public class GestureLauncherService extends SystemService {
      */
     @VisibleForTesting
     boolean handleCameraGesture(boolean useWakelock, int source) {
-        boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
-        if (!userSetupComplete) {
-            if (DBG) Slog.d(TAG, String.format(
-                    "userSetupComplete = %s, ignoring camera gesture.",
-                    userSetupComplete));
-            return false;
-        }
-        if (DBG) Slog.d(TAG, String.format(
-                "userSetupComplete = %s, performing camera gesture.",
-                userSetupComplete));
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "GestureLauncher:handleCameraGesture");
+        try {
+            boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+            if (!userSetupComplete) {
+                if (DBG) {
+                    Slog.d(TAG, String.format(
+                            "userSetupComplete = %s, ignoring camera gesture.",
+                            userSetupComplete));
+                }
+                return false;
+            }
+            if (DBG) {
+                Slog.d(TAG, String.format(
+                        "userSetupComplete = %s, performing camera gesture.",
+                        userSetupComplete));
+            }
 
-        if (useWakelock) {
-            // Make sure we don't sleep too early
-            mWakeLock.acquire(500L);
+            if (useWakelock) {
+                // Make sure we don't sleep too early
+                mWakeLock.acquire(500L);
+            }
+            StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            service.onCameraLaunchGestureDetected(source);
+            return true;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-        StatusBarManagerInternal service = LocalServices.getService(
-                StatusBarManagerInternal.class);
-        service.onCameraLaunchGestureDetected(source);
-        return true;
     }
 
     private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {

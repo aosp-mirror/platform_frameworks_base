@@ -17,13 +17,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/menu_container"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/navigation_key_width"
     android:layout_height="match_parent"
     android:importantForAccessibility="no"
     >
-    <!-- Use width & height=match_parent for parent FrameLayout and buttons because they are placed
-    inside a view that has a size controlled by weight. Ensure weight is large enough to support
-    icon size. -->
+    <!-- Use nav button width & height=match_parent for parent FrameLayout and buttons because they
+    are placed inside a view that has a size controlled by weight. Ensure weight is large enough to
+    support icon size. -->
 
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/menu"
@@ -35,13 +35,13 @@
         android:visibility="invisible"
         android:contentDescription="@string/accessibility_menu"
         />
-    <com.android.systemui.statusbar.policy.KeyButtonView
-        android:id="@+id/ime_switcher"
+    <include layout="@layout/ime_switcher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:contentDescription="@string/accessibility_ime_switch_button"
         android:scaleType="centerInside"
+        android:visibility="invisible"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
         />
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/rotate_suggestion"

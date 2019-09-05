@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.AppIdInt;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -43,7 +44,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user handle to indicate all users on the device */
     @SystemApi
     @TestApi
-    public static final UserHandle ALL = new UserHandle(USER_ALL);
+    public static final @NonNull UserHandle ALL = new UserHandle(USER_ALL);
 
     /** @hide A user id to indicate the currently active user */
     @UnsupportedAppUsage
@@ -52,7 +53,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user handle to indicate the current user of the device */
     @SystemApi
     @TestApi
-    public static final UserHandle CURRENT = new UserHandle(USER_CURRENT);
+    public static final @NonNull UserHandle CURRENT = new UserHandle(USER_CURRENT);
 
     /** @hide A user id to indicate that we would like to send to the current
      *  user, but if this is calling from a user process then we will send it
@@ -64,7 +65,7 @@ public final class UserHandle implements Parcelable {
      *  user, but if this is calling from a user process then we will send it
      *  to the caller's user instead of failing with a security exception */
     @UnsupportedAppUsage
-    public static final UserHandle CURRENT_OR_SELF = new UserHandle(USER_CURRENT_OR_SELF);
+    public static final @NonNull UserHandle CURRENT_OR_SELF = new UserHandle(USER_CURRENT_OR_SELF);
 
     /** @hide An undefined user id */
     @UnsupportedAppUsage
@@ -86,7 +87,7 @@ public final class UserHandle implements Parcelable {
      */
     @UnsupportedAppUsage
     @Deprecated
-    public static final UserHandle OWNER = new UserHandle(USER_OWNER);
+    public static final @NonNull UserHandle OWNER = new UserHandle(USER_OWNER);
 
     /** @hide A user id constant to indicate the "system" user of the device */
     @UnsupportedAppUsage
@@ -99,7 +100,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user handle to indicate the "system" user of the device */
     @SystemApi
     @TestApi
-    public static final UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
+    public static final @NonNull UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
 
     /**
      * @hide Enable multi-user related side effects. Set this to false if
@@ -159,8 +160,7 @@ public final class UserHandle implements Parcelable {
     @UnsupportedAppUsage
     public static boolean isIsolated(int uid) {
         if (uid > 0) {
-            final int appId = getAppId(uid);
-            return appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID;
+            return Process.isIsolated(uid);
         } else {
             return false;
         }
@@ -171,7 +171,7 @@ public final class UserHandle implements Parcelable {
      * "it's system", because of isolated UIDs. Use {@link #isCore} for that.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static boolean isApp(int uid) {
         if (uid > 0) {
             final int appId = getAppId(uid);
@@ -320,9 +320,14 @@ public final class UserHandle implements Parcelable {
             sb.append('u');
             sb.append(getUserId(uid));
             final int appId = getAppId(uid);
-            if (appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID) {
-                sb.append('i');
-                sb.append(appId - Process.FIRST_ISOLATED_UID);
+            if (isIsolated(appId)) {
+                if (appId > Process.FIRST_ISOLATED_UID) {
+                    sb.append('i');
+                    sb.append(appId - Process.FIRST_ISOLATED_UID);
+                } else {
+                    sb.append("ai");
+                    sb.append(appId - Process.FIRST_APP_ZYGOTE_ISOLATED_UID);
+                }
             } else if (appId >= Process.FIRST_APPLICATION_UID) {
                 sb.append('a');
                 sb.append(appId - Process.FIRST_APPLICATION_UID);
@@ -356,9 +361,14 @@ public final class UserHandle implements Parcelable {
             pw.print('u');
             pw.print(getUserId(uid));
             final int appId = getAppId(uid);
-            if (appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID) {
-                pw.print('i');
-                pw.print(appId - Process.FIRST_ISOLATED_UID);
+            if (isIsolated(appId)) {
+                if (appId > Process.FIRST_ISOLATED_UID) {
+                    pw.print('i');
+                    pw.print(appId - Process.FIRST_ISOLATED_UID);
+                } else {
+                    pw.print("ai");
+                    pw.print(appId - Process.FIRST_APP_ZYGOTE_ISOLATED_UID);
+                }
             } else if (appId >= Process.FIRST_APPLICATION_UID) {
                 pw.print('a');
                 pw.print(appId - Process.FIRST_APPLICATION_UID);
@@ -498,7 +508,7 @@ public final class UserHandle implements Parcelable {
         return h != USER_NULL ? new UserHandle(h) : null;
     }
     
-    public static final Parcelable.Creator<UserHandle> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<UserHandle> CREATOR
             = new Parcelable.Creator<UserHandle>() {
         public UserHandle createFromParcel(Parcel in) {
             return new UserHandle(in);

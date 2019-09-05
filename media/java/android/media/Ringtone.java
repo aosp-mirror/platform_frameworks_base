@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -23,13 +24,12 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
-import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.provider.MediaStore.MediaColumns;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.io.IOException;
@@ -50,7 +50,6 @@ public class Ringtone {
 
     private static final String[] MEDIA_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID,
-        MediaStore.Audio.Media.DATA,
         MediaStore.Audio.Media.TITLE
     };
     /** Selection that limits query results to just audio files */
@@ -62,6 +61,8 @@ public class Ringtone {
 
     private final Context mContext;
     private final AudioManager mAudioManager;
+    private VolumeShaper.Configuration mVolumeShaperConfig;
+    private VolumeShaper mVolumeShaper;
 
     /**
      * Flag indicating if we're allowed to fall back to remote playback using
@@ -137,7 +138,7 @@ public class Ringtone {
         mAudioAttributes = attributes;
         // The audio attributes have to be set before the media player is prepared.
         // Re-initialize it.
-        setUri(mUri);
+        setUri(mUri, mVolumeShaperConfig);
     }
 
     /**
@@ -254,7 +255,7 @@ public class Ringtone {
                         cursor = res.query(uri, MEDIA_COLUMNS, mediaSelection, null, null);
                         if (cursor != null && cursor.getCount() == 1) {
                             cursor.moveToFirst();
-                            return cursor.getString(2);
+                            return cursor.getString(1);
                         }
                         // missing cursor is handled below
                     }
@@ -304,6 +305,18 @@ public class Ringtone {
      */
     @UnsupportedAppUsage
     public void setUri(Uri uri) {
+        setUri(uri, null);
+    }
+
+    /**
+     * Set {@link Uri} to be used for ringtone playback. Attempts to open
+     * locally, otherwise will delegate playback to remote
+     * {@link IRingtonePlayer}. Add {@link VolumeShaper} if required.
+     *
+     * @hide
+     */
+    public void setUri(Uri uri, @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        mVolumeShaperConfig = volumeShaperConfig;
         destroyLocalPlayer();
 
         mUri = uri;
@@ -320,6 +333,9 @@ public class Ringtone {
             mLocalPlayer.setAudioAttributes(mAudioAttributes);
             synchronized (mPlaybackSettingsLock) {
                 applyPlaybackProperties_sync();
+            }
+            if (mVolumeShaperConfig != null) {
+                mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
             }
             mLocalPlayer.prepare();
 
@@ -365,7 +381,8 @@ public class Ringtone {
                 volume = mVolume;
             }
             try {
-                mRemotePlayer.play(mRemoteToken, canonicalUri, mAudioAttributes, volume, looping);
+                mRemotePlayer.playWithVolumeShaping(mRemoteToken, canonicalUri, mAudioAttributes,
+                        volume, looping, mVolumeShaperConfig);
             } catch (RemoteException e) {
                 if (!playFallbackRingtone()) {
                     Log.w(TAG, "Problem playing ringtone: " + e);
@@ -399,6 +416,7 @@ public class Ringtone {
             mLocalPlayer.reset();
             mLocalPlayer.release();
             mLocalPlayer = null;
+            mVolumeShaper = null;
             synchronized (sActiveRingtones) {
                 sActiveRingtones.remove(this);
             }
@@ -414,6 +432,9 @@ public class Ringtone {
         }
         mLocalPlayer.setOnCompletionListener(mCompletionListener);
         mLocalPlayer.start();
+        if (mVolumeShaper != null) {
+            mVolumeShaper.apply(VolumeShaper.Operation.PLAY);
+        }
     }
 
     /**
@@ -459,6 +480,9 @@ public class Ringtone {
                         mLocalPlayer.setAudioAttributes(mAudioAttributes);
                         synchronized (mPlaybackSettingsLock) {
                             applyPlaybackProperties_sync();
+                        }
+                        if (mVolumeShaperConfig != null) {
+                            mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
                         }
                         mLocalPlayer.prepare();
                         startLocalPlayer();

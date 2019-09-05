@@ -17,4 +17,5 @@
     <string name="app_name">Touch Latency</string>
 
     <string name="mode">Touch</string>
+    <string name="display_mode">Mode</string>
 </resources>

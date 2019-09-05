@@ -82,6 +82,8 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.AbsSpinner, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.AbsSpinner, attrs, a, defStyleAttr,
+                defStyleRes);
 
         final CharSequence[] entries = a.getTextArray(R.styleable.AbsSpinner_entries);
         if (entries != null) {
@@ -413,7 +415,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
                     + " position=" + position + "}";
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

@@ -21,10 +21,8 @@
 #include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
-#include <utils/Log.h>
+#include <log/log.h>
 #include <utils/Looper.h>
-#include <utils/threads.h>
-#include <utils/KeyedVector.h>
 #include <input/InputTransport.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
@@ -32,6 +30,7 @@
 #include "android_view_MotionEvent.h"
 
 #include <nativehelper/ScopedLocalRef.h>
+#include <unordered_map>
 
 #include "core_jni_helpers.h"
 
@@ -39,8 +38,6 @@ namespace android {
 
 // Log debug messages about the dispatch cycle.
 static const bool kDebugDispatchCycle = false;
-// Display id for default(primary) display.
-static const int32_t kDefaultDisplayId = 0;
 
 static struct {
     jclass clazz;
@@ -67,7 +64,8 @@ private:
     jobject mSenderWeakGlobal;
     InputPublisher mInputPublisher;
     sp<MessageQueue> mMessageQueue;
-    KeyedVector<uint32_t, uint32_t> mPublishedSeqMap;
+    std::unordered_map<uint32_t, uint32_t> mPublishedSeqMap;
+
     uint32_t mNextPublishedSeq;
 
     const std::string getInputChannelName() {
@@ -116,15 +114,15 @@ status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* even
 
     uint32_t publishedSeq = mNextPublishedSeq++;
     status_t status = mInputPublisher.publishKeyEvent(publishedSeq,
-            event->getDeviceId(), event->getSource(), event->getAction(), event->getFlags(),
-            event->getKeyCode(), event->getScanCode(), event->getMetaState(),
+            event->getDeviceId(), event->getSource(), event->getDisplayId(), event->getAction(),
+            event->getFlags(), event->getKeyCode(), event->getScanCode(), event->getMetaState(),
             event->getRepeatCount(), event->getDownTime(), event->getEventTime());
     if (status) {
         ALOGW("Failed to send key event on channel '%s'.  status=%d",
                 getInputChannelName().c_str(), status);
         return status;
     }
-    mPublishedSeqMap.add(publishedSeq, seq);
+    mPublishedSeqMap.emplace(publishedSeq, seq);
     return OK;
 }
 
@@ -137,10 +135,10 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
     for (size_t i = 0; i <= event->getHistorySize(); i++) {
         publishedSeq = mNextPublishedSeq++;
         status_t status = mInputPublisher.publishMotionEvent(publishedSeq,
-                event->getDeviceId(), event->getSource(),
-                kDefaultDisplayId /* TODO(multi-display): propagate display id */,
+                event->getDeviceId(), event->getSource(), event->getDisplayId(),
                 event->getAction(), event->getActionButton(), event->getFlags(),
                 event->getEdgeFlags(), event->getMetaState(), event->getButtonState(),
+                event->getClassification(),
                 event->getXOffset(), event->getYOffset(),
                 event->getXPrecision(), event->getYPrecision(),
                 event->getDownTime(), event->getHistoricalEventTime(i),
@@ -152,7 +150,7 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
             return status;
         }
     }
-    mPublishedSeqMap.add(publishedSeq, seq);
+    mPublishedSeqMap.emplace(publishedSeq, seq);
     return OK;
 }
 
@@ -201,35 +199,37 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
             return status;
         }
 
-        ssize_t index = mPublishedSeqMap.indexOfKey(publishedSeq);
-        if (index >= 0) {
-            uint32_t seq = mPublishedSeqMap.valueAt(index);
-            mPublishedSeqMap.removeItemsAt(index);
+        auto it = mPublishedSeqMap.find(publishedSeq);
+        if (it == mPublishedSeqMap.end()) {
+            continue;
+        }
 
-            if (kDebugDispatchCycle) {
-                ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
-                        "pendingEvents=%zu.",
-                        getInputChannelName().c_str(), seq, handled ? "true" : "false",
-                        mPublishedSeqMap.size());
+        uint32_t seq = it->second;
+        mPublishedSeqMap.erase(it);
+
+        if (kDebugDispatchCycle) {
+            ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
+                    "pendingEvents=%zu.",
+                    getInputChannelName().c_str(), seq, handled ? "true" : "false",
+                    mPublishedSeqMap.size());
+        }
+
+        if (!skipCallbacks) {
+            if (!senderObj.get()) {
+                senderObj.reset(jniGetReferent(env, mSenderWeakGlobal));
+                if (!senderObj.get()) {
+                    ALOGW("channel '%s' ~ Sender object was finalized "
+                            "without being disposed.", getInputChannelName().c_str());
+                    return DEAD_OBJECT;
+                }
             }
 
-            if (!skipCallbacks) {
-                if (!senderObj.get()) {
-                    senderObj.reset(jniGetReferent(env, mSenderWeakGlobal));
-                    if (!senderObj.get()) {
-                        ALOGW("channel '%s' ~ Sender object was finalized "
-                                "without being disposed.", getInputChannelName().c_str());
-                        return DEAD_OBJECT;
-                    }
-                }
-
-                env->CallVoidMethod(senderObj.get(),
-                        gInputEventSenderClassInfo.dispatchInputEventFinished,
-                        jint(seq), jboolean(handled));
-                if (env->ExceptionCheck()) {
-                    ALOGE("Exception dispatching finished signal.");
-                    skipCallbacks = true;
-                }
+            env->CallVoidMethod(senderObj.get(),
+                    gInputEventSenderClassInfo.dispatchInputEventFinished,
+                    jint(seq), jboolean(handled));
+            if (env->ExceptionCheck()) {
+                ALOGE("Exception dispatching finished signal.");
+                skipCallbacks = true;
             }
         }
     }

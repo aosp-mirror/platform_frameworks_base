@@ -21,6 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcSpnFormats">
     <item msgid="2776657861851140021">"%s"</item>
-    <item msgid="5094669985484060934">"%s Wi-Fi"</item>
+    <item msgid="5094669985484060934">"%s WiFi"</item>
   </string-array>
 </resources>

@@ -80,7 +80,26 @@ public final class SubtitleData
     }
 
     /**
-     * Returns the index of the MediaPlayer track which contains this subtitle data.
+     * Constructor.
+     *
+     * @param trackIndex the index of the media player track which contains this subtitle data.
+     * @param startTimeUs the start time in microsecond for the subtitle data
+     * @param durationUs the duration in microsecond for the subtitle data
+     * @param data the data array for the subtitle data. It should not be null.
+     *            No data copying is made.
+     */
+    public SubtitleData(int trackIndex, long startTimeUs, long durationUs, @NonNull byte[] data) {
+        if (data == null) {
+            throw new IllegalArgumentException("null data is not allowed");
+        }
+        mTrackIndex = trackIndex;
+        mStartTimeUs = startTimeUs;
+        mDurationUs = durationUs;
+        mData = data;
+    }
+
+    /**
+     * Returns the index of the media player track which contains this subtitle data.
      * @return an index in the array returned by {@link MediaPlayer#getTrackInfo()}.
      */
     public int getTrackIndex() {

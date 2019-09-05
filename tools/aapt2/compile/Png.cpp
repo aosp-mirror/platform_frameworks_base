@@ -27,6 +27,7 @@
 #include "androidfw/ResourceTypes.h"
 
 #include "Source.h"
+#include "trace/TraceBuffer.h"
 #include "util/BigBuffer.h"
 #include "util/Util.h"
 
@@ -1233,6 +1234,7 @@ getout:
 
 bool Png::process(const Source& source, std::istream* input,
                   BigBuffer* outBuffer, const PngOptions& options) {
+  TRACE_CALL();
   png_byte signature[kPngSignatureSize];
 
   // Read the PNG signature first.

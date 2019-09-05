@@ -29,7 +29,9 @@ import android.content.Context;
  * This loader is based on the MailAsyncTaskLoader from the AOSP EmailUnified repo.
  *
  * @param <T> the data type to be loaded.
+ * @deprecated Framework loader is deprecated, use the compat version instead.
  */
+@Deprecated
 public abstract class AsyncLoader<T> extends AsyncTaskLoader<T> {
     private T mResult;
 

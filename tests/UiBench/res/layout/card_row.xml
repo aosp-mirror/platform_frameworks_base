@@ -24,7 +24,7 @@
     android:paddingBottom="5dp"
     android:clipToPadding="false"
     android:background="@null">
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1">
@@ -32,13 +32,13 @@
             android:id="@+id/card_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v4.widget.Space
+    <androidx.legacy.widget.Space
         android:layout_height="match_parent"
         android:layout_width="10dp" />
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />

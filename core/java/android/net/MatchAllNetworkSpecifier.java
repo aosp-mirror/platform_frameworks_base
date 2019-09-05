@@ -68,7 +68,7 @@ public final class MatchAllNetworkSpecifier extends NetworkSpecifier implements 
         // Nothing to write.
     }
 
-    public static final Parcelable.Creator<MatchAllNetworkSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MatchAllNetworkSpecifier> CREATOR =
             new Parcelable.Creator<MatchAllNetworkSpecifier>() {
         public MatchAllNetworkSpecifier createFromParcel(Parcel in) {
             return new MatchAllNetworkSpecifier();

@@ -139,7 +139,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<ValidationProbeEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ValidationProbeEvent> CREATOR
         = new Parcelable.Creator<ValidationProbeEvent>() {
         public ValidationProbeEvent createFromParcel(Parcel in) {
             return new ValidationProbeEvent(in);

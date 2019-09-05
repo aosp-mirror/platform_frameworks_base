@@ -21,8 +21,11 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -478,7 +481,9 @@ public final class IpSecTransform implements AutoCloseable {
          * @throws IOException indicating other errors
          * @hide
          */
+        @SystemApi
         @NonNull
+        @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public IpSecTransform buildTunnelModeTransform(
                 @NonNull InetAddress sourceAddress,

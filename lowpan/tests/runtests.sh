@@ -21,4 +21,4 @@ adb wait-for-device
 
 adb install -r -g "$OUT/data/app/FrameworksLowpanApiTests/FrameworksLowpanApiTests.apk"
 
-adb shell am instrument -w "$@" 'android.net.lowpan.test/android.support.test.runner.AndroidJUnitRunner'
+adb shell am instrument -w "$@" 'android.net.lowpan.test/androidx.test.runner.AndroidJUnitRunner'

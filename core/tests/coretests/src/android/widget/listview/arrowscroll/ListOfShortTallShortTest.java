@@ -17,10 +17,11 @@
 package android.widget.listview.arrowscroll;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.widget.ListView;
 import android.view.KeyEvent;
+import android.widget.ListView;
 import android.widget.listview.ListOfShortTallShort;
+
+import androidx.test.filters.MediumTest;
 
 public class ListOfShortTallShortTest extends ActivityInstrumentationTestCase<ListOfShortTallShort> {
     private ListView mListView;

@@ -15,8 +15,7 @@
  */
 
 #include "LayerDrawable.h"
-#include "GlLayer.h"
-#include "VkLayer.h"
+#include <utils/MathUtils.h>
 
 #include "GrBackendSurface.h"
 #include "SkColorFilter.h"
@@ -30,112 +29,109 @@ namespace skiapipeline {
 void LayerDrawable::onDraw(SkCanvas* canvas) {
     Layer* layer = mLayerUpdater->backingLayer();
     if (layer) {
-        DrawLayer(canvas->getGrContext(), canvas, layer);
+        DrawLayer(canvas->getGrContext(), canvas, layer, nullptr, nullptr, true);
     }
 }
 
+// This is a less-strict matrix.isTranslate() that will still report being translate-only
+// on imperceptibly small scaleX & scaleY values.
+static bool isBasicallyTranslate(const SkMatrix& matrix) {
+    if (!matrix.isScaleTranslate()) return false;
+    return MathUtils::isOne(matrix.getScaleX()) && MathUtils::isOne(matrix.getScaleY());
+}
+
+static bool shouldFilter(const SkMatrix& matrix) {
+    if (!matrix.isScaleTranslate()) return true;
+
+    // We only care about meaningful scale here
+    bool noScale = MathUtils::isOne(matrix.getScaleX()) && MathUtils::isOne(matrix.getScaleY());
+    bool pixelAligned =
+            SkScalarIsInt(matrix.getTranslateX()) && SkScalarIsInt(matrix.getTranslateY());
+    return !(noScale && pixelAligned);
+}
+
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
-                              const SkRect* dstRect) {
+                              const SkRect* srcRect, const SkRect* dstRect,
+                              bool useLayerTransform) {
     if (context == nullptr) {
         SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
         return false;
     }
     // transform the matrix based on the layer
-    SkMatrix layerTransform;
-    layer->getTransform().copyTo(layerTransform);
-    sk_sp<SkImage> layerImage;
+    SkMatrix layerTransform = layer->getTransform();
+    sk_sp<SkImage> layerImage = layer->getImage();
     const int layerWidth = layer->getWidth();
     const int layerHeight = layer->getHeight();
-    const int bufferWidth = layer->getBufferWidth();
-    const int bufferHeight = layer->getBufferHeight();
-    if (bufferWidth <= 0 || bufferHeight <=0) {
-        return false;
-    }
-    if (layer->getApi() == Layer::Api::OpenGL) {
-        GlLayer* glLayer = static_cast<GlLayer*>(layer);
-        GrGLTextureInfo externalTexture;
-        externalTexture.fTarget = glLayer->getRenderTarget();
-        externalTexture.fID = glLayer->getTextureId();
-        // The format may not be GL_RGBA8, but given the DeferredLayerUpdater and GLConsumer don't
-        // expose that info we use it as our default.  Further, given that we only use this texture
-        // as a source this will not impact how Skia uses the texture.  The only potential affect
-        // this is anticipated to have is that for some format types if we are not bound as an OES
-        // texture we may get invalid results for SKP capture if we read back the texture.
-        externalTexture.fFormat = GL_RGBA8;
-        GrBackendTexture backendTexture(bufferWidth, bufferHeight, GrMipMapped::kNo, externalTexture);
-        layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
-                                              kPremul_SkAlphaType, nullptr);
-    } else {
-        SkASSERT(layer->getApi() == Layer::Api::Vulkan);
-        VkLayer* vkLayer = static_cast<VkLayer*>(layer);
-        canvas->clear(SK_ColorGREEN);
-        layerImage = vkLayer->getImage();
-    }
 
     if (layerImage) {
         SkMatrix textureMatrixInv;
-        layer->getTexTransform().copyTo(textureMatrixInv);
+        textureMatrixInv = layer->getTexTransform();
         // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
         // use bottom left origin and remove flipV and invert transformations.
         SkMatrix flipV;
         flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
         textureMatrixInv.preConcat(flipV);
         textureMatrixInv.preScale(1.0f / layerWidth, 1.0f / layerHeight);
-        textureMatrixInv.postScale(bufferWidth, bufferHeight);
+        textureMatrixInv.postScale(layerImage->width(), layerImage->height());
         SkMatrix textureMatrix;
         if (!textureMatrixInv.invert(&textureMatrix)) {
             textureMatrix = textureMatrixInv;
         }
 
         SkMatrix matrix;
-        if (dstRect) {
-            // Destination rectangle is set only when we are trying to read back the content
-            // of the layer. In this case we don't want to apply layer transform.
-            matrix = textureMatrix;
-        } else {
+        if (useLayerTransform) {
             matrix = SkMatrix::Concat(layerTransform, textureMatrix);
+        } else {
+            matrix = textureMatrix;
         }
 
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
-        paint.setColorFilter(layer->getColorSpaceWithFilter());
-
+        paint.setColorFilter(layer->getColorFilter());
         const bool nonIdentityMatrix = !matrix.isIdentity();
         if (nonIdentityMatrix) {
             canvas->save();
             canvas->concat(matrix);
         }
         const SkMatrix& totalMatrix = canvas->getTotalMatrix();
-        if (dstRect) {
+        if (dstRect || srcRect) {
             SkMatrix matrixInv;
             if (!matrix.invert(&matrixInv)) {
                 matrixInv = matrix;
             }
-            SkRect srcRect = SkRect::MakeIWH(layerWidth, layerHeight);
-            matrixInv.mapRect(&srcRect);
-            SkRect skiaDestRect = *dstRect;
+            SkRect skiaSrcRect;
+            if (srcRect) {
+                skiaSrcRect = *srcRect;
+            } else {
+                skiaSrcRect = SkRect::MakeIWH(layerWidth, layerHeight);
+            }
+            matrixInv.mapRect(&skiaSrcRect);
+            SkRect skiaDestRect;
+            if (dstRect) {
+                skiaDestRect = *dstRect;
+            } else {
+                skiaDestRect = SkRect::MakeIWH(layerWidth, layerHeight);
+            }
             matrixInv.mapRect(&skiaDestRect);
             // If (matrix is identity or an integer translation) and (src/dst buffers size match),
             // then use nearest neighbor, otherwise use bilerp sampling.
             // Integer translation is defined as when src rect and dst rect align fractionally.
             // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
             // only for SrcOver blending and without color filter (readback uses Src blending).
-            bool isIntegerTranslate = totalMatrix.isTranslate()
-                    && SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX])
-                    == SkScalarFraction(srcRect.fLeft)
-                    && SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY])
-                    == SkScalarFraction(srcRect.fTop);
+            bool isIntegerTranslate =
+                    isBasicallyTranslate(totalMatrix) &&
+                    SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX]) ==
+                            SkScalarFraction(skiaSrcRect.fLeft) &&
+                    SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY]) ==
+                            SkScalarFraction(skiaSrcRect.fTop);
             if (layer->getForceFilter() || !isIntegerTranslate) {
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }
-            canvas->drawImageRect(layerImage.get(), srcRect, skiaDestRect, &paint,
+            canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, &paint,
                                   SkCanvas::kFast_SrcRectConstraint);
         } else {
-            bool isIntegerTranslate = totalMatrix.isTranslate()
-                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransX])
-                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransY]);
-            if (layer->getForceFilter() || !isIntegerTranslate) {
+            if (layer->getForceFilter() || shouldFilter(totalMatrix)) {
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }
             canvas->drawImage(layerImage.get(), 0, 0, &paint);
@@ -146,9 +142,9 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         }
     }
 
-    return layerImage;
+    return layerImage != nullptr;
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

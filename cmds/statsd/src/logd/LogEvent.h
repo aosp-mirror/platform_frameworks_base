@@ -18,6 +18,8 @@
 
 #include "FieldValue.h"
 
+#include <android/frameworks/stats/1.0/types.h>
+#include <android/os/StatsLogEventWrapper.h>
 #include <android/util/ProtoOutputStream.h>
 #include <log/log_event_list.h>
 #include <log/log_read.h>
@@ -26,6 +28,8 @@
 
 #include <string>
 #include <vector>
+
+using namespace android::frameworks::stats::V1_0;
 
 namespace android {
 namespace os {
@@ -51,6 +55,14 @@ struct AttributionNodeInternal {
     int32_t mUid;
     std::string mTag;
 };
+
+struct InstallTrainInfo {
+    int64_t trainVersionCode;
+    std::string trainName;
+    int32_t status;
+    std::vector<int64_t> experimentIds;
+};
+
 /**
  * Wrapper for the log_msg structure.
  */
@@ -62,12 +74,47 @@ public:
     explicit LogEvent(log_msg& msg);
 
     /**
+     * Creates LogEvent from StatsLogEventWrapper.
+     */
+    static void createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,
+                                std::vector<std::shared_ptr<LogEvent>>& logEvents);
+
+    /**
+     * Construct one LogEvent from a StatsLogEventWrapper with the i-th work chain. -1 if no chain.
+     */
+    explicit LogEvent(const StatsLogEventWrapper& statsLogEventWrapper, int workChainIndex);
+
+    /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
      */
     explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs);
 
     // For testing. The timestamp is used as both elapsed real time and logd timestamp.
     explicit LogEvent(int32_t tagId, int64_t timestampNs);
+
+    // For testing. The timestamp is used as both elapsed real time and logd timestamp.
+    explicit LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid);
+
+    /**
+     * Constructs a KeyValuePairsAtom LogEvent from value maps.
+     */
+    explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                      int32_t uid,
+                      const std::map<int32_t, int32_t>& int_map,
+                      const std::map<int32_t, int64_t>& long_map,
+                      const std::map<int32_t, std::string>& string_map,
+                      const std::map<int32_t, float>& float_map);
+
+    // Constructs a BinaryPushStateChanged LogEvent from API call.
+    explicit LogEvent(const std::string& trainName, int64_t trainVersionCode, bool requiresStaging,
+                      bool rollbackEnabled, bool requiresLowLatencyMonitor, int32_t state,
+                      const std::vector<uint8_t>& experimentIds, int32_t userId);
+
+    explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                      const VendorAtom& vendorAtom);
+
+    explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                      const InstallTrainInfo& installTrainInfo);
 
     ~LogEvent();
 
@@ -110,6 +157,11 @@ public:
     bool write(float value);
     bool write(const std::vector<AttributionNodeInternal>& nodes);
     bool write(const AttributionNodeInternal& node);
+    bool writeKeyValuePairs(int32_t uid,
+                            const std::map<int32_t, int32_t>& int_map,
+                            const std::map<int32_t, int64_t>& long_map,
+                            const std::map<int32_t, std::string>& string_map,
+                            const std::map<int32_t, float>& float_map);
 
     /**
      * Return a string representation of this event.
@@ -153,10 +205,13 @@ public:
         return &mValues;
     }
 
+    inline LogEvent makeCopy() {
+        return LogEvent(*this);
+    }
+
 private:
     /**
-     * Don't copy, it's slower. If we really need this we can add it but let's try to
-     * avoid it.
+     * Only use this if copy is absolutely needed.
      */
     LogEvent(const LogEvent&);
 
@@ -184,6 +239,8 @@ private:
 
     uint32_t mLogUid;
 };
+
+void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);
 
 }  // namespace statsd
 }  // namespace os

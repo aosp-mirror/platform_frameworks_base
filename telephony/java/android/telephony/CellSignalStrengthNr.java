@@ -295,7 +295,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /** Implement the Parcelable interface */
-    public static final Parcelable.Creator<CellSignalStrengthNr> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CellSignalStrengthNr> CREATOR =
             new Parcelable.Creator<CellSignalStrengthNr>() {
         @Override
         public CellSignalStrengthNr createFromParcel(Parcel in) {

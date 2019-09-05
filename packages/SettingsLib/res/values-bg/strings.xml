@@ -38,11 +38,22 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Автоматично е установена връзка чрез %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Автоматично е установена връзка чрез доставчик на услуги за оценяване на мрежите"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Установена е връзка през „%1$s“"</string>
+    <string name="connected_via_app" msgid="5571999941988929520">"Установена е връзка през <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Мрежата е достъпна през „%1$s“"</string>
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"Докоснете, за да се регистрирате"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Установена е връзка – няма достъп до интернет"</string>
+    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
+    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Няма връзка с интернет"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Изисква се вход в профила"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Точката за достъп временно е пълна"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Установена е връзка през %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Мрежата е достъпна през %1$s"</string>
+    <string name="osu_opening_provider" msgid="5488997661548640424">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> се отваря"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"Не можа да се установи връзка"</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"Регистрацията се завършва…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"Регистрацията не можа да бъде завършена. Докоснете, за да опитате отново."</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"Регистрацията е завършена. Установява се връзка…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Много бавна"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Бавна"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ОK"</string>
@@ -63,6 +74,13 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Свързано (без телефон), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Свързано (без мултимедия), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Свързано (без телефон или мултимедия), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Активно. Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
+    <skip />
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
+    <skip />
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Активно"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Мултимедийно аудио"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонни обаждания"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Прехвърляне на файл"</string>
@@ -75,8 +93,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Достъп до SIM картата"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Висококачествено аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Висококачествено аудио"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Слухов апарат"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Има връзка със слуховия апарат"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Слухови апарати"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Установена е връзка със слухов апарат"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Установена е връзка с медийно аудио"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Връзка със звука на телефона"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Установена е връзка със сървър за трансфер на файлове"</string>
@@ -93,7 +111,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Използване на телефон за аудио"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Използване на за пренос на файлове"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Да се използва за въвеждане"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Използване за слухов апарат"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Използване за слухови апарати"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Сдвояване"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"СДВОЯВАНЕ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Отказ"</string>
@@ -109,6 +127,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Слушалки"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Периферен вход"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Слуховият апарат за ляво ухо се сдвоява…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Слуховият апарат за дясно ухо се сдвоява…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"За ляво ухо. Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"За дясно ухо. Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi е изключен."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Няма връзка с Wi-Fi."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi е с една чертичка."</string>
@@ -120,6 +142,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android (ОС)"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Премахнати приложения"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Премахнати приложения и потребители"</string>
+    <string name="data_usage_ota" msgid="5377889154805560860">"Системни актуализации"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"Тетъринг през USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Преносима точка за достъп"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Тетъринг през Bluetooth"</string>
@@ -188,7 +211,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Да остане активен"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Екранът никога няма да е в спящ режим при зареждане"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Активиране на рег. файл за анализ за Bluetooth с протокола HCI"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Заснемане на всички пакети за Bluetooth с протокола HCI във файла"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Запис на Bluetooth пакетите. (Превключване на Bluetooth след промяна на тази настройка)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Отключване от OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Разрешаване на първонач. зареждащата прогр. да се откл."</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Да се разреши ли отключване от OEM?"</string>
@@ -199,7 +222,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Мрежи"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Безжичен дисплей"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"„Многословно“ регистр. на Wi‑Fi: Актив."</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Рандомизиране на свързания MAC адрес"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Винаги активни мобилни данни"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардуерно ускорение за тетъринга"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Показване на устройствата с Bluetooth без имена"</string>
@@ -207,26 +229,27 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Избиране на версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек за Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Изберете аудиокодек за Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Задействане на аудиокодек за Bluetooth\nИзбор"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Честота на дискретизация за звука през Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Изберете аудиокодек за Bluetooth:\nЧестота на дискретизация"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Задействане на аудиокодек за Bluetooth\nИзбор: Честота на дискретизация"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Битове на дискрет за звука през Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Изберете аудиокодек за Bluetooth:\nБитове на дискрет"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Задействане на аудиокодек за Bluetooth\nИзбор: Битове на дискрет"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим на канала на звука през Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Изберете аудиокодек за Bluetooth:\nРежим на канала"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Задействане на аудиокодек за Bluetooth\nИзбор: Режим на канала"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Кодек за звука през Bluetooth с технологията LDAC: Качество на възпроизвеждане"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Изберете кодек за звука през Bluetooth с технологията LDAC:\nКачество на възпроизвеждане"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Задействане на аудиокодек за Bluetooth с технологията LDAC\nИзбор на кодек: Качество на възпроизвеждане"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Поточно предаване: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Частен DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Изберете режим на частния DNS"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Изкл."</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматично"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Име на хоста на доставчика на частния DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Въведете името на хоста на DNS доставчика"</string>
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не можа да се установи връзка"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Рандомизиране на MAC адреса при свързване с Wi-Fi мрежи"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"С отчитане"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Без отчитане"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Размери на регистрац. буфери"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Размер на един рег. буфер: Избор"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Да се изчистят ли трайно съхраняваните регистрационни данни?"</string>
@@ -266,7 +289,7 @@
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Хардуерно ускорено изобразяване"</string>
     <string name="media_category" msgid="4388305075496848353">"Мултимедия"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Наблюдение"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"Строг режим: Активиран"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Активиран строг режим"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Примигване на екрана при дълги операции в главната нишка"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Mестопол. на показалеца"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Насл. на екран показва текущи данни при докосване"</string>
@@ -274,8 +297,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Показване на визуална обр. връзка за докосванията"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Актуал. на повърхн: Показв."</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Примигв. на целите повърхности на прозорците при актуализирането им"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Показв. на актуал. на изгледа от GPU"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Примигв. на изгледи в прозорците при начертаване с GPU"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Актуализации на изгледите"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Примигв. на изгледите в прозорците при начертаване"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Актуал. на слоевете на хардуера"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Примигв. на слоевете на хардуера в зелено при актуал."</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Отстран. на проблеми с преизчертаване от GPU"</string>
@@ -289,12 +312,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Показв. на границите на изрязване, полетата и др."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Принуд. оформл. отдясно наляво"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Принуд. оформл. на екрана отдясно наляво за вс. локали"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Принудително изобразяване"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Принуд. използв. на GPU за двуизмерно начертаване"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Задаване на 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Активиране на 4x MSAA в прилож. с OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отстр. на грешки при неправоъг. изрязване"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Профилиране на GPU"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Изобр. на HWUI: Профилир."</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Слоеве за отстр. на грешки в ГП: Актив."</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Разреш. на зарежд. на слоевете за отстр. на грешки в ГП за съотв. прилож."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Скала на аним.: Прозорец"</string>
@@ -305,22 +326,23 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Без съхран. на дейностите"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Унищож. на всяка дейност при напускане от потребител"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Лимит за фонови процеси"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"Всички нереагиращи прил."</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"Диалог. прозорец „НП“ за приложения на заден план"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"ANR на заден план"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Показване на диалоговия прозорец за грешки от типа ANR за приложенията на заден план"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Предупрежд. за канала за известия"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Показва се предупреждение, когато приложение публикува известие без валиден канал"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Външно хран.: Принуд. разрешаване на приложенията"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Прави всички приложения да отговарят на условията да бъдат записвани във външното хранилище независимо от стойностите в манифеста"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Външно хран.: принуд. разрешаване на приложенията"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Всички приложения ще отговарят на условията да бъдат записвани във външното хранилище независимо от стойностите в манифеста"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Възможност за преоразмеряване на активностите"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Дава възможност за преоразмеряване на всички активности в режима за няколко прозореца независимо от стойностите в манифеста."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Активиране на прозорците в свободна форма"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Активиране на поддръжката за експерименталните прозорци в свободна форма."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Наст. комп.: Парола"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Парола за резервни копия"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Понастоящем пълните резервни копия за настолен компютър не са защитени"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Докоснете, за да промените или премахнете паролата за пълни резервни копия на настолния компютър"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Зададена е нова парола за резервно копие"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Новата парола и въведената за потвърждаване не съвпадат"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Задаването на парола за резервно копие не бе успешно"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Зарежда се…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Ярък (по подразбиране)"</item>
     <item msgid="8446070607501413455">"Естествен"</item>
@@ -356,40 +378,30 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекция на цветове"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Тази функция е експериментална и може да се отрази на ефективността."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Заменено от „<xliff:g id="TITLE">%1$s</xliff:g>“"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Оставащо време: около <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Още около <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Още около <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Още около <xliff:g id="TIME_REMAINING">%1$s</xliff:g> въз основа на използването"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Още около <xliff:g id="TIME_REMAINING">%1$s</xliff:g> въз основа на използването (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Още около <xliff:g id="TIME">%1$s</xliff:g> въз основа на използването"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Оставащо време: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g> въз основа на използването (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g> въз основа на използването"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Следва да издържи до около <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
     <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Остава/т по-малко от <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Остава/т по-малко от <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Остава/т повече от <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Остава/т повече от <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Възможно е телефонът да се изключи скоро"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Възможно е таблетът да се изключи скоро"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Възможно е устройството да се изключи скоро"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Възможно е телефонът да се изключи скоро (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Възможно е таблетът да се изключи скоро (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Възможно е устройството да се изключи скоро (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Оставащо време до пълно зареждане: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до пълно зареждане"</string>
@@ -400,8 +412,6 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Включена в захранването, в момента не се зарежда"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Пълна"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Контролира се от администратор"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"Активирано от администратора"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"Деактивирано от администратора"</string>
     <string name="disabled" msgid="9206776641295849915">"Деактивирано"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Има разрешение"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Няма разрешение"</string>
@@ -420,7 +430,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"По-голямо"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Най-голямо"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Персонализирано (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"Помощ и отзиви"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Меню"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Въведете парола за възст. на фабр. настройки в демонстр. режим"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Напред"</string>
@@ -434,14 +443,16 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Регистрирано"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не е регистрирано"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Няма данни"</string>
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC адресът е рандомизиран"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d устройства са свързани</item>
       <item quantity="one">%1$d устройство е свързано</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Повече време."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"По-малко време."</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Включване"</string>
     <string name="cancel" msgid="6859253417269739139">"Отказ"</string>
+    <string name="okay" msgid="1997666393121016642">"ОK"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Включване"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Включване на режима „Не безпокойте“"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Никога"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Само с приоритет"</string>
@@ -450,4 +461,10 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Няма да чуете следващия си будилник в <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"в <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"в/ъв <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Времетраене"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Да се пита винаги"</string>
+    <string name="zen_mode_forever" msgid="2704305038191592967">"До изключване"</string>
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Току-що"</string>
+    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
+    <skip />
 </resources>

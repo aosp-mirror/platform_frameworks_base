@@ -21,6 +21,8 @@ import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Paint;
 
+import java.util.Objects;
+
 /**
  * Defines a generic graphical "shape."
  * <p>
@@ -114,5 +116,23 @@ public abstract class Shape implements Cloneable {
     @Override
     public Shape clone() throws CloneNotSupportedException {
         return (Shape) super.clone();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Shape shape = (Shape) o;
+        return Float.compare(shape.mWidth, mWidth) == 0
+            && Float.compare(shape.mHeight, mHeight) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mWidth, mHeight);
     }
 }

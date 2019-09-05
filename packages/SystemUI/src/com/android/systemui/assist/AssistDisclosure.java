@@ -31,7 +31,6 @@ import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.AnimationUtils;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;

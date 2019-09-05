@@ -37,6 +37,12 @@ Picture::Picture(const Picture* src) {
     }
 }
 
+Picture::Picture(sk_sp<SkPicture>&& src) {
+    mPicture = std::move(src);
+    mWidth = 0;
+    mHeight = 0;
+}
+
 Canvas* Picture::beginRecording(int width, int height) {
     mPicture.reset(NULL);
     mRecorder.reset(new SkPictureRecorder);

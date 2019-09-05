@@ -233,7 +233,7 @@ public class LowpanIdentity implements Parcelable {
     }
 
     /** Implement the Parcelable interface. */
-    public static final Creator<LowpanIdentity> CREATOR =
+    public static final @android.annotation.NonNull Creator<LowpanIdentity> CREATOR =
             new Creator<LowpanIdentity>() {
 
                 public LowpanIdentity createFromParcel(Parcel in) {

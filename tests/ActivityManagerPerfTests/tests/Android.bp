@@ -16,7 +16,7 @@ android_test {
     name: "ActivityManagerPerfTests",
     srcs: ["src/**/*.java"],
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "apct-perftests-utils",
         "ActivityManagerPerfTestsUtils",
     ],

@@ -21,6 +21,7 @@
 #include "util.h"
 
 #include <json/reader.h>
+#include <json/writer.h>
 #include <json/value.h>
 
 #include <fstream>
@@ -34,22 +35,130 @@
 
 using namespace std;
 
-map<string,string> g_buildVars;
+static bool
+map_contains(const map<string,string>& m, const string& k, const string& v) {
+    map<string,string>::const_iterator it = m.find(k);
+    if (it == m.end()) {
+        return false;
+    }
+    return it->second == v;
+}
+
+static string
+make_cache_filename(const string& outDir)
+{
+    string filename(outDir);
+    return filename + "/.bit_cache";
+}
+
+bool
+Module::HasClass(const string& cl)
+{
+    for (vector<string>::const_iterator c = classes.begin(); c != classes.end(); c++) {
+        if (*c == cl) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+BuildVars::BuildVars(const string& outDir, const string& buildProduct,
+        const string& buildVariant, const string& buildType)
+    :m_filename(),
+     m_cache()
+{
+    m_cache["TARGET_PRODUCT"] = buildProduct;
+    m_cache["TARGET_BUILD_VARIANT"] = buildVariant;
+    m_cache["TARGET_BUILD_TYPE"] = buildType;
+
+    // If we have any problems reading the file, that's ok, just do
+    // uncached calls to make / soong.
+
+    if (outDir == "") {
+        return;
+    }
+
+
+    m_filename = make_cache_filename(outDir);
+
+    std::ifstream stream(m_filename, std::ifstream::binary);
+
+    if (stream.fail()) {
+        return;
+    }
+
+    Json::Value json;
+    Json::Reader reader;
+    if (!reader.parse(stream, json)) {
+        return;
+    }
+
+    if (!json.isObject()) {
+        return;
+    }
+
+    map<string,string> cache;
+
+    vector<string> names = json.getMemberNames();
+    const int N = names.size();
+    for (int i=0; i<N; i++) {
+        const string& name = names[i];
+        const Json::Value& value = json[name];
+        if (!value.isString()) {
+            continue;
+        }
+        cache[name] = value.asString();
+    }
+
+    // If all of the base variables match, then we can use this cache.  Otherwise, use our
+    // base one.  The next time someone reads a value, the new one, with our base varaibles
+    // will be saved.
+    if (map_contains(cache, "TARGET_PRODUCT", buildProduct)
+            && map_contains(cache, "TARGET_BUILD_VARIANT", buildVariant)
+            && map_contains(cache, "TARGET_BUILD_TYPE", buildType)) {
+        m_cache = cache;
+    }
+}
+
+BuildVars::~BuildVars()
+{
+}
+
+void
+BuildVars::save()
+{
+    if (m_filename == "") {
+        return;
+    }
+
+    Json::StyledStreamWriter writer("  ");
+
+    Json::Value json(Json::objectValue);
+
+    for (map<string,string>::const_iterator it = m_cache.begin(); it != m_cache.end(); it++) {
+        json[it->first] = it->second;
+    }
+
+    std::ofstream stream(m_filename, std::ofstream::binary);
+    writer.write(stream, json);
+}
 
 string
-get_build_var(const string& name, bool quiet)
+BuildVars::GetBuildVar(const string& name, bool quiet)
 {
     int err;
 
-    map<string,string>::iterator it = g_buildVars.find(name);
-    if (it == g_buildVars.end()) {
+    map<string,string>::iterator it = m_cache.find(name);
+    if (it == m_cache.end()) {
         Command cmd("build/soong/soong_ui.bash");
         cmd.AddArg("--dumpvar-mode");
         cmd.AddArg(name);
 
         string output = trim(get_command_output(cmd, &err, quiet));
         if (err == 0) {
-            g_buildVars[name] = output;
+            m_cache[name] = output;
+            save();
             return output;
         } else {
             return string();
@@ -57,38 +166,6 @@ get_build_var(const string& name, bool quiet)
     } else {
         return it->second;
     }
-}
-
-string
-sniff_device_name(const string& buildOut, const string& product)
-{
-    string match("ro.build.product=" + product);
-
-    string base(buildOut + "/target/product");
-    DIR* dir = opendir(base.c_str());
-    if (dir == NULL) {
-        return string();
-    }
-
-    dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') {
-            continue;
-        }
-        if (entry->d_type == DT_DIR) {
-            string filename(base + "/" + entry->d_name + "/system/build.prop");
-            vector<string> lines;
-            split_lines(&lines, read_file(filename));
-            for (size_t i=0; i<lines.size(); i++) {
-                if (lines[i] == match) {
-                    return entry->d_name;
-                }
-            }
-        }
-    }
-
-    closedir(dir);
-    return string();
 }
 
 void

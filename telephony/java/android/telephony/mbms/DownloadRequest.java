@@ -331,7 +331,7 @@ public final class DownloadRequest implements Parcelable {
         return version;
     }
 
-    public static final Parcelable.Creator<DownloadRequest> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DownloadRequest> CREATOR =
             new Parcelable.Creator<DownloadRequest>() {
         public DownloadRequest createFromParcel(Parcel in) {
             return new DownloadRequest(in);

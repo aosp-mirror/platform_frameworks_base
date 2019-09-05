@@ -21,9 +21,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.view.View;
-
 import android.view.View.AccessibilityDelegate;
-import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
+
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class ButtonDispatcher {
     private Boolean mLongClickable;
     private Float mAlpha;
     private Float mDarkIntensity;
-    private Integer mVisibility = -1;
+    private Integer mVisibility = View.VISIBLE;
     private Boolean mDelayTouchFeedback;
     private KeyButtonDrawable mImageDrawable;
     private View mCurrentView;
@@ -61,6 +60,7 @@ public class ButtonDispatcher {
     private final AnimatorListenerAdapter mFadeListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
+            mFadeAnimator = null;
             setVisibility(getAlpha() == 1 ? View.VISIBLE : View.INVISIBLE);
         }
     };
@@ -85,7 +85,7 @@ public class ButtonDispatcher {
         if (mAlpha != null) {
             view.setAlpha(mAlpha);
         }
-        if (mVisibility != null && mVisibility != -1) {
+        if (mVisibility != null) {
             view.setVisibility(mVisibility);
         }
         if (mAccessibilityDelegate != null) {
@@ -134,10 +134,17 @@ public class ButtonDispatcher {
                 ((ButtonInterface) mViews.get(i)).setImageDrawable(mImageDrawable);
             }
         }
+        if (mImageDrawable != null) {
+            mImageDrawable.setCallback(mCurrentView);
+        }
     }
 
     public void setVisibility(int visibility) {
         if (mVisibility == visibility) return;
+        if (mFadeAnimator != null) {
+            mFadeAnimator.cancel();
+        }
+
         mVisibility = visibility;
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
@@ -160,17 +167,21 @@ public class ButtonDispatcher {
     }
 
     public void setAlpha(float alpha, boolean animate) {
+        setAlpha(alpha, animate, (getAlpha() < alpha) ? FADE_DURATION_IN : FADE_DURATION_OUT);
+    }
+
+    public void setAlpha(float alpha, boolean animate, long duration) {
         if (animate) {
             if (mFadeAnimator != null) {
                 mFadeAnimator.cancel();
             }
+            setVisibility(View.VISIBLE);
             mFadeAnimator = ValueAnimator.ofFloat(getAlpha(), alpha);
-            mFadeAnimator.setDuration(getAlpha() < alpha? FADE_DURATION_IN : FADE_DURATION_OUT);
+            mFadeAnimator.setDuration(duration);
             mFadeAnimator.setInterpolator(getAlpha() < alpha ? ALPHA_IN : ALPHA_OUT);
             mFadeAnimator.addListener(mFadeListener);
             mFadeAnimator.addUpdateListener(mAlphaListener);
             mFadeAnimator.start();
-            setVisibility(View.VISIBLE);
         } else {
             mAlpha = alpha;
             final int N = mViews.size();
@@ -256,6 +267,16 @@ public class ButtonDispatcher {
         }
     }
 
+    public void setTranslation(int x, int y, int z) {
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            final View view = mViews.get(i);
+            view.setTranslationX(x);
+            view.setTranslationY(y);
+            view.setTranslationZ(z);
+        }
+    }
+
     public ArrayList<View> getViews() {
         return mViews;
     }
@@ -266,6 +287,14 @@ public class ButtonDispatcher {
 
     public void setCurrentView(View currentView) {
         mCurrentView = currentView.findViewById(mId);
+        if (mImageDrawable != null) {
+            mImageDrawable.setCallback(mCurrentView);
+        }
+        if (mCurrentView != null) {
+            mCurrentView.setTranslationX(0);
+            mCurrentView.setTranslationY(0);
+            mCurrentView.setTranslationZ(0);
+        }
     }
 
     public void setVertical(boolean vertical) {
@@ -277,5 +306,11 @@ public class ButtonDispatcher {
                 ((ButtonInterface) view).setVertical(vertical);
             }
         }
+    }
+
+    /**
+     * Executes when button is detached from window.
+     */
+    protected void onDestroy() {
     }
 }

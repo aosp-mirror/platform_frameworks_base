@@ -18,7 +18,7 @@ syntax = "proto2";
 
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package android.os;
 
@@ -194,7 +194,7 @@ message SystemPropertiesProto {
     message Log {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional string tag_WifiHAL = 1;
+        optional string tag_wifi_hal = 1;
         optional string tag_stats_log = 2;
 
         // Next Tag: 3
@@ -237,7 +237,7 @@ message SystemPropertiesProto {
         optional bool  adb_secure = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional string arch = 2;
         optional bool   audio_ignore_effects = 3;
-        optional bool   audio_monitorRotation = 4;
+        optional bool   audio_monitor_rotation = 4;
         optional string baseband = 5;
         optional string board_platform = 6;
 
@@ -249,9 +249,13 @@ message SystemPropertiesProto {
             repeated string boottime = 5;
             optional string console = 6;
             optional int32  fake_battery = 7;
+            // The name of the hardware (from the kernel command line or /proc). It
+            // SHOULD be reasonably human-readable.
             optional string hardware = 8;
             optional string hardware_color = 9;
             optional string hardware_revision = 10;
+            // SKU is for small variants such as device color, targeted market,
+            // ram/rom size, etc.
             optional string hardware_sku = 11;
             optional string keymaster = 12;
             optional string mode = 13;
@@ -292,27 +296,60 @@ message SystemPropertiesProto {
         message Build {
             option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+            // Date of the platform build.
             optional string date = 1;
+            // UTC timstamp of build data.
             optional int64  date_utc = 2;
             optional string description = 3;
+            // A build ID string meant for displaying to the user.
             optional string display_id = 4;
+            // A string that uniquely identifies the host the build was built on, in
+            // human-readable format. Only makes sense for internal engineering
+            // builds.
             optional string host = 5;
+            // Unique id of this android platform build. An identifier chosen by the
+            // device implementer to refer to a specific release, in human-readable
+            // format. This field can be the same as
+            // android.os.Build.VERSION.INCREMENTAL, but SHOULD be a value
+            // sufficiently meaningful for end users to distinguish between software
+            // builds.
             optional string id = 6;
+            // Product name.
             optional string product = 7;
             optional bool   system_root_image = 8;
+            // Tags of the buid, e.g. dev-keys, release-keys.
             optional string tags = 9;
+            // Type of the build, e.g. eng, userdebug, user.
             optional string type = 10;
+            // Name of the user (an engineer or a build bot) that built the image. For
+            // production builds, this is from the build bot but some OEMs might use a
+            // real username. Only makes sense for internal engineering builds.
             optional string user = 11;
 
             message Version {
                 option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+                // The base OS build the product is based on. A value representing the
+                // FINGERPRINT parameter of the build that is otherwise identical to
+                // this build except for the patches provided in the Android Public
+                // Security Bulletin.
                 optional string base_os = 1;
                 optional string codename = 2;
+                // A value chosen by the device implementer designating the specific
+                // build of the currently-executing Android system, in human-readable
+                // format. This value MUST NOT be reused for different builds made
+                // available to end users. A typical use of this field is to indicate
+                // which build number or source-control change identifier was used to
+                // generate the build.
                 optional string incremental = 3;
                 optional int32  preview_sdk = 4;
+                // The version of the currently-executing Android system, in
+                // human-readable format.
                 optional string release = 5;
+                // The version of the currently-executing Android system, in a format
+                // accessible to third-party application code.
                 optional int32  sdk = 6;
+                // A value indicating the security patch level of a build.
                 optional string security_patch = 7;
 
                 // Next Tag: 8
@@ -324,8 +361,11 @@ message SystemPropertiesProto {
         optional Build build = 11;
 
         optional bool   camera_notify_nfc = 12  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Carrier name on the phone.
         optional string carrier = 13;
+        // Is dataroaming enabled.
         optional bool   com_android_dataroaming = 14  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // does it provide mobiledata.
         optional bool   com_android_prov_mobiledata = 15  [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional string com_google_clientidbase = 16;
 
@@ -346,6 +386,7 @@ message SystemPropertiesProto {
         optional string crypto_state = 21;
         optional string crypto_type = 22;
         optional string dalvik_vm_native_bridge = 23;
+        // Is this build debuggable.
         optional bool   debuggable = 24;
         optional string frp_pst = 25;
         optional string gfx_driver_0 = 26;
@@ -353,8 +394,8 @@ message SystemPropertiesProto {
         message Hardware {
             option (android.msg_privacy).dest = DEST_LOCAL;
 
-            optional string value = 1; // value of ro.hardware itself
-
+            // value of ro.hardware itself
+            optional string value = 1;
             optional string activity_recognition = 2;
             optional string audio = 3;
             optional string audio_policy = 4;
@@ -403,21 +444,30 @@ message SystemPropertiesProto {
         optional int32  oem_unlock_supported = 30;
         optional int32  opengles_version = 31;
 
+        // The product of the device.
         message Product {
             option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+            // Name of the product.
             optional string board = 1;
+            // Brand of the product.
             optional string brand = 2;
             optional string cpu_abi = 3;
             repeated string cpu_abilist = 4;
             repeated string cpu_abilist32 = 5;
             repeated string cpu_abilist64 = 6;
+            // Device name.
             optional string device = 7;
+            // The first api level when the phone is launched.
             optional int32  first_api_level = 8;
+            // Manufacturer of the product.
             optional string manufacturer = 9;
+            // Marketing name of the phone.
             optional string model = 10;
+            // Name of the product.
             optional string name = 11;
 
+            // Vendor related information about the product.
             message Vendor {
                 option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -434,13 +484,14 @@ message SystemPropertiesProto {
         optional Product product = 32;
 
         optional int32  property_service_version = 33;
-        optional string retaildemo_video_path = 34;
+        reserved 34; // Removed retaildemo_video_path.
         optional string revision = 35;
         optional int32  sf_lcd_density = 36;
         optional bool   storage_manager_enabled = 37;
 
         message Telephony {
             optional bool  call_ring_multiple = 1;
+            // CDMA subscription number.
             optional int32 default_cdma_sub = 2;
             optional int32 default_network = 3;
         }
@@ -455,6 +506,7 @@ message SystemPropertiesProto {
         }
         optional Vendor vendor = 41;
 
+        // Vendor Native Development Kit version.
         optional string vndk_version = 42;
         optional int32  vts_coverage = 43;
         optional string zygote = 44;
@@ -493,7 +545,7 @@ message SystemPropertiesProto {
     }
     optional Sys sys = 24;
 
-    optional int32  telephony_lteOnCdmaDevice = 25;
+    optional int32  telephony_lte_on_cdma_device = 25;
     optional int32  tombstoned_max_tombstone_count = 26;
     optional string vold_decrypt = 27;
     optional int32  vold_post_fs_data_done = 28;

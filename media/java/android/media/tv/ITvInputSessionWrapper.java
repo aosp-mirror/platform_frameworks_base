@@ -367,7 +367,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
         }
 
         @Override
-        public void onInputEvent(InputEvent event, int displayId) {
+        public void onInputEvent(InputEvent event) {
             if (mTvInputSessionImpl == null) {
                 // The session has been finished.
                 finishInputEvent(event, false);

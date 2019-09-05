@@ -27,7 +27,7 @@
 
     <!-- Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->
-    <dimen name="keyguard_security_height">400dp</dimen>
+    <dimen name="keyguard_security_height">420dp</dimen>
 
     <!-- Max Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->
@@ -43,28 +43,27 @@
 
     <!-- Slice header -->
     <dimen name="widget_title_font_size">24dp</dimen>
-    <dimen name="widget_title_bottom_margin">7dp</dimen>
-    <dimen name="bottom_text_spacing_digital">0dp</dimen>
+    <dimen name="header_subtitle_padding">12dp</dimen>
+    <dimen name="header_icon_size">16dp</dimen>
     <!-- Slice subtitle -->
-    <dimen name="widget_label_font_size">16dp</dimen>
-    <!-- Slice offset when pulsing -->
-    <dimen name="widget_pulsing_bottom_padding">48dp</dimen>
+    <dimen name="widget_label_font_size">18dp</dimen>
     <!-- Clock without header -->
-    <dimen name="widget_big_font_size">64dp</dimen>
+    <dimen name="widget_big_font_size">54dp</dimen>
+    <dimen name="bottom_text_spacing_digital">0dp</dimen>
+    <dimen name="title_clock_padding">4dp</dimen>
     <!-- Clock with header -->
-    <dimen name="widget_small_font_size">24dp</dimen>
-    <dimen name="widget_small_font_stroke">0.6dp</dimen>
-    <!-- Dash between clock and header -->
-    <dimen name="widget_separator_width">12dp</dimen>
-    <dimen name="widget_separator_thickness">1dp</dimen>
-    <dimen name="widget_vertical_padding">26dp</dimen>
-    <dimen name="widget_icon_bottom_padding">14dp</dimen>
+    <dimen name="widget_small_font_size">@dimen/widget_title_font_size</dimen>
+    <dimen name="widget_vertical_padding">24dp</dimen>
+    <dimen name="widget_vertical_padding_with_header">32dp</dimen>
+    <dimen name="widget_vertical_padding_clock">12dp</dimen>
     <!-- Subtitle paddings -->
     <dimen name="widget_horizontal_padding">8dp</dimen>
-    <dimen name="widget_icon_size">16dp</dimen>
+    <dimen name="widget_icon_size">20dp</dimen>
     <dimen name="widget_icon_padding">8dp</dimen>
-    <!-- Space between notification shelf and dash above it -->
-    <dimen name="widget_bottom_separator_padding">28dp</dimen>
+    <dimen name="subtitle_clock_padding">0dp</dimen>
+    <dimen name="header_row_font_size">14dp</dimen>
+    <!-- Notification shelf padding when dark -->
+    <dimen name="widget_bottom_separator_padding">-6dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>

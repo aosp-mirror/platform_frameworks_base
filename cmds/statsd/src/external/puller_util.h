@@ -25,8 +25,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
-void mergeIsolatedUidsToHostUid(std::vector<std::shared_ptr<LogEvent>>& data,
-                                const sp<UidMap>& uidMap, int tagId);
+void mapAndMergeIsolatedUidsToHostUid(std::vector<std::shared_ptr<LogEvent>>& data,
+                                      const sp<UidMap>& uidMap, int tagId);
 
 }  // namespace statsd
 }  // namespace os

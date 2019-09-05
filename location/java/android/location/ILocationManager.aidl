@@ -21,6 +21,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GnssMeasurementCorrections;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
@@ -28,6 +29,7 @@ import android.location.IGnssNavigationMessageListener;
 import android.location.ILocationListener;
 import android.location.Location;
 import android.location.LocationRequest;
+import android.location.LocationTime;
 import android.os.Bundle;
 
 import com.android.internal.location.ProviderProperties;
@@ -63,6 +65,9 @@ interface ILocationManager
     boolean sendNiResponse(int notifId, int userResponse);
 
     boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener, in String packageName);
+    void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,
+            in String packageName);
+    long getGnssCapabilities(in String packageName);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
     boolean addGnssNavigationMessageListener(
@@ -81,46 +86,39 @@ interface ILocationManager
     boolean stopGnssBatch();
     boolean injectLocation(in Location location);
 
-    // --- deprecated ---
     @UnsupportedAppUsage
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
-    boolean providerMeetsCriteria(String provider, in Criteria criteria);
     ProviderProperties getProviderProperties(String provider);
-    @UnsupportedAppUsage
-    String getNetworkProviderPackage();
+    boolean isProviderPackage(String packageName);
+
+    void setExtraLocationControllerPackage(String packageName);
+    String getExtraLocationControllerPackage();
+    void setExtraLocationControllerPackageEnabled(boolean enabled);
+    boolean isExtraLocationControllerPackageEnabled();
 
     boolean isProviderEnabledForUser(String provider, int userId);
-    boolean setProviderEnabledForUser(String provider, boolean enabled, int userId);
     boolean isLocationEnabledForUser(int userId);
-    void setLocationEnabledForUser(boolean enabled, int userId);
     void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
     void removeTestProvider(String provider, String opPackageName);
     void setTestProviderLocation(String provider, in Location loc, String opPackageName);
-    void clearTestProviderLocation(String provider, String opPackageName);
     void setTestProviderEnabled(String provider, boolean enabled, String opPackageName);
-    void clearTestProviderEnabled(String provider, String opPackageName);
+    List<LocationRequest> getTestProviderCurrentRequests(String provider, String opPackageName);
+    LocationTime getGnssTimeMillis();
+
+    // --- deprecated ---
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime,
             String opPackageName);
-    void clearTestProviderStatus(String provider, String opPackageName);
 
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
     // --- internal ---
 
-    // Used by location providers to tell the location manager when it has a new location.
-    // Passive is true if the location is coming from the passive provider, in which case
-    // it need not be shared with other providers.
-    @UnsupportedAppUsage
-    void reportLocation(in Location location, boolean passive);
-
-    // Used when a (initially Gnss) Location batch arrives
-    void reportLocationBatch(in List<Location> locations);
-
     // for reporting callback completion
     void locationCallbackFinished(ILocationListener listener);
 
-    // used by gts tests to verify throttling whitelist
+    // used by gts tests to verify whitelists
     String[] getBackgroundThrottlingWhitelist();
+    String[] getIgnoreSettingsWhitelist();
 }

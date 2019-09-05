@@ -16,9 +16,11 @@
 
 #pragma once
 
+#include "Properties.h"
 #include "utils/Macros.h"
 
 #include <utils/Timers.h>
+#include "SkSize.h"
 
 #include <string>
 
@@ -39,7 +41,7 @@ public:
     virtual void onError(const std::string& message) = 0;
 
 protected:
-    virtual ~ErrorHandler() {}
+    virtual ~ErrorHandler() = default;
 };
 
 class TreeObserver {
@@ -51,7 +53,7 @@ public:
     virtual void onMaybeRemovedFromTree(RenderNode* node) = 0;
 
 protected:
-    virtual ~TreeObserver() {}
+    virtual ~TreeObserver() = default;
 };
 
 // This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
@@ -70,8 +72,7 @@ public:
         MODE_RT_ONLY,
     };
 
-    TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext)
-            : mode(mode), prepareTextures(mode == MODE_FULL), canvasContext(canvasContext) {}
+    TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext);
 
     TraversalMode mode;
     // TODO: Remove this? Currently this is used to signal to stop preparing
@@ -87,11 +88,16 @@ public:
 
     // Must not be null during actual usage
     DamageAccumulator* damageAccumulator = nullptr;
+    int64_t damageGenerationId = 0;
 
     LayerUpdateQueue* layerUpdateQueue = nullptr;
     ErrorHandler* errorHandler = nullptr;
 
     bool updateWindowPositions = false;
+
+    int disableForceDark;
+
+    const SkISize screenSize;
 
     struct Out {
         bool hasFunctors = false;

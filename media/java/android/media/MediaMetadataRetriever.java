@@ -41,8 +41,7 @@ import java.util.Map;
  * MediaMetadataRetriever class provides a unified interface for retrieving
  * frame and meta data from an input media file.
  */
-public class MediaMetadataRetriever
-{
+public class MediaMetadataRetriever implements AutoCloseable {
     static {
         System.loadLibrary("media_jni");
         native_init();
@@ -673,6 +672,11 @@ public class MediaMetadataRetriever
     @UnsupportedAppUsage
     private native byte[] getEmbeddedPicture(int pictureType);
 
+    @Override
+    public void close() {
+        release();
+    }
+
     /**
      * Call it when one is done with the object. This method releases the memory
      * allocated internally.
@@ -865,7 +869,7 @@ public class MediaMetadataRetriever
      * This key retrieves the location information, if available.
      * The location should be specified according to ISO-6709 standard, under
      * a mp4/3gp box "@xyz". Location with longitude of -90 degrees and latitude
-     * of 180 degrees will be retrieved as "-90.0000+180.0000", for instance.
+     * of 180 degrees will be retrieved as "+180.0000-90.0000/", for instance.
      */
     public static final int METADATA_KEY_LOCATION        = 23;
     /**
@@ -916,12 +920,14 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_VIDEO_FRAME_COUNT = 32;
 
     /**
-     * @hide
+     * If the media contains EXIF data, this key retrieves the offset value
+     * of the data.
      */
     public static final int METADATA_KEY_EXIF_OFFSET = 33;
 
     /**
-     * @hide
+     * If the media contains EXIF data, this key retrieves the length of the
+     * data.
      */
     public static final int METADATA_KEY_EXIF_LENGTH = 34;
 

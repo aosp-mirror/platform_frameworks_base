@@ -53,9 +53,8 @@ static inline int NumDistinctRects(const SkCanvas::Lattice& lattice) {
     return xRects * yRects;
 }
 
-static inline void SetLatticeFlags(SkCanvas::Lattice* lattice,
-        SkCanvas::Lattice::RectType* flags, int numFlags, const Res_png_9patch& chunk,
-        SkColor* colors) {
+static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice::RectType* flags,
+                                   int numFlags, const Res_png_9patch& chunk, SkColor* colors) {
     lattice->fRectTypes = flags;
     lattice->fColors = colors;
     sk_bzero(flags, numFlags * sizeof(SkCanvas::Lattice::RectType));
@@ -104,5 +103,5 @@ static inline void SetLatticeFlags(SkCanvas::Lattice* lattice,
     }
 }
 
-};  // namespace NinePatchUtils
-};  // namespace android
+}  // namespace NinePatchUtils
+}  // namespace android

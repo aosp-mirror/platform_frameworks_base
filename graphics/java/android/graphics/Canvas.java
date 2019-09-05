@@ -17,11 +17,13 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
+import android.graphics.text.MeasuredText;
 import android.os.Build;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -64,7 +66,7 @@ public class Canvas extends BaseCanvas {
     public boolean isRecordingFor(Object o) { return false; }
 
     // may be null
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117521088)
     private Bitmap mBitmap;
 
     // optional field set by the caller
@@ -74,14 +76,11 @@ public class Canvas extends BaseCanvas {
     // (see SkCanvas.cpp, SkDraw.cpp)
     private static final int MAXMIMUM_BITMAP_SIZE = 32766;
 
-    // The approximate size of the native allocation associated with
-    // a Canvas object.
-    private static final long NATIVE_ALLOCATION_SIZE = 525;
-
     // Use a Holder to allow static initialization of Canvas in the boot image.
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Canvas.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Canvas.class.getClassLoader(), nGetNativeFinalizer());
     }
 
     // This field is used to finalize the native Canvas properly
@@ -96,7 +95,7 @@ public class Canvas extends BaseCanvas {
     public Canvas() {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
-            mNativeCanvasWrapper = nInitRaster(null);
+            mNativeCanvasWrapper = nInitRaster(0);
             mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                     this, mNativeCanvasWrapper);
         } else {
@@ -118,7 +117,7 @@ public class Canvas extends BaseCanvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
-        mNativeCanvasWrapper = nInitRaster(bitmap);
+        mNativeCanvasWrapper = nInitRaster(bitmap.getNativeInstance());
         mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeCanvasWrapper);
         mBitmap = bitmap;
@@ -186,7 +185,7 @@ public class Canvas extends BaseCanvas {
         }
 
         if (bitmap == null) {
-            nSetBitmap(mNativeCanvasWrapper, null);
+            nSetBitmap(mNativeCanvasWrapper, 0);
             mDensity = Bitmap.DENSITY_NONE;
         } else {
             if (!bitmap.isMutable()) {
@@ -194,7 +193,7 @@ public class Canvas extends BaseCanvas {
             }
             throwIfCannotDraw(bitmap);
 
-            nSetBitmap(mNativeCanvasWrapper, bitmap);
+            nSetBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance());
             mDensity = bitmap.mDensity;
         }
 
@@ -205,11 +204,70 @@ public class Canvas extends BaseCanvas {
         mBitmap = bitmap;
     }
 
-    /** @hide */
-    public void insertReorderBarrier() {}
+    /**
+     * @deprecated use {@link #enableZ()} instead
+     * @hide */
+    @Deprecated
+    public void insertReorderBarrier() {
+        enableZ();
+    }
 
-    /** @hide */
-    public void insertInorderBarrier() {}
+    /**
+     * @deprecated use {@link #disableZ()} instead
+     * @hide */
+    @Deprecated
+    public void insertInorderBarrier() {
+        disableZ();
+    }
+
+    /**
+     * <p>Enables Z support which defaults to disabled. This allows for RenderNodes drawn with
+     * {@link #drawRenderNode(RenderNode)} to be re-arranged based off of their
+     * {@link RenderNode#getElevation()} and {@link RenderNode#getTranslationZ()}
+     * values. It also enables rendering of shadows for RenderNodes with an elevation or
+     * translationZ.</p>
+     *
+     * <p>Any draw reordering will not be moved before this call. A typical usage of this might
+     * look something like:
+     *
+     * <pre class="prettyprint">
+     *     void draw(Canvas canvas) {
+     *         // Draw any background content
+     *         canvas.drawColor(backgroundColor);
+     *
+     *         // Begin drawing that may be reordered based off of Z
+     *         canvas.enableZ();
+     *         for (RenderNode child : children) {
+     *             canvas.drawRenderNode(child);
+     *         }
+     *         // End drawing that may be reordered based off of Z
+     *         canvas.disableZ();
+     *
+     *         // Draw any overlays
+     *         canvas.drawText("I'm on top of everything!", 0, 0, paint);
+     *     }
+     * </pre>
+     * </p>
+     *
+     * Note: This is not impacted by any {@link #save()} or {@link #restore()} calls as it is not
+     * considered to be part of the current matrix or clip.
+     *
+     * See {@link #disableZ()}
+     */
+    public void enableZ() {
+    }
+
+    /**
+     * Disables Z support, preventing any RenderNodes drawn after this point from being
+     * visually reordered or having shadows rendered.
+     *
+     * Note: This is not impacted by any {@link #save()} or {@link #restore()} calls as it is not
+     * considered to be part of the current matrix or clip.
+     *
+     * See {@link #enableZ()}
+     */
+    public void disableZ() {
+    }
 
     /**
      * Return true if the device that the current layer draws into is opaque
@@ -497,7 +555,17 @@ public class Canvas extends BaseCanvas {
      * @hide
      */
     public int saveUnclippedLayer(int left, int top, int right, int bottom) {
-        return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom, 0, 0);
+        return nSaveUnclippedLayer(mNativeCanvasWrapper, left, top, right, bottom);
+    }
+
+    /**
+     * @hide
+     * @param saveCount The save level to restore to.
+     * @param paint     This is copied and is applied to the area within the unclipped layer's
+     *                  bounds (i.e. equivalent to a drawPaint()) before restore() is called.
+     */
+    public void restoreUnclippedLayer(int saveCount, Paint paint) {
+        nRestoreUnclippedLayer(mNativeCanvasWrapper, saveCount, paint.getNativeInstance());
     }
 
     /**
@@ -1306,14 +1374,16 @@ public class Canvas extends BaseCanvas {
 
     private static native void nFreeCaches();
     private static native void nFreeTextLayoutCaches();
-    private static native long nInitRaster(Bitmap bitmap);
     private static native long nGetNativeFinalizer();
     private static native void nSetCompatibilityVersion(int apiLevel);
 
     // ---------------- @FastNative -------------------
 
     @FastNative
-    private static native void nSetBitmap(long canvasHandle, Bitmap bitmap);
+    private static native long nInitRaster(long bitmapHandle);
+
+    @FastNative
+    private static native void nSetBitmap(long canvasHandle, long bitmapHandle);
 
     @FastNative
     private static native boolean nGetClipBounds(long nativeCanvas, Rect bounds);
@@ -1335,6 +1405,11 @@ public class Canvas extends BaseCanvas {
     @CriticalNative
     private static native int nSaveLayerAlpha(long nativeCanvas, float l, float t, float r, float b,
             int alpha, int layerFlags);
+    @CriticalNative
+    private static native int nSaveUnclippedLayer(long nativeCanvas, int l, int t, int r, int b);
+    @CriticalNative
+    private static native void nRestoreUnclippedLayer(long nativeCanvas, int saveCount,
+            long nativePaint);
     @CriticalNative
     private static native boolean nRestore(long canvasHandle);
     @CriticalNative
@@ -1620,13 +1695,51 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color,
+     * using srcover porterduff mode.
+     *
+     * @param color the {@code ColorLong} to draw onto the canvas. See the {@link Color}
+     *              class for details about {@code ColorLong}s.
+     * @throws IllegalArgumentException if the color space encoded in the {@code ColorLong}
+     *                                  is invalid or unknown.
+     */
+    public void drawColor(@ColorLong long color) {
+        super.drawColor(color, BlendMode.SRC_OVER);
+    }
+
+    /**
      * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
      * porter-duff xfermode.
      *
-     * @param color the color to draw with
+     * @param color the color to draw onto the canvas
      * @param mode the porter-duff mode to apply to the color
      */
     public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
+        super.drawColor(color, mode);
+    }
+
+    /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
+     * blendmode.
+     *
+     * @param color the color to draw onto the canvas
+     * @param mode the blendmode to apply to the color
+     */
+    public void drawColor(@ColorInt int color, @NonNull BlendMode mode) {
+        super.drawColor(color, mode);
+    }
+
+    /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
+     * blendmode.
+     *
+     * @param color the {@code ColorLong} to draw onto the canvas. See the {@link Color}
+     *              class for details about {@code ColorLong}s.
+     * @param mode the blendmode to apply to the color
+     * @throws IllegalArgumentException if the color space encoded in the {@code ColorLong}
+     *                                  is invalid or unknown.
+     */
+    public void drawColor(@ColorLong long color, @NonNull BlendMode mode) {
         super.drawColor(color, mode);
     }
 
@@ -1877,6 +1990,51 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Draws a double rounded rectangle using the specified paint. The resultant round rect
+     * will be filled in the area defined between the outer and inner rectangular bounds if
+     * the {@link Paint} configured with {@link Paint.Style#FILL}.
+     * Otherwise if {@link Paint.Style#STROKE} is used, then 2 rounded rect strokes will
+     * be drawn at the outer and inner rounded rectangles
+     *
+     * @param outer The outer rectangular bounds of the roundRect to be drawn
+     * @param outerRx The x-radius of the oval used to round the corners on the outer rectangle
+     * @param outerRy The y-radius of the oval used to round the corners on the outer rectangle
+     * @param inner The inner rectangular bounds of the roundRect to be drawn
+     * @param innerRx The x-radius of the oval used to round the corners on the inner rectangle
+     * @param innerRy The y-radius of the oval used to round the corners on the outer rectangle
+     * @param paint The paint used to draw the double roundRect
+     */
+    @Override
+    public void drawDoubleRoundRect(@NonNull RectF outer, float outerRx, float outerRy,
+            @NonNull RectF inner, float innerRx, float innerRy, @NonNull Paint paint) {
+        super.drawDoubleRoundRect(outer, outerRx, outerRy, inner, innerRx, innerRy, paint);
+    }
+
+    /**
+     * Draws a double rounded rectangle using the specified paint. The resultant round rect
+     * will be filled in the area defined between the outer and inner rectangular bounds if
+     * the {@link Paint} configured with {@link Paint.Style#FILL}.
+     * Otherwise if {@link Paint.Style#STROKE} is used, then 2 rounded rect strokes will
+     * be drawn at the outer and inner rounded rectangles
+     *
+     * @param outer The outer rectangular bounds of the roundRect to be drawn
+     * @param outerRadii Array of 8 float representing the x, y corner radii for top left,
+     *                   top right, bottom right, bottom left corners respectively on the outer
+     *                   rounded rectangle
+     *
+     * @param inner The inner rectangular bounds of the roundRect to be drawn
+     * @param innerRadii Array of 8 float representing the x, y corner radii for top left,
+     *                   top right, bottom right, bottom left corners respectively on the
+     *                   outer rounded rectangle
+     * @param paint The paint used to draw the double roundRect
+     */
+    @Override
+    public void drawDoubleRoundRect(@NonNull RectF outer, @NonNull float[] outerRadii,
+            @NonNull RectF inner, @NonNull float[] innerRadii, @NonNull Paint paint) {
+        super.drawDoubleRoundRect(outer, outerRadii, inner, innerRadii, paint);
+    }
+
+    /**
      * Draw the text, with origin at (x,y), using the specified paint. The origin is interpreted
      * based on the Align setting in the paint.
      *
@@ -2002,7 +2160,8 @@ public class Canvas extends BaseCanvas {
      * the text next to it.
      * <p>
      * All text outside the range {@code contextStart..contextEnd} is ignored. The text between
-     * {@code start} and {@code end} will be laid out and drawn.
+     * {@code start} and {@code end} will be laid out and drawn. The context range is useful for
+     * contextual shaping, e.g. Kerning, Arabic contextural form.
      * <p>
      * The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
      * suitable only for runs of a single direction. Alignment of the text is as determined by the
@@ -2026,6 +2185,31 @@ public class Canvas extends BaseCanvas {
      * @see #drawTextRun(char[], int, int, int, int, float, float, boolean, Paint)
      */
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
+            int contextEnd, float x, float y, boolean isRtl, @NonNull Paint paint) {
+        super.drawTextRun(text, start, end, contextStart, contextEnd, x, y, isRtl, paint);
+    }
+
+    /**
+     * Draw a run of text, all in a single direction, with optional context for complex text
+     * shaping.
+     * <p>
+     * See {@link #drawTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)} for
+     * more details. This method uses a {@link MeasuredText} rather than CharSequence to represent
+     * the string.
+     *
+     * @param text the text to render
+     * @param start the start of the text to render. Data before this position can be used for
+     *            shaping context.
+     * @param end the end of the text to render. Data at or after this position can be used for
+     *            shaping context.
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index of the end of the shaping context
+     * @param x the x position at which to draw the text
+     * @param y the y position at which to draw the text
+     * @param isRtl whether the run is in RTL direction
+     * @param paint the paint
+     */
+    public void drawTextRun(@NonNull MeasuredText text, int start, int end, int contextStart,
             int contextEnd, float x, float y, boolean isRtl, @NonNull Paint paint) {
         super.drawTextRun(text, start, end, contextStart, contextEnd, x, y, isRtl, paint);
     }
@@ -2064,5 +2248,18 @@ public class Canvas extends BaseCanvas {
             @NonNull Paint paint) {
         super.drawVertices(mode, vertexCount, verts, vertOffset, texs, texOffset,
                 colors, colorOffset, indices, indexOffset, indexCount, paint);
+    }
+
+    /**
+     * Draws the given RenderNode. This is only supported in hardware rendering, which can be
+     * verified by asserting that {@link #isHardwareAccelerated()} is true. If
+     * {@link #isHardwareAccelerated()} is false then this throws an exception.
+     *
+     * See {@link RenderNode} for more information on what a RenderNode is and how to use it.
+     *
+     * @param renderNode The RenderNode to draw, must be non-null.
+     */
+    public void drawRenderNode(@NonNull RenderNode renderNode) {
+        throw new IllegalArgumentException("Software rendering doesn't support drawRenderNode");
     }
 }

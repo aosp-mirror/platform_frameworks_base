@@ -19,23 +19,27 @@ package com.android.systemui.statusbar.phone;
 import android.metrics.LogMaker;
 import android.util.ArrayMap;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Wrapper that emits both new- and old-style gesture logs.
  * TODO: delete this once the old logs are no longer needed.
  */
+@Singleton
 public class LockscreenGestureLogger {
     private ArrayMap<Integer, Integer> mLegacyMap;
     private LogMaker mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
             .setType(MetricsEvent.TYPE_ACTION);
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
+    @Inject
     public LockscreenGestureLogger() {
         mLegacyMap = new ArrayMap<>(EventLogConstants.METRICS_GESTURE_TYPE_MAP.length);
         for (int i = 0; i < EventLogConstants.METRICS_GESTURE_TYPE_MAP.length ; i++) {

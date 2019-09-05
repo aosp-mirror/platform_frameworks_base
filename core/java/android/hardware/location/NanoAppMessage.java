@@ -16,11 +16,14 @@
 package android.hardware.location;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import libcore.util.HexEncoding;
+
+import java.util.Arrays;
 
 /**
  * A class describing messages send to or from nanoapps through the Context Hub Service.
@@ -171,5 +174,23 @@ public final class NanoAppMessage implements Parcelable {
         ret += ")";
 
         return ret;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object object) {
+        if (object == this) {
+            return true;
+        }
+
+        boolean isEqual = false;
+        if (object instanceof NanoAppMessage) {
+            NanoAppMessage other = (NanoAppMessage) object;
+            isEqual = (other.getNanoAppId() == mNanoAppId)
+                    && (other.getMessageType() == mMessageType)
+                    && (other.isBroadcastMessage() == mIsBroadcasted)
+                    && Arrays.equals(other.getMessageBody(), mMessageBody);
+        }
+
+        return isEqual;
     }
 }

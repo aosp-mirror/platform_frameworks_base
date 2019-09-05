@@ -1,0 +1,13 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsUiRenderingTestCases"
+    },
+    {
+      "name": "CtsGraphicsTestCases"
+    },
+    {
+      "name": "CtsAccelerationTestCases"
+    }
+  ]
+}

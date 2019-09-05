@@ -1,0 +1,115 @@
+java_library {
+    name: "updatable-media",
+
+    srcs: [
+        ":updatable-media-srcs",
+    ],
+
+    aidl: {
+        export_include_dirs: [
+            "apex/java",
+        ],
+
+        // It would be great if we don't need to add include_dirs for public
+        // parcelable classes. Find a better way.
+        include_dirs: [
+            // To refer:
+            // android.os.Bundle
+            // android.os.ResultReceiver
+            "frameworks/base/core/java",
+        ],
+    },
+
+    permitted_packages: [
+        "android.media",
+    ],
+
+    installable: true,
+
+    // Make sure that the implementaion only relies on SDK or system APIs.
+    sdk_version: "core_platform",
+    libs: [
+        // The order matters. android_system_* library should come later.
+        "framework_media_annotation",
+        "android_system_stubs_current",
+    ],
+}
+
+filegroup {
+    name: "updatable-media-srcs",
+    srcs: [
+        ":mediasession2-srcs",
+    ],
+}
+
+filegroup {
+    name: "mediasession2-srcs",
+    srcs: [
+        "apex/java/android/media/Controller2Link.java",
+        "apex/java/android/media/IMediaController2.aidl",
+        "apex/java/android/media/IMediaSession2.aidl",
+        "apex/java/android/media/IMediaSession2Service.aidl",
+        "apex/java/android/media/MediaConstants.java",
+        "apex/java/android/media/MediaController2.java",
+        "apex/java/android/media/MediaSession2.java",
+        "apex/java/android/media/MediaSession2Service.java",
+        "apex/java/android/media/Session2Command.java",
+        "apex/java/android/media/Session2CommandGroup.java",
+        "apex/java/android/media/Session2Link.java",
+        "apex/java/android/media/Session2Token.java",
+    ],
+    path: "apex/java",
+}
+
+filegroup {
+    name: "mediaplayer2-srcs",
+    srcs: [
+        "apex/java/android/media/CloseGuard.java",
+        "apex/java/android/media/DataSourceCallback.java",
+        "apex/java/android/media/DataSourceDesc.java",
+        "apex/java/android/media/UriDataSourceDesc.java",
+        "apex/java/android/media/FileDataSourceDesc.java",
+        "apex/java/android/media/Media2Utils.java",
+        "apex/java/android/media/MediaPlayer2Utils.java",
+        "apex/java/android/media/MediaPlayer2.java",
+        "apex/java/android/media/Media2HTTPService.java",
+        "apex/java/android/media/Media2HTTPConnection.java",
+        "apex/java/android/media/RoutingDelegate.java",
+        "apex/java/android/media/BufferingParams.java",
+        "apex/java/android/media/ProxyDataSourceCallback.java",
+    ],
+    path: "apex/java",
+}
+
+metalava_updatable_media_args = " --error UnhiddenSystemApi " +
+    "--hide RequiresPermission " +
+    "--hide MissingPermission --hide BroadcastBehavior " +
+    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi "
+
+droidstubs {
+    name: "updatable-media-stubs",
+    srcs: [
+        ":updatable-media-srcs",
+        ":framework-media-annotation-srcs",
+    ],
+    args: metalava_updatable_media_args,
+    aidl: {
+        // TODO(b/135922046) remove this
+        include_dirs: ["frameworks/base/core/java"],
+    },
+    sdk_version: "system_current",
+}
+
+java_library {
+    name: "updatable_media_stubs",
+    srcs: [":updatable-media-stubs"],
+    sdk_version: "system_current",
+}
+
+java_library {
+    name: "framework_media_annotation",
+    srcs: [":framework-media-annotation-srcs"],
+    installable: false,
+}

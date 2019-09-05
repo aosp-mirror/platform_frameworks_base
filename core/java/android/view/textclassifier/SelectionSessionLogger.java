@@ -39,7 +39,6 @@ import java.util.StringJoiner;
 public final class SelectionSessionLogger {
 
     private static final String LOG_TAG = "SelectionSessionLogger";
-    private static final boolean DEBUG_LOG_ENABLED = false;
     static final String CLASSIFIER_ID = "androidtc";
 
     private static final int START_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_START;
@@ -81,12 +80,16 @@ public final class SelectionSessionLogger {
                 .addTaggedData(INDEX, event.getEventIndex())
                 .addTaggedData(WIDGET_TYPE, event.getWidgetType())
                 .addTaggedData(WIDGET_VERSION, event.getWidgetVersion())
-                .addTaggedData(MODEL_NAME, SignatureParser.getModelName(event.getResultId()))
                 .addTaggedData(ENTITY_TYPE, event.getEntityType())
-                .addTaggedData(SMART_START, event.getSmartStart())
-                .addTaggedData(SMART_END, event.getSmartEnd())
                 .addTaggedData(EVENT_START, event.getStart())
                 .addTaggedData(EVENT_END, event.getEnd());
+        if (isPlatformLocalTextClassifierSmartSelection(event.getResultId())) {
+            // Ensure result id and smart indices are only set for events with smart selection from
+            // the platform's textclassifier.
+            log.addTaggedData(MODEL_NAME, SignatureParser.getModelName(event.getResultId()))
+                    .addTaggedData(SMART_START, event.getSmartStart())
+                    .addTaggedData(SMART_END, event.getSmartEnd());
+        }
         if (event.getSessionId() != null) {
             log.addTaggedData(SESSION_ID, event.getSessionId().flattenToString());
         }
@@ -194,9 +197,15 @@ public final class SelectionSessionLogger {
         }
     }
 
-    private static void debugLog(LogMaker log) {
-        if (!DEBUG_LOG_ENABLED) return;
+    static boolean isPlatformLocalTextClassifierSmartSelection(String signature) {
+        return SelectionSessionLogger.CLASSIFIER_ID.equals(
+                SelectionSessionLogger.SignatureParser.getClassifierId(signature));
+    }
 
+    private static void debugLog(LogMaker log) {
+        if (!Log.ENABLE_FULL_LOGGING) {
+            return;
+        }
         final String widgetType = Objects.toString(log.getTaggedData(WIDGET_TYPE), UNKNOWN);
         final String widgetVersion = Objects.toString(log.getTaggedData(WIDGET_VERSION), "");
         final String widget = widgetVersion.isEmpty()
@@ -221,7 +230,7 @@ public final class SelectionSessionLogger {
         final int eventEnd = Integer.parseInt(
                 Objects.toString(log.getTaggedData(EVENT_END), ZERO));
 
-        Log.d(LOG_TAG,
+        Log.v(LOG_TAG,
                 String.format(Locale.US, "%2d: %s/%s/%s, range=%d,%d - smart_range=%d,%d (%s/%s)",
                         index, type, subType, entity, eventStart, eventEnd, smartStart, smartEnd,
                         widget, model));

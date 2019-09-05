@@ -17,8 +17,8 @@
 
 package com.android.internal.os;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

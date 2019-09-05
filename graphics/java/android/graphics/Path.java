@@ -36,8 +36,9 @@ import libcore.util.NativeAllocationRegistry;
  */
 public class Path {
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Path.class.getClassLoader(), nGetFinalizer(), 48 /* dummy size */);
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(
+                Path.class.getClassLoader(), nGetFinalizer());
 
     /**
      * @hide
@@ -69,7 +70,7 @@ public class Path {
      *
      * @param src The path to copy from when initializing the new path
      */
-    public Path(Path src) {
+    public Path(@Nullable Path src) {
         long valNative = 0;
         if (src != null) {
             valNative = src.mNativePath;
@@ -171,7 +172,7 @@ public class Path {
      * @see Op
      * @see #op(Path, Path, android.graphics.Path.Op)
      */
-    public boolean op(Path path, Op op) {
+    public boolean op(@NonNull Path path, @NonNull Op op) {
         return op(this, path, op);
     }
 
@@ -189,7 +190,7 @@ public class Path {
      * @see Op
      * @see #op(Path, android.graphics.Path.Op)
      */
-    public boolean op(Path path1, Path path2, Op op) {
+    public boolean op(@NonNull Path path1, @NonNull Path path2, @NonNull Op op) {
         if (nOp(path1.mNativePath, path2.mNativePath, op.ordinal(), this.mNativePath)) {
             isSimplePath = false;
             rects = null;
@@ -258,6 +259,7 @@ public class Path {
      *
      * @return the path's fill type
      */
+    @NonNull
     public FillType getFillType() {
         return sFillTypeArray[nGetFillType(mNativePath)];
     }
@@ -267,7 +269,7 @@ public class Path {
      *
      * @param ft The new fill type for this path
      */
-    public void setFillType(FillType ft) {
+    public void setFillType(@NonNull FillType ft) {
         nSetFillType(mNativePath, ft.nativeInt);
     }
 
@@ -321,7 +323,7 @@ public class Path {
      * @param exact This parameter is no longer used.
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    public void computeBounds(RectF bounds, boolean exact) {
+    public void computeBounds(@NonNull RectF bounds, boolean exact) {
         nComputeBounds(mNativePath, bounds);
     }
 
@@ -464,7 +466,7 @@ public class Path {
      *                    mod 360.
      * @param forceMoveTo If true, always begin a new contour with the arc
      */
-    public void arcTo(RectF oval, float startAngle, float sweepAngle,
+    public void arcTo(@NonNull RectF oval, float startAngle, float sweepAngle,
                       boolean forceMoveTo) {
         arcTo(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle, forceMoveTo);
     }
@@ -480,7 +482,7 @@ public class Path {
      * @param startAngle  Starting angle (in degrees) where the arc begins
      * @param sweepAngle  Sweep angle (in degrees) measured clockwise
      */
-    public void arcTo(RectF oval, float startAngle, float sweepAngle) {
+    public void arcTo(@NonNull RectF oval, float startAngle, float sweepAngle) {
         arcTo(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle, false);
     }
 
@@ -545,7 +547,7 @@ public class Path {
      * @param rect The rectangle to add as a closed contour to the path
      * @param dir  The direction to wind the rectangle's contour
      */
-    public void addRect(RectF rect, Direction dir) {
+    public void addRect(@NonNull RectF rect, @NonNull Direction dir) {
         addRect(rect.left, rect.top, rect.right, rect.bottom, dir);
     }
 
@@ -558,7 +560,7 @@ public class Path {
      * @param bottom The bottom of a rectangle to add to the path
      * @param dir    The direction to wind the rectangle's contour
      */
-    public void addRect(float left, float top, float right, float bottom, Direction dir) {
+    public void addRect(float left, float top, float right, float bottom, @NonNull Direction dir) {
         detectSimplePath(left, top, right, bottom, dir);
         nAddRect(mNativePath, left, top, right, bottom, dir.nativeInt);
     }
@@ -569,7 +571,7 @@ public class Path {
      * @param oval The bounds of the oval to add as a closed contour to the path
      * @param dir  The direction to wind the oval's contour
      */
-    public void addOval(RectF oval, Direction dir) {
+    public void addOval(@NonNull RectF oval, @NonNull Direction dir) {
         addOval(oval.left, oval.top, oval.right, oval.bottom, dir);
     }
 
@@ -578,7 +580,7 @@ public class Path {
      *
      * @param dir The direction to wind the oval's contour
      */
-    public void addOval(float left, float top, float right, float bottom, Direction dir) {
+    public void addOval(float left, float top, float right, float bottom, @NonNull Direction dir) {
         isSimplePath = false;
         nAddOval(mNativePath, left, top, right, bottom, dir.nativeInt);
     }
@@ -591,7 +593,7 @@ public class Path {
      * @param radius The radius of a circle to add to the path
      * @param dir    The direction to wind the circle's contour
      */
-    public void addCircle(float x, float y, float radius, Direction dir) {
+    public void addCircle(float x, float y, float radius, @NonNull Direction dir) {
         isSimplePath = false;
         nAddCircle(mNativePath, x, y, radius, dir.nativeInt);
     }
@@ -603,7 +605,7 @@ public class Path {
      * @param startAngle Starting angle (in degrees) where the arc begins
      * @param sweepAngle Sweep angle (in degrees) measured clockwise
      */
-    public void addArc(RectF oval, float startAngle, float sweepAngle) {
+    public void addArc(@NonNull RectF oval, float startAngle, float sweepAngle) {
         addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
     }
 
@@ -627,7 +629,7 @@ public class Path {
      * @param ry   The y-radius of the rounded corners on the round-rectangle
      * @param dir  The direction to wind the round-rectangle's contour
      */
-    public void addRoundRect(RectF rect, float rx, float ry, Direction dir) {
+    public void addRoundRect(@NonNull RectF rect, float rx, float ry, @NonNull Direction dir) {
         addRoundRect(rect.left, rect.top, rect.right, rect.bottom, rx, ry, dir);
     }
 
@@ -639,7 +641,7 @@ public class Path {
      * @param dir  The direction to wind the round-rectangle's contour
      */
     public void addRoundRect(float left, float top, float right, float bottom, float rx, float ry,
-            Direction dir) {
+            @NonNull Direction dir) {
         isSimplePath = false;
         nAddRoundRect(mNativePath, left, top, right, bottom, rx, ry, dir.nativeInt);
     }
@@ -653,7 +655,7 @@ public class Path {
      * @param radii Array of 8 values, 4 pairs of [X,Y] radii
      * @param dir  The direction to wind the round-rectangle's contour
      */
-    public void addRoundRect(RectF rect, float[] radii, Direction dir) {
+    public void addRoundRect(@NonNull RectF rect, @NonNull float[] radii, @NonNull Direction dir) {
         if (rect == null) {
             throw new NullPointerException("need rect parameter");
         }
@@ -668,8 +670,8 @@ public class Path {
      * @param radii Array of 8 values, 4 pairs of [X,Y] radii
      * @param dir  The direction to wind the round-rectangle's contour
      */
-    public void addRoundRect(float left, float top, float right, float bottom, float[] radii,
-            Direction dir) {
+    public void addRoundRect(float left, float top, float right, float bottom,
+            @NonNull float[] radii, @NonNull Direction dir) {
         if (radii.length < 8) {
             throw new ArrayIndexOutOfBoundsException("radii[] needs 8 values");
         }
@@ -683,7 +685,7 @@ public class Path {
      * @param src The path to add as a new contour
      * @param dx  The amount to translate the path in X as it is added
      */
-    public void addPath(Path src, float dx, float dy) {
+    public void addPath(@NonNull Path src, float dx, float dy) {
         isSimplePath = false;
         nAddPath(mNativePath, src.mNativePath, dx, dy);
     }
@@ -693,7 +695,7 @@ public class Path {
      *
      * @param src The path that is appended to the current path
      */
-    public void addPath(Path src) {
+    public void addPath(@NonNull Path src) {
         isSimplePath = false;
         nAddPath(mNativePath, src.mNativePath);
     }
@@ -703,7 +705,7 @@ public class Path {
      *
      * @param src The path to add as a new contour
      */
-    public void addPath(Path src, Matrix matrix) {
+    public void addPath(@NonNull Path src, @NonNull Matrix matrix) {
         if (!src.isSimplePath) isSimplePath = false;
         nAddPath(mNativePath, src.mNativePath, matrix.native_instance);
     }
@@ -763,7 +765,7 @@ public class Path {
      * @param dst    The transformed path is written here. If dst is null,
      *               then the the original path is modified
      */
-    public void transform(Matrix matrix, Path dst) {
+    public void transform(@NonNull Matrix matrix, @Nullable Path dst) {
         long dstNative = 0;
         if (dst != null) {
             dst.isSimplePath = false;
@@ -777,7 +779,7 @@ public class Path {
      *
      * @param matrix The matrix to apply to the path
      */
-    public void transform(Matrix matrix) {
+    public void transform(@NonNull Matrix matrix) {
         isSimplePath = false;
         nTransform(mNativePath, matrix.native_instance);
     }

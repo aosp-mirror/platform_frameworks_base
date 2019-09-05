@@ -180,7 +180,7 @@ public class NetworkKey implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<NetworkKey> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NetworkKey> CREATOR =
             new Parcelable.Creator<NetworkKey>() {
                 @Override
                 public NetworkKey createFromParcel(Parcel in) {

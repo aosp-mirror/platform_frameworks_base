@@ -28,7 +28,7 @@ oneway interface IWallpaperEngine {
     void setDisplayPadding(in Rect padding);
     @UnsupportedAppUsage
     void setVisibility(boolean visible);
-    void setInAmbientMode(boolean inAmbientDisplay, boolean animated);
+    void setInAmbientMode(boolean inAmbientDisplay, long animationDuration);
     @UnsupportedAppUsage
     void dispatchPointer(in MotionEvent event);
     @UnsupportedAppUsage

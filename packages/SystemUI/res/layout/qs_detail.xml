@@ -24,7 +24,8 @@
     android:orientation="vertical"
     android:paddingBottom="8dp"
     android:visibility="invisible"
-    android:elevation="4dp" >
+    android:elevation="4dp"
+    android:importantForAccessibility="no" >
 
     <include
         android:id="@+id/qs_detail_header"

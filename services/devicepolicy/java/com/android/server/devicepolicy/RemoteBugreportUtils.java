@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
@@ -65,7 +64,7 @@ class RemoteBugreportUtils {
                 dialogIntent, 0, null, UserHandle.CURRENT);
 
         Notification.Builder builder =
-                new Notification.Builder(context, SystemNotificationChannels.DEVELOPER)
+                new Notification.Builder(context, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                         .setOngoing(true)
                         .setLocalOnly(true)

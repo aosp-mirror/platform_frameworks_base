@@ -24,7 +24,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
-import com.android.systemui.statusbar.stack.HeadsUpAppearInterpolator;
+import com.android.systemui.statusbar.notification.stack.HeadsUpAppearInterpolator;
 
 /**
  * Utility class to receive interpolators from

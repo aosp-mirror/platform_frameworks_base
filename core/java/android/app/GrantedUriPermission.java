@@ -54,7 +54,7 @@ public class GrantedUriPermission implements Parcelable {
         out.writeString(packageName);
     }
 
-    public static final Parcelable.Creator<GrantedUriPermission> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<GrantedUriPermission> CREATOR =
             new Parcelable.Creator<GrantedUriPermission>() {
                 @Override
                 public GrantedUriPermission createFromParcel(Parcel in) {

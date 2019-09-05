@@ -20,7 +20,6 @@ import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
 import android.annotation.Nullable;
 import android.app.Fragment;
-import android.app.StatusBarManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -34,9 +33,9 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -47,7 +46,8 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
  * and keyguard state. Also manages lifecycle to make sure the views it contains are being
  * updated by the StatusBarIconController and DarkIconManager while it is attached.
  */
-public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks {
+public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks,
+        StatusBarStateController.StateListener {
 
     public static final String TAG = "CollapsedStatusBarFragment";
     private static final String EXTRA_PANEL_STATE = "panel_state";
@@ -55,20 +55,23 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public static final int FADE_IN_DURATION = 320;
     public static final int FADE_IN_DELAY = 50;
     private PhoneStatusBarView mStatusBar;
+    private StatusBarStateController mStatusBarStateController;
     private KeyguardMonitor mKeyguardMonitor;
     private NetworkController mNetworkController;
     private LinearLayout mSystemIconArea;
     private View mClockView;
     private View mNotificationIconAreaInner;
+    private View mCenteredIconArea;
     private int mDisabled1;
     private StatusBar mStatusBarComponent;
     private DarkIconManager mDarkIconManager;
     private View mOperatorNameFrame;
+    private CommandQueue mCommandQueue;
 
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
         public void setIsAirplaneMode(NetworkController.IconState icon) {
-            mStatusBarComponent.recomputeDisableFlags(true /* animate */);
+            mCommandQueue.recomputeDisableFlags(getContext().getDisplayId(), true /* animate */);
         }
     };
 
@@ -77,7 +80,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onCreate(savedInstanceState);
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mNetworkController = Dependency.get(NetworkController.class);
+        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         mStatusBarComponent = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
+        mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
     }
 
     @Override
@@ -116,13 +121,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onResume() {
         super.onResume();
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+        mCommandQueue.addCallback(this);
+        mStatusBarStateController.addCallback(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
+        mCommandQueue.removeCallback(this);
+        mStatusBarStateController.removeCallback(this);
     }
 
     @Override
@@ -144,12 +151,24 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     .removeView(mNotificationIconAreaInner);
         }
         notificationIconArea.addView(mNotificationIconAreaInner);
+
+        ViewGroup statusBarCenteredIconArea = mStatusBar.findViewById(R.id.centered_icon_area);
+        mCenteredIconArea = notificationIconAreaController.getCenteredNotificationAreaView();
+        if (mCenteredIconArea.getParent() != null) {
+            ((ViewGroup) mCenteredIconArea.getParent())
+                    .removeView(mCenteredIconArea);
+        }
+        statusBarCenteredIconArea.addView(mCenteredIconArea);
+
         // Default to showing until we know otherwise.
         showNotificationIconArea(false);
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != getContext().getDisplayId()) {
+            return;
+        }
         state1 = adjustDisableFlags(state1);
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
@@ -182,7 +201,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     protected int adjustDisableFlags(int state) {
-        if (!mStatusBarComponent.isLaunchTransitionFadingAway()
+        if (!mKeyguardMonitor.isLaunchTransitionFadingAway()
                 && !mKeyguardMonitor.isKeyguardFadingAway()
                 && shouldHideNotificationIcons()) {
             state |= DISABLE_NOTIFICATION_ICONS;
@@ -205,6 +224,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 state |= DISABLE_SYSTEM_INFO;
             }
         }
+
+        // The shelf will be hidden when dozing with a custom clock, we must show notification
+        // icons in this occasion.
+        if (mStatusBarStateController.isDozing()
+                && mStatusBarComponent.getPanel().hasCustomClock()) {
+            state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
+        }
+
         return state;
     }
 
@@ -239,7 +266,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * don't set the clock GONE otherwise it'll mess up the animation.
      */
     private int clockHiddenMode() {
-        if (!mStatusBar.isClosed() && !mKeyguardMonitor.isShowing()) {
+        if (!mStatusBar.isClosed() && !mKeyguardMonitor.isShowing()
+                && !mStatusBarStateController.isDozing()) {
             return View.INVISIBLE;
         }
         return View.GONE;
@@ -247,10 +275,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void hideNotificationIconArea(boolean animate) {
         animateHide(mNotificationIconAreaInner, animate);
+        animateHide(mCenteredIconArea, animate);
     }
 
     public void showNotificationIconArea(boolean animate) {
         animateShow(mNotificationIconAreaInner, animate);
+        animateShow(mCenteredIconArea, animate);
     }
 
     public void hideOperatorName(boolean animate) {
@@ -340,5 +370,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             ViewStub stub = mStatusBar.findViewById(R.id.operator_name);
             mOperatorNameFrame = stub.inflate();
         }
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        disable(getContext().getDisplayId(), mDisabled1, mDisabled1, false /* animate */);
     }
 }

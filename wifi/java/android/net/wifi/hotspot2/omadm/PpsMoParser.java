@@ -136,7 +136,7 @@ public final class PpsMoParser {
     private static final String NODE_UPDATE_IDENTIFIER = "UpdateIdentifier";
     private static final String NODE_AAA_SERVER_TRUST_ROOT = "AAAServerTrustRoot";
     private static final String NODE_SUBSCRIPTION_UPDATE = "SubscriptionUpdate";
-    private static final String NODE_SUBSCRIPTION_PARAMETER = "SubscriptionParameter";
+    private static final String NODE_SUBSCRIPTION_PARAMETER = "SubscriptionParameters";
     private static final String NODE_TYPE_OF_SUBSCRIPTION = "TypeOfSubscription";
     private static final String NODE_USAGE_LIMITS = "UsageLimits";
     private static final String NODE_DATA_LIMIT = "DataLimit";

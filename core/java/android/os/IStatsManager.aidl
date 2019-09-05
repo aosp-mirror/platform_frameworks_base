@@ -16,6 +16,9 @@
 
 package android.os;
 
+import android.os.IStatsPullerCallback;
+import android.os.ParcelFileDescriptor;
+
 /**
   * Binder interface to communicate with the statistics management service.
   * {@hide}
@@ -59,15 +62,19 @@ interface IStatsManager {
     void informDeviceShutdown();
 
     /**
-     * Inform statsd what the version and package are for each uid. Note that each array should
-     * have the same number of elements, and version[i] and package[i] correspond to uid[i].
+     * Inform statsd about a file descriptor for a pipe through which we will pipe version
+     * and package information for each uid.
+     * Versions and package information are supplied via UidData proto where info for each app
+     * is captured in its own element of a repeated ApplicationInfo message.
      */
-    oneway void informAllUidData(in int[] uid, in long[] version, in String[] app);
+    oneway void informAllUidData(in ParcelFileDescriptor fd);
 
     /**
-     * Inform statsd what the uid and version are for one app that was updated.
+     * Inform statsd what the uid, version, version_string, and installer are for one app that was
+     * updated.
      */
-    oneway void informOnePackage(in String app, in int uid, in long version);
+    oneway void informOnePackage(in String app, in int uid, in long version,
+        in String version_string, in String installer);
 
     /**
      * Inform stats that an app was removed.
@@ -116,6 +123,23 @@ interface IStatsManager {
     void removeDataFetchOperation(long configKey, in String packageName);
 
     /**
+     * Registers the given pending intent for this packagename. This intent is invoked when the
+     * active status of any of the configs sent by this package changes and will contain a list of
+     * config ids that are currently active. It also returns the list of configs that are currently
+     * active. There can be at most one active configs changed listener per package.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    long[] setActiveConfigsChangedOperation(in IBinder intentSender, in String packageName);
+
+    /**
+     * Removes the active configs changed operation for the specified package name.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    void removeActiveConfigsChangedOperation(in String packageName);
+
+    /**
      * Removes the configuration with the matching config key. No-op if this config key does not
      * exist.
      *
@@ -158,4 +182,52 @@ interface IStatsManager {
      * this label. This allows building custom metrics and predicates.
      */
     void sendAppBreadcrumbAtom(int label, int state);
+
+    /**
+     * Registers a puller callback function that, when invoked, pulls the data
+     * for the specified vendor atom tag.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
+     */
+    oneway void registerPullerCallback(int atomTag, IStatsPullerCallback pullerCallback,
+                                       String packageName);
+
+   /**
+    * Unregisters a puller callback function for the given vendor atom.
+    *
+    * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
+    */
+   oneway void unregisterPullerCallback(int atomTag, String packageName);
+
+    /**
+     * The install requires staging.
+     */
+    const int FLAG_REQUIRE_STAGING = 0x01;
+
+    /**
+     * Rollback is enabled with this install.
+     */
+    const int FLAG_ROLLBACK_ENABLED = 0x02;
+
+    /**
+     * Requires low latency monitoring.
+     */
+    const int FLAG_REQUIRE_LOW_LATENCY_MONITOR = 0x04;
+
+    /**
+     * Logs an event for binary push for module updates.
+     */
+     oneway void sendBinaryPushStateChangedAtom(in String trainName, in long trainVersionCode,
+         in int options, in int state, in long[] experimentId);
+
+    /**
+     * Logs an event for watchdog rollbacks.
+     */
+     oneway void sendWatchdogRollbackOccurredAtom(in int rollbackType, in String packageName,
+         in long packageVersionCode);
+
+    /**
+     * Returns the most recently registered experiment IDs.
+     */
+    long[] getRegisteredExperimentIds();
 }

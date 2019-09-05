@@ -55,7 +55,7 @@ import java.util.Map;
  *
  * <p>{@link TotalCaptureResult} objects are immutable.</p>
  *
- * @see CameraDevice.CaptureCallback#onCaptureCompleted
+ * @see CameraCaptureSession.CaptureCallback#onCaptureCompleted
  */
 public final class TotalCaptureResult extends CaptureResult {
 

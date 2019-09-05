@@ -189,7 +189,7 @@ public final class CapabilityChangeRequest implements Parcelable {
         }
     }
 
-    public static final Creator<CapabilityChangeRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<CapabilityChangeRequest> CREATOR =
             new Creator<CapabilityChangeRequest>() {
                 @Override
                 public CapabilityChangeRequest createFromParcel(Parcel in) {

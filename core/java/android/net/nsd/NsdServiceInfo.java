@@ -355,7 +355,7 @@ public final class NsdServiceInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<NsdServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<NsdServiceInfo> CREATOR =
         new Creator<NsdServiceInfo>() {
             public NsdServiceInfo createFromParcel(Parcel in) {
                 NsdServiceInfo info = new NsdServiceInfo();

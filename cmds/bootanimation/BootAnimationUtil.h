@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_BOOTANIMATION_UTIL_H
+#define ANDROID_BOOTANIMATION_UTIL_H
+
 namespace android {
 
 // Returns true if boot animation is disabled.
@@ -22,4 +25,8 @@ bool bootAnimationDisabled();
 // Waits until the surface flinger is up.
 void waitForSurfaceFlinger();
 
+// Returns whether sounds should be played during current boot.
+bool playSoundsAllowed();
 }  // namespace android
+
+#endif  // ANDROID_BOOTANIMATION_UTIL_H

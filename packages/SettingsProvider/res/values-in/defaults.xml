@@ -26,4 +26,5 @@
     <string name="def_nfc_payment_component" msgid="5861297439873026958"></string>
     <string name="def_backup_manager_constants" msgid="75273734665044867"></string>
     <string name="def_backup_local_transport_parameters" msgid="303005414813191641"></string>
+    <string name="def_backup_agent_timeout_parameters" msgid="8293164064853654150"></string>
 </resources>

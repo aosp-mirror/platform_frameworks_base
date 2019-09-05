@@ -189,6 +189,8 @@ public class XmlConfigSource implements ConfigSource {
             source = SystemCertificateSource.getInstance();
         } else if ("user".equals(sourceString)) {
             source = UserCertificateSource.getInstance();
+        } else if ("wfa".equals(sourceString)) {
+            source = WfaCertificateSource.getInstance();
         } else {
             throw new ParserException(parser, "Unknown certificates src. "
                     + "Should be one of system|user|@resourceVal");

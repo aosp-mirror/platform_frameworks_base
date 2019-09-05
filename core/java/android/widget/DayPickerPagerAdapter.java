@@ -249,7 +249,8 @@ class DayPickerPagerAdapter extends PagerAdapter {
         final int year = getYearForPosition(position);
 
         final int selectedDay;
-        if (mSelectedDay != null && mSelectedDay.get(Calendar.MONTH) == month) {
+        if (mSelectedDay != null && mSelectedDay.get(Calendar.MONTH) == month && mSelectedDay.get(
+                Calendar.YEAR) == year) {
             selectedDay = mSelectedDay.get(Calendar.DAY_OF_MONTH);
         } else {
             selectedDay = -1;

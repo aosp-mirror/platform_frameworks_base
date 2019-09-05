@@ -16,11 +16,11 @@
 
 package android.widget.layout.linear;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 public class FillInWrap extends Activity {
     @Override

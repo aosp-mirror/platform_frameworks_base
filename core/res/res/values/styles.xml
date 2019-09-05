@@ -506,13 +506,13 @@ please see styles_device_defaults.xml.
         <item name="textEditSuggestionHighlightStyle">?attr/textEditSuggestionHighlightStyle</item>
         <item name="textCursorDrawable">?attr/textCursorDrawable</item>
         <item name="breakStrategy">high_quality</item>
-        <item name="hyphenationFrequency">normal</item>
+        <item name="hyphenationFrequency">@dimen/config_preferredHyphenationFrequency</item>
     </style>
 
     <style name="Widget.CheckedTextView">
         <item name="textAlignment">viewStart</item>
         <item name="breakStrategy">high_quality</item>
-        <item name="hyphenationFrequency">normal</item>
+        <item name="hyphenationFrequency">@dimen/config_preferredHyphenationFrequency</item>
     </style>
 
     <style name="Widget.TextView.ListSeparator">
@@ -540,7 +540,7 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/editTextColor</item>
         <item name="gravity">center_vertical</item>
         <item name="breakStrategy">simple</item>
-        <item name="hyphenationFrequency">normal</item>
+        <item name="hyphenationFrequency">@dimen/config_preferredHyphenationFrequency</item>
         <item name="defaultFocusHighlightEnabled">false</item>
     </style>
 
@@ -797,6 +797,16 @@ please see styles_device_defaults.xml.
     <style name="Widget.CompoundButton.Switch">
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
+    </style>
+
+    <style name="Widget.Magnifier">
+        <item name="magnifierWidth">100dp</item>
+        <item name="magnifierHeight">48dp</item>
+        <item name="magnifierZoom">1.25</item>
+        <item name="magnifierElevation">4dp</item>
+        <item name="magnifierVerticalOffset">-42dp</item>
+        <item name="magnifierHorizontalOffset">0dp</item>
+        <item name="magnifierColorOverlay">#0EFFFFFF</item>
     </style>
 
     <!-- Text Appearances -->
@@ -1516,10 +1526,22 @@ please see styles_device_defaults.xml.
         <item name="gravity">top</item>
     </style>
 
-    <!-- Colored bordered ink button -->
+    <!-- The style for normal action button on notification -->
+    <style name="NotificationAction" parent="Widget.Material.Light.Button.Borderless.Small">
+      <item name="textColor">@color/notification_action_button_text_color</item>
+      <item name="background">@drawable/notification_material_action_background</item>
+    </style>
+
+    <!-- The style for emphasized action button on notification: Colored bordered ink button -->
     <style name="NotificationEmphasizedAction" parent="Widget.Material.Button">
         <item name="background">@drawable/btn_notification_emphasized</item>
         <item name="stateListAnimator">@anim/flat_button_state_list_anim_material</item>
     </style>
+
+    <!-- The style for disabled action button on notification -->
+    <style name="NotificationTombstoneAction" parent="NotificationAction">
+      <item name="textColor">#555555</item>
+    </style>
+
 
 </resources>

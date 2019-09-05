@@ -21,13 +21,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
+import android.graphics.Picture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
-import android.view.ThreadedRenderer;
 import android.view.View;
 
 import java.util.function.Consumer;
@@ -108,12 +106,10 @@ public class RecentsTransition {
      *         null if we were unable to allocate a hardware bitmap.
      */
     public static Bitmap createHardwareBitmap(int width, int height, Consumer<Canvas> consumer) {
-        RenderNode node = RenderNode.create("RecentsTransition", null);
-        node.setLeftTopRightBottom(0, 0, width, height);
-        node.setClipToBounds(false);
-        DisplayListCanvas c = node.start(width, height);
-        consumer.accept(c);
-        node.end(c);
-        return ThreadedRenderer.createHardwareBitmap(node, width, height);
+        final Picture picture = new Picture();
+        final Canvas canvas = picture.beginRecording(width, height);
+        consumer.accept(canvas);
+        picture.endRecording();
+        return Bitmap.createBitmap(picture);
     }
 }

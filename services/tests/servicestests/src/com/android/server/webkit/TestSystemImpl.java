@@ -88,19 +88,13 @@ public class TestSystemImpl implements SystemInterface {
     }
 
     @Override
-    public void uninstallAndDisablePackageForAllUsers(Context context, String packageName) {
-        enablePackageForAllUsers(context, packageName, false);
-    }
-
-    @Override
     public void enablePackageForAllUsers(Context context, String packageName, boolean enable) {
         for(int userId : mUsers) {
             enablePackageForUser(packageName, enable, userId);
         }
     }
 
-    @Override
-    public void enablePackageForUser(String packageName, boolean enable, int userId) {
+    private void enablePackageForUser(String packageName, boolean enable, int userId) {
         Map<Integer, PackageInfo> userPackages = mPackages.get(packageName);
         if (userPackages == null) {
             throw new IllegalArgumentException("There is no package called " + packageName);
@@ -172,7 +166,7 @@ public class TestSystemImpl implements SystemInterface {
 
         pi = userPackages.get(PRIMARY_USER_ID);
         if (pi != null && pi.applicationInfo.isSystemApp()) {
-            return pi.applicationInfo.versionCode;
+            return pi.applicationInfo.longVersionCode;
         }
         throw new NameNotFoundException();
     }
@@ -189,6 +183,9 @@ public class TestSystemImpl implements SystemInterface {
 
     @Override
     public void notifyZygote(boolean enableMultiProcess) {}
+
+    @Override
+    public void ensureZygoteStarted() {}
 
     @Override
     public boolean isMultiProcessDefaultEnabled() {

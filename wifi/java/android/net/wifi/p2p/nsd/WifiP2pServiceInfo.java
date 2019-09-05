@@ -171,7 +171,7 @@ public class WifiP2pServiceInfo implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<WifiP2pServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiP2pServiceInfo> CREATOR =
         new Creator<WifiP2pServiceInfo>() {
             public WifiP2pServiceInfo createFromParcel(Parcel in) {
 

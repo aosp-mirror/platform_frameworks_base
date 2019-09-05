@@ -16,11 +16,11 @@
 
 package android.util;
 
-import android.test.suitebuilder.annotation.SmallTest;
-
-import java.util.Calendar;
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
+
+import java.util.Calendar;
 
 /**
  * Unit tests for {@link MonthDisplayHelper}.

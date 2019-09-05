@@ -16,9 +16,11 @@
 package com.android.settingslib.core;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
@@ -33,6 +35,8 @@ import org.robolectric.RuntimeEnvironment;
 @RunWith(RobolectricTestRunner.class)
 public class AbstractPreferenceControllerTest {
 
+    private static final String KEY_PREF = "test_pref";
+
     @Mock
     private PreferenceScreen mScreen;
 
@@ -45,9 +49,9 @@ public class AbstractPreferenceControllerTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mPreference = new Preference(mContext);
-        mPreference.setKey(TestPrefController.KEY_PREF);
-        when(mScreen.findPreference(TestPrefController.KEY_PREF)).thenReturn(mPreference);
-        mTestPrefController = new TestPrefController(mContext);
+        mPreference.setKey(KEY_PREF);
+        when(mScreen.findPreference(KEY_PREF)).thenReturn(mPreference);
+        mTestPrefController = new TestPrefController(mContext, KEY_PREF);
     }
 
     @Test
@@ -60,15 +64,24 @@ public class AbstractPreferenceControllerTest {
     }
 
     @Test
+    public void displayPref_noKey_shouldDoNothing() {
+        mTestPrefController.isAvailable = true;
+
+        mTestPrefController.displayPreference(mScreen);
+
+        assertThat(mPreference.isVisible()).isTrue();
+    }
+
+    @Test
     public void setVisible_prefIsVisible_shouldSetToVisible() {
-        mTestPrefController.setVisible(mScreen, TestPrefController.KEY_PREF, true /* visible */);
+        mTestPrefController.setVisible(mScreen, KEY_PREF, true /* visible */);
 
         assertThat(mPreference.isVisible()).isTrue();
     }
 
     @Test
     public void setVisible_prefNotVisible_shouldSetToInvisible() {
-        mTestPrefController.setVisible(mScreen, TestPrefController.KEY_PREF, false /* visible */);
+        mTestPrefController.setVisible(mScreen, KEY_PREF, false /* visible */);
 
         assertThat(mPreference.isVisible()).isFalse();
     }
@@ -90,13 +103,14 @@ public class AbstractPreferenceControllerTest {
     }
 
     private static class TestPrefController extends AbstractPreferenceController {
-        private static final String KEY_PREF = "test_pref";
         private static final CharSequence TEST_SUMMARY = "Test";
 
         public boolean isAvailable;
+        private final String mPrefKey;
 
-        public TestPrefController(Context context) {
+        TestPrefController(Context context, String key) {
             super(context);
+            mPrefKey = key;
         }
 
         @Override
@@ -111,7 +125,7 @@ public class AbstractPreferenceControllerTest {
 
         @Override
         public String getPreferenceKey() {
-            return KEY_PREF;
+            return mPrefKey;
         }
 
         @Override

@@ -139,7 +139,7 @@ public class RemoteAnimationDefinition implements Parcelable {
         }
     }
 
-    public static final Creator<RemoteAnimationDefinition> CREATOR =
+    public static final @android.annotation.NonNull Creator<RemoteAnimationDefinition> CREATOR =
             new Creator<RemoteAnimationDefinition>() {
         public RemoteAnimationDefinition createFromParcel(Parcel in) {
             return new RemoteAnimationDefinition(in);
@@ -181,7 +181,7 @@ public class RemoteAnimationDefinition implements Parcelable {
             return 0;
         }
 
-        private static final Creator<RemoteAnimationAdapterEntry> CREATOR
+        private static final @android.annotation.NonNull Creator<RemoteAnimationAdapterEntry> CREATOR
                 = new Creator<RemoteAnimationAdapterEntry>() {
 
             @Override

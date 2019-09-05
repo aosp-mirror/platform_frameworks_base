@@ -89,7 +89,7 @@ public final class PhoneAccountSuggestion implements Parcelable {
         mShouldAutoSelect = in.readByte() != 0;
     }
 
-    public static final Creator<PhoneAccountSuggestion> CREATOR =
+    public static final @android.annotation.NonNull Creator<PhoneAccountSuggestion> CREATOR =
             new Creator<PhoneAccountSuggestion>() {
                 @Override
                 public PhoneAccountSuggestion createFromParcel(Parcel in) {

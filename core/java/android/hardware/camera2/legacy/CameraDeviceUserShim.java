@@ -28,6 +28,7 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.os.ConditionVariable;
 import android.os.IBinder;
@@ -38,6 +39,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
+import android.util.Size;
 import android.util.SparseArray;
 import android.view.Surface;
 
@@ -355,7 +357,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     public static CameraDeviceUserShim connectBinderShim(ICameraDeviceCallbacks callbacks,
-                                                         int cameraId) {
+                                                         int cameraId, Size displaySize) {
         if (DEBUG) {
             Log.d(TAG, "Opening shim Camera device");
         }
@@ -392,7 +394,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         CameraCharacteristics characteristics =
-                LegacyMetadataMapper.createCharacteristics(legacyParameters, info);
+                LegacyMetadataMapper.createCharacteristics(legacyParameters, info, cameraId,
+                        displaySize);
         LegacyCameraDevice device = new LegacyCameraDevice(
                 cameraId, legacyCamera, characteristics, threadCallbacks);
         return new CameraDeviceUserShim(cameraId, device, characteristics, init, threadCallbacks);
@@ -477,6 +480,42 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             }
         }
         return mLegacyDevice.cancelRequest(requestId);
+    }
+
+    @Override
+    public boolean isSessionConfigurationSupported(SessionConfiguration sessionConfig) {
+        if (sessionConfig.getSessionType() != SessionConfiguration.SESSION_REGULAR) {
+            Log.e(TAG, "Session type: " + sessionConfig.getSessionType() + " is different from " +
+                    " regular. Legacy devices support only regular session types!");
+            return false;
+        }
+
+        if (sessionConfig.getInputConfiguration() != null) {
+            Log.e(TAG, "Input configuration present, legacy devices do not support this feature!");
+            return false;
+        }
+
+        List<OutputConfiguration> outputConfigs = sessionConfig.getOutputConfigurations();
+        if (outputConfigs.isEmpty()) {
+            Log.e(TAG, "Empty output configuration list!");
+            return false;
+        }
+
+        SparseArray<Surface> surfaces = new SparseArray<Surface>(outputConfigs.size());
+        int idx = 0;
+        for (OutputConfiguration outputConfig : outputConfigs) {
+            List<Surface> surfaceList = outputConfig.getSurfaces();
+            if (surfaceList.isEmpty() || (surfaceList.size() > 1)) {
+                Log.e(TAG, "Legacy devices do not support deferred or shared surfaces!");
+                return false;
+            }
+
+            surfaces.put(idx++, outputConfig.getSurface());
+        }
+
+        int ret = mLegacyDevice.configureOutputs(surfaces, /*validateSurfacesOnly*/true);
+
+        return ret == LegacyExceptionUtils.NO_ERROR;
     }
 
     @Override

@@ -16,14 +16,12 @@
 
 package android.view;
 
-import android.view.BigCache;
-import com.android.frameworks.coretests.R;
-
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.view.View;
-import android.view.ViewConfiguration;
 import android.graphics.Bitmap;
+import android.test.ActivityInstrumentationTestCase;
+
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Builds the drawing cache of two Views, one smaller than the maximum cache size,

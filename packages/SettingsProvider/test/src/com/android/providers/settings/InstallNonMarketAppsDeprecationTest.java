@@ -26,9 +26,10 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
 
 import org.junit.After;
 import org.junit.Before;

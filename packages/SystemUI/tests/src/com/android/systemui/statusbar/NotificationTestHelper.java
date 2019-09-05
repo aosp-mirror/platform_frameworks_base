@@ -16,11 +16,20 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.Notification;
+import android.app.Notification.BubbleMetadata;
+import android.app.NotificationChannel;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -30,7 +39,11 @@ import android.widget.RemoteViews;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationInflaterTest;
+import com.android.systemui.bubbles.BubblesTestActivity;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflaterTest;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -41,8 +54,13 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
  */
 public class NotificationTestHelper {
 
-    static final String PKG = "com.android.systemui";
-    static final int UID = 1000;
+    /** Package name for testing purposes. */
+    public static final String PKG = "com.android.systemui";
+    /** System UI id for testing purposes. */
+    public static final int UID = 1000;
+    /** Current {@link UserHandle} of the system. */
+    public static final UserHandle USER_HANDLE = UserHandle.of(ActivityManager.getCurrentUser());
+
     private static final String GROUP_KEY = "gruKey";
 
     private final Context mContext;
@@ -56,18 +74,54 @@ public class NotificationTestHelper {
         mContext = context;
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, null, mGroupManager, null, null);
+        mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 
+    /**
+     * Creates a generic row.
+     *
+     * @return a generic row with no special properties.
+     * @throws Exception
+     */
     public ExpandableNotificationRow createRow() throws Exception {
-        return createRow(PKG, UID);
+        return createRow(PKG, UID, USER_HANDLE);
     }
 
-    public ExpandableNotificationRow createRow(String pkg, int uid) throws Exception {
-        return createRow(pkg, uid, false /* isGroupSummary */, null /* groupKey */);
+    /**
+     * Create a row with the package and user id specified.
+     *
+     * @param pkg package
+     * @param uid user id
+     * @return a row with a notification using the package and user id
+     * @throws Exception
+     */
+    public ExpandableNotificationRow createRow(String pkg, int uid, UserHandle userHandle)
+            throws Exception {
+        return createRow(pkg, uid, userHandle, false /* isGroupSummary */, null /* groupKey */);
     }
 
+    /**
+     * Creates a row based off the notification given.
+     *
+     * @param notification the notification
+     * @return a row built off the notification
+     * @throws Exception
+     */
     public ExpandableNotificationRow createRow(Notification notification) throws Exception {
-        return generateRow(notification, PKG, UID, false /* isGroupRow */);
+        return generateRow(notification, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */);
+    }
+
+    /**
+     * Create a row with the specified content views inflated in addition to the default.
+     *
+     * @param extraInflationFlags the flags corresponding to the additional content views that
+     *                            should be inflated
+     * @return a row with the specified content views inflated in addition to the default
+     * @throws Exception
+     */
+    public ExpandableNotificationRow createRow(@InflationFlag int extraInflationFlags)
+            throws Exception {
+        return generateRow(createNotification(), PKG, UID, USER_HANDLE, extraInflationFlags);
     }
 
     /**
@@ -89,11 +143,45 @@ public class NotificationTestHelper {
     }
 
     private ExpandableNotificationRow createGroupSummary(String groupkey) throws Exception {
-        return createRow(PKG, UID, true /* isGroupSummary */, groupkey);
+        return createRow(PKG, UID, USER_HANDLE, true /* isGroupSummary */, groupkey);
     }
 
     private ExpandableNotificationRow createGroupChild(String groupkey) throws Exception {
-        return createRow(PKG, UID, false /* isGroupSummary */, groupkey);
+        return createRow(PKG, UID, USER_HANDLE, false /* isGroupSummary */, groupkey);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     */
+    public ExpandableNotificationRow createBubble()
+            throws Exception {
+        return createBubble(makeBubbleMetadata(null), PKG);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     *
+     * @param deleteIntent the intent to assign to {@link BubbleMetadata#deleteIntent}
+     */
+    public ExpandableNotificationRow createBubble(@Nullable PendingIntent deleteIntent)
+            throws Exception {
+        return createBubble(makeBubbleMetadata(deleteIntent), PKG);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     *
+     * @param bubbleMetadata the {@link BubbleMetadata} to use
+     */
+    public ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg)
+            throws Exception {
+        Notification n = createNotification(false /* isGroupSummary */,
+                null /* groupKey */, bubbleMetadata);
+        n.flags |= FLAG_BUBBLE;
+        ExpandableNotificationRow row = generateRow(n, pkg, UID, USER_HANDLE,
+                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+        row.getEntry().canBubble = true;
+        return row;
     }
 
     /**
@@ -110,37 +198,85 @@ public class NotificationTestHelper {
     private ExpandableNotificationRow createRow(
             String pkg,
             int uid,
+            UserHandle userHandle,
             boolean isGroupSummary,
             @Nullable String groupKey)
             throws Exception {
+        Notification notif = createNotification(isGroupSummary, groupKey);
+        return generateRow(notif, pkg, uid, userHandle, 0 /* inflationFlags */);
+    }
+
+    /**
+     * Creates a generic notification.
+     *
+     * @return a notification with no special properties
+     */
+    public Notification createNotification() {
+        return createNotification(false /* isGroupSummary */, null /* groupKey */);
+    }
+
+    /**
+     * Creates a notification with the given parameters.
+     *
+     * @param isGroupSummary whether the notification is a group summary
+     * @param groupKey the group key for the notification group used across notifications
+     * @return a notification that is in the group specified or standalone if unspecified
+     */
+    private Notification createNotification(boolean isGroupSummary, @Nullable String groupKey) {
+        return createNotification(isGroupSummary, groupKey, null /* bubble metadata */);
+    }
+
+    /**
+     * Creates a notification with the given parameters.
+     *
+     * @param isGroupSummary whether the notification is a group summary
+     * @param groupKey the group key for the notification group used across notifications
+     * @param bubbleMetadata the bubble metadata to use for this notification if it exists.
+     * @return a notification that is in the group specified or standalone if unspecified
+     */
+    public Notification createNotification(boolean isGroupSummary,
+            @Nullable String groupKey, @Nullable BubbleMetadata bubbleMetadata) {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
                         R.layout.custom_view_dark))
                 .build();
-        Notification.Builder notificationBuilder =
-                new Notification.Builder(mContext)
-                        .setSmallIcon(R.drawable.ic_person)
-                        .setContentTitle("Title")
-                        .setContentText("Text")
-                        .setPublicVersion(publicVersion);
-
-        // Group notification setup
+        Notification.Builder notificationBuilder = new Notification.Builder(mContext, "channelId")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text")
+                .setPublicVersion(publicVersion)
+                .setStyle(new Notification.BigTextStyle().bigText("Big Text"));
         if (isGroupSummary) {
             notificationBuilder.setGroupSummary(true);
         }
         if (!TextUtils.isEmpty(groupKey)) {
             notificationBuilder.setGroup(groupKey);
         }
-
-        return generateRow(notificationBuilder.build(), pkg, uid, !TextUtils.isEmpty(groupKey));
+        if (bubbleMetadata != null) {
+            notificationBuilder.setBubbleMetadata(bubbleMetadata);
+        }
+        return notificationBuilder.build();
     }
 
     private ExpandableNotificationRow generateRow(
             Notification notification,
             String pkg,
             int uid,
-            boolean isGroupRow)
+            UserHandle userHandle,
+            @InflationFlag int extraInflationFlags)
+            throws Exception {
+        return generateRow(notification, pkg, uid, userHandle, extraInflationFlags,
+                IMPORTANCE_DEFAULT);
+    }
+
+    private ExpandableNotificationRow generateRow(
+            Notification notification,
+            String pkg,
+            int uid,
+            UserHandle userHandle,
+            @InflationFlag int extraInflationFlags,
+            int importance)
             throws Exception {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 mContext.LAYOUT_INFLATER_SERVICE);
@@ -152,7 +288,6 @@ public class NotificationTestHelper {
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);
         row.setAboveShelfChangedListener(aboveShelf -> {});
-        UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
         StatusBarNotification sbn = new StatusBarNotification(
                 pkg,
                 pkg,
@@ -161,14 +296,19 @@ public class NotificationTestHelper {
                 uid,
                 2000 /* initialPid */,
                 notification,
-                mUser,
+                userHandle,
                 null /* overrideGroupKey */,
                 System.currentTimeMillis());
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        entry.row = row;
+        NotificationEntry entry = new NotificationEntry(sbn);
+        entry.setRow(row);
         entry.createIcons(mContext, sbn);
-        NotificationInflaterTest.runThenWaitForInflation(
-                () -> row.updateNotification(entry),
+        entry.channel = new NotificationChannel(
+                notification.getChannelId(), notification.getChannelId(), importance);
+        entry.channel.setBlockableSystem(true);
+        row.setEntry(entry);
+        row.getNotificationInflater().addInflationFlags(extraInflationFlags);
+        NotificationContentInflaterTest.runThenWaitForInflation(
+                () -> row.inflateViews(),
                 row.getNotificationInflater());
 
         // This would be done as part of onAsyncInflationFinished, but we skip large amounts of
@@ -176,5 +316,17 @@ public class NotificationTestHelper {
         // here.
         mGroupManager.onEntryAdded(entry);
         return row;
+    }
+
+    private BubbleMetadata makeBubbleMetadata(PendingIntent deleteIntent) {
+        Intent target = new Intent(mContext, BubblesTestActivity.class);
+        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target, 0);
+
+        return new BubbleMetadata.Builder()
+                .setIntent(bubbleIntent)
+                .setDeleteIntent(deleteIntent)
+                .setIcon(Icon.createWithResource(mContext, R.drawable.android))
+                .setDesiredHeight(314)
+                .build();
     }
 }

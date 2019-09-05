@@ -17,6 +17,7 @@
 package android.hardware.location;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -108,6 +109,25 @@ public class MemoryRegion implements Parcelable{
     }
 
     @Override
+    public boolean equals(@Nullable Object object) {
+        if (object == this) {
+            return true;
+        }
+
+        boolean isEqual = false;
+        if (object instanceof MemoryRegion) {
+            MemoryRegion other = (MemoryRegion) object;
+            isEqual = (other.getCapacityBytes() == mSizeBytes)
+                    && (other.getFreeCapacityBytes() == mSizeBytesFree)
+                    && (other.isReadable() == mIsReadable)
+                    && (other.isWritable() == mIsWritable)
+                    && (other.isExecutable() == mIsExecutable);
+        }
+
+        return isEqual;
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -129,7 +149,7 @@ public class MemoryRegion implements Parcelable{
         mIsExecutable = source.readInt() != 0;
     }
 
-    public static final Parcelable.Creator<MemoryRegion> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<MemoryRegion> CREATOR
             = new Parcelable.Creator<MemoryRegion>() {
         public MemoryRegion createFromParcel(Parcel in) {
             return new MemoryRegion(in);

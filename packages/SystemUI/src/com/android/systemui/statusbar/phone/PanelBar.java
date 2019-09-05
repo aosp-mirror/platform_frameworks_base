@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.FrameLayout;
 
 public abstract class PanelBar extends FrameLayout {
@@ -194,7 +193,7 @@ public abstract class PanelBar extends FrameLayout {
             pv.collapse(delayed, speedUpFactor);
             waiting = true;
         } else {
-            pv.resetViews();
+            pv.resetViews(false /* animate */);
             pv.setExpandedFraction(0); // just in case
             pv.cancelPeek();
         }

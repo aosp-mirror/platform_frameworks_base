@@ -147,7 +147,7 @@ public class Slide extends Visibility {
     /**
      * Constructor using the provided slide edge direction.
      */
-    public Slide(int slideEdge) {
+    public Slide(@GravityFlag int slideEdge) {
         setSlideEdge(slideEdge);
     }
 

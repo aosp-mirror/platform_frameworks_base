@@ -106,7 +106,7 @@ public class Voice implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<Voice> CREATOR = new Parcelable.Creator<Voice>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Voice> CREATOR = new Parcelable.Creator<Voice>() {
         @Override
         public Voice createFromParcel(Parcel in) {
             return new Voice(in);

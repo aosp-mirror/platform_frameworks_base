@@ -16,13 +16,13 @@
 
 package android.widget.scroll.arrowscroll;
 
-import android.widget.scroll.TallTextAboveButton;
-
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.scroll.TallTextAboveButton;
+
+import androidx.test.filters.MediumTest;
 
 public class TallTextAboveButtonTest extends ActivityInstrumentationTestCase<TallTextAboveButton> {
     private ScrollView mScrollView;

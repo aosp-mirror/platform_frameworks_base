@@ -257,7 +257,7 @@ public final class TelephonyHistogram implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<TelephonyHistogram> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TelephonyHistogram> CREATOR =
             new Parcelable.Creator<TelephonyHistogram> () {
 
                 @Override

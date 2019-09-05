@@ -474,9 +474,9 @@ void printXMLBlock(ResXMLTree* block)
                 if (value.dataType == Res_value::TYPE_NULL) {
                     printf("=(null)");
                 } else if (value.dataType == Res_value::TYPE_REFERENCE) {
-                    printf("=@0x%x", (int)value.data);
+                    printf("=@0x%08x", (int)value.data);
                 } else if (value.dataType == Res_value::TYPE_ATTRIBUTE) {
-                    printf("=?0x%x", (int)value.data);
+                    printf("=?0x%08x", (int)value.data);
                 } else if (value.dataType == Res_value::TYPE_STRING) {
                     printf("=\"%s\"",
                             ResTable::normalizeForOutput(String8(block->getAttributeStringValue(i,

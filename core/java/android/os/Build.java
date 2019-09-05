@@ -17,10 +17,13 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityThread;
 import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
@@ -31,6 +34,8 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -103,13 +108,12 @@ public class Build {
      * Whether this build was for an emulator device.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
     /**
      * A hardware serial number, if available. Alphanumeric only, case-insensitive.
-     * For apps targeting SDK higher than {@link Build.VERSION_CODES#O_MR1} this
-     * field is set to {@link Build#UNKNOWN}.
+     * This field is always set to {@link Build#UNKNOWN}.
      *
      * @deprecated Use {@link #getSerial()} instead.
      **/
@@ -127,14 +131,35 @@ public class Build {
      * <a href="/training/articles/security-key-attestation.html">key attestation</a> to obtain
      * proof of the device's original identifiers.
      *
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}). The profile
+     * owner is an app that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
+     *
+     * <p>If the calling app does not meet one of these requirements then this method will behave
+     * as follows:
+     *
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
+     *     READ_PHONE_STATE permission then {@link Build#UNKNOWN} is returned.</li>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
+     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
+     *     higher, then a SecurityException is thrown.</li>
+     * </ul>
+     * *
      * @return The serial number if specified.
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public static String getSerial() {
         IDeviceIdentifiersPolicyService service = IDeviceIdentifiersPolicyService.Stub
                 .asInterface(ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE));
         try {
-            return service.getSerial();
+            Application application = ActivityThread.currentApplication();
+            String callingPackage = application != null ? application.getPackageName() : null;
+            return service.getSerialForPackage(callingPackage);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -167,6 +192,11 @@ public class Build {
     public static final String[] SUPPORTED_64_BIT_ABIS =
             getStringList("ro.product.cpu.abilist64", ",");
 
+    /** {@hide} */
+    @TestApi
+    public static boolean is64BitAbi(String abi) {
+        return VMRuntime.is64BitAbi(abi);
+    }
 
     static {
         /*
@@ -272,6 +302,26 @@ public class Build {
          */
         public static final int PREVIEW_SDK_INT = SystemProperties.getInt(
                 "ro.build.version.preview_sdk", 0);
+
+        /**
+         * The SDK fingerprint for a given prerelease SDK. This value will always be
+         * {@code REL} on production platform builds/devices.
+         *
+         * <p>When this value is not {@code REL}, it contains a string fingerprint of the API
+         * surface exposed by the preview SDK. Preview platforms with different API surfaces
+         * will have different {@code PREVIEW_SDK_FINGERPRINT}.
+         *
+         * <p>This attribute is intended for use by installers for finer grained targeting of
+         * packages. Applications targeting preview APIs should not use this field and should
+         * instead use {@code PREVIEW_SDK_INT} or use reflection or other runtime checks to
+         * detect the presence of an API or guard themselves against unexpected runtime
+         * behavior.
+         *
+         * @hide
+         */
+        @SystemApi
+        @NonNull public static final String PREVIEW_SDK_FINGERPRINT = SystemProperties.get(
+                "ro.build.version.preview_sdk_fingerprint", "REL");
 
         /**
          * The current development codename, or the string "REL" if this is
@@ -940,7 +990,7 @@ public class Build {
          * to come. Con permiso, Capitan. The hall is rented, the orchestra
          * engaged. It's now time to see if you can dance.</em>
          */
-        public static final int Q = CUR_DEVELOPMENT;
+        public static final int Q = 29;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1076,7 +1126,84 @@ public class Build {
         return true;
     }
 
+    /** Build information for a particular device partition. */
+    public static class Partition {
+        /** The name identifying the system partition. */
+        public static final String PARTITION_NAME_SYSTEM = "system";
+
+        private final String mName;
+        private final String mFingerprint;
+        private final long mTimeMs;
+
+        private Partition(String name, String fingerprint, long timeMs) {
+            mName = name;
+            mFingerprint = fingerprint;
+            mTimeMs = timeMs;
+        }
+
+        /** The name of this partition, e.g. "system", or "vendor" */
+        @NonNull
+        public String getName() {
+            return mName;
+        }
+
+        /** The build fingerprint of this partition, see {@link Build#FINGERPRINT}. */
+        @NonNull
+        public String getFingerprint() {
+            return mFingerprint;
+        }
+
+        /** The time (ms since epoch), at which this partition was built, see {@link Build#TIME}. */
+        public long getBuildTimeMillis() {
+            return mTimeMs;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Partition)) {
+                return false;
+            }
+            Partition op = (Partition) o;
+            return mName.equals(op.mName)
+                    && mFingerprint.equals(op.mFingerprint)
+                    && mTimeMs == op.mTimeMs;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mName, mFingerprint, mTimeMs);
+        }
+    }
+
+    /**
+     * Get build information about partitions that have a separate fingerprint defined.
+     *
+     * The list includes partitions that are suitable candidates for over-the-air updates. This is
+     * not an exhaustive list of partitions on the device.
+     */
+    @NonNull
+    public static List<Partition> getFingerprintedPartitions() {
+        ArrayList<Partition> partitions = new ArrayList();
+
+        String[] names = new String[] {
+            "bootimage", "odm", "product", "product_services", Partition.PARTITION_NAME_SYSTEM,
+            "vendor"
+        };
+        for (String name : names) {
+            String fingerprint = SystemProperties.get("ro." + name + ".build.fingerprint");
+            if (TextUtils.isEmpty(fingerprint)) {
+                continue;
+            }
+            long time = getLong("ro." + name + ".build.date.utc") * 1000;
+            partitions.add(new Partition(name, fingerprint, time));
+        }
+
+        return partitions;
+    }
+
     // The following properties only make sense for internal engineering builds.
+
+    /** The time at which the build was produced, given in milliseconds since the UNIX epoch. */
     public static final long TIME = getLong("ro.build.date.utc") * 1000;
     public static final String USER = getString("ro.build.user");
     public static final String HOST = getString("ro.build.host");
@@ -1122,8 +1249,7 @@ public class Build {
      * @removed
      */
     @SystemApi
-    public static final boolean PERMISSIONS_REVIEW_REQUIRED =
-            SystemProperties.getInt("ro.permission_review_required", 0) == 1;
+    public static final boolean PERMISSIONS_REVIEW_REQUIRED = true;
 
     /**
      * Returns the version string for the radio firmware.  May return
