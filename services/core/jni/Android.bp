@@ -62,6 +62,17 @@ cc_library_static {
         "frameworks/native/services",
         "system/gatekeeper/include",
     ],
+
+    product_variables: {
+        arc: {
+            exclude_srcs: [
+                "com_android_server_AlarmManagerService.cpp",
+            ],
+            srcs: [
+                ":arctimersrcs",
+            ],
+        }
+    }
 }
 
 cc_defaults {
