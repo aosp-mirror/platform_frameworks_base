@@ -76,6 +76,8 @@ class UserUsageStatsService {
     private final String mLogPrefix;
     private String mLastBackgroundedPackage;
     private final int mUserId;
+    private long mRealTimeSnapshot;
+    private long mSystemTimeSnapshot;
 
     private static final long[] INTERVAL_LENGTH = new long[] {
             UnixCalendar.DAY_IN_MILLIS, UnixCalendar.WEEK_IN_MILLIS,
@@ -101,6 +103,8 @@ class UserUsageStatsService {
         mListener = listener;
         mLogPrefix = "User[" + Integer.toString(userId) + "] ";
         mUserId = userId;
+        mRealTimeSnapshot = SystemClock.elapsedRealtime();
+        mSystemTimeSnapshot = System.currentTimeMillis();
     }
 
     void init(final long currentTimeMillis) {
@@ -165,10 +169,39 @@ class UserUsageStatsService {
         persistActiveStats();
     }
 
-    void onTimeChanged(long oldTime, long newTime) {
+    private void onTimeChanged(long oldTime, long newTime) {
         persistActiveStats();
         mDatabase.onTimeChanged(newTime - oldTime);
         loadActiveStats(newTime);
+    }
+
+    /**
+     * This should be the only way to get the time from the system.
+     */
+    private long checkAndGetTimeLocked() {
+        final long actualSystemTime = System.currentTimeMillis();
+        if (!UsageStatsService.ENABLE_TIME_CHANGE_CORRECTION) {
+            return actualSystemTime;
+        }
+        final long actualRealtime = SystemClock.elapsedRealtime();
+        final long expectedSystemTime = (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+        final long diffSystemTime = actualSystemTime - expectedSystemTime;
+        if (Math.abs(diffSystemTime) > UsageStatsService.TIME_CHANGE_THRESHOLD_MILLIS) {
+            // The time has changed.
+            Slog.i(TAG, mLogPrefix + "Time changed in by " + (diffSystemTime / 1000) + " seconds");
+            onTimeChanged(expectedSystemTime, actualSystemTime);
+            mRealTimeSnapshot = actualRealtime;
+            mSystemTimeSnapshot = actualSystemTime;
+        }
+        return actualSystemTime;
+    }
+
+    /**
+     * Assuming the event's timestamp is measured in milliseconds since boot,
+     * convert it to a system wall time.
+     */
+    private void convertToSystemTimeLocked(Event event) {
+        event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
     }
 
     void reportEvent(Event event) {
@@ -177,6 +210,9 @@ class UserUsageStatsService {
                     + "[" + event.mTimeStamp + "]: "
                     + eventToString(event.mEventType));
         }
+
+        checkAndGetTimeLocked();
+        convertToSystemTimeLocked(event);
 
         if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
@@ -298,6 +334,10 @@ class UserUsageStatsService {
                 }
             };
 
+    private static boolean validRange(long currentTime, long beginTime, long endTime) {
+        return beginTime <= currentTime && beginTime < endTime;
+    }
+
     /**
      * Generic query method that selects the appropriate IntervalStats for the specified time range
      * and bucket, then calls the {@link com.android.server.usage.UsageStatsDatabase.StatCombiner}
@@ -370,19 +410,31 @@ class UserUsageStatsService {
     }
 
     List<UsageStats> queryUsageStats(int bucketType, long beginTime, long endTime) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner);
     }
 
     List<ConfigurationStats> queryConfigurationStats(int bucketType, long beginTime, long endTime) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
     }
 
     List<EventStats> queryEventStats(int bucketType, long beginTime, long endTime) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
     }
 
     UsageEvents queryEvents(final long beginTime, final long endTime,
                             boolean obfuscateInstantApps) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         final ArraySet<String> names = new ArraySet<>();
         List<Event> results = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, new StatCombiner<Event>() {
@@ -428,6 +480,9 @@ class UserUsageStatsService {
 
     UsageEvents queryEventsForPackage(final long beginTime, final long endTime,
             final String packageName, boolean includeTaskRoot) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         final ArraySet<String> names = new ArraySet<>();
         names.add(packageName);
         final List<Event> results = queryStats(INTERVAL_DAILY,
@@ -1030,10 +1085,12 @@ class UserUsageStatsService {
     }
 
     byte[] getBackupPayload(String key){
+        checkAndGetTimeLocked();
         return mDatabase.getBackupPayload(key);
     }
 
     void applyRestoredPayload(String key, byte[] payload){
+        checkAndGetTimeLocked();
         mDatabase.applyRestoredPayload(key, payload);
     }
 }

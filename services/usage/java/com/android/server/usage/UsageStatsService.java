@@ -121,7 +121,7 @@ public class UsageStatsService extends SystemService implements
     private static final long TEN_SECONDS = 10 * 1000;
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
     private static final long FLUSH_INTERVAL = COMPRESS_TIME ? TEN_SECONDS : TWENTY_MINUTES;
-    private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
+    static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
 
     private static final boolean ENABLE_KERNEL_UPDATES = true;
     private static final File KERNEL_COUNTER_FILE = new File("/proc/uid_procstat/set");
@@ -156,8 +156,6 @@ public class UsageStatsService extends SystemService implements
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
     private final SparseBooleanArray mUserUnlockedStates = new SparseBooleanArray();
     private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
-    long mRealTimeSnapshot;
-    long mSystemTimeSnapshot;
     int mUsageSource;
 
     /** Manages the standby state of apps. */
@@ -253,9 +251,6 @@ public class UsageStatsService extends SystemService implements
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
                 null, mHandler);
 
-        mRealTimeSnapshot = SystemClock.elapsedRealtime();
-        mSystemTimeSnapshot = System.currentTimeMillis();
-
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
     }
@@ -345,7 +340,7 @@ public class UsageStatsService extends SystemService implements
             mUserUnlockedStates.put(userId, true);
             final UserUsageStatsService userService = getUserDataAndInitializeIfNeededLocked(
                     userId, System.currentTimeMillis());
-            userService.userUnlocked(checkAndGetTimeLocked());
+            userService.userUnlocked(System.currentTimeMillis());
             // Process all the pending reported events
             while (pendingEvents.peek() != null) {
                 reportEvent(pendingEvents.poll(), userId);
@@ -569,37 +564,6 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
-     * This should be the only way to get the time from the system.
-     */
-    private long checkAndGetTimeLocked() {
-        final long actualSystemTime = System.currentTimeMillis();
-        final long actualRealtime = SystemClock.elapsedRealtime();
-        final long expectedSystemTime = (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
-        final long diffSystemTime = actualSystemTime - expectedSystemTime;
-        if (Math.abs(diffSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS
-                && ENABLE_TIME_CHANGE_CORRECTION) {
-            // The time has changed.
-            Slog.i(TAG, "Time changed in UsageStats by " + (diffSystemTime / 1000) + " seconds");
-            final int userCount = mUserState.size();
-            for (int i = 0; i < userCount; i++) {
-                final UserUsageStatsService service = mUserState.valueAt(i);
-                service.onTimeChanged(expectedSystemTime, actualSystemTime);
-            }
-            mRealTimeSnapshot = actualRealtime;
-            mSystemTimeSnapshot = actualSystemTime;
-        }
-        return actualSystemTime;
-    }
-
-    /**
-     * Assuming the event's timestamp is measured in milliseconds since boot,
-     * convert it to a system wall time.
-     */
-    private void convertToSystemTimeLocked(Event event) {
-        event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
-    }
-
-    /**
      * Called by the Binder stub
      */
     void shutdown() {
@@ -718,9 +682,8 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            final long timeNow = checkAndGetTimeLocked();
+            final long timeNow = System.currentTimeMillis();
             final long elapsedRealtime = SystemClock.elapsedRealtime();
-            convertToSystemTimeLocked(event);
 
             if (event.mPackage != null
                     && mPackageManagerInternal.isPackageEphemeral(userId, event.mPackage)) {
@@ -876,13 +839,8 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final long timeNow = checkAndGetTimeLocked();
-            if (!validRange(timeNow, beginTime, endTime)) {
-                return null;
-            }
-
             final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
             List<UsageStats> list = service.queryUsageStats(bucketType, beginTime, endTime);
             if (list == null) {
                 return null;
@@ -913,13 +871,8 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final long timeNow = checkAndGetTimeLocked();
-            if (!validRange(timeNow, beginTime, endTime)) {
-                return null;
-            }
-
             final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
             return service.queryConfigurationStats(bucketType, beginTime, endTime);
         }
     }
@@ -935,13 +888,8 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final long timeNow = checkAndGetTimeLocked();
-            if (!validRange(timeNow, beginTime, endTime)) {
-                return null;
-            }
-
             final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
             return service.queryEventStats(bucketType, beginTime, endTime);
         }
     }
@@ -957,13 +905,8 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final long timeNow = checkAndGetTimeLocked();
-            if (!validRange(timeNow, beginTime, endTime)) {
-                return null;
-            }
-
             final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
             return service.queryEvents(beginTime, endTime, shouldObfuscateInstantApps);
         }
     }
@@ -979,19 +922,10 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final long timeNow = checkAndGetTimeLocked();
-            if (!validRange(timeNow, beginTime, endTime)) {
-                return null;
-            }
-
             final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
             return service.queryEventsForPackage(beginTime, endTime, packageName, includeTaskRoot);
         }
-    }
-
-    private static boolean validRange(long currentTime, long beginTime, long endTime) {
-        return beginTime <= currentTime && beginTime < endTime;
     }
 
     private String buildFullToken(String packageName, String token) {
@@ -2050,8 +1984,8 @@ public class UsageStatsService extends SystemService implements
 
                 // Check to ensure that only user 0's data is b/r for now
                 if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats =
-                            getUserDataAndInitializeIfNeededLocked(user, checkAndGetTimeLocked());
+                    final UserUsageStatsService userStats = getUserDataAndInitializeIfNeededLocked(
+                            user, System.currentTimeMillis());
                     return userStats.getBackupPayload(key);
                 } else {
                     return null;
@@ -2068,8 +2002,8 @@ public class UsageStatsService extends SystemService implements
                 }
 
                 if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats =
-                            getUserDataAndInitializeIfNeededLocked(user, checkAndGetTimeLocked());
+                    final UserUsageStatsService userStats = getUserDataAndInitializeIfNeededLocked(
+                            user, System.currentTimeMillis());
                     userStats.applyRestoredPayload(key, payload);
                 }
             }
