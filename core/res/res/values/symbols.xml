@@ -3842,4 +3842,5 @@
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
 
+  <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
 </resources>
