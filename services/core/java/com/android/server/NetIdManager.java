@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Class used to reserve and release net IDs.
@@ -38,14 +39,25 @@ public class NetIdManager {
     @GuardedBy("mNetIdInUse")
     private int mLastNetId = MIN_NET_ID - 1;
 
+    private final int mMaxNetId;
+
+    public NetIdManager() {
+        this(MAX_NET_ID);
+    }
+
+    @VisibleForTesting
+    NetIdManager(int maxNetId) {
+        mMaxNetId = maxNetId;
+    }
+
     /**
      * Get the first netId that follows the provided lastId and is available.
      */
-    private static int getNextAvailableNetIdLocked(
+    private int getNextAvailableNetIdLocked(
             int lastId, @NonNull SparseBooleanArray netIdInUse) {
         int netId = lastId;
-        for (int i = MIN_NET_ID; i <= MAX_NET_ID; i++) {
-            netId = netId < MAX_NET_ID ? netId + 1 : MIN_NET_ID;
+        for (int i = MIN_NET_ID; i <= mMaxNetId; i++) {
+            netId = netId < mMaxNetId ? netId + 1 : MIN_NET_ID;
             if (!netIdInUse.get(netId)) {
                 return netId;
             }
