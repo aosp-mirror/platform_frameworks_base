@@ -28,6 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Runs the staged rollback tests.
  */
@@ -99,9 +101,15 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // crash system_server enough times to trigger a rollback
         crashProcess("system_server", NATIVE_CRASHES_THRESHOLD);
 
-        // Rollback should be committed automatically now
-        // Give time for rollback to be committed
-        assertTrue(getDevice().waitForDeviceNotAvailable(60000));
+        // Rollback should be committed automatically now.
+        // Give time for rollback to be committed. This could take a while,
+        // because we need all of the following to happen:
+        // 1. system_server comes back up and boot completes.
+        // 2. Rollback health observer detects updatable crashing signal.
+        // 3. Staged rollback session becomes ready.
+        // 4. Device actually reboots.
+        // So we give a generous timeout here.
+        assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5)));
         getDevice().waitForDeviceAvailable();
 
         // verify rollback committed
