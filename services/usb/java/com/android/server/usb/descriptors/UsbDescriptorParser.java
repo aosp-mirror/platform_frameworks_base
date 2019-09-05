@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 public final class UsbDescriptorParser {
     private static final String TAG = "UsbDescriptorParser";
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     private final String mDeviceAddr;
 
