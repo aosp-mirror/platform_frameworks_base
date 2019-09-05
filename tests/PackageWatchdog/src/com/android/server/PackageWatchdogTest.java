@@ -284,7 +284,7 @@ public class PackageWatchdogTest {
 
     /** Observing already observed package extends the observation time. */
     @Test
-    public void testObserveAlreadyObservedPackage() throws Exception {
+    public void testObserveAlreadyObservedPackage() {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
@@ -300,9 +300,12 @@ public class PackageWatchdogTest {
         // Then advance time such that it should have expired were it not for the second observation
         moveTimeForwardAndDispatch((SHORT_DURATION / 2) + 1);
 
-        // Verify that APP_A not expired since second observation extended the time
-        assertEquals(1, watchdog.getPackages(observer).size());
-        assertTrue(watchdog.getPackages(observer).contains(APP_A));
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // Verify that we receive failed packages as expected for APP_A not expired
+        assertEquals(1, observer.mHealthCheckFailedPackages.size());
+        assertTrue(observer.mHealthCheckFailedPackages.contains(APP_A));
     }
 
     /**
