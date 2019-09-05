@@ -115,6 +115,106 @@ public class PackageWatchdogTest {
         dropShellPermissions();
     }
 
+    @Test
+    public void testRegistration_singleObserver() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // The failed packages should be the same as the registered ones to ensure registration is
+        // done successfully
+        assertEquals(1, observer.mHealthCheckFailedPackages.size());
+        assertTrue(observer.mHealthCheckFailedPackages.contains(APP_A));
+    }
+
+    @Test
+    public void testRegistration_multiObservers() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
+
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
+                new VersionedPackage(APP_B, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // The failed packages should be the same as the registered ones to ensure registration is
+        // done successfully
+        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
+        assertEquals(2, observer2.mHealthCheckFailedPackages.size());
+        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_B));
+    }
+
+    @Test
+    public void testUnregistration_singleObserver() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.unregisterHealthObserver(observer);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // We should have no failed packages to ensure unregistration is done successfully
+        assertEquals(0, observer.mHealthCheckFailedPackages.size());
+    }
+
+    @Test
+    public void testUnregistration_multiObservers() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
+
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.unregisterHealthObserver(observer2);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // observer1 should receive failed packages as intended.
+        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
+        // observer2 should have no failed packages to ensure unregistration is done successfully
+        assertEquals(0, observer2.mHealthCheckFailedPackages.size());
+    }
+
+    @Test
+    public void testExpiration_singleObserver() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        moveTimeForwardAndDispatch(SHORT_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // We should have no failed packages for the fatal failure is raised after expiration
+        assertEquals(0, observer.mHealthCheckFailedPackages.size());
+    }
+
+    @Test
+    public void testExpiration_multiObservers() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
+
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), LONG_DURATION);
+        moveTimeForwardAndDispatch(SHORT_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // We should have no failed packages for the fatal failure is raised after expiration
+        assertEquals(0, observer1.mHealthCheckFailedPackages.size());
+        // We should have failed packages since observer2 hasn't expired
+        assertEquals(1, observer2.mHealthCheckFailedPackages.size());
+    }
+
     /**
      * Test registration, unregistration, package expiry and duration reduction
      */
