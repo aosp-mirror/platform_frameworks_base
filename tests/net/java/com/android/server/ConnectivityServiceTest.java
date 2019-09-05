@@ -2188,7 +2188,6 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    @FlakyTest(bugId = 140306320)
     public void testPartialConnectivity() throws Exception {
         // Register network callback.
         NetworkRequest request = new NetworkRequest.Builder()
@@ -2261,9 +2260,8 @@ public class ConnectivityServiceTest {
         // If user accepted partial connectivity network before,
         // NetworkMonitor#setAcceptPartialConnectivity() will be called in
         // ConnectivityService#updateNetworkInfo().
-        waitForIdle();
-        verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         callback.expectCallback(CallbackRecord.LOSING, mCellNetworkAgent);
         nc = callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
         assertFalse(nc.hasCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY));
@@ -2283,9 +2281,8 @@ public class ConnectivityServiceTest {
         // If user accepted partial connectivity network before,
         // NetworkMonitor#setAcceptPartialConnectivity() will be called in
         // ConnectivityService#updateNetworkInfo().
-        waitForIdle();
-        verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         callback.expectCallback(CallbackRecord.LOSING, mCellNetworkAgent);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         callback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY, mWiFiNetworkAgent);
@@ -2308,9 +2305,8 @@ public class ConnectivityServiceTest {
         // valid, because ConnectivityService calls setAcceptPartialConnectivity before it calls
         // notifyNetworkConnected.
         mWiFiNetworkAgent.connectWithPartialValidConnectivity();
-        waitForIdle();
-        verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         callback.expectCallback(CallbackRecord.LOSING, mCellNetworkAgent);
         callback.expectCapabilitiesWith(
                 NET_CAPABILITY_PARTIAL_CONNECTIVITY | NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
