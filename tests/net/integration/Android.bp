@@ -14,6 +14,39 @@
 // limitations under the License.
 //
 
+android_test {
+    name: "FrameworksNetIntegrationTests",
+    platform_apis: true,
+    certificate: "platform",
+    srcs: [
+        "src/**/*.kt",
+        "src/**/*.aidl",
+    ],
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "TestNetworkStackLib",
+        "androidx.test.ext.junit",
+        "frameworks-net-integration-testutils",
+        "kotlin-reflect",
+        "mockito-target-extended-minus-junit4",
+        "net-tests-utils",
+        "services.core",
+        "services.net",
+        "testables",
+    ],
+    use_embedded_native_libs: true,
+    jni_libs: [
+        // For mockito extended
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+        // android_library does not include JNI libs: include NetworkStack dependencies here
+        "libnativehelper_compat_libc++",
+        "libnetworkstackutilsjni",
+    ],
+}
+
 // Utilities for testing framework code both in integration and unit tests.
 java_library {
     name: "frameworks-net-integration-testutils",
