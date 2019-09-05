@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.DisplayInfoProto.APP_HEIGHT;
 import static android.view.DisplayInfoProto.APP_WIDTH;
+import static android.view.DisplayInfoProto.FLAGS;
 import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
 import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
@@ -708,6 +709,7 @@ public final class DisplayInfo implements Parcelable {
         protoOutputStream.write(APP_WIDTH, appWidth);
         protoOutputStream.write(APP_HEIGHT, appHeight);
         protoOutputStream.write(NAME, name);
+        protoOutputStream.write(FLAGS, flags);
         protoOutputStream.end(token);
     }
 
