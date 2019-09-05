@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package android.view.test;
-
-import android.view.ViewRootImpl;
+package com.android.server.wm;
 
 /**
- * Session to set insets mode for {@link ViewRootImpl#sNewInsetsMode}.
+ * Generalization of an object that can control insets state.
  */
-public class InsetsModeSession implements AutoCloseable {
-
-    private int mOldMode;
-
-    public InsetsModeSession(int flag) {
-        mOldMode = ViewRootImpl.sNewInsetsMode;
-        ViewRootImpl.sNewInsetsMode = flag;
-    }
-
-    @Override
-    public void close() {
-        ViewRootImpl.sNewInsetsMode = mOldMode;
-    }
+interface InsetsControlTarget {
+    void notifyInsetsControlChanged();
 }

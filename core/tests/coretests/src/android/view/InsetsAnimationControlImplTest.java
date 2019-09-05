@@ -86,7 +86,7 @@ public class InsetsAnimationControlImplTest {
     }
 
     @AfterClass
-    public static void tearDownOnce() throws Exception {
+    public static void tearDownOnce() {
         sInsetsModeSession.close();
     }
 

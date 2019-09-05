@@ -16,12 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.InternalInsetType;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,7 +29,6 @@ import android.util.SparseArray;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.ViewRootImpl;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -46,10 +43,11 @@ class InsetsStateController {
     private final InsetsState mState = new InsetsState();
     private final DisplayContent mDisplayContent;
 
-    private final ArrayMap<Integer, InsetsSourceProvider> mControllers = new ArrayMap<>();
-    private final ArrayMap<WindowState, ArrayList<Integer>> mWinControlTypeMap = new ArrayMap<>();
-    private final SparseArray<WindowState> mTypeWinControlMap = new SparseArray<>();
-    private final ArraySet<WindowState> mPendingControlChanged = new ArraySet<>();
+    private final ArrayMap<Integer, InsetsSourceProvider> mProviders = new ArrayMap<>();
+    private final ArrayMap<InsetsControlTarget, ArrayList<Integer>> mControlTargetTypeMap =
+            new ArrayMap<>();
+    private final SparseArray<InsetsControlTarget> mTypeControlTargetMap = new SparseArray<>();
+    private final ArraySet<InsetsControlTarget> mPendingControlChanged = new ArraySet<>();
 
     private final Consumer<WindowState> mDispatchInsetsChanged = w -> {
         if (w.isVisible()) {
@@ -87,15 +85,15 @@ class InsetsStateController {
         return state;
     }
 
-    @Nullable InsetsSourceControl[] getControlsForDispatch(WindowState target) {
-        ArrayList<Integer> controlled = mWinControlTypeMap.get(target);
+    @Nullable InsetsSourceControl[] getControlsForDispatch(InsetsControlTarget target) {
+        ArrayList<Integer> controlled = mControlTargetTypeMap.get(target);
         if (controlled == null) {
             return null;
         }
         final int size = controlled.size();
         final InsetsSourceControl[] result = new InsetsSourceControl[size];
         for (int i = 0; i < size; i++) {
-            result[i] = mControllers.get(controlled.get(i)).getControl();
+            result[i] = mProviders.get(controlled.get(i)).getControl();
         }
         return result;
     }
@@ -103,8 +101,8 @@ class InsetsStateController {
     /**
      * @return The provider of a specific type.
      */
-    InsetsSourceProvider getSourceProvider(int type) {
-        return mControllers.computeIfAbsent(type,
+    InsetsSourceProvider getSourceProvider(@InternalInsetType int type) {
+        return mProviders.computeIfAbsent(type,
                 key -> new InsetsSourceProvider(mState.getSource(key), this, mDisplayContent));
     }
 
@@ -113,8 +111,8 @@ class InsetsStateController {
      */
     void onPostLayout() {
         mState.setDisplayFrame(mDisplayContent.getBounds());
-        for (int i = mControllers.size() - 1; i>= 0; i--) {
-            mControllers.valueAt(i).onPostLayout();
+        for (int i = mProviders.size() - 1; i >= 0; i--) {
+            mProviders.valueAt(i).onPostLayout();
         }
         if (!mLastState.equals(mState)) {
             mLastState.set(mState, true /* copySources */);
@@ -126,7 +124,7 @@ class InsetsStateController {
         boolean changed = false;
         for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
             final InsetsSource source = state.sourceAt(i);
-            final InsetsSourceProvider provider = mControllers.get(source.getType());
+            final InsetsSourceProvider provider = mProviders.get(source.getType());
             if (provider == null) {
                 continue;
             }
@@ -137,75 +135,77 @@ class InsetsStateController {
         }
     }
 
-    void onImeTargetChanged(@Nullable WindowState imeTarget) {
+    void onImeTargetChanged(@Nullable InsetsControlTarget imeTarget) {
         onControlChanged(TYPE_IME, imeTarget);
         notifyPendingInsetsControlChanged();
     }
 
     /**
-     * Called when the top opaque fullscreen window that is able to control the system bars changes.
+     * Called when the focused window that is able to control the system bars changes.
      *
-     * @param controllingWindow The window that is now able to control the system bars appearance
-     *                          and visibility.
+     * @param topControlling The target that is now able to control the top bar appearance
+     *                       and visibility.
+     * @param navControlling The target that is now able to control the nav bar appearance
+     *                       and visibility.
      */
-    void onBarControllingWindowChanged(@Nullable WindowState controllingWindow) {
-        // TODO: Apply policy that determines whether controllingWindow is able to control system
-        // bars
-
-        // TODO: Depending on the form factor, mapping is different
-        onControlChanged(TYPE_TOP_BAR, controllingWindow);
-        onControlChanged(TYPE_NAVIGATION_BAR, controllingWindow);
+    void onBarControlTargetChanged(@Nullable InsetsControlTarget topControlling,
+            @Nullable InsetsControlTarget navControlling) {
+        onControlChanged(TYPE_TOP_BAR, topControlling);
+        onControlChanged(TYPE_NAVIGATION_BAR, navControlling);
         notifyPendingInsetsControlChanged();
     }
 
-    void notifyControlRevoked(@NonNull WindowState previousControllingWin,
+    void notifyControlRevoked(@NonNull InsetsControlTarget previousControlTarget,
             InsetsSourceProvider provider) {
-        removeFromControlMaps(previousControllingWin, provider.getSource().getType());
+        removeFromControlMaps(previousControlTarget, provider.getSource().getType());
     }
 
-    private void onControlChanged(int type, @Nullable WindowState win) {
-        final WindowState previous = mTypeWinControlMap.get(type);
-        if (win == previous) {
+    private void onControlChanged(@InternalInsetType int type,
+            @Nullable InsetsControlTarget target) {
+        final InsetsControlTarget previous = mTypeControlTargetMap.get(type);
+        if (target == previous) {
             return;
         }
-        final InsetsSourceProvider controller = getSourceProvider(type);
-        if (controller == null) {
+        final InsetsSourceProvider provider = getSourceProvider(type);
+        if (provider == null) {
             return;
         }
-        if (!controller.isControllable()) {
+        if (!provider.isControllable()) {
             return;
         }
-        controller.updateControlForTarget(win, false /* force */);
+        provider.updateControlForTarget(target, false /* force */);
         if (previous != null) {
             removeFromControlMaps(previous, type);
             mPendingControlChanged.add(previous);
         }
-        if (win != null) {
-            addToControlMaps(win, type);
-            mPendingControlChanged.add(win);
+        if (target != null) {
+            addToControlMaps(target, type);
+            mPendingControlChanged.add(target);
         }
     }
 
-    private void removeFromControlMaps(@NonNull WindowState win, int type) {
-        final ArrayList<Integer> array = mWinControlTypeMap.get(win);
+    private void removeFromControlMaps(@NonNull InsetsControlTarget target,
+            @InternalInsetType int type) {
+        final ArrayList<Integer> array = mControlTargetTypeMap.get(target);
         if (array == null) {
             return;
         }
         array.remove((Integer) type);
         if (array.isEmpty()) {
-            mWinControlTypeMap.remove(win);
+            mControlTargetTypeMap.remove(target);
         }
-        mTypeWinControlMap.remove(type);
+        mTypeControlTargetMap.remove(type);
     }
 
-    private void addToControlMaps(@NonNull WindowState win, int type) {
-        final ArrayList<Integer> array = mWinControlTypeMap.computeIfAbsent(win,
+    private void addToControlMaps(@NonNull InsetsControlTarget target,
+            @InternalInsetType int type) {
+        final ArrayList<Integer> array = mControlTargetTypeMap.computeIfAbsent(target,
                 key -> new ArrayList<>());
         array.add(type);
-        mTypeWinControlMap.put(type, win);
+        mTypeControlTargetMap.put(type, target);
     }
 
-    void notifyControlChanged(WindowState target) {
+    void notifyControlChanged(InsetsControlTarget target) {
         mPendingControlChanged.add(target);
         notifyPendingInsetsControlChanged();
     }
@@ -216,8 +216,8 @@ class InsetsStateController {
         }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
-                final WindowState controllingWin = mPendingControlChanged.valueAt(i);
-                controllingWin.notifyInsetsControlChanged();
+                final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
+                controlTarget.notifyInsetsControlChanged();
             }
             mPendingControlChanged.clear();
         });
@@ -231,10 +231,10 @@ class InsetsStateController {
         pw.println(prefix + "WindowInsetsStateController");
         mState.dump(prefix + "  ", pw);
         pw.println(prefix + "  " + "Control map:");
-        for (int i = mTypeWinControlMap.size() - 1; i >= 0; i--) {
+        for (int i = mTypeControlTargetMap.size() - 1; i >= 0; i--) {
             pw.print(prefix + "  ");
-            pw.println(InsetsState.typeToString(mTypeWinControlMap.keyAt(i)) + " -> "
-                    + mTypeWinControlMap.valueAt(i));
+            pw.println(InsetsState.typeToString(mTypeControlTargetMap.keyAt(i)) + " -> "
+                    + mTypeControlTargetMap.valueAt(i));
         }
     }
 }
