@@ -97,6 +97,8 @@ public final class AutofillOptions implements Parcelable {
 
     /**
      * Returns if autofill is disabled by service to the given activity.
+     *
+     * @hide
      */
     public boolean isAutofillDisabledLocked(@NonNull ComponentName componentName) {
         final long elapsedTime = SystemClock.elapsedRealtime();

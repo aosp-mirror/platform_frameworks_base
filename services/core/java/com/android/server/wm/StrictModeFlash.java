@@ -27,17 +27,20 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
+import java.util.function.Supplier;
+
 class StrictModeFlash {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "StrictModeFlash" : TAG_WM;
 
     private final SurfaceControl mSurfaceControl;
-    private final Surface mSurface = new Surface();
+    private final Surface mSurface;
     private int mLastDW;
     private int mLastDH;
     private boolean mDrawNeeded;
     private final int mThickness = 20;
 
-    public StrictModeFlash(DisplayContent dc) {
+    StrictModeFlash(Supplier<Surface> surfaceFactory, DisplayContent dc) {
+        mSurface = surfaceFactory.get();
         SurfaceControl ctrl = null;
         try {
             ctrl = dc.makeOverlay()

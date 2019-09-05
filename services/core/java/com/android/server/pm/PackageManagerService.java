@@ -13852,7 +13852,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // If this is an update to a package that might be potentially downgraded, then we
         // need to check with the rollback manager whether there's any userdata that might
-        // need to be restored for the package.
+        // need to be snapshotted or restored for the package.
         //
         // TODO(narayan): Get this working for cases where userId == UserHandle.USER_ALL.
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && !doRestore && update) {
@@ -13879,12 +13879,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 installedUsers = ps.queryInstalledUsers(allUsers, true);
             }
 
-            if (ps != null) {
+            boolean doSnapshotOrRestore = data != null && data.args != null
+                    && ((data.args.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
+                    || (data.args.installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0);
+
+            if (ps != null && doSnapshotOrRestore) {
                 try {
                     rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
                             seInfo, token);
                 } catch (RemoteException re) {
-                    // Cannot happen, the RollbackManager is hosted in the same process.
+                    Log.e(TAG, "Error snapshotting/restoring user data: " + re);
                 }
                 doRestore = true;
             }
@@ -18013,19 +18017,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         // or packages running under the shared user of the removed
                         // package if revoking the permissions requested only by the removed
                         // package is successful and this causes a change in gids.
+                        boolean shouldKill = false;
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             final int userIdToKill = mSettings.updateSharedUserPermsLPw(deletedPs,
                                     userId);
-                            if (userIdToKill == UserHandle.USER_ALL
-                                    || userIdToKill >= UserHandle.USER_SYSTEM) {
-                                // If gids changed for this user, kill all affected packages.
-                                mHandler.post(() -> {
-                                    // This has to happen with no lock held.
-                                    killApplication(deletedPs.name, deletedPs.appId,
-                                            KILL_APP_REASON_GIDS_CHANGED);
-                                });
-                                break;
-                            }
+                            shouldKill |= userIdToKill == UserHandle.USER_ALL
+                                    || userIdToKill >= UserHandle.USER_SYSTEM;
+                        }
+                        // If gids changed, kill all affected packages.
+                        if (shouldKill) {
+                            mHandler.post(() -> {
+                                // This has to happen with no lock held.
+                                killApplication(deletedPs.name, deletedPs.appId,
+                                        KILL_APP_REASON_GIDS_CHANGED);
+                            });
                         }
                     }
                     clearPackagePreferredActivitiesLPw(

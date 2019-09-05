@@ -51,6 +51,8 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
 
         packageUpdaters.add(new AndroidHidlUpdater());
 
+        packageUpdaters.add(new AndroidTelephonyCommonUpdater());
+
         // Add this before adding AndroidTestBaseUpdater so that android.test.base comes before
         // android.test.mock.
         packageUpdaters.add(new AndroidTestRunnerSplitUpdater());

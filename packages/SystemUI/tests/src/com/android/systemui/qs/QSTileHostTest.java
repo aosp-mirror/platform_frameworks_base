@@ -97,6 +97,8 @@ public class QSTileHostTest extends SysuiTestCase {
                 mLooper.getLooper(),
                 mPluginManager, mTunerService, mAutoTiles, mDumpController);
         setUpTileFactory();
+        Settings.Secure.putStringForUser(mContext.getContentResolver(), QSTileHost.TILES_SETTING,
+                "", ActivityManager.getCurrentUser());
     }
 
     private void setUpTileFactory() {
@@ -188,7 +190,8 @@ public class QSTileHostTest extends SysuiTestCase {
             // changed
             String newSetting = Settings.Secure.getStringForUser(getContext().getContentResolver(),
                     TILES_SETTING, ActivityManager.getCurrentUser());
-            if (!previousSetting.equals(newSetting)) {
+            // newSetting is not null, as it has just been set.
+            if (!newSetting.equals(previousSetting)) {
                 onTuningChanged(TILES_SETTING, newSetting);
             }
         }

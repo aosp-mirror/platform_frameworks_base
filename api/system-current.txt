@@ -3029,6 +3029,26 @@ package android.hardware.soundtrigger {
     field public static final int STATUS_OK = 0; // 0x0
   }
 
+  public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
+    field @NonNull public final String description;
+    field public final int id;
+    field @NonNull public final String implementor;
+    field public final int maxBufferMs;
+    field public final int maxKeyphrases;
+    field public final int maxSoundModels;
+    field public final int maxUsers;
+    field public final int powerConsumptionMw;
+    field public final int recognitionModes;
+    field public final boolean returnsTriggerInEvent;
+    field public final boolean supportsCaptureTransition;
+    field public final boolean supportsConcurrentCapture;
+    field @NonNull public final java.util.UUID uuid;
+    field public final int version;
+  }
+
   public static class SoundTrigger.RecognitionEvent {
     method @Nullable public android.media.AudioFormat getCaptureFormat();
     method public int getCaptureSession();
@@ -3771,6 +3791,7 @@ package android.media.soundtrigger {
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void deleteModel(java.util.UUID);
     method public int getDetectionServiceOperationsTimeout();
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) @Nullable public android.hardware.soundtrigger.SoundTrigger.ModuleProperties getModuleProperties();
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }
 
@@ -8187,7 +8208,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimApplicationState(int);
     method public int getSimCardState();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimCardState(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Locale getSimLocale();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getSupportedRadioAccessFamily();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();

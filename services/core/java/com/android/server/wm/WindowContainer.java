@@ -139,7 +139,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
-        mPendingTransaction = wms.mTransactionFactory.make();
+        mPendingTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
     }
 

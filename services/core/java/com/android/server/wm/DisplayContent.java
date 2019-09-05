@@ -1062,6 +1062,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         addWindowToken(token.token, token);
+
+        if (mWmService.mAccessibilityController != null) {
+            final int prevDisplayId = prevDc != null ? prevDc.getDisplayId() : INVALID_DISPLAY;
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(prevDisplayId,
+                    getDisplayId());
+        }
     }
 
     void removeAppToken(IBinder binder) {
@@ -4388,7 +4394,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         .show(mSplitScreenDividerAnchor);
                 scheduleAnimation();
             } else {
-                mWmService.mTransactionFactory.make()
+                mWmService.mTransactionFactory.get()
                         .remove(mAppAnimationLayer)
                         .remove(mBoostedAppAnimationLayer)
                         .remove(mHomeAppAnimationLayer)

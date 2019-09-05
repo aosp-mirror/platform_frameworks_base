@@ -653,7 +653,6 @@ public class KeyguardIndicationController implements StateListener,
             if (!updateMonitor.isUnlockingWithBiometricAllowed()) {
                 return;
             }
-            animatePadlockError();
             boolean showSwipeToUnlock =
                     msgId == KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {

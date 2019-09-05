@@ -820,7 +820,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         mActivity.setState(RESUMED, "test");
         mActivity.finishIfPossible(0 /* resultCode */, null /* resultData */, "test",
-                false /* oomAdj */, false /* pauseImmediately */);
+                false /* oomAdj */);
 
         assertTrue(stack1.isTopStackOnDisplay());
     }

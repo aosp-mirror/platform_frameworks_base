@@ -41,7 +41,8 @@ public class Letterbox {
     private static final Rect EMPTY_RECT = new Rect();
     private static final Point ZERO_POINT = new Point(0, 0);
 
-    private final Supplier<SurfaceControl.Builder> mFactory;
+    private final Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
+    private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
     private final Rect mOuter = new Rect();
     private final Rect mInner = new Rect();
     private final LetterboxSurface mTop = new LetterboxSurface("top");
@@ -55,8 +56,10 @@ public class Letterbox {
      *
      * @param surfaceControlFactory a factory for creating the managed {@link SurfaceControl}s
      */
-    public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory) {
-        mFactory = surfaceControlFactory;
+    public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            Supplier<SurfaceControl.Transaction> transactionFactory) {
+        mSurfaceControlFactory = surfaceControlFactory;
+        mTransactionFactory = transactionFactory;
     }
 
     /**
@@ -245,7 +248,7 @@ public class Letterbox {
         }
 
         private void createSurface() {
-            mSurface = mFactory.get().setName("Letterbox - " + mType)
+            mSurface = mSurfaceControlFactory.get().setName("Letterbox - " + mType)
                     .setFlags(HIDDEN).setColorLayer().build();
             mSurface.setLayer(-1);
             mSurface.setColor(new float[]{0, 0, 0});
@@ -261,7 +264,7 @@ public class Letterbox {
 
         public void remove() {
             if (mSurface != null) {
-                new SurfaceControl.Transaction().remove(mSurface).apply();
+                mTransactionFactory.get().remove(mSurface).apply();
                 mSurface = null;
             }
             if (mInputInterceptor != null) {

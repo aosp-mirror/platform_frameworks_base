@@ -1576,7 +1576,7 @@ public final class OomAdjuster {
         }
 
         if (adj == ProcessList.SERVICE_ADJ) {
-            if (doingAll) {
+            if (doingAll && !cycleReEval) {
                 app.serviceb = mNewNumAServiceProcs > (mNumServiceProcs/3);
                 mNewNumServiceProcs++;
                 //Slog.i(TAG, "ADJ " + app + " serviceb=" + app.serviceb);

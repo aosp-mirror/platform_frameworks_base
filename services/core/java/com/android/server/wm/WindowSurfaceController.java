@@ -81,7 +81,7 @@ class WindowSurfaceController {
     private final int mWindowType;
     private final Session mWindowSession;
 
-    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mTmpTransaction;
 
     public WindowSurfaceController(SurfaceSession s, String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
@@ -96,6 +96,7 @@ class WindowSurfaceController {
         final WindowState win = animator.mWin;
         mWindowType = windowType;
         mWindowSession = win.mSession;
+        mTmpTransaction = mService.mTransactionFactory.get();
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
         final SurfaceControl.Builder b = win.makeSurface()

@@ -54,4 +54,6 @@ interface ISoundTriggerService {
     boolean isRecognitionActive(in ParcelUuid parcelUuid);
 
     int getModelState(in ParcelUuid soundModelId);
+
+    @nullable SoundTrigger.ModuleProperties getModuleProperties();
 }

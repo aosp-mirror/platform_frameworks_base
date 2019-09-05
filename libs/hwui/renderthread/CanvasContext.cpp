@@ -15,7 +15,17 @@
  */
 
 #include "CanvasContext.h"
+
 #include <GpuMemoryTracker.h>
+#include <apex/window.h>
+#include <fcntl.h>
+#include <strings.h>
+#include <sys/stat.h>
+
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
 
 #include "../Properties.h"
 #include "AnimationContext.h"
@@ -31,16 +41,6 @@
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
-
-#include <strings.h>
-
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <algorithm>
-
-#include <cstdint>
-#include <cstdlib>
-#include <functional>
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
@@ -484,16 +484,16 @@ void CanvasContext::draw() {
         swap.swapCompletedTime = systemTime(SYSTEM_TIME_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
         if (didDraw) {
-            int durationUs;
             nsecs_t dequeueStart = mNativeSurface->getLastDequeueStartTime();
             if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::SyncStart)) {
                 // Ignoring dequeue duration as it happened prior to frame render start
                 // and thus is not part of the frame.
                 swap.dequeueDuration = 0;
             } else {
-                mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
-                swap.dequeueDuration = us2ns(durationUs);
+                swap.dequeueDuration =
+                        us2ns(ANativeWindow_getLastDequeueDuration(mNativeSurface.get()));
             }
+            int durationUs;
             mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
             swap.queueDuration = us2ns(durationUs);
         } else {

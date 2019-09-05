@@ -39,6 +39,8 @@ import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.server.AnimationThread;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
+import java.util.function.Supplier;
+
 /**
  * Class to run animations without holding the window manager lock.
  */
@@ -73,9 +75,10 @@ class SurfaceAnimationRunner {
     @GuardedBy("mLock")
     private boolean mAnimationStartDeferred;
 
-    SurfaceAnimationRunner(PowerManagerInternal powerManagerInternal) {
-        this(null /* callbackProvider */, null /* animatorFactory */, new Transaction(),
-                powerManagerInternal);
+    SurfaceAnimationRunner(Supplier<Transaction> transactionFactory,
+            PowerManagerInternal powerManagerInternal) {
+        this(null /* callbackProvider */, null /* animatorFactory */,
+                transactionFactory.get(), powerManagerInternal);
     }
 
     @VisibleForTesting

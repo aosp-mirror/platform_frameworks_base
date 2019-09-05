@@ -127,7 +127,7 @@ class ScreenRotationAnimation {
         mOriginalWidth = originalWidth;
         mOriginalHeight = originalHeight;
 
-        final SurfaceControl.Transaction t = mService.mTransactionFactory.make();
+        final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
         try {
             mSurfaceControl = displayContent.makeOverlay()
                     .setName("ScreenshotSurface")
@@ -137,13 +137,13 @@ class ScreenRotationAnimation {
 
             // In case display bounds change, screenshot buffer and surface may mismatch so set a
             // scaling mode.
-            SurfaceControl.Transaction t2 = mService.mTransactionFactory.make();
+            SurfaceControl.Transaction t2 = mService.mTransactionFactory.get();
             t2.setOverrideScalingMode(mSurfaceControl, Surface.SCALING_MODE_SCALE_TO_WINDOW);
             t2.apply(true /* sync */);
 
             // Capture a screenshot into the surface we just created.
             final int displayId = display.getDisplayId();
-            final Surface surface = mService.mSurfaceFactory.make();
+            final Surface surface = mService.mSurfaceFactory.get();
             surface.copyFrom(mSurfaceControl);
             SurfaceControl.ScreenshotGraphicBuffer gb =
                     mService.mDisplayManagerInternal.screenshot(displayId);
@@ -427,7 +427,7 @@ class ScreenRotationAnimation {
                 Slog.i(TAG_WM,
                         "  FREEZE " + mSurfaceControl + ": DESTROY");
             }
-            mService.mTransactionFactory.make().remove(mSurfaceControl).apply();
+            mService.mTransactionFactory.get().remove(mSurfaceControl).apply();
             mSurfaceControl = null;
         }
         if (mExitingBlackFrame != null) {

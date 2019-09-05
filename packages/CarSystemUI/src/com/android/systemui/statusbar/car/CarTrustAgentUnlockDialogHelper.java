@@ -52,7 +52,7 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
      * Not using Dialog because context passed from {@link FullscreenUserSwitcher} is not an
      * activity.
      */
-    private final View mUnlockDialog;
+    private final View mUnlockDialogLayout;
     private final TextView mUnlockingText;
     private final Button mButton;
     private final IntentFilter mFilter;
@@ -70,14 +70,25 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
         mParams.packageName = mContext.getPackageName();
         mParams.setTitle(mContext.getString(R.string.unlock_dialog_title));
 
-        mUnlockDialog = LayoutInflater.from(mContext).inflate(
+        mUnlockDialogLayout = LayoutInflater.from(mContext).inflate(
             R.layout.trust_agent_unlock_dialog, null);
-        mUnlockDialog.setLayoutParams(mParams);
+        mUnlockDialogLayout.setLayoutParams(mParams);
 
-        mUnlockingText = mUnlockDialog.findViewById(R.id.unlocking_text);
-        mButton = mUnlockDialog.findViewById(R.id.enter_pin_button);
+        View dialogParent = mUnlockDialogLayout.findViewById(R.id.unlock_dialog_parent);
+        dialogParent.setOnTouchListener((v, event)-> {
+            hideUnlockDialog(/* dismissUserSwitcher= */ false);
+            return true;
+        });
+        View unlockDialog = mUnlockDialogLayout.findViewById(R.id.unlock_dialog);
+        unlockDialog.setOnTouchListener((v, event) -> {
+            // If the person taps inside the unlock dialog, the touch event will be intercepted here
+            // and the dialog will not exit
+            return true;
+        });
+        mUnlockingText = mUnlockDialogLayout.findViewById(R.id.unlocking_text);
+        mButton = mUnlockDialogLayout.findViewById(R.id.enter_pin_button);
         mButton.setOnClickListener(v -> {
-            hideUnlockDialog(/* notifyOnHideListener= */true);
+            hideUnlockDialog(/* dismissUserSwitcher= */true);
             // TODO(b/138250105) Stop unlock advertising
         });
 
@@ -133,7 +144,7 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
                 if (!mUserManager.isUserUnlocked(uid)) {
                     logd("Showed unlock dialog for user: " + uid + " after " + delayMillis
                             + " delay.");
-                    mWindowManager.addView(mUnlockDialog, mParams);
+                    mWindowManager.addView(mUnlockDialogLayout, mParams);
                 }
             }, delayMillis);
         }
@@ -142,22 +153,22 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
 
     private void setUid(int uid) {
         mUid = uid;
-        TextView userName = mUnlockDialog.findViewById(R.id.user_name);
+        TextView userName = mUnlockDialogLayout.findViewById(R.id.user_name);
         userName.setText(mUserManager.getUserInfo(mUid).name);
-        ImageView avatar = mUnlockDialog.findViewById(R.id.avatar);
+        ImageView avatar = mUnlockDialogLayout.findViewById(R.id.avatar);
         avatar.setImageBitmap(mUserManager.getUserIcon(mUid));
         setButtonText();
     }
 
-    private void hideUnlockDialog(boolean notifyOnHideListener) {
+    private void hideUnlockDialog(boolean dismissUserSwitcher) {
         if (!mIsDialogShowing) {
             return;
         }
-        mWindowManager.removeView(mUnlockDialog);
+        mWindowManager.removeView(mUnlockDialogLayout);
         logd("Receiver unregistered");
         mContext.unregisterReceiver(this);
-        if (notifyOnHideListener && mOnHideListener != null) {
-            mOnHideListener.onHide();
+        if (mOnHideListener != null) {
+            mOnHideListener.onHide(dismissUserSwitcher);
         }
         mIsDialogShowing = false;
     }
@@ -240,6 +251,6 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
      * Listener used to notify when the dialog is hidden
      */
     interface OnHideListener {
-        void onHide();
+        void onHide(boolean dismissUserSwitcher);
     }
 }

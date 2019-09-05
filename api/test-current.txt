@@ -620,7 +620,6 @@ package android.content {
     method public int describeContents();
     method public static android.content.AutofillOptions forWhitelistingItself();
     method public boolean isAugmentedAutofillEnabled(@NonNull android.content.Context);
-    method public boolean isAutofillDisabledLocked(@NonNull android.content.ComponentName);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.AutofillOptions> CREATOR;
     field public long appDisabledExpiration;
