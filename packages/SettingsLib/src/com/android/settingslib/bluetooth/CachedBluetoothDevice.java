@@ -25,6 +25,7 @@ import android.content.SharedPreferences;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.bluetooth.BluetoothAdapter;
 
@@ -806,10 +807,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                         == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
                     mDevice.getBluetoothClass().getDeviceClass()
                         == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET) {
-                    setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_ALLOWED);
-                } else {
-                    setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_REJECTED);
+                    EventLog.writeEvent(0x534e4554, "138529441", -1, "");
                 }
+                setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_REJECTED);
             }
         }
     }
