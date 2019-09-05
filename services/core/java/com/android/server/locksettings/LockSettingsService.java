@@ -1461,7 +1461,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     // This method should be called by LockPatternUtil only, all internal methods in this class
     // should call setLockCredentialInternal.
     @Override
-    public void setLockCredential(byte[] credential, int type,
+    public boolean setLockCredential(byte[] credential, int type,
             byte[] savedCredential, int requestedQuality, int userId,
             boolean allowUntrustedChange) {
 
@@ -1471,8 +1471,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
-            setLockCredentialInternal(credential, type, savedCredential, requestedQuality, userId,
-                    allowUntrustedChange, /* isLockTiedToParent= */ false);
+            if (!setLockCredentialInternal(credential, type, savedCredential, requestedQuality,
+                    userId, allowUntrustedChange, /* isLockTiedToParent= */ false)) {
+                return false;
+            }
             setSeparateProfileChallengeEnabledLocked(userId, true, null);
             notifyPasswordChanged(userId);
         }
@@ -1481,13 +1483,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             setDeviceUnlockedForUser(userId);
         }
         notifySeparateProfileChallengeChanged(userId);
+        return true;
     }
 
     /**
      * @param isLockTiedToParent is {@code true} if {@code userId} is a profile and its new
      *     credentials are being tied to its parent's credentials.
      */
-    private void setLockCredentialInternal(byte[] credential, @CredentialType int credentialType,
+    private boolean setLockCredentialInternal(byte[] credential, @CredentialType int credentialType,
             byte[] savedCredential, int requestedQuality, int userId, boolean allowUntrustedChange,
             boolean isLockTiedToParent) {
         // Normalize savedCredential and credential such that empty string is always represented
@@ -1500,9 +1503,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
-                spBasedSetLockCredentialInternalLocked(credential, credentialType, savedCredential,
-                        requestedQuality, userId, allowUntrustedChange, isLockTiedToParent);
-                return;
+                return spBasedSetLockCredentialInternalLocked(credential, credentialType,
+                        savedCredential, requestedQuality, userId, allowUntrustedChange,
+                        isLockTiedToParent);
             }
         }
 
@@ -1519,7 +1522,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setUserPasswordMetrics(CREDENTIAL_TYPE_NONE, null, userId);
             sendCredentialsOnChangeIfRequired(
                     credentialType, credential, userId, isLockTiedToParent);
-            return;
+            return true;
         }
         if (credential == null) {
             throw new IllegalArgumentException("Null credential with mismatched credential type");
@@ -1552,37 +1555,38 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (shouldMigrateToSyntheticPasswordLocked(userId)) {
                 initializeSyntheticPasswordLocked(currentHandle.hash, savedCredential,
                         currentHandle.type, requestedQuality, userId);
-                spBasedSetLockCredentialInternalLocked(credential, credentialType, savedCredential,
-                        requestedQuality, userId, allowUntrustedChange, isLockTiedToParent);
-                return;
+                return spBasedSetLockCredentialInternalLocked(credential, credentialType,
+                        savedCredential, requestedQuality, userId, allowUntrustedChange,
+                        isLockTiedToParent);
             }
         }
         if (DEBUG) Slog.d(TAG, "setLockCredentialInternal: user=" + userId);
         byte[] enrolledHandle = enrollCredential(currentHandle.hash, savedCredential, credential,
                 userId);
-        if (enrolledHandle != null) {
-            CredentialHash willStore = CredentialHash.create(enrolledHandle, credentialType);
-            mStorage.writeCredentialHash(willStore, userId);
-            // push new secret and auth token to vold
-            GateKeeperResponse gkResponse;
-            try {
-                gkResponse = getGateKeeperService().verifyChallenge(userId, 0, willStore.hash,
-                        credential);
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed to verify current credential", e);
-            }
-            setUserKeyProtection(userId, credential, convertResponse(gkResponse));
-            fixateNewestUserKeyAuth(userId);
-            // Refresh the auth token
-            doVerifyCredential(credential, credentialType, CHALLENGE_FROM_CALLER, 0, userId,
-                    null /* progressCallback */);
-            synchronizeUnifiedWorkChallengeForProfiles(userId, null);
-            sendCredentialsOnChangeIfRequired(
-                    credentialType, credential, userId, isLockTiedToParent);
-        } else {
-            throw new IllegalStateException(String.format("Failed to enroll %s",
+        if (enrolledHandle == null) {
+            Slog.w(TAG, String.format("Failed to enroll %s: incorrect credential",
                     credentialType == CREDENTIAL_TYPE_PASSWORD ? "password" : "pattern"));
+            return false;
         }
+        CredentialHash willStore = CredentialHash.create(enrolledHandle, credentialType);
+        mStorage.writeCredentialHash(willStore, userId);
+        // push new secret and auth token to vold
+        GateKeeperResponse gkResponse;
+        try {
+            gkResponse = getGateKeeperService().verifyChallenge(userId, 0, willStore.hash,
+                    credential);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to verify current credential", e);
+        }
+        setUserKeyProtection(userId, credential, convertResponse(gkResponse));
+        fixateNewestUserKeyAuth(userId);
+        // Refresh the auth token
+        doVerifyCredential(credential, credentialType, CHALLENGE_FROM_CALLER, 0, userId,
+                null /* progressCallback */);
+        synchronizeUnifiedWorkChallengeForProfiles(userId, null);
+        sendCredentialsOnChangeIfRequired(
+                credentialType, credential, userId, isLockTiedToParent);
+        return true;
     }
 
     private VerifyCredentialResponse convertResponse(GateKeeperResponse gateKeeperResponse) {
@@ -2711,7 +2715,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @GuardedBy("mSpManager")
-    private void spBasedSetLockCredentialInternalLocked(byte[] credential, int credentialType,
+    private boolean spBasedSetLockCredentialInternalLocked(byte[] credential, int credentialType,
             byte[] savedCredential, int requestedQuality, int userId,
             boolean allowUntrustedChange, boolean isLockTiedToParent) {
         if (DEBUG) Slog.d(TAG, "spBasedSetLockCredentialInternalLocked: user=" + userId);
@@ -2736,8 +2740,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         // If existing credential is provided, the existing credential must match.
         if (savedCredential != null && auth == null) {
-            throw new IllegalStateException(String.format("Failed to enroll %s",
+            Slog.w(TAG, String.format("Failed to enroll %s: incorrect credential",
                     credentialType == CREDENTIAL_TYPE_PASSWORD ? "password" : "pattern"));
+            return false;
         }
         boolean untrustedReset = false;
         if (auth != null) {
@@ -2757,7 +2762,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
             untrustedReset = true;
         } else /* responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
-            throw new IllegalStateException("Rate limit exceeded, so password was not changed.");
+            Slog.w(TAG, "Rate limit exceeded, so password was not changed.");
+            return false;
         }
 
         if (auth != null) {
@@ -2779,6 +2785,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // synthetic password. That would invalidate existing escrow tokens though.
         }
         sendCredentialsOnChangeIfRequired(credentialType, credential, userId, isLockTiedToParent);
+        return true;
     }
 
     /**

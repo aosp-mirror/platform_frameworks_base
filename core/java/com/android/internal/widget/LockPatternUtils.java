@@ -680,6 +680,15 @@ public class LockPatternUtils {
 
     /**
      * Clear any lock pattern or password.
+
+     * <p> This method will fail (returning {@code false}) if the previously
+     * saved password provided is incorrect, or if the lockscreen verification
+     * is still being throttled.
+     *
+     * @param savedCredential The previously saved credential
+     * @param userHandle the user whose pattern is to be saved.
+     * @return whether this was successful or not.
+     * @throws RuntimeException if password change encountered an unrecoverable error.
      */
     public boolean clearLock(byte[] savedCredential, int userHandle) {
         return clearLock(savedCredential, userHandle, false);
@@ -687,19 +696,27 @@ public class LockPatternUtils {
 
     /**
      * Clear any lock pattern or password, with the option to ignore incorrect existing credential.
+     * <p> This method will fail (returning {@code false}) if the previously
+     * saved password provided is incorrect, or if the lockscreen verification
+     * is still being throttled.
+     *
+     * @param savedCredential The previously saved credential
+     * @param userHandle the user whose pattern is to be saved.
+     * @return whether this was successful or not.
+     * @throws RuntimeException if password change encountered an unrecoverable error.
      */
     public boolean clearLock(byte[] savedCredential, int userHandle, boolean allowUntrustedChange) {
         final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
         setKeyguardStoredPasswordQuality(PASSWORD_QUALITY_UNSPECIFIED, userHandle);
 
-        try{
-            getLockSettings().setLockCredential(null, CREDENTIAL_TYPE_NONE,
-                    savedCredential, PASSWORD_QUALITY_UNSPECIFIED, userHandle,
-                    allowUntrustedChange);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to clear lock", e);
+        try {
+            if (!getLockSettings().setLockCredential(null, CREDENTIAL_TYPE_NONE, savedCredential,
+                    PASSWORD_QUALITY_UNSPECIFIED, userHandle, allowUntrustedChange)) {
+                return false;
+            }
+        } catch (RemoteException | RuntimeException e) {
             setKeyguardStoredPasswordQuality(currentQuality, userHandle);
-            return false;
+            throw new RuntimeException("Failed to clear lock", e);
         }
 
         if (userHandle == UserHandle.USER_SYSTEM) {
@@ -747,11 +764,15 @@ public class LockPatternUtils {
 
     /**
      * Save a lock pattern.
+     *
+     * <p> This method will fail (returning {@code false}) if the previously saved pattern provided
+     * is incorrect, or if the lockscreen verification is still being throttled.
+     *
      * @param pattern The new pattern to save.
      * @param savedPattern The previously saved pattern, converted to byte[] format
      * @param userId the user whose pattern is to be saved.
-     *
      * @return whether this was successful or not.
+     * @throws RuntimeException if password change encountered an unrecoverable error.
      */
     public boolean saveLockPattern(List<LockPatternView.Cell> pattern, byte[] savedPattern,
             int userId) {
@@ -760,13 +781,17 @@ public class LockPatternUtils {
 
     /**
      * Save a lock pattern.
+     *
+     * <p> This method will fail (returning {@code false}) if the previously saved pattern provided
+     * is incorrect, or if the lockscreen verification is still being throttled.
+     *
      * @param pattern The new pattern to save.
      * @param savedPattern The previously saved pattern, converted to byte[] format
      * @param userId the user whose pattern is to be saved.
      * @param allowUntrustedChange whether we want to allow saving a new password if the existing
      * password being provided is incorrect.
-     *
      * @return whether this was successful or not.
+     * @throws RuntimeException if password change encountered an unrecoverable error.
      */
     public boolean saveLockPattern(List<LockPatternView.Cell> pattern, byte[] savedPattern,
             int userId, boolean allowUntrustedChange) {
@@ -783,12 +808,13 @@ public class LockPatternUtils {
         final int currentQuality = getKeyguardStoredPasswordQuality(userId);
         setKeyguardStoredPasswordQuality(PASSWORD_QUALITY_SOMETHING, userId);
         try {
-            getLockSettings().setLockCredential(bytePattern, CREDENTIAL_TYPE_PATTERN, savedPattern,
-                    PASSWORD_QUALITY_SOMETHING, userId, allowUntrustedChange);
-        } catch (Exception e) {
-            Log.e(TAG, "Couldn't save lock pattern", e);
+            if (!getLockSettings().setLockCredential(bytePattern, CREDENTIAL_TYPE_PATTERN,
+                    savedPattern, PASSWORD_QUALITY_SOMETHING, userId, allowUntrustedChange)) {
+                return false;
+            }
+        } catch (RemoteException | RuntimeException e) {
             setKeyguardStoredPasswordQuality(currentQuality, userId);
-            return false;
+            throw new RuntimeException("Couldn't save lock pattern", e);
         }
         // Update the device encryption password.
         if (userId == UserHandle.USER_SYSTEM
@@ -906,14 +932,18 @@ public class LockPatternUtils {
      * Save a lock password.  Does not ensure that the password is as good
      * as the requested mode, but will adjust the mode to be as good as the
      * password.
+     *
+     * <p> This method will fail (returning {@code false}) if the previously
+     * saved password provided is incorrect, or if the lockscreen verification
+     * is still being throttled.
+     *
      * @param password The password to save
      * @param savedPassword The previously saved lock password, or null if none
      * @param requestedQuality {@see DevicePolicyManager#getPasswordQuality(
      * android.content.ComponentName)}
      * @param userHandle The userId of the user to change the password for
-     *
      * @return whether this was successful or not.
-     *
+     * @throws RuntimeException if password change encountered an unrecoverable error.
      * @deprecated Pass password as a byte array
      */
     @Deprecated
@@ -928,13 +958,18 @@ public class LockPatternUtils {
      * Save a lock password.  Does not ensure that the password is as good
      * as the requested mode, but will adjust the mode to be as good as the
      * password.
+     *
+     * <p> This method will fail (returning {@code false}) if the previously
+     * saved password provided is incorrect, or if the lockscreen verification
+     * is still being throttled.
+     *
      * @param password The password to save
      * @param savedPassword The previously saved lock password, or null if none
      * @param requestedQuality {@see DevicePolicyManager#getPasswordQuality(
      * android.content.ComponentName)}
      * @param userHandle The userId of the user to change the password for
-     *
      * @return whether this was successful or not.
+     * @throws RuntimeException if password change encountered an unrecoverable error.
      */
     public boolean saveLockPassword(byte[] password, byte[] savedPassword, int requestedQuality,
             int userHandle) {
@@ -946,6 +981,11 @@ public class LockPatternUtils {
      * Save a lock password.  Does not ensure that the password is as good
      * as the requested mode, but will adjust the mode to be as good as the
      * password.
+     *
+     * <p> This method will fail (returning {@code false}) if the previously
+     * saved password provided is incorrect, or if the lockscreen verification
+     * is still being throttled.
+     *
      * @param password The password to save
      * @param savedPassword The previously saved lock password, or null if none
      * @param requestedQuality {@see DevicePolicyManager#getPasswordQuality(
@@ -953,9 +993,9 @@ public class LockPatternUtils {
      * @param userHandle The userId of the user to change the password for
      * @param allowUntrustedChange whether we want to allow saving a new password if the existing
      * password being provided is incorrect.
-     *
      * @return whether this method saved the new password successfully or not. This flow will fail
      * and return false if the given credential is wrong and allowUntrustedChange is false.
+     * @throws RuntimeException if password change encountered an unrecoverable error.
      */
     public boolean saveLockPassword(byte[] password, byte[] savedPassword,
             int requestedQuality, int userHandle, boolean allowUntrustedChange) {
@@ -981,10 +1021,9 @@ public class LockPatternUtils {
         try {
             getLockSettings().setLockCredential(password, CREDENTIAL_TYPE_PASSWORD, savedPassword,
                     requestedQuality, userHandle, allowUntrustedChange);
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to save lock password", e);
+        } catch (RemoteException | RuntimeException e) {
             setKeyguardStoredPasswordQuality(currentQuality, userHandle);
-            return false;
+            throw new RuntimeException("Unable to save lock password", e);
         }
 
         updateEncryptionPasswordIfNeeded(password, passwordQuality, userHandle);
