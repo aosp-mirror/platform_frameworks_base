@@ -24,7 +24,6 @@ import android.os.Bundle;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
-import java.util.function.Function;
 
 public abstract class SystemUI implements SysUiServiceProvider {
     public Context mContext;
@@ -61,8 +60,5 @@ public abstract class SystemUI implements SysUiServiceProvider {
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, appName);
 
         n.addExtras(extras);
-    }
-
-    public interface Injector extends Function<Context, SystemUI> {
     }
 }

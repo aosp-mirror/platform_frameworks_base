@@ -41,6 +41,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -73,6 +74,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void setUp() {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(BubbleController.class);
         when(mGutsManager.openGuts(
                 any(View.class),
                 anyInt(),

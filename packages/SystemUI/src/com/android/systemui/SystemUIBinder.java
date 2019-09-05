@@ -16,21 +16,21 @@
 
 package com.android.systemui;
 
-import javax.inject.Singleton;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 
-import dagger.Component;
+import dagger.Binds;
+import dagger.Module;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
-@Singleton
-@Component(
-        modules = {
-                DependencyProvider.class,
-                DependencyBinder.class,
-                ServiceBinder.class,
-                SystemUIBinder.class,
-                SystemUIFactory.ContextHolder.class,
-                SystemUIModule.class,
-                CarSystemUIModule.class
-        })
-interface CarSystemUIRootComponent extends SystemUIRootComponent {
-
+/**
+ * Services and Activities that are injectable should go here.
+ */
+@Module
+public abstract class SystemUIBinder {
+    /** Inject into KeyguardViewMediator. */
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardViewMediator.class)
+    public abstract SystemUI bindKeyguardViewMediator(KeyguardViewMediator sysui);
 }
