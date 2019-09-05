@@ -20,56 +20,82 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Assistant Handle behavior that makes Assistant handles show/hide when the home handle is
  * shown/hidden, respectively.
  */
+@Singleton
 final class AssistHandleLikeHomeBehavior implements BehaviorController {
 
-    private final StatusBarStateController.StateListener mStatusBarStateListener =
-            new StatusBarStateController.StateListener() {
+    private final WakefulnessLifecycle.Observer mWakefulnessLifecycleObserver =
+            new WakefulnessLifecycle.Observer() {
                 @Override
-                public void onDozingChanged(boolean isDozing) {
-                    handleDozingChanged(isDozing);
+                public void onStartedWakingUp() {
+                    handleDozingChanged(/* isDozing = */ true);
+                }
+
+                @Override
+                public void onFinishedWakingUp() {
+                    handleDozingChanged(/* isDozing = */ false);
+                }
+
+                @Override
+                public void onStartedGoingToSleep() {
+                    handleDozingChanged(/* isDozing = */ true);
+                }
+
+                @Override
+                public void onFinishedGoingToSleep() {
+                    handleDozingChanged(/* isDozing = */ true);
                 }
             };
 
     private final SysUiState.SysUiStateCallback mSysUiStateCallback =
             this::handleSystemUiStateChange;
-    private final StatusBarStateController mStatusBarStateController;
-    private final SysUiState mSysUiFlagContainer;
+
+    private final Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
+    private final Lazy<SysUiState> mSysUiFlagContainer;
 
     private boolean mIsDozing;
     private boolean mIsHomeHandleHiding;
 
     @Nullable private AssistHandleCallbacks mAssistHandleCallbacks;
 
-    AssistHandleLikeHomeBehavior() {
-        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
-        mSysUiFlagContainer = Dependency.get(SysUiState.class);
+    @Inject
+    AssistHandleLikeHomeBehavior(
+            Lazy<WakefulnessLifecycle> wakefulnessLifecycle,
+            Lazy<SysUiState> sysUiFlagContainer) {
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mSysUiFlagContainer = sysUiFlagContainer;
     }
 
     @Override
     public void onModeActivated(Context context, AssistHandleCallbacks callbacks) {
         mAssistHandleCallbacks = callbacks;
-        mIsDozing = mStatusBarStateController.isDozing();
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mSysUiFlagContainer.addCallback(mSysUiStateCallback);
+        mIsDozing = mWakefulnessLifecycle.get().getWakefulness()
+                != WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+        mWakefulnessLifecycle.get().addObserver(mWakefulnessLifecycleObserver);
+        mSysUiFlagContainer.get().addCallback(mSysUiStateCallback);
         callbackForCurrentState();
     }
 
     @Override
     public void onModeDeactivated() {
         mAssistHandleCallbacks = null;
-        mSysUiFlagContainer.removeCallback(mSysUiStateCallback);
+        mWakefulnessLifecycle.get().removeObserver(mWakefulnessLifecycleObserver);
+        mSysUiFlagContainer.get().removeCallback(mSysUiStateCallback);
     }
 
     private static boolean isHomeHandleHiding(int sysuiStateFlags) {
