@@ -7437,7 +7437,7 @@ package android.telephony.ims.feature {
     field public static final int STATE_UNAVAILABLE = 0; // 0x0
   }
 
-  public static class ImsFeature.Capabilities {
+  @Deprecated public static class ImsFeature.Capabilities {
     field @Deprecated protected int mCapabilities;
   }
 
@@ -7471,7 +7471,7 @@ package android.telephony.ims.feature {
   public static class MmTelFeature.MmTelCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
     ctor public MmTelFeature.MmTelCapabilities();
     ctor @Deprecated public MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
-    ctor public MmTelFeature.MmTelCapabilities(int);
+    ctor public MmTelFeature.MmTelCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final void addCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final boolean isCapable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final void removeCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);

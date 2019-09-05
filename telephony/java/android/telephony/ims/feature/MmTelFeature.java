@@ -242,8 +242,8 @@ public class MmTelFeature extends ImsFeature {
          * @param capabilities The capabilities that are supported for MmTel in the form of a
          *                     bitfield.
          */
-        public MmTelCapabilities(int capabilities) {
-            mCapabilities = capabilities;
+        public MmTelCapabilities(@MmTelCapability int capabilities) {
+            super(capabilities);
         }
 
         @IntDef(flag = true,
