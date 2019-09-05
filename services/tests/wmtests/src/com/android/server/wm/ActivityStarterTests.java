@@ -147,8 +147,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertThat((Object) task2.getStack()).isInstanceOf(ActivityStack.class);
         mStarter.updateBounds(task2, bounds);
 
-        verify(mService, times(1)).resizeStack(eq(task2.getStack().mStackId),
-                eq(bounds), anyBoolean(), anyBoolean(), anyBoolean(), anyInt());
+        verify(mService, times(1)).animateResizePinnedStack(eq(task2.getStack().mStackId),
+                eq(bounds), anyInt());
 
         // In the case of no animation, the stack and task bounds should be set immediately.
         if (!ANIMATE) {

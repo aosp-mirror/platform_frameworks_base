@@ -6324,13 +6324,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void resizeStack(int stackId, Rect destBounds, boolean allowResizeInDockedMode,
-            boolean preserveWindows, boolean animate, int animationDuration) {
-        mActivityTaskManager.resizeStack(stackId, destBounds, allowResizeInDockedMode,
-                preserveWindows, animate, animationDuration);
-    }
-
-    @Override
     public ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
             int userId) {
         return mActivityTaskManager.getRecentTasks(maxNum, flags, userId);

@@ -152,7 +152,7 @@ class LaunchParamsController {
 
             if (task.getStack().inFreeformWindowingMode()) {
                 // Only set bounds if it's in freeform mode.
-                task.updateOverrideConfiguration(mTmpParams.mBounds);
+                task.setBounds(mTmpParams.mBounds);
                 return true;
             }
 

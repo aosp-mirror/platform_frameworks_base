@@ -2585,35 +2585,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void resizeStack(int stackId, Rect destBounds, boolean allowResizeInDockedMode,
-            boolean preserveWindows, boolean animate, int animationDuration) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizeStack()");
+    public void animateResizePinnedStack(int stackId, Rect destBounds, int animationDuration) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "animateResizePinnedStack()");
 
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (animate) {
-                    final ActivityStack stack = mRootActivityContainer.getStack(stackId);
-                    if (stack == null) {
-                        Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
-                        return;
-                    }
-                    if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
-                        throw new IllegalArgumentException("Stack: " + stackId
-                                + " doesn't support animated resize.");
-                    }
-                    stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
-                            animationDuration, false /* fromFullscreen */);
-                } else {
-                    final ActivityStack stack = mRootActivityContainer.getStack(stackId);
-                    if (stack == null) {
-                        Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
-                        return;
-                    }
-                    mRootActivityContainer.resizeStack(stack, destBounds,
-                            null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                            preserveWindows, allowResizeInDockedMode, !DEFER_RESUME);
+                final ActivityStack stack = mRootActivityContainer.getStack(stackId);
+                if (stack == null) {
+                    Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
+                    return;
                 }
+                if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                    throw new IllegalArgumentException("Stack: " + stackId
+                        + " doesn't support animated resize.");
+                }
+                stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
+                        animationDuration, false /* fromFullscreen */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

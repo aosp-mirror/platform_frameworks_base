@@ -2400,11 +2400,10 @@ class ActivityStarter {
         }
 
         final ActivityStack stack = task.getStack();
-        if (stack != null && stack.resizeStackWithLaunchBounds()) {
-            mService.resizeStack(
-                    stack.mStackId, bounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
+        if (stack != null && stack.inPinnedWindowingMode()) {
+            mService.animateResizePinnedStack(stack.mStackId, bounds, -1);
         } else {
-            task.updateOverrideConfiguration(bounds);
+            task.setBounds(bounds);
         }
     }
 

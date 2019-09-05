@@ -234,21 +234,15 @@ interface IActivityTaskManager {
     void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop);
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
     /**
-     * Resizes the input stack id to the given bounds.
+     * Resizes the input pinned stack to the given bounds with animation.
      *
-     * @param stackId Id of the stack to resize.
+     * @param stackId Id of the pinned stack to resize.
      * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
-     * @param allowResizeInDockedMode True if the resize should be allowed when the docked stack is
-     *                                active.
-     * @param preserveWindows True if the windows of activities contained in the stack should be
-     *                        preserved.
-     * @param animate True if the stack resize should be animated.
      * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
      *                          default animation duration should be used.
      * @throws RemoteException
      */
-    void resizeStack(int stackId, in Rect bounds, boolean allowResizeInDockedMode,
-            boolean preserveWindows, boolean animate, int animationDuration);
+    void animateResizePinnedStack(int stackId, in Rect bounds, int animationDuration);
     boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
             boolean animate, in Rect initialBounds, boolean showRecents);
     /**

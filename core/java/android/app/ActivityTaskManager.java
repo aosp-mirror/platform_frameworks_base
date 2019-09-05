@@ -202,21 +202,6 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Resizes the input stack id to the given bounds.
-     * @param stackId Id of the stack to resize.
-     * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void resizeStack(int stackId, Rect bounds) throws SecurityException {
-        try {
-            getService().resizeStack(stackId, bounds, false /* allowResizeInDockedMode */,
-                    false /* preserveWindows */, false /* animate */, -1 /* animationDuration */);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Removes stacks in the windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
@@ -362,10 +347,13 @@ public class ActivityTaskManager {
      * @param animate Whether we should play an animation for resizing stack.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void resizeStack(int stackId, Rect bounds, boolean animate) {
+    public void resizePinnedStack(int stackId, Rect bounds, boolean animate) {
         try {
-            getService().resizeStack(stackId, bounds, false, false, animate /* animate */,
-                    -1 /* animationDuration */);
+            if (animate) {
+                getService().animateResizePinnedStack(stackId, bounds, -1 /* animationDuration */);
+            } else {
+                getService().resizePinnedStack(bounds, null /* tempPinnedTaskBounds */);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

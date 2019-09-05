@@ -2481,8 +2481,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         switch (op) {
             case "move-task":
                 return runStackMoveTask(pw);
-            case "resize":
-                return runStackResize(pw);
             case "resize-animated":
                 return runStackResizeAnimated(pw);
             case "resize-docked-stack":
@@ -2561,17 +2559,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    int runStackResize(PrintWriter pw) throws RemoteException {
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
-        final Rect bounds = getBounds();
-        if (bounds == null) {
-            getErrPrintWriter().println("Error: invalid input bounds");
-            return -1;
-        }
-        return resizeStack(stackId, bounds, 0);
-    }
-
     int runStackResizeAnimated(PrintWriter pw) throws RemoteException {
         String stackIdStr = getNextArgRequired();
         int stackId = Integer.parseInt(stackIdStr);
@@ -2585,16 +2572,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
-        return resizeStackUnchecked(stackId, bounds, 0, true);
-    }
-
-    int resizeStackUnchecked(int stackId, Rect bounds, int delayMs, boolean animate)
-            throws RemoteException {
-        try {
-            mTaskInterface.resizeStack(stackId, bounds, false, false, animate, -1);
-            Thread.sleep(delayMs);
-        } catch (InterruptedException e) {
-        }
+        mTaskInterface.animateResizePinnedStack(stackId, bounds, -1);
         return 0;
     }
 
@@ -2607,14 +2585,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         mTaskInterface.resizeDockedStack(bounds, taskBounds, null, null, null);
         return 0;
-    }
-
-    int resizeStack(int stackId, Rect bounds, int delayMs) throws RemoteException {
-        if (bounds == null) {
-            getErrPrintWriter().println("Error: invalid input bounds");
-            return -1;
-        }
-        return resizeStackUnchecked(stackId, bounds, delayMs, false);
     }
 
     int runStackPositionTask(PrintWriter pw) throws RemoteException {
@@ -3195,8 +3165,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("       move-task <TASK_ID> <STACK_ID> [true|false]");
             pw.println("           Move <TASK_ID> from its current stack to the top (true) or");
             pw.println("           bottom (false) of <STACK_ID>.");
-            pw.println("       resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("           Change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>.");
             pw.println("       resize-animated <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
             pw.println("           Same as resize, but allow animation.");
             pw.println("       resize-docked-stack <LEFT,TOP,RIGHT,BOTTOM> [<TASK_LEFT,TASK_TOP,TASK_RIGHT,TASK_BOTTOM>]");
