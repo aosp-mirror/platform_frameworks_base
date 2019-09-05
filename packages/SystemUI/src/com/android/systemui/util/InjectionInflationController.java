@@ -32,6 +32,7 @@ import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.LockIcon;
@@ -172,6 +173,11 @@ public class InjectionInflationController {
          * Creates the QuickQSPanel.
          */
         QuickQSPanel createQuickQSPanel();
+
+        /**
+         * Creates the QSCustomizer.
+         */
+        QSCustomizer createQSCustomizer();
     }
 
     /**
