@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -30,7 +31,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.TransactionTooLargeException;
-import android.view.RemoteAnimationAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +51,12 @@ public abstract class ActivityManagerInternal {
     /**
      * Verify that calling app has access to the given provider.
      */
-    public abstract String checkContentProviderAccess(String authority, int userId);
+    public abstract String checkContentProviderAccess(String authority, @UserIdInt int userId);
 
     /**
      * Verify that calling UID has access to the given provider.
      */
-    public abstract int checkContentProviderUriPermission(Uri uri, int userId,
+    public abstract int checkContentProviderUriPermission(Uri uri, @UserIdInt int userId,
             int callingUid, int modeFlags);
 
     // Called by the power manager.
@@ -71,7 +71,7 @@ public abstract class ActivityManagerInternal {
     /**
      * Kill foreground apps from the specified user.
      */
-    public abstract void killForegroundAppsForUser(int userHandle);
+    public abstract void killForegroundAppsForUser(@UserIdInt int userId);
 
     /**
      *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
@@ -174,7 +174,7 @@ public abstract class ActivityManagerInternal {
      * Checks to see if the calling pid is allowed to handle the user. Returns adjusted user id as
      * needed.
      */
-    public abstract int handleIncomingUser(int callingPid, int callingUid, int userId,
+    public abstract int handleIncomingUser(int callingPid, int callingUid, @UserIdInt int userId,
             boolean allowAll, int allowMode, String name, String callerPackage);
 
     /** Checks if the calling binder pid as the permission. */
@@ -184,7 +184,7 @@ public abstract class ActivityManagerInternal {
     public abstract int getCurrentUserId();
 
     /** Returns true if the user is running. */
-    public abstract boolean isUserRunning(int userId, int flags);
+    public abstract boolean isUserRunning(@UserIdInt int userId, int flags);
 
     /** Trims memory usage in the system by removing/stopping unused application processes. */
     public abstract void trimApplications();
@@ -211,7 +211,7 @@ public abstract class ActivityManagerInternal {
      * @param started
      */
     public abstract void updateBatteryStats(
-            ComponentName activity, int uid, int userId, boolean resumed);
+            ComponentName activity, int uid, @UserIdInt int userId, boolean resumed);
 
     /**
      * Update UsageStats of the activity.
@@ -222,23 +222,23 @@ public abstract class ActivityManagerInternal {
      * @param taskRoot TaskRecord's root
      */
     public abstract void updateActivityUsageStats(
-            ComponentName activity, int userId, int event, IBinder appToken,
+            ComponentName activity, @UserIdInt int userId, int event, IBinder appToken,
             ComponentName taskRoot);
     public abstract void updateForegroundTimeIfOnBattery(
             String packageName, int uid, long cpuTimeDiff);
-    public abstract void sendForegroundProfileChanged(int userId);
+    public abstract void sendForegroundProfileChanged(@UserIdInt int userId);
 
     /**
      * Returns whether the given user requires credential entry at this time. This is used to
      * intercept activity launches for work apps when the Work Challenge is present.
      */
-    public abstract boolean shouldConfirmCredentials(int userId);
+    public abstract boolean shouldConfirmCredentials(@UserIdInt int userId);
 
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();
-    public abstract void ensureNotSpecialUser(int userId);
-    public abstract boolean isCurrentProfile(int userId);
-    public abstract boolean hasStartedUserState(int userId);
+    public abstract void ensureNotSpecialUser(@UserIdInt int userId);
+    public abstract boolean isCurrentProfile(@UserIdInt int userId);
+    public abstract boolean hasStartedUserState(@UserIdInt int userId);
     public abstract void finishUserSwitch(Object uss);
 
     /** Schedule the execution of all pending app GCs. */
@@ -261,15 +261,16 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntentInPackage(String packageName, int uid, int realCallingUid,
             int realCallingPid, Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras, String requiredPermission,
-            Bundle bOptions, boolean serialized, boolean sticky, int userId,
+            Bundle bOptions, boolean serialized, boolean sticky, @UserIdInt int userId,
             boolean allowBackgroundActivityStarts);
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
-            String resolvedType, boolean fgRequired, String callingPackage, int userId,
+            String resolvedType, boolean fgRequired, String callingPackage, @UserIdInt int userId,
             boolean allowBackgroundActivityStarts) throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder, Object conns);
-    public abstract void cleanUpServices(int userId, ComponentName component, Intent baseIntent);
-    public abstract ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId);
+    public abstract void cleanUpServices(@UserIdInt int userId, ComponentName component,
+            Intent baseIntent);
+    public abstract ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, @UserIdInt int userId);
     public abstract void ensureBootCompleted();
     public abstract void updateOomLevelsForDisplay(int displayId);
     public abstract boolean isActivityStartsLoggingEnabled();
@@ -328,7 +329,7 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isAppBad(ApplicationInfo info);
 
     /** Remove pending backup for the given userId. */
-    public abstract void clearPendingBackup(int userId);
+    public abstract void clearPendingBackup(@UserIdInt int userId);
 
     /**
      * When power button is very long pressed, call this interface to do some pre-shutdown work

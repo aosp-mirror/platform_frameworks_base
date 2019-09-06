@@ -168,7 +168,7 @@ public abstract class SystemService {
      * calls this method).
      */
     @Deprecated
-    public void onStartUser(@UserIdInt int userHandle) {}
+    public void onStartUser(@UserIdInt int userId) {}
 
     /**
      * Called when a new user is starting, for system services to initialize any per-user
@@ -189,7 +189,7 @@ public abstract class SystemService {
      * default calls this method).
      */
     @Deprecated
-    public void onUnlockUser(@UserIdInt int userHandle) {}
+    public void onUnlockUser(@UserIdInt int userId) {}
 
     /**
      * Called when an existing user is in the process of being unlocked. This
@@ -218,7 +218,7 @@ public abstract class SystemService {
      * (which by default calls this method).
      */
     @Deprecated
-    public void onSwitchUser(@UserIdInt int userHandle) {}
+    public void onSwitchUser(@UserIdInt int userId) {}
 
     /**
      * Called when switching to a different foreground user, for system services that have
@@ -243,7 +243,7 @@ public abstract class SystemService {
      * calls this method).
      */
     @Deprecated
-    public void onStopUser(@UserIdInt int userHandle) {}
+    public void onStopUser(@UserIdInt int userId) {}
 
     /**
      * Called when an existing user is stopping, for system services to finalize any per-user
@@ -268,7 +268,7 @@ public abstract class SystemService {
      * default calls this method).
      */
     @Deprecated
-    public void onCleanupUser(@UserIdInt int userHandle) {}
+    public void onCleanupUser(@UserIdInt int userId) {}
 
     /**
      * Called when an existing user is stopping, for system services to finalize any per-user

@@ -5413,8 +5413,8 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.ALLOW_MULTIPLE";
 
     /**
-     * The integer userHandle carried with broadcast intents related to addition, removal and
-     * switching of users and managed profiles - {@link #ACTION_USER_ADDED},
+     * The integer userHandle (i.e. userId) carried with broadcast intents related to addition,
+     * removal and switching of users and managed profiles - {@link #ACTION_USER_ADDED},
      * {@link #ACTION_USER_REMOVED} and {@link #ACTION_USER_SWITCHED}.
      *
      * @hide

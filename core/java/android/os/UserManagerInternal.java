@@ -137,7 +137,7 @@ public abstract class UserManagerInternal {
             String[] disallowedPackages);
 
     /**
-     * Same as {@link UserManager#removeUser(int userHandle)}, but bypasses the check for
+     * Same as {@link UserManager#removeUser(int userId)}, but bypasses the check for
      * {@link UserManager#DISALLOW_REMOVE_USER} and
      * {@link UserManager#DISALLOW_REMOVE_MANAGED_PROFILE} and does not require the
      * {@link android.Manifest.permission#MANAGE_USERS} permission.
