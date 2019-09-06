@@ -722,10 +722,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void notePhoneDataConnectionState(int dataType, boolean hasData) {
+    public void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.notePhoneDataConnectionStateLocked(dataType, hasData);
+            mStats.notePhoneDataConnectionStateLocked(dataType, hasData, serviceType);
         }
     }
 
