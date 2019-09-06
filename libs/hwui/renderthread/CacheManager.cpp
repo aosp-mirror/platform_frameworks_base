@@ -16,6 +16,7 @@
 
 #include "CacheManager.h"
 
+#include "DeviceInfo.h"
 #include "Layer.h"
 #include "Properties.h"
 #include "RenderThread.h"
@@ -42,8 +43,8 @@ namespace renderthread {
 #define SURFACE_SIZE_MULTIPLIER (5.0f * 4.0f)
 #define BACKGROUND_RETENTION_PERCENTAGE (0.5f)
 
-CacheManager::CacheManager(const DisplayInfo& display)
-        : mMaxSurfaceArea(display.w * display.h)
+CacheManager::CacheManager()
+        : mMaxSurfaceArea(DeviceInfo::getWidth() * DeviceInfo::getHeight())
         , mMaxResourceBytes(mMaxSurfaceArea * SURFACE_SIZE_MULTIPLIER)
         , mBackgroundResourceBytes(mMaxResourceBytes * BACKGROUND_RETENTION_PERCENTAGE)
         // This sets the maximum size for a single texture atlas in the GPU font cache. If
@@ -52,9 +53,9 @@ CacheManager::CacheManager(const DisplayInfo& display)
         , mMaxGpuFontAtlasBytes(GrNextSizePow2(mMaxSurfaceArea))
         // This sets the maximum size of the CPU font cache to be at least the same size as the
         // total number of GPU font caches (i.e. 4 separate GPU atlases).
-        , mMaxCpuFontCacheBytes(std::max(mMaxGpuFontAtlasBytes*4, SkGraphics::GetFontCacheLimit()))
+        , mMaxCpuFontCacheBytes(
+                  std::max(mMaxGpuFontAtlasBytes * 4, SkGraphics::GetFontCacheLimit()))
         , mBackgroundCpuFontCacheBytes(mMaxCpuFontCacheBytes * BACKGROUND_RETENTION_PERCENTAGE) {
-
     SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
 
     mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(

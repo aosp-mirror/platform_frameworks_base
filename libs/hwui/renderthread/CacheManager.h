@@ -21,7 +21,6 @@
 #include <GrContext.h>
 #endif
 #include <SkSurface.h>
-#include <ui/DisplayInfo.h>
 #include <utils/String8.h>
 #include <vector>
 
@@ -59,7 +58,7 @@ public:
 private:
     friend class RenderThread;
 
-    explicit CacheManager(const DisplayInfo& display);
+    explicit CacheManager();
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     void reset(sk_sp<GrContext> grContext);

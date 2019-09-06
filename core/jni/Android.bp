@@ -260,6 +260,7 @@ cc_library_shared {
                 "libhidltransport",
                 "libhwbinder",
                 "libvintf",
+                "libnativedisplay",
                 "libnativewindow",
                 "libdl",
                 "libdl_android",
@@ -439,6 +440,7 @@ cc_library_static {
             ],
             shared_libs: [
                 "libandroidfw",
+                "libnativedisplay",
                 "libnativewindow",
                 "libgui",
                 "libpdfium",

@@ -29,7 +29,6 @@
 #include <GrContext.h>
 #include <SkBitmap.h>
 #include <cutils/compiler.h>
-#include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
 #include <utils/Thread.h>
 
