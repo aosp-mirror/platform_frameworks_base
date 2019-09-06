@@ -479,6 +479,10 @@ class ZygoteConnection {
 
         closeSocket();
 
+        if (parsedArgs.mNiceName != null) {
+            Process.setArgV0(parsedArgs.mNiceName);
+        }
+
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         if (parsedArgs.mInvokeWith != null) {
