@@ -17,7 +17,8 @@
 package com.android.systemui.biometrics;
 
 import android.annotation.IntDef;
-import android.hardware.biometrics.BiometricPrompt;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.view.WindowManager;
 
@@ -28,28 +29,12 @@ import java.lang.annotation.RetentionPolicy;
  * Interface for the biometric dialog UI.
  */
 public interface AuthDialog {
-
-    // TODO: Clean up save/restore state
-    String[] KEYS_TO_BACKUP = {
-            BiometricPrompt.KEY_TITLE,
-            BiometricPrompt.KEY_USE_DEFAULT_TITLE,
-            BiometricPrompt.KEY_SUBTITLE,
-            BiometricPrompt.KEY_DESCRIPTION,
-            BiometricPrompt.KEY_POSITIVE_TEXT,
-            BiometricPrompt.KEY_NEGATIVE_TEXT,
-            BiometricPrompt.KEY_REQUIRE_CONFIRMATION,
-            BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL,
-            BiometricPrompt.KEY_FROM_CONFIRM_DEVICE_CREDENTIAL,
-
-            BiometricDialogView.KEY_TRY_AGAIN_VISIBILITY,
-            BiometricDialogView.KEY_CONFIRM_VISIBILITY,
-            BiometricDialogView.KEY_CONFIRM_ENABLED,
-            BiometricDialogView.KEY_STATE,
-            BiometricDialogView.KEY_ERROR_TEXT_VISIBILITY,
-            BiometricDialogView.KEY_ERROR_TEXT_STRING,
-            BiometricDialogView.KEY_ERROR_TEXT_IS_TEMPORARY,
-            BiometricDialogView.KEY_ERROR_TEXT_COLOR,
-    };
+    String KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY = "try_agian_visibility";
+    String KEY_BIOMETRIC_STATE = "state";
+    String KEY_BIOMETRIC_INDICATOR_STRING = "indicator_string"; // error / help / hint
+    String KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING = "error_is_temporary";
+    String KEY_BIOMETRIC_INDICATOR_HELP_SHOWING = "hint_is_temporary";
+    String KEY_BIOMETRIC_DIALOG_SIZE = "size";
 
     int SIZE_UNKNOWN = 0;
     int SIZE_SMALL = 1;
@@ -68,7 +53,7 @@ public interface AuthDialog {
      * Show the dialog.
      * @param wm
      */
-    void show(WindowManager wm);
+    void show(WindowManager wm, @Nullable Bundle savedState);
 
     /**
      * Dismiss the dialog without sending a callback.
@@ -107,13 +92,7 @@ public interface AuthDialog {
      * Save the current state.
      * @param outState
      */
-    void onSaveState(Bundle outState);
-
-    /**
-     * Restore a previous state.
-     * @param savedState
-     */
-    void restoreState(Bundle savedState);
+    void onSaveState(@NonNull Bundle outState);
 
     /**
      * Get the client's package name

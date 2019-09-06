@@ -154,18 +154,18 @@ public class AuthBiometricFaceView extends AuthBiometricView {
 
     @Override
     protected void handleResetAfterError() {
-        resetErrorView(mContext, mErrorView);
+        resetErrorView(mContext, mIndicatorView);
     }
 
     @Override
     protected void handleResetAfterHelp() {
-        resetErrorView(mContext, mErrorView);
+        resetErrorView(mContext, mIndicatorView);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mIconController = new IconController(mContext, mIconView, mErrorView);
+        mIconController = new IconController(mContext, mIconView, mIndicatorView);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
 
         if (newState == STATE_AUTHENTICATING_ANIMATING_IN ||
                 (newState == STATE_AUTHENTICATING && mSize == AuthDialog.SIZE_MEDIUM)) {
-            resetErrorView(mContext, mErrorView);
+            resetErrorView(mContext, mIndicatorView);
         }
 
         // Do this last since the state variable gets updated.

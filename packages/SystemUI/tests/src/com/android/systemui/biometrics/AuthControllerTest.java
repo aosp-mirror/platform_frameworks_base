@@ -147,7 +147,7 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testShowInvoked_whenSystemRequested()
             throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any());
+        verify(mDialog1).show(any(), any());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any());
+        verify(mDialog1).show(any(), any());
 
         showDialog(BiometricPrompt.TYPE_FACE);
 
@@ -223,13 +223,13 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mDialog1).dismissWithoutCallback(eq(false) /* animate */);
 
         // Second dialog should be shown without animation
-        verify(mDialog2).show(any());
+        verify(mDialog2).show(any(), any());
     }
 
     @Test
     public void testConfigurationPersists_whenOnConfigurationChanged() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        verify(mDialog1).show(any());
+        verify(mDialog1).show(any(), any());
 
         mBiometricDialogImpl.onConfigurationChanged(new Configuration());
 
@@ -241,10 +241,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         // Saved state is restored into new dialog
         ArgumentCaptor<Bundle> captor2 = ArgumentCaptor.forClass(Bundle.class);
-        verify(mDialog2).restoreState(captor2.capture());
-
-        // Dialog for new configuration skips intro
-        verify(mDialog2).show(any());
+        verify(mDialog2).show(any(), captor2.capture());
 
         // TODO: This should check all values we want to save/restore
         assertEquals(captor.getValue(), captor2.getValue());

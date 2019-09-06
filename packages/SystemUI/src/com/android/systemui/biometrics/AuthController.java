@@ -272,11 +272,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     + " type: " + type);
         }
 
-        if (savedState != null) {
-            // SavedState is only non-null if it's from onConfigurationChanged. Restore the state
-            // even though it may be removed / re-created again
-            newDialog.restoreState(savedState);
-        } else if (mCurrentDialog != null) {
+        if (mCurrentDialog != null) {
             // If somehow we're asked to show a dialog, the old one doesn't need to be animated
             // away. This can happen if the app cancels and re-starts auth during configuration
             // change. This is ugly because we also have to do things on onConfigurationChanged
@@ -286,7 +282,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
         mReceiver = (IBiometricServiceReceiverInternal) args.arg2;
         mCurrentDialog = newDialog;
-        mCurrentDialog.show(mWindowManager);
+        mCurrentDialog.show(mWindowManager, savedState);
     }
 
     private void onDialogDismissed(@DismissedReason int reason) {
