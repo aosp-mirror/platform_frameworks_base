@@ -1222,7 +1222,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                                                         .setVariant(variant)
                                                         .setScript(script)
                                                         .build();
-                                list.add(locale);
+                                // Log a WTF here if a repeated locale is found to avoid throwing an
+                                // exception in system server when LocaleList is created below
+                                final int inListIndex = list.indexOf(locale);
+                                if (inListIndex != -1) {
+                                    Slog.wtf(TAG, "Repeated locale (" + list.get(inListIndex) + ")"
+                                            + " found when trying to add: " + locale.toString());
+                                } else {
+                                    list.add(locale);
+                                }
                             } catch (IllformedLocaleException e) {
                                 Slog.e(TAG, "readFromProto error building locale with: "
                                         + "language-" + language + ";country-" + country
