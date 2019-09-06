@@ -20,7 +20,6 @@ import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -65,8 +64,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-// TODO: Write test without using PackageWatchdog#getPackages. Just rely on
-// behavior of observers receiving crash notifications or not to determine if it's registered
 // TODO: Use Truth in tests.
 /**
  * Test PackageWatchdog.
@@ -115,76 +112,109 @@ public class PackageWatchdogTest {
         dropShellPermissions();
     }
 
-    /**
-     * Test registration, unregistration, package expiry and duration reduction
-     */
     @Test
-    public void testRegistration() throws Exception {
+    public void testRegistration_singleObserver() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // The failed packages should be the same as the registered ones to ensure registration is
+        // done successfully
+        assertEquals(1, observer.mHealthCheckFailedPackages.size());
+        assertTrue(observer.mHealthCheckFailedPackages.contains(APP_A));
+    }
+
+    @Test
+    public void testRegistration_multiObservers() {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
-        TestObserver observer3 = new TestObserver(OBSERVER_NAME_3);
 
-        // Start observing for observer1 which will be unregistered
         watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
-        // Start observing for observer2 which will expire
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
-        // Start observing for observer3 which will have expiry duration reduced
-        watchdog.startObservingHealth(observer3, Arrays.asList(APP_A), LONG_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
+                new VersionedPackage(APP_B, VERSION_CODE)));
+        mTestLooper.dispatchAll();
 
-        // Verify packages observed at start
-        // 1
-        assertEquals(1, watchdog.getPackages(observer1).size());
-        assertTrue(watchdog.getPackages(observer1).contains(APP_A));
-        // 2
-        assertEquals(2, watchdog.getPackages(observer2).size());
-        assertTrue(watchdog.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog.getPackages(observer2).contains(APP_B));
-        // 3
-        assertEquals(1, watchdog.getPackages(observer3).size());
-        assertTrue(watchdog.getPackages(observer3).contains(APP_A));
+        // The failed packages should be the same as the registered ones to ensure registration is
+        // done successfully
+        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
+        assertEquals(2, observer2.mHealthCheckFailedPackages.size());
+        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_B));
+    }
 
-        // Then unregister observer1
-        watchdog.unregisterHealthObserver(observer1);
+    @Test
+    public void testUnregistration_singleObserver() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
-        // Verify observer2 and observer3 left
-        // 1
-        assertNull(watchdog.getPackages(observer1));
-        // 2
-        assertEquals(2, watchdog.getPackages(observer2).size());
-        assertTrue(watchdog.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog.getPackages(observer2).contains(APP_B));
-        // 3
-        assertEquals(1, watchdog.getPackages(observer3).size());
-        assertTrue(watchdog.getPackages(observer3).contains(APP_A));
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.unregisterHealthObserver(observer);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
 
-        // Then advance time a little and run messages in Handlers so observer2 expires
+        // We should have no failed packages to ensure unregistration is done successfully
+        assertEquals(0, observer.mHealthCheckFailedPackages.size());
+    }
+
+    @Test
+    public void testUnregistration_multiObservers() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
+
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.unregisterHealthObserver(observer2);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // observer1 should receive failed packages as intended.
+        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
+        // observer2 should have no failed packages to ensure unregistration is done successfully
+        assertEquals(0, observer2.mHealthCheckFailedPackages.size());
+    }
+
+    @Test
+    public void testExpiration_singleObserver() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
         moveTimeForwardAndDispatch(SHORT_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
 
-        // Verify observer3 left with reduced expiry duration
-        // 1
-        assertNull(watchdog.getPackages(observer1));
-        // 2
-        assertNull(watchdog.getPackages(observer2));
-        // 3
-        assertEquals(1, watchdog.getPackages(observer3).size());
-        assertTrue(watchdog.getPackages(observer3).contains(APP_A));
+        // We should have no failed packages for the fatal failure is raised after expiration
+        assertEquals(0, observer.mHealthCheckFailedPackages.size());
+    }
 
-        // Then advance time some more and run messages in Handlers so observer3 expires
-        moveTimeForwardAndDispatch(LONG_DURATION);
+    @Test
+    public void testExpiration_multiObservers() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
-        // Verify observer3 expired
-        // 1
-        assertNull(watchdog.getPackages(observer1));
-        // 2
-        assertNull(watchdog.getPackages(observer2));
-        // 3
-        assertNull(watchdog.getPackages(observer3));
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), LONG_DURATION);
+        moveTimeForwardAndDispatch(SHORT_DURATION);
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // We should have no failed packages for the fatal failure is raised after expiration
+        assertEquals(0, observer1.mHealthCheckFailedPackages.size());
+        // We should have failed packages since observer2 hasn't expired
+        assertEquals(1, observer2.mHealthCheckFailedPackages.size());
     }
 
     /** Observing already observed package extends the observation time. */
     @Test
-    public void testObserveAlreadyObservedPackage() throws Exception {
+    public void testObserveAlreadyObservedPackage() {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
@@ -200,56 +230,43 @@ public class PackageWatchdogTest {
         // Then advance time such that it should have expired were it not for the second observation
         moveTimeForwardAndDispatch((SHORT_DURATION / 2) + 1);
 
-        // Verify that APP_A not expired since second observation extended the time
-        assertEquals(1, watchdog.getPackages(observer).size());
-        assertTrue(watchdog.getPackages(observer).contains(APP_A));
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // Verify that we receive failed packages as expected for APP_A not expired
+        assertEquals(1, observer.mHealthCheckFailedPackages.size());
+        assertTrue(observer.mHealthCheckFailedPackages.contains(APP_A));
     }
 
     /**
      * Test package observers are persisted and loaded on startup
      */
     @Test
-    public void testPersistence() throws Exception {
+    public void testPersistence() {
         PackageWatchdog watchdog1 = createWatchdog();
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog1.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog1.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
-
-        // Verify 2 observers are registered and saved internally
-        // 1
-        assertEquals(1, watchdog1.getPackages(observer1).size());
-        assertTrue(watchdog1.getPackages(observer1).contains(APP_A));
-        // 2
-        assertEquals(2, watchdog1.getPackages(observer2).size());
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_B));
-
         // Then advance time and run IO Handler so file is saved
         mTestLooper.dispatchAll();
-
         // Then start a new watchdog
         PackageWatchdog watchdog2 = createWatchdog();
-
-        // Verify the new watchdog loads observers on startup but nothing registered
-        assertEquals(0, watchdog2.getPackages(observer1).size());
-        assertEquals(0, watchdog2.getPackages(observer2).size());
-        // Verify random observer not saved returns null
-        assertNull(watchdog2.getPackages(new TestObserver(OBSERVER_NAME_3)));
-
-        // Then register observer1
+        // Then resume observer1 and observer2
         watchdog2.registerHealthObserver(observer1);
         watchdog2.registerHealthObserver(observer2);
+        raiseFatalFailure(watchdog2, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
+                new VersionedPackage(APP_B, VERSION_CODE)));
+        mTestLooper.dispatchAll();
 
-        // Verify 2 observers are registered after reload
-        // 1
-        assertEquals(1, watchdog1.getPackages(observer1).size());
-        assertTrue(watchdog1.getPackages(observer1).contains(APP_A));
-        // 2
-        assertEquals(2, watchdog1.getPackages(observer2).size());
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_A));
-        assertTrue(watchdog1.getPackages(observer2).contains(APP_B));
+        // We should receive failed packages as expected to ensure observers are persisted and
+        // resumed correctly
+        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
+        assertEquals(2, observer2.mHealthCheckFailedPackages.size());
+        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
+        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_B));
     }
 
     /**
@@ -273,8 +290,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify that observers are not notified
-        assertEquals(0, observer1.mFailedPackages.size());
-        assertEquals(0, observer2.mFailedPackages.size());
+        assertEquals(0, observer1.mMitigatedPackages.size());
+        assertEquals(0, observer2.mMitigatedPackages.size());
     }
 
     /**
@@ -292,16 +309,14 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer1, Arrays.asList(APP_B), SHORT_DURATION);
 
         // Then fail APP_C (not observed) above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify that observers are not notified
-        assertEquals(0, observer1.mFailedPackages.size());
-        assertEquals(0, observer2.mFailedPackages.size());
+        assertEquals(0, observer1.mMitigatedPackages.size());
+        assertEquals(0, observer2.mMitigatedPackages.size());
     }
 
     /**
@@ -326,16 +341,14 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A (different version) above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(
-                            new VersionedPackage(APP_A, differentVersionCode)));
-        }
+        raiseFatalFailure(watchdog,
+                Arrays.asList(new VersionedPackage(APP_A, differentVersionCode)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify that observers are not notified
-        assertEquals(0, observer.mFailedPackages.size());
+        assertEquals(0, observer.mMitigatedPackages.size());
     }
 
 
@@ -365,21 +378,19 @@ public class PackageWatchdogTest {
                 SHORT_DURATION);
 
         // Then fail all apps above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
-                    new VersionedPackage(APP_B, VERSION_CODE),
-                    new VersionedPackage(APP_C, VERSION_CODE),
-                    new VersionedPackage(APP_D, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
+                new VersionedPackage(APP_B, VERSION_CODE),
+                new VersionedPackage(APP_C, VERSION_CODE),
+                new VersionedPackage(APP_D, VERSION_CODE)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify least impact observers are notifed of package failures
-        List<String> observerNonePackages = observerNone.mFailedPackages;
-        List<String> observerHighPackages = observerHigh.mFailedPackages;
-        List<String> observerMidPackages = observerMid.mFailedPackages;
-        List<String> observerLowPackages = observerLow.mFailedPackages;
+        List<String> observerNonePackages = observerNone.mMitigatedPackages;
+        List<String> observerHighPackages = observerHigh.mMitigatedPackages;
+        List<String> observerMidPackages = observerMid.mMitigatedPackages;
+        List<String> observerLowPackages = observerLow.mMitigatedPackages;
 
         // APP_D failure observed by only observerNone is not caught cos its impact is none
         assertEquals(0, observerNonePackages.size());
@@ -418,66 +429,58 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observerSecond, Arrays.asList(APP_A), LONG_DURATION);
 
         // Then fail APP_A above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify only observerFirst is notifed
-        assertEquals(1, observerFirst.mFailedPackages.size());
-        assertEquals(APP_A, observerFirst.mFailedPackages.get(0));
-        assertEquals(0, observerSecond.mFailedPackages.size());
+        assertEquals(1, observerFirst.mMitigatedPackages.size());
+        assertEquals(APP_A, observerFirst.mMitigatedPackages.get(0));
+        assertEquals(0, observerSecond.mMitigatedPackages.size());
 
         // After observerFirst handles failure, next action it has is high impact
         observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_HIGH;
-        observerFirst.mFailedPackages.clear();
-        observerSecond.mFailedPackages.clear();
+        observerFirst.mMitigatedPackages.clear();
+        observerSecond.mMitigatedPackages.clear();
 
         // Then fail APP_A again above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify only observerSecond is notifed cos it has least impact
-        assertEquals(1, observerSecond.mFailedPackages.size());
-        assertEquals(APP_A, observerSecond.mFailedPackages.get(0));
-        assertEquals(0, observerFirst.mFailedPackages.size());
+        assertEquals(1, observerSecond.mMitigatedPackages.size());
+        assertEquals(APP_A, observerSecond.mMitigatedPackages.get(0));
+        assertEquals(0, observerFirst.mMitigatedPackages.size());
 
         // After observerSecond handles failure, it has no further actions
         observerSecond.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
-        observerFirst.mFailedPackages.clear();
-        observerSecond.mFailedPackages.clear();
+        observerFirst.mMitigatedPackages.clear();
+        observerSecond.mMitigatedPackages.clear();
 
         // Then fail APP_A again above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify only observerFirst is notifed cos it has the only action
-        assertEquals(1, observerFirst.mFailedPackages.size());
-        assertEquals(APP_A, observerFirst.mFailedPackages.get(0));
-        assertEquals(0, observerSecond.mFailedPackages.size());
+        assertEquals(1, observerFirst.mMitigatedPackages.size());
+        assertEquals(APP_A, observerFirst.mMitigatedPackages.get(0));
+        assertEquals(0, observerSecond.mMitigatedPackages.size());
 
         // After observerFirst handles failure, it too has no further actions
         observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
-        observerFirst.mFailedPackages.clear();
-        observerSecond.mFailedPackages.clear();
+        observerFirst.mMitigatedPackages.clear();
+        observerSecond.mMitigatedPackages.clear();
 
         // Then fail APP_A again above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify no observer is notified cos no actions left
-        assertEquals(0, observerFirst.mFailedPackages.size());
-        assertEquals(0, observerSecond.mFailedPackages.size());
+        assertEquals(0, observerFirst.mMitigatedPackages.size());
+        assertEquals(0, observerSecond.mMitigatedPackages.size());
     }
 
     /**
@@ -496,17 +499,15 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A above the threshold
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        }
+        raiseFatalFailure(watchdog, Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
 
         // Verify only one observer is notifed
-        assertEquals(1, observer1.mFailedPackages.size());
-        assertEquals(APP_A, observer1.mFailedPackages.get(0));
-        assertEquals(0, observer2.mFailedPackages.size());
+        assertEquals(1, observer1.mMitigatedPackages.size());
+        assertEquals(APP_A, observer1.mMitigatedPackages.get(0));
+        assertEquals(0, observer2.mMitigatedPackages.size());
     }
 
     /**
@@ -555,15 +556,15 @@ public class PackageWatchdogTest {
         assertEquals(0, controller.getRequestedPackages().size());
 
         // Verify observer1 is not notified
-        assertEquals(0, observer1.mFailedPackages.size());
+        assertEquals(0, observer1.mMitigatedPackages.size());
 
         // Verify observer2 is notifed because health checks for APP_B never passed
-        assertEquals(1, observer2.mFailedPackages.size());
-        assertEquals(APP_B, observer2.mFailedPackages.get(0));
+        assertEquals(1, observer2.mMitigatedPackages.size());
+        assertEquals(APP_B, observer2.mMitigatedPackages.get(0));
 
         // Verify observer3 is notifed because health checks for APP_A did not pass before expiry
-        assertEquals(1, observer3.mFailedPackages.size());
-        assertEquals(APP_A, observer3.mFailedPackages.get(0));
+        assertEquals(1, observer3.mMitigatedPackages.size());
+        assertEquals(APP_A, observer3.mMitigatedPackages.get(0));
     }
 
     /**
@@ -607,7 +608,7 @@ public class PackageWatchdogTest {
         moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify APP_A is not failed (APP_B) is not expired yet
-        assertEquals(0, observer.mFailedPackages.size());
+        assertEquals(0, observer.mMitigatedPackages.size());
 
         // Re-enable explicit health checks
         setExplicitHealthCheckEnabled(true);
@@ -635,8 +636,8 @@ public class PackageWatchdogTest {
         moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify only APP_C is failed because explicit health checks was not supported for APP_A
-        assertEquals(1, observer.mFailedPackages.size());
-        assertEquals(APP_C, observer.mFailedPackages.get(0));
+        assertEquals(1, observer.mMitigatedPackages.size());
+        assertEquals(APP_C, observer.mMitigatedPackages.get(0));
     }
 
     /**
@@ -660,17 +661,17 @@ public class PackageWatchdogTest {
         moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify that health check is failed
-        assertEquals(1, observer.mFailedPackages.size());
-        assertEquals(APP_A, observer.mFailedPackages.get(0));
+        assertEquals(1, observer.mMitigatedPackages.size());
+        assertEquals(APP_A, observer.mMitigatedPackages.get(0));
 
         // Then clear failed packages and start observing a random package so requests are synced
         // and PackageWatchdog#onSupportedPackages is called and APP_A has a chance to fail again
         // this time due to package expiry.
-        observer.mFailedPackages.clear();
+        observer.mMitigatedPackages.clear();
         watchdog.startObservingHealth(observer, Arrays.asList(APP_B), LONG_DURATION);
 
         // Verify that health check failure is not notified again
-        assertTrue(observer.mFailedPackages.isEmpty());
+        assertTrue(observer.mMitigatedPackages.isEmpty());
     }
 
     /** Tests {@link MonitoredPackage} health check state transitions. */
@@ -734,8 +735,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify the NetworkStack observer is notified
-        assertEquals(1, observer.mFailedPackages.size());
-        assertEquals(APP_A, observer.mFailedPackages.get(0));
+        assertEquals(1, observer.mMitigatedPackages.size());
+        assertEquals(APP_A, observer.mMitigatedPackages.get(0));
     }
 
     private void adoptShellPermissions(String... permissions) {
@@ -770,6 +771,13 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
     }
 
+    /** Trigger package failures above the threshold. */
+    private void raiseFatalFailure(PackageWatchdog watchdog, List<VersionedPackage> packages) {
+        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
+            watchdog.onPackageFailure(packages);
+        }
+    }
+
     private PackageWatchdog createWatchdog() {
         return createWatchdog(new TestController(), true /* withPackagesReady */);
     }
@@ -799,7 +807,8 @@ public class PackageWatchdogTest {
     private static class TestObserver implements PackageHealthObserver {
         private final String mName;
         private int mImpact;
-        final List<String> mFailedPackages = new ArrayList<>();
+        final List<String> mHealthCheckFailedPackages = new ArrayList<>();
+        final List<String> mMitigatedPackages = new ArrayList<>();
 
         TestObserver(String name) {
             mName = name;
@@ -812,11 +821,12 @@ public class PackageWatchdogTest {
         }
 
         public int onHealthCheckFailed(VersionedPackage versionedPackage) {
+            mHealthCheckFailedPackages.add(versionedPackage.getPackageName());
             return mImpact;
         }
 
         public boolean execute(VersionedPackage versionedPackage) {
-            mFailedPackages.add(versionedPackage.getPackageName());
+            mMitigatedPackages.add(versionedPackage.getPackageName());
             return true;
         }
 
