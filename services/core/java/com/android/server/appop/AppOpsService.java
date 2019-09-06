@@ -2979,17 +2979,40 @@ public class AppOpsService extends IAppOpsService.Stub {
                 out.startTag(null, "app-ops");
                 out.attribute(null, "v", String.valueOf(CURRENT_VERSION));
 
-                final int uidStateCount = mUidStates.size();
-                for (int i = 0; i < uidStateCount; i++) {
-                    UidState uidState = mUidStates.valueAt(i);
-                    if (uidState.opModes != null && uidState.opModes.size() > 0) {
+                SparseArray<SparseIntArray> uidStatesClone;
+                synchronized (this) {
+                    uidStatesClone = new SparseArray<>(mUidStates.size());
+
+                    final int uidStateCount = mUidStates.size();
+                    for (int uidStateNum = 0; uidStateNum < uidStateCount; uidStateNum++) {
+                        UidState uidState = mUidStates.valueAt(uidStateNum);
+                        int uid = mUidStates.keyAt(uidStateNum);
+
+                        SparseIntArray opModes = uidState.opModes;
+                        if (opModes != null && opModes.size() > 0) {
+                            uidStatesClone.put(uid, new SparseIntArray(opModes.size()));
+
+                            final int opCount = opModes.size();
+                            for (int opCountNum = 0; opCountNum < opCount; opCountNum++) {
+                                uidStatesClone.get(uid).put(
+                                        opModes.keyAt(opCountNum),
+                                        opModes.valueAt(opCountNum));
+                            }
+                        }
+                    }
+                }
+
+                final int uidStateCount = uidStatesClone.size();
+                for (int uidStateNum = 0; uidStateNum < uidStateCount; uidStateNum++) {
+                    SparseIntArray opModes = uidStatesClone.valueAt(uidStateNum);
+                    if (opModes != null && opModes.size() > 0) {
                         out.startTag(null, "uid");
-                        out.attribute(null, "n", Integer.toString(uidState.uid));
-                        SparseIntArray uidOpModes = uidState.opModes;
-                        final int opCount = uidOpModes.size();
-                        for (int j = 0; j < opCount; j++) {
-                            final int op = uidOpModes.keyAt(j);
-                            final int mode = uidOpModes.valueAt(j);
+                        out.attribute(null, "n",
+                                Integer.toString(uidStatesClone.keyAt(uidStateNum)));
+                        final int opCount = opModes.size();
+                        for (int opCountNum = 0; opCountNum < opCount; opCountNum++) {
+                            final int op = opModes.keyAt(opCountNum);
+                            final int mode = opModes.valueAt(opCountNum);
                             out.startTag(null, "op");
                             out.attribute(null, "n", Integer.toString(op));
                             out.attribute(null, "m", Integer.toString(mode));
