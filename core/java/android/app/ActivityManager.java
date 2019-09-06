@@ -188,57 +188,6 @@ public class ActivityManager {
     final ArrayMap<OnUidImportanceListener, UidObserver> mImportanceListeners = new ArrayMap<>();
 
     /**
-     * Defines acceptable types of bugreports.
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "BUGREPORT_OPTION_" }, value = {
-            BUGREPORT_OPTION_FULL,
-            BUGREPORT_OPTION_INTERACTIVE,
-            BUGREPORT_OPTION_REMOTE,
-            BUGREPORT_OPTION_WEAR,
-            BUGREPORT_OPTION_TELEPHONY,
-            BUGREPORT_OPTION_WIFI
-    })
-    public @interface BugreportMode {}
-    /**
-     * Takes a bugreport without user interference (and hence causing less
-     * interference to the system), but includes all sections.
-     * @hide
-     */
-    public static final int BUGREPORT_OPTION_FULL = 0;
-    /**
-     * Allows user to monitor progress and enter additional data; might not include all
-     * sections.
-     * @hide
-     */
-    public static final int BUGREPORT_OPTION_INTERACTIVE = 1;
-    /**
-     * Takes a bugreport requested remotely by administrator of the Device Owner app,
-     * not the device's user.
-     * @hide
-     */
-    public static final int BUGREPORT_OPTION_REMOTE = 2;
-    /**
-     * Takes a bugreport on a wearable device.
-     * @hide
-     */
-    public static final int BUGREPORT_OPTION_WEAR = 3;
-
-    /**
-     * Takes a lightweight version of bugreport that only includes a few, urgent sections
-     * used to report telephony bugs.
-     * @hide
-     */
-    public static final int BUGREPORT_OPTION_TELEPHONY = 4;
-
-    /**
-     * Takes a lightweight bugreport that only includes a few sections related to Wifi.
-     * @hide
-     */
-    public static final int BUGREPORT_OPTION_WIFI = 5;
-
-    /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
      * <meta-data>}</a> name for a 'home' Activity that declares a package that is to be
      * uninstalled in lieu of the declaring one.  The package named here must be
