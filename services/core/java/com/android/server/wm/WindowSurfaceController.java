@@ -245,10 +245,6 @@ class WindowSurfaceController {
         }
     }
 
-    void setGeometryAppliesWithResizeInTransaction(boolean recoveringMemory) {
-        mSurfaceControl.setGeometryAppliesWithResize();
-    }
-
     void setMatrixInTransaction(float dsdx, float dtdx, float dtdy, float dsdy,
             boolean recoveringMemory) {
         setMatrix(null, dsdx, dtdx, dtdy, dsdy, false);

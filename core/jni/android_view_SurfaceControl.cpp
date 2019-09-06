@@ -397,15 +397,6 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
     transaction->setGeometry(ctrl, source, dst, orientation);
 }
 
-static void nativeSetGeometryAppliesWithResize(JNIEnv* env, jclass clazz,
-jlong transactionObj,
-        jlong nativeObject) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setGeometryAppliesWithResize(ctrl);
-}
-
 static void nativeSetSize(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint w, jint h) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -1295,8 +1286,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetRelativeLayer },
     {"nativeSetPosition", "(JJFF)V",
             (void*)nativeSetPosition },
-    {"nativeSetGeometryAppliesWithResize", "(JJ)V",
-            (void*)nativeSetGeometryAppliesWithResize },
     {"nativeSetSize", "(JJII)V",
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JJLandroid/graphics/Region;)V",
