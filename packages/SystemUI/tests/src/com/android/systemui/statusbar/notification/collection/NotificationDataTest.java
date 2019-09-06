@@ -344,8 +344,8 @@ public class NotificationDataTest extends SysuiTestCase {
 
         assertEquals(systemGeneratedSmartActions, entry.systemGeneratedSmartActions);
         assertEquals(NOTIFICATION_CHANNEL, entry.getChannel());
-        assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.userSentiment);
-        assertEquals(snoozeCriterions, entry.snoozeCriteria);
+        assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.getUserSentiment());
+        assertEquals(snoozeCriterions, entry.getSnoozeCriteria());
     }
 
     @Test

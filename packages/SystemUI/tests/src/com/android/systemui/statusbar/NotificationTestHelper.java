@@ -20,6 +20,8 @@ import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+
 import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
@@ -187,7 +189,9 @@ public class NotificationTestHelper {
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, pkg, UID, USER_HANDLE,
                 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
-        row.getEntry().canBubble = true;
+        modifyRanking(row.getEntry())
+                .setCanBubble(true)
+                .build();
         return row;
     }
 

@@ -300,7 +300,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         assertEquals(mEntryManager.getNotificationData().get(mSbn.getKey()), entry);
         assertNotNull(entry.getRow());
-        assertEquals(mEntry.userSentiment,
+        assertEquals(mEntry.getUserSentiment(),
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL);
     }
 
@@ -325,7 +325,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mEntryListener).onPostEntryUpdated(mEntry);
 
         assertNotNull(mEntry.getRow());
-        assertEquals(mEntry.userSentiment,
+        assertEquals(mEntry.getUserSentiment(),
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
     }
 

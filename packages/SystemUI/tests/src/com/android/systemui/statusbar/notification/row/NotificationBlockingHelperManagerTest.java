@@ -131,7 +131,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     @Test
     public void testPerhapsShowBlockingHelper_shown() throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
 
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
 
@@ -150,7 +152,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
                     .build();
         }
 
-        groupRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(groupRow.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(groupRow, mMenuRow));
 
@@ -160,7 +164,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     @Test
     public void testPerhapsShowBlockingHelper_shownForLargeGroup() throws Exception {
         ExpandableNotificationRow groupRow = createBlockableGroupRowSpy(10);
-        groupRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(groupRow.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
 
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(groupRow, mMenuRow));
 
@@ -175,7 +181,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         // as other factors such as view expansion may cause us to get the parent row back instead
         // of the child row.
         ExpandableNotificationRow childRow = groupRow.getChildrenContainer().getViewAtPosition(0);
-        childRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(childRow.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         assertFalse(childRow.getIsNonblockable());
 
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(childRow, mMenuRow));
@@ -186,7 +194,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     @Test
     public void testPerhapsShowBlockingHelper_notShownDueToNeutralUserSentiment() throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
-        row.getEntry().userSentiment = USER_SENTIMENT_NEUTRAL;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEUTRAL)
+                .build();
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
     }
@@ -195,7 +205,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void testPerhapsShowBlockingHelper_notShownDueToPositiveUserSentiment()
             throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
-        row.getEntry().userSentiment = USER_SENTIMENT_POSITIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_POSITIVE)
+                .build();
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
     }
@@ -203,7 +215,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     @Test
     public void testPerhapsShowBlockingHelper_notShownDueToShadeVisibility() throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         // Hide the shade
         mBlockingHelperManager.setNotificationShadeExpanded(0f);
 
@@ -214,7 +228,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void testPerhapsShowBlockingHelper_notShownDueToNonblockability() throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
         when(row.getIsNonblockable()).thenReturn(true);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
     }
@@ -227,7 +243,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         // as other factors such as view expansion may cause us to get the parent row back instead
         // of the child row.
         ExpandableNotificationRow childRow = groupRow.getChildrenContainer().getViewAtPosition(0);
-        childRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(childRow.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(childRow, mMenuRow));
     }
@@ -235,7 +253,9 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     @Test
     public void testBlockingHelperShowAndDismiss() throws Exception{
         ExpandableNotificationRow row = createBlockableRowSpy();
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         when(row.isAttachedToWindow()).thenReturn(true);
 
         // Show check

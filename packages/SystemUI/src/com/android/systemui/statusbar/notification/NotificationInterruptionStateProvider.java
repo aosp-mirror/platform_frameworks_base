@@ -169,7 +169,7 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (!entry.canBubble) {
+        if (!entry.canBubble()) {
             if (DEBUG) {
                 Log.d(TAG, "No bubble up: not allowed to bubble: " + sbn.getKey());
             }

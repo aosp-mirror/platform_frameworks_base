@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Importance;
 import android.os.UserHandle;
+import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -108,6 +109,68 @@ public class NotificationEntryBuilder {
     }
 
     /* Delegated to RankingBuilder */
+
+    public NotificationEntryBuilder setRank(int rank) {
+        mRankingBuilder.setRank(rank);
+        return this;
+    }
+
+    public NotificationEntryBuilder setMatchesInterruptionFilter(
+            boolean matchesInterruptionFilter) {
+        mRankingBuilder.setMatchesInterruptionFilter(matchesInterruptionFilter);
+        return this;
+    }
+
+    public NotificationEntryBuilder setVisibilityOverride(int visibilityOverride) {
+        mRankingBuilder.setVisibilityOverride(visibilityOverride);
+        return this;
+    }
+
+    public NotificationEntryBuilder setSuppressedVisualEffects(int suppressedVisualEffects) {
+        mRankingBuilder.setSuppressedVisualEffects(suppressedVisualEffects);
+        return this;
+    }
+
+    public NotificationEntryBuilder setExplanation(CharSequence explanation) {
+        mRankingBuilder.setExplanation(explanation);
+        return this;
+    }
+
+    public NotificationEntryBuilder setAdditionalPeople(ArrayList<String> additionalPeople) {
+        mRankingBuilder.setAdditionalPeople(additionalPeople);
+        return this;
+    }
+
+    public NotificationEntryBuilder setSnoozeCriteria(
+            ArrayList<SnoozeCriterion> snoozeCriteria) {
+        mRankingBuilder.setSnoozeCriteria(snoozeCriteria);
+        return this;
+    }
+
+    public NotificationEntryBuilder setCanShowBadge(boolean canShowBadge) {
+        mRankingBuilder.setCanShowBadge(canShowBadge);
+        return this;
+    }
+
+    public NotificationEntryBuilder setSuspended(boolean suspended) {
+        mRankingBuilder.setSuspended(suspended);
+        return this;
+    }
+
+    public NotificationEntryBuilder setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
+        mRankingBuilder.setLastAudiblyAlertedMs(lastAudiblyAlertedMs);
+        return this;
+    }
+
+    public NotificationEntryBuilder setNoisy(boolean noisy) {
+        mRankingBuilder.setNoisy(noisy);
+        return this;
+    }
+
+    public NotificationEntryBuilder setCanBubble(boolean canBubble) {
+        mRankingBuilder.setCanBubble(canBubble);
+        return this;
+    }
 
     public NotificationEntryBuilder setImportance(@Importance int importance) {
         mRankingBuilder.setImportance(importance);

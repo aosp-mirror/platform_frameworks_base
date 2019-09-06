@@ -85,6 +85,7 @@ public final class NotificationEntry {
     private static final long INITIALIZATION_DELAY = 400;
     private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
     private static final int COLOR_INVALID = 1;
+
     public final String key;
     public StatusBarNotification notification;
     private Ranking mRanking;
@@ -99,8 +100,6 @@ public final class NotificationEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
-    public List<SnoozeCriterion> snoozeCriteria;
-    public int userSentiment = Ranking.USER_SENTIMENT_NEUTRAL;
     /** Smart Actions provided by the NotificationAssistantService. */
     @NonNull
     public List<Notification.Action> systemGeneratedSmartActions = Collections.emptyList();
@@ -114,10 +113,6 @@ public final class NotificationEntry {
      * suggestion being edited. Otherwise <code>null</code>.
      */
     public EditedSuggestionInfo editedSuggestionInfo;
-
-    @VisibleForTesting
-    public int suppressedVisualEffects;
-    public boolean suspended;
 
     private NotificationEntry parent; // our parent (if we're in a group)
     private ExpandableNotificationRow row; // the outer expanded view
@@ -145,12 +140,6 @@ public final class NotificationEntry {
      * Has the user sent a reply through this Notification.
      */
     private boolean hasSentReply;
-
-    /**
-     * Whether this notification has been approved globally, at the app level, and at the channel
-     * level for bubbling.
-     */
-    public boolean canBubble;
 
     /**
      * Whether this notification is shown to the user as a high priority notification: visible on
@@ -239,16 +228,11 @@ public final class NotificationEntry {
     public void setRanking(@NonNull Ranking ranking) {
         mRanking = ranking;
 
-        snoozeCriteria = ranking.getSnoozeCriteria();
-        userSentiment = ranking.getUserSentiment();
         systemGeneratedSmartActions = ranking.getSmartActions() == null
                 ? Collections.emptyList() : ranking.getSmartActions();
         systemGeneratedSmartReplies = ranking.getSmartReplies() == null
                 ? new CharSequence[0]
                 : ranking.getSmartReplies().toArray(new CharSequence[0]);
-        suppressedVisualEffects = ranking.getSuppressedVisualEffects();
-        suspended = ranking.isSuspended();
-        canBubble = ranking.canBubble();
     }
 
     public NotificationChannel getChannel() {
@@ -266,6 +250,28 @@ public final class NotificationEntry {
     public int getImportance() {
         return mRanking.getImportance();
     }
+
+    public List<SnoozeCriterion> getSnoozeCriteria() {
+        return mRanking.getSnoozeCriteria();
+    }
+
+    public int getUserSentiment() {
+        return mRanking.getUserSentiment();
+    }
+
+    public int getSuppressedVisualEffects() {
+        return mRanking.getSuppressedVisualEffects();
+    }
+
+    public boolean isSuspended() {
+        return mRanking.isSuspended();
+    }
+
+    /** @see Ranking#canBubble() */
+    public boolean canBubble() {
+        return mRanking.canBubble();
+    }
+
 
     public void setInterruption() {
         interruption = true;
@@ -793,7 +799,7 @@ public final class NotificationEntry {
         if (isExemptFromDndVisualSuppression()) {
             return false;
         }
-        return (suppressedVisualEffects & effect) != 0;
+        return (getSuppressedVisualEffects() & effect) != 0;
     }
 
     /**

@@ -23,6 +23,7 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -288,7 +289,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForHeadsUpWhenDozing();
 
         NotificationEntry entry = createNotification(IMPORTANCE_DEFAULT);
-        entry.suppressedVisualEffects = SUPPRESSED_EFFECT_AMBIENT;
+        modifyRanking(entry)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_AMBIENT)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
     }
@@ -379,7 +382,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
-        entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
+        modifyRanking(entry)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_PEEK)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
     }
@@ -481,7 +486,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForBubbleUp();
 
         NotificationEntry entry = createBubble();
-        entry.canBubble = false;
+        modifyRanking(entry)
+                .setCanBubble(false)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(entry)).isFalse();
     }
@@ -494,7 +501,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForBubbleUp();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
-        entry.canBubble = true;
+        modifyRanking(entry)
+                .setCanBubble(true)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(entry)).isFalse();
     }
@@ -507,8 +516,10 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForBubbleUp();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
-        entry.canBubble = true;
-        entry.notification.getNotification().flags |= FLAG_BUBBLE;
+        modifyRanking(entry)
+                .setCanBubble(true)
+                .build();
+        entry.sbn().getNotification().flags |= FLAG_BUBBLE;
 
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(entry)).isFalse();
     }
@@ -550,16 +561,15 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
                 .setBubbleMetadata(data)
                 .build();
         n.flags |= FLAG_BUBBLE;
-        NotificationEntry entry = new NotificationEntryBuilder()
+
+        return new NotificationEntryBuilder()
                 .setPkg("a")
                 .setOpPkg("a")
                 .setTag("a")
                 .setNotification(n)
                 .setImportance(IMPORTANCE_HIGH)
+                .setCanBubble(true)
                 .build();
-
-        entry.canBubble = true;
-        return entry;
     }
 
     private NotificationEntry createNotification(int importance) {

@@ -314,7 +314,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(true);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
@@ -343,7 +345,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(false);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
@@ -405,7 +409,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(false);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
@@ -435,7 +441,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(true);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 

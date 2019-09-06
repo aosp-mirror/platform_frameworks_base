@@ -75,8 +75,99 @@ public class RankingBuilder {
         mCanBubble = ranking.canBubble();
     }
 
+    public Ranking build() {
+        final Ranking ranking = new Ranking();
+        ranking.populate(
+                mKey,
+                mRank,
+                mMatchesInterruptionFilter,
+                mVisibilityOverride,
+                mSuppressedVisualEffects,
+                mImportance,
+                mExplanation,
+                mOverrideGroupKey,
+                mChannel,
+                mAdditionalPeople,
+                mSnoozeCriteria,
+                mCanShowBadge,
+                mUserSentiment,
+                mIsSuspended,
+                mLastAudiblyAlertedMs,
+                mNoisy,
+                mSmartActions,
+                mSmartReplies,
+                mCanBubble);
+        return ranking;
+    }
+
     public RankingBuilder setKey(String key) {
         mKey = key;
+        return this;
+    }
+
+    public RankingBuilder setRank(int rank) {
+        mRank = rank;
+        return this;
+    }
+
+    public RankingBuilder setMatchesInterruptionFilter(boolean matchesInterruptionFilter) {
+        mMatchesInterruptionFilter = matchesInterruptionFilter;
+        return this;
+    }
+
+    public RankingBuilder setVisibilityOverride(int visibilityOverride) {
+        mVisibilityOverride = visibilityOverride;
+        return this;
+    }
+
+    public RankingBuilder setSuppressedVisualEffects(int suppressedVisualEffects) {
+        mSuppressedVisualEffects = suppressedVisualEffects;
+        return this;
+    }
+
+    public RankingBuilder setExplanation(CharSequence explanation) {
+        mExplanation = explanation;
+        return this;
+    }
+
+    public RankingBuilder setOverrideGroupKey(String overrideGroupKey) {
+        mOverrideGroupKey = overrideGroupKey;
+        return this;
+    }
+
+    public RankingBuilder setAdditionalPeople(ArrayList<String> additionalPeople) {
+        mAdditionalPeople = additionalPeople;
+        return this;
+    }
+
+    public RankingBuilder setSnoozeCriteria(
+            ArrayList<SnoozeCriterion> snoozeCriteria) {
+        mSnoozeCriteria = snoozeCriteria;
+        return this;
+    }
+
+    public RankingBuilder setCanShowBadge(boolean canShowBadge) {
+        mCanShowBadge = canShowBadge;
+        return this;
+    }
+
+    public RankingBuilder setSuspended(boolean suspended) {
+        mIsSuspended = suspended;
+        return this;
+    }
+
+    public RankingBuilder setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
+        mLastAudiblyAlertedMs = lastAudiblyAlertedMs;
+        return this;
+    }
+
+    public RankingBuilder setNoisy(boolean noisy) {
+        mNoisy = noisy;
+        return this;
+    }
+
+    public RankingBuilder setCanBubble(boolean canBubble) {
+        mCanBubble = canBubble;
         return this;
     }
 
@@ -103,31 +194,6 @@ public class RankingBuilder {
     public RankingBuilder setSmartReplies(ArrayList<CharSequence> smartReplies) {
         mSmartReplies = smartReplies;
         return this;
-    }
-
-    public Ranking build() {
-        final Ranking ranking = new Ranking();
-        ranking.populate(
-                mKey,
-                mRank,
-                mMatchesInterruptionFilter,
-                mVisibilityOverride,
-                mSuppressedVisualEffects,
-                mImportance,
-                mExplanation,
-                mOverrideGroupKey,
-                mChannel,
-                mAdditionalPeople,
-                mSnoozeCriteria,
-                mCanShowBadge,
-                mUserSentiment,
-                mIsSuspended,
-                mLastAudiblyAlertedMs,
-                mNoisy,
-                mSmartActions,
-                mSmartReplies,
-                mCanBubble);
-        return ranking;
     }
 
     private static <E> ArrayList<E> copyList(List<E> list) {

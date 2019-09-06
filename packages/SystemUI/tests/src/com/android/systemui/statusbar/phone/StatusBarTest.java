@@ -469,9 +469,8 @@ public class StatusBarTest extends SysuiTestCase {
                 .setTag("a")
                 .setNotification(n)
                 .setImportance(IMPORTANCE_HIGH)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_PEEK)
                 .build();
-
-        entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
 
         assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }

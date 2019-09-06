@@ -87,7 +87,7 @@ public class NotificationBlockingHelperManager {
         // - The row is blockable (i.e. not non-blockable)
         // - The dismissed row is a valid group (>1 or 0 children from the same channel)
         // or the only child in the group
-        if ((row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE || DEBUG)
+        if ((row.getEntry().getUserSentiment() == USER_SENTIMENT_NEGATIVE || DEBUG)
                 && mIsShadeExpanded
                 && !row.getIsNonblockable()
                 && ((!row.isChildInGroup() || row.isOnlyChildInGroup())
