@@ -57,6 +57,7 @@ import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PermissionGroupInfoFlags;
 import android.content.pm.PackageManager.PermissionInfoFlags;
@@ -3750,7 +3751,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         // Make sure all dynamic permissions have been assigned to a package,
         // and make sure there are no dangling permissions.
         boolean permissionSourcePackageChanged = updatePermissionSourcePackage(changingPkgName,
-                changingPkg);
+                changingPkg, callback);
 
         if (permissionTreesSourcePackageChanged | permissionSourcePackageChanged) {
             // Permission ownership has changed. This e.g. changes which packages can get signature
@@ -3803,7 +3804,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @return {@code true} if a permission source package might have changed
      */
     private boolean updatePermissionSourcePackage(@Nullable String packageName,
-            @Nullable PackageParser.Package pkg) {
+            @Nullable PackageParser.Package pkg,
+            final @Nullable PermissionCallback callback) {
         boolean changed = false;
 
         Set<BasePermission> needsUpdate = null;
@@ -3819,6 +3821,45 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         && (pkg == null || !hasPermission(pkg, bp.getName()))) {
                         Slog.i(TAG, "Removing permission " + bp.getName()
                                 + " that used to be declared by " + bp.getSourcePackageName());
+                        if (bp.isRuntime()) {
+                            final int[] userIds = mUserManagerInt.getUserIds();
+                            final int numUserIds = userIds.length;
+                            for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                                final int userId = userIds[userIdNum];
+
+                                mPackageManagerInt.forEachPackage((Package p) -> {
+                                    final String pName = p.packageName;
+                                    final ApplicationInfo appInfo =
+                                            mPackageManagerInt.getApplicationInfo(pName, 0,
+                                                    Process.SYSTEM_UID, UserHandle.USER_SYSTEM);
+                                    if (appInfo != null
+                                            && appInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                                        return;
+                                    }
+
+                                    final String permissionName = bp.getName();
+                                    if (checkPermissionImpl(permissionName, pName, userId)
+                                            == PackageManager.PERMISSION_GRANTED) {
+                                        try {
+                                            revokeRuntimePermissionInternal(
+                                                    permissionName,
+                                                    pName,
+                                                    false,
+                                                    Process.SYSTEM_UID,
+                                                    userId,
+                                                    callback);
+                                        } catch (IllegalArgumentException e) {
+                                            Slog.e(TAG,
+                                                    "Failed to revoke "
+                                                            + permissionName
+                                                            + " from "
+                                                            + pName,
+                                                    e);
+                                        }
+                                    }
+                                });
+                            }
+                        }
                         changed = true;
                         it.remove();
                     }
