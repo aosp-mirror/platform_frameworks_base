@@ -222,7 +222,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (!TILES_SETTING.equals(key)) {
             return;
         }
-        if (DEBUG) Log.d(TAG, "Recreating tiles");
+        Log.d(TAG, "Recreating tiles");
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
@@ -231,7 +231,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
         mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(
                 tile -> {
-                    if (DEBUG) Log.d(TAG, "Destroying tile: " + tile.getKey());
+                    Log.d(TAG, "Destroying tile: " + tile.getKey());
                     tile.getValue().destroy();
                 });
         final LinkedHashMap<String, QSTile> newTiles = new LinkedHashMap<>();
@@ -248,9 +248,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                     newTiles.put(tileSpec, tile);
                 } else {
                     tile.destroy();
+                    Log.d(TAG, "Destroying not available tile: " + tileSpec);
                 }
             } else {
-                if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
+                Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
                     tile = createTile(tileSpec);
                     if (tile != null) {
@@ -259,6 +260,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                             newTiles.put(tileSpec, tile);
                         } else {
                             tile.destroy();
+                            Log.d(TAG, "Destroying not available tile: " + tileSpec);
                         }
                     }
                 } catch (Throwable t) {
@@ -274,7 +276,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mTiles.putAll(newTiles);
         if (newTiles.isEmpty() && !tileSpecs.isEmpty()) {
             // If we didn't manage to create any tiles, set it to empty (default)
-            if (DEBUG) Log.d(TAG, "No valid tiles on tuning changed. Setting to default.");
+            Log.d(TAG, "No valid tiles on tuning changed. Setting to default.");
             changeTiles(currentSpecs, loadTileSpecs(mContext, ""));
         } else {
             for (int i = 0; i < mCallbacks.size(); i++) {
