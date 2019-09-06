@@ -65,6 +65,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -237,9 +238,16 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text");
-        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
-                0, n.build(), new UserHandle(ActivityManager.getCurrentUser()), null, 0);
-        mEntry = NotificationEntry.buildForTest(mSbn);
+
+        mEntry = new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setUid(TEST_UID)
+                .setNotification(n.build())
+                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
+                .build();
+        mSbn = mEntry.sbn();
+
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
         mEntryManager = new TestableNotificationEntryManager(mContext);

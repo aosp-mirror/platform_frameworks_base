@@ -411,7 +411,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + entry.key);
                 }
-            } else if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
+            } else if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: not important enough: " + entry.key);
                 }

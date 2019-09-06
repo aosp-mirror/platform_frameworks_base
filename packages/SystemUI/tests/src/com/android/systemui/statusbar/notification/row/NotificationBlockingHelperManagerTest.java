@@ -21,6 +21,8 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +46,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.util.Assert;
 
@@ -142,11 +143,11 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         ExpandableNotificationRow groupRow = createBlockableGroupRowSpy(10);
         int i = 0;
         for (ExpandableNotificationRow childRow : groupRow.getNotificationChildren()) {
-            childRow.getEntry().setRanking(new RankingBuilder()
+            modifyRanking(childRow.getEntry())
                     .setChannel(
                             new NotificationChannel(
                                     Integer.toString(i++), "", IMPORTANCE_DEFAULT))
-                    .build());
+                    .build();
         }
 
         groupRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;

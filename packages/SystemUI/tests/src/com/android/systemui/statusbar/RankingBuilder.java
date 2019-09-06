@@ -18,10 +18,12 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager.Importance;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Standard builder class for Ranking objects. For use in tests that need to craft the underlying
@@ -33,27 +35,52 @@ public class RankingBuilder {
     private boolean mMatchesInterruptionFilter = false;
     private int mVisibilityOverride = 0;
     private int mSuppressedVisualEffects = 0;
-    private int mImportance = 0;
+    @Importance private int mImportance = 0;
     private CharSequence mExplanation = "test_explanation";
     private String mOverrideGroupKey = null;
     private NotificationChannel mChannel = null;
-    private ArrayList<String> mOverridePeople = null;
+    private ArrayList<String> mAdditionalPeople = null;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria = null;
-    private boolean mShowBadge = false;
+    private boolean mCanShowBadge = false;
     private int mUserSentiment = 0;
-    private boolean mHidden = false;
+    private boolean mIsSuspended = false;
     private long mLastAudiblyAlertedMs = 0;
     private boolean mNoisy = false;
     private ArrayList<Notification.Action> mSmartActions = null;
     private ArrayList<CharSequence> mSmartReplies = null;
     private boolean mCanBubble = false;
 
+    public RankingBuilder() {
+    }
+
+    public RankingBuilder(Ranking ranking) {
+        mKey = ranking.getKey();
+        mRank = ranking.getRank();
+        mMatchesInterruptionFilter = ranking.matchesInterruptionFilter();
+        mVisibilityOverride = ranking.getVisibilityOverride();
+        mSuppressedVisualEffects = ranking.getSuppressedVisualEffects();
+        mImportance = ranking.getImportance();
+        mExplanation = ranking.getImportanceExplanation();
+        mOverrideGroupKey = ranking.getOverrideGroupKey();
+        mChannel = ranking.getChannel();
+        mAdditionalPeople = copyList(ranking.getAdditionalPeople());
+        mSnoozeCriteria = copyList(ranking.getSnoozeCriteria());
+        mCanShowBadge = ranking.canShowBadge();
+        mUserSentiment = ranking.getUserSentiment();
+        mIsSuspended = ranking.isSuspended();
+        mLastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
+        mNoisy = ranking.isNoisy();
+        mSmartActions = copyList(ranking.getSmartActions());
+        mSmartReplies = copyList(ranking.getSmartReplies());
+        mCanBubble = ranking.canBubble();
+    }
+
     public RankingBuilder setKey(String key) {
         mKey = key;
         return this;
     }
 
-    public RankingBuilder setImportance(int importance) {
+    public RankingBuilder setImportance(@Importance int importance) {
         mImportance = importance;
         return this;
     }
@@ -90,16 +117,24 @@ public class RankingBuilder {
                 mExplanation,
                 mOverrideGroupKey,
                 mChannel,
-                mOverridePeople,
+                mAdditionalPeople,
                 mSnoozeCriteria,
-                mShowBadge,
+                mCanShowBadge,
                 mUserSentiment,
-                mHidden,
+                mIsSuspended,
                 mLastAudiblyAlertedMs,
                 mNoisy,
                 mSmartActions,
                 mSmartReplies,
                 mCanBubble);
         return ranking;
+    }
+
+    private static <E> ArrayList<E> copyList(List<E> list) {
+        if (list == null) {
+            return null;
+        } else {
+            return new ArrayList<>(list);
+        }
     }
 }

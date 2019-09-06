@@ -40,9 +40,7 @@ import android.graphics.drawable.Icon;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -231,15 +229,17 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
     public void testCanAlertCommon_false_suppressedForGroups() {
         ensureStateForAlertCommon();
 
-        Notification n = new Notification.Builder(getContext(), "a")
-                .setGroup("a")
-                .setGroupSummary(true)
-                .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(new Notification.Builder(getContext(), "a")
+                        .setGroup("a")
+                        .setGroupSummary(true)
+                        .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+                        .build())
+                .setImportance(IMPORTANCE_DEFAULT)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.importance = IMPORTANCE_DEFAULT;
 
         assertThat(mNotifInterruptionStateProvider.canAlertCommon(entry)).isFalse();
     }
@@ -549,11 +549,15 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
                 .setContentText("content text")
                 .setBubbleMetadata(data)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.notification.getNotification().flags |= FLAG_BUBBLE;
-        entry.importance = IMPORTANCE_HIGH;
+        n.flags |= FLAG_BUBBLE;
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(IMPORTANCE_HIGH)
+                .build();
+
         entry.canBubble = true;
         return entry;
     }
@@ -563,11 +567,14 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
                 .setContentTitle("title")
                 .setContentText("content text")
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.importance = importance;
-        return entry;
+
+        return new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(importance)
+                .build();
     }
 
     /**

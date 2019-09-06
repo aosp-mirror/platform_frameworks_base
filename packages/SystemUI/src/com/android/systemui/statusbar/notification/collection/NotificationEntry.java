@@ -38,7 +38,6 @@ import android.app.Person;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
@@ -90,10 +89,7 @@ public final class NotificationEntry {
     public StatusBarNotification notification;
     private Ranking mRanking;
 
-    public long lastAudiblyAlertedMs;
     public boolean noisy;
-    public boolean ambient;
-    public int importance;
     public StatusBarIconView icon;
     public StatusBarIconView expandedIcon;
     public StatusBarIconView centeredIcon;
@@ -243,9 +239,6 @@ public final class NotificationEntry {
     public void setRanking(@NonNull Ranking ranking) {
         mRanking = ranking;
 
-        lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
-        importance = ranking.getImportance();
-        ambient = ranking.isAmbient();
         snoozeCriteria = ranking.getSnoozeCriteria();
         userSentiment = ranking.getUserSentiment();
         systemGeneratedSmartActions = ranking.getSmartActions() == null
@@ -260,6 +253,18 @@ public final class NotificationEntry {
 
     public NotificationChannel getChannel() {
         return mRanking.getChannel();
+    }
+
+    public long getLastAudiblyAlertedMs() {
+        return mRanking.getLastAudiblyAlertedMillis();
+    }
+
+    public boolean isAmbient() {
+        return mRanking.isAmbient();
+    }
+
+    public int getImportance() {
+        return mRanking.getImportance();
     }
 
     public void setInterruption() {

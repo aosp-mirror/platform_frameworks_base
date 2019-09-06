@@ -325,7 +325,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
                 isForBlockingHelper,
-                row.getEntry().importance,
+                row.getEntry().getImportance(),
                 row.getEntry().isHighPriority());
 
     }
