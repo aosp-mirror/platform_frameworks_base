@@ -26,6 +26,7 @@ import android.car.Car;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
+import android.car.trust.CarTrustAgentEnrollmentManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -1027,8 +1028,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         UserSwitcherController userSwitcherController =
                 Dependency.get(UserSwitcherController.class);
         if (userSwitcherController.useFullscreenUserSwitcher()) {
+            Car car = Car.createCar(mContext);
+            CarTrustAgentEnrollmentManager enrollmentManager = (CarTrustAgentEnrollmentManager) car
+                    .getCarManager(Car.CAR_TRUST_AGENT_ENROLLMENT_SERVICE);
             mFullscreenUserSwitcher = new FullscreenUserSwitcher(this,
-                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub), mContext);
+                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub),
+                    enrollmentManager, mContext);
         } else {
             super.createUserSwitcher();
         }
