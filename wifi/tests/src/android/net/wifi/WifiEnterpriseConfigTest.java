@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.net.wifi.WifiEnterpriseConfig.Eap;
 import android.net.wifi.WifiEnterpriseConfig.Phase2;
@@ -343,11 +344,13 @@ public class WifiEnterpriseConfigTest {
         enterpriseConfig.setPassword("*");
         enterpriseConfig.setEapMethod(Eap.TTLS);
         enterpriseConfig.setPhase2Method(Phase2.GTC);
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUIRE_CERT_STATUS);
         mEnterpriseConfig = new WifiEnterpriseConfig();
         mEnterpriseConfig.copyFromExternal(enterpriseConfig, "*");
         assertEquals("TTLS", getSupplicantEapMethod());
         assertEquals("\"autheap=GTC\"", getSupplicantPhase2Method());
         assertNotEquals("*", mEnterpriseConfig.getPassword());
+        assertEquals(enterpriseConfig.getOcsp(), mEnterpriseConfig.getOcsp());
     }
 
     /** Verfies that parceling a WifiEnterpriseConfig preseves method information. */
@@ -486,5 +489,36 @@ public class WifiEnterpriseConfigTest {
         // Make sure it is the owner now
         assertFalse(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
         assertTrue(mEnterpriseConfig.isAppInstalledCaCert());
+    }
+
+    /** Verifies that OCSP value is set correctly. */
+    @Test
+    public void testOcspSetGet() throws Exception {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_NONE);
+        assertEquals(WifiEnterpriseConfig.OCSP_NONE, enterpriseConfig.getOcsp());
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUIRE_CERT_STATUS);
+        assertEquals(WifiEnterpriseConfig.OCSP_REQUIRE_CERT_STATUS, enterpriseConfig.getOcsp());
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUEST_CERT_STATUS);
+        assertEquals(WifiEnterpriseConfig.OCSP_REQUEST_CERT_STATUS, enterpriseConfig.getOcsp());
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS);
+        assertEquals(WifiEnterpriseConfig.OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS,
+                enterpriseConfig.getOcsp());
+    }
+
+    /** Verifies that an exception is thrown when invalid OCSP is set. */
+    @Test
+    public void testInvalidOcspValue() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        try {
+            enterpriseConfig.setOcsp(-1);
+            fail("Should raise an IllegalArgumentException here.");
+        } catch (IllegalArgumentException e) {
+            // expected exception.
+        }
     }
 }

@@ -15,6 +15,7 @@
  */
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -23,6 +24,8 @@ import android.security.Credentials;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -111,6 +114,48 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** @hide */
     public static final String CA_CERT_ALIAS_DELIMITER = " ";
 
+    /**
+     * Do not use OCSP stapling (TLS certificate status extension)
+     * @hide
+     */
+    public static final int OCSP_NONE = 0;
+
+    /**
+     * Try to use OCSP stapling, but not require response
+     * @hide
+     */
+    public static final int OCSP_REQUEST_CERT_STATUS = 1;
+
+    /**
+     * Require valid OCSP stapling response
+     * @hide
+     */
+    public static final int OCSP_REQUIRE_CERT_STATUS = 2;
+
+    /**
+     * Require valid OCSP stapling response for all not-trusted certificates in the server
+     * certificate chain
+     * @hide
+     */
+    public static final int OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"OCSP_"}, value = {
+            OCSP_NONE,
+            OCSP_REQUEST_CERT_STATUS,
+            OCSP_REQUIRE_CERT_STATUS,
+            OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Ocsp {
+    }
+
+    /**
+     * Whether to use/require OCSP (Online Certificate Status Protocol) to check server certificate.
+     * @hide
+     */
+    private @Ocsp int mOcsp = OCSP_NONE;
+
     // Fields to copy verbatim from wpa_supplicant.
     private static final String[] SUPPLICANT_CONFIG_KEYS = new String[] {
             IDENTITY_KEY,
@@ -185,6 +230,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         mPhase2Method = source.mPhase2Method;
         mIsAppInstalledDeviceKeyAndCert = source.mIsAppInstalledDeviceKeyAndCert;
         mIsAppInstalledCaCert = source.mIsAppInstalledCaCert;
+        mOcsp = source.mOcsp;
     }
 
     /**
@@ -230,6 +276,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         ParcelUtil.writeCertificates(dest, mClientCertificateChain);
         dest.writeBoolean(mIsAppInstalledDeviceKeyAndCert);
         dest.writeBoolean(mIsAppInstalledCaCert);
+        dest.writeInt(mOcsp);
     }
 
     public static final @android.annotation.NonNull Creator<WifiEnterpriseConfig> CREATOR =
@@ -251,6 +298,7 @@ public class WifiEnterpriseConfig implements Parcelable {
                     enterpriseConfig.mClientCertificateChain = ParcelUtil.readCertificates(in);
                     enterpriseConfig.mIsAppInstalledDeviceKeyAndCert = in.readBoolean();
                     enterpriseConfig.mIsAppInstalledCaCert = in.readBoolean();
+                    enterpriseConfig.mOcsp = in.readInt();
                     return enterpriseConfig;
                 }
 
@@ -1141,6 +1189,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         if (mPhase2Method > 0 && mPhase2Method < Phase2.strings.length) {
             sb.append("phase2_method: ").append(Phase2.strings[mPhase2Method]).append("\n");
         }
+        sb.append(" ocsp: ").append(mOcsp).append("\n");
         return sb.toString();
     }
 
@@ -1189,5 +1238,29 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public boolean isAppInstalledCaCert() {
         return mIsAppInstalledCaCert;
+    }
+
+    /**
+     * Set the ocsp type.
+     * @param  ocsp is one {@link ##OCSP_NONE}, {@link #OCSP_REQUEST_CERT_STATUS},
+     *                   {@link #OCSP_REQUIRE_CERT_STATUS} or
+     *                   {@link #OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS}
+     * @hide
+     */
+    public void setOcsp(@Ocsp int ocsp) {
+        if (ocsp >= OCSP_NONE && ocsp <= OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS) {
+            mOcsp = ocsp;
+        } else {
+            throw new IllegalArgumentException("Invalid OCSP type.");
+        }
+    }
+
+    /**
+     * Get the ocsp type.
+     * @return ocsp type
+     * @hide
+     */
+    public @Ocsp int getOcsp() {
+        return mOcsp;
     }
 }
