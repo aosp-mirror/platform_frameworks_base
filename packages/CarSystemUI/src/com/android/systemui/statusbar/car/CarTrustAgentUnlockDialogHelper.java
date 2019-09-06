@@ -192,23 +192,28 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
         }
     }
 
-    // Set button text based on security lock type
+    // Set button text based on screen lock type
     private void setButtonText() {
         LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
         int passwordQuality = lockPatternUtils.getActivePasswordQuality(mUid);
         switch (passwordQuality) {
             // PIN
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                mButton.setText(R.string.unlock_dialog_button_text_pin);
+                break;
             // Pattern
             case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                 mButton.setText(R.string.unlock_dialog_button_text_pattern);
                 break;
             // Password
-            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
                 mButton.setText(R.string.unlock_dialog_button_text_password);
                 break;
             default:
-                Log.e(TAG, "Encountered unexpected security type when attempting to set "
+                Log.e(TAG, "Encountered unexpected screen lock type when attempting to set "
                         + "button text:" + passwordQuality);
         }
     }
