@@ -62,6 +62,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -498,7 +499,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         try {
             ExpandableNotificationRow row = mHelper.createRow(nb.build());
-            row.getEntry().channel = mTestNotificationChannel;
+            row.getEntry().setRanking(
+                    new RankingBuilder()
+                            .setChannel(mTestNotificationChannel)
+                            .build());
             return row;
         } catch (Exception e) {
             fail();

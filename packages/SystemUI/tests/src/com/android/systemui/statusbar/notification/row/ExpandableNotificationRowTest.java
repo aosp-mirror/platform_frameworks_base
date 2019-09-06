@@ -51,6 +51,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
@@ -327,8 +328,11 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // Give each child a unique channel id/name.
         int i = 0;
         for (ExpandableNotificationRow childRow : childRows) {
-            childRow.getEntry().channel =
-                    new NotificationChannel("id" + i, "dinnertime" + i, IMPORTANCE_DEFAULT);
+            childRow.getEntry().setRanking(new RankingBuilder()
+                    .setChannel(
+                            new NotificationChannel(
+                                    "id" + i, "dinnertime" + i, IMPORTANCE_DEFAULT))
+                    .build());
             i++;
         }
 
@@ -364,7 +368,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     public void testGetIsNonblockable_oemLocked() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().channel.setImportanceLockedByOEM(true);
+        row.getEntry().getChannel().setImportanceLockedByOEM(true);
 
         assertTrue(row.getIsNonblockable());
     }
@@ -373,7 +377,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().channel.setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
 
         assertTrue(row.getIsNonblockable());
     }

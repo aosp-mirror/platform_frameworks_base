@@ -90,7 +90,6 @@ public final class NotificationEntry {
     public StatusBarNotification notification;
     private Ranking mRanking;
 
-    public NotificationChannel channel;
     public long lastAudiblyAlertedMs;
     public boolean noisy;
     public boolean ambient;
@@ -244,7 +243,6 @@ public final class NotificationEntry {
     public void setRanking(@NonNull Ranking ranking) {
         mRanking = ranking;
 
-        channel = ranking.getChannel();
         lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
         importance = ranking.getImportance();
         ambient = ranking.isAmbient();
@@ -258,6 +256,10 @@ public final class NotificationEntry {
         suppressedVisualEffects = ranking.getSuppressedVisualEffects();
         suspended = ranking.isSuspended();
         canBubble = ranking.canBubble();
+    }
+
+    public NotificationChannel getChannel() {
+        return mRanking.getChannel();
     }
 
     public void setInterruption() {

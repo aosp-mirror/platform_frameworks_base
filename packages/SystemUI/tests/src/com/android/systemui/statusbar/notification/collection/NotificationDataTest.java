@@ -145,7 +145,7 @@ public class NotificationDataTest extends SysuiTestCase {
         override.putParcelable(OVERRIDE_CHANNEL, NOTIFICATION_CHANNEL);
         mNotificationData.rankingOverrides.put(mRow.getEntry().key, override);
         mNotificationData.add(mRow.getEntry());
-        assertEquals(NOTIFICATION_CHANNEL, mRow.getEntry().channel);
+        assertEquals(NOTIFICATION_CHANNEL, mRow.getEntry().getChannel());
     }
 
     @Test
@@ -343,7 +343,7 @@ public class NotificationDataTest extends SysuiTestCase {
                 new NotificationEntry(mMockStatusBarNotification, ranking);
 
         assertEquals(systemGeneratedSmartActions, entry.systemGeneratedSmartActions);
-        assertEquals(NOTIFICATION_CHANNEL, entry.channel);
+        assertEquals(NOTIFICATION_CHANNEL, entry.getChannel());
         assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.userSentiment);
         assertEquals(snoozeCriterions, entry.snoozeCriteria);
     }
