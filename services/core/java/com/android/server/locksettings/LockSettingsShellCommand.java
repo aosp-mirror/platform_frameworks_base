@@ -16,16 +16,12 @@
 
 package com.android.server.locksettings;
 
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-
-import static com.android.internal.widget.LockPatternUtils.stringToPattern;
-
 import android.app.ActivityManager;
 import android.os.ShellCommand;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
+import com.android.internal.widget.LockscreenCredential;
 
 import java.io.PrintWriter;
 
@@ -189,31 +185,49 @@ class LockSettingsShellCommand extends ShellCommand {
                 mLockPatternUtils.isSyntheticPasswordEnabled()));
     }
 
+    private LockscreenCredential getOldCredential() {
+        if (mLockPatternUtils.isLockPasswordEnabled(mCurrentUserId)) {
+            final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality(mCurrentUserId);
+            if (LockPatternUtils.isQualityAlphabeticPassword(quality)) {
+                return LockscreenCredential.createPassword(mOld);
+            } else {
+                return LockscreenCredential.createPin(mOld);
+            }
+        } else if (mLockPatternUtils.isLockPatternEnabled(mCurrentUserId)) {
+            return LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(
+                    mOld.getBytes()));
+        } else {
+            return LockscreenCredential.createNone();
+        }
+    }
+
     private void runSetPattern() {
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.saveLockPattern(stringToPattern(mNew), oldBytes, mCurrentUserId);
+        mLockPatternUtils.setLockCredential(
+                LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(
+                        mNew.getBytes())),
+                getOldCredential(),
+                mCurrentUserId);
         getOutPrintWriter().println("Pattern set to '" + mNew + "'");
     }
 
     private void runSetPassword() {
-        byte[] newBytes = mNew != null ? mNew.getBytes() : null;
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.saveLockPassword(newBytes, oldBytes, PASSWORD_QUALITY_ALPHABETIC,
+        mLockPatternUtils.setLockCredential(LockscreenCredential.createPassword(mNew),
+                getOldCredential(),
                 mCurrentUserId);
         getOutPrintWriter().println("Password set to '" + mNew + "'");
     }
 
     private void runSetPin() {
-        byte[] newBytes = mNew != null ? mNew.getBytes() : null;
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.saveLockPassword(newBytes, oldBytes, PASSWORD_QUALITY_NUMERIC,
+        mLockPatternUtils.setLockCredential(LockscreenCredential.createPin(mNew),
+                getOldCredential(),
                 mCurrentUserId);
         getOutPrintWriter().println("Pin set to '" + mNew + "'");
     }
 
     private void runClear() {
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.clearLock(oldBytes, mCurrentUserId);
+        mLockPatternUtils.setLockCredential(LockscreenCredential.createNone(),
+                getOldCredential(),
+                mCurrentUserId);
         getOutPrintWriter().println("Lock credential cleared");
     }
 
@@ -238,13 +252,8 @@ class LockSettingsShellCommand extends ShellCommand {
             }
 
             try {
-                final boolean result;
-                if (havePassword) {
-                    byte[] passwordBytes = mOld != null ? mOld.getBytes() : null;
-                    result = mLockPatternUtils.checkPassword(passwordBytes, mCurrentUserId);
-                } else {
-                    result = mLockPatternUtils.checkPattern(stringToPattern(mOld), mCurrentUserId);
-                }
+                final boolean result = mLockPatternUtils.checkCredential(getOldCredential(),
+                        mCurrentUserId, null);
                 if (!result) {
                     if (!mLockPatternUtils.isManagedProfileWithUnifiedChallenge(mCurrentUserId)) {
                         mLockPatternUtils.reportFailedPasswordAttempt(mCurrentUserId);

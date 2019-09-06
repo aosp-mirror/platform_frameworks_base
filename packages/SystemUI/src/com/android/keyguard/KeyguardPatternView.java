@@ -39,6 +39,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
@@ -297,9 +298,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL);
                 LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL_UNLOCKED);
             }
-            mPendingLockCheck = LockPatternChecker.checkPattern(
+            mPendingLockCheck = LockPatternChecker.checkCredential(
                     mLockPatternUtils,
-                    pattern,
+                    LockscreenCredential.createPattern(pattern),
                     userId,
                     new LockPatternChecker.OnCheckCallback() {
 

@@ -39,6 +39,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
@@ -364,7 +365,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // Verify DPM gets notified about new device lock
         flushHandlerTasks();
         final PasswordMetrics metric = PasswordMetrics.computeForCredential(
-                LockPatternUtils.CREDENTIAL_TYPE_PATTERN, pattern);
+                LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(pattern)));
         assertEquals(metric, mService.getUserPasswordMetrics(PRIMARY_USER_ID));
         verify(mDevicePolicyManager).reportPasswordChanged(PRIMARY_USER_ID);
 
