@@ -865,8 +865,8 @@ public class PackageWatchdog {
                 MonitoredPackage p = it.next();
                 int oldState = p.getHealthCheckStateLocked();
                 int newState = p.handleElapsedTimeLocked(elapsedMs);
-                if (oldState != MonitoredPackage.STATE_FAILED
-                        && newState == MonitoredPackage.STATE_FAILED) {
+                if (oldState != HealthCheckState.FAILED
+                        && newState == HealthCheckState.FAILED) {
                     Slog.i(TAG, "Package " + p.mName + " failed health check");
                     failedPackages.add(p);
                 }
@@ -941,6 +941,23 @@ public class PackageWatchdog {
         }
     }
 
+    @Retention(SOURCE)
+    @IntDef(value = {
+            HealthCheckState.ACTIVE,
+            HealthCheckState.INACTIVE,
+            HealthCheckState.PASSED,
+            HealthCheckState.FAILED})
+    public @interface HealthCheckState {
+        // The package has not passed health check but has requested a health check
+        int ACTIVE = 0;
+        // The package has not passed health check and has not requested a health check
+        int INACTIVE = 1;
+        // The package has passed health check
+        int PASSED = 2;
+        // The package has failed health check
+        int FAILED = 3;
+    }
+
     /**
      * Represents a package and its health check state along with the time
      * it should be monitored for.
@@ -949,23 +966,12 @@ public class PackageWatchdog {
      * instances of this class.
      */
     class MonitoredPackage {
-        // Health check states
-        // TODO(b/120598832): Prefix with HEALTH_CHECK
-        // mName has not passed health check but has requested a health check
-        public static final int STATE_ACTIVE = 0;
-        // mName has not passed health check and has not requested a health check
-        public static final int STATE_INACTIVE = 1;
-        // mName has passed health check
-        public static final int STATE_PASSED = 2;
-        // mName has failed health check
-        public static final int STATE_FAILED = 3;
-
         //TODO(b/120598832): VersionedPackage?
         private final String mName;
         // One of STATE_[ACTIVE|INACTIVE|PASSED|FAILED]. Updated on construction and after
         // methods that could change the health check state: handleElapsedTimeLocked and
         // tryPassHealthCheckLocked
-        private int mHealthCheckState = STATE_INACTIVE;
+        private int mHealthCheckState = HealthCheckState.INACTIVE;
         // Whether an explicit health check has passed.
         // This value in addition with mHealthCheckDurationMs determines the health check state
         // of the package, see #getHealthCheckStateLocked
@@ -1052,7 +1058,7 @@ public class PackageWatchdog {
                         + ". Using total duration " + mDurationMs + "ms instead");
                 initialHealthCheckDurationMs = mDurationMs;
             }
-            if (mHealthCheckState == STATE_INACTIVE) {
+            if (mHealthCheckState == HealthCheckState.INACTIVE) {
                 // Transitions to ACTIVE
                 mHealthCheckDurationMs = initialHealthCheckDurationMs;
             }
@@ -1072,7 +1078,7 @@ public class PackageWatchdog {
             }
             // Transitions to FAILED if now <= 0 and health check not passed
             mDurationMs -= elapsedMs;
-            if (mHealthCheckState == STATE_ACTIVE) {
+            if (mHealthCheckState == HealthCheckState.ACTIVE) {
                 // We only update health check durations if we have #setHealthCheckActiveLocked
                 // This ensures we don't leave the INACTIVE state for an unexpected elapsed time
                 // Transitions to FAILED if now <= 0 and health check not passed
@@ -1082,14 +1088,15 @@ public class PackageWatchdog {
         }
 
         /**
-         * Marks the health check as passed and transitions to {@link #STATE_PASSED}
-         * if not yet {@link #STATE_FAILED}.
+         * Marks the health check as passed and transitions to {@link HealthCheckState.PASSED}
+         * if not yet {@link HealthCheckState.FAILED}.
          *
-         * @return the new health check state
+         * @return the new {@link HealthCheckState health check state}
          */
         @GuardedBy("mLock")
+        @HealthCheckState
         public int tryPassHealthCheckLocked() {
-            if (mHealthCheckState != STATE_FAILED) {
+            if (mHealthCheckState != HealthCheckState.FAILED) {
                 // FAILED is a final state so only pass if we haven't failed
                 // Transition to PASSED
                 mHasPassedHealthCheck = true;
@@ -1102,12 +1109,11 @@ public class PackageWatchdog {
             return mName;
         }
 
-        //TODO(b/120598832): IntDef
         /**
-         * Returns the current health check state, any of {@link #STATE_ACTIVE},
-         * {@link #STATE_INACTIVE} or {@link #STATE_PASSED}
+         * Returns the current {@link HealthCheckState health check state}.
          */
         @GuardedBy("mLock")
+        @HealthCheckState
         public int getHealthCheckStateLocked() {
             return mHealthCheckState;
         }
@@ -1140,28 +1146,30 @@ public class PackageWatchdog {
          */
         @GuardedBy("mLock")
         public boolean isPendingHealthChecksLocked() {
-            return mHealthCheckState == STATE_ACTIVE || mHealthCheckState == STATE_INACTIVE;
+            return mHealthCheckState == HealthCheckState.ACTIVE
+                    || mHealthCheckState == HealthCheckState.INACTIVE;
         }
 
         /**
          * Updates the health check state based on {@link #mHasPassedHealthCheck}
          * and {@link #mHealthCheckDurationMs}.
          *
-         * @return the new health check state
+         * @return the new {@link HealthCheckState health check state}
          */
         @GuardedBy("mLock")
+        @HealthCheckState
         private int updateHealthCheckStateLocked() {
             int oldState = mHealthCheckState;
             if (mHasPassedHealthCheck) {
                 // Set final state first to avoid ambiguity
-                mHealthCheckState = STATE_PASSED;
+                mHealthCheckState = HealthCheckState.PASSED;
             } else if (mHealthCheckDurationMs <= 0 || mDurationMs <= 0) {
                 // Set final state first to avoid ambiguity
-                mHealthCheckState = STATE_FAILED;
+                mHealthCheckState = HealthCheckState.FAILED;
             } else if (mHealthCheckDurationMs == Long.MAX_VALUE) {
-                mHealthCheckState = STATE_INACTIVE;
+                mHealthCheckState = HealthCheckState.INACTIVE;
             } else {
-                mHealthCheckState = STATE_ACTIVE;
+                mHealthCheckState = HealthCheckState.ACTIVE;
             }
             Slog.i(TAG, "Updated health check state for package " + mName + ": "
                     + toString(oldState) + " -> " + toString(mHealthCheckState));
@@ -1169,15 +1177,15 @@ public class PackageWatchdog {
         }
 
         /** Returns a {@link String} representation of the current health check state. */
-        private String toString(int state) {
+        private String toString(@HealthCheckState int state) {
             switch (state) {
-                case STATE_ACTIVE:
+                case HealthCheckState.ACTIVE:
                     return "ACTIVE";
-                case STATE_INACTIVE:
+                case HealthCheckState.INACTIVE:
                     return "INACTIVE";
-                case STATE_PASSED:
+                case HealthCheckState.PASSED:
                     return "PASSED";
-                case STATE_FAILED:
+                case HealthCheckState.FAILED:
                     return "FAILED";
                 default:
                     return "UNKNOWN";

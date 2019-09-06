@@ -43,6 +43,7 @@ import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.PackageWatchdog.HealthCheckState;
 import com.android.server.PackageWatchdog.MonitoredPackage;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
@@ -687,36 +688,36 @@ public class PackageWatchdogTest {
 
         // Verify transition: inactive -> active -> passed
         // Verify initially inactive
-        assertEquals(MonitoredPackage.STATE_INACTIVE, m1.getHealthCheckStateLocked());
+        assertEquals(HealthCheckState.INACTIVE, m1.getHealthCheckStateLocked());
         // Verify still inactive, until we #setHealthCheckActiveLocked
-        assertEquals(MonitoredPackage.STATE_INACTIVE, m1.handleElapsedTimeLocked(SHORT_DURATION));
+        assertEquals(HealthCheckState.INACTIVE, m1.handleElapsedTimeLocked(SHORT_DURATION));
         // Verify now active
-        assertEquals(MonitoredPackage.STATE_ACTIVE, m1.setHealthCheckActiveLocked(SHORT_DURATION));
+        assertEquals(HealthCheckState.ACTIVE, m1.setHealthCheckActiveLocked(SHORT_DURATION));
         // Verify now passed
-        assertEquals(MonitoredPackage.STATE_PASSED, m1.tryPassHealthCheckLocked());
+        assertEquals(HealthCheckState.PASSED, m1.tryPassHealthCheckLocked());
 
         // Verify transition: inactive -> active -> failed
         // Verify initially inactive
-        assertEquals(MonitoredPackage.STATE_INACTIVE, m2.getHealthCheckStateLocked());
+        assertEquals(HealthCheckState.INACTIVE, m2.getHealthCheckStateLocked());
         // Verify now active
-        assertEquals(MonitoredPackage.STATE_ACTIVE, m2.setHealthCheckActiveLocked(SHORT_DURATION));
+        assertEquals(HealthCheckState.ACTIVE, m2.setHealthCheckActiveLocked(SHORT_DURATION));
         // Verify now failed
-        assertEquals(MonitoredPackage.STATE_FAILED, m2.handleElapsedTimeLocked(SHORT_DURATION));
+        assertEquals(HealthCheckState.FAILED, m2.handleElapsedTimeLocked(SHORT_DURATION));
 
         // Verify transition: inactive -> failed
         // Verify initially inactive
-        assertEquals(MonitoredPackage.STATE_INACTIVE, m3.getHealthCheckStateLocked());
+        assertEquals(HealthCheckState.INACTIVE, m3.getHealthCheckStateLocked());
         // Verify now failed because package expired
-        assertEquals(MonitoredPackage.STATE_FAILED, m3.handleElapsedTimeLocked(LONG_DURATION));
+        assertEquals(HealthCheckState.FAILED, m3.handleElapsedTimeLocked(LONG_DURATION));
         // Verify remains failed even when asked to pass
-        assertEquals(MonitoredPackage.STATE_FAILED, m3.tryPassHealthCheckLocked());
+        assertEquals(HealthCheckState.FAILED, m3.tryPassHealthCheckLocked());
 
         // Verify transition: passed
-        assertEquals(MonitoredPackage.STATE_PASSED, m4.getHealthCheckStateLocked());
+        assertEquals(HealthCheckState.PASSED, m4.getHealthCheckStateLocked());
         // Verify remains passed even if health check fails
-        assertEquals(MonitoredPackage.STATE_PASSED, m4.handleElapsedTimeLocked(SHORT_DURATION));
+        assertEquals(HealthCheckState.PASSED, m4.handleElapsedTimeLocked(SHORT_DURATION));
         // Verify remains passed even if package expires
-        assertEquals(MonitoredPackage.STATE_PASSED, m4.handleElapsedTimeLocked(LONG_DURATION));
+        assertEquals(HealthCheckState.PASSED, m4.handleElapsedTimeLocked(LONG_DURATION));
     }
 
     @Test
