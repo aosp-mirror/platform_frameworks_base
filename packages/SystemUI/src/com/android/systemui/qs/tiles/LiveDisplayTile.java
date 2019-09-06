@@ -32,11 +32,11 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
+import android.provider.Settings;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.service.quicksettings.Tile;
 
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.plugins.qs.QSTile.LiveDisplayState;
 import com.android.systemui.qs.QSHost;
@@ -79,7 +79,7 @@ public class LiveDisplayTile extends QSTileImpl<LiveDisplayState> {
     @Inject
     public LiveDisplayTile(QSHost host) {
         super(host);
-        mNightDisplayAvailable = ColorDisplayController.isAvailable(mContext);
+        mNightDisplayAvailable = ColorDisplayManager.isNightDisplayAvailable(mContext);
 
         Resources res = mContext.getResources();
         TypedArray typedArray = res.obtainTypedArray(R.array.live_display_drawables);
