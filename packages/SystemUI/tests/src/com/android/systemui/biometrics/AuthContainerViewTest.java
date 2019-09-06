@@ -78,6 +78,13 @@ public class AuthContainerViewTest extends SysuiTestCase {
         verify(mCallback).onTryAgainPressed();
     }
 
+    @Test
+    public void testActionError_sendsDismissedError() {
+        mAuthContainer.mBiometricCallback.onAction(
+                AuthBiometricView.Callback.ACTION_ERROR);
+        verify(mCallback).onDismissed(AuthDialogCallback.DISMISSED_ERROR);
+    }
+
     private class TestableAuthContainer extends AuthContainerView {
         TestableAuthContainer(AuthContainerView.Config config) {
             super(config);

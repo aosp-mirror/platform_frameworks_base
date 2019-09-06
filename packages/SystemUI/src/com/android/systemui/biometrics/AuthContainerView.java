@@ -21,9 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -136,7 +136,8 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        public AuthContainerView build(int modalityMask) { // TODO
+        public AuthContainerView build(int modalityMask) {
+            mConfig.mModalityMask = modalityMask;
             return new AuthContainerView(mConfig);
         }
     }
@@ -157,6 +158,9 @@ public class AuthContainerView extends LinearLayout
                     break;
                 case AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN:
                     mConfig.mCallback.onTryAgainPressed();
+                    break;
+                case AuthBiometricView.Callback.ACTION_ERROR:
+                    animateAway(AuthDialogCallback.DISMISSED_ERROR);
                     break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
@@ -181,14 +185,25 @@ public class AuthContainerView extends LinearLayout
         mContainerView = (ViewGroup) factory.inflate(
                 R.layout.auth_container_view, this, false /* attachToRoot */);
 
-        // TODO: Depends on modality
-        mBiometricView = (AuthBiometricFaceView)
-                factory.inflate(R.layout.auth_biometric_face_view, null, false);
-
-        mBackgroundView = mContainerView.findViewById(R.id.background);
-
         mPanelView = mContainerView.findViewById(R.id.panel);
         mPanelController = new AuthPanelController(mContext, mPanelView);
+
+        // TODO: Update with new controllers if multi-modal authentication can occur simultaneously
+        if (config.mModalityMask == BiometricAuthenticator.TYPE_FINGERPRINT) {
+            mBiometricView = (AuthBiometricFingerprintView)
+                    factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+        } else if (config.mModalityMask == BiometricAuthenticator.TYPE_FACE) {
+            mBiometricView = (AuthBiometricFaceView)
+                    factory.inflate(R.layout.auth_biometric_face_view, null, false);
+        } else {
+            Log.e(TAG, "Unsupported modality mask: " + config.mModalityMask);
+            mBiometricView = null;
+            mBackgroundView = null;
+            mScrollView = null;
+            return;
+        }
+
+        mBackgroundView = mContainerView.findViewById(R.id.background);
 
         mBiometricView.setRequireConfirmation(mConfig.mRequireConfirmation);
         mBiometricView.setPanelController(mPanelController);
@@ -281,13 +296,13 @@ public class AuthContainerView extends LinearLayout
         if (animate) {
             animateAway(false /* sendReason */, 0 /* reason */);
         } else {
-            mWindowManager.removeView(this);
+            removeWindowIfAttached();
         }
     }
 
     @Override
     public void dismissFromSystemServer() {
-        mWindowManager.removeView(this);
+        removeWindowIfAttached();
     }
 
     @Override
@@ -307,7 +322,7 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onError(String error) {
-
+        mBiometricView.onError(error);
     }
 
     @Override
@@ -340,7 +355,7 @@ public class AuthContainerView extends LinearLayout
 
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
-            mWindowManager.removeView(this);
+            removeWindowIfAttached();
             if (sendReason) {
                 mConfig.mCallback.onDismissed(reason);
             }
@@ -367,6 +382,14 @@ public class AuthContainerView extends LinearLayout
                     .withLayer()
                     .start();
         });
+    }
+
+    private void removeWindowIfAttached() {
+        if (mContainerState == STATE_GONE) {
+            return;
+        }
+        mContainerState = STATE_GONE;
+        mWindowManager.removeView(this);
     }
 
     private void onDialogAnimatedIn() {

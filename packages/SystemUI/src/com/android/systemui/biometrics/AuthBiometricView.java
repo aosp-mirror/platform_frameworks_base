@@ -92,6 +92,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         int ACTION_USER_CANCELED = 2;
         int ACTION_BUTTON_NEGATIVE = 3;
         int ACTION_BUTTON_TRY_AGAIN = 4;
+        int ACTION_ERROR = 5;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -135,6 +136,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         public ImageView getIconView() {
             return mBiometricView.findViewById(R.id.biometric_icon);
+        }
+
+        public int getDelayAfterError() {
+            return BiometricPrompt.HIDE_DIALOG_DELAY;
         }
     }
 
@@ -185,6 +190,11 @@ public abstract class AuthBiometricView extends LinearLayout {
      * Invoked when the help message is being cleared.
      */
     protected abstract void handleResetAfterHelp();
+
+    /**
+     * @return true if the dialog supports {@link AuthDialog.DialogSize#SIZE_SMALL}
+     */
+    protected abstract boolean supportsSmallDialog();
 
     private final Runnable mResetErrorRunnable = () -> {
         updateState(getStateForAfterError());
@@ -250,7 +260,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     @VisibleForTesting
     void updateSize(@AuthDialog.DialogSize int newSize) {
-        Log.v(TAG, "Current: " + mSize + " New: " + newSize);
+        Log.v(TAG, "Current size: " + mSize + " New size: " + newSize);
         if (newSize == AuthDialog.SIZE_SMALL) {
             mTitleView.setVisibility(View.GONE);
             mSubtitleView.setVisibility(View.GONE);
@@ -406,8 +416,18 @@ public abstract class AuthBiometricView extends LinearLayout {
         updateState(STATE_ERROR);
     }
 
+    public void onError(String error) {
+        showTemporaryMessage(error, mResetErrorRunnable);
+        updateState(STATE_ERROR);
+
+        mHandler.postDelayed(() -> {
+            mCallback.onAction(Callback.ACTION_ERROR);
+        }, mInjector.getDelayAfterError());
+    }
+
     public void onHelp(String help) {
         if (mSize != AuthDialog.SIZE_MEDIUM) {
+            Log.w(TAG, "Help received in size: " + mSize);
             return;
         }
         showTemporaryMessage(help, mResetHelpRunnable);
@@ -527,15 +547,6 @@ public abstract class AuthBiometricView extends LinearLayout {
             // Restore positive button state
             mTryAgainButton.setVisibility(
                     mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY));
-
-            // Restore indicator text state
-            final String indicatorText =
-                    mSavedState.getString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING);
-            if (mSavedState.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_HELP_SHOWING)) {
-                onHelp(indicatorText);
-            } else if (mSavedState.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING)) {
-                onAuthenticationFailed(indicatorText);
-            }
         }
     }
 
@@ -600,9 +611,20 @@ public abstract class AuthBiometricView extends LinearLayout {
         if (mIconOriginalY == 0) {
             mIconOriginalY = mIconView.getY();
             if (mSavedState == null) {
-                updateSize(mRequireConfirmation ? AuthDialog.SIZE_MEDIUM : AuthDialog.SIZE_SMALL);
+                updateSize(!mRequireConfirmation && supportsSmallDialog() ? AuthDialog.SIZE_SMALL
+                        : AuthDialog.SIZE_MEDIUM);
             } else {
                 updateSize(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_DIALOG_SIZE));
+
+                // Restore indicator text state only after size has been restored
+                final String indicatorText =
+                        mSavedState.getString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING);
+                if (mSavedState.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_HELP_SHOWING)) {
+                    onHelp(indicatorText);
+                } else if (mSavedState.getBoolean(
+                        AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING)) {
+                    onAuthenticationFailed(indicatorText);
+                }
             }
         }
     }

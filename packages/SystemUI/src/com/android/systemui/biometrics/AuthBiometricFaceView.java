@@ -163,6 +163,11 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     }
 
     @Override
+    protected boolean supportsSmallDialog() {
+        return true;
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mIconController = new IconController(mContext, mIconView, mIndicatorView);
