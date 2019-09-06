@@ -493,6 +493,9 @@ public class ChooserActivity extends ResolverActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final long intentReceivedTime = System.currentTimeMillis();
+        // This is the only place this value is being set. Effectively final.
+        mIsAppPredictorComponentAvailable = isAppPredictionServiceAvailable();
+
         mIsSuccessfullySelected = false;
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
@@ -618,9 +621,6 @@ public class ChooserActivity extends ResolverActivity {
                         MetricsEvent.PARENT_PROFILE)
                 .addTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE, target.getType())
                 .addTaggedData(MetricsEvent.FIELD_TIME_TO_APP_TARGETS, systemCost));
-
-        // This is the only place this value is being set. Effectively final.
-        mIsAppPredictorComponentAvailable = isAppPredictionServiceAvailable();
 
         AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
         if (appPredictor != null) {
