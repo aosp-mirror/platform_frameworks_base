@@ -65,6 +65,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.KeyValueListParser;
 import android.util.Log;

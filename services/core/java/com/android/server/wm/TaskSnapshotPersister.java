@@ -29,11 +29,11 @@ import android.graphics.Bitmap.Config;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.AtomicFile;
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 
 import java.io.File;

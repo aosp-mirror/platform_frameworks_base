@@ -42,13 +42,13 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseLongArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer;
