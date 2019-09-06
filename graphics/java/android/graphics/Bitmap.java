@@ -1359,9 +1359,44 @@ public final class Bitmap implements Parcelable {
      * Specifies the known formats a bitmap can be compressed into
      */
     public enum CompressFormat {
-        JPEG    (0),
-        PNG     (1),
-        WEBP    (2);
+        /**
+         * Compress to the JPEG format. {@code quality} of {@code 0} means
+         * compress for the smallest size. {@code 100} means compress for max
+         * visual quality.
+         */
+        JPEG          (0),
+        /**
+         * Compress to the PNG format. PNG is lossless, so {@code quality} is
+         * ignored.
+         */
+        PNG           (1),
+        /**
+         * Compress to the WEBP format. {@code quality} of {@code 0} means
+         * compress for the smallest size. {@code 100} means compress for max
+         * visual quality. As of {@link android.os.Build.VERSION_CODES#Q}, a
+         * value of {@code 100} results in a file in the lossless WEBP format.
+         * Otherwise the file will be in the lossy WEBP format.
+         *
+         * @deprecated in favor of the more explicit
+         *             {@link CompressFormat#WEBP_LOSSY} and
+         *             {@link CompressFormat#WEBP_LOSSLESS}.
+         */
+        @Deprecated
+        WEBP          (2),
+        /**
+         * Compress to the WEBP lossy format. {@code quality} of {@code 0} means
+         * compress for the smallest size. {@code 100} means compress for max
+         * visual quality.
+         */
+        WEBP_LOSSY    (3),
+        /**
+         * Compress to the WEBP lossless format. {@code quality} refers to how
+         * much effort to put into compression. A value of {@code 0} means to
+         * compress quickly, resulting in a relatively large file size.
+         * {@code 100} means to spend more time compressing, resulting in a
+         * smaller file.
+         */
+        WEBP_LOSSLESS (4);
 
         CompressFormat(int nativeInt) {
             this.nativeInt = nativeInt;
@@ -1385,10 +1420,8 @@ public final class Bitmap implements Parcelable {
      * pixels).
      *
      * @param format   The format of the compressed image
-     * @param quality  Hint to the compressor, 0-100. 0 meaning compress for
-     *                 small size, 100 meaning compress for max quality. Some
-     *                 formats, like PNG which is lossless, will ignore the
-     *                 quality setting
+     * @param quality  Hint to the compressor, 0-100. The value is interpreted
+     *                 differently depending on the {@link CompressFormat}.
      * @param stream   The outputstream to write the compressed data.
      * @return true if successfully compressed to the specified stream.
      */

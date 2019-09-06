@@ -9,6 +9,7 @@
 #include "SkColorSpace.h"
 #include "GraphicsJNI.h"
 #include "SkStream.h"
+#include "SkWebpEncoder.h"
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
@@ -512,27 +513,14 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
 enum JavaEncodeFormat {
     kJPEG_JavaEncodeFormat = 0,
     kPNG_JavaEncodeFormat = 1,
-    kWEBP_JavaEncodeFormat = 2
+    kWEBP_JavaEncodeFormat = 2,
+    kWEBP_LOSSY_JavaEncodeFormat = 3,
+    kWEBP_LOSSLESS_JavaEncodeFormat = 4,
 };
 
 static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
                                 jint format, jint quality,
                                 jobject jstream, jbyteArray jstorage) {
-    SkEncodedImageFormat fm;
-    switch (format) {
-    case kJPEG_JavaEncodeFormat:
-        fm = SkEncodedImageFormat::kJPEG;
-        break;
-    case kPNG_JavaEncodeFormat:
-        fm = SkEncodedImageFormat::kPNG;
-        break;
-    case kWEBP_JavaEncodeFormat:
-        fm = SkEncodedImageFormat::kWEBP;
-        break;
-    default:
-        return JNI_FALSE;
-    }
-
     LocalScopedBitmap bitmap(bitmapHandle);
     if (!bitmap.valid()) {
         return JNI_FALSE;
@@ -563,6 +551,30 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         }
         skbitmap = p3;
     }
+    SkEncodedImageFormat fm;
+    switch (format) {
+        case kJPEG_JavaEncodeFormat:
+            fm = SkEncodedImageFormat::kJPEG;
+            break;
+        case kPNG_JavaEncodeFormat:
+            fm = SkEncodedImageFormat::kPNG;
+            break;
+        case kWEBP_JavaEncodeFormat:
+            fm = SkEncodedImageFormat::kWEBP;
+            break;
+        case kWEBP_LOSSY_JavaEncodeFormat:
+        case kWEBP_LOSSLESS_JavaEncodeFormat: {
+            SkWebpEncoder::Options options;
+            options.fQuality = quality;
+            options.fCompression = format == kWEBP_LOSSY_JavaEncodeFormat ?
+                    SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
+            return SkWebpEncoder::Encode(strm.get(), skbitmap.pixmap(), options) ?
+                    JNI_TRUE : JNI_FALSE;
+        }
+        default:
+            return JNI_FALSE;
+    }
+
     return SkEncodeImage(strm.get(), skbitmap, fm, quality) ? JNI_TRUE : JNI_FALSE;
 }
 
