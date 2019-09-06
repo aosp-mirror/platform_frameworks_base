@@ -63,6 +63,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.qs.tiles.QSSettingsControllerKt;
+import com.android.systemui.qs.tiles.QSSettingsPanel;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -121,9 +123,16 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     abstract public int getMetricsCategory();
 
+    /**
+     * Experimental option on whether to use settings panels. Only loaded on creation, so the tile
+     * needs to be removed and added for this to take effect.
+     */
+    protected final QSSettingsPanel mQSSettingsPanelOption;
+
     protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
+        mQSSettingsPanelOption = QSSettingsControllerKt.getQSSettingsPanelOption();
     }
 
     @NonNull
@@ -288,6 +297,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     protected void handleLongClick() {
+        if (mQSSettingsPanelOption == QSSettingsPanel.USE_DETAIL) {
+            showDetail(true);
+            return;
+        }
         Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
                 getLongClickIntent(), 0);
     }

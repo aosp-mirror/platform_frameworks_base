@@ -50,9 +50,18 @@ public final class SystemUiDeviceConfigFlags {
     // Flags related to controls
 
     /**
-     * (boolean) Wether to have split behavior when opening QS
+     * (boolean) Whether to have split behavior when opening QS
      */
     public static final String QS_SPLIT_ENABLED = "qs_split_enabled";
+
+    /**
+     * (int) Open settings panels for WiFi and BT tiles
+     * 0 - default behavior, link to settings
+     * 1 - open panel on long press, click remains the same
+     * 2 - open panel on click, long press remains the same
+     * 3 - use details on long press
+     */
+    public static final String QS_USE_SETTINGS_PANELS = "qs_use_settings_panels";
 
     // Flags related to Smart Suggestions - these are read in SmartReplyConstants.
 
