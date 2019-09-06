@@ -89,13 +89,11 @@ public class AppOpsUpgradeTest {
         final int defaultModeOp2 = AppOpsManager.opToDefaultMode(op2);
         for(int i = 0; i < uidStates.size(); i++) {
             final AppOpsService.UidState uidState = uidStates.valueAt(i);
-            if (uidState.opModes != null) {
-                final int uidMode1 = uidState.opModes.get(op1, defaultModeOp1);
-                final int uidMode2 = uidState.opModes.get(op2, defaultModeOp2);
-                assertEquals(uidMode1, uidMode2);
-                if (uidMode1 != defaultModeOp1) {
-                    numberOfNonDefaultOps++;
-                }
+            final int uidMode1 = uidState.hasOpMode(op1) ? uidState.getOpMode(op1) : defaultModeOp1;
+            final int uidMode2 = uidState.hasOpMode(op2) ? uidState.getOpMode(op2) : defaultModeOp2;
+            assertEquals(uidMode1, uidMode2);
+            if (uidMode1 != defaultModeOp1) {
+                numberOfNonDefaultOps++;
             }
             if (uidState.pkgOps == null) {
                 continue;
