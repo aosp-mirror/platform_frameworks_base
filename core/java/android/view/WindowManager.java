@@ -2891,8 +2891,6 @@ public interface WindowManager extends ViewManager {
         public static final int COLOR_MODE_CHANGED = 1 << 26;
         /** {@hide} */
         public static final int INSET_FLAGS_CHANGED = 1 << 27;
-        /** {@hide} */
-        public static final int EVERYTHING_CHANGED = 0xffffffff;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
