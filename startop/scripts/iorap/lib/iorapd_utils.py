@@ -18,10 +18,9 @@
 
 import os
 import sys
-from pathlib import Path
 
-# up to two level, like '../../'
-sys.path.append(Path(os.path.abspath(__file__)).parents[2])
+# up to two level
+sys.path.append(os.path.join(os.path.abspath(__file__),'../..'))
 import lib.cmd_utils as cmd_utils
 
 IORAPID_LIB_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -38,6 +37,22 @@ def _iorapd_path_to_data_file(package: str, activity: str, suffix: str) -> str:
   """
   # Match logic of 'AppComponentName' in iorap::compiler C++ code.
   return '{}/{}%2F{}.{}'.format(IORAPD_DATA_PATH, package, activity, suffix)
+
+def compile_perfetto_trace_on_device(package: str, activity: str,
+                                     inodes: str) -> bool:
+  """Compiles the perfetto trace using on-device compiler."""
+  passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                       'iorapd_compiler_for_app_trace',
+                                       [package, activity, inodes])
+  return passed
+
+def get_iorapd_compiler_trace(package: str, activity: str, dest: str) -> str:
+  """Gets compiler trace to dest file."""
+  src = _iorapd_path_to_data_file(package, activity, 'compiled_trace.pb')
+  passed, _ = cmd_utils.run_shell_command('adb pull "{}" "{}"'.format(src, dest))
+  if not passed:
+    return False
+  return True
 
 def iorapd_compiler_install_trace_file(package: str, activity: str,
                                        input_file: str) -> bool:
