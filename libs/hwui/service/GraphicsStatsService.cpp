@@ -282,9 +282,9 @@ void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int fd) {
         return;
     }
     dprintf(fd, "\nPackage: %s", proto->package_name().c_str());
-    dprintf(fd, "\nVersion: %lld", proto->version_code());
-    dprintf(fd, "\nStats since: %lldns", proto->stats_start());
-    dprintf(fd, "\nStats end: %lldns", proto->stats_end());
+    dprintf(fd, "\nVersion: %" PRId64, proto->version_code());
+    dprintf(fd, "\nStats since: %" PRId64 "ns", proto->stats_start());
+    dprintf(fd, "\nStats end: %" PRId64 "ns", proto->stats_end());
     auto summary = proto->summary();
     dprintf(fd, "\nTotal frames rendered: %d", summary.total_frames());
     dprintf(fd, "\nJanky frames: %d (%.2f%%)", summary.janky_frames(),
