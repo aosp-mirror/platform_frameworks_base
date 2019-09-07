@@ -654,7 +654,7 @@ public class MediaScanner implements AutoCloseable {
                                 "since ringtone setting didn't finish");
                         scanAlways = true;
                     } else if (isSystemSoundWithMetadata(entry.mPath)
-                            && !Build.FINGERPRINT.equals(sLastInternalScanFingerprint)) {
+                            && !Build.CUSTOM_FINGERPRINT.equals(sLastInternalScanFingerprint)) {
                         // file is located on the system partition where the date cannot be trusted:
                         // rescan if the build fingerprint has changed since the last scan.
                         Log.i(TAG, "forcing rescan of " + entry.mPath
