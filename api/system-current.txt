@@ -7736,6 +7736,24 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
+  public final class ModemActivityInfo implements android.os.Parcelable {
+    ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
+    method public int describeContents();
+    method public int getIdleTimeMillis();
+    method public int getReceiveTimeMillis();
+    method public int getSleepTimeMillis();
+    method public long getTimestamp();
+    method @NonNull public java.util.List<android.telephony.ModemActivityInfo.TransmitPower> getTransmitPowerInfo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
+    field public static final int TX_POWER_LEVELS = 5; // 0x5
+  }
+
+  public class ModemActivityInfo.TransmitPower {
+    method @NonNull public android.util.Range<java.lang.Integer> getPowerRangeInDbm();
+    method public int getTimeInMillis();
+  }
+
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getAccessNetworkTechnology();
