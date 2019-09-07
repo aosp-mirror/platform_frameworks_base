@@ -104,7 +104,7 @@ public class GsmSmsCbMessage {
                     header.getSerialNumber(), location, header.getServiceCategory(), null,
                     getEtwsPrimaryMessage(context, header.getEtwsInfo().getWarningType()),
                     SmsCbMessage.MESSAGE_PRIORITY_EMERGENCY, header.getEtwsInfo(),
-                    header.getCmasInfo(), null /* geometries */, receivedTimeMillis);
+                    header.getCmasInfo(), 0, null /* geometries */, receivedTimeMillis);
         } else if (header.isUmtsFormat()) {
             // UMTS format has only 1 PDU
             byte[] pdu = pdus[0];
@@ -120,9 +120,13 @@ public class GsmSmsCbMessage {
 
             // Has Warning Area Coordinates information
             List<Geometry> geometries = null;
+            int maximumWaitingTimeSec = 255;
             if (pdu.length > wacDataOffset) {
                 try {
-                    geometries = parseWarningAreaCoordinates(pdu, wacDataOffset);
+                    Pair<Integer, List<Geometry>> wac = parseWarningAreaCoordinates(pdu,
+                            wacDataOffset);
+                    maximumWaitingTimeSec = wac.first;
+                    geometries = wac.second;
                 } catch (Exception ex) {
                     // Catch the exception here, the message will be considered as having no WAC
                     // information which means the message will be broadcasted directly.
@@ -133,7 +137,8 @@ public class GsmSmsCbMessage {
             return new SmsCbMessage(SmsCbMessage.MESSAGE_FORMAT_3GPP,
                     header.getGeographicalScope(), header.getSerialNumber(), location,
                     header.getServiceCategory(), language, body, priority,
-                    header.getEtwsInfo(), header.getCmasInfo(), geometries, receivedTimeMillis);
+                    header.getEtwsInfo(), header.getCmasInfo(), maximumWaitingTimeSec, geometries,
+                    receivedTimeMillis);
         } else {
             String language = null;
             StringBuilder sb = new StringBuilder();
@@ -148,7 +153,7 @@ public class GsmSmsCbMessage {
             return new SmsCbMessage(SmsCbMessage.MESSAGE_FORMAT_3GPP,
                     header.getGeographicalScope(), header.getSerialNumber(), location,
                     header.getServiceCategory(), language, sb.toString(), priority,
-                    header.getEtwsInfo(), header.getCmasInfo(), null /* geometries */,
+                    header.getEtwsInfo(), header.getCmasInfo(), 0, null /* geometries */,
                     receivedTimeMillis);
         }
     }
@@ -197,7 +202,17 @@ public class GsmSmsCbMessage {
         }
     }
 
-    private static List<Geometry> parseWarningAreaCoordinates(byte[] pdu, int wacOffset) {
+    /**
+     * Parse the broadcast area and maximum wait time from the Warning Area Coordinates TLV.
+     *
+     * @param pdu Warning Area Coordinates TLV.
+     * @param wacOffset the offset of Warning Area Coordinates TLV.
+     * @return a pair with the first element is maximum wait time and the second is the broadcast
+     * area. The default value of the maximum wait time is 255 which means use the device default
+     * value.
+     */
+    private static Pair<Integer, List<Geometry>> parseWarningAreaCoordinates(
+            byte[] pdu, int wacOffset) {
         // little-endian
         int wacDataLength = (pdu[wacOffset + 1] << 8) | pdu[wacOffset];
         int offset = wacOffset + 2;
@@ -208,6 +223,8 @@ public class GsmSmsCbMessage {
         }
 
         BitStreamReader bitReader = new BitStreamReader(pdu, offset);
+
+        int maximumWaitTimeSec = SmsCbMessage.MAXIMUM_WAIT_TIME_NOT_SET;
 
         List<Geometry> geo = new ArrayList<>();
         int remainedBytes = wacDataLength;
@@ -220,8 +237,7 @@ public class GsmSmsCbMessage {
 
             switch (type) {
                 case CbGeoUtils.GEO_FENCING_MAXIMUM_WAIT_TIME:
-                    // TODO: handle the maximum wait time in cell broadcast provider.
-                    int maximumWaitTimeSec = bitReader.read(8);
+                    maximumWaitTimeSec = bitReader.read(8);
                     break;
                 case CbGeoUtils.GEOMETRY_TYPE_POLYGON:
                     List<LatLng> latLngs = new ArrayList<>();
@@ -247,7 +263,7 @@ public class GsmSmsCbMessage {
                     throw new IllegalArgumentException("Unsupported geoType = " + type);
             }
         }
-        return geo;
+        return new Pair(maximumWaitTimeSec, geo);
     }
 
     /**
