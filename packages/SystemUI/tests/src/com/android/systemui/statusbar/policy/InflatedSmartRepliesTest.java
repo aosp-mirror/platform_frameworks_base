@@ -15,6 +15,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -29,7 +31,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
-import android.service.notification.StatusBarNotification;
 import android.util.Pair;
 
 import androidx.test.annotation.UiThreadTest;
@@ -41,6 +42,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
+import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions;
@@ -65,7 +68,6 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
             new Intent("com.android.WHITELISTED_TEST_ACTION");
 
     @Mock SmartReplyConstants mSmartReplyConstants;
-    @Mock StatusBarNotification mStatusBarNotification;
     @Mock Notification mNotification;
     NotificationEntry mEntry;
     @Mock RemoteInput mRemoteInput;
@@ -87,8 +89,9 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         mDependency.injectTestDependency(PackageManagerWrapper.class, mPackageManagerWrapper);
 
         when(mNotification.getAllowSystemGeneratedContextualActions()).thenReturn(true);
-        when(mStatusBarNotification.getNotification()).thenReturn(mNotification);
-        mEntry = NotificationEntry.buildForTest(mStatusBarNotification);
+        mEntry = new NotificationEntryBuilder()
+                .setNotification(mNotification)
+                .build();
         when(mSmartReplyConstants.isEnabled()).thenReturn(true);
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
 
@@ -99,7 +102,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
     public void chooseSmartRepliesAndActions_smartRepliesOff_noAppGeneratedSmartSuggestions() {
         CharSequence[] smartReplies = new String[] {"Reply1", "Reply2"};
         List<Notification.Action> smartActions =
-                createActions(new String[] {"Test Action 1", "Test Action 2"});
+                createActions("Test Action 1", "Test Action 2");
         setupAppGeneratedSuggestions(smartReplies, smartActions);
         when(mSmartReplyConstants.isEnabled()).thenReturn(false);
 
@@ -112,10 +115,11 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
 
     @Test
     public void chooseSmartRepliesAndActions_smartRepliesOff_noSystemGeneratedSmartSuggestions() {
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
-        mEntry.systemGeneratedSmartActions =
-                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+        modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
+                .build();
+
         when(mSmartReplyConstants.isEnabled()).thenReturn(false);
 
         SmartRepliesAndActions repliesAndActions =
@@ -133,7 +137,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(smartReplies);
+        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(Arrays.asList(smartReplies));
         assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
         assertThat(repliesAndActions.smartActions).isNull();
     }
@@ -142,13 +146,13 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
     public void chooseSmartRepliesAndActions_appGeneratedSmartRepliesAndActions() {
         CharSequence[] smartReplies = new String[] {"Reply1", "Reply2"};
         List<Notification.Action> smartActions =
-                createActions(new String[] {"Test Action 1", "Test Action 2"});
+                createActions("Test Action 1", "Test Action 2");
         setupAppGeneratedSuggestions(smartReplies, smartActions);
 
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(smartReplies);
+        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(Arrays.asList(smartReplies));
         assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
         assertThat(repliesAndActions.smartActions.actions).isEqualTo(smartActions);
         assertThat(repliesAndActions.smartActions.fromAssistant).isFalse();
@@ -160,13 +164,15 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // replies.
         setupAppGeneratedReplies(null /* smartReplies */);
 
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
+        modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .build();
+
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
-                mEntry.systemGeneratedSmartReplies);
+                mEntry.getSmartReplies());
         assertThat(repliesAndActions.smartReplies.fromAssistant).isTrue();
         assertThat(repliesAndActions.smartActions).isNull();
     }
@@ -177,8 +183,9 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // replies.
         setupAppGeneratedReplies(null /* smartReplies */, false /* allowSystemGeneratedReplies */);
 
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
+        NotificationEntryHelper.modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .build();
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
@@ -192,14 +199,15 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // actions.
         setupAppGeneratedReplies(null /* smartReplies */);
 
-        mEntry.systemGeneratedSmartActions =
-                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+        modifyRanking(mEntry)
+                .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
+                .build();
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
         assertThat(repliesAndActions.smartReplies).isNull();
         assertThat(repliesAndActions.smartActions.actions)
-                .isEqualTo(mEntry.systemGeneratedSmartActions);
+                .isEqualTo(mEntry.getSmartActions());
         assertThat(repliesAndActions.smartActions.fromAssistant).isTrue();
     }
 
@@ -209,18 +217,19 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // replies.
         List<Notification.Action> appGenSmartActions =
-                createActions(new String[] {"Test Action 1", "Test Action 2"});
+                createActions("Test Action 1", "Test Action 2");
         setupAppGeneratedSuggestions(appGenSmartReplies, appGenSmartActions);
 
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
-        mEntry.systemGeneratedSmartActions =
-                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+        modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
+                .build();
 
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(appGenSmartReplies);
+        assertThat(repliesAndActions.smartReplies.choices)
+                .isEqualTo(Arrays.asList(appGenSmartReplies));
         assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
         assertThat(repliesAndActions.smartActions.actions).isEqualTo(appGenSmartActions);
         assertThat(repliesAndActions.smartActions.fromAssistant).isFalse();
@@ -232,10 +241,11 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // actions.
         setupAppGeneratedReplies(null /* smartReplies */, false /* allowSystemGeneratedReplies */);
         when(mNotification.getAllowSystemGeneratedContextualActions()).thenReturn(false);
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
-        mEntry.systemGeneratedSmartActions =
-                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+
+        modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
+                .build();
 
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
@@ -253,16 +263,17 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // suggestions.
         setupAppGeneratedReplies(null /* smartReplies */);
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
-        mEntry.systemGeneratedSmartActions =
-                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+
+        modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
+                .build();
 
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
-                mEntry.systemGeneratedSmartReplies);
+                mEntry.getSmartReplies());
         // Since no apps are whitelisted no actions should be shown.
         assertThat(repliesAndActions.smartActions.actions).isEmpty();
     }
@@ -285,12 +296,14 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // suggestions.
         setupAppGeneratedReplies(null /* smartReplies */);
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
-        List<Notification.Action> actions = new ArrayList<>();
+        ArrayList<Notification.Action> actions = new ArrayList<>();
         actions.add(createAction("allowed action", WHITELISTED_TEST_INTENT));
         actions.add(createAction("non-allowed action", TEST_INTENT));
-        mEntry.systemGeneratedSmartActions = actions;
+
+        modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .setSmartActions(actions)
+                .build();
 
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
@@ -298,7 +311,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // Only the action for the whitelisted package should be allowed.
         assertThat(repliesAndActions.smartActions.actions.size()).isEqualTo(1);
         assertThat(repliesAndActions.smartActions.actions.get(0)).isEqualTo(
-                mEntry.systemGeneratedSmartActions.get(0));
+                mEntry.getSmartActions().get(0));
     }
 
     @Test
@@ -310,25 +323,25 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
         // suggestions.
         setupAppGeneratedReplies(null /* smartReplies */);
-        mEntry.systemGeneratedSmartReplies =
-                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
-        mEntry.systemGeneratedSmartActions =
-                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+        modifyRanking(mEntry)
+                .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
+                .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
+                .build();
 
         SmartRepliesAndActions repliesAndActions =
                 InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
         // We don't restrict replies or actions in screen pinning mode.
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
-                mEntry.systemGeneratedSmartReplies);
+                mEntry.getSmartReplies());
         assertThat(repliesAndActions.smartActions.actions).isEqualTo(
-                mEntry.systemGeneratedSmartActions);
+                mEntry.getSmartActions());
     }
 
     @Test
     public void areSuggestionsSimilar_trueForSimilar() {
-        CharSequence[] leftReplies = new CharSequence[] { "first reply", "second reply"};
-        CharSequence[] rightReplies = new CharSequence[] { "first reply", "second reply"};
+        List<CharSequence> leftReplies = createReplies("first reply", "second reply");
+        List<CharSequence> rightReplies = createReplies("first reply", "second reply");
         List<Notification.Action> leftActions = Arrays.asList(
                 createAction("firstAction"),
                 createAction("secondAction"));
@@ -349,8 +362,8 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
 
     @Test
     public void areSuggestionsSimilar_falseForDifferentReplies() {
-        CharSequence[] leftReplies = new CharSequence[] { "first reply"};
-        CharSequence[] rightReplies = new CharSequence[] { "first reply", "second reply"};
+        List<CharSequence> leftReplies = createReplies("first reply");
+        List<CharSequence> rightReplies = createReplies("first reply", "second reply");
         List<Notification.Action> leftActions = Arrays.asList(
                 createAction("firstAction"),
                 createAction("secondAction"));
@@ -371,8 +384,8 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
 
     @Test
     public void areSuggestionsSimilar_falseForDifferentActions() {
-        CharSequence[] leftReplies = new CharSequence[] { "first reply", "second reply"};
-        CharSequence[] rightReplies = new CharSequence[] { "first reply", "second reply"};
+        List<CharSequence> leftReplies = createReplies("first reply", "second reply");
+        List<CharSequence> rightReplies = createReplies("first reply", "second reply");
         List<Notification.Action> leftActions = Arrays.asList(
                 createAction("firstAction"),
                 createAction("secondAction"));
@@ -441,11 +454,15 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         return createActionBuilder(actionTitle, intent).build();
     }
 
-    private List<Notification.Action> createActions(String[] actionTitles) {
-        List<Notification.Action> actions = new ArrayList<>();
+    private ArrayList<Notification.Action> createActions(String... actionTitles) {
+        ArrayList<Notification.Action> actions = new ArrayList<>();
         for (String title : actionTitles) {
             actions.add(createAction(title));
         }
         return actions;
+    }
+
+    private ArrayList<CharSequence> createReplies(CharSequence... replies) {
+        return new ArrayList<>(Arrays.asList(replies));
     }
 }

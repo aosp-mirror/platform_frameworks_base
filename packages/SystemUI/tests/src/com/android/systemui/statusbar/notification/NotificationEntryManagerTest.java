@@ -411,8 +411,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.updateNotificationRanking(mRankingMap);
         verify(mRow).setEntry(eq(mEntry));
-        assertEquals(1, mEntry.systemGeneratedSmartActions.size());
-        assertEquals("action", mEntry.systemGeneratedSmartActions.get(0).title);
+        assertEquals(1, mEntry.getSmartActions().size());
+        assertEquals("action", mEntry.getSmartActions().get(0).title);
         verify(mEntryListener).onNotificationRankingUpdated(mRankingMap);
     }
 
@@ -427,7 +427,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.updateNotificationRanking(mRankingMap);
         verify(mRow, never()).setEntry(eq(mEntry));
-        assertEquals(0, mEntry.systemGeneratedSmartActions.size());
+        assertNull(mEntry.getSmartActions());
     }
 
     @Test
@@ -441,8 +441,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.updateNotificationRanking(mRankingMap);
         verify(mRow, never()).setEntry(eq(mEntry));
-        assertEquals(1, mEntry.systemGeneratedSmartActions.size());
-        assertEquals("action", mEntry.systemGeneratedSmartActions.get(0).title);
+        assertEquals(1, mEntry.getSmartActions().size());
+        assertEquals("action", mEntry.getSmartActions().get(0).title);
     }
 
     @Test
@@ -456,8 +456,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.updateNotificationRanking(mRankingMap);
         verify(mRow, never()).setEntry(eq(mEntry));
-        assertEquals(1, mEntry.systemGeneratedSmartActions.size());
-        assertEquals("action", mEntry.systemGeneratedSmartActions.get(0).title);
+        assertEquals(1, mEntry.getSmartActions().size());
+        assertEquals("action", mEntry.getSmartActions().get(0).title);
     }
 
     @Test

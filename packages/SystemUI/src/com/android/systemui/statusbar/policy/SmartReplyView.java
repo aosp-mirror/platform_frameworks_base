@@ -220,7 +220,7 @@ public class SmartReplyView extends ViewGroup {
 
         if (smartReplies.remoteInput != null && smartReplies.pendingIntent != null) {
             if (smartReplies.choices != null) {
-                for (int i = 0; i < smartReplies.choices.length; ++i) {
+                for (int i = 0; i < smartReplies.choices.size(); ++i) {
                     buttons.add(inflateReplyButton(
                             this, getContext(), i, smartReplies, smartReplyController, entry,
                             delayOnClickListener));
@@ -265,7 +265,7 @@ public class SmartReplyView extends ViewGroup {
             NotificationEntry entry, boolean useDelayedOnClickListener) {
         Button b = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_reply_button, smartReplyView, false);
-        CharSequence choice = smartReplies.choices[replyIndex];
+        CharSequence choice = smartReplies.choices.get(replyIndex);
         b.setText(choice);
 
         OnDismissAction action = () -> {
@@ -944,10 +944,10 @@ public class SmartReplyView extends ViewGroup {
         @NonNull
         public final PendingIntent pendingIntent;
         @NonNull
-        public final CharSequence[] choices;
+        public final List<CharSequence> choices;
         public final boolean fromAssistant;
 
-        public SmartReplies(CharSequence[] choices, RemoteInput remoteInput,
+        public SmartReplies(List<CharSequence> choices, RemoteInput remoteInput,
                 PendingIntent pendingIntent, boolean fromAssistant) {
             this.choices = choices;
             this.remoteInput = remoteInput;

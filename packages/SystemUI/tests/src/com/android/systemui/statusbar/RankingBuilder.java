@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Importance;
@@ -46,8 +47,8 @@ public class RankingBuilder {
     private boolean mIsSuspended = false;
     private long mLastAudiblyAlertedMs = 0;
     private boolean mNoisy = false;
-    private ArrayList<Notification.Action> mSmartActions = null;
-    private ArrayList<CharSequence> mSmartReplies = null;
+    private ArrayList<Notification.Action> mSmartActions = new ArrayList<>();
+    private ArrayList<CharSequence> mSmartReplies = new ArrayList<>();
     private boolean mCanBubble = false;
 
     public RankingBuilder() {
@@ -186,12 +187,12 @@ public class RankingBuilder {
         return this;
     }
 
-    public RankingBuilder setSmartActions(ArrayList<Notification.Action> smartActions) {
+    public RankingBuilder setSmartActions(@NonNull ArrayList<Notification.Action> smartActions) {
         mSmartActions = smartActions;
         return this;
     }
 
-    public RankingBuilder setSmartReplies(ArrayList<CharSequence> smartReplies) {
+    public RankingBuilder setSmartReplies(@NonNull ArrayList<CharSequence> smartReplies) {
         mSmartReplies = smartReplies;
         return this;
     }

@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.notification.row.NotificationContentInflat
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -100,12 +99,6 @@ public final class NotificationEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
-    /** Smart Actions provided by the NotificationAssistantService. */
-    @NonNull
-    public List<Notification.Action> systemGeneratedSmartActions = Collections.emptyList();
-    /** Smart replies provided by the NotificationAssistantService. */
-    @NonNull
-    public CharSequence[] systemGeneratedSmartReplies = new CharSequence[0];
 
     /**
      * If {@link android.app.RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
@@ -176,14 +169,13 @@ public final class NotificationEntry {
     }
 
     /**
-     * Method for old tests that build NotificationEntries with a ranking.
+     * Method for old tests that build NotificationEntries without a ranking.
      *
-     * @deprecated New tests should pass a ranking object as well.
+     * @deprecated Use NotificationEntryBuilder instead.
      */
     @VisibleForTesting
     @Deprecated
     public static NotificationEntry buildForTest(StatusBarNotification sbn) {
-        // TODO START here this will NPE on all tests
         return new NotificationEntry(sbn, null, true);
     }
 
@@ -227,12 +219,6 @@ public final class NotificationEntry {
      */
     public void setRanking(@NonNull Ranking ranking) {
         mRanking = ranking;
-
-        systemGeneratedSmartActions = ranking.getSmartActions() == null
-                ? Collections.emptyList() : ranking.getSmartActions();
-        systemGeneratedSmartReplies = ranking.getSmartReplies() == null
-                ? new CharSequence[0]
-                : ranking.getSmartReplies().toArray(new CharSequence[0]);
     }
 
     public NotificationChannel getChannel() {
@@ -270,6 +256,14 @@ public final class NotificationEntry {
     /** @see Ranking#canBubble() */
     public boolean canBubble() {
         return mRanking.canBubble();
+    }
+
+    public @NonNull List<Notification.Action> getSmartActions() {
+        return mRanking.getSmartActions();
+    }
+
+    public @NonNull List<CharSequence> getSmartReplies() {
+        return mRanking.getSmartReplies();
     }
 
 

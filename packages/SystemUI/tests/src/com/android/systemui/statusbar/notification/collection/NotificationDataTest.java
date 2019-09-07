@@ -342,7 +342,7 @@ public class NotificationDataTest extends SysuiTestCase {
         NotificationEntry entry =
                 new NotificationEntry(mMockStatusBarNotification, ranking);
 
-        assertEquals(systemGeneratedSmartActions, entry.systemGeneratedSmartActions);
+        assertEquals(systemGeneratedSmartActions, entry.getSmartActions());
         assertEquals(NOTIFICATION_CHANNEL, entry.getChannel());
         assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.getUserSentiment());
         assertEquals(snoozeCriterions, entry.getSnoozeCriteria());
