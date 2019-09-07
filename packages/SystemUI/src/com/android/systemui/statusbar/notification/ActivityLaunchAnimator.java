@@ -34,7 +34,6 @@ import android.view.View;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Interpolators;
-import com.android.systemui.shared.system.SurfaceControlCompat;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
@@ -145,6 +144,7 @@ public class ActivityLaunchAnimator {
 
         @Override
         public void onAnimationStart(RemoteAnimationTarget[] remoteAnimationTargets,
+                RemoteAnimationTarget[] remoteAnimationWallpaperTargets,
                 IRemoteAnimationFinishedCallback iRemoteAnimationFinishedCallback)
                     throws RemoteException {
             mSourceNotification.post(() -> {

@@ -19,7 +19,9 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -27,10 +29,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.IInterface;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -96,9 +100,12 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
                     ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
-            verify(mMockRunner).onAnimationStart(appsCaptor.capture(), finishedCaptor.capture());
+            verify(mMockRunner).onAnimationStart(appsCaptor.capture(), wallpapersCaptor.capture(),
+                    finishedCaptor.capture());
             assertEquals(1, appsCaptor.getValue().length);
             final RemoteAnimationTarget app = appsCaptor.getValue()[0];
             assertEquals(new Point(50, 100), app.position);
@@ -201,9 +208,12 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
         final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                 ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
         final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
                 ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
-        verify(mMockRunner).onAnimationStart(appsCaptor.capture(), finishedCaptor.capture());
+        verify(mMockRunner).onAnimationStart(appsCaptor.capture(), wallpapersCaptor.capture(),
+                finishedCaptor.capture());
         assertEquals(1, appsCaptor.getValue().length);
         assertEquals(mMockLeash, appsCaptor.getValue()[0].leash);
     }
@@ -237,9 +247,12 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
             final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
                     ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
             final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
                     ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
-            verify(mMockRunner).onAnimationStart(appsCaptor.capture(), finishedCaptor.capture());
+            verify(mMockRunner).onAnimationStart(appsCaptor.capture(), wallpapersCaptor.capture(),
+                    finishedCaptor.capture());
             assertEquals(1, appsCaptor.getValue().length);
             final RemoteAnimationTarget app = appsCaptor.getValue()[0];
             assertEquals(RemoteAnimationTarget.MODE_CHANGING, app.mode);
@@ -261,6 +274,66 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             verify(mThumbnailFinishedCallback).onAnimationFinished(eq(record.mThumbnailAdapter));
         } finally {
             mDisplayContent.mChangingApps.clear();
+        }
+    }
+
+    @Test
+    public void testWallpaperIncluded_expectTarget() throws Exception {
+        final WindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm, mock(IBinder.class),
+                true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        spyOn(mDisplayContent.mWallpaperController);
+        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mOpeningApps.add(win.mAppToken);
+        try {
+            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mAppToken,
+                    new Point(50, 100), new Rect(50, 100, 150, 150), null).mAdapter;
+            adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
+            mController.goodToGo();
+            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                    ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+            verify(mMockRunner).onAnimationStart(appsCaptor.capture(), wallpapersCaptor.capture(),
+                    finishedCaptor.capture());
+            assertEquals(1, wallpapersCaptor.getValue().length);
+        } finally {
+            mDisplayContent.mOpeningApps.clear();
+        }
+    }
+
+    @Test
+    public void testWallpaperAnimatorCanceled_expectAnimationKeepsRunning() throws Exception {
+        final WindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm, mock(IBinder.class),
+                true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        spyOn(mDisplayContent.mWallpaperController);
+        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mOpeningApps.add(win.mAppToken);
+        try {
+            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mAppToken,
+                    new Point(50, 100), new Rect(50, 100, 150, 150), null).mAdapter;
+            adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
+            mController.goodToGo();
+            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                    ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+            verify(mMockRunner).onAnimationStart(appsCaptor.capture(), wallpapersCaptor.capture(),
+                    finishedCaptor.capture());
+            assertEquals(1, wallpapersCaptor.getValue().length);
+
+            // Cancel the wallpaper window animator and ensure the runner is not canceled
+            wallpaperWindowToken.cancelAnimation();
+            verify(mMockRunner, never()).onAnimationCancelled();
+        } finally {
+            mDisplayContent.mOpeningApps.clear();
         }
     }
 

@@ -58,6 +58,8 @@ class RemoteAnimationController implements DeathRecipient {
     private final WindowManagerService mService;
     private final RemoteAnimationAdapter mRemoteAnimationAdapter;
     private final ArrayList<RemoteAnimationRecord> mPendingAnimations = new ArrayList<>();
+    private final ArrayList<WallpaperAnimationAdapter> mPendingWallpaperAnimations =
+            new ArrayList<>();
     private final Rect mTmpRect = new Rect();
     private final Handler mHandler;
     private final Runnable mTimeoutRunnable = () -> cancelAnimation("timeoutRunnable");
@@ -110,16 +112,21 @@ class RemoteAnimationController implements DeathRecipient {
                 (long) (TIMEOUT_MS * mService.getCurrentAnimatorScale()));
         mFinishedCallback = new FinishedCallback(this);
 
-        final RemoteAnimationTarget[] animations = createAnimations();
-        if (animations.length == 0) {
+        // Create the app targets
+        final RemoteAnimationTarget[] appTargets = createAppAnimations();
+        if (appTargets.length == 0) {
             if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "goodToGo(): No apps to animate");
             onAnimationFinished();
             return;
         }
+
+        // Create the remote wallpaper animation targets (if any)
+        final RemoteAnimationTarget[] wallpaperTargets = createWallpaperAnimations();
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
                 linkToDeathOfRunner();
-                mRemoteAnimationAdapter.getRunner().onAnimationStart(animations, mFinishedCallback);
+                mRemoteAnimationAdapter.getRunner().onAnimationStart(appTargets, wallpaperTargets,
+                        mFinishedCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to start remote animation", e);
                 onAnimationFinished();
@@ -155,8 +162,8 @@ class RemoteAnimationController implements DeathRecipient {
         Slog.i(TAG, sw.toString());
     }
 
-    private RemoteAnimationTarget[] createAnimations() {
-        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "createAnimations()");
+    private RemoteAnimationTarget[] createAppAnimations() {
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "createAppAnimations()");
         final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final RemoteAnimationRecord wrappers = mPendingAnimations.get(i);
@@ -186,6 +193,19 @@ class RemoteAnimationController implements DeathRecipient {
         return targets.toArray(new RemoteAnimationTarget[targets.size()]);
     }
 
+    private RemoteAnimationTarget[] createWallpaperAnimations() {
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "createWallpaperAnimations()");
+        return WallpaperAnimationAdapter.startWallpaperAnimations(mService,
+                mRemoteAnimationAdapter.getDuration(),
+                mRemoteAnimationAdapter.getStatusBarTransitionDelay(),
+                adapter -> {
+                    synchronized (mService.mGlobalLock) {
+                        // If the wallpaper animation is canceled, continue with the app animation
+                        mPendingWallpaperAnimations.remove(adapter);
+                    }
+                }, mPendingWallpaperAnimations);
+    }
+
     private void onAnimationFinished() {
         if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "onAnimationFinished(): mPendingAnimations="
                 + mPendingAnimations.size());
@@ -207,7 +227,15 @@ class RemoteAnimationController implements DeathRecipient {
                         adapters.mThumbnailAdapter.mCapturedFinishCallback
                                 .onAnimationFinished(adapters.mThumbnailAdapter);
                     }
-                    if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "\t" + adapters.mAppWindowToken);
+                    mPendingAnimations.remove(i);
+                    if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "\tapp=" + adapters.mAppWindowToken);
+                }
+
+                for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
+                    final WallpaperAnimationAdapter adapter = mPendingWallpaperAnimations.get(i);
+                    adapter.getLeashFinishedCallback().onAnimationFinished(adapter);
+                    mPendingWallpaperAnimations.remove(i);
+                    if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "\twallpaper=" + adapter.getToken());
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to finish remote animation", e);
@@ -424,10 +452,7 @@ class RemoteAnimationController implements DeathRecipient {
                 mPendingAnimations.remove(mRecord);
             }
             if (mPendingAnimations.isEmpty()) {
-                mHandler.removeCallbacks(mTimeoutRunnable);
-                releaseFinishedCallback();
-                invokeAnimationCancelled();
-                setRunningRemoteAnimation(false);
+                cancelAnimation("allAppAnimationsCanceled");
             }
         }
 

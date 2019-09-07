@@ -142,7 +142,9 @@ public class SyncRtSurfaceTransactionApplierCompat {
     public static void applyParams(TransactionCompat t,
             SyncRtSurfaceTransactionApplierCompat.SurfaceParams params) {
         t.setMatrix(params.surface, params.matrix);
-        t.setWindowCrop(params.surface, params.windowCrop);
+        if (params.windowCrop != null) {
+            t.setWindowCrop(params.surface, params.windowCrop);
+        }
         t.setAlpha(params.surface, params.alpha);
         t.setLayer(params.surface, params.layer);
         t.setCornerRadius(params.surface, params.cornerRadius);
@@ -187,14 +189,14 @@ public class SyncRtSurfaceTransactionApplierCompat {
          * @param surface The surface to modify.
          * @param alpha Alpha to apply.
          * @param matrix Matrix to apply.
-         * @param windowCrop Crop to apply.
+         * @param windowCrop Crop to apply, only applied if not {@code null}
          */
         public SurfaceParams(SurfaceControlCompat surface, float alpha, Matrix matrix,
                 Rect windowCrop, int layer, float cornerRadius) {
             this.surface = surface;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
-            this.windowCrop = new Rect(windowCrop);
+            this.windowCrop = windowCrop != null ? new Rect(windowCrop) : null;
             this.layer = layer;
             this.cornerRadius = cornerRadius;
         }

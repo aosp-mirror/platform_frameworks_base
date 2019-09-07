@@ -34,7 +34,7 @@ oneway interface IRemoteAnimationRunner {
      * @param finishedCallback The callback to invoke when the animation is finished.
      */
     @UnsupportedAppUsage
-    void onAnimationStart(in RemoteAnimationTarget[] apps,
+    void onAnimationStart(in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
             in IRemoteAnimationFinishedCallback finishedCallback);
 
     /**

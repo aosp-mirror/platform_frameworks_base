@@ -188,8 +188,8 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
 
             @Override
             public void onAnimationStart(IRecentsAnimationController controller,
-                    RemoteAnimationTarget[] apps, Rect homeContentInsets,
-                    Rect minimizedHomeBounds) throws RemoteException {
+                    RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
+                    Rect homeContentInsets, Rect minimizedHomeBounds) throws RemoteException {
                 final Pair<String, Boolean> finishCase = finishCases.get(mIteration++ % 2);
                 final boolean moveRecentsToTop = finishCase.second;
                 makeInterval();

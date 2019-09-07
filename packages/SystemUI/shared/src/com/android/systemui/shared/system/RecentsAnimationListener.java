@@ -21,12 +21,12 @@ import android.graphics.Rect;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
 public interface RecentsAnimationListener {
-
     /**
      * Called when the animation into Recents can start. This call is made on the binder thread.
      */
     void onAnimationStart(RecentsAnimationControllerCompat controller,
-            RemoteAnimationTargetCompat[] apps, Rect homeContentInsets, Rect minimizedHomeBounds);
+            RemoteAnimationTargetCompat[] apps, RemoteAnimationTargetCompat[] wallpapers,
+            Rect homeContentInsets, Rect minimizedHomeBounds);
 
     /**
      * Called when the animation into Recents was canceled. This call is made on the binder thread.

@@ -225,14 +225,16 @@ public class ActivityManagerWrapper {
                 runner = new IRecentsAnimationRunner.Stub() {
                     @Override
                     public void onAnimationStart(IRecentsAnimationController controller,
-                            RemoteAnimationTarget[] apps, Rect homeContentInsets,
-                            Rect minimizedHomeBounds) {
+                            RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
+                            Rect homeContentInsets, Rect minimizedHomeBounds) {
                         final RecentsAnimationControllerCompat controllerCompat =
                                 new RecentsAnimationControllerCompat(controller);
                         final RemoteAnimationTargetCompat[] appsCompat =
                                 RemoteAnimationTargetCompat.wrap(apps);
+                        final RemoteAnimationTargetCompat[] wallpapersCompat =
+                                RemoteAnimationTargetCompat.wrap(wallpapers);
                         animationHandler.onAnimationStart(controllerCompat, appsCompat,
-                                homeContentInsets, minimizedHomeBounds);
+                                wallpapersCompat, homeContentInsets, minimizedHomeBounds);
                     }
 
                     @Override
