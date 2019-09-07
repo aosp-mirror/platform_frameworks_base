@@ -76,6 +76,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private boolean mIsPulsing;
     private boolean mIsScreenOn;
     private boolean mIsViewAdded;
+    private boolean mIsRemoving;
 
     private Handler mHandler;
 
@@ -246,6 +247,20 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        if (mIsInsideCircle) {
+            canvas.drawCircle(mWidth / 2, mHeight / 2, (float) (mWidth / 2.0f), mPaintFingerprint);
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        // onLayout is a good time to call the HAL because dim layer
+        // added by setDim() should have come into effect
+        // the HAL is expected (if supported) to set the screen brightness
+        // to maximum / minimum immediately when called
         if (mIsInsideCircle) {
             if (mIsDreaming) {
                 setAlpha(1.0f);
@@ -261,7 +276,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 }
                 mIsPressed = true;
             }
-            canvas.drawCircle(mWidth / 2, mHeight / 2, (float) (mWidth / 2.0f), mPaintFingerprint);
         } else {
             setAlpha(mIsDreaming ? 0.5f : 1.0f);
             if (mIsPressed) {
@@ -274,6 +288,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                     }
                 }
                 mIsPressed = false;
+            }
+
+            if (mIsRemoving) {
+                mIsRemoving = false;
+                mWindowManager.removeView(this);
             }
         }
     }
@@ -320,6 +339,33 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
+        if (daemon != null) {
+            try {
+                daemon.onHideFODView();
+            } catch (RemoteException e) {
+                // do nothing
+            }
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
+        if (daemon != null) {
+            try {
+                daemon.onShowFODView();
+            } catch (RemoteException e) {
+                // do nothing
+            }
+        }
+    }
 
     public synchronized IFingerprintInscreen getFingerprintInScreenDaemon() {
         if (mFingerprintInscreenDaemon == null) {
@@ -339,6 +385,12 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     }
 
     public void show() {
+        if (mIsRemoving) {
+            // Last removal hasn't been finished yet
+            mIsRemoving = false;
+            mWindowManager.removeView(this);
+        }
+
         if (mIsViewAdded) {
             return;
         }
@@ -369,15 +421,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
         mIsPressed = false;
         setDim(false);
-
-        IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
-        if (daemon != null) {
-            try {
-                daemon.onShowFODView();
-            } catch (RemoteException e) {
-                // do nothing
-            }
-        }
     }
 
     public void hide() {
@@ -386,21 +429,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         }
 
         mIsInsideCircle = false;
-
-        mWindowManager.removeView(this);
         mIsViewAdded = false;
-
-        mIsPressed = false;
+        // Postpone removal to next re-layout to avoid blinking
+        mIsRemoving = true;
         setDim(false);
-
-        IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
-        if (daemon != null) {
-            try {
-                daemon.onHideFODView();
-            } catch (RemoteException e) {
-                // do nothing
-            }
-        }
+        invalidate();
     }
 
     private void resetPosition() {
