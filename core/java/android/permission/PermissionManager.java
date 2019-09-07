@@ -24,16 +24,18 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.IPackageManager;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.RemoteException;
+import android.util.Slog;
 
 import com.android.internal.annotations.Immutable;
-import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * System level service for accessing the permission capabilities of the platform.
@@ -44,6 +46,8 @@ import java.util.Objects;
 @SystemApi
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
+    private static final String TAG = PermissionManager.class.getName();
+
     /** @hide */
     public static final String KILL_APP_REASON_PERMISSIONS_REVOKED =
             "permissions revoked";
@@ -51,18 +55,11 @@ public final class PermissionManager {
     public static final String KILL_APP_REASON_GIDS_CHANGED =
             "permission grant or revoke changed gids";
 
-
-    /**
-     * {@link android.content.pm.PackageParser} needs access without having a {@link Context}.
-     *
-     * @hide
-     */
-    public static final ArrayList<SplitPermissionInfo> SPLIT_PERMISSIONS =
-            SystemConfig.getInstance().getSplitPermissions();
-
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
+
+    private List<SplitPermissionInfo> mSplitPermissionInfos;
 
     /**
      * Creates a new instance.
@@ -131,7 +128,48 @@ public final class PermissionManager {
      * @return All permissions that are split.
      */
     public @NonNull List<SplitPermissionInfo> getSplitPermissions() {
-        return SPLIT_PERMISSIONS;
+        if (mSplitPermissionInfos != null) {
+            return mSplitPermissionInfos;
+        }
+
+        List<SplitPermissionInfoParcelable> parcelableList;
+        try {
+            parcelableList = ActivityThread.getPermissionManager().getSplitPermissions();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error getting split permissions", e);
+            return Collections.emptyList();
+        }
+
+        mSplitPermissionInfos = splitPermissionInfoListToNonParcelableList(parcelableList);
+
+        return mSplitPermissionInfos;
+    }
+
+    private List<SplitPermissionInfo> splitPermissionInfoListToNonParcelableList(
+            List<SplitPermissionInfoParcelable> parcelableList) {
+        final int size = parcelableList.size();
+        List<SplitPermissionInfo> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            list.add(new SplitPermissionInfo(parcelableList.get(i)));
+        }
+        return list;
+    }
+
+    /**
+     * Converts a {@link List} of {@link SplitPermissionInfo} into a List of
+     * {@link SplitPermissionInfoParcelable} and returns it.
+     * @hide
+     */
+    public static List<SplitPermissionInfoParcelable> splitPermissionInfoListToParcelableList(
+            List<SplitPermissionInfo> splitPermissionsList) {
+        final int size = splitPermissionsList.size();
+        List<SplitPermissionInfoParcelable> outList = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            SplitPermissionInfo info = splitPermissionsList.get(i);
+            outList.add(new SplitPermissionInfoParcelable(
+                    info.getSplitPermission(), info.getNewPermissions(), info.getTargetSdk()));
+        }
+        return outList;
     }
 
     /**
@@ -140,44 +178,40 @@ public final class PermissionManager {
      */
     @Immutable
     public static final class SplitPermissionInfo {
-        private final @NonNull String mSplitPerm;
-        private final @NonNull List<String> mNewPerms;
-        private final int mTargetSdk;
+        private @NonNull final SplitPermissionInfoParcelable mSplitPermissionInfoParcelable;
 
         @Override
         public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SplitPermissionInfo that = (SplitPermissionInfo) o;
-            return mTargetSdk == that.mTargetSdk
-                    && mSplitPerm.equals(that.mSplitPerm)
-                    && mNewPerms.equals(that.mNewPerms);
+            return mSplitPermissionInfoParcelable.equals(that.mSplitPermissionInfoParcelable);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mSplitPerm, mNewPerms, mTargetSdk);
+            return mSplitPermissionInfoParcelable.hashCode();
         }
 
         /**
          * Get the permission that is split.
          */
         public @NonNull String getSplitPermission() {
-            return mSplitPerm;
+            return mSplitPermissionInfoParcelable.getSplitPermission();
         }
 
         /**
          * Get the permissions that are added.
          */
         public @NonNull List<String> getNewPermissions() {
-            return mNewPerms;
+            return mSplitPermissionInfoParcelable.getNewPermissions();
         }
 
         /**
          * Get the target API level when the permission was split.
          */
         public int getTargetSdk() {
-            return mTargetSdk;
+            return mSplitPermissionInfoParcelable.getTargetSdk();
         }
 
         /**
@@ -191,9 +225,11 @@ public final class PermissionManager {
          */
         public SplitPermissionInfo(@NonNull String splitPerm, @NonNull List<String> newPerms,
                 int targetSdk) {
-            mSplitPerm = splitPerm;
-            mNewPerms = newPerms;
-            mTargetSdk = targetSdk;
+            this(new SplitPermissionInfoParcelable(splitPerm, newPerms, targetSdk));
+        }
+
+        private SplitPermissionInfo(@NonNull SplitPermissionInfoParcelable parcelable) {
+            mSplitPermissionInfoParcelable = parcelable;
         }
     }
 }

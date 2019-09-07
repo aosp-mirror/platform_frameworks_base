@@ -1050,7 +1050,7 @@ class WindowStateAnimator {
         // to prevent further updates until buffer latch.
         // We also need to freeze the Surface geometry until a buffer
         // comes in at the new size (normally position and crop are unfrozen).
-        // setGeometryAppliesWithResizeInTransaction accomplishes this for us.
+        // deferTransactionUntil accomplishes this for us.
         if (wasForceScaled && !mForceScaleUntilResize) {
             mSurfaceController.deferTransactionUntil(mSurfaceController.mSurfaceControl,
                     mWin.getFrameNumber());

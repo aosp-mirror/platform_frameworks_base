@@ -5125,6 +5125,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private ContentCaptureSession mContentCaptureSession;
 
+    /**
+     * Whether {@link ContentCaptureSession} is cached, resets on {@link #invalidate()}.
+     */
+    private boolean mContentCaptureSessionCached;
+
     @LayoutRes
     private int mSourceLayoutId = ID_NULL;
 
@@ -5136,11 +5141,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @StyleRes
     private int mExplicitStyle;
-
-    /**
-     * Cached reference to the {@link ContentCaptureSession}, is reset on {@link #invalidate()}.
-     */
-    private ContentCaptureSession mCachedContentCaptureSession;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -9560,18 +9560,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @Nullable
     public final ContentCaptureSession getContentCaptureSession() {
-        if (mCachedContentCaptureSession != null) {
-            return mCachedContentCaptureSession;
+        if (mContentCaptureSessionCached) {
+            return mContentCaptureSession;
         }
 
-        mCachedContentCaptureSession = getAndCacheContentCaptureSession();
-        return mCachedContentCaptureSession;
+        mContentCaptureSession = getAndCacheContentCaptureSession();
+        mContentCaptureSessionCached = true;
+        return mContentCaptureSession;
     }
 
     @Nullable
     private ContentCaptureSession getAndCacheContentCaptureSession() {
         // First try the session explicitly set by setContentCaptureSession()
-        if (mContentCaptureSession != null) return mContentCaptureSession;
+        if (mContentCaptureSession != null) {
+            return mContentCaptureSession;
+        }
 
         // Then the session explicitly set in an ancestor
         ContentCaptureSession session = null;
@@ -18094,7 +18097,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Reset content capture caches
         mPrivateFlags4 &= ~PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
-        mCachedContentCaptureSession = null;
+        mContentCaptureSessionCached = false;
 
         if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)
                 || (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID)

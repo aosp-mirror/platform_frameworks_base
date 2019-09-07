@@ -512,7 +512,7 @@ class TaskRecord extends ConfigurationContainer {
         if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses
             // default configuration the next time it launches.
-            updateOverrideConfiguration(null);
+            setBounds(null);
         }
         mService.getTaskChangeNotificationController().notifyTaskRemoved(taskId);
     }
@@ -565,7 +565,7 @@ class TaskRecord extends ConfigurationContainer {
                 // Task doesn't exist in window manager yet (e.g. was restored from recents).
                 // All we can do for now is update the bounds so it can be used when the task is
                 // added to window manager.
-                updateOverrideConfiguration(bounds);
+                setBounds(bounds);
                 if (!inFreeformWindowingMode()) {
                     // re-restore the task so it can have the proper stack association.
                     mService.mStackSupervisor.restoreRecentTaskLocked(this, null, !ON_TOP);
@@ -584,7 +584,11 @@ class TaskRecord extends ConfigurationContainer {
 
             Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + taskId);
 
-            final boolean updatedConfig = updateOverrideConfiguration(bounds);
+            boolean updatedConfig = false;
+            mTmpConfig.setTo(getResolvedOverrideConfiguration());
+            if (setBounds(bounds) != BOUNDS_CHANGE_NONE) {
+                updatedConfig = !mTmpConfig.equals(getResolvedOverrideConfiguration());
+            }
             // This variable holds information whether the configuration didn't change in a significant
 
             // way and the activity was kept the way it was. If it's false, it means the activity
@@ -1803,47 +1807,12 @@ class TaskRecord extends ConfigurationContainer {
         }
     }
 
-    /**
-     * Update task's override configuration based on the bounds.
-     * @param bounds The bounds of the task.
-     * @return True if the override configuration was updated.
-     */
-    boolean updateOverrideConfiguration(Rect bounds) {
-        return updateOverrideConfiguration(bounds, null /* insetBounds */);
-    }
-
     void setLastNonFullscreenBounds(Rect bounds) {
         if (mLastNonFullscreenBounds == null) {
             mLastNonFullscreenBounds = new Rect(bounds);
         } else {
             mLastNonFullscreenBounds.set(bounds);
         }
-    }
-
-    /**
-     * Update task's override configuration based on the bounds.
-     * @param bounds The bounds of the task.
-     * @param insetBounds The bounds used to calculate the system insets, which is used here to
-     *                    subtract the navigation bar/status bar size from the screen size reported
-     *                    to the application. See {@link IActivityTaskManager#resizeDockedStack}.
-     * @return True if the override configuration was updated.
-     */
-    boolean updateOverrideConfiguration(Rect bounds, @Nullable Rect insetBounds) {
-        final boolean hasSetDisplayedBounds = (insetBounds != null && !insetBounds.isEmpty());
-        if (hasSetDisplayedBounds) {
-            setDisplayedBounds(bounds);
-        } else {
-            setDisplayedBounds(null);
-        }
-        // "steady" bounds do not include any temporary offsets from animation or interaction.
-        Rect steadyBounds = hasSetDisplayedBounds ? insetBounds : bounds;
-        if (equivalentRequestedOverrideBounds(steadyBounds)) {
-            return false;
-        }
-
-        mTmpConfig.setTo(getResolvedOverrideConfiguration());
-        setBounds(steadyBounds);
-        return !mTmpConfig.equals(getResolvedOverrideConfiguration());
     }
 
     /**
@@ -2297,7 +2266,7 @@ class TaskRecord extends ConfigurationContainer {
 
     Rect updateOverrideConfigurationFromLaunchBounds() {
         final Rect bounds = getLaunchBounds();
-        updateOverrideConfiguration(bounds);
+        setBounds(bounds);
         if (bounds != null && !bounds.isEmpty()) {
             // TODO: Review if we actually want to do this - we are setting the launch bounds
             // directly here.
@@ -2322,12 +2291,12 @@ class TaskRecord extends ConfigurationContainer {
                 return;
             }
             if (mLastNonFullscreenBounds != null) {
-                updateOverrideConfiguration(mLastNonFullscreenBounds);
+                setBounds(mLastNonFullscreenBounds);
             } else {
                 mService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
             }
         } else {
-            updateOverrideConfiguration(inStack.getRequestedOverrideBounds());
+            setBounds(inStack.getRequestedOverrideBounds());
         }
     }
 

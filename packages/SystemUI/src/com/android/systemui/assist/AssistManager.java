@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -163,8 +164,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = new PhoneStateMonitor(context);
-        mHandleController =
-                new AssistHandleBehaviorController(context, mAssistUtils, new Handler());
+        final HandlerThread assistHandleThread = new HandlerThread("AssistHandleThread");
+        assistHandleThread.start();
+        mHandleController = new AssistHandleBehaviorController(
+                context, mAssistUtils, assistHandleThread.getThreadHandler());
 
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION

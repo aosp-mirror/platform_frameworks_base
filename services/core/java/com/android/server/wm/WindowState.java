@@ -217,7 +217,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
-class WindowState extends WindowContainer<WindowState> implements WindowManagerPolicy.WindowState {
+class WindowState extends WindowContainer<WindowState> implements WindowManagerPolicy.WindowState,
+        InsetsControlTarget {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowState" : TAG_WM;
 
     // The minimal size of a window within the usable area of the freeform stack.
@@ -3329,7 +3330,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    void notifyInsetsControlChanged() {
+    @Override
+    public void notifyInsetsControlChanged() {
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
         try {

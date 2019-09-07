@@ -41,8 +41,10 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.util.Assert;
 
@@ -73,6 +75,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void setUp() {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(BubbleController.class);
         when(mGutsManager.openGuts(
                 any(View.class),
                 anyInt(),
@@ -82,6 +85,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
         mDependency.injectTestDependency(NotificationGutsManager.class, mGutsManager);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectMockDependency(BubbleController.class);
 
         mHelper = new NotificationTestHelper(mContext);
 
@@ -138,8 +142,11 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         ExpandableNotificationRow groupRow = createBlockableGroupRowSpy(10);
         int i = 0;
         for (ExpandableNotificationRow childRow : groupRow.getNotificationChildren()) {
-            childRow.getEntry().channel =
-                    new NotificationChannel(Integer.toString(i++), "", IMPORTANCE_DEFAULT);
+            childRow.getEntry().setRanking(new RankingBuilder()
+                    .setChannel(
+                            new NotificationChannel(
+                                    Integer.toString(i++), "", IMPORTANCE_DEFAULT))
+                    .build());
         }
 
         groupRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;

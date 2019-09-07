@@ -27,12 +27,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
@@ -93,7 +91,6 @@ import android.os.FactoryTest;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -881,48 +878,6 @@ class RootActivityContainer extends ConfigurationContainer
         }
     }
 
-    void resizeStack(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
-            Rect tempTaskInsetBounds, boolean preserveWindows, boolean allowResizeInDockedMode,
-            boolean deferResume) {
-
-        if (stack.inSplitScreenPrimaryWindowingMode()) {
-            mStackSupervisor.resizeDockedStackLocked(bounds, tempTaskBounds,
-                    tempTaskInsetBounds, null, null, preserveWindows, deferResume);
-            return;
-        }
-
-        final boolean splitScreenActive = getDefaultDisplay().hasSplitScreenPrimaryStack();
-        if (!allowResizeInDockedMode
-                && !stack.getWindowConfiguration().tasksAreFloating() && splitScreenActive) {
-            // If the docked stack exists, don't resize non-floating stacks independently of the
-            // size computed from the docked stack size (otherwise they will be out of sync)
-            return;
-        }
-
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stack.mStackId);
-        mWindowManager.deferSurfaceLayout();
-        try {
-            if (stack.affectedBySplitScreenResize()) {
-                if (bounds == null && stack.inSplitScreenWindowingMode()) {
-                    // null bounds = fullscreen windowing mode...at least for now.
-                    stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-                } else if (splitScreenActive) {
-                    // If we are in split-screen mode and this stack support split-screen, then
-                    // it should be split-screen secondary mode. i.e. adjacent to the docked stack.
-                    stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-                }
-            }
-            stack.resize(bounds, tempTaskBounds, tempTaskInsetBounds);
-            if (!deferResume) {
-                stack.ensureVisibleActivitiesConfigurationLocked(
-                        stack.topRunningActivityLocked(), preserveWindows);
-            }
-        } finally {
-            mWindowManager.continueSurfaceLayout();
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
-        }
-    }
-
     /**
      * Move stack with all its existing content to specified display.
      * @param stackId Id of stack to move.
@@ -1014,9 +969,8 @@ class RootActivityContainer extends ConfigurationContainer
             // Resize the pinned stack to match the current size of the task the activity we are
             // going to be moving is currently contained in. We do this to have the right starting
             // animation bounds for the pinned stack to the desired bounds the caller wants.
-            resizeStack(stack, task.getRequestedOverrideBounds(), null /* tempTaskBounds */,
-                    null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS,
-                    true /* allowResizeInDockedMode */, !DEFER_RESUME);
+            stack.resize(task.getRequestedOverrideBounds(), null /* tempTaskBounds */,
+                    null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS, !DEFER_RESUME);
 
             if (task.mActivities.size() == 1) {
                 // Defer resume until below, and do not schedule PiP changes until we animate below
@@ -2260,9 +2214,9 @@ class RootActivityContainer extends ConfigurationContainer
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
             @WindowConfiguration.ActivityType int ignoreActivityType,
             @WindowConfiguration.WindowingMode int ignoreWindowingMode, int callingUid,
-            boolean allowed) {
+            boolean allowed, boolean crossUser) {
         mStackSupervisor.getRunningTasks().getTasks(maxNum, list, ignoreActivityType,
-                ignoreWindowingMode, mActivityDisplays, callingUid, allowed);
+                ignoreWindowingMode, mActivityDisplays, callingUid, allowed, crossUser);
     }
 
     void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {

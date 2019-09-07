@@ -299,7 +299,8 @@ public class CbGeoUtils {
      * @return the encoded string.
      */
     @NonNull
-    public static String encodeGeometriesToString(@NonNull List<Geometry> geometries) {
+    public static String encodeGeometriesToString(List<Geometry> geometries) {
+        if (geometries == null || geometries.isEmpty()) return "";
         return geometries.stream()
                 .map(geometry -> encodeGeometryToString(geometry))
                 .filter(encodedStr -> !TextUtils.isEmpty(encodedStr))

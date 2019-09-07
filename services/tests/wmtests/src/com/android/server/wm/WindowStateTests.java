@@ -403,7 +403,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(topBar.isVisible());
         mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
                 .setWindow(topBar, null);
-        mDisplayContent.getInsetsStateController().onBarControllingWindowChanged(app);
+        mDisplayContent.getInsetsStateController().onBarControlTargetChanged(app, app);
         mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
                 .onInsetsModified(app, new InsetsSource(TYPE_TOP_BAR));
         waitUntilHandlersIdle();

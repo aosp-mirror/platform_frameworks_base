@@ -1794,14 +1794,14 @@ public class UserManager {
     /**
      * Returns the UserInfo object describing a specific user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param userHandle the user handle of the user whose information is being requested.
+     * @param userId the user handle of the user whose information is being requested.
      * @return the UserInfo object for a specific user.
      * @hide
      */
     @UnsupportedAppUsage
-    public UserInfo getUserInfo(@UserIdInt int userHandle) {
+    public UserInfo getUserInfo(@UserIdInt int userId) {
         try {
-            return mService.getUserInfo(userHandle);
+            return mService.getUserInfo(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2066,15 +2066,15 @@ public class UserManager {
      *
      * @param name the user's name
      * @param flags flags that identify the type of user and other properties.
-     * @param userHandle new user will be a profile of this user.
+     * @param userId new user will be a profile of this user.
      *
      * @return the {@link UserInfo} object for the created user, or null if the user
      *         could not be created.
      * @hide
      */
     @UnsupportedAppUsage
-    public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userHandle) {
-        return createProfileForUser(name, flags, userHandle, null);
+    public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userId) {
+        return createProfileForUser(name, flags, userId, null);
     }
 
     /**
@@ -2084,17 +2084,17 @@ public class UserManager {
      *
      * @param name the user's name
      * @param flags flags that identify the type of user and other properties.
-     * @param userHandle new user will be a profile of this user.
+     * @param userId new user will be a profile of this user.
      * @param disallowedPackages packages that will not be installed in the profile being created.
      *
      * @return the {@link UserInfo} object for the created user, or null if the user
      *         could not be created.
      * @hide
      */
-    public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userHandle,
+    public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userId,
             String[] disallowedPackages) {
         try {
-            return mService.createProfileForUser(name, flags, userHandle, disallowedPackages);
+            return mService.createProfileForUser(name, flags, userId, disallowedPackages);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2109,9 +2109,9 @@ public class UserManager {
      * @hide
      */
     public UserInfo createProfileForUserEvenWhenDisallowed(String name, int flags,
-            @UserIdInt int userHandle, String[] disallowedPackages) {
+            @UserIdInt int userId, String[] disallowedPackages) {
         try {
-            return mService.createProfileForUserEvenWhenDisallowed(name, flags, userHandle,
+            return mService.createProfileForUserEvenWhenDisallowed(name, flags, userId,
                     disallowedPackages);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -2280,12 +2280,12 @@ public class UserManager {
      * @hide
      * Marks the guest user for deletion to allow a new guest to be created before deleting
      * the current user who is a guest.
-     * @param userHandle
+     * @param userId
      * @return
      */
-    public boolean markGuestForDeletion(@UserIdInt int userHandle) {
+    public boolean markGuestForDeletion(@UserIdInt int userId) {
         try {
-            return mService.markGuestForDeletion(userHandle);
+            return mService.markGuestForDeletion(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2317,16 +2317,16 @@ public class UserManager {
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} and
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permissions.
      *
-     * @param userHandle the id of the user to become admin
+     * @param userId the id of the user to become admin
      * @hide
      */
     @RequiresPermission(allOf = {
             Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             Manifest.permission.MANAGE_USERS
     })
-    public void setUserAdmin(@UserIdInt int userHandle) {
+    public void setUserAdmin(@UserIdInt int userId) {
         try {
-            mService.setUserAdmin(userHandle);
+            mService.setUserAdmin(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2337,9 +2337,9 @@ public class UserManager {
      *
      * @hide
      */
-    public void evictCredentialEncryptionKey(@UserIdInt int userHandle) {
+    public void evictCredentialEncryptionKey(@UserIdInt int userId) {
         try {
-            mService.evictCredentialEncryptionKey(userHandle);
+            mService.evictCredentialEncryptionKey(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2400,9 +2400,9 @@ public class UserManager {
             Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             Manifest.permission.MANAGE_USERS
     })
-    public @Nullable String getUserAccount(@UserIdInt int userHandle) {
+    public @Nullable String getUserAccount(@UserIdInt int userId) {
         try {
-            return mService.getUserAccount(userHandle);
+            return mService.getUserAccount(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2416,9 +2416,9 @@ public class UserManager {
             Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             Manifest.permission.MANAGE_USERS
     })
-    public void setUserAccount(@UserIdInt int userHandle, @Nullable String accountName) {
+    public void setUserAccount(@UserIdInt int userId, @Nullable String accountName) {
         try {
-            mService.setUserAccount(userHandle, accountName);
+            mService.setUserAccount(userId, accountName);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2477,20 +2477,19 @@ public class UserManager {
     }
 
     /**
-     * Returns list of the profiles of userHandle including
-     * userHandle itself.
+     * Returns list of the profiles of userId including userId itself.
      * Note that this returns both enabled and not enabled profiles. See
      * {@link #getEnabledProfiles(int)} if you need only the enabled ones.
      *
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param userHandle profiles of this user will be returned.
+     * @param userId profiles of this user will be returned.
      * @return the list of profiles.
      * @hide
      */
     @UnsupportedAppUsage
-    public List<UserInfo> getProfiles(@UserIdInt int userHandle) {
+    public List<UserInfo> getProfiles(@UserIdInt int userId) {
         try {
-            return mService.getProfiles(userHandle, false /* enabledOnly */);
+            return mService.getProfiles(userId, false /* enabledOnly */);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2512,19 +2511,18 @@ public class UserManager {
     }
 
     /**
-     * Returns list of the profiles of userHandle including
-     * userHandle itself.
+     * Returns list of the profiles of userId including userId itself.
      * Note that this returns only enabled.
      *
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param userHandle profiles of this user will be returned.
+     * @param userId profiles of this user will be returned.
      * @return the list of profiles.
      * @hide
      */
     @UnsupportedAppUsage
-    public List<UserInfo> getEnabledProfiles(@UserIdInt int userHandle) {
+    public List<UserInfo> getEnabledProfiles(@UserIdInt int userId) {
         try {
-            return mService.getProfiles(userHandle, true /* enabledOnly */);
+            return mService.getProfiles(userId, true /* enabledOnly */);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2584,14 +2582,14 @@ public class UserManager {
 
     /**
      * Returns the device credential owner id of the profile from
-     * which this method is called, or userHandle if called from a user that
+     * which this method is called, or userId if called from a user that
      * is not a profile.
      *
      * @hide
      */
-    public int getCredentialOwnerProfile(@UserIdInt int userHandle) {
+    public int getCredentialOwnerProfile(@UserIdInt int userId) {
         try {
-            return mService.getCredentialOwnerProfile(userHandle);
+            return mService.getCredentialOwnerProfile(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2604,9 +2602,9 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public UserInfo getProfileParent(@UserIdInt int userHandle) {
+    public UserInfo getProfileParent(@UserIdInt int userId) {
         try {
-            return mService.getProfileParent(userHandle);
+            return mService.getProfileParent(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2785,13 +2783,13 @@ public class UserManager {
     /**
      * Removes a user and all associated data.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param userHandle the integer handle of the user, where 0 is the primary user.
+     * @param userId the integer handle of the user.
      * @hide
      */
     @UnsupportedAppUsage
-    public boolean removeUser(@UserIdInt int userHandle) {
+    public boolean removeUser(@UserIdInt int userId) {
         try {
-            return mService.removeUser(userHandle);
+            return mService.removeUser(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2823,9 +2821,9 @@ public class UserManager {
      * @see {@link #removeUser(int)}
      * @hide
      */
-    public boolean removeUserEvenWhenDisallowed(@UserIdInt int userHandle) {
+    public boolean removeUserEvenWhenDisallowed(@UserIdInt int userId) {
         try {
-            return mService.removeUserEvenWhenDisallowed(userHandle);
+            return mService.removeUserEvenWhenDisallowed(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2835,13 +2833,13 @@ public class UserManager {
      * Updates the user's name.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
-     * @param userHandle the user's integer handle
+     * @param userId the user's integer id
      * @param name the new name for the user
      * @hide
      */
-    public void setUserName(@UserIdInt int userHandle, String name) {
+    public void setUserName(@UserIdInt int userId, String name) {
         try {
-            mService.setUserName(userHandle, name);
+            mService.setUserName(userId, name);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2862,13 +2860,13 @@ public class UserManager {
 
     /**
      * Sets the user's photo.
-     * @param userHandle the user for whom to change the photo.
+     * @param userId the user for whom to change the photo.
      * @param icon the bitmap to set as the photo.
      * @hide
      */
-    public void setUserIcon(@UserIdInt int userHandle, Bitmap icon) {
+    public void setUserIcon(@UserIdInt int userId, Bitmap icon) {
         try {
-            mService.setUserIcon(userHandle, icon);
+            mService.setUserIcon(userId, icon);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2889,15 +2887,15 @@ public class UserManager {
 
     /**
      * Returns a file descriptor for the user's photo. PNG data can be read from this file.
-     * @param userHandle the user whose photo we want to read.
+     * @param userId the user whose photo we want to read.
      * @return a {@link Bitmap} of the user's photo, or null if there's no photo.
      * @see com.android.internal.util.UserIcons#getDefaultUserIcon for a default.
      * @hide
      */
     @UnsupportedAppUsage
-    public Bitmap getUserIcon(@UserIdInt int userHandle) {
+    public Bitmap getUserIcon(@UserIdInt int userId) {
         try {
-            ParcelFileDescriptor fd = mService.getUserIcon(userHandle);
+            ParcelFileDescriptor fd = mService.getUserIcon(userId);
             if (fd != null) {
                 try {
                     return BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
@@ -2999,27 +2997,27 @@ public class UserManager {
     }
 
     /**
-     * Returns a serial number on this device for a given userHandle. User handles can be recycled
+     * Returns a serial number on this device for a given userId. User handles can be recycled
      * when deleting and creating users, but serial numbers are not reused until the device is wiped.
-     * @param userHandle
-     * @return a serial number associated with that user, or -1 if the userHandle is not valid.
+     * @param userId
+     * @return a serial number associated with that user, or -1 if the userId is not valid.
      * @hide
      */
     @UnsupportedAppUsage
-    public int getUserSerialNumber(@UserIdInt int userHandle) {
+    public int getUserSerialNumber(@UserIdInt int userId) {
         try {
-            return mService.getUserSerialNumber(userHandle);
+            return mService.getUserSerialNumber(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Returns a userHandle on this device for a given user serial number. User handles can be
+     * Returns a userId on this device for a given user serial number. User handles can be
      * recycled when deleting and creating users, but serial numbers are not reused until the device
      * is wiped.
      * @param userSerialNumber
-     * @return the userHandle associated with that user serial number, or -1 if the serial number
+     * @return the userId associated with that user serial number, or -1 if the serial number
      * is not valid.
      * @hide
      */

@@ -31,6 +31,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BA
 
 import android.annotation.NonNull;
 import android.app.Notification;
+import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
@@ -89,7 +90,6 @@ public final class NotificationEntry {
     public StatusBarNotification notification;
     private Ranking mRanking;
 
-    public NotificationChannel channel;
     public long lastAudiblyAlertedMs;
     public boolean noisy;
     public boolean ambient;
@@ -243,7 +243,6 @@ public final class NotificationEntry {
     public void setRanking(@NonNull Ranking ranking) {
         mRanking = ranking;
 
-        channel = ranking.getChannel();
         lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
         importance = ranking.getImportance();
         ambient = ranking.isAmbient();
@@ -257,6 +256,10 @@ public final class NotificationEntry {
         suppressedVisualEffects = ranking.getSuppressedVisualEffects();
         suspended = ranking.isSuspended();
         canBubble = ranking.canBubble();
+    }
+
+    public NotificationChannel getChannel() {
+        return mRanking.getChannel();
     }
 
     public void setInterruption() {
@@ -545,21 +548,18 @@ public final class NotificationEntry {
         if (!ArrayUtils.isEmpty(replyTexts)) {
             return true;
         }
-        Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        if (messages != null && messages.length > 0) {
-            Parcelable message = messages[messages.length - 1];
-            if (message instanceof Bundle) {
-                Notification.MessagingStyle.Message lastMessage =
-                        Notification.MessagingStyle.Message.getMessageFromBundle(
-                                (Bundle) message);
-                if (lastMessage != null) {
-                    Person senderPerson = lastMessage.getSenderPerson();
-                    if (senderPerson == null) {
-                        return true;
-                    }
-                    Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
-                    return Objects.equals(user, senderPerson);
+        List<Message> messages = Message.getMessagesFromBundleArray(
+                extras.getParcelableArray(Notification.EXTRA_MESSAGES));
+        if (messages != null && !messages.isEmpty()) {
+            Message lastMessage = messages.get(messages.size() -1);
+
+            if (lastMessage != null) {
+                Person senderPerson = lastMessage.getSenderPerson();
+                if (senderPerson == null) {
+                    return true;
                 }
+                Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+                return Objects.equals(user, senderPerson);
             }
         }
         return false;

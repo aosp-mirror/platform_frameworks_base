@@ -393,6 +393,10 @@ public class NotificationPanelView extends PanelView implements
     private boolean mAllowExpandForSmallExpansion;
     private Runnable mExpandAfterLayoutRunnable;
 
+    private PluginManager mPluginManager;
+    private FrameLayout mPluginFrame;
+    private NPVPluginManager mNPVPluginManager;
+
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             InjectionInflationController injectionInflationController,
@@ -400,7 +404,8 @@ public class NotificationPanelView extends PanelView implements
             PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager,
+            PluginManager pluginManager) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
@@ -431,6 +436,7 @@ public class NotificationPanelView extends PanelView implements
         });
         mBottomAreaShadeAlphaAnimator.setDuration(160);
         mBottomAreaShadeAlphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
+        mPluginManager = pluginManager;
     }
 
     /**
@@ -465,6 +471,9 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea = findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mLastOrientation = getResources().getConfiguration().orientation;
+        mPluginFrame = findViewById(R.id.plugin_frame);
+        mNPVPluginManager = new NPVPluginManager(mPluginFrame, mPluginManager);
+
 
         initBottomArea();
 
@@ -584,6 +593,19 @@ public class NotificationPanelView extends PanelView implements
             lp.gravity = panelGravity;
             mNotificationStackScroller.setLayoutParams(lp);
         }
+        int sideMargin = res.getDimensionPixelOffset(R.dimen.notification_side_paddings);
+        int topMargin =
+                res.getDimensionPixelOffset(com.android.internal.R.dimen.quick_qs_total_height);
+        lp = (FrameLayout.LayoutParams) mPluginFrame.getLayoutParams();
+        if (lp.width != qsWidth || lp.gravity != panelGravity || lp.leftMargin != sideMargin
+                || lp.rightMargin != sideMargin || lp.topMargin != topMargin) {
+            lp.width = qsWidth;
+            lp.gravity = panelGravity;
+            lp.leftMargin = sideMargin;
+            lp.rightMargin = sideMargin;
+            lp.topMargin = topMargin;
+            mPluginFrame.setLayoutParams(lp);
+        }
     }
 
     @Override
@@ -650,6 +672,43 @@ public class NotificationPanelView extends PanelView implements
         if (mOnReinflationListener != null) {
             mOnReinflationListener.run();
         }
+        reinflatePluginContainer();
+    }
+
+    @Override
+    public void onUiModeChanged() {
+        reinflatePluginContainer();
+    }
+
+    private void reinflatePluginContainer() {
+        int index = indexOfChild(mPluginFrame);
+        removeView(mPluginFrame);
+        mPluginFrame = (FrameLayout) mInjectionInflationController
+                .injectable(LayoutInflater.from(mContext)).inflate(
+                        R.layout.status_bar_expanded_plugin_frame,
+                        this,
+                        false);
+        addView(mPluginFrame, index);
+
+        Resources res = getResources();
+        int qsWidth = res.getDimensionPixelSize(R.dimen.qs_panel_width);
+        int panelGravity = getResources().getInteger(R.integer.notification_panel_layout_gravity);
+        FrameLayout.LayoutParams lp;
+        int sideMargin = res.getDimensionPixelOffset(R.dimen.notification_side_paddings);
+        int topMargin =
+                res.getDimensionPixelOffset(com.android.internal.R.dimen.quick_qs_total_height);
+        lp = (FrameLayout.LayoutParams) mPluginFrame.getLayoutParams();
+        if (lp.width != qsWidth || lp.gravity != panelGravity || lp.leftMargin != sideMargin
+                || lp.rightMargin != sideMargin || lp.topMargin != topMargin) {
+            lp.width = qsWidth;
+            lp.gravity = panelGravity;
+            lp.leftMargin = sideMargin;
+            lp.rightMargin = sideMargin;
+            lp.topMargin = topMargin;
+            mPluginFrame.setLayoutParams(lp);
+        }
+
+        mNPVPluginManager.replaceFrameLayout(mPluginFrame);
     }
 
     private void initBottomArea() {
@@ -679,6 +738,7 @@ public class NotificationPanelView extends PanelView implements
         int oldMaxHeight = mQsMaxExpansionHeight;
         if (mQs != null) {
             mQsMinExpansionHeight = mKeyguardShowing ? 0 : mQs.getQsMinExpansionHeight();
+            mQsMinExpansionHeight += mNPVPluginManager.getHeight();
             mQsMaxExpansionHeight = mQs.getDesiredHeight();
             mNotificationStackScroller.setMaxTopPadding(
                     mQsMaxExpansionHeight + mQsNotificationTopPadding);
@@ -1784,6 +1844,9 @@ public class NotificationPanelView extends PanelView implements
                 mBarState != StatusBarState.KEYGUARD && (!mQsExpanded
                         || mQsExpansionFromOverscroll));
         updateEmptyShadeView();
+        mNPVPluginManager.changeVisibility((mBarState != StatusBarState.KEYGUARD)
+                ? View.VISIBLE
+                : View.INVISIBLE);
         mQsNavbarScrim.setVisibility(mBarState == StatusBarState.SHADE && mQsExpanded
                 && !mStackScrollerOverscrolling && mQsScrimEnabled
                 ? View.VISIBLE
@@ -1840,6 +1903,8 @@ public class NotificationPanelView extends PanelView implements
         if (mQs == null) return;
         float qsExpansionFraction = getQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
+        int heightDiff = mQs.getDesiredHeight() - mQs.getQsMinExpansionHeight();
+        mNPVPluginManager.setExpansion(qsExpansionFraction, getHeaderTranslation(), heightDiff);
         mNotificationStackScroller.setQsExpansionFraction(qsExpansionFraction);
     }
 
@@ -2260,6 +2325,7 @@ public class NotificationPanelView extends PanelView implements
                 appearAmount = mNotificationStackScroller.calculateAppearFractionBypass();
             }
             startHeight = -mQs.getQsMinExpansionHeight();
+            startHeight -= mNPVPluginManager.getHeight();
         }
         float translation = MathUtils.lerp(startHeight, 0,
                 Math.min(1.0f, appearAmount))
@@ -2400,6 +2466,7 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusBar.setListening(listening);
         if (mQs == null) return;
         mQs.setListening(listening);
+        mNPVPluginManager.setListening(listening);
     }
 
     @Override

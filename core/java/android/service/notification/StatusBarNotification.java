@@ -170,10 +170,7 @@ public class StatusBarNotification implements Parcelable {
 
     /**
      * Returns true if application asked that this notification be part of a group.
-     *
-     * @hide
      */
-    @SystemApi
     public boolean isAppGroup() {
         if (getNotification().getGroup() != null || getNotification().getSortKey() != null) {
             return true;

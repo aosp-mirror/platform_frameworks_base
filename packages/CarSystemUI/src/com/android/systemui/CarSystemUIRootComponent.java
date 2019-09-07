@@ -26,6 +26,7 @@ import dagger.Component;
                 DependencyProvider.class,
                 DependencyBinder.class,
                 ServiceBinder.class,
+                SystemUIBinder.class,
                 SystemUIFactory.ContextHolder.class,
                 SystemUIModule.class,
                 CarSystemUIModule.class

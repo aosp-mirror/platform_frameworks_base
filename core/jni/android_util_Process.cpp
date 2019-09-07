@@ -658,6 +658,12 @@ static jlong android_os_Process_getTotalMemory(JNIEnv* env, jobject clazz)
     return si.totalram;
 }
 
+/*
+ * The outFields array is initialized to -1 to allow the caller to identify
+ * when the status file (and therefore the process) they specified is invalid.
+ * This array should not be overwritten or cleared before we know that the
+ * status file can be read.
+ */
 void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileStr,
                                       jobjectArray reqFields, jlongArray outFields)
 {
@@ -706,14 +712,14 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
         return;
     }
 
-    //ALOGI("Clearing %" PRId32 " sizes", count);
-    for (i=0; i<count; i++) {
-        sizesArray[i] = 0;
-    }
-
     int fd = open(file.string(), O_RDONLY | O_CLOEXEC);
 
     if (fd >= 0) {
+        //ALOGI("Clearing %" PRId32 " sizes", count);
+        for (i=0; i<count; i++) {
+            sizesArray[i] = 0;
+        }
+
         const size_t BUFFER_SIZE = 4096;
         char* buffer = (char*)malloc(BUFFER_SIZE);
         int len = read(fd, buffer, BUFFER_SIZE-1);

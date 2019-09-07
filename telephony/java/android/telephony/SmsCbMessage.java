@@ -139,6 +139,12 @@ public final class SmsCbMessage implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface MessagePriority {}
 
+    /**
+     * ATIS-0700041 Section 5.2.8 WAC Geo-Fencing Maximum Wait Time Table 12.
+     * @hide
+     */
+    public static final int MAXIMUM_WAIT_TIME_NOT_SET = 255;
+
     /** Format of this message (for interpretation of service category values). */
     private final int mMessageFormat;
 
@@ -187,6 +193,14 @@ public final class SmsCbMessage implements Parcelable {
     @Nullable
     private final SmsCbCmasInfo mCmasWarningInfo;
 
+    /**
+     * Geo-Fencing Maximum Wait Time in second, a device shall allow to determine its position
+     * meeting operator policy. If the device is unable to determine its position meeting operator
+     * policy within the GeoFencing Maximum Wait Time, it shall present the alert to the user and
+     * discontinue further positioning determination for the alert.
+     */
+    private final int mMaximumWaitTimeSec;
+
     /** UNIX timestamp of when the message was received. */
     private final long mReceivedTimeMillis;
 
@@ -202,8 +216,8 @@ public final class SmsCbMessage implements Parcelable {
             @Nullable SmsCbCmasInfo cmasWarningInfo) {
 
         this(messageFormat, geographicalScope, serialNumber, location, serviceCategory, language,
-                body, priority, etwsWarningInfo, cmasWarningInfo, null /* geometries */,
-                System.currentTimeMillis());
+                body, priority, etwsWarningInfo, cmasWarningInfo, 0 /* maximumWaitingTime */,
+                null /* geometries */, System.currentTimeMillis());
     }
 
     /**
@@ -213,7 +227,7 @@ public final class SmsCbMessage implements Parcelable {
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
             SmsCbLocation location, int serviceCategory, String language, String body,
             int priority, SmsCbEtwsInfo etwsWarningInfo, SmsCbCmasInfo cmasWarningInfo,
-            List<Geometry> geometries, long receivedTimeMillis) {
+            int maximumWaitTimeSec, List<Geometry> geometries, long receivedTimeMillis) {
         mMessageFormat = messageFormat;
         mGeographicalScope = geographicalScope;
         mSerialNumber = serialNumber;
@@ -226,6 +240,7 @@ public final class SmsCbMessage implements Parcelable {
         mCmasWarningInfo = cmasWarningInfo;
         mReceivedTimeMillis = receivedTimeMillis;
         mGeometries = geometries;
+        mMaximumWaitTimeSec = maximumWaitTimeSec;
     }
 
     /**
@@ -262,6 +277,7 @@ public final class SmsCbMessage implements Parcelable {
         mReceivedTimeMillis = in.readLong();
         String geoStr = in.readString();
         mGeometries = geoStr != null ? CbGeoUtils.parseGeometriesFromString(geoStr) : null;
+        mMaximumWaitTimeSec = in.readInt();
     }
 
     /**
@@ -295,6 +311,7 @@ public final class SmsCbMessage implements Parcelable {
         dest.writeLong(mReceivedTimeMillis);
         dest.writeString(
                 mGeometries != null ? CbGeoUtils.encodeGeometriesToString(mGeometries) : null);
+        dest.writeInt(mMaximumWaitTimeSec);
     }
 
     @NonNull
@@ -389,6 +406,15 @@ public final class SmsCbMessage implements Parcelable {
     }
 
     /**
+     * Get the Geo-Fencing Maximum Wait Time.
+     * @return the time in second.
+     * @hide
+     */
+    public int getMaximumWaitingTime() {
+        return mMaximumWaitTimeSec;
+    }
+
+    /**
      * Get the time when this message was received.
      * @return the time in millisecond
      */
@@ -475,6 +501,7 @@ public final class SmsCbMessage implements Parcelable {
                 + ", priority=" + mPriority
                 + (mEtwsWarningInfo != null ? (", " + mEtwsWarningInfo.toString()) : "")
                 + (mCmasWarningInfo != null ? (", " + mCmasWarningInfo.toString()) : "")
+                + ", maximumWaitingTime = " + mMaximumWaitTimeSec
                 + ", geo=" + (mGeometries != null
                 ? CbGeoUtils.encodeGeometriesToString(mGeometries) : "null")
                 + '}';
@@ -534,6 +561,8 @@ public final class SmsCbMessage implements Parcelable {
         } else {
             cv.put(CellBroadcasts.GEOMETRIES, (String) null);
         }
+
+        cv.put(CellBroadcasts.MAXIMUM_WAIT_TIME, mMaximumWaitTimeSec);
 
         return cv;
     }
@@ -644,17 +673,21 @@ public final class SmsCbMessage implements Parcelable {
         List<Geometry> geometries =
                 geoStr != null ? CbGeoUtils.parseGeometriesFromString(geoStr) : null;
 
-        long receivedTimeSec = cursor.getLong(
+        long receivedTimeMillis = cursor.getLong(
                 cursor.getColumnIndexOrThrow(CellBroadcasts.RECEIVED_TIME));
 
+        int maximumWaitTimeSec = cursor.getInt(
+                cursor.getColumnIndexOrThrow(CellBroadcasts.MAXIMUM_WAIT_TIME));
+
         return new SmsCbMessage(format, geoScope, serialNum, location, category,
-                language, body, priority, etwsInfo, cmasInfo, geometries, receivedTimeSec);
+                language, body, priority, etwsInfo, cmasInfo, maximumWaitTimeSec, geometries,
+                receivedTimeMillis);
     }
 
     /**
      * @return {@code True} if this message needs geo-fencing check.
      */
     public boolean needGeoFencingCheck() {
-        return mGeometries != null;
+        return mMaximumWaitTimeSec > 0 && mGeometries != null;
     }
 }

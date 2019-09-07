@@ -99,6 +99,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
  * state of the keyguard, power management events that effect whether the keyguard
@@ -216,6 +218,7 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mBootSendUserPresent;
     private boolean mShuttingDown;
     private boolean mDozing;
+    private final FalsingManager mFalsingManager;
 
     /** High level access to the power manager for WakeLocks */
     private PowerManager mPM;
@@ -677,6 +680,13 @@ public class KeyguardViewMediator extends SystemUI {
             return message;
         }
     };
+
+    @Inject
+    public KeyguardViewMediator(FalsingManager falsingManager) {
+        super();
+
+        mFalsingManager = falsingManager;
+    }
 
     public void userActivity() {
         mPM.userActivity(SystemClock.uptimeMillis(), false);
@@ -1603,7 +1613,7 @@ public class KeyguardViewMediator extends SystemUI {
                     Trace.beginSection("KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
-                    Dependency.get(FalsingManager.class).onSucccessfulUnlock();
+                    mFalsingManager.onSucccessfulUnlock();
                     Trace.endSection();
                     break;
                 case KEYGUARD_DONE_PENDING_TIMEOUT:
@@ -2075,11 +2085,10 @@ public class KeyguardViewMediator extends SystemUI {
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
             ViewGroup container, NotificationPanelView panelView,
             BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer,
-            View notificationContainer, KeyguardBypassController bypassController,
-            FalsingManager falsingManager) {
+            View notificationContainer, KeyguardBypassController bypassController) {
         mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container, panelView,
                 biometricUnlockController, mDismissCallbackRegistry, lockIconContainer,
-                notificationContainer, bypassController, falsingManager);
+                notificationContainer, bypassController, mFalsingManager);
         return mStatusBarKeyguardViewManager;
     }
 

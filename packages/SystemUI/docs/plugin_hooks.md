@@ -56,6 +56,11 @@ Expected interface: [ClockPlugin](/packages/SystemUI/plugin/src/com/android/syst
 
 Use: Allows replacement of the keyguard main clock.
 
+### Action: com.android.systemui.action.PLUGIN_NPV
+Expected interface: [NPVPlugin](/packages/SystemUI/plugin/src/com/android/systemui/plugins/NPVPlugin.java)
+
+Use: Attach a view under QQS for prototyping.
+
 # Global plugin dependencies
 These classes can be accessed by any plugin using PluginDependency as long as they @Requires them.
 

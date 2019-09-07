@@ -57,6 +57,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageParserCacheHelper.ReadHelper;
 import android.content.pm.PackageParserCacheHelper.WriteHelper;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
@@ -79,7 +80,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.system.StructStat;
@@ -2528,11 +2528,17 @@ public class PackageParser {
             Slog.i(TAG, newPermsMsg.toString());
         }
 
+        List<SplitPermissionInfoParcelable> splitPermissions;
 
-        final int NS = PermissionManager.SPLIT_PERMISSIONS.size();
-        for (int is=0; is<NS; is++) {
-            final PermissionManager.SplitPermissionInfo spi =
-                    PermissionManager.SPLIT_PERMISSIONS.get(is);
+        try {
+            splitPermissions = ActivityThread.getPermissionManager().getSplitPermissions();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        final int listSize = splitPermissions.size();
+        for (int is = 0; is < listSize; is++) {
+            final SplitPermissionInfoParcelable spi = splitPermissions.get(is);
             if (pkg.applicationInfo.targetSdkVersion >= spi.getTargetSdk()
                     || !pkg.requestedPermissions.contains(spi.getSplitPermission())) {
                 continue;
@@ -8501,5 +8507,4 @@ public class PackageParser {
             this.error = error;
         }
     }
-
 }

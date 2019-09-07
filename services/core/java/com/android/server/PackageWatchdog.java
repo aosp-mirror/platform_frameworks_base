@@ -116,6 +116,10 @@ public class PackageWatchdog {
     private final AtomicFile mPolicyFile;
     private final ExplicitHealthCheckController mHealthCheckController;
     private final ConnectivityModuleConnector mConnectivityModuleConnector;
+    private final Runnable mSyncRequests = this::syncRequests;
+    private final Runnable mSyncStateWithScheduledReason = this::syncStateWithScheduledReason;
+    private final Runnable mSaveToFile = this::saveToFile;
+    private final SystemClock mSystemClock;
     @GuardedBy("mLock")
     private boolean mIsPackagesReady;
     // Flag to control whether explicit health checks are supported or not
@@ -130,17 +134,11 @@ public class PackageWatchdog {
     @GuardedBy("mLock")
     private long mUptimeAtLastStateSync;
 
-    private final Runnable mSyncRequests = this::syncRequests;
-    private final Runnable mSyncStateWithScheduledReason = this::syncStateWithScheduledReason;
-    private final Runnable mSaveToFile = this::saveToFile;
-
     @FunctionalInterface
     @VisibleForTesting
     interface SystemClock {
         long uptimeMillis();
     }
-
-    private final SystemClock mSystemClock;
 
     private PackageWatchdog(Context context) {
         // Needs to be constructed inline
@@ -283,28 +281,6 @@ public class PackageWatchdog {
             mAllObservers.remove(observer.getName());
         }
         syncState("unregistering observer: " + observer.getName());
-    }
-
-    /**
-     * Returns packages observed by {@code observer}
-     *
-     * @return an empty set if {@code observer} has some packages observerd from a previous boot
-     * but has not registered itself in the current boot to receive notifications. Returns null
-     * if there are no active packages monitored from any boot.
-     */
-    @Nullable
-    public Set<String> getPackages(PackageHealthObserver observer) {
-        synchronized (mLock) {
-            for (int i = 0; i < mAllObservers.size(); i++) {
-                if (observer.getName().equals(mAllObservers.keyAt(i))) {
-                    if (observer.equals(mAllObservers.valueAt(i).mRegisteredObserver)) {
-                        return mAllObservers.valueAt(i).mPackages.keySet();
-                    }
-                    return Collections.emptySet();
-                }
-            }
-        }
-        return null;
     }
 
     /**

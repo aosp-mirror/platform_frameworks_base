@@ -549,6 +549,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final PointerEventDispatcher mPointerEventDispatcher;
 
     private final InsetsStateController mInsetsStateController;
+    private final InsetsPolicy mInsetsPolicy;
 
     /** @see #getParentWindow() */
     private WindowState mParentWindow;
@@ -968,6 +969,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWmService.mAnimator.addDisplayLocked(mDisplayId);
         mInputMonitor = new InputMonitor(service, mDisplayId);
         mInsetsStateController = new InsetsStateController(this);
+        mInsetsPolicy = new InsetsPolicy(mInsetsStateController, this);
     }
 
     boolean isReady() {
@@ -1124,6 +1126,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     InsetsStateController getInsetsStateController() {
         return mInsetsStateController;
+    }
+
+    InsetsPolicy getInsetsPolicy() {
+        return mInsetsPolicy;
     }
 
     @Surface.Rotation

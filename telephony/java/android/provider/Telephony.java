@@ -3962,6 +3962,13 @@ public final class Telephony {
         public static final Uri CONTENT_URI = Uri.parse("content://cellbroadcasts");
 
         /**
+         * The id of the subscription which received this cell broadcast message.
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String SUB_ID = "sub_id";
+
+        /**
          * Message geographical scope. Valid values are:
          * <ul>
          * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_CELL_WIDE}. meaning the
@@ -4183,6 +4190,18 @@ public final class Telephony {
         public static final String GEOMETRIES = "geometries";
 
         /**
+         * Geo-Fencing Maximum Wait Time in second. The range of the time is [0, 255]. A device
+         * shall allow to determine its position meeting operator policy. If the device is unable to
+         * determine its position meeting operator policy within the GeoFencing Maximum Wait Time,
+         * it shall present the alert to the user and discontinue further positioning determination
+         * for the alert.
+         *
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String MAXIMUM_WAIT_TIME = "maximum_wait_time";
+
+        /**
          * Query columns for instantiating {@link android.telephony.CellBroadcastMessage} objects.
          * @hide
          */
@@ -4235,7 +4254,8 @@ public final class Telephony {
                 CMAS_CERTAINTY,
                 RECEIVED_TIME,
                 MESSAGE_BROADCASTED,
-                GEOMETRIES
+                GEOMETRIES,
+                MAXIMUM_WAIT_TIME
         };
     }
 

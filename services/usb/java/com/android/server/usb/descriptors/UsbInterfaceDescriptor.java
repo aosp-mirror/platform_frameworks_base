@@ -31,7 +31,6 @@ import java.util.ArrayList;
  */
 public class UsbInterfaceDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbInterfaceDescriptor";
-
     protected int mInterfaceNumber;   // 2:1 Number of Interface
     protected byte mAlternateSetting; // 3:1 Value used to select alternative setting
     protected byte mNumEndpoints;     // 4:1 Number of Endpoints used for this interface
@@ -71,6 +70,19 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
 
     public byte getNumEndpoints() {
         return mNumEndpoints;
+    }
+
+    /**
+     * @param index Index of desired UsbEndpointDescriptor.
+     * @return the UsbEndpointDescriptor descriptor at the specified index, or
+     *  null if an invalid index.
+     */
+    public UsbEndpointDescriptor getEndpointDescriptor(int index) {
+        if (index < 0 || index >= mEndpointDescriptors.size()) {
+            return null;
+        }
+
+        return mEndpointDescriptors.get(index);
     }
 
     public int getUsbClass() {

@@ -521,18 +521,12 @@ package android.app {
   }
 
   public class Notification implements android.os.Parcelable {
-    method @Nullable public android.util.Pair<android.app.RemoteInput,android.app.Notification.Action> findRemoteInputActionPair(boolean);
-    method @NonNull public java.util.List<android.app.Notification.Action> getContextualActions();
     field public static final String CATEGORY_CAR_EMERGENCY = "car_emergency";
     field public static final String CATEGORY_CAR_INFORMATION = "car_information";
     field public static final String CATEGORY_CAR_WARNING = "car_warning";
     field @RequiresPermission(android.Manifest.permission.NOTIFICATION_DURING_SETUP) public static final String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
     field @RequiresPermission(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME) public static final String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";
     field public static final int FLAG_AUTOGROUP_SUMMARY = 1024; // 0x400
-  }
-
-  public static final class Notification.MessagingStyle.Message {
-    method @Nullable public static android.app.Notification.MessagingStyle.Message getMessageFromBundle(@NonNull android.os.Bundle);
   }
 
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
@@ -6710,10 +6704,6 @@ package android.service.notification {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.SnoozeCriterion> CREATOR;
   }
 
-  public class StatusBarNotification implements android.os.Parcelable {
-    method public boolean isAppGroup();
-  }
-
 }
 
 package android.service.oemlock {
@@ -9319,7 +9309,7 @@ package android.telephony.ims.feature {
     field public static final int STATE_UNAVAILABLE = 0; // 0x0
   }
 
-  public static class ImsFeature.Capabilities {
+  @Deprecated public static class ImsFeature.Capabilities {
     field @Deprecated protected int mCapabilities;
   }
 
@@ -9353,7 +9343,7 @@ package android.telephony.ims.feature {
   public static class MmTelFeature.MmTelCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
     ctor public MmTelFeature.MmTelCapabilities();
     ctor @Deprecated public MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
-    ctor public MmTelFeature.MmTelCapabilities(int);
+    ctor public MmTelFeature.MmTelCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final void addCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final boolean isCapable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final void removeCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);

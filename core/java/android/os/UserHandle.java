@@ -128,8 +128,9 @@ public final class UserHandle implements Parcelable {
     @UnsupportedAppUsage
     public static final int AID_CACHE_GID_START = android.os.Process.FIRST_APPLICATION_CACHE_GID;
 
+    /** The userId represented by this UserHandle. */
     @UnsupportedAppUsage
-    final int mHandle;
+    final @UserIdInt int mHandle;
 
     /**
      * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
@@ -270,7 +271,7 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static int getSharedAppGid(int userId, int appId) {
+    public static int getSharedAppGid(@UserIdInt int userId, @AppIdInt int appId) {
         if (appId >= AID_APP_START && appId <= AID_APP_END) {
             return (appId - AID_APP_START) + AID_SHARED_GID_START;
         } else if (appId >= AID_ROOT && appId <= AID_APP_START) {
@@ -300,7 +301,7 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static int getCacheAppGid(int userId, int appId) {
+    public static int getCacheAppGid(@UserIdInt int userId, @AppIdInt int appId) {
         if (appId >= AID_APP_START && appId <= AID_APP_END) {
             return getUid(userId, (appId - AID_APP_START) + AID_CACHE_GID_START);
         } else {
@@ -432,8 +433,8 @@ public final class UserHandle implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage
-    public UserHandle(int h) {
-        mHandle = h;
+    public UserHandle(@UserIdInt int userId) {
+        mHandle = userId;
     }
 
     /**

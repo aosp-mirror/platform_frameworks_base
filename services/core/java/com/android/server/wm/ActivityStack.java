@@ -33,6 +33,7 @@ import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.INVALID_DISPLAY;
@@ -134,6 +135,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
@@ -635,11 +637,15 @@ class ActivityStack extends ConfigurationContainer {
             display.onStackWindowingModeChanged(this);
         }
         if (hasNewOverrideBounds) {
-            // Note the resizeStack may enter onConfigurationChanged recursively, so we make a copy
-            // of the temporary bounds (newBounds is mTmpRect) to avoid it being modified.
-            mRootActivityContainer.resizeStack(this, new Rect(newBounds), null /* tempTaskBounds */,
-                    null /* tempTaskInsetBounds */, PRESERVE_WINDOWS,
-                    true /* allowResizeInDockedMode */, true /* deferResume */);
+            if (inSplitScreenPrimaryWindowingMode()) {
+                mStackSupervisor.resizeDockedStackLocked(new Rect(newBounds),
+                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                        null /* tempOtherTaskBounds */, null /* tempOtherTaskInsetBounds */,
+                        PRESERVE_WINDOWS, true /* deferResume */);
+            } else {
+                resize(new Rect(newBounds), null /* tempTaskBounds */,
+                        null /* tempTaskInsetBounds */, PRESERVE_WINDOWS, true /* deferResume */);
+            }
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
             // Since always on top is only on when the stack is freeform or pinned, the state
@@ -818,7 +824,8 @@ class ActivityStack extends ConfigurationContainer {
             }
 
             if (!Objects.equals(getRequestedOverrideBounds(), mTmpRect2)) {
-                resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
+                resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                        false /* preserveWindows */, true /* deferResume */);
             }
         } finally {
             if (showRecents && !alreadyInSplitScreenMode && mDisplayId == DEFAULT_DISPLAY
@@ -2208,7 +2215,7 @@ class ActivityStack extends ConfigurationContainer {
      * Returns true if this stack should be resized to match the bounds specified by
      * {@link ActivityOptions#setLaunchBounds} when launching an activity into the stack.
      */
-    boolean resizeStackWithLaunchBounds() {
+    boolean shouldResizeStackWithLaunchBounds() {
         return inPinnedWindowingMode();
     }
 
@@ -4344,31 +4351,42 @@ class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    // TODO: Figure-out a way to consolidate with resize() method below.
-    void requestResize(Rect bounds) {
-        mService.resizeStack(mStackId, bounds,
-                true /* allowResizeInDockedMode */, false /* preserveWindows */,
-                false /* animate */, -1 /* animationDuration */);
-    }
-
     // TODO: Can only be called from special methods in ActivityStackSupervisor.
     // Need to consolidate those calls points into this resize method so anyone can call directly.
-    void resize(Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds) {
+    void resize(Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds,
+            boolean preserveWindows, boolean deferResume) {
         if (!updateBoundsAllowed(bounds)) {
             return;
         }
 
-        // Update override configurations of all tasks in the stack.
-        final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
-
-        for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
-            final TaskRecord task = mTaskHistory.get(i);
-            if (task.isResizeable()) {
-                task.updateOverrideConfiguration(taskBounds, tempTaskInsetBounds);
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "stack.resize_" + mStackId);
+        mWindowManager.deferSurfaceLayout();
+        try {
+            // Update override configurations of all tasks in the stack.
+            final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
+            for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
+                final TaskRecord task = mTaskHistory.get(i);
+                if (task.isResizeable()) {
+                    if (tempTaskInsetBounds != null && !tempTaskInsetBounds.isEmpty()) {
+                        task.setDisplayedBounds(taskBounds);
+                        task.setBounds(tempTaskInsetBounds);
+                    } else {
+                        task.setDisplayedBounds(null);
+                        task.setBounds(taskBounds);
+                    }
+                }
             }
-        }
 
-        setBounds(bounds);
+            setBounds(bounds);
+
+            if (!deferResume) {
+                ensureVisibleActivitiesConfigurationLocked(
+                        topRunningActivityLocked(), preserveWindows);
+            }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     void onPipAnimationEndResize() {
@@ -4497,18 +4515,27 @@ class ActivityStack extends ConfigurationContainer {
      *         then skip running tasks that match those types.
      */
     void getRunningTasks(List<TaskRecord> tasksOut, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed) {
+            @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed,
+            boolean crossUser) {
         boolean focusedStack = mRootActivityContainer.getTopDisplayFocusedStack() == this;
         boolean topTask = true;
+        int userId = UserHandle.getUserId(callingUid);
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.getTopActivity() == null) {
                 // Skip if there are no activities in the task
                 continue;
             }
-            if (!allowed && !task.isActivityTypeHome() && task.effectiveUid != callingUid) {
-                // Skip if the caller can't fetch this task
-                continue;
+            if (task.effectiveUid != callingUid) {
+                if (task.userId != userId && !crossUser) {
+                    // Skip if the caller does not have cross user permission
+                    continue;
+                }
+                if (!allowed && !task.isActivityTypeHome()) {
+                    // Skip if the caller isn't allowed to fetch this task, except for the home
+                    // task which we always return.
+                    continue;
+                }
             }
             if (ignoreActivityType != ACTIVITY_TYPE_UNDEFINED
                     && task.getActivityType() == ignoreActivityType) {
@@ -4774,7 +4801,7 @@ class ActivityStack extends ConfigurationContainer {
         if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
-            task.updateOverrideConfiguration(getRequestedOverrideBounds());
+            task.setBounds(getRequestedOverrideBounds());
         }
         task.createTask(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         return task;

@@ -107,11 +107,6 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected boolean shouldShowDetail() {
-        return !mExpanded;
-    }
-
-    @Override
     protected void drawTile(TileRecord r, State state) {
         if (state instanceof SignalState) {
             SignalState copy = new SignalState();

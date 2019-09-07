@@ -38,6 +38,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -195,7 +196,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                             SystemUIFactory.getInstance().getRootComponent()),
                     coordinator, expansionHandler, mock(DynamicPrivacyController.class),
                     bypassController,
-                    mFalsingManager);
+                    mFalsingManager, mock(PluginManager.class));
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

@@ -329,7 +329,7 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"顯示背景 ANR"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"為背景應用程式顯示「應用程式無回應」對話方塊"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"顯示通知管道警告"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"當應用程式未經有效管道發布通知時，在畫面上顯示警告"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"當應用程式未經有效管道發佈通知時，在畫面上顯示警告"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"強制允許將應用程式寫入外部儲存空間"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"允許將任何應用程式寫入外部儲存空間 (無論資訊清單值為何)"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"將活動強制設為可調整大小"</string>

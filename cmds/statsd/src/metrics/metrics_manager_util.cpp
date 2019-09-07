@@ -21,7 +21,7 @@
 
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"
-#include "../condition/StateTracker.h"
+#include "../condition/StateConditionTracker.h"
 #include "../external/StatsPullerManager.h"
 #include "../matchers/CombinationLogMatchingTracker.h"
 #include "../matchers/SimpleLogMatchingTracker.h"
@@ -34,6 +34,8 @@
 
 #include "stats_util.h"
 #include "statslog.h"
+
+#include <inttypes.h>
 
 using std::set;
 using std::string;
@@ -182,13 +184,13 @@ bool initLogTrackers(const StatsdConfig& config, const UidMap& uidMap,
 }
 
 /**
- * A StateTracker is built from a SimplePredicate which has only "start", and no "stop"
+ * A StateConditionTracker is built from a SimplePredicate which has only "start", and no "stop"
  * or "stop_all". The start must be an atom matcher that matches a state atom. It must
  * have dimension, the dimension must be the state atom's primary fields plus exclusive state
- * field. For example, the StateTracker is used in tracking UidProcessState and ScreenState.
+ * field. For example, the StateConditionTracker is used in tracking UidProcessState and ScreenState.
  *
  */
-bool isStateTracker(const SimplePredicate& simplePredicate, vector<Matcher>* primaryKeys) {
+bool isStateConditionTracker(const SimplePredicate& simplePredicate, vector<Matcher>* primaryKeys) {
     // 1. must not have "stop". must have "dimension"
     if (!simplePredicate.has_stop() && simplePredicate.has_dimensions()) {
         auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(
@@ -240,8 +242,8 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
         switch (condition.contents_case()) {
             case Predicate::ContentsCase::kSimplePredicate: {
                 vector<Matcher> primaryKeys;
-                if (isStateTracker(condition.simple_predicate(), &primaryKeys)) {
-                    allConditionTrackers.push_back(new StateTracker(key, condition.id(), index,
+                if (isStateConditionTracker(condition.simple_predicate(), &primaryKeys)) {
+                    allConditionTrackers.push_back(new StateConditionTracker(key, condition.id(), index,
                                                                     condition.simple_predicate(),
                                                                     logTrackerMap, primaryKeys));
                 } else {
@@ -593,7 +595,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
     for (int i = 0; i < config.no_report_metric_size(); ++i) {
         const auto no_report_metric = config.no_report_metric(i);
         if (metricMap.find(no_report_metric) == metricMap.end()) {
-            ALOGW("no_report_metric %lld not exist", no_report_metric);
+            ALOGW("no_report_metric %" PRId64 " not exist", no_report_metric);
             return false;
         }
         noReportMetricIds.insert(no_report_metric);

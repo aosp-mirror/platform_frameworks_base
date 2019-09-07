@@ -740,7 +740,6 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
   }
 
   std::unique_ptr<io::IFileCollection> file_collection;
-  std::unique_ptr<IArchiveWriter> archive_writer;
 
   // Collect the resources files to compile
   if (options_.res_dir && options_.res_zip) {
@@ -761,8 +760,6 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
       context.GetDiagnostics()->Error(DiagMessage(options_.res_dir.value()) << err);
       return 1;
     }
-
-    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options_.output_path);
   } else if (options_.res_zip) {
     if (!args.empty()) {
       context.GetDiagnostics()->Error(DiagMessage() << "files given but --zip specified");
@@ -777,8 +774,6 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
       context.GetDiagnostics()->Error(DiagMessage(options_.res_zip.value()) << err);
       return 1;
     }
-
-    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options_.output_path);
   } else {
     auto collection = util::make_unique<io::FileCollection>();
 
@@ -791,7 +786,14 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
     }
 
     file_collection = std::move(collection);
+  }
+
+  std::unique_ptr<IArchiveWriter> archive_writer;
+  file::FileType output_file_type = file::GetFileType(options_.output_path);
+  if (output_file_type == file::FileType::kDirectory) {
     archive_writer = CreateDirectoryArchiveWriter(context.GetDiagnostics(), options_.output_path);
+  } else {
+    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options_.output_path);
   }
 
   if (!archive_writer) {

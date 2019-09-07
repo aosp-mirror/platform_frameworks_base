@@ -568,6 +568,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     void onUnlockUser(int userId) {
+        // In order to ensure that no package begins running while a backup or restore is taking
+        // place, onUnlockUser must remain blocked until all pending backups and restores have
+        // completed.
+        CountDownLatch latch = new CountDownLatch(1);
         getHandler().post(() -> {
             final List<Rollback> rollbacks;
             synchronized (mLock) {
@@ -580,7 +584,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (Rollback rollback : changed) {
                 saveRollback(rollback);
             }
+            latch.countDown();
         });
+
+        try {
+            latch.await();
+        } catch (InterruptedException ie) {
+            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
+        }
     }
 
     private void updateRollbackLifetimeDurationInMillis() {

@@ -23,13 +23,15 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import android.platform.test.annotations.Presubmit;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.ViewRootImpl;
+import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -37,90 +39,91 @@ import androidx.test.filters.SmallTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
+@FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class InsetsStateControllerTest extends WindowTestsBase {
-    private static int sPreviousNewInsetsMode;
+    private static InsetsModeSession sInsetsModeSession;
 
     @BeforeClass
     public static void setUpOnce() {
-        // TODO: Make use of SettingsSession when it becomes feasible for this.
-        sPreviousNewInsetsMode = ViewRootImpl.sNewInsetsMode;
         // To let the insets provider control the insets visibility, the insets mode has to be
         // NEW_INSETS_MODE_FULL.
-        ViewRootImpl.sNewInsetsMode = NEW_INSETS_MODE_FULL;
+        sInsetsModeSession = new InsetsModeSession(NEW_INSETS_MODE_FULL);
     }
 
     @AfterClass
     public static void tearDownOnce() {
-        ViewRootImpl.sNewInsetsMode = sPreviousNewInsetsMode;
+        sInsetsModeSession.close();
     }
 
     @Test
     @FlakyTest(bugId = 131005232)
     public void testStripForDispatch_notOwn() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
         topBar.setInsetProvider(getController().getSourceProvider(TYPE_TOP_BAR));
         assertNotNull(getController().getInsetsForDispatch(app).getSource(TYPE_TOP_BAR));
     }
 
-    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testStripForDispatch_own() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
                 .setWindow(topBar, null);
         topBar.setInsetProvider(getController().getSourceProvider(TYPE_TOP_BAR));
-        assertEquals(new InsetsState(), getController().getInsetsForDispatch(topBar));
+        final InsetsState state = getController().getInsetsForDispatch(topBar);
+        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            assertNotEquals(TYPE_TOP_BAR, source.getType());
+        }
     }
 
-    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testStripForDispatch_navBar() {
-        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
+        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
         getController().getSourceProvider(TYPE_NAVIGATION_BAR).setWindow(navBar, null);
         getController().getSourceProvider(TYPE_IME).setWindow(ime, null);
-        assertEquals(new InsetsState(), getController().getInsetsForDispatch(navBar));
+        assertEquals(0, getController().getInsetsForDispatch(navBar).getSourcesCount());
     }
 
-    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testBarControllingWinChanged() {
-        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
         getController().getSourceProvider(TYPE_NAVIGATION_BAR).setWindow(navBar, null);
-        getController().onBarControllingWindowChanged(app);
+        getController().onBarControlTargetChanged(app, app);
         InsetsSourceControl[] controls = getController().getControlsForDispatch(app);
         assertEquals(2, controls.length);
     }
 
-    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testControlRevoked() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
-        getController().onBarControllingWindowChanged(app);
+        getController().onBarControlTargetChanged(app, null);
         assertNotNull(getController().getControlsForDispatch(app));
-        getController().onBarControllingWindowChanged(null);
+        getController().onBarControlTargetChanged(null, null);
         assertNull(getController().getControlsForDispatch(app));
     }
 
     @FlakyTest(bugId = 124088319)
     @Test
     public void testControlRevoked_animation() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
-        getController().onBarControllingWindowChanged(app);
+        getController().onBarControlTargetChanged(app, null);
         assertNotNull(getController().getControlsForDispatch(app));
         topBar.cancelAnimation();
         assertNull(getController().getControlsForDispatch(app));

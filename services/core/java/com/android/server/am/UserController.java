@@ -841,7 +841,7 @@ class UserController implements Handler.Callback {
      * @return user id to lock. UserHandler.USER_NULL will be returned if no user should be locked.
      */
     @GuardedBy("mLock")
-    private int updateUserToLockLU(int userId) {
+    private int updateUserToLockLU(@UserIdInt int userId) {
         int userIdToLock = userId;
         if (mDelayUserDataLocking && !getUserInfo(userId).isEphemeral()
                 && !hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, userId)) {
@@ -869,7 +869,7 @@ class UserController implements Handler.Callback {
      * {@code userId}. The returned list includes {@code userId}.
      */
     @GuardedBy("mLock")
-    private @NonNull int[] getUsersToStopLU(int userId) {
+    private @NonNull int[] getUsersToStopLU(@UserIdInt int userId) {
         int startedUsersSize = mStartedUsers.size();
         IntArray userIds = new IntArray();
         userIds.add(userId);
@@ -892,7 +892,7 @@ class UserController implements Handler.Callback {
         return userIds.toArray();
     }
 
-    private void forceStopUser(int userId, String reason) {
+    private void forceStopUser(@UserIdInt int userId, String reason) {
         mInjector.activityManagerForceStopPackage(userId, reason);
         Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -965,7 +965,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean startUser(final int userId, final boolean foreground) {
+    boolean startUser(final @UserIdInt int userId, final boolean foreground) {
         return startUser(userId, foreground, null);
     }
 
@@ -1002,7 +1002,7 @@ class UserController implements Handler.Callback {
      * @return true if the user has been successfully started
      */
     boolean startUser(
-            final int userId,
+            final @UserIdInt int userId,
             final boolean foreground,
             @Nullable IProgressListener unlockListener) {
 
@@ -1018,7 +1018,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean startUserInternal(int userId, boolean foreground,
+    private boolean startUserInternal(@UserIdInt int userId, boolean foreground,
             @Nullable IProgressListener unlockListener, @NonNull TimingsTraceAndSlog t) {
         Slog.i(TAG, "Starting userid:" + userId + " fg:" + foreground);
 
@@ -1257,7 +1257,8 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean unlockUser(final int userId, byte[] token, byte[] secret, IProgressListener listener) {
+    boolean unlockUser(final @UserIdInt int userId, byte[] token, byte[] secret,
+            IProgressListener listener) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "unlockUser");
         final long binderToken = Binder.clearCallingIdentity();
         try {
@@ -1273,12 +1274,12 @@ class UserController implements Handler.Callback {
      * when the credential-encrypted storage isn't tied to a user-provided
      * PIN or pattern.
      */
-    private boolean maybeUnlockUser(final int userId) {
+    private boolean maybeUnlockUser(final @UserIdInt int userId) {
         // Try unlocking storage using empty token
         return unlockUserCleared(userId, null, null, null);
     }
 
-    private static void notifyFinished(int userId, IProgressListener listener) {
+    private static void notifyFinished(@UserIdInt int userId, IProgressListener listener) {
         if (listener == null) return;
         try {
             listener.onFinished(userId, null);
@@ -1286,7 +1287,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean unlockUserCleared(final int userId, byte[] token, byte[] secret,
+    private boolean unlockUserCleared(final @UserIdInt int userId, byte[] token, byte[] secret,
             IProgressListener listener) {
         UserState uss;
         if (!StorageManager.isUserKeyUnlocked(userId)) {
@@ -1384,7 +1385,7 @@ class UserController implements Handler.Callback {
                 getSwitchingFromSystemUserMessage(), getSwitchingToSystemUserMessage());
     }
 
-    private void dispatchForegroundProfileChanged(int userId) {
+    private void dispatchForegroundProfileChanged(@UserIdInt int userId) {
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         for (int i = 0; i < observerCount; i++) {
             try {
@@ -1397,7 +1398,7 @@ class UserController implements Handler.Callback {
     }
 
     /** Called on handler thread */
-    void dispatchUserSwitchComplete(int userId) {
+    void dispatchUserSwitchComplete(@UserIdInt int userId) {
         mInjector.getWindowManager().setSwitchingUser(false);
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         for (int i = 0; i < observerCount; i++) {
@@ -1409,7 +1410,7 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.finishBroadcast();
     }
 
-    private void dispatchLockedBootComplete(int userId) {
+    private void dispatchLockedBootComplete(@UserIdInt int userId) {
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         for (int i = 0; i < observerCount; i++) {
             try {
@@ -1596,7 +1597,7 @@ class UserController implements Handler.Callback {
     }
 
 
-    int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
+    int handleIncomingUser(int callingPid, int callingUid, @UserIdInt int userId, boolean allowAll,
             int allowMode, String name, String callerPackage) {
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (callingUserId == userId) {
@@ -1682,12 +1683,12 @@ class UserController implements Handler.Callback {
         return targetUserId;
     }
 
-    int unsafeConvertIncomingUser(int userId) {
+    int unsafeConvertIncomingUser(@UserIdInt int userId) {
         return (userId == UserHandle.USER_CURRENT || userId == UserHandle.USER_CURRENT_OR_SELF)
                 ? getCurrentUserId(): userId;
     }
 
-    void ensureNotSpecialUser(int userId) {
+    void ensureNotSpecialUser(@UserIdInt int userId) {
         if (userId >= 0) {
             return;
         }
@@ -1700,7 +1701,7 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.register(observer, name);
     }
 
-    void sendForegroundProfileChanged(int userId) {
+    void sendForegroundProfileChanged(@UserIdInt int userId) {
         mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
         mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG, userId, 0).sendToTarget();
     }
@@ -1709,13 +1710,13 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.unregister(observer);
     }
 
-    UserState getStartedUserState(int userId) {
+    UserState getStartedUserState(@UserIdInt int userId) {
         synchronized (mLock) {
             return mStartedUsers.get(userId);
         }
     }
 
-    boolean hasStartedUserState(int userId) {
+    boolean hasStartedUserState(@UserIdInt int userId) {
         synchronized (mLock) {
             return mStartedUsers.get(userId) != null;
         }
@@ -1804,7 +1805,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean isUserRunning(int userId, int flags) {
+    boolean isUserRunning(@UserIdInt int userId, int flags) {
         UserState state = getStartedUserState(userId);
         if (state == null) {
             return false;
@@ -1920,7 +1921,7 @@ class UserController implements Handler.Callback {
     }
 
     @GuardedBy("mLock")
-    private boolean isCurrentUserLU(int userId) {
+    private boolean isCurrentUserLU(@UserIdInt int userId) {
         return userId == getCurrentOrTargetUserIdLU();
     }
 
@@ -1929,7 +1930,7 @@ class UserController implements Handler.Callback {
         return ums != null ? ums.getUserIds() : new int[] { 0 };
     }
 
-    private UserInfo getUserInfo(int userId) {
+    private UserInfo getUserInfo(@UserIdInt int userId) {
         return mInjector.getUserManager().getUserInfo(userId);
     }
 
@@ -1943,7 +1944,7 @@ class UserController implements Handler.Callback {
      *
      * It doesn't handle other special user IDs such as {@link UserHandle#USER_CURRENT}.
      */
-    int[] expandUserId(int userId) {
+    int[] expandUserId(@UserIdInt int userId) {
         if (userId != UserHandle.USER_ALL) {
             return new int[] {userId};
         } else {
@@ -1951,7 +1952,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean exists(int userId) {
+    boolean exists(@UserIdInt int userId) {
         return mInjector.getUserManager().exists(userId);
     }
 
@@ -1967,16 +1968,16 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private void enforceShellRestriction(String restriction, int userHandle) {
+    private void enforceShellRestriction(String restriction, @UserIdInt int userId) {
         if (Binder.getCallingUid() == SHELL_UID) {
-            if (userHandle < 0 || hasUserRestriction(restriction, userHandle)) {
+            if (userId < 0 || hasUserRestriction(restriction, userId)) {
                 throw new SecurityException("Shell does not have permission to access user "
-                        + userHandle);
+                        + userId);
             }
         }
     }
 
-    boolean hasUserRestriction(String restriction, int userId) {
+    boolean hasUserRestriction(String restriction, @UserIdInt int userId) {
         return mInjector.getUserManager().hasUserRestriction(restriction, userId);
     }
 
@@ -1994,7 +1995,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean isUserOrItsParentRunning(int userId) {
+    boolean isUserOrItsParentRunning(@UserIdInt int userId) {
         synchronized (mLock) {
             if (isUserRunning(userId, 0)) {
                 return true;
@@ -2007,7 +2008,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean isCurrentProfile(int userId) {
+    boolean isCurrentProfile(@UserIdInt int userId) {
         synchronized (mLock) {
             return ArrayUtils.contains(mCurrentProfileIds, userId);
         }
@@ -2019,7 +2020,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    void onUserRemoved(int userId) {
+    void onUserRemoved(@UserIdInt int userId) {
         synchronized (mLock) {
             int size = mUserProfileGroupIds.size();
             for (int i = size - 1; i >= 0; i--) {
@@ -2037,7 +2038,7 @@ class UserController implements Handler.Callback {
      * Returns whether the given user requires credential entry at this time. This is used to
      * intercept activity launches for work apps when the Work Challenge is present.
      */
-    protected boolean shouldConfirmCredentials(int userId) {
+    protected boolean shouldConfirmCredentials(@UserIdInt int userId) {
         synchronized (mLock) {
             if (mStartedUsers.get(userId) == null) {
                 return false;
@@ -2265,7 +2266,7 @@ class UserController implements Handler.Callback {
                 IIntentReceiver resultTo, int resultCode, String resultData,
                 Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
                 boolean ordered, boolean sticky, int callingPid, int callingUid, int realCallingUid,
-                int realCallingPid, int userId) {
+                int realCallingPid, @UserIdInt int userId) {
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
                 return mService.broadcastIntentLocked(null, null, intent, resolvedType, resultTo,
@@ -2282,11 +2283,11 @@ class UserController implements Handler.Callback {
         WindowManagerService getWindowManager() {
             return mService.mWindowManager;
         }
-        void activityManagerOnUserStopped(int userId) {
+        void activityManagerOnUserStopped(@UserIdInt int userId) {
             LocalServices.getService(ActivityTaskManagerInternal.class).onUserStopped(userId);
         }
 
-        void systemServiceManagerCleanupUser(int userId) {
+        void systemServiceManagerCleanupUser(@UserIdInt int userId) {
             mService.mSystemServiceManager.cleanupUser(userId);
         }
 
@@ -2330,7 +2331,7 @@ class UserController implements Handler.Callback {
             }
         }
 
-        void sendPreBootBroadcast(int userId, boolean quiet, final Runnable onFinish) {
+        void sendPreBootBroadcast(@UserIdInt int userId, boolean quiet, final Runnable onFinish) {
             new PreBootBroadcaster(mService, userId, null, quiet) {
                 @Override
                 public void onFinished() {
@@ -2339,7 +2340,7 @@ class UserController implements Handler.Callback {
             }.sendNext();
         }
 
-        void activityManagerForceStopPackage(int userId, String reason) {
+        void activityManagerForceStopPackage(@UserIdInt int userId, String reason) {
             synchronized (mService) {
                 mService.forceStopPackageLocked(null, -1, false, false, true, false, false,
                         userId, reason);
@@ -2351,11 +2352,11 @@ class UserController implements Handler.Callback {
             return mService.checkComponentPermission(permission, pid, uid, owningUid, exported);
         }
 
-        protected void startHomeActivity(int userId, String reason) {
+        protected void startHomeActivity(@UserIdInt int userId, String reason) {
             mService.mAtmInternal.startHomeActivity(userId, reason);
         }
 
-        void startUserWidgets(int userId) {
+        void startUserWidgets(@UserIdInt int userId) {
             AppWidgetManagerInternal awm = LocalServices.getService(AppWidgetManagerInternal.class);
             if (awm != null) {
                 // Out of band, because this is called during a sequence with
@@ -2370,13 +2371,13 @@ class UserController implements Handler.Callback {
             mService.mAtmInternal.updateUserConfiguration();
         }
 
-        void clearBroadcastQueueForUser(int userId) {
+        void clearBroadcastQueueForUser(@UserIdInt int userId) {
             synchronized (mService) {
                 mService.clearBroadcastQueueForUserLocked(userId);
             }
         }
 
-        void loadUserRecents(int userId) {
+        void loadUserRecents(@UserIdInt int userId) {
             mService.mAtmInternal.loadRecentTasksForUser(userId);
         }
 
@@ -2384,7 +2385,7 @@ class UserController implements Handler.Callback {
             mService.startPersistentApps(matchFlags);
         }
 
-        void installEncryptionUnawareProviders(int userId) {
+        void installEncryptionUnawareProviders(@UserIdInt int userId) {
             mService.installEncryptionUnawareProviders(userId);
         }
 
@@ -2417,11 +2418,11 @@ class UserController implements Handler.Callback {
             }
         }
 
-        void stackSupervisorRemoveUser(int userId) {
+        void stackSupervisorRemoveUser(@UserIdInt int userId) {
             mService.mAtmInternal.removeUser(userId);
         }
 
-        protected boolean stackSupervisorSwitchUser(int userId, UserState uss) {
+        protected boolean stackSupervisorSwitchUser(@UserIdInt int userId, UserState uss) {
             return mService.mAtmInternal.switchUser(userId, uss);
         }
 

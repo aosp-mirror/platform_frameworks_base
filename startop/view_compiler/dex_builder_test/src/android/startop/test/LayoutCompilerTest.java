@@ -15,11 +15,11 @@
 package android.startop.test;
 
 import android.content.Context;
-
 import androidx.test.InstrumentationRegistry;
-
+import android.view.View;
 import dalvik.system.PathClassLoader;
-
+import java.lang.reflect.Method;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Method;

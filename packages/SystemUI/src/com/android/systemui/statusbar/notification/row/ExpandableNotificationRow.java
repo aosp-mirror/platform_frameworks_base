@@ -520,7 +520,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public boolean getIsNonblockable() {
         boolean isNonblockable = Dependency.get(NotificationBlockingHelperManager.class)
                 .isNonblockable(mStatusBarNotification.getPackageName(),
-                        mEntry.channel.getId());
+                        mEntry.getChannel().getId());
 
         // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
         // again, but in-place on the main thread this time. This should rarely ever get called.
@@ -532,13 +532,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mEntry.mIsSystemNotification = isSystemNotification(mContext, mStatusBarNotification);
         }
 
-        isNonblockable |= mEntry.channel.isImportanceLockedByOEM();
-        isNonblockable |= mEntry.channel.isImportanceLockedByCriticalDeviceFunction();
+        isNonblockable |= mEntry.getChannel().isImportanceLockedByOEM();
+        isNonblockable |= mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction();
 
         if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
             if (mEntry.mIsSystemNotification) {
-                if (mEntry.channel != null
-                        && !mEntry.channel.isBlockableSystem()) {
+                if (mEntry.getChannel() != null
+                        && !mEntry.getChannel().isBlockableSystem()) {
                     isNonblockable = true;
                 }
             }
@@ -2389,7 +2389,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public ArraySet<NotificationChannel> getUniqueChannels() {
         ArraySet<NotificationChannel> channels = new ArraySet<>();
 
-        channels.add(mEntry.channel);
+        channels.add(mEntry.getChannel());
 
         // If this is a summary, then add in the children notification channels for the
         // same user and pkg.
@@ -2398,7 +2398,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             final int numChildren = childrenRows.size();
             for (int i = 0; i < numChildren; i++) {
                 final ExpandableNotificationRow childRow = childrenRows.get(i);
-                final NotificationChannel childChannel = childRow.getEntry().channel;
+                final NotificationChannel childChannel = childRow.getEntry().getChannel();
                 final StatusBarNotification childSbn = childRow.getStatusBarNotification();
                 if (childSbn.getUser().equals(mStatusBarNotification.getUser()) &&
                         childSbn.getPackageName().equals(mStatusBarNotification.getPackageName())) {

@@ -1398,7 +1398,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         boolean reparented = false;
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
             final Rect bounds = options.getLaunchBounds();
-            task.updateOverrideConfiguration(bounds);
+            task.setBounds(bounds);
 
             ActivityStack stack =
                     mRootActivityContainer.getLaunchStack(null, options, task, ON_TOP);
@@ -1412,10 +1412,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // task.reparent() should already placed the task on top,
                 // still need moveTaskToFrontLocked() below for any transition settings.
             }
-            if (stack.resizeStackWithLaunchBounds()) {
-                mRootActivityContainer.resizeStack(stack, bounds, null /* tempTaskBounds */,
-                        null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS,
-                        true /* allowResizeInDockedMode */, !DEFER_RESUME);
+            if (stack.shouldResizeStackWithLaunchBounds()) {
+                stack.resize(bounds, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                        !PRESERVE_WINDOWS, !DEFER_RESUME);
             } else {
                 // WM resizeTask must be done after the task is moved to the correct stack,
                 // because Task's setBounds() also updates dim layer's bounds, but that has
@@ -1636,7 +1635,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Don't allow re-entry while resizing. E.g. due to docked stack detaching.
             mAllowDockedStackResize = false;
             ActivityRecord r = stack.topRunningActivityLocked();
-            stack.resize(dockedBounds, tempDockedTaskBounds, tempDockedTaskInsetBounds);
+            stack.resize(dockedBounds, tempDockedTaskBounds, tempDockedTaskInsetBounds,
+                    !PRESERVE_WINDOWS, DEFER_RESUME);
 
             // TODO: Checking for isAttached might not be needed as if the user passes in null
             // dockedBounds then they want the docked stack to be dismissed.
@@ -1674,11 +1674,19 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                             tempRect /* outStackBounds */,
                             otherTaskRect /* outTempTaskBounds */);
 
-                    mRootActivityContainer.resizeStack(current,
-                            !tempRect.isEmpty() ? tempRect : null,
+                    if (tempRect.isEmpty()) {
+                        // If this scenario is hit, it means something is not working right.
+                        // Empty/null bounds implies fullscreen. In the event that this stack
+                        // *should* be fullscreen, its mode should be set explicitly in a form
+                        // of setWindowingMode so that other parts of the system are updated
+                        // properly.
+                        throw new IllegalArgumentException("Trying to set null bounds on a"
+                                + " non-fullscreen stack");
+                    }
+
+                    current.resize(tempRect,
                             !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
-                            tempOtherTaskInsetBounds, preserveWindows,
-                            true /* allowResizeInDockedMode */, deferResume);
+                            tempOtherTaskInsetBounds, preserveWindows, deferResume);
                 }
             }
             if (!deferResume) {
@@ -1728,8 +1736,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // transitioning it from fullscreen into a floating state.
                 stack.onPipAnimationEndResize();
             }
-            stack.resize(pinnedBounds, tempPinnedTaskBounds, insetBounds);
-            stack.ensureVisibleActivitiesConfigurationLocked(r, false);
+            stack.resize(pinnedBounds, tempPinnedTaskBounds, insetBounds, !PRESERVE_WINDOWS,
+                    !DEFER_RESUME);
         } finally {
             mWindowManager.continueSurfaceLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);

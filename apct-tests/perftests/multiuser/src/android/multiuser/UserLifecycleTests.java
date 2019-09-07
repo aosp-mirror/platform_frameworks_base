@@ -119,9 +119,20 @@ public class UserLifecycleTests {
     }
 
     @Test
+    public void createUser() {
+        while (mRunner.keepRunning()) {
+            final int userId = createUserNoFlags();
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    @Test
     public void createAndStartUser() throws Exception {
         while (mRunner.keepRunning()) {
-            final int userId = createUser();
+            final int userId = createUserNoFlags();
 
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
@@ -140,7 +151,7 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
-            final int userId = createUser();
+            final int userId = createUserNoFlags();
             mRunner.resumeTiming();
 
             switchUser(userId);
@@ -197,7 +208,7 @@ public class UserLifecycleTests {
     public void stopUser() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
-            final int userId = createUser();
+            final int userId = createUserNoFlags();
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
             mIam.startUserInBackground(userId);
@@ -217,7 +228,7 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
-            final int userId = createUser();
+            final int userId = createUserNoFlags();
             final CountDownLatch latch = new CountDownLatch(1);
             registerUserSwitchObserver(null, latch, userId);
             mRunner.resumeTiming();
@@ -237,7 +248,7 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
-            final int userId = createUser(UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
+            final int userId = createUserWithFlags(UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
             switchUser(userId);
             final CountDownLatch latch = new CountDownLatch(1);
             InstrumentationRegistry.getContext().registerReceiver(new BroadcastReceiver() {
@@ -396,7 +407,6 @@ public class UserLifecycleTests {
     public void managedProfileCreateUnlockInstallAndLaunchApp() throws Exception {
         assumeTrue(mHasManagedUserFeature);
 
-        final String packageName = "perftests.multiuser.apps.dummyapp";
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
@@ -433,12 +443,12 @@ public class UserLifecycleTests {
     }
 
     /** Creates a new user, returning its userId. */
-    private int createUser() {
-        return createUser(0);
+    private int createUserNoFlags() {
+        return createUserWithFlags(/* flags= */ 0);
     }
 
     /** Creates a new user with the given flags, returning its userId. */
-    private int createUser(int flags) {
+    private int createUserWithFlags(int flags) {
         int userId = mUm.createUser("TestUser", flags).id;
         mUsersToRemove.add(userId);
         return userId;
@@ -501,7 +511,7 @@ public class UserLifecycleTests {
     private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws Exception {
         final int origUser = mAm.getCurrentUser();
         // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
-        final int testUser = createUser();
+        final int testUser = createUserNoFlags();
         final CountDownLatch latch1 = new CountDownLatch(1);
         registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, testUser);
         mAm.switchUser(testUser);

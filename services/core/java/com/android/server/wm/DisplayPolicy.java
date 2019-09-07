@@ -1029,6 +1029,14 @@ public class DisplayPolicy {
                 displayFrames.mDisplayCutoutSafe.top);
     }
 
+    WindowState getStatusBar() {
+        return mStatusBar;
+    }
+
+    WindowState getNavigationBar() {
+        return mNavigationBar;
+    }
+
     /**
      * Control the animation to run when a window's state changes.  Return a
      * non-0 number to force the animation to a specific resource ID, or 0
@@ -3108,8 +3116,7 @@ public class DisplayPolicy {
             return 0;
         }
 
-        mDisplayContent.getInsetsStateController().onBarControllingWindowChanged(
-                mTopFullscreenOpaqueWindowState);
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
         int tmpVisibility = PolicyControl.getSystemUiVisibility(win, null)
                 & ~mResettingSystemUiFlags
@@ -3544,7 +3551,8 @@ public class DisplayPolicy {
         if (mScreenshotHelper != null) {
             mScreenshotHelper.takeScreenshot(screenshotType,
                     mStatusBar != null && mStatusBar.isVisibleLw(),
-                    mNavigationBar != null && mNavigationBar.isVisibleLw(), mHandler);
+                    mNavigationBar != null && mNavigationBar.isVisibleLw(),
+                    mHandler, null /* completionConsumer */);
         }
     }
 

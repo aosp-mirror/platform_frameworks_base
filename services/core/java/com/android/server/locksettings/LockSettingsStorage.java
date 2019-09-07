@@ -47,6 +47,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -325,23 +326,16 @@ class LockSettingsStorage {
             version = mCache.getVersion();
         }
 
-        RandomAccessFile raf = null;
         byte[] stored = null;
-        try {
-            raf = new RandomAccessFile(name, "r");
+        try (RandomAccessFile raf = new RandomAccessFile(name, "r")) {
             stored = new byte[(int) raf.length()];
             raf.readFully(stored, 0, stored.length);
             raf.close();
+        } catch (FileNotFoundException suppressed) {
+            // readFile() is also called by hasFile() to check the existence of files, in this
+            // case FileNotFoundException is expected.
         } catch (IOException e) {
             Slog.e(TAG, "Cannot read file " + e);
-        } finally {
-            if (raf != null) {
-                try {
-                    raf.close();
-                } catch (IOException e) {
-                    Slog.e(TAG, "Error closing file " + e);
-                }
-            }
         }
         mCache.putFileIfUnchanged(name, stored, version);
         return stored;

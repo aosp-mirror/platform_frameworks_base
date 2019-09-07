@@ -41,6 +41,8 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
                                  //     D4..0 Reserved, set to 0.
     private int mMaxPower;       // 8:1 Maximum Power Consumption in 2mA units
 
+    private boolean mBlockAudio; // leave it off for now. We be replace with a "Developer Option"
+
     private ArrayList<UsbInterfaceDescriptor> mInterfaceDescriptors =
             new ArrayList<UsbInterfaceDescriptor>();
 
@@ -77,21 +79,35 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
         mInterfaceDescriptors.add(interfaceDesc);
     }
 
+    private boolean isAudioInterface(UsbInterfaceDescriptor descriptor) {
+        return descriptor.getUsbClass() == UsbDescriptor.CLASSID_AUDIO
+                && descriptor.getUsbSubclass() == UsbDescriptor.AUDIO_AUDIOSTREAMING;
+    }
+
     UsbConfiguration toAndroid(UsbDescriptorParser parser) {
         if (UsbDescriptorParser.DEBUG) {
             Log.d(TAG, "  toAndroid()");
         }
+
+        // NOTE - This code running in the server process.
+        //TODO (pmclean@) - remove this
+//        int pid = android.os.Process.myPid();
+//        int uid = android.os.Process.myUid();
+//        Log.d(TAG, "  ---- pid:" + pid + " uid:" + uid);
+
         String name = parser.getDescriptorString(mConfigIndex);
         UsbConfiguration config = new
                 UsbConfiguration(mConfigValue, name, mAttribs, mMaxPower);
-        UsbInterface[] interfaces = new UsbInterface[mInterfaceDescriptors.size()];
-        if (UsbDescriptorParser.DEBUG) {
-            Log.d(TAG, "    " + mInterfaceDescriptors.size() + " interfaces.");
+
+        ArrayList<UsbInterface> filteredInterfaces = new ArrayList<UsbInterface>();
+        for (UsbInterfaceDescriptor descriptor : mInterfaceDescriptors) {
+            if (!mBlockAudio || !isAudioInterface(descriptor)) {
+                filteredInterfaces.add(descriptor.toAndroid(parser));
+            }
         }
-        for (int index = 0; index < mInterfaceDescriptors.size(); index++) {
-            interfaces[index] = mInterfaceDescriptors.get(index).toAndroid(parser);
-        }
-        config.setInterfaces(interfaces);
+        UsbInterface[] interfaceArray = new UsbInterface[0];
+        interfaceArray = filteredInterfaces.toArray(interfaceArray);
+        config.setInterfaces(interfaceArray);
         return config;
     }
 
