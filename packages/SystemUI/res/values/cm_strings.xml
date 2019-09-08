@@ -2,7 +2,7 @@
 <!--
 /**
  * Copyright (c) 2015, The CyanogenMod Project
- * Copyright (c) 2017-2018, The LineageOS Project
+ * Copyright (c) 2017-2019, The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,10 @@
     <string name="global_action_current_user">Current</string>
 
     <!-- Custom QS tiles -->
+    <!-- ADB over network QS tile -->
+    <string name="quick_settings_network_adb_label">ADB over network</string>
+    <string name="quick_settings_network_adb_no_network">no network</string>
+
     <!-- Caffeine QS tile -->
     <string name="quick_settings_caffeine_label">Caffeine</string>
     <string name="accessibility_quick_settings_caffeine_off">Caffeine off.</string>

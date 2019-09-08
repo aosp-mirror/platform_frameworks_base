@@ -27,6 +27,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.tiles.AdbOverNetworkTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
@@ -80,6 +81,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<NfcTile> mNfcTileProvider;
     private final Provider<GarbageMonitor.MemoryTile> mMemoryTileProvider;
     private final Provider<UiModeNightTile> mUiModeNightTileProvider;
+    private final Provider<AdbOverNetworkTile> mAdbOverNetworkTileProvider;
     private final Provider<CaffeineTile> mCaffeineTileProvider;
     private final Provider<HeadsUpTile> mHeadsUpTileProvider;
     private final Provider<SyncTile> mSyncTileProvider;
@@ -107,6 +109,7 @@ public class QSFactoryImpl implements QSFactory {
             Provider<NfcTile> nfcTileProvider,
             Provider<GarbageMonitor.MemoryTile> memoryTileProvider,
             Provider<UiModeNightTile> uiModeNightTileProvider,
+            Provider<AdbOverNetworkTile> adbOverNetworkTileProvider,
             Provider<CaffeineTile> caffeineTileProvider,
             Provider<HeadsUpTile> headsUpTileProvider,
             Provider<SyncTile> syncTileProvider,
@@ -130,6 +133,7 @@ public class QSFactoryImpl implements QSFactory {
         mNfcTileProvider = nfcTileProvider;
         mMemoryTileProvider = memoryTileProvider;
         mUiModeNightTileProvider = uiModeNightTileProvider;
+        mAdbOverNetworkTileProvider = adbOverNetworkTileProvider;
         mCaffeineTileProvider = caffeineTileProvider;
         mHeadsUpTileProvider = headsUpTileProvider;
         mSyncTileProvider = syncTileProvider;
@@ -188,6 +192,8 @@ public class QSFactoryImpl implements QSFactory {
             case "dark":
                 return mUiModeNightTileProvider.get();
             // Custom tiles.
+            case "adb_network":
+                return mAdbOverNetworkTileProvider.get();
             case "caffeine":
                 return mCaffeineTileProvider.get();
             case "heads_up":
