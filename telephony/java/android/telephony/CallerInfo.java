@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony;
+package android.telephony;
 
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -31,10 +33,6 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
-import android.telephony.PhoneNumberUtils;
-import android.telephony.Rlog;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -43,6 +41,7 @@ import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
 
+import com.android.internal.annotations.VisibleForTesting;
 import java.util.Locale;
 
 
@@ -51,11 +50,14 @@ import java.util.Locale;
  *
  * {@hide}
  */
+@SystemApi
 public class CallerInfo {
     private static final String TAG = "CallerInfo";
     private static final boolean VDBG = Rlog.isLoggable(TAG, Log.VERBOSE);
 
+    /** @hide */
     public static final long USER_TYPE_CURRENT = 0;
+    /** @hide */
     public static final long USER_TYPE_WORK = 1;
 
     /**
@@ -85,49 +87,61 @@ public class CallerInfo {
      * field here, NOT name.  We're NOT always guaranteed to have a name
      * for a connection, but the number should be displayable.
      */
-    @UnsupportedAppUsage
-    public String name;
-    @UnsupportedAppUsage
-    public String phoneNumber;
+    private String name;
+    private String phoneNumber;
+    /** @hide */
     public String normalizedNumber;
+    /** @hide */
     public String geoDescription;
-
+    /** @hide */
     public String cnapName;
+    /** @hide */
     public int numberPresentation;
+    /** @hide */
     public int namePresentation;
+    /** @hide */
     public boolean contactExists;
-
+    /** @hide */
     public String phoneLabel;
-    /* Split up the phoneLabel into number type and label name */
+    /**
+     * Split up the phoneLabel into number type and label name.
+     * @hide
+     */
     @UnsupportedAppUsage
     public int    numberType;
+    /** @hide */
     @UnsupportedAppUsage
     public String numberLabel;
-
+    /** @hide */
     public int photoResource;
 
     // Contact ID, which will be 0 if a contact comes from the corp CP2.
-    @UnsupportedAppUsage
-    public long contactIdOrZero;
+    private long contactIdOrZero;
+    /** @hide */
     public boolean needUpdate;
+    /** @hide */
     public Uri contactRefUri;
+    /** @hide */
     public String lookupKey;
-
+    /** @hide */
     public ComponentName preferredPhoneAccountComponent;
+    /** @hide */
     public String preferredPhoneAccountId;
-
+    /** @hide */
     public long userType;
 
     /**
      * Contact display photo URI.  If a contact has no display photo but a thumbnail, it'll be
      * the thumbnail URI instead.
      */
-    public Uri contactDisplayPhotoUri;
+    private Uri contactDisplayPhotoUri;
 
     // fields to hold individual contact preference data,
     // including the send to voicemail flag and the ringtone
     // uri reference.
+    /** @hide */
     public Uri contactRingtoneUri;
+    /** @hide */
     public boolean shouldSendToVoicemail;
 
     /**
@@ -141,6 +155,8 @@ public class CallerInfo {
      *
      * The {@link #isCachedPhotoCurrent} flag indicates if the image
      * data needs to be reloaded.
+     *
+     * @hide
      */
     public Drawable cachedPhoto;
     /**
@@ -153,18 +169,23 @@ public class CallerInfo {
      *
      * The {@link #isCachedPhotoCurrent} flag indicates if the image
      * data needs to be reloaded.
+     *
+     * @hide
      */
     public Bitmap cachedPhotoIcon;
     /**
      * Boolean which indicates if {@link #cachedPhoto} and
      * {@link #cachedPhotoIcon} is fresh enough. If it is false,
      * those images aren't pointing to valid objects.
+     *
+     * @hide
      */
     public boolean isCachedPhotoCurrent;
 
     private boolean mIsEmergency;
     private boolean mIsVoiceMail;
 
+    /** @hide */
     @UnsupportedAppUsage
     public CallerInfo() {
         // TODO: Move all the basic initialization here?
@@ -180,6 +201,8 @@ public class CallerInfo {
      * @param cursor the first object in the cursor is used to build the CallerInfo object.
      * @return the CallerInfo which contains the caller id for the given
      * number. The returned CallerInfo is null if no number is supplied.
+     *
+     * @hide
      */
     public static CallerInfo getCallerInfo(Context context, Uri contactRef, Cursor cursor) {
         CallerInfo info = new CallerInfo();
@@ -321,6 +344,8 @@ public class CallerInfo {
      * @param contactRef the URI used to lookup caller id
      * @return the CallerInfo which contains the caller id for the given
      * number. The returned CallerInfo is null if no number is supplied.
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public static CallerInfo getCallerInfo(Context context, Uri contactRef) {
@@ -346,6 +371,8 @@ public class CallerInfo {
      * number. The returned CallerInfo is null if no number is supplied. If
      * a matching number is not found, then a generic caller info is returned,
      * with all relevant fields empty or null.
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public static CallerInfo getCallerInfo(Context context, String number) {
@@ -365,6 +392,8 @@ public class CallerInfo {
      * number. The returned CallerInfo is null if no number is supplied. If
      * a matching number is not found, then a generic caller info is returned,
      * with all relevant fields empty or null.
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public static CallerInfo getCallerInfo(Context context, String number, int subId) {
@@ -398,6 +427,59 @@ public class CallerInfo {
     }
 
     /**
+     * @return Name assocaited with this caller.
+     */
+    @Nullable
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set caller Info Name.
+     * @param name caller Info Name
+     *
+     * @hide
+     */
+    public void setName(@Nullable String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return Phone number assocaited with this caller.
+     */
+    @Nullable
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    /** @hide */
+    public void setPhoneNumber(String number) {
+        phoneNumber = number;
+    }
+
+    /**
+     * @return Contact ID, which will be 0 if a contact comes from the corp Contacts Provider.
+     */
+    public long getContactId() {
+      return contactIdOrZero;
+    }
+
+    /**
+     * @return Contact display photo URI. If a contact has no display photo but a thumbnail,
+     * it'll the thumbnail URI instead.
+     */
+    @Nullable
+    public Uri getContactDisplayPhotoUri() {
+      return contactDisplayPhotoUri;
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public void SetContactDisplayPhotoUri(Uri photoUri) {
+        contactDisplayPhotoUri = photoUri;
+    }
+
+    /**
      * Performs another lookup if previous lookup fails and it's a SIP call
      * and the peer's username is all numeric. Look up the username as it
      * could be a PSTN number in the contact database.
@@ -425,6 +507,7 @@ public class CallerInfo {
 
     /**
      * @return true if the caller info is an emergency number.
+     * @hide
      */
     public boolean isEmergencyNumber() {
         return mIsEmergency;
@@ -432,6 +515,7 @@ public class CallerInfo {
 
     /**
      * @return true if the caller info is a voicemail number.
+     * @hide
      */
     public boolean isVoiceMailNumber() {
         return mIsVoiceMail;
@@ -591,6 +675,7 @@ public class CallerInfo {
      * @param context the context used to look up the current locale / country
      * @param fallbackNumber if this CallerInfo's phoneNumber field is empty,
      *        this specifies a fallback number to use instead.
+     * @hide
      */
     public void updateGeoDescription(Context context, String fallbackNumber) {
         String number = TextUtils.isEmpty(phoneNumber) ? fallbackNumber : phoneNumber;
@@ -600,6 +685,8 @@ public class CallerInfo {
     /**
      * @return a geographical description string for the specified number.
      * @see com.android.i18n.phonenumbers.PhoneNumberOfflineGeocoder
+     *
+     * @hide
      */
     public static String getGeoDescription(Context context, String number) {
         if (VDBG) Rlog.v(TAG, "getGeoDescription('" + number + "')...");
@@ -657,6 +744,7 @@ public class CallerInfo {
         return countryIso;
     }
 
+    /** @hide */
     protected static String getCurrentCountryIso(Context context) {
         return getCurrentCountryIso(context, Locale.getDefault());
     }
