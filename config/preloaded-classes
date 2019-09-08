@@ -4698,7 +4698,7 @@ com.android.internal.telephony.CallManager$CallManagerHandler
 com.android.internal.telephony.CallManager
 com.android.internal.telephony.CallStateException
 com.android.internal.telephony.CallTracker
-com.android.internal.telephony.CallerInfoAsyncQuery$OnQueryCompleteListener
+android.telephony.CallerInfoAsyncQuery$OnQueryCompleteListener
 com.android.internal.telephony.CarrierActionAgent$1
 com.android.internal.telephony.CarrierActionAgent
 com.android.internal.telephony.CarrierAppUtils

@@ -255,7 +255,7 @@ com.android.internal.os.SomeArgs
 com.android.internal.policy.DecorView
 com.android.internal.statusbar.IStatusBarService
 com.android.internal.telephony.AppSmsManager
-com.android.internal.telephony.CallerInfoAsyncQuery$OnQueryCompleteListener
+android.telephony.CallerInfoAsyncQuery$OnQueryCompleteListener
 com.android.internal.telephony.CarrierActionAgent
 com.android.internal.telephony.cat.CatService
 com.android.internal.telephony.cat.IconLoader
