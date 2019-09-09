@@ -15,6 +15,8 @@
  */
 package android.service.euicc;
 
+import static android.telephony.euicc.EuiccCardManager.ResetOption;
+
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -503,7 +505,7 @@ public abstract class EuiccService extends Service {
             String nickname);
 
     /**
-     * Erase all of the subscriptions on the device.
+     * Erase all operational subscriptions on the device.
      *
      * <p>This is intended to be used for device resets. As such, the reset should be performed even
      * if an active SIM must be deactivated in order to access the eUICC.
@@ -512,8 +514,29 @@ public abstract class EuiccService extends Service {
      * @return the result of the erase operation. May be one of the predefined {@code RESULT_}
      *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#eraseSubscriptions
+     *
+     * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
+     * and use @link{onEraseSubscriptionsWithOptions} instead
      */
+    @Deprecated
     public abstract int onEraseSubscriptions(int slotId);
+
+    /**
+     * Erase specific subscriptions on the device.
+     *
+     * <p>This is intended to be used for device resets. As such, the reset should be performed even
+     * if an active SIM must be deactivated in order to access the eUICC.
+     *
+     * @param slotIndex index of the SIM slot to use for the operation.
+     * @param options flag for specific group of subscriptions to erase
+     * @return the result of the erase operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
+     * @see android.telephony.euicc.EuiccManager#eraseSubscriptionsWithOptions
+     */
+    public int onEraseSubscriptionsWithOptions(int slotIndex, @ResetOption int options) {
+        throw new UnsupportedOperationException(
+                "This method must be overridden to enable the ResetOption parameter");
+    }
 
     /**
      * Ensure that subscriptions will be retained on the next factory reset.
@@ -741,6 +764,23 @@ public abstract class EuiccService extends Service {
                 @Override
                 public void run() {
                     int result = EuiccService.this.onEraseSubscriptions(slotId);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void eraseSubscriptionsWithOptions(
+                int slotIndex, @ResetOption int options, IEraseSubscriptionsCallback callback) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int result = EuiccService.this.onEraseSubscriptionsWithOptions(
+                            slotIndex, options);
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {
