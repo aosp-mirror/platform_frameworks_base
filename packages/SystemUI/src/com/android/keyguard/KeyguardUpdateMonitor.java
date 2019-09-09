@@ -1688,7 +1688,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return shouldListen;
     }
 
-    private boolean shouldListenForFace() {
+    /**
+     * If face auth is allows to scan on this exact moment.
+     */
+    public boolean shouldListenForFace() {
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);

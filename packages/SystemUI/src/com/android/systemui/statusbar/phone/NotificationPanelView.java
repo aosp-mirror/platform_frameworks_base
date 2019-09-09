@@ -39,6 +39,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -59,6 +60,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -164,6 +166,25 @@ public class NotificationPanelView extends PanelView implements
             R.id.keyguard_hun_animator_start_tag);
     private static final AnimationProperties KEYGUARD_HUN_PROPERTIES =
             new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+    @VisibleForTesting
+    final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onBiometricRunningStateChanged(boolean running,
+                        BiometricSourceType biometricSourceType) {
+                    boolean keyguardOrShadeLocked = mBarState == StatusBarState.KEYGUARD
+                            || mBarState == StatusBarState.SHADE_LOCKED;
+                    if (!running && mFirstBypassAttempt && keyguardOrShadeLocked && !mDozing) {
+                        mFirstBypassAttempt = false;
+                        animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                    }
+                }
+
+                @Override
+                public void onFinishedGoingToSleep(int why) {
+                    mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
+                }
+            };
 
     private final InjectionInflationController mInjectionInflationController;
     private final PowerManager mPowerManager;
@@ -171,8 +192,8 @@ public class NotificationPanelView extends PanelView implements
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final KeyguardBypassController mKeyguardBypassController;
-    private final KeyguardUpdateMonitor mUpdateMonitor;
-
+    @VisibleForTesting
+    protected KeyguardUpdateMonitor mUpdateMonitor;
     @VisibleForTesting
     protected KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -383,6 +404,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mShowingKeyguardHeadsUp;
     private boolean mAllowExpandForSmallExpansion;
     private Runnable mExpandAfterLayoutRunnable;
+    private boolean mFirstBypassAttempt;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -413,6 +435,7 @@ public class NotificationPanelView extends PanelView implements
         mThemeResId = context.getThemeResId();
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
         dynamicPrivacyController.addListener(this);
 
         mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);
@@ -485,6 +508,7 @@ public class NotificationPanelView extends PanelView implements
         Dependency.get(StatusBarStateController.class).addCallback(this);
         Dependency.get(ZenModeController.class).addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
+        mUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
         // Theme might have changed between inflating this view and attaching it to the window, so
         // force a call to onThemeChanged
         onThemeChanged();
@@ -497,6 +521,7 @@ public class NotificationPanelView extends PanelView implements
         Dependency.get(StatusBarStateController.class).removeCallback(this);
         Dependency.get(ZenModeController.class).removeCallback(this);
         Dependency.get(ConfigurationController.class).removeCallback(this);
+        mUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
     }
 
     @Override
@@ -2238,7 +2263,9 @@ public class NotificationPanelView extends PanelView implements
                 * mKeyguardStatusBarAnimateAlpha;
         newAlpha *= 1.0f - mKeyguardHeadsUpShowingAmount;
         mKeyguardStatusBar.setAlpha(newAlpha);
-        mKeyguardStatusBar.setVisibility(newAlpha != 0f && !mDozing ? VISIBLE : INVISIBLE);
+        boolean hideForBypass = mFirstBypassAttempt && mUpdateMonitor.shouldListenForFace();
+        mKeyguardStatusBar.setVisibility(newAlpha != 0f && !mDozing && !hideForBypass
+                ? VISIBLE : INVISIBLE);
     }
 
     private void updateKeyguardBottomAreaAlpha() {
