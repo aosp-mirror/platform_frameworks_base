@@ -372,11 +372,18 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         long currentTimestamp = SystemClock.uptimeMillis();
         mLearningTimeElapsed += currentTimestamp - mLastLearningTimestamp;
         mLastLearningTimestamp = currentTimestamp;
-        Settings.Secure.putLong(
-                mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, mLearningTimeElapsed);
 
         mIsLearned =
                 mLearningCount >= getLearningCount() || mLearningTimeElapsed >= getLearningTimeMs();
+
+        mHandler.post(this::recordLearnTimeElapsed);
+    }
+
+    private void recordLearnTimeElapsed() {
+        if (mContext != null) {
+            Settings.Secure.putLong(
+                    mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, mLearningTimeElapsed);
+        }
     }
 
     private void resetConsecutiveTaskSwitches() {

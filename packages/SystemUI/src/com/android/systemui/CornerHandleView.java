@@ -19,6 +19,7 @@ package com.android.systemui;
 import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -27,6 +28,7 @@ import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 
 /**
@@ -107,6 +109,7 @@ public class CornerHandleView extends View {
         mPaint.setColor((int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
                 mLightColor,
                 mDarkColor));
+        updateShadow();
         if (getVisibility() == VISIBLE) {
             invalidate();
         }
@@ -116,6 +119,21 @@ public class CornerHandleView extends View {
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawPath(mPath, mPaint);
+    }
+
+    private void updateShadow() {
+        if (ColorUtils.calculateLuminance(mPaint.getColor()) > 0.7f) {
+            mPaint.setShadowLayer(/** radius */ 5,/** shadowDx */ 0, /** shadowDy */ -1,
+                    /** color */ ColorUtils.setAlphaComponent(/** color */ Color.BLACK,
+                                                              /** alpha */ 102));
+        } else {
+            mPaint.setShadowLayer(/** radius */ 0, /** shadowDx */ 0, /** shadowDy */ 0,
+                    /** color */ Color.TRANSPARENT);
+        }
+
+        if (getVisibility() == VISIBLE) {
+            invalidate();
+        }
     }
 
     private static float convertDpToPixel(float dp, Context context) {
