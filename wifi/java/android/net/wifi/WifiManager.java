@@ -1732,13 +1732,12 @@ public class WifiManager {
      * <li> When an app is uninstalled, all its suggested networks are discarded. If the device is
      * currently connected to a suggested network which is being removed then the device will
      * disconnect from that network.</li>
-     * <li> No in-place modification of existing suggestions are allowed. Apps are expected to
-     * remove suggestions using {@link #removeNetworkSuggestions(List)} and then add the modified
-     * suggestion back using this API.</li>
+     * <li> In-place modification of existing suggestions are allowed.
+     * If the provided suggestions {@link WifiNetworkSuggestion#equals(Object)} any previously
+     * provided suggestions by the app. Previous suggestions will be updated</li>
      *
      * @param networkSuggestions List of network suggestions provided by the app.
      * @return Status code for the operation. One of the STATUS_NETWORK_SUGGESTIONS_ values.
-     * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
      * @throws {@link SecurityException} if the caller is missing required permissions.
      */
     @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
