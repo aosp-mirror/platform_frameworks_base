@@ -564,11 +564,13 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
 
     // Read system memory info including ZRAM. The values are stored in the vector
     // in the same order as MEMINFO_* enum
-    std::vector<uint64_t> mem(MEMINFO_COUNT);
-    std::vector<std::string> tags(::android::meminfo::SysMemInfo::kDefaultSysMemInfoTags);
+    std::vector<std::string_view> tags(
+        ::android::meminfo::SysMemInfo::kDefaultSysMemInfoTags.begin(),
+        ::android::meminfo::SysMemInfo::kDefaultSysMemInfoTags.end());
     tags.insert(tags.begin() + MEMINFO_ZRAM_TOTAL, "Zram:");
+    std::vector<uint64_t> mem(tags.size());
     ::android::meminfo::SysMemInfo smi;
-    if (!smi.ReadMemInfo(tags, &mem)) {
+    if (!smi.ReadMemInfo(tags.size(), tags.data(), mem.data())) {
         jniThrowRuntimeException(env, "SysMemInfo read failed");
         return;
     }
