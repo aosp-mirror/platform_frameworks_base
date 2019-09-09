@@ -21,19 +21,23 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.StatusBarManager;
+import android.hardware.biometrics.BiometricSourceType;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.FalsingManager;
@@ -51,7 +55,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationRoundnessMa
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
@@ -101,7 +104,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardAffordanceHelper mAffordanceHelper;
     @Mock
+    private KeyguardUpdateMonitor mUpdateMonitor;
+    @Mock
     private FalsingManager mFalsingManager;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
     private NotificationPanelView mNotificationPanelView;
 
     @Before
@@ -112,22 +119,21 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mHeadsUpCallback.getContext()).thenReturn(mContext);
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mStatusBarStateController);
+        mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mUpdateMonitor);
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mDependency.injectMockDependency(ConfigurationController.class);
         mDependency.injectMockDependency(ZenModeController.class);
-        KeyguardBypassController bypassController = new KeyguardBypassController(mContext,
-                mock(TunerService.class), mStatusBarStateController,
-                mock(NotificationLockscreenUserManager.class));
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(mContext,
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(),
-                        bypassController);
+                        mKeyguardBypassController);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator,
-                bypassController, mHeadsUpManager, mock(NotificationRoundnessManager.class));
+                mKeyguardBypassController, mHeadsUpManager,
+                mock(NotificationRoundnessManager.class));
         mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler,
-                bypassController);
+                mKeyguardBypassController);
         mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelView.setBar(mPanelBar);
 
@@ -185,6 +191,20 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 0L /* eventTime */, MotionEvent.ACTION_UP, 0f /* x */, 300f /* y */,
                 0 /* metaState */));
         assertThat(mNotificationPanelView.isTrackingBlocked()).isFalse();
+    }
+
+    @Test
+    public void testKeyguardStatusBarVisibility_hiddenForBypass() {
+        when(mUpdateMonitor.shouldListenForFace()).thenReturn(true);
+        mNotificationPanelView.mKeyguardUpdateCallback.onBiometricRunningStateChanged(true,
+                BiometricSourceType.FACE);
+        verify(mKeyguardStatusBar, never()).setVisibility(View.VISIBLE);
+
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
+        mNotificationPanelView.mKeyguardUpdateCallback.onFinishedGoingToSleep(0);
+        mNotificationPanelView.mKeyguardUpdateCallback.onBiometricRunningStateChanged(true,
+                BiometricSourceType.FACE);
+        verify(mKeyguardStatusBar, never()).setVisibility(View.VISIBLE);
     }
 
     private class TestableNotificationPanelView extends NotificationPanelView {
