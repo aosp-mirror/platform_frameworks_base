@@ -1148,9 +1148,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             // shade is visible to the user. When the notification shade is completely open then
             // alpha value will be 1.
             float alpha = (float) height / mNotificationView.getHeight();
-            Drawable background = mNotificationView.getBackground();
+            Drawable background = mNotificationView.getBackground().mutate();
 
             background.setAlpha((int) (alpha * 255));
+            mNotificationView.setBackground(background);
         }
     }
 
