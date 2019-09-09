@@ -37,6 +37,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.ZygoteProcess;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -459,6 +460,16 @@ public class ZygoteInit {
         ZygoteHooks.gcAndFinalize();
     }
 
+    private static boolean profileSystemServer() {
+        boolean defaultValue = SystemProperties.getBoolean("dalvik.vm.profilesystemserver",
+                /*default=*/ false);
+        // Can't use DeviceConfig since it's not initialized at this point.
+        return SystemProperties.getBoolean(
+                "persist.device_config." + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
+                        + ".profilesystemserver",
+                defaultValue);
+    }
+
     /**
      * Finish remaining work for the newly forked system server process.
      */
@@ -481,10 +492,9 @@ public class ZygoteInit {
             }
             // Capturing profiles is only supported for debug or eng builds since selinux normally
             // prevents it.
-            boolean profileSystemServer = SystemProperties.getBoolean(
-                    "dalvik.vm.profilesystemserver", false);
-            if (profileSystemServer && (Build.IS_USERDEBUG || Build.IS_ENG)) {
+            if (profileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
                 try {
+                    Log.d(TAG, "Preparing system server profile");
                     prepareSystemServerProfile(systemServerClasspath);
                 } catch (Exception e) {
                     Log.wtf(TAG, "Failed to set up system server profile", e);
@@ -755,9 +765,8 @@ public class ZygoteInit {
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
-            boolean profileSystemServer = SystemProperties.getBoolean(
-                    "dalvik.vm.profilesystemserver", false);
-            if (profileSystemServer) {
+            if (profileSystemServer()) {
+
                 parsedArgs.mRuntimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
             }
 
