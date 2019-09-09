@@ -160,13 +160,19 @@ class MenuVisitor : public BaseVisitor {
   void Visit(xml::Element* node) override {
     if (node->namespace_uri.empty() && node->name == "item") {
       for (const auto& attr : node->attributes) {
-        if (attr.namespace_uri == xml::kSchemaAndroid) {
-          if ((attr.name == "actionViewClass" || attr.name == "actionProviderClass") &&
-              util::IsJavaClassName(attr.value)) {
-            AddClass(node->line_number, attr.value, "android.content.Context");
-          } else if (attr.name == "onClick") {
-            AddMethod(node->line_number, attr.value, "android.view.MenuItem");
-          }
+        // AppCompat-v7 defines its own versions of Android attributes if
+        // they're defined after SDK 7 (the below are from 11 and 14,
+        // respectively), so don't bother checking the XML namespace.
+        //
+        // Given the names of the containing XML files and the attribute
+        // names, it's unlikely that keeping these classes would be wrong.
+        if ((attr.name == "actionViewClass" || attr.name == "actionProviderClass") &&
+            util::IsJavaClassName(attr.value)) {
+          AddClass(node->line_number, attr.value, "android.content.Context");
+        }
+
+        if (attr.namespace_uri == xml::kSchemaAndroid && attr.name == "onClick") {
+          AddMethod(node->line_number, attr.value, "android.view.MenuItem");
         }
       }
     }
