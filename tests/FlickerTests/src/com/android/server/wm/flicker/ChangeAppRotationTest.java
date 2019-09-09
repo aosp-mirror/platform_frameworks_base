@@ -32,8 +32,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -44,18 +46,19 @@ import java.util.Collection;
  * Cycle through supported app rotations.
  * To run this test: {@code atest FlickerTest:ChangeAppRotationTest}
  */
-@RunWith(Parameterized.class)
 @LargeTest
+@RunWith(Parameterized.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ChangeAppRotationTest extends FlickerTestBase {
-    private int beginRotation;
-    private int endRotation;
+    private int mBeginRotation;
+    private int mEndRotation;
 
     public ChangeAppRotationTest(String beginRotationName, String endRotationName,
             int beginRotation, int endRotation) {
-        this.testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
-        this.beginRotation = beginRotation;
-        this.endRotation = endRotation;
+        this.mBeginRotation = beginRotation;
+        this.mEndRotation = endRotation;
     }
 
     @Parameters(name = "{0}-{1}")
@@ -77,7 +80,7 @@ public class ChangeAppRotationTest extends FlickerTestBase {
     @Before
     public void runTransition() {
         super.runTransition(
-                changeAppRotation(testApp, uiDevice, beginRotation, endRotation).build());
+                changeAppRotation(mTestApp, mUiDevice, mBeginRotation, mEndRotation).build());
     }
 
     @Test
@@ -94,8 +97,8 @@ public class ChangeAppRotationTest extends FlickerTestBase {
 
     @Test
     public void checkPosition_navBarLayerRotatesAndScales() {
-        Rect startingPos = getNavigationBarPosition(beginRotation);
-        Rect endingPos = getNavigationBarPosition(endRotation);
+        Rect startingPos = getNavigationBarPosition(mBeginRotation);
+        Rect endingPos = getNavigationBarPosition(mEndRotation);
         checkResults(result -> {
                     LayersTraceSubject.assertThat(result)
                             .hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, startingPos)
@@ -108,22 +111,22 @@ public class ChangeAppRotationTest extends FlickerTestBase {
 
     @Test
     public void checkPosition_appLayerRotates() {
-        Rect startingPos = getAppPosition(beginRotation);
-        Rect endingPos = getAppPosition(endRotation);
+        Rect startingPos = getAppPosition(mBeginRotation);
+        Rect endingPos = getAppPosition(mEndRotation);
         Log.e(TAG, "startingPos=" + startingPos + " endingPos=" + endingPos);
         checkResults(result -> {
                     LayersTraceSubject.assertThat(result)
-                            .hasVisibleRegion(testApp.getPackage(), startingPos).inTheBeginning();
+                            .hasVisibleRegion(mTestApp.getPackage(), startingPos).inTheBeginning();
                     LayersTraceSubject.assertThat(result)
-                            .hasVisibleRegion(testApp.getPackage(), endingPos).atTheEnd();
+                            .hasVisibleRegion(mTestApp.getPackage(), endingPos).atTheEnd();
                 }
         );
     }
 
     @Test
     public void checkPosition_statusBarLayerScales() {
-        Rect startingPos = getStatusBarPosition(beginRotation);
-        Rect endingPos = getStatusBarPosition(endRotation);
+        Rect startingPos = getStatusBarPosition(mBeginRotation);
+        Rect endingPos = getStatusBarPosition(mEndRotation);
         checkResults(result -> {
                     LayersTraceSubject.assertThat(result)
                             .hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, startingPos)
