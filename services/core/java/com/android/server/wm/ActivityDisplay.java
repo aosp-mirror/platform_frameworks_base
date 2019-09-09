@@ -740,7 +740,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     private void onSplitScreenModeDismissed() {
-        mRootActivityContainer.mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             // Adjust the windowing mode of any stack in secondary split-screen to fullscreen.
             for (int i = mStacks.size() - 1; i >= 0; --i) {
@@ -764,12 +764,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 mHomeStack.moveToFront("onSplitScreenModeDismissed");
                 topFullscreenStack.moveToFront("onSplitScreenModeDismissed");
             }
-            mRootActivityContainer.mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
     }
 
     private void onSplitScreenModeActivated() {
-        mRootActivityContainer.mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             // Adjust the windowing mode of any affected by split-screen to split-screen secondary.
             for (int i = mStacks.size() - 1; i >= 0; --i) {
@@ -784,7 +784,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                         false /* creating */);
             }
         } finally {
-            mRootActivityContainer.mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
     }
 
@@ -1002,12 +1002,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         Configuration values = new Configuration();
         mDisplayContent.computeScreenConfiguration(values);
 
-        if (mService.mWindowManager != null) {
-            final Message msg = PooledLambda.obtainMessage(
-                    ActivityManagerInternal::updateOomLevelsForDisplay, mService.mAmInternal,
-                    mDisplayId);
-            mService.mH.sendMessage(msg);
-        }
+        mService.mH.sendMessage(PooledLambda.obtainMessage(
+                ActivityManagerInternal::updateOomLevelsForDisplay, mService.mAmInternal,
+                mDisplayId));
 
         Settings.System.clearConfiguration(values);
         updateDisplayOverrideConfigurationLocked(values, null /* starting */,
@@ -1026,9 +1023,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         int changes = 0;
         boolean kept = true;
 
-        if (mService.mWindowManager != null) {
-            mService.mWindowManager.deferSurfaceLayout();
-        }
+        mService.deferWindowLayout();
         try {
             if (values != null) {
                 if (mDisplayId == DEFAULT_DISPLAY) {
@@ -1045,9 +1040,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
             kept = mService.ensureConfigAndVisibilityAfterUpdate(starting, changes);
         } finally {
-            if (mService.mWindowManager != null) {
-                mService.mWindowManager.continueSurfaceLayout();
-            }
+            mService.continueWindowLayout();
         }
 
         if (result != null) {
@@ -1096,6 +1089,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             mService.mWindowManager.setNewDisplayOverrideConfiguration(
                     overrideConfiguration, mDisplayContent);
         }
+        mService.addWindowLayoutReasons(
+                ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
     }
 
     @Override

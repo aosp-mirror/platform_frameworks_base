@@ -1495,7 +1495,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     private void moveTasksToFullscreenStackInSurfaceTransaction(ActivityStack fromStack,
             int toDisplayId, boolean onTop) {
 
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             final int windowingMode = fromStack.getWindowingMode();
             final boolean inPinnedWindowingMode = windowingMode == WINDOWING_MODE_PINNED;
@@ -1561,7 +1561,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             mRootActivityContainer.resumeFocusedStacksTopActivities();
         } finally {
             mAllowDockedStackResize = true;
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
     }
 
@@ -1630,7 +1630,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeDockedStack");
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             // Don't allow re-entry while resizing. E.g. due to docked stack detaching.
             mAllowDockedStackResize = false;
@@ -1694,7 +1694,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             }
         } finally {
             mAllowDockedStackResize = true;
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
@@ -1718,9 +1718,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizePinnedStack");
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
-            ActivityRecord r = stack.topRunningActivityLocked();
             Rect insetBounds = null;
             if (tempPinnedTaskBounds != null && stack.isAnimatingBoundsToFullscreen()) {
                 // Use 0,0 as the position for the inset rect because we are headed for fullscreen.
@@ -1739,7 +1738,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             stack.resize(pinnedBounds, tempPinnedTaskBounds, insetBounds, !PRESERVE_WINDOWS,
                     !DEFER_RESUME);
         } finally {
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
@@ -2731,7 +2730,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     + taskId + " can't be launch in the home/recents stack.");
         }
 
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 mWindowManager.setDockedStackCreateStateLocked(
@@ -2822,7 +2821,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     mWindowManager.checkSplitScreenMinimizedChanged(false /* animate */);
                 }
             }
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
     }
 

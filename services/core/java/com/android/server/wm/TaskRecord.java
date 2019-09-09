@@ -545,7 +545,7 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
-        mService.mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
 
         try {
             if (!isResizeable()) {
@@ -619,7 +619,7 @@ class TaskRecord extends ConfigurationContainer {
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             return kept;
         } finally {
-            mService.mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
     }
 
@@ -725,7 +725,7 @@ class TaskRecord extends ConfigurationContainer {
             windowManager.setWillReplaceWindow(topActivity.appToken, animate);
         }
 
-        windowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         boolean kept = true;
         try {
             final ActivityRecord r = topRunningActivityLocked();
@@ -809,7 +809,7 @@ class TaskRecord extends ConfigurationContainer {
                         !mightReplaceWindow, deferResume);
             }
         } finally {
-            windowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
 
         if (mightReplaceWindow) {

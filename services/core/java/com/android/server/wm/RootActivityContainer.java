@@ -945,7 +945,7 @@ class RootActivityContainer extends ConfigurationContainer
 
     void moveActivityToPinnedStack(ActivityRecord r, Rect sourceHintBounds, float aspectRatio,
             String reason) {
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
 
         final ActivityDisplay display = r.getActivityStack().getDisplay();
         ActivityStack stack = display.getPinnedStack();
@@ -994,7 +994,7 @@ class RootActivityContainer extends ConfigurationContainer
             // to the pinned stack
             r.supportsEnterPipOnTaskSwitch = false;
         } finally {
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
 
         // Notify the pinned stack controller to prepare the PiP animation, expect callback
@@ -2060,7 +2060,7 @@ class RootActivityContainer extends ConfigurationContainer
      * @param userId user handle for the locked managed profile.
      */
     void lockAllProfileTasks(@UserIdInt int userId) {
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
                 final ActivityDisplay display = mActivityDisplays.get(displayNdx);
@@ -2081,7 +2081,7 @@ class RootActivityContainer extends ConfigurationContainer
                 }
             }
         } finally {
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
     }
 

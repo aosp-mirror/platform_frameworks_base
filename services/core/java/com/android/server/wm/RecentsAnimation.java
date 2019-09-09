@@ -196,7 +196,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             mCaller.setRunningRecentsAnimation(true);
         }
 
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
@@ -260,7 +260,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             Slog.e(TAG, "Failed to start recents activity", e);
             throw e;
         } finally {
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
@@ -297,7 +297,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
-                mWindowManager.deferSurfaceLayout();
+                mService.deferWindowLayout();
                 try {
                     mWindowManager.cleanupRecentsAnimation(reorderMode);
 
@@ -387,7 +387,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     Slog.e(TAG, "Failed to clean up recents activity", e);
                     throw e;
                 } finally {
-                    mWindowManager.continueSurfaceLayout();
+                    mService.continueWindowLayout();
                     Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
                 }
             });
