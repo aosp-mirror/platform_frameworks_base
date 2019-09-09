@@ -29,6 +29,11 @@ public interface QSFooter {
     void setQSPanel(@Nullable QSPanel panel);
 
     /**
+     * Sets the given {@link QuickQSPanel} to be the one associated with quick settings.
+     */
+    default void setQQSPanel(@Nullable QuickQSPanel panel) {};
+
+    /**
      * Sets whether or not the footer should be visible.
      *
      * @param visibility One of {@link View#VISIBLE}, {@link View#INVISIBLE} or {@link View#GONE}.
