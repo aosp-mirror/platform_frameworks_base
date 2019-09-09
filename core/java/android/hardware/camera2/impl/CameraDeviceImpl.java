@@ -1026,34 +1026,35 @@ public class CameraDeviceImpl extends CameraDevice
         // callback is valid
         executor = checkExecutor(executor, callback);
 
-        // Make sure that there all requests have at least 1 surface; all surfaces are non-null;
-        // the surface isn't a physical stream surface for reprocessing request
-        for (CaptureRequest request : requestList) {
-            if (request.getTargets().isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Each request must have at least one Surface target");
-            }
+        synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
 
-            for (Surface surface : request.getTargets()) {
-                if (surface == null) {
-                    throw new IllegalArgumentException("Null Surface targets are not allowed");
+            // Make sure that there all requests have at least 1 surface; all surfaces are non-null;
+            // the surface isn't a physical stream surface for reprocessing request
+            for (CaptureRequest request : requestList) {
+                if (request.getTargets().isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "Each request must have at least one Surface target");
                 }
 
-                for (int i = 0; i < mConfiguredOutputs.size(); i++) {
-                    OutputConfiguration configuration = mConfiguredOutputs.valueAt(i);
-                    if (configuration.isForPhysicalCamera()
-                            && configuration.getSurfaces().contains(surface)) {
-                        if (request.isReprocess()) {
-                            throw new IllegalArgumentException(
-                                    "Reprocess request on physical stream is not allowed");
+                for (Surface surface : request.getTargets()) {
+                    if (surface == null) {
+                        throw new IllegalArgumentException("Null Surface targets are not allowed");
+                    }
+
+                    for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                        OutputConfiguration configuration = mConfiguredOutputs.valueAt(i);
+                        if (configuration.isForPhysicalCamera()
+                                && configuration.getSurfaces().contains(surface)) {
+                            if (request.isReprocess()) {
+                                throw new IllegalArgumentException(
+                                        "Reprocess request on physical stream is not allowed");
+                            }
                         }
                     }
                 }
             }
-        }
 
-        synchronized(mInterfaceLock) {
-            checkIfCameraClosedOrInError();
             if (repeating) {
                 stopRepeating();
             }
@@ -2343,14 +2344,21 @@ public class CameraDeviceImpl extends CameraDevice
             if (errorCode == ERROR_CAMERA_BUFFER) {
                 // Because 1 stream id could map to multiple surfaces, we need to specify both
                 // streamId and surfaceId.
-                List<Surface> surfaces =
-                        mConfiguredOutputs.get(resultExtras.getErrorStreamId()).getSurfaces();
-                for (Surface surface : surfaces) {
+                OutputConfiguration config = mConfiguredOutputs.get(
+                        resultExtras.getErrorStreamId());
+                if (config == null) {
+                    Log.v(TAG, String.format(
+                            "Stream %d has been removed. Skipping buffer lost callback",
+                            resultExtras.getErrorStreamId()));
+                    return;
+                }
+                for (Surface surface : config.getSurfaces()) {
                     if (!request.containsTarget(surface)) {
                         continue;
                     }
                     if (DEBUG) {
-                        Log.v(TAG, String.format("Lost output buffer reported for frame %d, target %s",
+                        Log.v(TAG, String.format(
+                                "Lost output buffer reported for frame %d, target %s",
                                 frameNumber, surface));
                     }
                     failureDispatch = new Runnable() {
