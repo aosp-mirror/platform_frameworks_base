@@ -17,8 +17,11 @@
 package com.android.startop.test;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Trace;
@@ -108,5 +111,48 @@ public class SystemServerBenchmarkActivity extends Activity {
         new Benchmark(benchmarkList, "getInstalledApplications", () -> {
             pm.getInstalledApplications(PackageManager.MATCH_SYSTEM_ONLY);
         });
+
+        new Benchmark(benchmarkList, "getInstalledPackages", () -> {
+            pm.getInstalledPackages(PackageManager.GET_ACTIVITIES);
+        });
+
+        new Benchmark(benchmarkList, "getPackageInfo", () -> {
+            try {
+                pm.getPackageInfo("com.android.startop.test", 0);
+            } catch (NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        new Benchmark(benchmarkList, "getApplicationInfo", () -> {
+            try {
+                pm.getApplicationInfo("com.android.startop.test", 0);
+            } catch (NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        try {
+            ApplicationInfo app = pm.getApplicationInfo("com.android.startop.test", 0);
+            new Benchmark(benchmarkList, "getResourcesForApplication", () -> {
+                try {
+                    pm.getResourcesForApplication(app);
+                } catch (NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        ComponentName component = new ComponentName(this, this.getClass());
+        new Benchmark(benchmarkList, "getActivityInfo", () -> {
+            try {
+                pm.getActivityInfo(component, PackageManager.GET_META_DATA);
+            } catch (NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
     }
 }
