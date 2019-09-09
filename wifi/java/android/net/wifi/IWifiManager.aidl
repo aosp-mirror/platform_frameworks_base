@@ -24,10 +24,12 @@ import android.net.wifi.hotspot2.IProvisioningCallback;
 
 import android.net.DhcpInfo;
 import android.net.Network;
+import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
+import android.net.wifi.ITxPacketCountListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -156,8 +158,6 @@ interface IWifiManager
 
     void notifyUserOfApBandConversion(String packageName);
 
-    Messenger getWifiServiceMessenger(String packageName);
-
     void enableTdls(String remoteIPAddress, boolean enable);
 
     void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable);
@@ -220,4 +220,12 @@ interface IWifiManager
     void stopDppSession();
 
     void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec);
+
+    oneway void connect(in WifiConfiguration config, int netId, in IBinder binder, in IActionListener listener, int callbackIdentifier);
+
+    oneway void save(in WifiConfiguration config, in IBinder binder, in IActionListener listener, int callbackIdentifier);
+
+    oneway void forget(int netId, in IBinder binder, in IActionListener listener, int callbackIdentifier);
+
+    oneway void getTxPacketCount(String packageName, in IBinder binder, in ITxPacketCountListener listener, int callbackIdentifier);
 }

@@ -21,11 +21,13 @@ package com.android.server.wifi;
 import android.content.pm.ParceledListSlice;
 import android.net.DhcpInfo;
 import android.net.Network;
+import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
+import android.net.wifi.ITxPacketCountListener;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -323,7 +325,7 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @removed */
     public Messenger getWifiServiceMessenger(String packageName) {
         throw new UnsupportedOperationException();
     }
@@ -484,6 +486,30 @@ public class BaseWifiService extends IWifiManager.Stub {
 
     @Override
     public void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void connect(WifiConfiguration config, int netId, IBinder binder,
+            IActionListener callback, int callbackIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void save(WifiConfiguration config, IBinder binder, IActionListener callback,
+            int callbackIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void forget(int netId, IBinder binder, IActionListener callback,
+            int callbackIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void getTxPacketCount(String packageName, IBinder binder,
+            ITxPacketCountListener callback, int callbackIdentifier) {
         throw new UnsupportedOperationException();
     }
 }
