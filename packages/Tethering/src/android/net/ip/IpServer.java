@@ -16,7 +16,7 @@
 
 package android.net.ip;
 
-import static android.net.NetworkUtils.numericToInetAddress;
+import static android.net.InetAddresses.parseNumericAddress;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
@@ -77,6 +77,7 @@ public class IpServer extends StateMachine {
     public static final int STATE_TETHERED    = 2;
     public static final int STATE_LOCAL_ONLY  = 3;
 
+    /** Get string name of |state|.*/
     public static String getStateString(int state) {
         switch (state) {
             case STATE_UNAVAILABLE: return "UNAVAILABLE";
@@ -103,15 +104,16 @@ public class IpServer extends StateMachine {
     // TODO: have this configurable
     private static final int DHCP_LEASE_TIME_SECS = 3600;
 
-    private final static String TAG = "IpServer";
-    private final static boolean DBG = false;
-    private final static boolean VDBG = false;
-    private static final Class[] messageClasses = {
+    private static final String TAG = "IpServer";
+    private static final boolean DBG = false;
+    private static final boolean VDBG = false;
+    private static final Class[] sMessageClasses = {
             IpServer.class
     };
     private static final SparseArray<String> sMagicDecoderRing =
-            MessageUtils.findMessageNames(messageClasses);
+            MessageUtils.findMessageNames(sMessageClasses);
 
+    /** IpServer callback. */
     public static class Callback {
         /**
          * Notify that |who| has changed its tethering state.
@@ -131,11 +133,14 @@ public class IpServer extends StateMachine {
         public void updateLinkProperties(IpServer who, LinkProperties newLp) {}
     }
 
+    /** Capture IpServer dependencies, for injection. */
     public static class Dependencies {
+        /** Create a RouterAdvertisementDaemon instance to be used by IpServer.*/
         public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
             return new RouterAdvertisementDaemon(ifParams);
         }
 
+        /** Get |ifName|'s interface information.*/
         public InterfaceParams getInterfaceParams(String ifName) {
             return InterfaceParams.getByName(ifName);
         }
@@ -244,25 +249,51 @@ public class IpServer extends StateMachine {
         setInitialState(mInitialState);
     }
 
-    public String interfaceName() { return mIfaceName; }
-
-    public int interfaceType() { return mInterfaceType; }
-
-    public int lastError() { return mLastError; }
-
-    public int servingMode() { return mServingMode; }
-
-    public LinkProperties linkProperties() { return new LinkProperties(mLinkProperties); }
-
-    public void stop() { sendMessage(CMD_INTERFACE_DOWN); }
-
-    public void unwanted() { sendMessage(CMD_TETHER_UNREQUESTED); }
+    /** Interface name which IpServer served.*/
+    public String interfaceName() {
+        return mIfaceName;
+    }
 
     /**
-     * Internals.
+     * Tethering downstream type. It would be one of ConnectivityManager#TETHERING_*.
      */
+    public int interfaceType() {
+        return mInterfaceType;
+    }
 
-    private boolean startIPv4() { return configureIPv4(true); }
+    /** Last error from this IpServer. */
+    public int lastError() {
+        return mLastError;
+    }
+
+    /** Serving mode is the current state of IpServer state machine. */
+    public int servingMode() {
+        return mServingMode;
+    }
+
+    /** The properties of the network link which IpServer is serving. */
+    public LinkProperties linkProperties() {
+        return new LinkProperties(mLinkProperties);
+    }
+
+    /** Stop this IpServer. After this is called this IpServer should not be used any more. */
+    public void stop() {
+        sendMessage(CMD_INTERFACE_DOWN);
+    }
+
+    /**
+     * Tethering is canceled. IpServer state machine will be available and wait for
+     * next tethering request.
+     */
+    public void unwanted() {
+        sendMessage(CMD_TETHER_UNREQUESTED);
+    }
+
+    /** Internals. */
+
+    private boolean startIPv4() {
+        return configureIPv4(true);
+    }
 
     /**
      * Convenience wrapper around INetworkStackStatusCallback to run callbacks on the IpServer
@@ -410,7 +441,7 @@ public class IpServer extends StateMachine {
             prefixLen = WIFI_P2P_IFACE_PREFIX_LENGTH;
         } else {
             // BT configures the interface elsewhere: only start DHCP.
-            final Inet4Address srvAddr = (Inet4Address) numericToInetAddress(BLUETOOTH_IFACE_ADDR);
+            final Inet4Address srvAddr = (Inet4Address) parseNumericAddress(BLUETOOTH_IFACE_ADDR);
             return configureDhcp(enabled, srvAddr, BLUETOOTH_DHCP_PREFIX_LENGTH);
         }
 
@@ -422,7 +453,7 @@ public class IpServer extends StateMachine {
                 return false;
             }
 
-            InetAddress addr = numericToInetAddress(ipAsString);
+            InetAddress addr = parseNumericAddress(ipAsString);
             linkAddr = new LinkAddress(addr, prefixLen);
             ifcg.setLinkAddress(linkAddr);
             if (mInterfaceType == ConnectivityManager.TETHERING_WIFI) {
@@ -473,7 +504,7 @@ public class IpServer extends StateMachine {
 
     private String getRandomWifiIPv4Address() {
         try {
-            byte[] bytes = numericToInetAddress(WIFI_HOST_IFACE_ADDR).getAddress();
+            byte[] bytes = parseNumericAddress(WIFI_HOST_IFACE_ADDR).getAddress();
             bytes[3] = getRandomSanitizedByte(DOUG_ADAMS, asByte(0), asByte(1), FF);
             return InetAddress.getByAddress(bytes).getHostAddress();
         } catch (Exception e) {
