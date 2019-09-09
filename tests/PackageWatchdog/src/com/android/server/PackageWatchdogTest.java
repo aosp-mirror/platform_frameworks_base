@@ -18,9 +18,8 @@ package com.android.server;
 
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -124,8 +123,7 @@ public class PackageWatchdogTest {
 
         // The failed packages should be the same as the registered ones to ensure registration is
         // done successfully
-        assertEquals(1, observer.mHealthCheckFailedPackages.size());
-        assertTrue(observer.mHealthCheckFailedPackages.contains(APP_A));
+        assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
     }
 
     @Test
@@ -142,11 +140,8 @@ public class PackageWatchdogTest {
 
         // The failed packages should be the same as the registered ones to ensure registration is
         // done successfully
-        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
-        assertEquals(2, observer2.mHealthCheckFailedPackages.size());
-        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
-        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_A));
-        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_B));
+        assertThat(observer1.mHealthCheckFailedPackages).containsExactly(APP_A);
+        assertThat(observer2.mHealthCheckFailedPackages).containsExactly(APP_A, APP_B);
     }
 
     @Test
@@ -160,7 +155,7 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // We should have no failed packages to ensure unregistration is done successfully
-        assertEquals(0, observer.mHealthCheckFailedPackages.size());
+        assertThat(observer.mHealthCheckFailedPackages).isEmpty();
     }
 
     @Test
@@ -176,9 +171,9 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // observer1 should receive failed packages as intended.
-        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
+        assertThat(observer1.mHealthCheckFailedPackages).containsExactly(APP_A);
         // observer2 should have no failed packages to ensure unregistration is done successfully
-        assertEquals(0, observer2.mHealthCheckFailedPackages.size());
+        assertThat(observer2.mHealthCheckFailedPackages).isEmpty();
     }
 
     @Test
@@ -192,7 +187,7 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // We should have no failed packages for the fatal failure is raised after expiration
-        assertEquals(0, observer.mHealthCheckFailedPackages.size());
+        assertThat(observer.mHealthCheckFailedPackages).isEmpty();
     }
 
     @Test
@@ -208,9 +203,9 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // We should have no failed packages for the fatal failure is raised after expiration
-        assertEquals(0, observer1.mHealthCheckFailedPackages.size());
+        assertThat(observer1.mHealthCheckFailedPackages).isEmpty();
         // We should have failed packages since observer2 hasn't expired
-        assertEquals(1, observer2.mHealthCheckFailedPackages.size());
+        assertThat(observer2.mHealthCheckFailedPackages).containsExactly(APP_A);
     }
 
     /** Observing already observed package extends the observation time. */
@@ -235,8 +230,7 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify that we receive failed packages as expected for APP_A not expired
-        assertEquals(1, observer.mHealthCheckFailedPackages.size());
-        assertTrue(observer.mHealthCheckFailedPackages.contains(APP_A));
+        assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
     }
 
     /**
@@ -263,11 +257,8 @@ public class PackageWatchdogTest {
 
         // We should receive failed packages as expected to ensure observers are persisted and
         // resumed correctly
-        assertEquals(1, observer1.mHealthCheckFailedPackages.size());
-        assertEquals(2, observer2.mHealthCheckFailedPackages.size());
-        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
-        assertTrue(observer1.mHealthCheckFailedPackages.contains(APP_A));
-        assertTrue(observer2.mHealthCheckFailedPackages.contains(APP_B));
+        assertThat(observer1.mHealthCheckFailedPackages).containsExactly(APP_A);
+        assertThat(observer2.mHealthCheckFailedPackages).containsExactly(APP_A, APP_B);
     }
 
     /**
@@ -291,8 +282,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify that observers are not notified
-        assertEquals(0, observer1.mMitigatedPackages.size());
-        assertEquals(0, observer2.mMitigatedPackages.size());
+        assertThat(observer1.mHealthCheckFailedPackages).isEmpty();
+        assertThat(observer2.mHealthCheckFailedPackages).isEmpty();
     }
 
     /**
@@ -316,8 +307,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify that observers are not notified
-        assertEquals(0, observer1.mMitigatedPackages.size());
-        assertEquals(0, observer2.mMitigatedPackages.size());
+        assertThat(observer1.mHealthCheckFailedPackages).isEmpty();
+        assertThat(observer2.mHealthCheckFailedPackages).isEmpty();
     }
 
     /**
@@ -349,7 +340,7 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify that observers are not notified
-        assertEquals(0, observer.mMitigatedPackages.size());
+        assertThat(observer.mHealthCheckFailedPackages).isEmpty();
     }
 
 
@@ -394,16 +385,13 @@ public class PackageWatchdogTest {
         List<String> observerLowPackages = observerLow.mMitigatedPackages;
 
         // APP_D failure observed by only observerNone is not caught cos its impact is none
-        assertEquals(0, observerNonePackages.size());
+        assertThat(observerNonePackages).isEmpty();
         // APP_C failure is caught by observerHigh cos it's the lowest impact observer
-        assertEquals(1, observerHighPackages.size());
-        assertEquals(APP_C, observerHighPackages.get(0));
+        assertThat(observerHighPackages).containsExactly(APP_C);
         // APP_B failure is caught by observerMid cos it's the lowest impact observer
-        assertEquals(1, observerMidPackages.size());
-        assertEquals(APP_B, observerMidPackages.get(0));
+        assertThat(observerMidPackages).containsExactly(APP_B);
         // APP_A failure is caught by observerLow cos it's the lowest impact observer
-        assertEquals(1, observerLowPackages.size());
-        assertEquals(APP_A, observerLowPackages.get(0));
+        assertThat(observerLowPackages).containsExactly(APP_A);
     }
 
     /**
@@ -435,9 +423,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify only observerFirst is notifed
-        assertEquals(1, observerFirst.mMitigatedPackages.size());
-        assertEquals(APP_A, observerFirst.mMitigatedPackages.get(0));
-        assertEquals(0, observerSecond.mMitigatedPackages.size());
+        assertThat(observerFirst.mMitigatedPackages).containsExactly(APP_A);
+        assertThat(observerSecond.mMitigatedPackages).isEmpty();
 
         // After observerFirst handles failure, next action it has is high impact
         observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_HIGH;
@@ -450,9 +437,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify only observerSecond is notifed cos it has least impact
-        assertEquals(1, observerSecond.mMitigatedPackages.size());
-        assertEquals(APP_A, observerSecond.mMitigatedPackages.get(0));
-        assertEquals(0, observerFirst.mMitigatedPackages.size());
+        assertThat(observerSecond.mMitigatedPackages).containsExactly(APP_A);
+        assertThat(observerFirst.mMitigatedPackages).isEmpty();
 
         // After observerSecond handles failure, it has no further actions
         observerSecond.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
@@ -465,9 +451,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify only observerFirst is notifed cos it has the only action
-        assertEquals(1, observerFirst.mMitigatedPackages.size());
-        assertEquals(APP_A, observerFirst.mMitigatedPackages.get(0));
-        assertEquals(0, observerSecond.mMitigatedPackages.size());
+        assertThat(observerFirst.mMitigatedPackages).containsExactly(APP_A);
+        assertThat(observerSecond.mMitigatedPackages).isEmpty();
 
         // After observerFirst handles failure, it too has no further actions
         observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
@@ -480,8 +465,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify no observer is notified cos no actions left
-        assertEquals(0, observerFirst.mMitigatedPackages.size());
-        assertEquals(0, observerSecond.mMitigatedPackages.size());
+        assertThat(observerFirst.mMitigatedPackages).isEmpty();
+        assertThat(observerSecond.mMitigatedPackages).isEmpty();
     }
 
     /**
@@ -506,9 +491,8 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify only one observer is notifed
-        assertEquals(1, observer1.mMitigatedPackages.size());
-        assertEquals(APP_A, observer1.mMitigatedPackages.get(0));
-        assertEquals(0, observer2.mMitigatedPackages.size());
+        assertThat(observer1.mMitigatedPackages).containsExactly(APP_A);
+        assertThat(observer2.mMitigatedPackages).isEmpty();
     }
 
     /**
@@ -537,9 +521,7 @@ public class PackageWatchdogTest {
 
         // Verify we requested health checks for APP_A and APP_B
         List<String> requestedPackages = controller.getRequestedPackages();
-        assertEquals(2, requestedPackages.size());
-        assertEquals(APP_A, requestedPackages.get(0));
-        assertEquals(APP_B, requestedPackages.get(1));
+        assertThat(requestedPackages).containsExactly(APP_A, APP_B);
 
         // Then health check passed for APP_A (observer1 is aware)
         controller.setPackagePassed(APP_A);
@@ -554,18 +536,16 @@ public class PackageWatchdogTest {
         moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify we cancelled all requests on expiry
-        assertEquals(0, controller.getRequestedPackages().size());
+        assertThat(controller.getRequestedPackages()).isEmpty();
 
         // Verify observer1 is not notified
-        assertEquals(0, observer1.mMitigatedPackages.size());
+        assertThat(observer1.mMitigatedPackages).isEmpty();
 
         // Verify observer2 is notifed because health checks for APP_B never passed
-        assertEquals(1, observer2.mMitigatedPackages.size());
-        assertEquals(APP_B, observer2.mMitigatedPackages.get(0));
+        assertThat(observer2.mMitigatedPackages).containsExactly(APP_B);
 
         // Verify observer3 is notifed because health checks for APP_A did not pass before expiry
-        assertEquals(1, observer3.mMitigatedPackages.size());
-        assertEquals(APP_A, observer3.mMitigatedPackages.get(0));
+        assertThat(observer3.mMitigatedPackages).containsExactly(APP_A);
     }
 
     /**
@@ -592,9 +572,7 @@ public class PackageWatchdogTest {
 
         // Verify we requested health checks for APP_A and APP_B
         List<String> requestedPackages = controller.getRequestedPackages();
-        assertEquals(2, requestedPackages.size());
-        assertEquals(APP_A, requestedPackages.get(0));
-        assertEquals(APP_B, requestedPackages.get(1));
+        assertThat(requestedPackages).containsExactly(APP_A, APP_B);
 
         // Disable explicit health checks (marks APP_A and APP_B as passed)
         setExplicitHealthCheckEnabled(false);
@@ -603,13 +581,13 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify all checks are cancelled
-        assertEquals(0, controller.getRequestedPackages().size());
+        assertThat(controller.getRequestedPackages()).isEmpty();
 
         // Then expire APP_A
         moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify APP_A is not failed (APP_B) is not expired yet
-        assertEquals(0, observer.mMitigatedPackages.size());
+        assertThat(observer.mMitigatedPackages).isEmpty();
 
         // Re-enable explicit health checks
         setExplicitHealthCheckEnabled(true);
@@ -618,7 +596,7 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify no requests are made cos APP_A is expired and APP_B was marked as passed
-        assertEquals(0, controller.getRequestedPackages().size());
+        assertThat(controller.getRequestedPackages()).isEmpty();
 
         // Then set new supported packages
         controller.setSupportedPackages(Arrays.asList(APP_C));
@@ -630,15 +608,13 @@ public class PackageWatchdogTest {
 
         // Verify requests are only made for APP_C
         requestedPackages = controller.getRequestedPackages();
-        assertEquals(1, requestedPackages.size());
-        assertEquals(APP_C, requestedPackages.get(0));
+        assertThat(requestedPackages).containsExactly(APP_C);
 
         // Then expire APP_A and APP_C
         moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify only APP_C is failed because explicit health checks was not supported for APP_A
-        assertEquals(1, observer.mMitigatedPackages.size());
-        assertEquals(APP_C, observer.mMitigatedPackages.get(0));
+        assertThat(observer.mMitigatedPackages).containsExactly(APP_C);
     }
 
     /**
@@ -662,8 +638,7 @@ public class PackageWatchdogTest {
         moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify that health check is failed
-        assertEquals(1, observer.mMitigatedPackages.size());
-        assertEquals(APP_A, observer.mMitigatedPackages.get(0));
+        assertThat(observer.mMitigatedPackages).containsExactly(APP_A);
 
         // Then clear failed packages and start observing a random package so requests are synced
         // and PackageWatchdog#onSupportedPackages is called and APP_A has a chance to fail again
@@ -672,7 +647,7 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_B), LONG_DURATION);
 
         // Verify that health check failure is not notified again
-        assertTrue(observer.mMitigatedPackages.isEmpty());
+        assertThat(observer.mMitigatedPackages).isEmpty();
     }
 
     /** Tests {@link MonitoredPackage} health check state transitions. */
@@ -688,36 +663,38 @@ public class PackageWatchdogTest {
 
         // Verify transition: inactive -> active -> passed
         // Verify initially inactive
-        assertEquals(HealthCheckState.INACTIVE, m1.getHealthCheckStateLocked());
+        assertThat(m1.getHealthCheckStateLocked()).isEqualTo(HealthCheckState.INACTIVE);
         // Verify still inactive, until we #setHealthCheckActiveLocked
-        assertEquals(HealthCheckState.INACTIVE, m1.handleElapsedTimeLocked(SHORT_DURATION));
+        assertThat(m1.handleElapsedTimeLocked(SHORT_DURATION)).isEqualTo(HealthCheckState.INACTIVE);
         // Verify now active
-        assertEquals(HealthCheckState.ACTIVE, m1.setHealthCheckActiveLocked(SHORT_DURATION));
+        assertThat(m1.setHealthCheckActiveLocked(SHORT_DURATION)).isEqualTo(
+                HealthCheckState.ACTIVE);
         // Verify now passed
-        assertEquals(HealthCheckState.PASSED, m1.tryPassHealthCheckLocked());
+        assertThat(m1.tryPassHealthCheckLocked()).isEqualTo(HealthCheckState.PASSED);
 
         // Verify transition: inactive -> active -> failed
         // Verify initially inactive
-        assertEquals(HealthCheckState.INACTIVE, m2.getHealthCheckStateLocked());
+        assertThat(m2.getHealthCheckStateLocked()).isEqualTo(HealthCheckState.INACTIVE);
         // Verify now active
-        assertEquals(HealthCheckState.ACTIVE, m2.setHealthCheckActiveLocked(SHORT_DURATION));
+        assertThat(m2.setHealthCheckActiveLocked(SHORT_DURATION)).isEqualTo(
+                HealthCheckState.ACTIVE);
         // Verify now failed
-        assertEquals(HealthCheckState.FAILED, m2.handleElapsedTimeLocked(SHORT_DURATION));
+        assertThat(m2.handleElapsedTimeLocked(SHORT_DURATION)).isEqualTo(HealthCheckState.FAILED);
 
         // Verify transition: inactive -> failed
         // Verify initially inactive
-        assertEquals(HealthCheckState.INACTIVE, m3.getHealthCheckStateLocked());
+        assertThat(m3.getHealthCheckStateLocked()).isEqualTo(HealthCheckState.INACTIVE);
         // Verify now failed because package expired
-        assertEquals(HealthCheckState.FAILED, m3.handleElapsedTimeLocked(LONG_DURATION));
+        assertThat(m3.handleElapsedTimeLocked(LONG_DURATION)).isEqualTo(HealthCheckState.FAILED);
         // Verify remains failed even when asked to pass
-        assertEquals(HealthCheckState.FAILED, m3.tryPassHealthCheckLocked());
+        assertThat(m3.tryPassHealthCheckLocked()).isEqualTo(HealthCheckState.FAILED);
 
         // Verify transition: passed
-        assertEquals(HealthCheckState.PASSED, m4.getHealthCheckStateLocked());
+        assertThat(m4.getHealthCheckStateLocked()).isEqualTo(HealthCheckState.PASSED);
         // Verify remains passed even if health check fails
-        assertEquals(HealthCheckState.PASSED, m4.handleElapsedTimeLocked(SHORT_DURATION));
+        assertThat(m4.handleElapsedTimeLocked(SHORT_DURATION)).isEqualTo(HealthCheckState.PASSED);
         // Verify remains passed even if package expires
-        assertEquals(HealthCheckState.PASSED, m4.handleElapsedTimeLocked(LONG_DURATION));
+        assertThat(m4.handleElapsedTimeLocked(LONG_DURATION)).isEqualTo(HealthCheckState.PASSED);
     }
 
     @Test
@@ -736,8 +713,7 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         // Verify the NetworkStack observer is notified
-        assertEquals(1, observer.mMitigatedPackages.size());
-        assertEquals(APP_A, observer.mMitigatedPackages.get(0));
+        assertThat(observer.mMitigatedPackages).containsExactly(APP_A);
     }
 
     private void adoptShellPermissions(String... permissions) {
@@ -791,13 +767,13 @@ public class PackageWatchdogTest {
                 new PackageWatchdog(mSpyContext, policyFile, handler, handler, controller,
                         mConnectivityModuleConnector, mTestClock);
         // Verify controller is not automatically started
-        assertFalse(controller.mIsEnabled);
+        assertThat(controller.mIsEnabled).isFalse();
         if (withPackagesReady) {
             // Only capture the NetworkStack callback for the latest registered watchdog
             reset(mConnectivityModuleConnector);
             watchdog.onPackagesReady();
             // Verify controller by default is started when packages are ready
-            assertTrue(controller.mIsEnabled);
+            assertThat(controller.mIsEnabled).isTrue();
 
             verify(mConnectivityModuleConnector).registerHealthListener(
                     mConnectivityModuleCallbackCaptor.capture());
