@@ -2570,11 +2570,19 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     @Override
-    public @CAMERA_AUDIO_RESTRICTION int setCameraAudioRestriction(
+    public void setCameraAudioRestriction(
             @CAMERA_AUDIO_RESTRICTION int mode) throws CameraAccessException {
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
-            return mRemoteDevice.setCameraAudioRestriction(mode);
+            mRemoteDevice.setCameraAudioRestriction(mode);
+        }
+    }
+
+    @Override
+    public @CAMERA_AUDIO_RESTRICTION int getCameraAudioRestriction() throws CameraAccessException {
+        synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
+            return mRemoteDevice.getGlobalAudioRestriction();
         }
     }
 }
