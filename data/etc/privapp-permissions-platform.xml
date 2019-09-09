@@ -152,6 +152,7 @@ applications that come with the platform
         <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SHUTDOWN"/>
         <permission name="android.permission.STATUS_BAR"/>
+        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
