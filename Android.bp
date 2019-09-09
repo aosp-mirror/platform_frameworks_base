@@ -234,6 +234,11 @@ java_defaults {
             "wifi/java",
         ],
     },
+
+    required: [
+        // TODO: remove gps_debug when the build system propagates "required" properly.
+        "gps_debug.conf",
+    ],
 }
 
 // Collection of classes that are generated from non-Java files that are not listed in
@@ -306,11 +311,6 @@ java_defaults {
     jarjar_rules: ":framework-jarjar-rules",
 
     static_libs: ["framework-internal-utils"],
-
-    required: [
-        // TODO: remove gps_debug when the build system propagates "required" properly.
-        "gps_debug.conf",
-    ],
 
     dxflags: [
         "--core-library",
