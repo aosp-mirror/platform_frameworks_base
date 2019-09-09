@@ -25,6 +25,11 @@ android_robolectric_test {
         "testng",
         "truth-prebuilt",
     ],
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.runner",
+        "androidx.test.rules",
+    ],
     instrumentation_for: "BackupEncryption",
 }
 
