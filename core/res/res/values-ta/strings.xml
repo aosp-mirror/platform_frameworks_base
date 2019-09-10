@@ -365,9 +365,9 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"கார் பயன்முறையை இயக்குதல்"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"கார் முறையை இயக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"பிற பயன்பாடுகளை மூடுதல்"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற பயன்பாடுகளின் பின்புலச் செயல்முறைகளை நிறுத்த ஆப்ஸை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
-    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே தோன்றலாம்"</string>
-    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான ஆப்ஸ் உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற ஆப்ஸின் பின்புலச் செயல்முறைகளை நிறுத்த ஆப்ஸை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்த ஆப்ஸ் பிற ஆப்ஸின் மேலே தோன்றலாம்"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்த ஆப்ஸ் பிற ஆப்ஸின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான ஆப்ஸ் உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"பின்னணியில் இயக்கு"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"இந்த ஆப்ஸ், பின்னணியில் இயங்கலாம். இதனால் பேட்டரி விரைவாகத் தீர்ந்துவிடக்கூடும்."</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"பின்னணியில் தரவைப் பயன்படுத்து"</string>
@@ -1380,7 +1380,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"பிற ஆப்ஸின் மேலே காட்டு"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> பிற பயன்பாடுகளின் மீது தோன்றுகிறது"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> பிற ஆப்ஸின் மீது தோன்றுகிறது"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> பிற ஆப்ஸின் மீது தோன்றுகிறது"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால், அமைப்புகளைத் திறந்து அதை முடக்க, தட்டவும்."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ஆஃப் செய்"</string>
@@ -2004,7 +2004,7 @@
     <string name="standby_warning_message" product="default" msgid="5222741828239073484">"இந்தச் சாதனம் விரைவில் ஆஃப் ஆகலாம். இதைத் தொடர்ந்து ஆனில் வைக்கத் தட்டவும்."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"கேமரா"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"மைக்ரோஃபோன்"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"உங்கள் திரையில் உள்ள பிற பயன்பாடுகளின் மேல் காட்டுகிறது"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"உங்கள் திரையில் உள்ள பிற ஆப்ஸின் மேல் காட்டுகிறது"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
