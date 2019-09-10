@@ -64,7 +64,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-// TODO: Use Truth in tests.
 /**
  * Test PackageWatchdog.
  */
