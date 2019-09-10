@@ -21,6 +21,7 @@ import static android.media.Utils.sortDistinctRanges;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -3741,8 +3742,11 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionProfileDvheStn = 0x20;
         public static final int DolbyVisionProfileDvheDth = 0x40;
         public static final int DolbyVisionProfileDvheDtb = 0x80;
-        public static final int DolbyVisionProfileDvheSt = 0x100;
-        public static final int DolbyVisionProfileDvavSe = 0x200;
+        public static final int DolbyVisionProfileDvheSt  = 0x100;
+        public static final int DolbyVisionProfileDvavSe  = 0x200;
+        /** Dolby Vision AV1 profile */
+        @SuppressLint("AllUpper")
+        public static final int DolbyVisionProfileDvav110 = 0x400;
 
         public static final int DolbyVisionLevelHd24    = 0x1;
         public static final int DolbyVisionLevelHd30    = 0x2;
