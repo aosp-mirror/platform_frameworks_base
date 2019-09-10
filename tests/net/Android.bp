@@ -20,8 +20,6 @@ java_defaults {
         "libdl_android",
         "libhidl-gen-utils",
         "libhidlbase",
-        "libhidltransport",
-        "libhwbinder",
         "libjsoncpp",
         "liblog",
         "liblzma",

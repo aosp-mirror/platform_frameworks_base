@@ -52,7 +52,6 @@ cc_library_shared {
         "libandroidfw",
         "libhidlallocatorutils",
         "libhidlbase",
-        "libhidltransport",
         "android.hardware.cas@1.0",
         "android.hardware.cas.native@1.0",
         "android.hidl.memory@1.0",
@@ -147,7 +146,6 @@ cc_library_shared {
         "android.hidl.memory@1.0",
         "libhidlbase",
         "libhidlmemory",
-        "libhidltransport",
         "libbinderthreadstate",
 
         // MediaPlayer2 implementation

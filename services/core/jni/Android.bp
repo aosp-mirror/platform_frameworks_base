@@ -98,8 +98,6 @@ cc_defaults {
         "libGLESv2",
         "libnetutils",
         "libhidlbase",
-        "libhidltransport",
-        "libhwbinder",
         "libutils",
         "libhwui",
         "libbpf_android",
