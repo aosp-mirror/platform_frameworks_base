@@ -17,8 +17,10 @@
 package com.android.startop.test;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -139,6 +141,10 @@ public class SystemServerBenchmarkActivity extends Activity {
                     throw new RuntimeException(e);
                 }
             });
+
+            new Benchmark(benchmarkList, "getPackagesForUid", () -> {
+                pm.getPackagesForUid(app.uid);
+            });
         } catch (NameNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -150,6 +156,46 @@ public class SystemServerBenchmarkActivity extends Activity {
             } catch (NameNotFoundException e) {
                 throw new RuntimeException(e);
             }
+        });
+
+        new Benchmark(benchmarkList, "getLaunchIntentForPackage", () -> {
+            pm.getLaunchIntentForPackage("com.android.startop.test");
+        });
+
+        new Benchmark(benchmarkList, "getPackageUid", () -> {
+            try {
+                pm.getPackageUid("com.android.startop.test", 0);
+            } catch (NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        new Benchmark(benchmarkList, "checkPermission", () -> {
+            // Check for the first permission I could find.
+            pm.checkPermission("android.permission.SEND_SMS", "com.android.startop.test");
+        });
+
+        new Benchmark(benchmarkList, "checkSignatures", () -> {
+            // Compare with settings, since settings is on both AOSP and Master builds
+            pm.checkSignatures("com.android.settings", "com.android.startop.test");
+        });
+
+        Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED);
+        new Benchmark(benchmarkList, "queryBroadcastReceivers", () -> {
+            pm.queryBroadcastReceivers(intent, 0);
+        });
+
+        new Benchmark(benchmarkList, "hasSystemFeature", () -> {
+            pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+        });
+
+        new Benchmark(benchmarkList, "resolveService", () -> {
+            pm.resolveService(intent, 0);
+        });
+
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        new Benchmark(benchmarkList, "getRunningAppProcesses", () -> {
+            am.getRunningAppProcesses();
         });
 
     }
