@@ -2103,10 +2103,6 @@ public final class Settings {
     private static final String TAG = "Settings";
     private static final boolean LOCAL_LOGV = false;
 
-    // Lock ensures that when enabling/disabling the master location switch, we don't end up
-    // with a partial enable/disable state in multi-threaded situations.
-    private static final Object mLocationSettingsLock = new Object();
-
     // Used in system server calling uid workaround in call()
     private static boolean sInSystemServer = false;
     private static final Object sInSystemServerLock = new Object();

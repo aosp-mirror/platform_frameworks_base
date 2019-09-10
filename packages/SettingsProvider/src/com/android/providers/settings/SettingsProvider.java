@@ -1521,14 +1521,14 @@ public class SettingsProvider extends ContentProvider {
             return false;
         }
 
-        // Special cases for location providers (sigh).
-        if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-            return updateLocationProvidersAllowedLocked(value, tag, owningUserId, makeDefault,
-                    forceNotify);
-        }
-
         // Mutate the value.
         synchronized (mLock) {
+            // Special cases for location providers (sigh).
+            if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
+                return updateLocationProvidersAllowedLocked(value, tag, owningUserId, makeDefault,
+                        forceNotify);
+            }
+
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
