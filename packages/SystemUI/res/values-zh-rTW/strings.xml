@@ -459,8 +459,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不要再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
-    <string name="notification_section_header_gentle" msgid="4372438504154095677">"無聲通知"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"清除所有無聲通知"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"靜音通知"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"清除所有靜音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"「零打擾」模式已將通知設為暫停"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
@@ -645,7 +645,7 @@
     <string name="inline_block_button" msgid="8735843688021655065">"封鎖"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"繼續顯示"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
-    <string name="inline_silent_button_silent" msgid="5315879183296940969">"無聲"</string>
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"靜音"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"繼續顯示通知但不發出音效"</string>
     <string name="inline_silent_button_alert" msgid="6008435419895088034">"快訊"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"繼續顯示通知"</string>
