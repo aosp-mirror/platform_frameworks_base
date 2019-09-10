@@ -1925,8 +1925,8 @@ public class AudioService extends IAudioService.Stub
                         if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
                             final long ident = Binder.clearCallingIdentity();
                             try {
-                                mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
-                                mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
+                                mHdmiPlaybackClient.sendVolumeKeyEvent(keyCode, true);
+                                mHdmiPlaybackClient.sendVolumeKeyEvent(keyCode, false);
                             } finally {
                                 Binder.restoreCallingIdentity(ident);
                             }
