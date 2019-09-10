@@ -87,6 +87,8 @@ public class PackageWatchdog {
     // Number of package failures within the duration above before we notify observers
     @VisibleForTesting
     static final int DEFAULT_TRIGGER_FAILURE_COUNT = 5;
+    @VisibleForTesting
+    static final long DEFAULT_OBSERVING_DURATION_MS = TimeUnit.DAYS.toMillis(2);
     // Whether explicit health checks are enabled or not
     private static final boolean DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED = true;
 
@@ -225,8 +227,10 @@ public class PackageWatchdog {
      * check state will be reset to a default depending on if the package is contained in
      * {@link mPackagesWithExplicitHealthCheckEnabled}.
      *
-     * @throws IllegalArgumentException if {@code packageNames} is empty
-     * or {@code durationMs} is less than 1
+     * <p>If {@code packageNames} is empty, this will be a no-op.
+     *
+     * <p>If {@code durationMs} is less than 1, a default monitoring duration
+     * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
      */
     public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
@@ -235,9 +239,9 @@ public class PackageWatchdog {
             return;
         }
         if (durationMs < 1) {
-            // TODO: Instead of failing, monitor for default? 48hrs?
-            throw new IllegalArgumentException("Invalid duration " + durationMs + "ms for observer "
+            Slog.wtf(TAG, "Invalid duration " + durationMs + "ms for observer "
                     + observer.getName() + ". Not observing packages " + packageNames);
+            durationMs = DEFAULT_OBSERVING_DURATION_MS;
         }
 
         List<MonitoredPackage> packages = new ArrayList<>();
