@@ -364,28 +364,8 @@ public class FocusRequester {
 
                 // check enforcement by the framework
                 boolean handled = false;
-                if (focusLoss == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
-                        && MediaFocusControl.ENFORCE_DUCKING
-                        && frWinner != null) {
-                    // candidate for enforcement by the framework
-                    if (frWinner.mCallingUid != this.mCallingUid) {
-                        if (!forceDuck && ((mGrantFlags
-                                & AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS) != 0)) {
-                            // the focus loser declared it would pause instead of duck, let it
-                            // handle it (the framework doesn't pause for apps)
-                            handled = false;
-                            Log.v(TAG, "not ducking uid " + this.mCallingUid + " - flags");
-                        } else if (!forceDuck && (MediaFocusControl.ENFORCE_DUCKING_FOR_NEW &&
-                                this.getSdkTarget() <= MediaFocusControl.DUCKING_IN_APP_SDK_LEVEL))
-                        {
-                            // legacy behavior, apps used to be notified when they should be ducking
-                            handled = false;
-                            Log.v(TAG, "not ducking uid " + this.mCallingUid + " - old SDK");
-                        } else {
-                            handled = mFocusController.duckPlayers(frWinner, this, forceDuck);
-                        }
-                    } // else: the focus change is within the same app, so let the dispatching
-                      //       happen as if the framework was not involved.
+                if (frWinner != null) {
+                    handled = frameworkHandleFocusLoss(focusLoss, frWinner, forceDuck);
                 }
 
                 if (handled) {
@@ -413,6 +393,47 @@ public class FocusRequester {
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal loss of audio focus due to:", e);
         }
+    }
+
+    /**
+     * Let the framework handle the focus loss if possible
+     * @param focusLoss
+     * @param frWinner
+     * @param forceDuck
+     * @return true if the framework handled the focus loss
+     */
+    @GuardedBy("MediaFocusControl.mAudioFocusLock")
+    private boolean frameworkHandleFocusLoss(int focusLoss, @NonNull final FocusRequester frWinner,
+                                             boolean forceDuck) {
+        if (frWinner.mCallingUid == this.mCallingUid) {
+            // the focus change is within the same app, so let the dispatching
+            // happen as if the framework was not involved.
+            return false;
+        }
+
+        if (focusLoss == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+            if (!MediaFocusControl.ENFORCE_DUCKING) {
+                return false;
+            }
+
+            // candidate for enforcement by the framework
+            if (!forceDuck && ((mGrantFlags
+                    & AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS) != 0)) {
+                // the focus loser declared it would pause instead of duck, let it
+                // handle it (the framework doesn't pause for apps)
+                Log.v(TAG, "not ducking uid " + this.mCallingUid + " - flags");
+                return false;
+            }
+            if (!forceDuck && (MediaFocusControl.ENFORCE_DUCKING_FOR_NEW
+                    && this.getSdkTarget() <= MediaFocusControl.DUCKING_IN_APP_SDK_LEVEL)) {
+                // legacy behavior, apps used to be notified when they should be ducking
+                Log.v(TAG, "not ducking uid " + this.mCallingUid + " - old SDK");
+                return false;
+            }
+
+            return mFocusController.duckPlayers(frWinner, this, forceDuck);
+        }
+        return false;
     }
 
     int dispatchFocusChange(int focusChange) {
