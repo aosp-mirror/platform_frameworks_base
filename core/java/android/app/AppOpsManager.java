@@ -5845,39 +5845,42 @@ public class AppOpsManager {
                     ActivityThread.currentOpPackageName())) {
                 // This app is noting an app-op for itself. Deliver immediately.
                 sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(code));
-            } else if (binderUid != null && binderUid == uid) {
-                // We are inside of a two-way binder call. Delivered to caller via
-                // {@link #prefixParcelWithAppOpsIfNeeded}
-                long[] appOpsNotedInThisBinderTransaction;
 
-                appOpsNotedInThisBinderTransaction = sAppOpsNotedInThisBinderTransaction.get();
-                if (appOpsNotedInThisBinderTransaction == null) {
-                    appOpsNotedInThisBinderTransaction = new long[2];
-                    sAppOpsNotedInThisBinderTransaction.set(appOpsNotedInThisBinderTransaction);
-                }
+                return;
+            }
+        }
 
-                if (code < 64) {
-                    appOpsNotedInThisBinderTransaction[0] |= 1L << code;
-                } else {
-                    appOpsNotedInThisBinderTransaction[1] |= 1L << (code - 64);
-                }
+        if (binderUid != null && binderUid == uid) {
+            // If this is inside of a two-way binder call: Delivered to caller via
+            // {@link #prefixParcelWithAppOpsIfNeeded}
+            long[] appOpsNotedInThisBinderTransaction;
+
+            appOpsNotedInThisBinderTransaction = sAppOpsNotedInThisBinderTransaction.get();
+            if (appOpsNotedInThisBinderTransaction == null) {
+                appOpsNotedInThisBinderTransaction = new long[2];
+                sAppOpsNotedInThisBinderTransaction.set(appOpsNotedInThisBinderTransaction);
+            }
+
+            if (code < 64) {
+                appOpsNotedInThisBinderTransaction[0] |= 1L << code;
             } else {
-                // We cannot deliver the note synchronous. Hence send it to the system server to
-                // notify the noted process.
-                if (message == null) {
-                    // Default message is a stack trace
-                    message = getFormattedStackTrace();
-                }
+                appOpsNotedInThisBinderTransaction[1] |= 1L << (code - 64);
+            }
+        } else {
+            // Cannot deliver the note synchronous: Hence send it to the system server to
+            // notify the noted process.
+            if (message == null) {
+                // Default message is a stack trace
+                message = getFormattedStackTrace();
+            }
 
-                long token = Binder.clearCallingIdentity();
-                try {
-                    mService.noteAsyncOp(mContext.getOpPackageName(), uid, packageName, code,
-                            message);
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mService.noteAsyncOp(mContext.getOpPackageName(), uid, packageName, code, message);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
