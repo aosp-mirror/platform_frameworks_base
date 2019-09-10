@@ -41,11 +41,12 @@ DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(DIR))
 import lib.cmd_utils as cmd_utils
 import lib.print_utils as print_utils
-import iorap.compiler as compiler
 from app_startup.run_app_with_prefetch import PrefetchAppRunner
 import app_startup.lib.args_utils as args_utils
 from app_startup.lib.data_frame import DataFrame
 from app_startup.lib.perfetto_trace_collector import PerfettoTraceCollector
+from iorap.compiler import CompilerType
+import iorap.compiler as compiler
 
 # The following command line options participate in the combinatorial generation.
 # All other arguments have a global effect.
@@ -58,8 +59,6 @@ _RUN_SCRIPT = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 CollectorPackageInfo = NamedTuple('CollectorPackageInfo',
                                   [('package', str), ('compiler_filter', str)])
-_COMPILER_SCRIPT = os.path.join(os.path.dirname(os.path.dirname(
-    os.path.realpath(__file__))), 'iorap/compiler.py')
 # by 2; systrace starts up slowly.
 
 _UNLOCK_SCREEN_SCRIPT = os.path.join(
@@ -135,6 +134,10 @@ def parse_options(argv: List[str] = None):
                               action='append',
                               help='The trace duration (milliseconds) in '
                                    'compilation')
+  optional_named.add_argument('--compiler-type', dest='compiler_type',
+                              type=CompilerType, choices=list(CompilerType),
+                              default=CompilerType.DEVICE,
+                              help='The type of compiler.')
 
   return parser.parse_args(argv)
 
@@ -211,26 +214,26 @@ def parse_run_script_csv_file(csv_file: TextIO) -> DataFrame:
 
   return DataFrame(d)
 
-def compile_perfetto_trace(inodes_path: str,
+def build_ri_compiler_argv(inodes_path: str,
                            perfetto_trace_file: str,
-                           trace_duration: Optional[timedelta]) -> TextIO:
-  compiler_trace_file = tempfile.NamedTemporaryFile()
-  argv = [_COMPILER_SCRIPT, '-i', inodes_path, '--perfetto-trace',
-          perfetto_trace_file, '-o', compiler_trace_file.name]
+                           trace_duration: Optional[timedelta]
+                           ) -> str:
+  argv = ['-i', inodes_path, '--perfetto-trace',
+          perfetto_trace_file]
 
   if trace_duration is not None:
     argv += ['--duration', str(int(trace_duration.total_seconds()
-                               * PerfettoTraceCollector.MS_PER_SEC))]
+                                   * PerfettoTraceCollector.MS_PER_SEC))]
 
   print_utils.debug_print(argv)
-  compiler.main(argv)
-  return compiler_trace_file
+  return argv
 
 def execute_run_using_perfetto_trace(collector_info,
                                      run_combos: Iterable[RunCommandArgs],
                                      simulate: bool,
                                      inodes_path: str,
-                                     timeout: int) -> DataFrame:
+                                     timeout: int,
+                                     compiler_type: CompilerType) -> DataFrame:
   """ Executes run based on perfetto trace. """
   passed, perfetto_trace_file = run_perfetto_collector(collector_info,
                                                        timeout,
@@ -244,9 +247,15 @@ def execute_run_using_perfetto_trace(collector_info,
         if simulate:
           compiler_trace_file = tempfile.NamedTemporaryFile()
         else:
-          compiler_trace_file = compile_perfetto_trace(inodes_path,
-                                                       perfetto_trace_file.name,
-                                                       combos.trace_duration)
+          ri_compiler_argv = build_ri_compiler_argv(inodes_path,
+                                                    perfetto_trace_file.name,
+                                                    combos.trace_duration)
+          compiler_trace_file = compiler.compile(compiler_type,
+                                                 inodes_path,
+                                                 ri_compiler_argv,
+                                                 combos.package,
+                                                 combos.activity)
+
         with compiler_trace_file:
           combos = combos._replace(input=compiler_trace_file.name)
           print_utils.debug_print(combos)
@@ -261,7 +270,8 @@ def execute_run_combos(
     grouped_run_combos: Iterable[Tuple[CollectorPackageInfo, Iterable[RunCommandArgs]]],
     simulate: bool,
     inodes_path: str,
-    timeout: int):
+    timeout: int,
+    compiler_type: CompilerType):
   # nothing will work if the screen isn't unlocked first.
   cmd_utils.execute_arbitrary_command([_UNLOCK_SCREEN_SCRIPT],
                                       timeout,
@@ -273,7 +283,8 @@ def execute_run_combos(
                                                 run_combos,
                                                 simulate,
                                                 inodes_path,
-                                                timeout)
+                                                timeout,
+                                                compiler_type)
 
 def gather_results(commands: Iterable[Tuple[DataFrame]],
                    key_list: List[str], value_list: List[Tuple[str, ...]]):
@@ -361,7 +372,8 @@ def main():
   exec = execute_run_combos(grouped_combos(),
                             opts.simulate,
                             opts.inodes,
-                            opts.timeout)
+                            opts.timeout,
+                            opts.compiler_type)
 
   results = gather_results(exec, _COMBINATORIAL_OPTIONS, combos())
 

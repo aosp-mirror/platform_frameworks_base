@@ -30,7 +30,7 @@ See also https://docs.pytest.org/en/latest/usage.html
 """
 import os
 
-import compiler
+import compiler_host as compiler
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 TEXTCACHE = os.path.join(DIR, 'test_fixtures/compiler/common_textcache')
