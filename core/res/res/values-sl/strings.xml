@@ -2051,7 +2051,7 @@
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Bližnjice ni bilo mogoče obnoviti zaradi neujemanja podpisa aplikacije"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Bližnjice ni bilo mogoče obnoviti"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Bližnjica je onemogočena"</string>
-    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"ODSTRANI"</string>
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"ODMESTI"</string>
     <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"VSEENO ODPRI"</string>
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Zaznana je bila škodljiva aplikacija"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
