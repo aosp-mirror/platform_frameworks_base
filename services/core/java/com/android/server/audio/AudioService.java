@@ -127,6 +127,7 @@ import android.util.AndroidRuntimeException;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
@@ -6399,6 +6400,12 @@ public class AudioService extends IAudioService.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
+        if (mAudioHandler != null) {
+            pw.println("\nMessage handler (watch for unhandled messages):");
+            mAudioHandler.dump(new PrintWriterPrinter(pw), "  ");
+        } else {
+            pw.println("\nMessage handler is null");
+        }
         mMediaFocusControl.dump(pw);
         dumpStreamStates(pw);
         dumpRingerMode(pw);
