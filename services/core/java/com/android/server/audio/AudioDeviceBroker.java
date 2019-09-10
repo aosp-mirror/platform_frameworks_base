@@ -40,9 +40,11 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.PrintWriterPrinter;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.PrintWriter;
 
 /** @hide */
 /*package*/ final class AudioDeviceBroker {
@@ -594,6 +596,15 @@ import com.android.internal.annotations.GuardedBy;
     /*package*/ int getA2dpCodec(@NonNull BluetoothDevice device) {
         synchronized (mDeviceStateLock) {
             return mBtHelper.getA2dpCodec(device);
+        }
+    }
+
+    /*package*/ void dump(PrintWriter pw, String prefix) {
+        if (mBrokerHandler != null) {
+            pw.println(prefix + "Message handler (watch for unhandled messages):");
+            mBrokerHandler.dump(new PrintWriterPrinter(pw), prefix + "  ");
+        } else {
+            pw.println("Message handler is null");
         }
     }
 
