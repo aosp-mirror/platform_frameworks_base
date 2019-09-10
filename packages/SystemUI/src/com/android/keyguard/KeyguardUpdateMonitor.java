@@ -217,8 +217,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private static KeyguardUpdateMonitor sInstance;
-
     private final Context mContext;
     private final boolean mIsPrimaryUser;
     HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
@@ -1387,15 +1385,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
         Trace.endSection();
-    }
-
-
-    /** Provides access to the static instance. */
-    public static KeyguardUpdateMonitor getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new KeyguardUpdateMonitor(context, Looper.getMainLooper());
-        }
-        return sInstance;
     }
 
     protected void handleStartedGoingToSleep(int arg1) {
