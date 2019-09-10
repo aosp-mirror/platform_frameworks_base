@@ -65,7 +65,7 @@ class Rollback {
     /**
      * The directory where the rollback data is stored.
      */
-    public final File backupDir;
+    private final File mBackupDir;
 
     /**
      * The time when the upgrade occurred, for purposes of expiring
@@ -74,24 +74,24 @@ class Rollback {
      * The timestamp is not applicable for all rollback states, but we make
      * sure to keep it non-null to avoid potential errors there.
      */
-    public @NonNull Instant timestamp;
+    private @NonNull Instant mTimestamp;
 
     /**
      * The session ID for the staged session if this rollback data represents a staged session,
      * {@code -1} otherwise.
      */
-    public final int stagedSessionId;
+    private final int mStagedSessionId;
 
     /**
      * The current state of the rollback.
      * ENABLING, AVAILABLE, or COMMITTED.
      */
-    public @RollbackState int state;
+    private @RollbackState int mState;
 
     /**
      * The id of the post-reboot apk session for a staged install, if any.
      */
-    public int apkSessionId = -1;
+    private int mApkSessionId = -1;
 
     /**
      * True if we are expecting the package manager to call restoreUserData
@@ -99,7 +99,7 @@ class Rollback {
      * has not yet been fully applied.
      */
     // NOTE: All accesses to this field are from the RollbackManager handler thread.
-    public boolean restoreUserDataInProgress = false;
+    private boolean mRestoreUserDataInProgress = false;
 
     /**
      * Constructs a new, empty Rollback instance.
@@ -114,10 +114,10 @@ class Rollback {
                 /* isStaged */ stagedSessionId != -1,
                 /* causePackages */ new ArrayList<>(),
                 /* committedSessionId */ -1);
-        this.backupDir = backupDir;
-        this.stagedSessionId = stagedSessionId;
-        this.state = ROLLBACK_STATE_ENABLING;
-        this.timestamp = Instant.now();
+        mBackupDir = backupDir;
+        mStagedSessionId = stagedSessionId;
+        mState = ROLLBACK_STATE_ENABLING;
+        mTimestamp = Instant.now();
     }
 
     /**
@@ -126,19 +126,113 @@ class Rollback {
     Rollback(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
             @RollbackState int state, int apkSessionId, boolean restoreUserDataInProgress) {
         this.info = info;
-        this.backupDir = backupDir;
-        this.timestamp = timestamp;
-        this.stagedSessionId = stagedSessionId;
-        this.state = state;
-        this.apkSessionId = apkSessionId;
-        this.restoreUserDataInProgress = restoreUserDataInProgress;
+        mBackupDir = backupDir;
+        mTimestamp = timestamp;
+        mStagedSessionId = stagedSessionId;
+        mState = state;
+        mApkSessionId = apkSessionId;
+        mRestoreUserDataInProgress = restoreUserDataInProgress;
     }
 
     /**
      * Whether the rollback is for rollback of a staged install.
      */
-    public boolean isStaged() {
+    boolean isStaged() {
         return info.isStaged();
+    }
+
+    /**
+     * Returns the directory in which rollback data should be stored.
+     */
+    File getBackupDir() {
+        return mBackupDir;
+    }
+
+    /**
+     * Returns the time when the upgrade occurred, for purposes of expiring rollback data.
+     */
+    Instant getTimestamp() {
+        return mTimestamp;
+    }
+
+    /**
+     * Sets the time at which upgrade occurred.
+     */
+    void setTimestamp(Instant timestamp) {
+        mTimestamp = timestamp;
+    }
+
+    /**
+     * Returns the session ID for the staged session if this rollback data represents a staged
+     * session, or {@code -1} otherwise.
+     */
+    int getStagedSessionId() {
+        return mStagedSessionId;
+    }
+
+    /**
+     * Returns true if the rollback is in the ENABLING state.
+     */
+    boolean isEnabling() {
+        return mState == ROLLBACK_STATE_ENABLING;
+    }
+
+    /**
+     * Returns true if the rollback is in the AVAILABLE state.
+     */
+    boolean isAvailable() {
+        return mState == ROLLBACK_STATE_AVAILABLE;
+    }
+
+    /**
+     * Returns true if the rollback is in the COMMITTED state.
+     */
+    boolean isCommitted() {
+        return mState == ROLLBACK_STATE_COMMITTED;
+    }
+
+    /**
+     * Sets the state of the rollback to AVAILABLE.
+     */
+    void setAvailable() {
+        mState = ROLLBACK_STATE_AVAILABLE;
+    }
+
+    /**
+     * Sets the state of the rollback to COMMITTED.
+     */
+    void setCommitted() {
+        mState = ROLLBACK_STATE_COMMITTED;
+    }
+
+    /**
+     * Returns the id of the post-reboot apk session for a staged install, if any.
+     */
+    int getApkSessionId() {
+        return mApkSessionId;
+    }
+
+    /**
+     * Sets the id of the post-reboot apk session for a staged install.
+     */
+    void setApkSessionId(int apkSessionId) {
+        mApkSessionId = apkSessionId;
+    }
+
+    /**
+     * Returns true if we are expecting the package manager to call restoreUserData for this
+     * rollback because it has just been committed but the rollback has not yet been fully applied.
+     */
+    boolean isRestoreUserDataInProgress() {
+        return mRestoreUserDataInProgress;
+    }
+
+    /**
+     * Sets whether we are expecting the package manager to call restoreUserData for this
+     * rollback because it has just been committed but the rollback has not yet been fully applied.
+     */
+    void setRestoreUserDataInProgress(boolean restoreUserDataInProgress) {
+        mRestoreUserDataInProgress = restoreUserDataInProgress;
     }
 
     static String rollbackStateToString(@RollbackState int state) {
@@ -160,7 +254,7 @@ class Rollback {
         throw new ParseException("Invalid rollback state: " + state, 0);
     }
 
-    public String getStateAsString() {
-        return rollbackStateToString(state);
+    String getStateAsString() {
+        return rollbackStateToString(mState);
     }
 }
