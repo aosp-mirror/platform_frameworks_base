@@ -21,6 +21,7 @@ android_app {
         "src/LayoutInflationActivity.java",
         "src/ComplexLayoutInflationActivity.java",
         "src/FrameLayoutInflationActivity.java",
+        "src/SystemServerBenchmarkActivity.java",
         "src/TextViewInflationActivity.java",
     ],
     platform_apis: true,
