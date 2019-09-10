@@ -1251,21 +1251,39 @@ public abstract class CameraDevice implements AutoCloseable {
      * are setting different modes, the system will pick a the mode that's union of
      * all modes set by CameraDevice.</p>
      *
-     * <p>The mute settings will be automatically removed when the CameraDevice is closed or
-     * the application is disconnected from the camera.</p>
+     * <p>The mute settings from this CameraDevice will be automatically removed when the
+     * CameraDevice is closed or the application is disconnected from the camera.</p>
      *
      * @param mode An enumeration selecting the audio restriction mode for this camera device.
-     *
-     * @return The system-wide mute mode setting resulting from this call
      *
      * @throws IllegalArgumentException if the mode is not supported
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #getCameraAudioRestriction
      */
-    public @CAMERA_AUDIO_RESTRICTION int setCameraAudioRestriction(
+    public void setCameraAudioRestriction(
             @CAMERA_AUDIO_RESTRICTION int mode) throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
+     * Get currently applied global camera audio restriction mode.
+     *
+     * <p>Application can use this method to retrieve the system-wide camera audio restriction
+     * settings described in {@link #setCameraAudioRestriction}.</p>
+     *
+     * @return The system-wide mute mode setting resulting from this call
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #setCameraAudioRestriction
+     */
+    public @CAMERA_AUDIO_RESTRICTION int getCameraAudioRestriction() throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 

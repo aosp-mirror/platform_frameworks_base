@@ -2169,11 +2169,18 @@ public class Camera {
     }
 
     /**
-     * Setting camera audio restriction mode.
+     * Set camera audio restriction mode.
      *
      * @hide
      */
-    public native final int setAudioRestriction(int mode);
+    public native final void setAudioRestriction(int mode);
+
+    /**
+     * Get currently applied camera audio restriction mode.
+     *
+     * @hide
+     */
+    public native final int getAudioRestriction();
 
     /**
      * Image size (width and height dimensions).
