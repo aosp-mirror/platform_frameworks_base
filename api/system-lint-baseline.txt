@@ -257,6 +257,8 @@ SamShouldBeLast: android.media.session.MediaSessionManager#registerCallback(java
     
 SamShouldBeLast: android.net.ConnectivityManager#createSocketKeepalive(android.net.Network, android.net.IpSecManager.UdpEncapsulationSocket, java.net.InetAddress, java.net.InetAddress, java.util.concurrent.Executor, android.net.SocketKeepalive.Callback):
     
+SamShouldBeLast: android.net.wifi.WifiManager#startLocalOnlyHotspot(android.net.wifi.SoftApConfiguration, java.util.concurrent.Executor, android.net.wifi.WifiManager.LocalOnlyHotspotCallback):
+    
 SamShouldBeLast: android.net.wifi.rtt.WifiRttManager#startRanging(android.net.wifi.rtt.RangingRequest, java.util.concurrent.Executor, android.net.wifi.rtt.RangingResultCallback):
     
 SamShouldBeLast: android.nfc.NfcAdapter#enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle):

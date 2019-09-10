@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -2747,13 +2748,6 @@ public class WifiManager {
         }
     }
 
-    private Executor executorForHandler(@Nullable Handler handler) {
-        if (handler == null) {
-            return mContext.getMainExecutor();
-        }
-        return new HandlerExecutor(handler);
-    }
-
     /**
      * Request a local only hotspot that an application can use to communicate between co-located
      * devices connected to the created WiFi hotspot.  The network created by this method will not
@@ -2809,9 +2803,59 @@ public class WifiManager {
      * @param handler Handler to be used for callbacks.  If the caller passes a null Handler, the
      * main thread will be used.
      */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.CHANGE_WIFI_STATE,
+            android.Manifest.permission.ACCESS_FINE_LOCATION})
     public void startLocalOnlyHotspot(LocalOnlyHotspotCallback callback,
             @Nullable Handler handler) {
-        Executor executor = executorForHandler(handler);
+        Executor executor = handler == null ? null : new HandlerExecutor(handler);
+        startLocalOnlyHotspotInternal(null, executor, callback);
+    }
+
+    /**
+     * Starts a local-only hotspot with a specific configuration applied. See
+     * {@link #startLocalOnlyHotspot(LocalOnlyHotspotCallback, Handler)}.
+     *
+     * Applications need either {@link android.Manifest.permission#NETWORK_SETUP_WIZARD} or
+     * {@link android.Manifest.permission#NETWORK_SETTINGS} to call this method.
+     *
+     * Since custom configuration settings may be incompatible with each other, the hotspot started
+     * through this method cannot coexist with another hotspot created through
+     * startLocalOnlyHotspot. If this is attempted, the first hotspot request wins and others
+     * receive {@link LocalOnlyHotspotCallback#ERROR_GENERIC} through
+     * {@link LocalOnlyHotspotCallback#onFailed}.
+     *
+     * @param config Custom configuration for the hotspot. See {@link SoftApConfiguration}.
+     * @param executor Executor to run callback methods on, or null to use the main thread.
+     * @param callback Callback object for updates about hotspot status, or null for no updates.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public void startLocalOnlyHotspot(@NonNull SoftApConfiguration config,
+            @Nullable Executor executor,
+            @Nullable LocalOnlyHotspotCallback callback) {
+        Objects.requireNonNull(config);
+        startLocalOnlyHotspotInternal(config, executor, callback);
+    }
+
+    /**
+     * Common implementation of both configurable and non-configurable LOHS.
+     *
+     * @param config App-specified configuration, or null. When present, additional privileges are
+     *               required, and the hotspot cannot be shared with other clients.
+     * @param executor Executor to run callback methods on, or null to use the main thread.
+     * @param callback Callback object for updates about hotspot status, or null for no updates.
+     */
+    private void startLocalOnlyHotspotInternal(
+            @Nullable SoftApConfiguration config,
+            @Nullable Executor executor,
+            @Nullable LocalOnlyHotspotCallback callback) {
+        if (executor == null) {
+            executor = mContext.getMainExecutor();
+        }
         synchronized (mLock) {
             LocalOnlyHotspotCallbackProxy proxy =
                     new LocalOnlyHotspotCallbackProxy(this, executor, callback);
@@ -2821,7 +2865,7 @@ public class WifiManager {
                     throw new RemoteException("Wifi service is not running");
                 }
                 String packageName = mContext.getOpPackageName();
-                int returnCode = iWifiManager.startLocalOnlyHotspot(proxy, packageName);
+                int returnCode = iWifiManager.startLocalOnlyHotspot(proxy, packageName, config);
                 if (returnCode != LocalOnlyHotspotCallback.REQUEST_REGISTERED) {
                     // Send message to the proxy to make sure we call back on the correct thread
                     proxy.onHotspotFailed(returnCode);
@@ -2902,7 +2946,8 @@ public class WifiManager {
      */
     public void watchLocalOnlyHotspot(LocalOnlyHotspotObserver observer,
             @Nullable Handler handler) {
-        Executor executor = executorForHandler(handler);
+        Executor executor = handler == null ? mContext.getMainExecutor()
+                : new HandlerExecutor(handler);
         synchronized (mLock) {
             mLOHSObserverProxy =
                     new LocalOnlyHotspotObserverProxy(this, executor, observer);
@@ -3484,10 +3529,12 @@ public class WifiManager {
          *
          * @param manager WifiManager
          * @param executor Executor for delivering callbacks.
-         * @param callback LocalOnlyHotspotCallback to notify the calling application.
+         * @param callback LocalOnlyHotspotCallback to notify the calling application, or null.
          */
-        LocalOnlyHotspotCallbackProxy(WifiManager manager, Executor executor,
-                                      LocalOnlyHotspotCallback callback) {
+        LocalOnlyHotspotCallbackProxy(
+                @NonNull WifiManager manager,
+                @NonNull Executor executor,
+                @Nullable LocalOnlyHotspotCallback callback) {
             mWifiManager = new WeakReference<>(manager);
             mExecutor = executor;
             mCallback = callback;
@@ -3505,6 +3552,7 @@ public class WifiManager {
             }
             final LocalOnlyHotspotReservation reservation =
                     manager.new LocalOnlyHotspotReservation(config);
+            if (mCallback == null) return;
             mExecutor.execute(() -> mCallback.onStarted(reservation));
         }
 
@@ -3514,6 +3562,7 @@ public class WifiManager {
             if (manager == null) return;
 
             Log.w(TAG, "LocalOnlyHotspotCallbackProxy: hotspot stopped");
+            if (mCallback == null) return;
             mExecutor.execute(() -> mCallback.onStopped());
         }
 
@@ -3524,6 +3573,7 @@ public class WifiManager {
 
             Log.w(TAG, "LocalOnlyHotspotCallbackProxy: failed to start.  reason: "
                     + reason);
+            if (mCallback == null) return;
             mExecutor.execute(() -> mCallback.onFailed(reason));
         }
     }
