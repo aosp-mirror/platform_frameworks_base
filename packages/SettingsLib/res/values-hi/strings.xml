@@ -90,7 +90,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"संपर्क साझाकरण के लिए उपयोग करें"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"इंटरनेट कनेक्शन साझाकरण"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"लेख संदेश"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम ऐक्सेस"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम एक्सेस"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ऑडियो: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ऑडियो"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"सुनने में मदद करने वाले डिवाइस"</string>
