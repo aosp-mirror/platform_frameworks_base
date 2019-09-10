@@ -79,7 +79,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
         when(mMockRunner.asBinder()).thenReturn(new Binder());
         mAdapter = new RemoteAnimationAdapter(mMockRunner, 100, 50, true /* changeNeedsSnapshot */);
-        mAdapter.setCallingPid(123);
+        mAdapter.setCallingPidUid(123, 456);
         mWm.mH.runWithScissors(() -> mHandler = new TestHandler(null, mClock), 0);
         mController = new RemoteAnimationController(mWm, mAdapter, mHandler);
     }

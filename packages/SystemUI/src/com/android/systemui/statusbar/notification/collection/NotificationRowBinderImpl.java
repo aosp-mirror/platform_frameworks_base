@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
@@ -34,6 +33,7 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.row.NotificationContentInflat
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -69,6 +70,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
     private final boolean mAllowLongPress;
+    private final KeyguardBypassController mKeyguardBypassController;
+    private final StatusBarStateController mStatusBarStateController;
 
     private NotificationRemoteInputManager mRemoteInputManager;
     private NotificationPresenter mPresenter;
@@ -80,10 +83,14 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private NotificationClicker mNotificationClicker;
     private final NotificationLogger mNotificationLogger = Dependency.get(NotificationLogger.class);
 
-    public NotificationRowBinderImpl(Context context, boolean allowLongPress) {
+    public NotificationRowBinderImpl(Context context, boolean allowLongPress,
+            KeyguardBypassController keyguardBypassController,
+            StatusBarStateController statusBarStateController) {
         mContext = context;
         mMessagingUtil = new NotificationMessagingUtil(context);
         mAllowLongPress = allowLongPress;
+        mKeyguardBypassController = keyguardBypassController;
+        mStatusBarStateController = statusBarStateController;
     }
 
     private NotificationRemoteInputManager getRemoteInputManager() {
@@ -144,6 +151,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             StatusBarNotification sbn, ExpandableNotificationRow row,
             Runnable onDismissRunnable) {
         row.setExpansionLogger(mExpansionLogger, entry.notification.getKey());
+        row.setBypassController(mKeyguardBypassController);
+        row.setStatusBarStateController(mStatusBarStateController);
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);
         row.setOnExpandClickListener(mPresenter);
@@ -248,9 +257,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
         if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
             row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, true /* shouldInflate */);
-        }
-        if (mNotificationInterruptionStateProvider.shouldPulse(entry)) {
-            row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, true /* shouldInflate */);
         }
         row.setNeedsRedaction(
                 Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));

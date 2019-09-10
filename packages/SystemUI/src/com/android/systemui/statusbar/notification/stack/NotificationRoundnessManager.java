@@ -18,11 +18,14 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.NUM_SECTIONS;
 
-import com.android.systemui.statusbar.AmbientPulseManager;
+
+import android.util.MathUtils;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
@@ -34,27 +37,26 @@ import javax.inject.Singleton;
  * A class that manages the roundness for notification views
  */
 @Singleton
-class NotificationRoundnessManager implements OnHeadsUpChangedListener,
-        AmbientPulseManager.OnAmbientChangedListener {
+public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     private final ActivatableNotificationView[] mFirstInSectionViews;
     private final ActivatableNotificationView[] mLastInSectionViews;
     private final ActivatableNotificationView[] mTmpFirstInSectionViews;
     private final ActivatableNotificationView[] mTmpLastInSectionViews;
+    private final KeyguardBypassController mBypassController;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
-    private ActivatableNotificationView mTrackedAmbient;
     private float mAppearFraction;
 
     @Inject
-    NotificationRoundnessManager(AmbientPulseManager ambientPulseManager) {
+    NotificationRoundnessManager(KeyguardBypassController keyguardBypassController) {
         mFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mTmpFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mTmpLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
-        ambientPulseManager.addListener(this);
+        mBypassController = keyguardBypassController;
     }
 
     @Override
@@ -73,14 +75,8 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onAmbientStateChanged(NotificationEntry entry, boolean isPulsing) {
-        ActivatableNotificationView row = entry.getRow();
-        if (isPulsing) {
-            mTrackedAmbient = row;
-        } else if (mTrackedAmbient == row) {
-            mTrackedAmbient = null;
-        }
-        updateView(row, false /* animate */);
+    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+        updateView(entry.getRow(), false /* animate */);
     }
 
     private void updateView(ActivatableNotificationView view, boolean animate) {
@@ -140,12 +136,12 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener,
         if (isLastInSection(view, true /* include last section */) && !top) {
             return 1.0f;
         }
-        if (view == mTrackedHeadsUp && mAppearFraction <= 0.0f) {
+        if (view == mTrackedHeadsUp) {
             // If we're pushing up on a headsup the appear fraction is < 0 and it needs to still be
             // rounded.
-            return 1.0f;
+            return MathUtils.saturate(1.0f - mAppearFraction);
         }
-        if (view == mTrackedAmbient) {
+        if (view.showingPulsing() && !mBypassController.getBypassEnabled()) {
             return 1.0f;
         }
         return 0.0f;
@@ -242,6 +238,10 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener,
     }
 
     public void setTrackingHeadsUp(ExpandableNotificationRow row) {
+        ExpandableNotificationRow previous = mTrackedHeadsUp;
         mTrackedHeadsUp = row;
+        if (previous != null) {
+            updateView(previous, true /* animate */);
+        }
     }
 }

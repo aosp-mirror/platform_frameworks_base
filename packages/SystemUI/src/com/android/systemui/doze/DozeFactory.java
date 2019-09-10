@@ -72,7 +72,8 @@ public class DozeFactory {
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, params,
                         handler),
                 new DozeWallpaperState(context, getBiometricUnlockController(dozeService)),
-                new DozeDockHandler(context, machine, host, config, handler, dockManager)
+                new DozeDockHandler(context, machine, host, config, handler, dockManager),
+                new DozeAuthRemover(dozeService)
         });
 
         return machine;

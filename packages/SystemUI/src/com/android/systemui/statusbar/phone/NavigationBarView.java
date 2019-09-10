@@ -21,7 +21,9 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 
@@ -321,7 +323,7 @@ public class NavigationBarView extends FrameLayout implements
 
     public void setComponents(NotificationPanelView panel, AssistManager assistManager) {
         mPanelView = panel;
-        updateSystemUiStateFlags();
+        updatePanelSystemUiStateFlags();
     }
 
     @Override
@@ -585,7 +587,7 @@ public class NavigationBarView extends FrameLayout implements
         updateNavButtonIcons();
         updateSlippery();
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
-        updateSystemUiStateFlags();
+        updateDisabledSystemUiStateFlags();
     }
 
     public void updateNavButtonIcons() {
@@ -617,6 +619,10 @@ public class NavigationBarView extends FrameLayout implements
         // Always disable recents when alternate car mode UI is active and for secondary displays.
         boolean disableRecent = isRecentsButtonDisabled();
 
+        // Disable the home handle if both hone and recents are disabled
+        boolean disableHomeHandle = disableRecent
+                && ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+
         boolean disableBack = !useAltBack && (isGesturalMode(mNavBarMode)
                 || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0));
 
@@ -627,7 +633,7 @@ public class NavigationBarView extends FrameLayout implements
         if (mOverviewProxyService.isEnabled()) {
             // Force disable recents when not in legacy mode
             disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
-            if (pinningActive) {
+            if (pinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
                 disableBack = disableHome = false;
             }
         } else if (pinningActive) {
@@ -647,6 +653,7 @@ public class NavigationBarView extends FrameLayout implements
         getBackButton().setVisibility(disableBack      ? View.INVISIBLE : View.VISIBLE);
         getHomeButton().setVisibility(disableHome      ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
+        getHomeHandle().setVisibility(disableHomeHandle ? View.INVISIBLE : View.VISIBLE);
     }
 
     @VisibleForTesting
@@ -706,12 +713,12 @@ public class NavigationBarView extends FrameLayout implements
         }
     }
 
-    public void onPanelExpandedChange() {
+    public void onStatusBarPanelStateChanged() {
         updateSlippery();
-        updateSystemUiStateFlags();
+        updatePanelSystemUiStateFlags();
     }
 
-    public void updateSystemUiStateFlags() {
+    public void updateDisabledSystemUiStateFlags() {
         int displayId = mContext.getDisplayId();
         mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SCREEN_PINNING,
                 ActivityManagerWrapper.getInstance().isScreenPinningActive(), displayId);
@@ -719,9 +726,17 @@ public class NavigationBarView extends FrameLayout implements
                 (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0, displayId);
         mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_HOME_DISABLED,
                 (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0, displayId);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SEARCH_DISABLED,
+                (mDisabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0, displayId);
+    }
+
+    public void updatePanelSystemUiStateFlags() {
+        int displayId = mContext.getDisplayId();
         if (mPanelView != null) {
             mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                     mPanelView.isFullyExpanded() && !mPanelView.isInSettings(), displayId);
+            mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
+                    mPanelView.isInSettings(), displayId);
         }
     }
 

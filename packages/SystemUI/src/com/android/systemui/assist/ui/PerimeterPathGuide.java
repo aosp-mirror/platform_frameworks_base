@@ -102,7 +102,7 @@ public class PerimeterPathGuide {
      * Sets the rotation.
      *
      * @param rotation one of Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_180,
-     *                  Surface.ROTATION_270
+     *                 Surface.ROTATION_270
      */
     public void setRotation(int rotation) {
         if (rotation != mRotation) {
@@ -229,14 +229,14 @@ public class PerimeterPathGuide {
                     - mDeviceWidthPx) / 2, (mDeviceWidthPx - mDeviceHeightPx) / 2);
         }
 
-        CircularCornerPathRenderer.Corner screenBottomLeft = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.BOTTOM_LEFT);
-        CircularCornerPathRenderer.Corner screenBottomRight = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.BOTTOM_RIGHT);
-        CircularCornerPathRenderer.Corner screenTopLeft = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.TOP_LEFT);
-        CircularCornerPathRenderer.Corner screenTopRight = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.TOP_RIGHT);
+        CornerPathRenderer.Corner screenBottomLeft = getRotatedCorner(
+                CornerPathRenderer.Corner.BOTTOM_LEFT);
+        CornerPathRenderer.Corner screenBottomRight = getRotatedCorner(
+                CornerPathRenderer.Corner.BOTTOM_RIGHT);
+        CornerPathRenderer.Corner screenTopLeft = getRotatedCorner(
+                CornerPathRenderer.Corner.TOP_LEFT);
+        CornerPathRenderer.Corner screenTopRight = getRotatedCorner(
+                CornerPathRenderer.Corner.TOP_RIGHT);
 
         mRegions[Region.BOTTOM_LEFT.ordinal()].path =
                 mCornerPathRenderer.getInsetPath(screenBottomLeft, mEdgeInset);
@@ -287,9 +287,12 @@ public class PerimeterPathGuide {
         float accum = 0;
         for (int i = 0; i < mRegions.length; i++) {
             mRegions[i].normalizedLength = mRegions[i].absoluteLength / perimeterLength;
-            accum += mRegions[i].normalizedLength;
-            mRegions[i].endCoordinate = accum;
+            accum += mRegions[i].absoluteLength;
+            mRegions[i].endCoordinate = accum / perimeterLength;
         }
+        // Ensure that the last coordinate is 1. Setting it explicitly to avoid floating point
+        // error.
+        mRegions[mRegions.length - 1].endCoordinate = 1f;
     }
 
     private CircularCornerPathRenderer.Corner getRotatedCorner(

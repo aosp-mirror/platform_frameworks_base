@@ -107,7 +107,9 @@ public class CornerHandleView extends View {
         mPaint.setColor((int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
                 mLightColor,
                 mDarkColor));
-        invalidate();
+        if (getVisibility() == VISIBLE) {
+            invalidate();
+        }
     }
 
     @Override

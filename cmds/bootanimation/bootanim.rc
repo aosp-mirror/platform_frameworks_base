@@ -4,4 +4,5 @@ service bootanim /system/bin/bootanimation
     group graphics audio
     disabled
     oneshot
+    ioprio rt 0
     writepid /dev/stune/top-app/tasks

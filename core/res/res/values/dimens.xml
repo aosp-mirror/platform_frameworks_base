@@ -90,6 +90,24 @@
         orientation. If zero, the value of rounded_corner_radius is used. -->
     <dimen name="rounded_corner_radius_bottom">0dp</dimen>
 
+    <!-- Default adjustment for the software rounded corners since corners are not perfectly
+        round. This value is used when retrieving the "radius" of the rounded corner in cases
+        where the exact bezier curve cannot be retrieved.  This value will be subtracted from
+        rounded_corner_radius to more accurately provide a "radius" for the rounded corner. -->
+    <dimen name="rounded_corner_radius_adjustment">0px</dimen>
+    <!-- Top adjustment for the software rounded corners since corners are not perfectly
+        round.  This value is used when retrieving the "radius" of the top rounded corner in cases
+        where the exact bezier curve cannot be retrieved.  This value will be subtracted from
+        rounded_corner_radius_top to more accurately provide a "radius" for the top rounded corners.
+         -->
+    <dimen name="rounded_corner_radius_top_adjustment">0px</dimen>
+    <!-- Bottom adjustment for the software rounded corners since corners are not perfectly
+        round.  This value is used when retrieving the "radius" of the bottom rounded corner in
+        cases where the exact bezier curve cannot be retrieved.  This value will be subtracted from
+        rounded_corner_radius_bottom to more accurately provide a "radius" for the bottom rounded
+        corners. -->
+    <dimen name="rounded_corner_radius_bottom_adjustment">0px</dimen>
+
     <!-- Width of the window of the divider bar used to resize docked stacks. -->
     <dimen name="docked_stack_divider_thickness">48dp</dimen>
 
@@ -261,7 +279,7 @@
     <dimen name="notification_expand_button_padding_top">1dp</dimen>
 
     <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">92dp</dimen>
+    <dimen name="notification_min_height">106dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
@@ -729,6 +747,8 @@
     <dimen name="harmful_app_message_padding_bottom">24dp</dimen>
     <!-- Line spacing modifier for the message field of the harmful app dialog -->
     <item name="harmful_app_message_line_spacing_modifier" type="dimen">1.22</item>
+
+    <dimen name="seekbar_thumb_exclusion_max_size">48dp</dimen>
 
     <!-- chooser (sharesheet) spacing -->
     <dimen name="chooser_corner_radius">8dp</dimen>

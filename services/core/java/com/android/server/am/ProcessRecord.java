@@ -20,6 +20,7 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -1345,6 +1346,25 @@ class ProcessRecord implements WindowProcessListener {
     public void appDied() {
         synchronized (mService) {
             mService.appDiedLocked(this);
+        }
+    }
+
+    @Override
+    public void setRunningRemoteAnimation(boolean runningRemoteAnimation) {
+        if (pid == Process.myPid()) {
+            Slog.wtf(TAG, "system can't run remote animation");
+            return;
+        }
+        synchronized (mService) {
+            if (this.runningRemoteAnimation == runningRemoteAnimation) {
+                return;
+            }
+            this.runningRemoteAnimation = runningRemoteAnimation;
+            if (DEBUG_OOM_ADJ) {
+                Slog.i(TAG, "Setting runningRemoteAnimation=" + runningRemoteAnimation
+                        + " for pid=" + pid);
+            }
+            mService.updateOomAdjLocked(this, true, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
         }
     }
 

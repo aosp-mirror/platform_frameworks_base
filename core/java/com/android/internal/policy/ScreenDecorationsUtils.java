@@ -36,13 +36,16 @@ public class ScreenDecorationsUtils {
         }
 
         // Radius that should be used in case top or bottom aren't defined.
-        float defaultRadius = resources.getDimension(R.dimen.rounded_corner_radius);
+        float defaultRadius = resources.getDimension(R.dimen.rounded_corner_radius)
+                - resources.getDimension(R.dimen.rounded_corner_radius_adjustment);
 
-        float topRadius = resources.getDimension(R.dimen.rounded_corner_radius_top);
+        float topRadius = resources.getDimension(R.dimen.rounded_corner_radius_top)
+                - resources.getDimension(R.dimen.rounded_corner_radius_top_adjustment);
         if (topRadius == 0f) {
             topRadius = defaultRadius;
         }
-        float bottomRadius = resources.getDimension(R.dimen.rounded_corner_radius_bottom);
+        float bottomRadius = resources.getDimension(R.dimen.rounded_corner_radius_bottom)
+                - resources.getDimension(R.dimen.rounded_corner_radius_bottom_adjustment);
         if (bottomRadius == 0f) {
             bottomRadius = defaultRadius;
         }

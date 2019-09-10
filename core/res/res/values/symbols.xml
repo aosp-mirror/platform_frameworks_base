@@ -654,6 +654,7 @@
   <java-symbol type="string" name="notification_channel_voice_mail" />
   <java-symbol type="string" name="notification_channel_wfc" />
   <java-symbol type="string" name="notification_channel_sim" />
+  <java-symbol type="string" name="notification_channel_sim_high_prio" />
   <java-symbol type="string" name="SetupCallDefault" />
   <java-symbol type="string" name="accept" />
   <java-symbol type="string" name="activity_chooser_view_see_all" />
@@ -2274,14 +2275,10 @@
   <java-symbol type="anim" name="lock_screen_behind_enter" />
   <java-symbol type="anim" name="lock_screen_behind_enter_wallpaper" />
   <java-symbol type="anim" name="lock_screen_behind_enter_fade_in" />
+  <java-symbol type="anim" name="lock_screen_behind_enter_subtle" />
   <java-symbol type="anim" name="lock_screen_wallpaper_exit" />
   <java-symbol type="anim" name="launch_task_behind_source" />
   <java-symbol type="anim" name="wallpaper_open_exit" />
-  <java-symbol type="anim" name="lock_to_error" />
-  <java-symbol type="anim" name="lock_lock" />
-  <java-symbol type="anim" name="lock_unlock" />
-  <java-symbol type="anim" name="lock_in" />
-  <java-symbol type="anim" name="lock_scanning" />
 
   <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="dimen" name="status_bar_icon_size" />
@@ -2592,6 +2589,7 @@
   <java-symbol type="array" name="config_face_acquire_vendor_keyguard_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_biometricprompt_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_biometricprompt_ignorelist" />
+  <java-symbol type="bool" name="config_faceAuthDismissesKeyguard" />
 
   <!-- Face config -->
   <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />
@@ -3202,6 +3200,8 @@
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
   <java-symbol type="array" name="config_availableColorModes" />
   <java-symbol type="integer" name="config_accessibilityColorMode" />
+  <java-symbol type="array" name="config_displayCompositionColorModes" />
+  <java-symbol type="array" name="config_displayCompositionColorSpaces" />
   <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
   <java-symbol type="bool" name="config_displayWhiteBalanceEnabledDefault" />
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureMin" />
@@ -3275,6 +3275,9 @@
   <java-symbol type="string" name="config_batterymeterBoltPath" />
   <java-symbol type="string" name="config_batterymeterPowersavePath" />
   <java-symbol type="bool" name="config_batterymeterDualTone" />
+  <java-symbol type="string" name="config_signalXPath" />
+  <java-symbol type="dimen" name="config_signalCutoutWidthFraction" />
+  <java-symbol type="dimen" name="config_signalCutoutHeightFraction" />
 
   <java-symbol type="bool" name="config_debugEnableAutomaticSystemServerHeapDumps" />
   <java-symbol type="integer" name="config_debugSystemServerPssThresholdBytes" />
@@ -3559,7 +3562,7 @@
 
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />
-  <java-symbol type="bool" name="config_display_no_service_when_sim_unready" />
+  <java-symbol type="array" name="config_display_no_service_when_sim_unready" />
 
   <java-symbol type="layout" name="slice_grid" />
   <java-symbol type="layout" name="slice_message_local" />
@@ -3710,6 +3713,9 @@
   <java-symbol type="dimen" name="rounded_corner_radius" />
   <java-symbol type="dimen" name="rounded_corner_radius_top" />
   <java-symbol type="dimen" name="rounded_corner_radius_bottom" />
+  <java-symbol type="dimen" name="rounded_corner_radius_adjustment" />
+  <java-symbol type="dimen" name="rounded_corner_radius_top_adjustment" />
+  <java-symbol type="dimen" name="rounded_corner_radius_bottom_adjustment" />
   <java-symbol type="bool" name="config_supportsRoundedCornersOnWindows" />
 
   <java-symbol type="string" name="config_defaultModuleMetadataProvider" />
@@ -3759,8 +3765,12 @@
   <java-symbol type="array" name="config_displayWhiteBalanceBaseThresholds" />
   <java-symbol type="array" name="config_displayWhiteBalanceIncreaseThresholds" />
   <java-symbol type="array" name="config_displayWhiteBalanceDecreaseThresholds" />
-  <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" />
+  <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBrightnesses" />
+  <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBiases" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperature" />
+  <java-symbol type="array" name="config_displayWhiteBalanceHighLightAmbientBrightnesses" />
+  <java-symbol type="array" name="config_displayWhiteBalanceHighLightAmbientBiases" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceHighLightAmbientColorTemperature" />
   <java-symbol type="array" name="config_displayWhiteBalanceAmbientColorTemperatures" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayColorTemperatures" />
   <java-symbol type="drawable" name="ic_action_open" />
@@ -3788,11 +3798,14 @@
 
   <!-- For high refresh rate displays -->
   <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
+  <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
+  <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />
 
   <!-- For Auto-Brightness -->
   <java-symbol type="string" name="config_displayLightSensorType" />
 
   <java-symbol type="drawable" name="iconfactory_adaptive_icon_drawable_wrapper"/>
+  <java-symbol type="dimen" name="notification_min_height" />
   <java-symbol type="dimen" name="resolver_icon_size"/>
   <java-symbol type="dimen" name="resolver_badge_size"/>
   <java-symbol type="dimen" name="resolver_button_bar_spacing"/>
@@ -3811,6 +3824,7 @@
   <java-symbol type="color" name="chooser_gradient_highlight" />
   <java-symbol type="drawable" name="chooser_direct_share_label_placeholder" />
   <java-symbol type="dimen" name="chooser_direct_share_label_placeholder_max_width" />
+  <java-symbol type="dimen" name="seekbar_thumb_exclusion_max_size" />
   <java-symbol type="layout" name="chooser_az_label_row" />
   <java-symbol type="string" name="chooser_all_apps_button_label" />
   <java-symbol type="anim" name="resolver_launch_anim" />
@@ -3821,6 +3835,8 @@
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
   <java-symbol type="bool" name="config_inflateSignalStrength" />
   <java-symbol type="array" name="config_restrictedPreinstalledCarrierApps" />
+
+  <java-symbol type="array" name="config_highRefreshRateBlacklist" />
 
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />

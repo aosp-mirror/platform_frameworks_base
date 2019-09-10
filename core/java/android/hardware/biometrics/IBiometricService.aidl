@@ -40,7 +40,10 @@ interface IBiometricService {
     void cancelAuthentication(IBinder token, String opPackageName);
 
     // Checks if biometrics can be used.
-    int canAuthenticate(String opPackageName);
+    int canAuthenticate(String opPackageName, int userId);
+
+    // Checks if any biometrics are enrolled.
+    boolean hasEnrolledBiometrics(int userId);
 
     // Register callback for when keyguard biometric eligibility changes.
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);

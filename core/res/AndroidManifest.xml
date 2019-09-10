@@ -724,6 +724,10 @@
 
     <!-- Allows an application to send SMS messages.
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.SEND_SMS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -734,6 +738,10 @@
 
     <!-- Allows an application to receive SMS messages.
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_SMS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -744,6 +752,10 @@
 
     <!-- Allows an application to read SMS messages.
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.READ_SMS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -754,6 +766,10 @@
 
     <!-- Allows an application to receive WAP push messages.
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_WAP_PUSH"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -763,7 +779,11 @@
         android:protectionLevel="dangerous" />
 
     <!-- Allows an application to monitor incoming MMS messages.
-        <p>Protection level: dangerous
+         <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_MMS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -783,6 +803,11 @@
          when the alert is first received, and to delay presenting the info
          to the user until after the initial alert dialog is dismissed.
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
+
          @hide Pending API council approval -->
     <permission android:name="android.permission.READ_CELL_BROADCASTS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -805,31 +830,36 @@
         android:priority="900" />
 
     <!-- Allows an application to read from external storage.
-     <p>Any app that declares the {@link #WRITE_EXTERNAL_STORAGE} permission is implicitly
-     granted this permission.</p>
-     <p>This permission is enforced starting in API level 19.  Before API level 19, this
-     permission is not enforced and all apps still have access to read from external storage.
-     You can test your app with the permission enforced by enabling <em>Protect USB
-     storage</em> under Developer options in the Settings app on a device running Android 4.1 or
-     higher.</p>
-     <p>Also starting in API level 19, this permission is <em>not</em> required to
-     read/write files in your application-specific directories returned by
-     {@link android.content.Context#getExternalFilesDir} and
-     {@link android.content.Context#getExternalCacheDir}.
-     <p class="note"><strong>Note:</strong> If <em>both</em> your <a
-     href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-     minSdkVersion}</a> and <a
-     href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-     targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
-     grants your app this permission. If you don't need this permission, be sure your <a
-     href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-     targetSdkVersion}</a> is 4 or higher.
-     <p>Is this permission is not whitelisted for an app that targets an API level before
-     {@link android.os.Build.VERSION_CODES#Q} this permission cannot be granted to apps.</p>
-     <p>Is this permission is not whitelisted for an app that targets an API level
-     {@link android.os.Build.VERSION_CODES#Q} or later the app will be forced into isolated storage.
-     </p>
-     -->
+      <p>Any app that declares the {@link #WRITE_EXTERNAL_STORAGE} permission is implicitly
+      granted this permission.</p>
+      <p>This permission is enforced starting in API level 19.  Before API level 19, this
+      permission is not enforced and all apps still have access to read from external storage.
+      You can test your app with the permission enforced by enabling <em>Protect USB
+      storage</em> under Developer options in the Settings app on a device running Android 4.1 or
+      higher.</p>
+      <p>Also starting in API level 19, this permission is <em>not</em> required to
+      read/write files in your application-specific directories returned by
+      {@link android.content.Context#getExternalFilesDir} and
+      {@link android.content.Context#getExternalCacheDir}.
+      <p class="note"><strong>Note:</strong> If <em>both</em> your <a
+      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+      minSdkVersion}</a> and <a
+      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+      targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
+      grants your app this permission. If you don't need this permission, be sure your <a
+      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+      targetSdkVersion}</a> is 4 or higher.
+
+      <p> This is a soft restricted permission which cannot be held by an app it its
+      full form until the installer on record whitelists the permission.
+      Specifically, if the permission is whitelisted the holder app can access
+      external storage and the visual and aural media collections while if the
+      permission is not whitelisted the holder app can only access to the visual
+      and aural medial collections. Also the permission is immutably restricted
+      meaning that the whitelist state can be specified only at install time and
+      cannot change until the app is installed. For more details see
+      {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
+     <p>Protection level: dangerous -->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_sdcardRead"
@@ -850,8 +880,9 @@
          read/write files in your application-specific directories returned by
          {@link android.content.Context#getExternalFilesDir} and
          {@link android.content.Context#getExternalCacheDir}.
-         <p>Is this permission is not whitelisted for an app that targets an API level before
+         <p>If this permission is not whitelisted for an app that targets an API level before
          {@link android.os.Build.VERSION_CODES#Q} this permission cannot be granted to apps.</p>
+         <p>Protection level: dangerous</p>
     -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -861,7 +892,8 @@
         android:protectionLevel="dangerous" />
 
     <!-- Allows an application to access any geographic locations persisted in the
-         user's shared collection. -->
+         user's shared collection.
+         <p>Protection level: dangerous -->
     <permission android:name="android.permission.ACCESS_MEDIA_LOCATION"
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_mediaLocation"
@@ -916,6 +948,10 @@
          {@link #ACCESS_FINE_LOCATION}. Requesting this permission by itself doesn't give you
          location access.
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -958,6 +994,10 @@
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
          targetSdkVersion}</a> is 16 or higher.</p>
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.READ_CALL_LOG"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -978,6 +1018,10 @@
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
          targetSdkVersion}</a> is 16 or higher.</p>
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.WRITE_CALL_LOG"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -990,6 +1034,10 @@
          call with the option to redirect the call to a different number or
          abort the call altogether.
          <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
 
          @deprecated Applications should use {@link android.telecom.CallRedirectionService} instead
          of the {@link android.content.Intent#ACTION_NEW_OUTGOING_CALL} broadcast.
@@ -1665,7 +1713,7 @@
 
     <!-- Allows applications to pair bluetooth devices without user interaction, and to
          allow or disallow phonebook access or message access.
-         This is not available to third party applications. -->
+         <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
         android:protectionLevel="signature|privileged" />
 
@@ -2515,7 +2563,8 @@
         android:protectionLevel="signature" />
 
     <!-- Allows an application to modify the current configuration, such
-         as locale. -->
+         as locale.
+         <p>Protection level: signature|privileged|development -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
         android:protectionLevel="signature|privileged|development" />
 
@@ -2814,7 +2863,8 @@
     <!-- ==================================== -->
     <eat-comment />
 
-    <!-- Allows access to the list of accounts in the Accounts Service. -->
+    <!-- Allows access to the list of accounts in the Accounts Service.
+         <p>Protection level: signature|privileged -->
     <permission android:name="android.permission.GET_ACCOUNTS_PRIVILEGED"
         android:protectionLevel="signature|privileged" />
 
@@ -3393,7 +3443,8 @@
         android:protectionLevel="signature" />
 
     <!-- Old permission for deleting an app's cache files, no longer used,
-         but signals for us to quietly ignore calls instead of throwing an exception. -->
+         but signals for us to quietly ignore calls instead of throwing an exception.
+         <p>Protection level: signature|privileged -->
     <permission android:name="android.permission.DELETE_CACHE_FILES"
         android:protectionLevel="signature|privileged" />
 
@@ -3751,7 +3802,8 @@
     <!-- Allows an application to collect component usage
          statistics
          <p>Declaring the permission implies intention to use the API and the user of the
-         device can grant permission through the Settings application. -->
+         device can grant permission through the Settings application.
+         <p>Protection level: signature|privileged|development|appop -->
     <permission android:name="android.permission.PACKAGE_USAGE_STATS"
         android:protectionLevel="signature|privileged|development|appop" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
@@ -3774,14 +3826,14 @@
 
     <!-- Permission an application must hold in order to use
          {@link android.provider.Settings#ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}.
-         This is a normal permission: an app requesting it will always be granted the
-         permission, without the user needing to approve or see it. -->
+         <p>Protection level: normal -->
     <permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
         android:label="@string/permlab_requestIgnoreBatteryOptimizations"
         android:description="@string/permdesc_requestIgnoreBatteryOptimizations"
         android:protectionLevel="normal" />
 
-    <!-- Allows an application to collect battery statistics -->
+    <!-- Allows an application to collect battery statistics
+         <p>Protection level: signature|privileged|development -->
     <permission android:name="android.permission.BATTERY_STATS"
         android:protectionLevel="signature|privileged|development" />
 
@@ -3811,7 +3863,8 @@
         android:protectionLevel="signature" />
 
     <!-- Must be required by a {@link android.widget.RemoteViewsService},
-         to ensure that only the system can bind to it. -->
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature|privileged -->
     <permission android:name="android.permission.BIND_REMOTEVIEWS"
         android:protectionLevel="signature|privileged" />
 
@@ -3853,7 +3906,8 @@
          to the path in the provider where global search queries are
          performed.  This permission can not be held by regular applications;
          it is used by applications to protect themselves from everyone else
-         besides global search. -->
+         besides global search.
+         <p>Protection level: signature|privileged -->
     <permission android:name="android.permission.GLOBAL_SEARCH"
         android:protectionLevel="signature|privileged" />
 
@@ -4392,7 +4446,8 @@
     <permission android:name="android.permission.MODIFY_THEME_OVERLAY"
                 android:protectionLevel="signature" />
 
-    <!-- Allows an instant app to create foreground services. -->
+    <!-- Allows an instant app to create foreground services.
+         <p>Protection level: signature|development|instant|appop -->
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
         android:protectionLevel="signature|development|instant|appop" />
 
@@ -4462,7 +4517,8 @@
     <permission android:name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- A subclass of {@link android.service.carrier.CarrierMessagingClientService} must be protected with this permission. -->
+    <!-- A subclass of {@link android.service.carrier.CarrierMessagingClientService} must be protected with this permission.
+           <p>Protection level: signature -->
     <permission android:name="android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE"
         android:protectionLevel="signature" />
 
@@ -4494,13 +4550,15 @@
     <permission android:name="android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS"
         android:protectionLevel="signature" />
 
-    <!-- Allows financial apps to read filtered sms messages. -->
+    <!-- Allows financial apps to read filtered sms messages.
+         Protection level: signature|appop  -->
     <permission android:name="android.permission.SMS_FINANCIAL_TRANSACTIONS"
         android:protectionLevel="signature|appop" />
 
     <!-- Required for apps targeting {@link android.os.Build.VERSION_CODES#Q} that want to use
          {@link android.app.Notification.Builder#setFullScreenIntent notification full screen
-         intents}.  -->
+         intents}.
+         <p>Protection level: normal -->
     <permission android:name="android.permission.USE_FULL_SCREEN_INTENT"
                 android:protectionLevel="normal" />
 

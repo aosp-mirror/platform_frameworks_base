@@ -20,6 +20,8 @@ import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
+import static org.mockito.Mockito.mock;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Instrumentation;
@@ -40,11 +42,13 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubblesTestActivity;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflaterTest;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -66,14 +70,18 @@ public class NotificationTestHelper {
     private final Context mContext;
     private final Instrumentation mInstrumentation;
     private int mId;
-    private final NotificationGroupManager mGroupManager = new NotificationGroupManager();
+    private final NotificationGroupManager mGroupManager;
     private ExpandableNotificationRow mRow;
-    private HeadsUpManager mHeadsUpManager;
+    private HeadsUpManagerPhone mHeadsUpManager;
 
     public NotificationTestHelper(Context context) {
         mContext = context;
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mHeadsUpManager = new HeadsUpManagerPhone(mContext, null, mGroupManager, null, null);
+        StatusBarStateController stateController = mock(StatusBarStateController.class);
+        mGroupManager = new NotificationGroupManager(stateController);
+        mHeadsUpManager = new HeadsUpManagerPhone(mContext, stateController,
+                mock(KeyguardBypassController.class));
+        mHeadsUpManager.setUp(null, mGroupManager, null, null);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 

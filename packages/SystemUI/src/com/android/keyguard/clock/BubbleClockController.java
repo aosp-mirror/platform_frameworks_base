@@ -75,6 +75,11 @@ public class BubbleClockController implements ClockPlugin {
     private TextClock mLockClock;
 
     /**
+     * Helper to extract colors from wallpaper palette for clock face.
+     */
+    private final ClockPalette mPalette = new ClockPalette();
+
+    /**
      * Create a BubbleClockController instance.
      *
      * @param res Resources contains title and thumbnail.
@@ -162,21 +167,26 @@ public class BubbleClockController implements ClockPlugin {
     public void setStyle(Style style) {}
 
     @Override
-    public void setTextColor(int color) { }
+    public void setTextColor(int color) {
+        updateColor();
+    }
 
     @Override
     public void setColorPalette(boolean supportsDarkText, int[] colorPalette) {
-        if (colorPalette == null || colorPalette.length == 0) {
-            return;
-        }
-        final int length = colorPalette.length;
-        final int color = colorPalette[Math.max(0, length - 3)];
-        mLockClock.setTextColor(color);
-        mAnalogClock.setClockColors(color, color);
+        mPalette.setColorPalette(supportsDarkText, colorPalette);
+        updateColor();
+    }
+
+    private void updateColor() {
+        final int primary = mPalette.getPrimaryColor();
+        final int secondary = mPalette.getSecondaryColor();
+        mLockClock.setTextColor(secondary);
+        mAnalogClock.setClockColors(primary, secondary);
     }
 
     @Override
     public void setDarkAmount(float darkAmount) {
+        mPalette.setDarkAmount(darkAmount);
         mClockPosition.setDarkAmount(darkAmount);
         mView.setDarkAmount(darkAmount);
     }

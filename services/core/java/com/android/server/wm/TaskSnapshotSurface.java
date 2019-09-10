@@ -284,7 +284,6 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void drawSnapshot() {
-        final GraphicBuffer buffer = mSnapshot.getSnapshot();
         mSurface.copyFrom(mSurfaceControl);
 
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Drawing snapshot surface sizeMismatch="
@@ -293,9 +292,9 @@ class TaskSnapshotSurface implements StartingSurface {
             // The dimensions of the buffer and the window don't match, so attaching the buffer
             // will fail. Better create a child window with the exact dimensions and fill the parent
             // window with the background color!
-            drawSizeMismatchSnapshot(buffer);
+            drawSizeMismatchSnapshot();
         } else {
-            drawSizeMatchSnapshot(buffer);
+            drawSizeMatchSnapshot();
         }
         synchronized (mService.mGlobalLock) {
             mShownTime = SystemClock.uptimeMillis();
@@ -307,15 +306,17 @@ class TaskSnapshotSurface implements StartingSurface {
         mSnapshot = null;
     }
 
-    private void drawSizeMatchSnapshot(GraphicBuffer buffer) {
-        mSurface.attachAndQueueBuffer(buffer);
+    private void drawSizeMatchSnapshot() {
+        mSurface.attachAndQueueBufferWithColorSpace(mSnapshot.getSnapshot(),
+                mSnapshot.getColorSpace());
         mSurface.release();
     }
 
-    private void drawSizeMismatchSnapshot(GraphicBuffer buffer) {
+    private void drawSizeMismatchSnapshot() {
         if (!mSurface.isValid()) {
             throw new IllegalStateException("mSurface does not hold a valid surface.");
         }
+        final GraphicBuffer buffer = mSnapshot.getSnapshot();
         final SurfaceSession session = new SurfaceSession();
         // We consider nearly matched dimensions as there can be rounding errors and the user won't
         // notice very minute differences from scaling one dimension more than the other
@@ -355,7 +356,7 @@ class TaskSnapshotSurface implements StartingSurface {
         } finally {
             SurfaceControl.closeTransaction();
         }
-        surface.attachAndQueueBuffer(buffer);
+        surface.attachAndQueueBufferWithColorSpace(buffer, mSnapshot.getColorSpace());
         surface.release();
 
         if (aspectRatioMismatch) {

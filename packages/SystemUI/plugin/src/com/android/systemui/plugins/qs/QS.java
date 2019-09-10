@@ -34,7 +34,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 6;
+    int VERSION = 7;
 
     String TAG = "QS";
 
@@ -51,7 +51,7 @@ public interface QS extends FragmentBase {
     void setListening(boolean listening);
     boolean isShowingDetail();
     void closeDetail();
-    void setKeyguardShowing(boolean keyguardShowing);
+    default void setShowCollapsedOnKeyguard(boolean showCollapsedOnKeyguard) {}
     void animateHeaderSlidingIn(long delay);
     void animateHeaderSlidingOut();
     void setQsExpansion(float qsExpansionFraction, float headerTranslation);

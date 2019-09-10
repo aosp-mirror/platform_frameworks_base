@@ -232,7 +232,6 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 
 import libcore.io.IoUtils;
-import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -540,7 +539,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final SparseArray<String> mSubIdToSubscriberId = new SparseArray<>();
     /** Set of all merged subscriberId as of last update */
     @GuardedBy("mNetworkPoliciesSecondLock")
-    private String[] mMergedSubscriberIds = EmptyArray.STRING;
+    private List<String[]> mMergedSubscriberIds = new ArrayList<>();
 
     /**
      * Indicates the uids restricted by admin from accessing metered data. It's a mapping from
@@ -1801,7 +1800,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
 
         final int[] subIds = ArrayUtils.defeatNullable(sm.getActiveSubscriptionIdList());
-        final String[] mergedSubscriberIds = ArrayUtils.defeatNullable(tm.getMergedSubscriberIds());
+        final List<String[]> mergedSubscriberIdsList = new ArrayList();
 
         final SparseArray<String> subIdToSubscriberId = new SparseArray<>(subIds.length);
         for (int subId : subIds) {
@@ -1811,6 +1810,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             } else {
                 Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
             }
+
+            String[] mergedSubscriberId = ArrayUtils.defeatNullable(
+                    tm.createForSubscriptionId(subId).getMergedSubscriberIdsFromGroup());
+            mergedSubscriberIdsList.add(mergedSubscriberId);
         }
 
         synchronized (mNetworkPoliciesSecondLock) {
@@ -1820,7 +1823,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         subIdToSubscriberId.valueAt(i));
             }
 
-            mMergedSubscriberIds = mergedSubscriberIds;
+            mMergedSubscriberIds = mergedSubscriberIdsList;
         }
 
         Trace.traceEnd(TRACE_TAG_NETWORK);
@@ -3373,8 +3376,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.decreaseIndent();
 
                 fout.println();
-                fout.println("Merged subscriptions: "
-                        + Arrays.toString(NetworkIdentity.scrubSubscriberId(mMergedSubscriberIds)));
+                for (String[] mergedSubscribers : mMergedSubscriberIds) {
+                    fout.println("Merged subscriptions: " + Arrays.toString(
+                            NetworkIdentity.scrubSubscriberId(mergedSubscribers)));
+                }
 
                 fout.println();
                 fout.println("Policy for UIDs:");
