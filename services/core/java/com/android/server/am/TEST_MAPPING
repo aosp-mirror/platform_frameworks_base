@@ -19,9 +19,6 @@
           "exclude-filter": "android.app.cts.AlarmManagerTest#testSetRepeating"
         },
         {
-          "exclude-filter": "android.app.cts.ServiceTest#testAppZygoteServices"
-        },
-        {
           "exclude-filter": "android.app.cts.SystemFeaturesTest#testLocationFeatures"
         },
         {
