@@ -15,9 +15,6 @@
  */
 package com.android.server.audio;
 
-import static com.android.server.audio.AudioService.CONNECTION_STATE_CONNECTED;
-import static com.android.server.audio.AudioService.CONNECTION_STATE_DISCONNECTED;
-
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
@@ -95,13 +92,28 @@ import java.io.PrintWriter;
     /*package*/ AudioDeviceBroker(@NonNull Context context, @NonNull AudioService service) {
         mContext = context;
         mAudioService = service;
-        setupMessaging(context);
         mBtHelper = new BtHelper(this);
         mDeviceInventory = new AudioDeviceInventory(this);
 
+        init();
+    }
+
+    /** for test purposes only, inject AudioDeviceInventory */
+    AudioDeviceBroker(@NonNull Context context, @NonNull AudioService service,
+                      @NonNull AudioDeviceInventory mockDeviceInventory) {
+        mContext = context;
+        mAudioService = service;
+        mBtHelper = new BtHelper(this);
+        mDeviceInventory = mockDeviceInventory;
+
+        init();
+    }
+
+    private void init() {
+        setupMessaging(mContext);
+
         mForcedUseForComm = AudioSystem.FORCE_NONE;
         mForcedUseForCommExt = mForcedUseForComm;
-
     }
 
     /*package*/ Context getContext() {
@@ -125,6 +137,8 @@ import java.io.PrintWriter;
     /*package*/ void onAudioServerDied() {
         // Restore forced usage for communications and record
         synchronized (mDeviceStateLock) {
+            AudioSystem.setParameters(
+                    "BT_SCO=" + (mForcedUseForComm == AudioSystem.FORCE_BT_SCO ? "on" : "off"));
             onSetForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, "onAudioServerDied");
             onSetForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm, "onAudioServerDied");
         }
@@ -230,7 +244,14 @@ import java.io.PrintWriter;
             mSupprNoisy = suppressNoisyIntent;
             mVolume = vol;
         }
+
+        // redefine equality op so we can match messages intended for this device
+        @Override
+        public boolean equals(Object o) {
+            return mDevice.equals(o);
+        }
     }
+
 
     /*package*/ void postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
             @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
@@ -238,9 +259,27 @@ import java.io.PrintWriter;
         final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
                 suppressNoisyIntent, a2dpVolume);
 
-        // TODO add a check to try to remove unprocessed messages for the same device (the old
-        //      check didn't work), and  make sure it doesn't conflict with config change message
-        sendLMsgNoDelay(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT, SENDMSG_QUEUE, info);
+        // when receiving a request to change the connection state of a device, this last request
+        // is the source of truth, so cancel all previous requests
+        removeAllA2dpConnectionEvents(device);
+
+        sendLMsgNoDelay(
+                state == BluetoothProfile.STATE_CONNECTED
+                        ? MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION
+                        : MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
+                SENDMSG_QUEUE, info);
+    }
+
+    /** remove all previously scheduled connection and disconnection events for the given device */
+    private void removeAllA2dpConnectionEvents(@NonNull BluetoothDevice device) {
+        mBrokerHandler.removeMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
+                device);
+        mBrokerHandler.removeMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION,
+                device);
+        mBrokerHandler.removeMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED,
+                device);
+        mBrokerHandler.removeMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
+                device);
     }
 
     private static final class HearingAidDeviceConnectionInfo {
@@ -428,13 +467,16 @@ import java.io.PrintWriter;
         sendMsgNoDelay(MSG_BROADCAST_AUDIO_BECOMING_NOISY, SENDMSG_REPLACE);
     }
 
-    /*package*/ void postA2dpSinkConnection(int state,
+    /*package*/ void postA2dpSinkConnection(@AudioService.BtProfileConnectionState int state,
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo, int delay) {
-        sendILMsg(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE, SENDMSG_QUEUE,
+        sendILMsg(state == BluetoothA2dp.STATE_CONNECTED
+                        ? MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED
+                        : MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
+                SENDMSG_QUEUE,
                 state, btDeviceInfo, delay);
     }
 
-    /*package*/ void postA2dpSourceConnection(int state,
+    /*package*/ void postA2dpSourceConnection(@AudioService.BtProfileConnectionState int state,
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo, int delay) {
         sendILMsg(MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE, SENDMSG_QUEUE,
                 state, btDeviceInfo, delay);
@@ -520,25 +562,6 @@ import java.io.PrintWriter;
         }
     }
 
-    @GuardedBy("mDeviceStateLock")
-    /*package*/ void handleSetA2dpSinkConnectionState(@BluetoothProfile.BtProfileState int state,
-                @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
-        final int intState = (state == BluetoothA2dp.STATE_CONNECTED)
-                ? CONNECTION_STATE_CONNECTED : CONNECTION_STATE_DISCONNECTED;
-        final int delay = mDeviceInventory.checkSendBecomingNoisyIntent(
-                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, intState,
-                    AudioSystem.DEVICE_NONE);
-        final String addr = btDeviceInfo == null ? "null" : btDeviceInfo.getBtDevice().getAddress();
-
-        if (AudioService.DEBUG_DEVICES) {
-            Log.d(TAG, "handleSetA2dpSinkConnectionState btDevice= " + btDeviceInfo
-                    + " state= " + state
-                    + " is dock: " + btDeviceInfo.getBtDevice().isBluetoothDock());
-        }
-        sendILMsg(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE, SENDMSG_QUEUE,
-                state, btDeviceInfo, delay);
-    }
-
     /*package*/ void postSetA2dpSourceConnectionState(@BluetoothProfile.BtProfileState int state,
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
         final int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
@@ -573,8 +596,10 @@ import java.io.PrintWriter;
 
     // must be called synchronized on mConnectedDevices
     /*package*/ boolean hasScheduledA2dpSinkConnectionState(BluetoothDevice btDevice) {
-        return mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE,
-                new BtHelper.BluetoothA2dpDeviceInfo(btDevice));
+        return (mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED,
+                        new BtHelper.BluetoothA2dpDeviceInfo(btDevice))
+                || mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
+                        new BtHelper.BluetoothA2dpDeviceInfo(btDevice)));
     }
 
     /*package*/ void setA2dpDockTimeout(String address, int a2dpCodec, int delayMs) {
@@ -709,7 +734,8 @@ import java.io.PrintWriter;
                         mDeviceInventory.onReportNewRoutes();
                     }
                     break;
-                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE:
+                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED:
+                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onSetA2dpSinkConnectionState(
                                 (BtHelper.BluetoothA2dpDeviceInfo) msg.obj, msg.arg1);
@@ -834,7 +860,8 @@ import java.io.PrintWriter;
                         }
                     }
                     break;
-                case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT: {
+                case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION:
+                case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION: {
                     final BtDeviceConnectionInfo info = (BtDeviceConnectionInfo) msg.obj;
                     AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
                             "setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent "
@@ -885,7 +912,7 @@ import java.io.PrintWriter;
     private static final int MSG_I_BROADCAST_BT_CONNECTION_STATE = 3;
     private static final int MSG_IIL_SET_FORCE_USE = 4;
     private static final int MSG_IIL_SET_FORCE_BT_A2DP_USE = 5;
-    private static final int MSG_IL_SET_A2DP_SINK_CONNECTION_STATE = 6;
+    private static final int MSG_TOGGLE_HDMI = 6;
     private static final int MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE = 7;
     private static final int MSG_IL_SET_HEARING_AID_CONNECTION_STATE = 8;
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
@@ -896,7 +923,6 @@ import java.io.PrintWriter;
     private static final int MSG_II_SET_HEARING_AID_VOLUME = 14;
     private static final int MSG_I_SET_AVRCP_ABSOLUTE_VOLUME = 15;
     private static final int MSG_I_DISCONNECT_BT_SCO = 16;
-    private static final int MSG_TOGGLE_HDMI = 17;
     private static final int MSG_L_A2DP_ACTIVE_DEVICE_CHANGE = 18;
     private static final int MSG_DISCONNECT_A2DP = 19;
     private static final int MSG_DISCONNECT_A2DP_SINK = 20;
@@ -906,25 +932,30 @@ import java.io.PrintWriter;
     private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP_SINK = 24;
     private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID = 25;
     private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET = 26;
+    private static final int MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED = 27;
+    private static final int MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED = 28;
     // process external command to (dis)connect an A2DP device
-    private static final int MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT = 27;
+    private static final int MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION = 29;
+    private static final int MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION = 30;
     // process external command to (dis)connect a hearing aid device
-    private static final int MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT = 28;
+    private static final int MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT = 31;
     // a ScoClient died in BtHelper
-    private static final int MSG_L_SCOCLIENT_DIED = 29;
+    private static final int MSG_L_SCOCLIENT_DIED = 32;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
             case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
-            case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE:
+            case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED:
+            case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
             case MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE:
             case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
             case MSG_IL_BTA2DP_DOCK_TIMEOUT:
             case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
             case MSG_TOGGLE_HDMI:
             case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE:
-            case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT:
+            case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION:
+            case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION:
             case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT:
                 return true;
             default:
@@ -1005,7 +1036,8 @@ import java.io.PrintWriter;
 
             switch (msg) {
                 case MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE:
-                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE:
+                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED:
+                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
                 case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
                 case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
                 case MSG_IL_BTA2DP_DOCK_TIMEOUT:
