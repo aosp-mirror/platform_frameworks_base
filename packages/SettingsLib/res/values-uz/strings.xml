@@ -201,7 +201,7 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Ushbu foydalanuvchi uchun VPN sozlamalari mavjud emas"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Ushbu foydalanuvchi uchun Modem rejimi sozlamalari mavjud emas"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Ushbu foydalanuvchi uchun Internetga kirish nuqtasi (APN) sozlamalari mavjud emas"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"USB orqali nosozliklarni aniqlash"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB orqali nosozliklarni tuzatish"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB orqali kompyuterga ulanganda tuzatish rejimi yoqilsin"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB orqali nosozliklarni tuzatishni taqiqlash"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Xatoliklar hisoboti"</string>
@@ -264,7 +264,7 @@
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobil internet har doim yoniq tursin, hatto Wi-Fi yoniq bo‘lsa ham (bir tarmoqdan ikkinchisiga tezroq o‘tish uchun)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Modem rejimida apparatli tezlashtirishdan foydalanish (agar mavjud bo‘lsa)"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB orqali nosozliklarni tuzatishga ruxsat berilsinmi?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB orqali nosozliklarni aniqlash faqat dasturlash maqsadlarida yoqiladi. Undan maʼlumotlarni qurilmangiz va kompyuter o‘rtasida ko‘chirish, ilovalarni xabarnomasiz o‘rnatish va jurnal maʼlumotlarini o‘qish uchun foydalaniladi."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB orqali nosozliklarni tuzatish faqat dasturlash maqsadlarida yoqiladi. Undan ma‘lumotlarni qurilmangiz va kompyuter o‘rtasida ko‘chirish, ilovalarni xabarnomasiz o‘rnatish va jurnal ma‘lumotlarini o‘qish uchun foydalaniladi."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"USB orqali nosozliklarni tuzatishga berilgan ruxsat siz hisobingizga kirgan barcha kompyuterlar uchun bekor qilinsinmi?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Dasturlash sozlamalariga ruxsat berilsinmi?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu sozlamalar faqat dasturlash maqsadlariga mo‘ljallangan. Shuning uchun, ular qurilmangizga va undagi ilovalariga shikast yetkazib, noto‘g‘ri ishlashiga sabab bo‘lishi mumkin."</string>
