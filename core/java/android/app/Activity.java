@@ -146,6 +146,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3646,6 +3647,22 @@ public class Activity extends ContextThemeWrapper
         return false;
     }
 
+    private static final class RequestFinishCallback extends IRequestFinishCallback.Stub {
+        private final WeakReference<Activity> mActivityRef;
+
+        RequestFinishCallback(WeakReference<Activity> activityRef) {
+            mActivityRef = activityRef;
+        }
+
+        @Override
+        public void requestFinish() {
+            Activity activity = mActivityRef.get();
+            if (activity != null) {
+                activity.mHandler.post(activity::finishAfterTransition);
+            }
+        }
+    }
+
     /**
      * Called when the activity has detected the user's press of the back
      * key.  The default implementation simply finishes the current activity,
@@ -3671,11 +3688,7 @@ public class Activity extends ContextThemeWrapper
             // while at the root of the task. This call allows ActivityTaskManager
             // to intercept or defer finishing.
             ActivityTaskManager.getService().onBackPressedOnTaskRoot(mToken,
-                    new IRequestFinishCallback.Stub() {
-                        public void requestFinish() {
-                            mHandler.post(() -> finishAfterTransition());
-                        }
-                    });
+                    new RequestFinishCallback(new WeakReference<>(this)));
         } catch (RemoteException e) {
             finishAfterTransition();
         }
