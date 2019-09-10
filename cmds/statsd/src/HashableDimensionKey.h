@@ -120,6 +120,13 @@ class MetricDimensionKey {
 android::hash_t hashDimension(const HashableDimensionKey& key);
 
 /**
+ * Returns true if a FieldValue field matches the matcher field.
+ * The value of the FieldValue is output.
+ */
+bool filterValues(const Matcher& matcherField, const std::vector<FieldValue>& values,
+                  Value* output);
+
+/**
  * Creating HashableDimensionKeys from FieldValues using matcher.
  *
  * This function may make modifications to the Field if the matcher has Position=FIRST,LAST or ALL
