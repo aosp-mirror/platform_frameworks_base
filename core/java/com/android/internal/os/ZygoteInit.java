@@ -460,7 +460,7 @@ public class ZygoteInit {
         ZygoteHooks.gcAndFinalize();
     }
 
-    private static boolean profileSystemServer() {
+    private static boolean shouldProfileSystemServer() {
         boolean defaultValue = SystemProperties.getBoolean("dalvik.vm.profilesystemserver",
                 /*default=*/ false);
         // Can't use DeviceConfig since it's not initialized at this point.
@@ -492,7 +492,7 @@ public class ZygoteInit {
             }
             // Capturing profiles is only supported for debug or eng builds since selinux normally
             // prevents it.
-            if (profileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
+            if (shouldProfileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
                 try {
                     Log.d(TAG, "Preparing system server profile");
                     prepareSystemServerProfile(systemServerClasspath);
@@ -765,8 +765,7 @@ public class ZygoteInit {
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
-            if (profileSystemServer()) {
-
+            if (shouldProfileSystemServer()) {
                 parsedArgs.mRuntimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
             }
 
