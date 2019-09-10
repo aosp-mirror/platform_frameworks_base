@@ -55,6 +55,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -64,6 +65,8 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderDeathDispatcher;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -88,6 +91,14 @@ public final class ContentService extends IContentService.Stub {
 
     /** Do a WTF if a single observer is registered more than this times. */
     private static final int TOO_MANY_OBSERVERS_THRESHOLD = 1000;
+
+    /**
+     * Delay to apply to content change notifications dispatched to apps running
+     * in the background. This is used to help prevent stampeding when the user
+     * is performing CPU/RAM intensive foreground tasks, such as when capturing
+     * burst photos.
+     */
+    private static final long BACKGROUND_OBSERVER_DELAY = 10 * DateUtils.SECOND_IN_MILLIS;
 
     public static class Lifecycle extends SystemService {
         private ContentService mService;
@@ -426,28 +437,15 @@ public final class ContentService extends IContentService.Stub {
                         flags, userHandle, calls);
             }
             final int numCalls = calls.size();
-            for (int i=0; i<numCalls; i++) {
-                ObserverCall oc = calls.get(i);
-                try {
-                    oc.mObserver.onChange(oc.mSelfChange, uri, userHandle);
-                    if (DEBUG) Slog.d(TAG, "Notified " + oc.mObserver + " of " + "update at "
-                            + uri);
-                } catch (RemoteException ex) {
-                    synchronized (mRootNode) {
-                        Log.w(TAG, "Found dead observer, removing");
-                        IBinder binder = oc.mObserver.asBinder();
-                        final ArrayList<ObserverNode.ObserverEntry> list
-                                = oc.mNode.mObservers;
-                        int numList = list.size();
-                        for (int j=0; j<numList; j++) {
-                            ObserverNode.ObserverEntry oe = list.get(j);
-                            if (oe.observer.asBinder() == binder) {
-                                list.remove(j);
-                                j--;
-                                numList--;
-                            }
-                        }
-                    }
+            for (int i = 0; i < numCalls; i++) {
+                // Immediately dispatch notifications to foreground apps that
+                // are important to the user; all other background observers are
+                // delayed to avoid stampeding
+                final ObserverCall oc = calls.get(i);
+                if (oc.mProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                    oc.run();
+                } else {
+                    BackgroundThread.getHandler().postDelayed(oc, BACKGROUND_OBSERVER_DELAY);
                 }
             }
             if ((flags&ContentResolver.NOTIFY_SYNC_TO_NETWORK) != 0) {
@@ -486,23 +484,33 @@ public final class ContentService extends IContentService.Stub {
                 UserHandle.getCallingUserId(), Build.VERSION_CODES.CUR_DEVELOPMENT, callingPackage);
     }
 
-    /**
-     * Hide this class since it is not part of api,
-     * but current unittest framework requires it to be public
-     * @hide
-     *
-     */
-    public static final class ObserverCall {
-        final ObserverNode mNode;
+    /** {@hide} */
+    @VisibleForTesting
+    public static final class ObserverCall implements Runnable {
         final IContentObserver mObserver;
         final boolean mSelfChange;
-        final int mObserverUserId;
+        final Uri mUri;
+        final int mUserId;
+        final int mProcState;
 
-        ObserverCall(ObserverNode node, IContentObserver observer, boolean selfChange, int observerUserId) {
-            mNode = node;
+        ObserverCall(IContentObserver observer, boolean selfChange, Uri uri, int userId,
+                int procState) {
             mObserver = observer;
             mSelfChange = selfChange;
-            mObserverUserId = observerUserId;
+            mUri = uri;
+            mUserId = userId;
+            mProcState = procState;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mObserver.onChange(mSelfChange, mUri, mUserId);
+                if (DEBUG) Slog.d(TAG, "Notified " + mObserver + " of update at " + mUri);
+            } catch (RemoteException ignored) {
+                // We already have a death observer that will clean up if the
+                // remote process dies
+            }
         }
     }
 
@@ -1345,11 +1353,8 @@ public final class ContentService extends IContentService.Stub {
         return ContentResolver.SYNC_EXEMPTION_NONE;
     }
 
-    /**
-     * Hide this class since it is not part of api,
-     * but current unittest framework requires it to be public
-     * @hide
-     */
+    /** {@hide} */
+    @VisibleForTesting
     public static final class ObserverNode {
         private class ObserverEntry implements IBinder.DeathRecipient {
             public final IContentObserver observer;
@@ -1546,7 +1551,7 @@ public final class ContentService extends IContentService.Stub {
             return false;
         }
 
-        private void collectMyObserversLocked(boolean leaf, IContentObserver observer,
+        private void collectMyObserversLocked(Uri uri, boolean leaf, IContentObserver observer,
                                               boolean observerWantsSelfNotifications, int flags,
                                               int targetUserHandle, ArrayList<ObserverCall> calls) {
             int N = mObservers.size();
@@ -1588,8 +1593,10 @@ public final class ContentService extends IContentService.Stub {
                     if (DEBUG) Slog.d(TAG, "Reporting to " + entry.observer + ": leaf=" + leaf
                             + " flags=" + Integer.toHexString(flags)
                             + " desc=" + entry.notifyForDescendants);
-                    calls.add(new ObserverCall(this, entry.observer, selfChange,
-                            UserHandle.getUserId(entry.uid)));
+                    final int procState = LocalServices.getService(ActivityManagerInternal.class)
+                            .getUidProcessState(entry.uid);
+                    calls.add(new ObserverCall(entry.observer, selfChange, uri,
+                            targetUserHandle, procState));
                 }
             }
         }
@@ -1605,14 +1612,14 @@ public final class ContentService extends IContentService.Stub {
             if (index >= segmentCount) {
                 // This is the leaf node, notify all observers
                 if (DEBUG) Slog.d(TAG, "Collecting leaf observers @ #" + index + ", node " + mName);
-                collectMyObserversLocked(true, observer, observerWantsSelfNotifications,
+                collectMyObserversLocked(uri, true, observer, observerWantsSelfNotifications,
                         flags, targetUserHandle, calls);
             } else if (index < segmentCount){
                 segment = getUriSegment(uri, index);
                 if (DEBUG) Slog.d(TAG, "Collecting non-leaf observers @ #" + index + " / "
                         + segment);
                 // Notify any observers at this level who are interested in descendants
-                collectMyObserversLocked(false, observer, observerWantsSelfNotifications,
+                collectMyObserversLocked(uri, false, observer, observerWantsSelfNotifications,
                         flags, targetUserHandle, calls);
             }
 

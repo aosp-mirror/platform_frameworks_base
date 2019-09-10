@@ -79,7 +79,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 /**
  * Since phone process can be restarted, this class provides a centralized place
@@ -849,10 +848,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                     }
                     if ((events & PhoneStateListener
-                            .LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE) != 0
-                            && TelephonyPermissions.checkReadPhoneStateOnAnyActiveSub(
-                                    r.context, r.callerPid, r.callerUid, r.callingPackage,
-                            "listen_active_data_subid_change")) {
+                            .LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE) != 0) {
                         try {
                             r.callback.onActiveDataSubIdChanged(mActiveDataSubId);
                         } catch (RemoteException ex) {
@@ -1829,23 +1825,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
         }
 
-        // Create a copy to prevent the IPC call while checking carrier privilege under the lock.
-        List<Record> copiedRecords;
-        synchronized (mRecords) {
-            copiedRecords = new ArrayList<>(mRecords);
-        }
         mActiveDataSubId = activeDataSubId;
-
-        // Filter the record that does not listen to this change or does not have the permission.
-        copiedRecords = copiedRecords.stream().filter(r -> r.matchPhoneStateListenerEvent(
-                PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE)
-                && TelephonyPermissions.checkReadPhoneStateOnAnyActiveSub(
-                        mContext, r.callerPid, r.callerUid, r.callingPackage,
-                "notifyActiveDataSubIdChanged")).collect(Collectors.toCollection(ArrayList::new));
-
         synchronized (mRecords) {
-            for (Record r : copiedRecords) {
-                if (mRecords.contains(r)) {
+            for (Record r : mRecords) {
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE)) {
                     try {
                         r.callback.onActiveDataSubIdChanged(activeDataSubId);
                     } catch (RemoteException ex) {

@@ -13,17 +13,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs the rollback test from a secondary user">
-    <option name="test-suite-tag" value="SecondaryUserRollbackTest" />
-    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
-        <option name="cleanup-apks" value="true" />
-        <option name="test-file-name" value="RollbackTest.apk" />
-    </target_preparer>
+<configuration description="Runs rollback tests for multiple users">
+    <option name="test-suite-tag" value="MultiUserRollbackTest" />
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command" value="pm uninstall com.android.cts.install.lib.testapp.A" />
-        <option name="run-command" value="pm uninstall com.android.cts.install.lib.testapp.B" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.HostTest" >
-        <option name="class" value="com.android.tests.rollback.host.SecondaryUserRollbackTest" />
+        <option name="class" value="com.android.tests.rollback.host.MultiUserRollbackTest" />
     </test>
 </configuration>

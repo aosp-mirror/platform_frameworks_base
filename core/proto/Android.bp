@@ -28,3 +28,13 @@ cc_library_static {
         "android/bluetooth/smp/enums.proto",
     ],
 }
+
+java_library_host {
+    name: "windowmanager-log-proto",
+    srcs: [
+        "android/server/windowmanagerlog.proto"
+    ],
+    proto: {
+        type: "full",
+    },
+}
