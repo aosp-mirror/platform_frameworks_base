@@ -609,6 +609,10 @@
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:process=":ui"
                 android:visibleToInstantApps="true">
+            <intent-filter>
+                <action android:name="android.intent.action.CHOOSER" />
+                <category android:name="android.intent.category.VOICE" />
+            </intent-filter>
         </activity>
 
         <!-- Doze with notifications, run in main sysui process for every user  -->
