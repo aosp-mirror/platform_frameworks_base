@@ -1071,15 +1071,10 @@ public abstract class BiometricServiceBase extends SystemService
                 }
             } else {
                 currentClient.stop(initiatedByClient);
-
-                // Only post the reset runnable for non-cleanup clients. Cleanup clients should
-                // never be forcibly stopped since they ensure synchronization between HAL and
-                // framework. Thus, we should instead just start the pending client once cleanup
-                // finishes instead of using the reset runnable.
-                mHandler.removeCallbacks(mResetClientState);
-                mHandler.postDelayed(mResetClientState, CANCEL_TIMEOUT_LIMIT);
             }
             mPendingClient = newClient;
+            mHandler.removeCallbacks(mResetClientState);
+            mHandler.postDelayed(mResetClientState, CANCEL_TIMEOUT_LIMIT);
         } else if (newClient != null) {
             // For BiometricPrompt clients, do not start until
             // <Biometric>Service#startPreparedClient is called. BiometricService waits until all
@@ -1258,7 +1253,6 @@ public abstract class BiometricServiceBase extends SystemService
         } else {
             clearEnumerateState();
             if (mPendingClient != null) {
-                Slog.d(getTag(), "Enumerate finished, starting pending client");
                 startClient(mPendingClient, false /* initiatedByClient */);
                 mPendingClient = null;
             }
