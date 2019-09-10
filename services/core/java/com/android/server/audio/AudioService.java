@@ -6441,10 +6441,11 @@ public class AudioService extends IAudioService.Stub
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);
-
         mPlaybackMonitor.dump(pw);
-
         mRecordMonitor.dump(pw);
+
+        pw.println("\nAudioDeviceBroker:");
+        mDeviceBroker.dump(pw, "  ");
 
         pw.println("\n");
         pw.println("\nEvent logs:");
