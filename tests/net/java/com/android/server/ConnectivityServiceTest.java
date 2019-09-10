@@ -5696,7 +5696,6 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    @FlakyTest(bugId = 140305678)
     public void testTcpBufferReset() throws Exception {
         final String testTcpBufferSizes = "1,2,3,4,5,6";
         final NetworkRequest networkRequest = new NetworkRequest.Builder()
