@@ -567,6 +567,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * match one of the supported input sizes for {@link android.graphics.ImageFormat#PRIVATE}
      * format. Otherwise, creating a reprocessable capture session will fail.</p>
      *
+     * <p>Starting from API level 30, recreating a reprocessable capture session will flush all the
+     * queued but not yet processed buffers from the input surface.</p>
+     *
      * <p>The guaranteed stream configurations listed in
      * {@link #createCaptureSession createCaptureSession} are also guaranteed to work for
      * {@link #createReprocessableCaptureSession createReprocessableCaptureSession}. In addition,
