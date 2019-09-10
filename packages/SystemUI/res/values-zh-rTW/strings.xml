@@ -264,8 +264,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"工作模式已開啟。"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"工作模式已關閉。"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"工作模式已開啟。"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Data Saver 已關閉。"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Data Saver 已開啟。"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"數據節省模式已關閉。"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"數據節省模式已開啟。"</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"已關閉感應器隱私設定。"</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"已開啟感應器隱私設定。"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"螢幕亮度"</string>
@@ -459,8 +459,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不要再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
-    <string name="notification_section_header_gentle" msgid="4372438504154095677">"無聲通知"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"清除所有無聲通知"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"靜音通知"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"清除所有靜音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"「零打擾」模式已將通知設為暫停"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
@@ -645,7 +645,7 @@
     <string name="inline_block_button" msgid="8735843688021655065">"封鎖"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"繼續顯示"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
-    <string name="inline_silent_button_silent" msgid="5315879183296940969">"無聲"</string>
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"靜音"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"繼續顯示通知但不發出音效"</string>
     <string name="inline_silent_button_alert" msgid="6008435419895088034">"快訊"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"繼續顯示通知"</string>
@@ -747,8 +747,8 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"已與耳機連線"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"已與耳機連線"</string>
     <string name="data_saver" msgid="5037565123367048522">"數據節省模式"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Data Saver 已開啟"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Data Saver 已關閉"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"數據節省模式已開啟"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"數據節省模式已關閉"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"開啟"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"關閉"</string>
     <string name="nav_bar" msgid="1993221402773877607">"導覽列"</string>

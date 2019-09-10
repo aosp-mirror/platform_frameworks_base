@@ -647,7 +647,7 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Kis méret"</string>
     <string name="inline_silent_button_silent" msgid="5315879183296940969">"Néma"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Néma megjelenítés"</string>
-    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Értesítések"</string>
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Figyelemfelkeltő"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Értesítések folytatása"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Az értesítések kikapcsolása"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Továbbra is megjelenjenek az alkalmazás értesítései?"</string>
