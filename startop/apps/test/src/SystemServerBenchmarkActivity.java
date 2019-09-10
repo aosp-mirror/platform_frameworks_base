@@ -35,7 +35,8 @@ import android.widget.TextView;
 import java.util.Arrays;
 
 class Benchmark {
-    public static final int NUM_ITERATIONS = 1000;
+    // Time limit to run benchmarks in seconds
+    public static final int TIME_LIMIT = 5;
 
     public Benchmark(ViewGroup parent, CharSequence name, Runnable thunk) {
         Context context = parent.getContext();
@@ -57,28 +58,25 @@ class Benchmark {
 
                 @Override
                 protected Object doInBackground(Object... _args) {
-                    long[] results = new long[NUM_ITERATIONS];
+                    long startTime = System.nanoTime();
+                    int count = 0;
 
                     // Run benchmark
-                    for (int i = 0; i < results.length; i++) {
-                        results[i] = -System.nanoTime();
+                    while (true) {
+                        long elapsed = -System.nanoTime();
                         thunk.run();
-                        results[i] += System.nanoTime();
+                        elapsed += System.nanoTime();
+
+                        count++;
+                        double elapsedVariance = (double) elapsed - resultMean;
+                        resultMean += elapsedVariance / count;
+                        resultStdev += elapsedVariance * ((double) elapsed - resultMean);
+
+                        if (System.nanoTime() - startTime > TIME_LIMIT * 1e9) {
+                            break;
+                        }
                     }
-
-                    // Compute mean
-                    long sum = Arrays.stream(results).sum();
-                    resultMean = (double) sum / results.length;
-
-                    // Compute standard deviation
-                    double variance = 0;
-                    for (long i : results) {
-                        double t = (double) i - resultMean;
-                        variance += t * t;
-                    }
-                    variance /= results.length - 1;
-
-                    resultStdev = Math.sqrt(variance);
+                    resultStdev = Math.sqrt(resultStdev / (count - 1));
 
                     return null;
                 }
