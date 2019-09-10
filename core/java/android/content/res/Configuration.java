@@ -23,7 +23,6 @@ import static android.content.ConfigurationProto.HARD_KEYBOARD_HIDDEN;
 import static android.content.ConfigurationProto.KEYBOARD;
 import static android.content.ConfigurationProto.KEYBOARD_HIDDEN;
 import static android.content.ConfigurationProto.LOCALES;
-import static android.content.ConfigurationProto.LOCALE_LIST;
 import static android.content.ConfigurationProto.MCC;
 import static android.content.ConfigurationProto.MNC;
 import static android.content.ConfigurationProto.NAVIGATION;
@@ -1112,7 +1111,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             protoOutputStream.write(MCC, mcc);
             protoOutputStream.write(MNC, mnc);
             if (mLocaleList != null) {
-                protoOutputStream.write(LOCALE_LIST, mLocaleList.toLanguageTags());
+                mLocaleList.writeToProto(protoOutputStream, LOCALES);
             }
             protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
             protoOutputStream.write(COLOR_MODE, colorMode);
@@ -1283,14 +1282,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         break;
                     case (int) WINDOW_CONFIGURATION:
                         windowConfiguration.readFromProto(protoInputStream, WINDOW_CONFIGURATION);
-                        break;
-                    case (int) LOCALE_LIST:
-                        try {
-                            setLocales(LocaleList.forLanguageTags(protoInputStream.readString(
-                                    LOCALE_LIST)));
-                        } catch (Exception e) {
-                            Slog.e(TAG, "error parsing locale list in configuration.", e);
-                        }
                         break;
                 }
             }
