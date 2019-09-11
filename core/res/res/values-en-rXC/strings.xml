@@ -95,7 +95,6 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎Voicemail messages‎‏‎‎‏‎"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‏‏‎‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‎‏‏‎‏‎‎‎‏‎Wi-Fi calling‎‏‎‎‏‎"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‏‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‎‏‏‎‏‎‏‎‏‎‎‎SIM status‎‏‎‎‏‎"</string>
-    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‏‏‎High priority SIM status‎‏‎‎‏‎"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‎‎‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎Peer requested TTY Mode FULL‎‏‎‎‏‎"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‎‎‎‎‎‎‎‎‎‏‎‏‎‏‎‏‎‏‎‎‎‎‎‏‎‎‏‏‏‎‎‎‏‏‏‎‎‏‎‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‎Peer requested TTY Mode HCO‎‏‎‎‏‎"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎Peer requested TTY Mode VCO‎‏‎‎‏‎"</string>
@@ -1255,10 +1254,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‏‏‏‎‏‏‏‏‎‏‎‏‎‏‏‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‏‎‏‏‎‎‏‏‎‎‏‏‎‎‏‏‎‏‎‏‎‏‎Tap to see all networks‎‏‎‎‏‎"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‏‏‏‏‏‎‎‎‏‎‏‏‎‏‏‎‎‎‏‏‏‏‏‎‎‎‏‏‏‏‎‏‎‎‏‏‏‏‎‏‏‎‎‎‎‏‎‏‎‎‎Connect‎‏‎‎‏‎"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‏‎‏‏‎‎‎‏‏‏‎‏‎‎‎‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎All networks‎‏‎‎‏‎"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‎‎‎‏‎‏‎‎‏‎‏‏‎‏‏‏‏‏‎‏‏‏‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‎‎‎‏‎Allow suggested Wi‑Fi networks?‎‏‎‎‏‎"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‎‏‎‏‎‏‏‎‎‎‎‏‎‎‎‎‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‏‏‎‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="NAME">%s</xliff:g>‎‏‎‎‏‏‏‎ suggested networks. Device may connect automatically.‎‏‎‎‏‎"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‏‎‏‎‏‏‎‏‎‏‎‎‏‏‏‎‏‎‎‏‏‎‏‎Allow‎‏‎‎‏‎"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‏‎‎‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‎‎‎‏‎‎‎‎‏‏‎‎‎‎‏‏‎‎‎‎‎‏‎‏‎‎‏‏‏‎‎‎‏‎‏‎‎‎No thanks‎‏‎‎‏‎"</string>
+    <string name="wifi_suggestion_title" msgid="9099832833531486167">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‎‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‏‎‏‎‏‏‏‎Connect to Wi‑Fi networks?‎‏‎‎‏‎"</string>
+    <string name="wifi_suggestion_content" msgid="5883181205841582873">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‎‏‎‏‎‏‎‎‎‎‏‎‎‎‏‎‎‎‏‎‏‏‏‎‎‎‏‏‎‏‏‏‎‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‏‎‎‏‎Suggested by ‎‏‎‎‏‏‎<xliff:g id="NAME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‎‏‎‏‎‎‏‏‎‎‏‏‎‏‏‏‏‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‎‏‎‏‎Yes‎‏‎‎‏‎"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‏‏‏‎‎‏‏‏‎‎‏‏‏‏‏‎‎‎‎‎‏‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‎‏‎No‎‏‎‎‏‎"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎‏‏‎‎‏‏‎‎‎‎‏‏‎‏‏‎‏‏‏‎‎‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‎‏‎‎‎‏‎‎‎‏‏‏‎‏‎‎‎Wi‑Fi will turn on automatically‎‏‎‎‏‎"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‏‏‏‏‎‎‏‎‎‎‎‎‎‏‏‎‎‏‏‏‏‏‎‎‏‏‎‏‏‎‎‎‏‎‏‏‎‎‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‎When you\'re near a high quality saved network‎‏‎‎‏‎"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‎‏‏‎‏‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‏‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‏‎‎‎Don\'t turn back on‎‏‎‎‏‎"</string>

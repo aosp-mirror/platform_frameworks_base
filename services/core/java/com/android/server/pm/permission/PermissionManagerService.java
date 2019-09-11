@@ -967,10 +967,12 @@ public class PermissionManagerService {
                         // or has updated its target SDK and AR is no longer implicit to it.
                         // This is a compatibility workaround for apps when AR permission was
                         // split in Q.
-                        int numSplitPerms = PermissionManager.SPLIT_PERMISSIONS.size();
+                        final List<PermissionManager.SplitPermissionInfo> permissionList =
+                                getSplitPermissions();
+                        int numSplitPerms = permissionList.size();
                         for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
                             PermissionManager.SplitPermissionInfo sp =
-                                    PermissionManager.SPLIT_PERMISSIONS.get(splitPermNum);
+                                    permissionList.get(splitPermNum);
                             String splitPermName = sp.getSplitPermission();
                             if (sp.getNewPermissions().contains(permName)
                                     && origPermissions.hasInstallPermission(splitPermName)) {
@@ -1537,10 +1539,10 @@ public class PermissionManagerService {
         String pkgName = pkg.packageName;
         ArrayMap<String, ArraySet<String>> newToSplitPerms = new ArrayMap<>();
 
-        int numSplitPerms = PermissionManager.SPLIT_PERMISSIONS.size();
+        final List<PermissionManager.SplitPermissionInfo> permissionList = getSplitPermissions();
+        int numSplitPerms = permissionList.size();
         for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-            PermissionManager.SplitPermissionInfo spi =
-                    PermissionManager.SPLIT_PERMISSIONS.get(splitPermNum);
+            PermissionManager.SplitPermissionInfo spi = permissionList.get(splitPermNum);
 
             List<String> newPerms = spi.getNewPermissions();
             int numNewPerms = newPerms.size();
@@ -1606,6 +1608,10 @@ public class PermissionManagerService {
         }
 
         return updatedUserIds;
+    }
+
+    private List<PermissionManager.SplitPermissionInfo> getSplitPermissions() {
+        return SystemConfig.getInstance().getSplitPermissions();
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {

@@ -30,7 +30,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Sin título&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(No hay número de teléfono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Desconocido"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correo de voz"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Buzón de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión o código incorrecto de MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"La operación está limitada a números de marcación fija."</string>
@@ -941,7 +941,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los favoritos del navegador almacenados en el dispositivo. La aplicación puede utilizar este permiso para borrar o modificar los datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"programar una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que la aplicación establezca una alarma en una aplicación de alarma instalada. Es posible que algunas aplicaciones de alarma no incluyan esta función."</string>
-    <string name="permlab_addVoicemail" msgid="5525660026090959044">"agregar correo de voz"</string>
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"agregar buzón de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite que la aplicación agregue mensajes a la bandeja de entrada de tu buzón de voz."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modificar los permisos de ubicación geográfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite que la aplicación modifique los permisos de ubicación geográfica del navegador. Las aplicaciones maliciosas pueden utilizar esto para permitir el envío de información de ubicación a sitios web arbitrarios."</string>

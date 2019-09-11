@@ -599,7 +599,7 @@
     <string name="status_bar_work" msgid="6022553324802866373">"Perfil de traballo"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Modo avión"</string>
     <string name="add_tile" msgid="2995389510240786221">"Engade un atallo"</string>
-    <string name="broadcast_tile" msgid="3894036511763289383">"Atallo de emisión"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Atallo de difusión"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g> a menos que desactives esta opción antes desa hora"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"ás <xliff:g id="WHEN">%1$s</xliff:g>"</string>
