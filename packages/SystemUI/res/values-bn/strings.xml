@@ -286,11 +286,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"স্ক্রিন সেভার"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ইথারনেট"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"আরও বিকল্পের জন্য আইকনগুলি টাচ করে ধরে থাকুন"</string>
-<<<<<<< HEAD
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"বিরক্ত করবেন না"</string>
-=======
-    <string name="quick_settings_dnd_label" msgid="7112342227663678739">"বিরক্ত করবেন না"</string>
->>>>>>> fetch_qt-r1-bubbles-dev_5835883
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"শুধুমাত্র অগ্রাধিকার"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"শুধুমাত্র অ্যালার্মগুলি"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"একদম নিরব"</string>
@@ -446,11 +442,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"আর দেখাবেন না"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সবকিছু সাফ করুন"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"পরিচালনা করুন"</string>
-<<<<<<< HEAD
-=======
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"নীরব বিজ্ঞপ্তি"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"সব নীরব বিজ্ঞপ্তি মুছুন"</string>
->>>>>>> fetch_qt-r1-bubbles-dev_5835883
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'বিরক্ত করবেন না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"এখন শুরু করুন"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো বিজ্ঞপ্তি নেই"</string>
@@ -712,15 +705,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"ক্যালেন্ডার"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"ভলিউম নিয়ন্ত্রণ সহ দেখান"</string>
-<<<<<<< HEAD
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"বিরক্ত করবেন না"</string>
-    <string name="volume_dnd_silent" msgid="4363882330723050727">"ভলিউম বোতামের শর্টকাট"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"ভলিউম বাড়ানোর মাধ্যেমে \'বিরক্ত করবেন না\' থেকে বেরিয়ে আসুন"</string>
-=======
     <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"বিরক্ত করবেন না"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"ভলিউম বোতামের শর্টকাট"</string>
     <string name="volume_up_silent" msgid="7545869833038212815">"ভলিউম বাড়িয়ে \'বিরক্ত করবেন না\' মোড থেকে বেরিয়ে আসুন"</string>
->>>>>>> fetch_qt-r1-bubbles-dev_5835883
     <string name="battery" msgid="7498329822413202973">"ব্যাটারি"</string>
     <string name="clock" msgid="7416090374234785905">"ঘড়ি"</string>
     <string name="headset" msgid="4534219457597457353">"হেডসেট"</string>
