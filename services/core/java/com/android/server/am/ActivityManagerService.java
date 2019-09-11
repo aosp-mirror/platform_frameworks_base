@@ -14994,7 +14994,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final int uid = getUidFromIntent(intent);
                             if (uid >= 0) {
                                 mBatteryStatsService.removeUid(uid);
-                                mAppOpsService.uidRemoved(uid);
+                                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                                    mAppOpsService.resetAllModes(UserHandle.getUserId(uid),
+                                            intent.getData().getSchemeSpecificPart());
+                                } else {
+                                    mAppOpsService.uidRemoved(uid);
+                                }
                             }
                             break;
                         case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
