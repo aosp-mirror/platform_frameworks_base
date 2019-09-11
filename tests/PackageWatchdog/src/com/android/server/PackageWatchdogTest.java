@@ -702,6 +702,69 @@ public class PackageWatchdogTest {
         assertThat(observer.mMitigatedPackages).containsExactly(APP_A);
     }
 
+    /** Test default values are used when device property is invalid. */
+    @Test
+    public void testInvalidConfig_watchdogTriggerFailureCount() {
+        adoptShellPermissions(
+                Manifest.permission.WRITE_DEVICE_CONFIG,
+                Manifest.permission.READ_DEVICE_CONFIG);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(-1), /*makeDefault*/false);
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        // Fail APP_A below the threshold which should not trigger package failures
+        for (int i = 0; i < PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT - 1; i++) {
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        }
+        mTestLooper.dispatchAll();
+        assertThat(observer.mHealthCheckFailedPackages).isEmpty();
+
+        // One more to trigger the package failure
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+        assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
+    }
+
+    /** Test default values are used when device property is invalid. */
+    @Test
+    public void testInvalidConfig_watchdogTriggerDurationMillis() {
+        adoptShellPermissions(
+                Manifest.permission.WRITE_DEVICE_CONFIG,
+                Manifest.permission.READ_DEVICE_CONFIG);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(2), /*makeDefault*/false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_DURATION_MILLIS,
+                Integer.toString(-1), /*makeDefault*/false);
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS + 1);
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // We shouldn't receive APP_A since the interval of 2 failures is greater than
+        // DEFAULT_TRIGGER_FAILURE_DURATION_MS.
+        assertThat(observer.mHealthCheckFailedPackages).isEmpty();
+
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS - 1);
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // We should receive APP_B since the interval of 2 failures is less than
+        // DEFAULT_TRIGGER_FAILURE_DURATION_MS.
+        assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_B);
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
