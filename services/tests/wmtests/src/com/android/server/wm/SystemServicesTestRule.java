@@ -74,6 +74,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.appop.AppOpsService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.input.InputManagerService;
+import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -100,6 +101,7 @@ public class SystemServicesTestRule implements TestRule {
     static int sNextTaskId = 100;
 
     private final AtomicBoolean mCurrentMessagesProcessed = new AtomicBoolean(false);
+    private static final int[] TEST_USER_PROFILE_IDS = {};
 
     private Context mContext;
     private StaticMockitoSession mMockitoSession;
@@ -423,6 +425,11 @@ public class SystemServicesTestRule implements TestRule {
             // Make sure permission checks aren't overridden.
             doReturn(AppOpsManager.MODE_DEFAULT)
                     .when(aos).noteOperation(anyInt(), anyInt(), anyString());
+
+            // UserManagerService
+            final UserManagerService ums = mock(UserManagerService.class);
+            doReturn(ums).when(this).getUserManager();
+            doReturn(TEST_USER_PROFILE_IDS).when(ums).getProfileIds(anyInt(), eq(true));
 
             setUsageStatsManager(LocalServices.getService(UsageStatsManagerInternal.class));
             ams.mActivityTaskManager = this;
