@@ -50,12 +50,12 @@ public class ForegroundServiceNotificationListener {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
-                addNotification(entry.notification, entry.importance);
+                addNotification(entry.notification, entry.getImportance());
             }
 
             @Override
             public void onPostEntryUpdated(NotificationEntry entry) {
-                updateNotification(entry.notification, entry.importance);
+                updateNotification(entry.notification, entry.getImportance());
             }
 
             @Override

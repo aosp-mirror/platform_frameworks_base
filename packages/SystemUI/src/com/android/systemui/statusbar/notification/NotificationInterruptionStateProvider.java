@@ -169,7 +169,7 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (!entry.canBubble) {
+        if (!entry.canBubble()) {
             if (DEBUG) {
                 Log.d(TAG, "No bubble up: not allowed to bubble: " + sbn.getKey());
             }
@@ -244,7 +244,7 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
+        if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
             if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: unimportant notification: " + sbn.getKey());
             }
@@ -307,7 +307,7 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (entry.importance < NotificationManager.IMPORTANCE_DEFAULT) {
+        if (entry.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
             if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: not important enough: " + sbn.getKey());
             }

@@ -511,7 +511,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     void updateBubble(NotificationEntry notif, boolean suppressFlyout) {
         // If this is an interruptive notif, mark that it's interrupted
-        if (notif.importance >= NotificationManager.IMPORTANCE_HIGH) {
+        if (notif.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
             notif.setInterruption();
         }
         mBubbleData.notificationEntryUpdated(notif, suppressFlyout);

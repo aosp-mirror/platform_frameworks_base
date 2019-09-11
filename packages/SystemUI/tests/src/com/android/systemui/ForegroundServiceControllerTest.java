@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -397,14 +398,18 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     private void entryAdded(StatusBarNotification notification, int importance) {
-        NotificationEntry entry = NotificationEntry.buildForTest(notification);
-        entry.importance = importance;
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(notification)
+                .setImportance(importance)
+                .build();
         mEntryListener.onPendingEntryAdded(entry);
     }
 
     private void entryUpdated(StatusBarNotification notification, int importance) {
-        NotificationEntry entry = NotificationEntry.buildForTest(notification);
-        entry.importance = importance;
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(notification)
+                .setImportance(importance)
+                .build();
         mEntryListener.onPostEntryUpdated(entry);
     }
 }

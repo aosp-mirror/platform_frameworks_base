@@ -471,7 +471,7 @@ public class NotificationEntryManager implements
             NotificationUiAdjustment adjustment =
                     NotificationUiAdjustment.extractFromNotificationEntry(entry);
             oldAdjustments.put(entry.key, adjustment);
-            oldImportances.put(entry.key, entry.importance);
+            oldImportances.put(entry.key, entry.getImportance());
         }
 
         // Populate notification entries from the new rankings.

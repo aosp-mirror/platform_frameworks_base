@@ -110,7 +110,7 @@ public class NotificationFilter {
             return true;
         }
 
-        if (entry.suspended) {
+        if (entry.isSuspended()) {
             return true;
         }
 

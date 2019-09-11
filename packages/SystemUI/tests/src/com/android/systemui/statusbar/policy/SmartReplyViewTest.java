@@ -66,6 +66,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -470,7 +471,11 @@ public class SmartReplyViewTest extends SysuiTestCase {
                 new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
         SmartReplyView.SmartReplies smartReplies =
-                new SmartReplyView.SmartReplies(choices, input, pendingIntent, fromAssistant);
+                new SmartReplyView.SmartReplies(
+                        Arrays.asList(choices),
+                        input,
+                        pendingIntent,
+                        fromAssistant);
         return mView.inflateRepliesFromRemoteInput(smartReplies, mLogger, mEntry,
                 useDelayedOnClickListener);
     }
@@ -555,7 +560,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         // Add smart replies
         Button previous = null;
         SmartReplyView.SmartReplies smartReplies =
-                new SmartReplyView.SmartReplies(choices, null, null, false);
+                new SmartReplyView.SmartReplies(Arrays.asList(choices), null, null, false);
         for (int i = 0; i < choices.length; ++i) {
             Button current = SmartReplyView.inflateReplyButton(mView, mContext, i, smartReplies,
                     null /* SmartReplyController */, null /* NotificationEntry */,

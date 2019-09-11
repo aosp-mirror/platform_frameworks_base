@@ -214,7 +214,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                 // no-op here.
             }
         } else {
-            if (oldImportance != null && entry.importance != oldImportance) {
+            if (oldImportance != null && entry.getImportance() != oldImportance) {
                 if (entry.rowExists()) {
                     entry.getRow().onNotificationRankingUpdated();
                 }
@@ -228,7 +228,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             PackageManager pmUser,
             StatusBarNotification sbn,
             ExpandableNotificationRow row) {
-        row.setIsLowPriority(entry.ambient);
+        row.setIsLowPriority(entry.isAmbient());
 
         // Extract target SDK version.
         try {
@@ -248,7 +248,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         row.setOnActivatedListener(mPresenter);
 
         boolean useIncreasedCollapsedHeight =
-                mMessagingUtil.isImportantMessaging(sbn, entry.importance);
+                mMessagingUtil.isImportantMessaging(sbn, entry.getImportance());
         boolean useIncreasedHeadsUp = useIncreasedCollapsedHeight
                 && !mPresenter.isPresenterFullyCollapsed();
         row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);

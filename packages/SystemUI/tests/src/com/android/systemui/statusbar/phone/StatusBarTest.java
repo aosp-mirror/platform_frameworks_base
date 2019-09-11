@@ -51,9 +51,7 @@ import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
-import android.service.notification.StatusBarNotification;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -88,6 +86,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -417,10 +416,14 @@ public class StatusBarTest extends SysuiTestCase {
                 .setGroupSummary(true)
                 .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.importance = IMPORTANCE_HIGH;
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(IMPORTANCE_HIGH)
+                .build();
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
@@ -438,10 +441,14 @@ public class StatusBarTest extends SysuiTestCase {
                 .setGroupSummary(true)
                 .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.importance = IMPORTANCE_HIGH;
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(IMPORTANCE_HIGH)
+                .build();
 
         assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
@@ -455,11 +462,15 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
-        entry.importance = IMPORTANCE_HIGH;
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(IMPORTANCE_HIGH)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_PEEK)
+                .build();
 
         assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
@@ -473,10 +484,14 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.importance = IMPORTANCE_HIGH;
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(IMPORTANCE_HIGH)
+                .build();
 
         assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
     }
