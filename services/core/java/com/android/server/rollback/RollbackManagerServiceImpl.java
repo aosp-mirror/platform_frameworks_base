@@ -578,12 +578,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 rollbacks = new ArrayList<>(mRollbacks);
             }
 
-            final Set<Rollback> changed =
-                    mAppDataRollbackHelper.commitPendingBackupAndRestoreForUser(userId, rollbacks);
-
-            for (Rollback rollback : changed) {
-                saveRollback(rollback);
+            for (int i = 0; i < rollbacks.size(); i++) {
+                Rollback rollback = rollbacks.get(i);
+                if (mAppDataRollbackHelper.commitPendingBackupAndRestoreForUser(userId, rollback)) {
+                    saveRollback(rollback);
+                }
             }
+
             latch.countDown();
         });
 
