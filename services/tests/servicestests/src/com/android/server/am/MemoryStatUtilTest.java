@@ -302,7 +302,7 @@ public class MemoryStatUtilTest {
 
     @Test
     public void testParseVmHWMFromProcfs_parsesCorrectValue() {
-        assertEquals(137668, parseVmHWMFromProcfs(PROC_STATUS_CONTENTS) / BYTES_IN_KILOBYTE);
+        assertEquals(137668, parseVmHWMFromProcfs(PROC_STATUS_CONTENTS));
     }
 
     @Test

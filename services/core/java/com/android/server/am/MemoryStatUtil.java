@@ -126,9 +126,9 @@ public final class MemoryStatUtil {
 
     /**
      * Reads RSS high-water mark of a process from procfs. Returns value of the VmHWM field in
-     * /proc/PID/status in bytes or 0 if not available.
+     * /proc/PID/status in kilobytes or 0 if not available.
      */
-    public static long readRssHighWaterMarkFromProcfs(int pid) {
+    public static int readRssHighWaterMarkFromProcfs(int pid) {
         final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
         return parseVmHWMFromProcfs(readFileContents(statusPath));
     }
@@ -236,17 +236,15 @@ public final class MemoryStatUtil {
     }
 
     /**
-     * Parses RSS high watermark out from the contents of the /proc/pid/status file in procfs. The
-     * returned value is in bytes.
+     * Parses RSS high-water mark out from the contents of the /proc/pid/status file in procfs. The
+     * returned value is in kilobytes.
      */
     @VisibleForTesting
-    static long parseVmHWMFromProcfs(String procStatusContents) {
+    static int parseVmHWMFromProcfs(String procStatusContents) {
         if (procStatusContents == null || procStatusContents.isEmpty()) {
             return 0;
         }
-        // Convert value read from /proc/pid/status from kilobytes to bytes.
-        return tryParseLong(RSS_HIGH_WATERMARK_IN_KILOBYTES, procStatusContents)
-                * BYTES_IN_KILOBYTE;
+        return (int) tryParseLong(RSS_HIGH_WATERMARK_IN_KILOBYTES, procStatusContents);
     }
 
 
