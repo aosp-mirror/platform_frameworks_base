@@ -18,7 +18,10 @@ package com.android.server.rollback;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -29,8 +32,12 @@ import java.util.ArrayList;
 
 
 /**
- * Information about a rollback available for a set of atomically installed
- * packages.
+ * Information about a rollback available for a set of atomically installed packages.
+ *
+ * <p>When accessing the state of a Rollback object, the caller is responsible for synchronization.
+ * The lock object provided by {@link #getLock} should be acquired when accessing any of the mutable
+ * state of a Rollback, including from the {@link RollbackInfo} and any of the
+ * {@link PackageRollbackInfo} objects held within.
  */
 class Rollback {
     @IntDef(flag = true, prefix = { "ROLLBACK_STATE_" }, value = {
@@ -58,8 +65,18 @@ class Rollback {
     static final int ROLLBACK_STATE_COMMITTED = 3;
 
     /**
-     * The rollback info for this rollback.
+     * The session ID for the staged session if this rollback data represents a staged session,
+     * {@code -1} otherwise.
      */
+    private final int mStagedSessionId;
+
+    /**
+     * The rollback info for this rollback.
+     *
+     * <p>Any access to this field that touches any mutable state should be synchronized on
+     * {@link #getLock}.
+     */
+    @GuardedBy("getLock")
     public final RollbackInfo info;
 
     /**
@@ -74,23 +91,20 @@ class Rollback {
      * The timestamp is not applicable for all rollback states, but we make
      * sure to keep it non-null to avoid potential errors there.
      */
+    @GuardedBy("mLock")
     private @NonNull Instant mTimestamp;
-
-    /**
-     * The session ID for the staged session if this rollback data represents a staged session,
-     * {@code -1} otherwise.
-     */
-    private final int mStagedSessionId;
 
     /**
      * The current state of the rollback.
      * ENABLING, AVAILABLE, or COMMITTED.
      */
+    @GuardedBy("mLock")
     private @RollbackState int mState;
 
     /**
      * The id of the post-reboot apk session for a staged install, if any.
      */
+    @GuardedBy("mLock")
     private int mApkSessionId = -1;
 
     /**
@@ -98,8 +112,15 @@ class Rollback {
      * for this rollback because it has just been committed but the rollback
      * has not yet been fully applied.
      */
-    // NOTE: All accesses to this field are from the RollbackManager handler thread.
+    @GuardedBy("mLock")
     private boolean mRestoreUserDataInProgress = false;
+
+    /**
+     * Lock object to guard all access to Rollback state.
+     *
+     * @see #getLock
+     */
+    private final Object mLock = new Object();
 
     /**
      * Constructs a new, empty Rollback instance.
@@ -135,8 +156,23 @@ class Rollback {
     }
 
     /**
+     * Returns a lock object that should be acquired before accessing any Rollback state from
+     * {@link RollbackManagerServiceImpl}.
+     *
+     * <p>Note that while holding this lock, the lock for {@link RollbackManagerServiceImpl} should
+     * not be acquired (but it is ok to acquire this lock while already holding the lock for that
+     * class).
+     */
+    // TODO(b/136241838): Move rollback functionality into this class and synchronize on the lock
+    // internally. Remove this method once this has been done for all cases.
+    Object getLock() {
+        return mLock;
+    }
+
+    /**
      * Whether the rollback is for rollback of a staged install.
      */
+    @GuardedBy("getLock")
     boolean isStaged() {
         return info.isStaged();
     }
@@ -151,6 +187,7 @@ class Rollback {
     /**
      * Returns the time when the upgrade occurred, for purposes of expiring rollback data.
      */
+    @GuardedBy("getLock")
     Instant getTimestamp() {
         return mTimestamp;
     }
@@ -158,6 +195,7 @@ class Rollback {
     /**
      * Sets the time at which upgrade occurred.
      */
+    @GuardedBy("getLock")
     void setTimestamp(Instant timestamp) {
         mTimestamp = timestamp;
     }
@@ -173,6 +211,7 @@ class Rollback {
     /**
      * Returns true if the rollback is in the ENABLING state.
      */
+    @GuardedBy("getLock")
     boolean isEnabling() {
         return mState == ROLLBACK_STATE_ENABLING;
     }
@@ -180,6 +219,7 @@ class Rollback {
     /**
      * Returns true if the rollback is in the AVAILABLE state.
      */
+    @GuardedBy("getLock")
     boolean isAvailable() {
         return mState == ROLLBACK_STATE_AVAILABLE;
     }
@@ -187,6 +227,7 @@ class Rollback {
     /**
      * Returns true if the rollback is in the COMMITTED state.
      */
+    @GuardedBy("getLock")
     boolean isCommitted() {
         return mState == ROLLBACK_STATE_COMMITTED;
     }
@@ -194,6 +235,7 @@ class Rollback {
     /**
      * Sets the state of the rollback to AVAILABLE.
      */
+    @GuardedBy("getLock")
     void setAvailable() {
         mState = ROLLBACK_STATE_AVAILABLE;
     }
@@ -201,6 +243,7 @@ class Rollback {
     /**
      * Sets the state of the rollback to COMMITTED.
      */
+    @GuardedBy("getLock")
     void setCommitted() {
         mState = ROLLBACK_STATE_COMMITTED;
     }
@@ -208,6 +251,7 @@ class Rollback {
     /**
      * Returns the id of the post-reboot apk session for a staged install, if any.
      */
+    @GuardedBy("getLock")
     int getApkSessionId() {
         return mApkSessionId;
     }
@@ -215,6 +259,7 @@ class Rollback {
     /**
      * Sets the id of the post-reboot apk session for a staged install.
      */
+    @GuardedBy("getLock")
     void setApkSessionId(int apkSessionId) {
         mApkSessionId = apkSessionId;
     }
@@ -223,6 +268,7 @@ class Rollback {
      * Returns true if we are expecting the package manager to call restoreUserData for this
      * rollback because it has just been committed but the rollback has not yet been fully applied.
      */
+    @GuardedBy("getLock")
     boolean isRestoreUserDataInProgress() {
         return mRestoreUserDataInProgress;
     }
@@ -231,6 +277,7 @@ class Rollback {
      * Sets whether we are expecting the package manager to call restoreUserData for this
      * rollback because it has just been committed but the rollback has not yet been fully applied.
      */
+    @GuardedBy("getLock")
     void setRestoreUserDataInProgress(boolean restoreUserDataInProgress) {
         mRestoreUserDataInProgress = restoreUserDataInProgress;
     }
@@ -254,6 +301,7 @@ class Rollback {
         throw new ParseException("Invalid rollback state: " + state, 0);
     }
 
+    @GuardedBy("getLock")
     String getStateAsString() {
         return rollbackStateToString(mState);
     }
