@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
+import android.content.pm.UserInfo.UserInfoFlag;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -2013,18 +2014,20 @@ public class UserManager {
 
     /**
      * Creates a user with the specified name and options. For non-admin users, default user
-     * restrictions are going to be applied.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * restrictions will be applied.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param name the user's name
-     * @param flags flags that identify the type of user and other properties.
+     * @param flags UserInfo flags that identify the type of user and other properties.
      * @see UserInfo
      *
-     * @return the UserInfo object for the created user, or null if the user could not be created.
+     * @return the UserInfo object for the created user, or {@code null} if the user could not be
+     * created.
      * @hide
      */
     @UnsupportedAppUsage
-    public UserInfo createUser(String name, int flags) {
+    public @Nullable UserInfo createUser(@Nullable String name, @UserInfoFlag int flags) {
         UserInfo user = null;
         try {
             user = mService.createUser(name, flags);
@@ -2038,6 +2041,36 @@ public class UserManager {
             throw re.rethrowFromSystemServer();
         }
         return user;
+    }
+
+    /**
+     * Pre-creates a user with the specified name and options. For non-admin users, default user
+     * restrictions will be applied.
+     *
+     * <p>This method can be used by OEMs to "warm" up the user creation by pre-creating some users
+     * at the first boot, so they when the "real" user is created (for example,
+     * by {@link #createUser(String, int)} or {@link #createGuest(Context, String)}), it takes
+     * less time.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param flags UserInfo flags that identify the type of user and other properties.
+     * @see UserInfo
+     *
+     * @return the UserInfo object for the created user, or {@code null} if the user could not be
+     * created.
+     *
+     * @throw {@link IllegalArgumentException} if {@code flags} contains
+     * {@link UserInfo#FLAG_MANAGED_PROFILE}.
+     *
+     * @hide
+     */
+    public @Nullable UserInfo preCreateUser(@UserInfoFlag int flags) {
+        try {
+            return mService.preCreateUser(flags);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
