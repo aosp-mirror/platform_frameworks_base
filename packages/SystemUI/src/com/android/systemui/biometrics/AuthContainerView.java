@@ -55,12 +55,12 @@ public class AuthContainerView extends LinearLayout
     private static final int ANIMATION_DURATION_SHOW_MS = 250;
     private static final int ANIMATION_DURATION_AWAY_MS = 350; // ms
 
-    private static final int STATE_UNKNOWN = 0;
-    private static final int STATE_ANIMATING_IN = 1;
-    private static final int STATE_PENDING_DISMISS = 2;
-    private static final int STATE_SHOWING = 3;
-    private static final int STATE_ANIMATING_OUT = 4;
-    private static final int STATE_GONE = 5;
+    static final int STATE_UNKNOWN = 0;
+    static final int STATE_ANIMATING_IN = 1;
+    static final int STATE_PENDING_DISMISS = 2;
+    static final int STATE_SHOWING = 3;
+    static final int STATE_ANIMATING_OUT = 4;
+    static final int STATE_GONE = 5;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATE_UNKNOWN, STATE_ANIMATING_IN, STATE_PENDING_DISMISS, STATE_SHOWING,
@@ -86,6 +86,9 @@ public class AuthContainerView extends LinearLayout
     @VisibleForTesting final WakefulnessLifecycle mWakefulnessLifecycle;
 
     private @ContainerState int mContainerState = STATE_UNKNOWN;
+
+    // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
+    @Nullable @AuthDialogCallback.DismissedReason Integer mPendingCallbackReason;
 
     static class Config {
         Context mContext;
@@ -327,6 +330,7 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onSaveState(@NonNull Bundle outState) {
+        outState.putInt(AuthDialog.KEY_CONTAINER_STATE, mContainerState);
         mBiometricView.onSaveState(outState);
     }
 
@@ -353,12 +357,15 @@ public class AuthContainerView extends LinearLayout
         }
         mContainerState = STATE_ANIMATING_OUT;
 
+        if (sendReason) {
+            mPendingCallbackReason = reason;
+        } else {
+            mPendingCallbackReason = null;
+        }
+
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
             removeWindowIfAttached();
-            if (sendReason) {
-                mConfig.mCallback.onDismissed(reason);
-            }
         };
 
         postOnAnimation(() -> {
@@ -384,7 +391,17 @@ public class AuthContainerView extends LinearLayout
         });
     }
 
+    private void sendPendingCallbackIfNotNull() {
+        Log.d(TAG, "pendingCallback: " + mPendingCallbackReason);
+        if (mPendingCallbackReason != null) {
+            mConfig.mCallback.onDismissed(mPendingCallbackReason);
+            mPendingCallbackReason = null;
+        }
+    }
+
     private void removeWindowIfAttached() {
+        sendPendingCallbackIfNotNull();
+
         if (mContainerState == STATE_GONE) {
             return;
         }

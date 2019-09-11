@@ -305,7 +305,12 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             mCurrentDialog.dismissWithoutCallback(false /* animate */);
             mCurrentDialog = null;
 
-            showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
+            // Only show the dialog if necessary. If it was animating out, the dialog is supposed
+            // to send its pending callback immediately.
+            if (savedState.getInt(AuthDialog.KEY_CONTAINER_STATE)
+                    != AuthContainerView.STATE_ANIMATING_OUT) {
+                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
+            }
         }
     }
 
