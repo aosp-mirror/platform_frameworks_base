@@ -8114,8 +8114,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void requestSystemServerHeapDump() {
-        if (!Build.IS_DEBUGGABLE) {
-            Slog.wtf(TAG, "requestSystemServerHeapDump called on a user build");
+        if (!Build.IS_ENG) {
+            Slog.wtf(TAG, "requestSystemServerHeapDump called on a non eng build.");
             return;
         }
         if (Binder.getCallingUid() != SYSTEM_UID) {
