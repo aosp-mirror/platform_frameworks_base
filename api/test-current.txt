@@ -2346,6 +2346,7 @@ package android.provider {
     field public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
     field public static final String LOW_POWER_MODE = "low_power";
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
+    field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
     field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
@@ -2369,7 +2370,7 @@ package android.provider {
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
-    field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
+    field @Deprecated public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";

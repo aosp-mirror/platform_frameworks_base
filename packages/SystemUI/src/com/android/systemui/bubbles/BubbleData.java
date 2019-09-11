@@ -16,6 +16,9 @@
 package com.android.systemui.bubbles;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_DATA;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import static java.util.stream.Collectors.toList;
 
@@ -33,11 +36,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,8 +55,7 @@ import javax.inject.Singleton;
 @Singleton
 public class BubbleData {
 
-    private static final String TAG = "BubbleData";
-    private static final boolean DEBUG = false;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleData" : TAG_BUBBLES;
 
     private static final int MAX_BUBBLES = 5;
 
@@ -123,6 +126,19 @@ public class BubbleData {
     @Nullable
     private Listener mListener;
 
+    /**
+     * We track groups with summaries that aren't visibly displayed but still kept around because
+     * the bubble(s) associated with the summary still exist.
+     *
+     * The summary must be kept around so that developers can cancel it (and hence the bubbles
+     * associated with it). This list is used to check if the summary should be hidden from the
+     * shade.
+     *
+     * Key: group key of the NotificationEntry
+     * Value: key of the NotificationEntry
+     */
+    private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
+
     @Inject
     public BubbleData(Context context) {
         mContext = context;
@@ -148,7 +164,7 @@ public class BubbleData {
     }
 
     public void setExpanded(boolean expanded) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setExpanded: " + expanded);
         }
         setExpandedInternal(expanded);
@@ -156,29 +172,30 @@ public class BubbleData {
     }
 
     public void setSelectedBubble(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setSelectedBubble: " + bubble);
         }
         setSelectedBubbleInternal(bubble);
         dispatchPendingChanges();
     }
 
-    public void notificationEntryUpdated(NotificationEntry entry) {
-        if (DEBUG) {
+    void notificationEntryUpdated(NotificationEntry entry, boolean suppressFlyout) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
         Bubble bubble = getBubbleWithKey(entry.key);
         if (bubble == null) {
             // Create a new bubble
-            bubble = new Bubble(mContext, entry, this::onBubbleBlocked);
+            bubble = new Bubble(mContext, entry);
+            bubble.setSuppressFlyout(suppressFlyout);
             doAdd(bubble);
             trim();
         } else {
             // Updates an existing bubble
-            bubble.setEntry(entry);
+            bubble.updateEntry(entry);
             doUpdate(bubble);
         }
-        if (shouldAutoExpand(entry)) {
+        if (bubble.shouldAutoExpand()) {
             setSelectedBubbleInternal(bubble);
             if (!mExpanded) {
                 setExpandedInternal(true);
@@ -186,11 +203,14 @@ public class BubbleData {
         } else if (mSelectedBubble == null) {
             setSelectedBubbleInternal(bubble);
         }
+        boolean isBubbleExpandedAndSelected = mExpanded && mSelectedBubble == bubble;
+        bubble.setShowInShadeWhenBubble(!isBubbleExpandedAndSelected);
+        bubble.setShowBubbleDot(!isBubbleExpandedAndSelected);
         dispatchPendingChanges();
     }
 
     public void notificationEntryRemoved(NotificationEntry entry, @DismissReason int reason) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryRemoved: entry=" + entry + " reason=" + reason);
         }
         doRemove(entry.key, reason);
@@ -222,8 +242,59 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
+    /**
+     * Adds a group key indicating that the summary for this group should be suppressed.
+     *
+     * @param groupKey the group key of the group whose summary should be suppressed.
+     * @param notifKey the notification entry key of that summary.
+     */
+    void addSummaryToSuppress(String groupKey, String notifKey) {
+        mSuppressedGroupKeys.put(groupKey, notifKey);
+    }
+
+    /**
+     * Retrieves the notif entry key of the summary associated with the provided group key.
+     *
+     * @param groupKey the group to look up
+     * @return the key for the {@link NotificationEntry} that is the summary of this group.
+     */
+    String getSummaryKey(String groupKey) {
+        return mSuppressedGroupKeys.get(groupKey);
+    }
+
+    /**
+     * Removes a group key indicating that summary for this group should no longer be suppressed.
+     */
+    void removeSuppressedSummary(String groupKey) {
+        mSuppressedGroupKeys.remove(groupKey);
+    }
+
+    /**
+     * Whether the summary for the provided group key is suppressed.
+     */
+    boolean isSummarySuppressed(String groupKey) {
+        return mSuppressedGroupKeys.containsKey(groupKey);
+    }
+
+    /**
+     * Retrieves any bubbles that are part of the notification group represented by the provided
+     * group key.
+     */
+    ArrayList<Bubble> getBubblesInGroup(@Nullable String groupKey) {
+        ArrayList<Bubble> bubbleChildren = new ArrayList<>();
+        if (groupKey == null) {
+            return bubbleChildren;
+        }
+        for (Bubble b : mBubbles) {
+            if (groupKey.equals(b.getEntry().notification.getGroupKey())) {
+                bubbleChildren.add(b);
+            }
+        }
+        return bubbleChildren;
+    }
+
     private void doAdd(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "doAdd: " + bubble);
         }
         int minInsertPoint = 0;
@@ -256,7 +327,7 @@ public class BubbleData {
     }
 
     private void doUpdate(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "doUpdate: " + bubble);
         }
         mStateChange.updatedBubble = bubble;
@@ -301,12 +372,11 @@ public class BubbleData {
             Bubble newSelected = mBubbles.get(newIndex);
             setSelectedBubbleInternal(newSelected);
         }
-        bubbleToRemove.setDismissed();
-        maybeSendDeleteIntent(reason, bubbleToRemove.entry);
+        maybeSendDeleteIntent(reason, bubbleToRemove.getEntry());
     }
 
     public void dismissAll(@DismissReason int reason) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "dismissAll: reason=" + reason);
         }
         if (mBubbles.isEmpty()) {
@@ -316,8 +386,7 @@ public class BubbleData {
         setSelectedBubbleInternal(null);
         while (!mBubbles.isEmpty()) {
             Bubble bubble = mBubbles.remove(0);
-            bubble.setDismissed();
-            maybeSendDeleteIntent(reason, bubble.entry);
+            maybeSendDeleteIntent(reason, bubble.getEntry());
             mStateChange.bubbleRemoved(bubble, reason);
         }
         dispatchPendingChanges();
@@ -336,7 +405,7 @@ public class BubbleData {
      * @param bubble the new selected bubble
      */
     private void setSelectedBubbleInternal(@Nullable Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setSelectedBubbleInternal: " + bubble);
         }
         if (Objects.equals(bubble, mSelectedBubble)) {
@@ -361,7 +430,7 @@ public class BubbleData {
      * @param shouldExpand the new requested state
      */
     private void setExpandedInternal(boolean shouldExpand) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setExpandedInternal: shouldExpand=" + shouldExpand);
         }
         if (mExpanded == shouldExpand) {
@@ -396,7 +465,7 @@ public class BubbleData {
                     // bubble remains on top.
                     mBubbles.remove(mSelectedBubble);
                     mBubbles.add(0, mSelectedBubble);
-                    packGroup(0);
+                    mStateChange.orderChanged |= packGroup(0);
                 }
             }
         }
@@ -466,7 +535,7 @@ public class BubbleData {
      * @return true if the position of any bubbles has changed as a result
      */
     private boolean packGroup(int position) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "packGroup: position=" + position);
         }
         Bubble groupStart = mBubbles.get(position);
@@ -495,7 +564,7 @@ public class BubbleData {
      * @return true if the position of any bubbles changed as a result
      */
     private boolean repackAll() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "repackAll()");
         }
         if (mBubbles.isEmpty()) {
@@ -550,28 +619,6 @@ public class BubbleData {
         }
     }
 
-    private void onBubbleBlocked(NotificationEntry entry) {
-        final String blockedGroupId = Bubble.groupId(entry);
-        int selectedIndex = mBubbles.indexOf(mSelectedBubble);
-        for (Iterator<Bubble> i = mBubbles.iterator(); i.hasNext(); ) {
-            Bubble bubble = i.next();
-            if (bubble.getGroupId().equals(blockedGroupId)) {
-                mStateChange.bubbleRemoved(bubble, BubbleController.DISMISS_BLOCKED);
-                i.remove();
-            }
-        }
-        if (mBubbles.isEmpty()) {
-            setExpandedInternal(false);
-            setSelectedBubbleInternal(null);
-        } else if (!mBubbles.contains(mSelectedBubble)) {
-            // choose a new one
-            int newIndex = Math.min(selectedIndex, mBubbles.size() - 1);
-            Bubble newSelected = mBubbles.get(newIndex);
-            setSelectedBubbleInternal(newSelected);
-        }
-        dispatchPendingChanges();
-    }
-
     private int indexForKey(String key) {
         for (int i = 0; i < mBubbles.size(); i++) {
             Bubble bubble = mBubbles.get(i);
@@ -610,9 +657,21 @@ public class BubbleData {
         mListener = listener;
     }
 
-    boolean shouldAutoExpand(NotificationEntry entry) {
-        Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
-        return metadata != null && metadata.getAutoExpandBubble()
-                && BubbleController.isForegroundApp(mContext, entry.notification.getPackageName());
+    /**
+     * Description of current bubble data state.
+     */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("selected: "); pw.println(mSelectedBubble != null
+                ? mSelectedBubble.getKey()
+                : "null");
+        pw.print("expanded: "); pw.println(mExpanded);
+        pw.print("count:    "); pw.println(mBubbles.size());
+        for (Bubble bubble : mBubbles) {
+            bubble.dump(fd, pw, args);
+        }
+        pw.print("summaryKeys: "); pw.println(mSuppressedGroupKeys.size());
+        for (String key : mSuppressedGroupKeys.keySet()) {
+            pw.println("   suppressing: " + key);
+        }
     }
 }

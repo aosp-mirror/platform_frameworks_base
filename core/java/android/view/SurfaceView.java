@@ -23,7 +23,6 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAY
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
-import android.content.res.Configuration;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -103,8 +102,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     private static final boolean DEBUG_POSITION = false;
 
     @UnsupportedAppUsage
-    final ArrayList<SurfaceHolder.Callback> mCallbacks
-            = new ArrayList<SurfaceHolder.Callback>();
+    final ArrayList<SurfaceHolder.Callback> mCallbacks = new ArrayList<>();
 
     final int[] mLocation = new int[2];
 
@@ -129,7 +127,6 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     SurfaceControl mBackgroundControl;
     final Object mSurfaceControlLock = new Object();
     final Rect mTmpRect = new Rect();
-    final Configuration mConfiguration = new Configuration();
 
     Paint mRoundedViewportPaint;
 
@@ -139,25 +136,16 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     boolean mIsCreating = false;
     private volatile boolean mRtHandlingPositionUpdates = false;
 
-    private final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener
-            = new ViewTreeObserver.OnScrollChangedListener() {
-                    @Override
-                    public void onScrollChanged() {
-                        updateSurface();
-                    }
-            };
+    private final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener =
+            this::updateSurface;
 
     @UnsupportedAppUsage
-    private final ViewTreeObserver.OnPreDrawListener mDrawListener =
-            new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    // reposition ourselves where the surface is
-                    mHaveFrame = getWidth() > 0 && getHeight() > 0;
-                    updateSurface();
-                    return true;
-                }
-            };
+    private final ViewTreeObserver.OnPreDrawListener mDrawListener = () -> {
+        // reposition ourselves where the surface is
+        mHaveFrame = getWidth() > 0 && getHeight() > 0;
+        updateSurface();
+        return true;
+    };
 
     boolean mRequestedVisible = false;
     boolean mWindowVisibility = false;
@@ -195,7 +183,6 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final Rect mSurfaceFrame = new Rect();
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
-    private Translator mTranslator;
 
     private boolean mGlobalListenersAdded;
     private boolean mAttachedToWindow;
@@ -702,9 +689,9 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             return;
         }
 
-        mTranslator = viewRoot.mTranslator;
-        if (mTranslator != null) {
-            mSurface.setCompatibilityTranslator(mTranslator);
+        final Translator translator = viewRoot.mTranslator;
+        if (translator != null) {
+            mSurface.setCompatibilityTranslator(translator);
         }
 
         int myWidth = mRequestedWidth;
@@ -748,8 +735,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 mScreenRect.top = mWindowSpaceTop;
                 mScreenRect.right = mWindowSpaceLeft + getWidth();
                 mScreenRect.bottom = mWindowSpaceTop + getHeight();
-                if (mTranslator != null) {
-                    mTranslator.translateRectInAppWindowToScreen(mScreenRect);
+                if (translator != null) {
+                    translator.translateRectInAppWindowToScreen(mScreenRect);
                 }
 
                 final Rect surfaceInsets = viewRoot.mWindowAttributes.surfaceInsets;
@@ -839,11 +826,11 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
                     mSurfaceFrame.left = 0;
                     mSurfaceFrame.top = 0;
-                    if (mTranslator == null) {
+                    if (translator == null) {
                         mSurfaceFrame.right = mSurfaceWidth;
                         mSurfaceFrame.bottom = mSurfaceHeight;
                     } else {
-                        float appInvertedScale = mTranslator.applicationInvertedScale;
+                        float appInvertedScale = translator.applicationInvertedScale;
                         mSurfaceFrame.right = (int) (mSurfaceWidth * appInvertedScale + 0.5f);
                         mSurfaceFrame.bottom = (int) (mSurfaceHeight * appInvertedScale + 0.5f);
                     }
@@ -861,7 +848,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 try {
                     redrawNeeded |= visible && !mDrawFinished;
 
-                    SurfaceHolder.Callback callbacks[] = null;
+                    SurfaceHolder.Callback[] callbacks = null;
 
                     final boolean surfaceChanged = creating;
                     if (mSurfaceCreated && (surfaceChanged || (!visible && visibleChanged))) {
@@ -976,8 +963,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 mScreenRect.set(mWindowSpaceLeft, mWindowSpaceTop,
                         mWindowSpaceLeft + mLocation[0], mWindowSpaceTop + mLocation[1]);
 
-                if (mTranslator != null) {
-                    mTranslator.translateRectInAppWindowToScreen(mScreenRect);
+                if (translator != null) {
+                    translator.translateRectInAppWindowToScreen(mScreenRect);
                 }
 
                 if (mSurfaceControl == null) {
@@ -1009,13 +996,11 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         }
 
         if (mDeferredDestroySurfaceControl != null) {
-            mDeferredDestroySurfaceControl.remove();
+            mTmpTransaction.remove(mDeferredDestroySurfaceControl).apply();
             mDeferredDestroySurfaceControl = null;
         }
 
-        runOnUiThread(() -> {
-            performDrawFinished();
-        });
+        runOnUiThread(this::performDrawFinished);
     }
 
     /**
@@ -1088,7 +1073,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 if (DEBUG_POSITION) {
                     Log.d(TAG, String.format(
                             "%d updateSurfacePosition RenderWorker, frameNr = %d, "
-                                    + "postion = [%d, %d, %d, %d]",
+                                    + "position = [%d, %d, %d, %d]",
                             System.identityHashCode(this), frameNumber,
                             left, top, right, bottom));
                 }
@@ -1124,7 +1109,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     };
 
     private SurfaceHolder.Callback[] getSurfaceCallbacks() {
-        SurfaceHolder.Callback callbacks[];
+        SurfaceHolder.Callback[] callbacks;
         synchronized (mCallbacks) {
             callbacks = new SurfaceHolder.Callback[mCallbacks.size()];
             mCallbacks.toArray(callbacks);
@@ -1194,7 +1179,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             synchronized (mCallbacks) {
                 // This is a linear search, but in practice we'll
                 // have only a couple callbacks, so it doesn't matter.
-                if (mCallbacks.contains(callback) == false) {
+                if (!mCallbacks.contains(callback)) {
                     mCallbacks.add(callback);
                 }
             }
