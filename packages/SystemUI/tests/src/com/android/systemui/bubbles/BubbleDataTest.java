@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleData.TimeSource;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -878,7 +879,7 @@ public class BubbleDataTest extends SysuiTestCase {
         when(sbn.getNotification()).thenReturn(notification);
 
         // NotificationEntry -> StatusBarNotification -> Notification -> BubbleMetadata
-        return NotificationEntry.buildForTest(sbn);
+        return new NotificationEntryBuilder().setSbn(sbn).build();
     }
 
     private void setCurrentTime(long time) {

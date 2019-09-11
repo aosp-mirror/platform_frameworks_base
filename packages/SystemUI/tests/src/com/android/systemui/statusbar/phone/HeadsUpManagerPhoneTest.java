@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
@@ -121,7 +122,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
-        NotificationEntry laterEntry = NotificationEntry.buildForTest(createNewNotification(1));
+        NotificationEntry laterEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(1))
+                .build();
         laterEntry.setRow(mRow);
         mHeadsUpManager.showNotification(mEntry);
         mHeadsUpManager.showNotification(laterEntry);

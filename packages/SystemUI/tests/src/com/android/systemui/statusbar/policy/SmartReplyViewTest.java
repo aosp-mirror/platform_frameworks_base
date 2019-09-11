@@ -23,7 +23,6 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,7 +36,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -53,6 +51,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -140,10 +139,10 @@ public class SmartReplyViewTest extends SysuiTestCase {
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text").build();
-        StatusBarNotification sbn = mock(StatusBarNotification.class);
-        when(sbn.getNotification()).thenReturn(mNotification);
-        when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
-        mEntry = NotificationEntry.buildForTest(sbn);
+
+        mEntry = new NotificationEntryBuilder()
+                .setNotification(mNotification)
+                .build();
 
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
     }

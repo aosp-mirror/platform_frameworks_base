@@ -24,6 +24,7 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -192,8 +193,18 @@ public class RankingBuilder {
         return this;
     }
 
+    public RankingBuilder setSmartActions(Notification.Action... smartActions) {
+        mSmartActions = new ArrayList<>(Arrays.asList(smartActions));
+        return this;
+    }
+
     public RankingBuilder setSmartReplies(@NonNull ArrayList<CharSequence> smartReplies) {
         mSmartReplies = smartReplies;
+        return this;
+    }
+
+    public RankingBuilder setSmartReplies(CharSequence... smartReplies) {
+        mSmartReplies = new ArrayList<>(Arrays.asList(smartReplies));
         return this;
     }
 

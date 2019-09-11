@@ -148,35 +148,11 @@ public final class NotificationEntry {
     private boolean mPulseSupressed;
 
     public NotificationEntry(
-            StatusBarNotification sbn,
+            @NonNull StatusBarNotification sbn,
             @NonNull Ranking ranking) {
-        this(sbn, ranking, false);
-    }
-
-    private NotificationEntry(
-            StatusBarNotification sbn,
-            Ranking ranking,
-            boolean isTest) {
         this.key = sbn.getKey();
-        this.notification = sbn;
-
-        // TODO: Update tests to no longer need to pass null ranking
-        if (ranking != null) {
-            setRanking(ranking);
-        } else if (!isTest) {
-            throw new IllegalArgumentException("Ranking cannot be null");
-        }
-    }
-
-    /**
-     * Method for old tests that build NotificationEntries without a ranking.
-     *
-     * @deprecated Use NotificationEntryBuilder instead.
-     */
-    @VisibleForTesting
-    @Deprecated
-    public static NotificationEntry buildForTest(StatusBarNotification sbn) {
-        return new NotificationEntry(sbn, null, true);
+        setNotification(sbn);
+        setRanking(ranking);
     }
 
     /** The key for this notification. Guaranteed to be immutable and unique */
@@ -218,6 +194,10 @@ public final class NotificationEntry {
      * TODO: Make this package-private
      */
     public void setRanking(@NonNull Ranking ranking) {
+        if (!ranking.getKey().equals(key)) {
+            throw new IllegalArgumentException("New key " + ranking.getKey()
+                    + " doesn't match existing key " + key);
+        }
         mRanking = ranking;
     }
 

@@ -38,7 +38,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -91,7 +90,11 @@ public class NotificationListenerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationUpdateCallsUpdateNotification() {
-        when(mNotificationData.get(mSbn.getKey())).thenReturn(NotificationEntry.buildForTest(mSbn));
+        when(mNotificationData.get(mSbn.getKey()))
+                .thenReturn(
+                        new NotificationEntryBuilder()
+                                .setSbn(mSbn)
+                                .build());
         mListener.onNotificationPosted(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
         verify(mEntryManager).updateNotification(mSbn, mRanking);

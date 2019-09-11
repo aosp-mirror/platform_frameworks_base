@@ -29,7 +29,6 @@ import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -40,6 +39,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -93,10 +93,13 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
-        StatusBarNotification sbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME,
-                0, null, TEST_UID,
-                0, new Notification(), UserHandle.CURRENT, null, 0);
-        mEntry = NotificationEntry.buildForTest(sbn);
+        mEntry = new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setUid(TEST_UID)
+                .setNotification(new Notification())
+                .setUser(UserHandle.CURRENT)
+                .build();
         mEntry.setRow(mRow);
 
         mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),
