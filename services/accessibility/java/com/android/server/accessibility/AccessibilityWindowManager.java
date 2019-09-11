@@ -1463,6 +1463,20 @@ public class AccessibilityWindowManager {
     }
 
     /**
+     * Returns the display ID according to given userId and windowId.
+     *
+     * @param userId The userId
+     * @param windowId The windowId
+     * @return The display ID
+     */
+    public int getDisplayIdByUserIdAndWindowIdLocked(int userId, int windowId) {
+        final IBinder windowToken = getWindowTokenForUserAndWindowIdLocked(userId, windowId);
+        final int displayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
+
+        return displayId;
+    }
+
+    /**
      * Gets current input focused window token from window manager, and returns its windowId.
      *
      * @param userId The userId

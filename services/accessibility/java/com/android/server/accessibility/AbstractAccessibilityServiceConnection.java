@@ -352,7 +352,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public List<AccessibilityWindowInfo> getWindows() {
-        ensureWindowsAvailableTimed();
+        ensureWindowsAvailableTimed(Display.DEFAULT_DISPLAY);
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return null;
@@ -362,8 +362,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (!permissionGranted) {
                 return null;
             }
-            // TODO [Multi-Display] (b/134891479) :
-            // using correct display Id to replace DEFAULT_DISPLAY.
             List<AccessibilityWindowInfo> internalWindowList =
                     mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
             if (internalWindowList == null) {
@@ -387,7 +385,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public AccessibilityWindowInfo getWindow(int windowId) {
-        ensureWindowsAvailableTimed();
+        int displayId = Display.INVALID_DISPLAY;
+        synchronized (mLock) {
+            if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+                displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(
+                        mSystemSupport.getCurrentUserIdLocked(), windowId);
+            }
+        }
+        ensureWindowsAvailableTimed(displayId);
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return null;
@@ -1308,28 +1313,28 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     /**
      * Request that the system make sure windows are available to interrogate.
+     *
+     * @param displayId The logical display id.
      */
-    private void ensureWindowsAvailableTimed() {
+    private void ensureWindowsAvailableTimed(int displayId) {
         synchronized (mLock) {
-            // TODO [Multi-Display] (b/134891479) :
-            // using correct display Id to replace DEFAULT_DISPLAY.
-            if (mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY) != null) {
+            if (mA11yWindowManager.getWindowListLocked(displayId) != null) {
                 return;
             }
             // If we have no registered callback, update the state we
             // we may have to register one but it didn't happen yet.
-            if (!mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY)) {
+            if (!mA11yWindowManager.isTrackingWindowsLocked(displayId)) {
                 // Invokes client change to make sure tracking window enabled.
                 mSystemSupport.onClientChangeLocked(false);
             }
             // We have no windows but do not care about them, done.
-            if (!mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY)) {
+            if (!mA11yWindowManager.isTrackingWindowsLocked(displayId)) {
                 return;
             }
 
             // Wait for the windows with a timeout.
             final long startMillis = SystemClock.uptimeMillis();
-            while (mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY) == null) {
+            while (mA11yWindowManager.getWindowListLocked(displayId) == null) {
                 final long elapsedMillis = SystemClock.uptimeMillis() - startMillis;
                 final long remainMillis = WAIT_WINDOWS_TIMEOUT_MILLIS - elapsedMillis;
                 if (remainMillis <= 0) {

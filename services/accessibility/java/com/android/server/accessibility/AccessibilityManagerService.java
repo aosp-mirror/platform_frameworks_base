@@ -580,17 +580,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // Make sure clients receiving this event will be able to get the
             // current state of the windows as the window manager may be delaying
             // the computation for performance reasons.
-            // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY.
             boolean shouldComputeWindows = false;
+            int displayId = Display.INVALID_DISPLAY;
             synchronized (mLock) {
+                final int windowId = event.getWindowId();
                 if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-                        && mA11yWindowManager.isTrackingWindowsLocked(Display.DEFAULT_DISPLAY)) {
+                        && windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+                    displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(
+                            mCurrentUserId, windowId);
+                }
+                if (displayId != Display.INVALID_DISPLAY
+                        && mA11yWindowManager.isTrackingWindowsLocked(displayId)) {
                     shouldComputeWindows = true;
                 }
             }
             if (shouldComputeWindows) {
-                WindowManagerInternal wm = LocalServices.getService(WindowManagerInternal.class);
-                wm.computeWindowsForAccessibility(Display.DEFAULT_DISPLAY);
+                final WindowManagerInternal wm = LocalServices.getService(
+                        WindowManagerInternal.class);
+                wm.computeWindowsForAccessibility(displayId);
             }
             synchronized (mLock) {
                 notifyAccessibilityServicesDelayedLocked(event, false);
