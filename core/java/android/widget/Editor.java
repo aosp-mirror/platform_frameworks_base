@@ -2561,7 +2561,8 @@ public class Editor {
      * @return True when the TextView isFocused and has a valid zero-length selection (cursor).
      */
     private boolean shouldBlink() {
-        if (!isCursorVisible() || !mTextView.isFocused()) return false;
+        if (!isCursorVisible() || !mTextView.isFocused() ||
+                !mTextView.isVisibleToUser()) return false;
 
         final int start = mTextView.getSelectionStart();
         if (start < 0) return false;
