@@ -17,7 +17,6 @@
 package com.android.server.rollback;
 
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
-import static com.android.server.rollback.Rollback.rollbackStateToString;
 
 import android.annotation.NonNull;
 import android.content.pm.VersionedPackage;
@@ -216,7 +215,7 @@ class RollbackStore {
     static void backupPackageCodePath(Rollback rollback, String packageName, String codePath)
             throws IOException {
         File sourceFile = new File(codePath);
-        File targetDir = new File(rollback.backupDir, packageName);
+        File targetDir = new File(rollback.getBackupDir(), packageName);
         targetDir.mkdirs();
         File targetFile = new File(targetDir, sourceFile.getName());
 
@@ -229,7 +228,7 @@ class RollbackStore {
      * Includes the base apk and any splits. Returns null if none found.
      */
     static File[] getPackageCodePaths(Rollback rollback, String packageName) {
-        File targetDir = new File(rollback.backupDir, packageName);
+        File targetDir = new File(rollback.getBackupDir(), packageName);
         File[] files = targetDir.listFiles();
         if (files == null || files.length == 0) {
             return null;
@@ -243,7 +242,7 @@ class RollbackStore {
      */
     static void deletePackageCodePaths(Rollback rollback) {
         for (PackageRollbackInfo info : rollback.info.getPackages()) {
-            File targetDir = new File(rollback.backupDir, info.getPackageName());
+            File targetDir = new File(rollback.getBackupDir(), info.getPackageName());
             removeFile(targetDir);
         }
     }
@@ -255,13 +254,13 @@ class RollbackStore {
         try {
             JSONObject dataJson = new JSONObject();
             dataJson.put("info", rollbackInfoToJson(rollback.info));
-            dataJson.put("timestamp", rollback.timestamp.toString());
-            dataJson.put("stagedSessionId", rollback.stagedSessionId);
-            dataJson.put("state", rollbackStateToString(rollback.state));
-            dataJson.put("apkSessionId", rollback.apkSessionId);
-            dataJson.put("restoreUserDataInProgress", rollback.restoreUserDataInProgress);
+            dataJson.put("timestamp", rollback.getTimestamp().toString());
+            dataJson.put("stagedSessionId", rollback.getStagedSessionId());
+            dataJson.put("state", rollback.getStateAsString());
+            dataJson.put("apkSessionId", rollback.getApkSessionId());
+            dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
 
-            PrintWriter pw = new PrintWriter(new File(rollback.backupDir, "rollback.json"));
+            PrintWriter pw = new PrintWriter(new File(rollback.getBackupDir(), "rollback.json"));
             pw.println(dataJson.toString());
             pw.close();
         } catch (JSONException e) {
@@ -273,7 +272,7 @@ class RollbackStore {
      * Removes all persistent storage associated with the given rollback.
      */
     void deleteRollback(Rollback rollback) {
-        removeFile(rollback.backupDir);
+        removeFile(rollback.getBackupDir());
     }
 
     /**

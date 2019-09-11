@@ -299,7 +299,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"บันทึกเสียง"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; บันทึกเสียงไหม"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"กิจกรรมการเคลื่อนไหวร่างกาย"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"การเคลื่อนไหวร่างกาย"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"เข้าถึงกิจกรรมการเคลื่อนไหวร่างกายของคุณ"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงกิจกรรมการเคลื่อนไหวร่างกายของคุณไหม"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"กล้องถ่ายรูป"</string>

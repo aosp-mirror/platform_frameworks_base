@@ -767,14 +767,25 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public int setCameraAudioRestriction(int mode) {
+    public void setCameraAudioRestriction(int mode) {
         if (mLegacyDevice.isClosed()) {
             String err = "Cannot set camera audio restriction, device has been closed.";
             Log.e(TAG, err);
             throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
         }
 
-        return mLegacyDevice.setAudioRestriction(mode);
+        mLegacyDevice.setAudioRestriction(mode);
+    }
+
+    @Override
+    public int getGlobalAudioRestriction() {
+        if (mLegacyDevice.isClosed()) {
+            String err = "Cannot set camera audio restriction, device has been closed.";
+            Log.e(TAG, err);
+            throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
+        }
+
+        return mLegacyDevice.getAudioRestriction();
     }
 
     @Override

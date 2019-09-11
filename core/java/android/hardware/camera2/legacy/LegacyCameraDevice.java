@@ -550,8 +550,12 @@ public class LegacyCameraDevice implements AutoCloseable {
         return lastFrame;
     }
 
-    public int setAudioRestriction(int mode) {
-        return mRequestThreadManager.setAudioRestriction(mode);
+    public void setAudioRestriction(int mode) {
+        mRequestThreadManager.setAudioRestriction(mode);
+    }
+
+    public int getAudioRestriction() {
+        return mRequestThreadManager.getAudioRestriction();
     }
 
     /**

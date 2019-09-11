@@ -135,6 +135,7 @@ public class PackageInstallerActivity extends AlertActivity {
 
         mEnableOk = true;
         mOk.setEnabled(true);
+        mOk.setFilterTouchesWhenObscured(true);
     }
 
     /**

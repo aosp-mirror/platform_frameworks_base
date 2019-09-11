@@ -184,6 +184,8 @@ enum SearchType {
     TYPE_CHIP_DOCS = 4;
     TYPE_SEARCH_HISTORY = 5;
     TYPE_SEARCH_STRING = 6;
+    TYPE_CHIP_LARGE_FILES = 7;
+    TYPE_CHIP_FROM_THIS_WEEK = 8;
 }
 
 enum SearchMode {

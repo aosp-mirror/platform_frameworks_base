@@ -277,9 +277,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         try {
             fd = ParcelFileDescriptor.open(snapshotProfile, ParcelFileDescriptor.MODE_READ_ONLY);
             if (fd == null || !fd.getFileDescriptor().valid()) {
-                Slog.wtf(TAG,
-                        "ParcelFileDescriptor.open returned an invalid descriptor for "
-                                + packageName + ":" + snapshotProfile + ". isNull=" + (fd == null));
                 postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
             } else {
                 postSuccess(packageName, fd, callback);
