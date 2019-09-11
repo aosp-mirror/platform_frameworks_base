@@ -62,4 +62,7 @@
     <!-- Default number of processes before start trimming. 0 = calc from config_defaultMaxCachedProcesses -->
     <integer name="config_defaultTrimCachedProcesses">0</integer>
 
+    <!-- Whether device ignores the RSSNR signal implementation -->
+    <bool name="config_ignoreRssnrSignalLevel">false</bool>
+
 </resources>
