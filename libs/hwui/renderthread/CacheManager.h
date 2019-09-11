@@ -71,7 +71,6 @@ private:
     sk_sp<GrContext> mGrContext;
 #endif
 
-    int mMaxResources = 0;
     const size_t mMaxResourceBytes;
     const size_t mBackgroundResourceBytes;
 
