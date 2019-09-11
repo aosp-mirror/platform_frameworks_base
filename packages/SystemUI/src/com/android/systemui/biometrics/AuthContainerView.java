@@ -19,12 +19,16 @@ package com.android.systemui.biometrics;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.UserManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -207,6 +211,17 @@ public class AuthContainerView extends LinearLayout
         }
 
         mBackgroundView = mContainerView.findViewById(R.id.background);
+
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        if (userManager.isManagedProfile(mConfig.mUserId)) {
+            final Drawable image = getResources().getDrawable(R.drawable.work_challenge_background,
+                    mContext.getTheme());
+            image.setColorFilter(dpm.getOrganizationColorForUser(mConfig.mUserId),
+                    PorterDuff.Mode.DARKEN);
+            mBackgroundView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            mBackgroundView.setImageDrawable(image);
+        }
 
         mBiometricView.setRequireConfirmation(mConfig.mRequireConfirmation);
         mBiometricView.setPanelController(mPanelController);
