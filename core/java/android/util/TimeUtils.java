@@ -67,20 +67,19 @@ public class TimeUtils {
      * found.
      */
     private static android.icu.util.TimeZone getIcuTimeZone(
-            int offset, boolean dst, long when, String country) {
-        if (country == null) {
+            int offsetMillis, boolean isDst, long whenMillis, String countryIso) {
+        if (countryIso == null) {
             return null;
         }
 
         android.icu.util.TimeZone bias = android.icu.util.TimeZone.getDefault();
         CountryTimeZones countryTimeZones =
-                TimeZoneFinder.getInstance().lookupCountryTimeZones(country);
+                TimeZoneFinder.getInstance().lookupCountryTimeZones(countryIso);
         if (countryTimeZones == null) {
             return null;
         }
-
-        CountryTimeZones.OffsetResult offsetResult =
-                countryTimeZones.lookupByOffsetWithBias(offset, dst, when, bias);
+        CountryTimeZones.OffsetResult offsetResult = countryTimeZones.lookupByOffsetWithBias(
+                offsetMillis, isDst, null /* dstOffsetMillis */, whenMillis, bias);
         return offsetResult != null ? offsetResult.mTimeZone : null;
     }
 
