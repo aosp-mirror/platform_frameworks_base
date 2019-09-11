@@ -326,12 +326,6 @@ interface IWindowManager
     oneway void setPipVisibility(boolean visible);
 
     /**
-     * Called by System UI to notify of changes to the visibility and height of the shelf.
-     */
-    @UnsupportedAppUsage
-    void setShelfHeight(boolean visible, int shelfHeight);
-
-    /**
      * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
      */
     @UnsupportedAppUsage

@@ -109,4 +109,9 @@ interface ISystemUiProxy {
      * Ends the system screen pinning.
      */
     void stopScreenPinning() = 17;
+
+    /**
+     * Sets the shelf height and visibility.
+     */
+    void setShelfHeight(boolean visible, int shelfHeight) = 20;
 }

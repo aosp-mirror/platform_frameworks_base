@@ -27,5 +27,6 @@ public interface BasePipManager {
     default void expandPip() {}
     default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}
     void onConfigurationChanged(Configuration newConfig);
+    default void setShelfHeight(boolean visible, int height) {}
     default void dump(PrintWriter pw) {}
 }

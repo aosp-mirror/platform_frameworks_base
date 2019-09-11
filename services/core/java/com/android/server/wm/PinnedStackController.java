@@ -90,8 +90,6 @@ class PinnedStackController {
     private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
-    private boolean mIsShelfShowing;
-    private int mShelfHeight;
 
     // The set of actions and aspect-ratio for the that are currently allowed on the PiP activity
     private ArrayList<RemoteAction> mActions = new ArrayList<>();
@@ -216,7 +214,6 @@ class PinnedStackController {
             mPinnedStackListener = listener;
             notifyDisplayInfoChanged(mDisplayInfo);
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
-            notifyShelfVisibilityChanged(mIsShelfShowing, mShelfHeight);
             // The movement bounds notification needs to be sent before the minimized state, since
             // SystemUI may use the bounds to retore the minimized position
             notifyMovementBoundsChanged(false /* fromImeAdjustment */,
@@ -278,9 +275,7 @@ class PinnedStackController {
                 mSnapAlgorithm.applySnapFraction(defaultBounds, movementBounds, snapFraction);
             } else {
                 Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
-                        0, Math.max(mIsImeShowing ? mImeHeight : 0,
-                                mIsShelfShowing ? mShelfHeight : 0),
-                        defaultBounds);
+                        0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
             }
             return defaultBounds;
         }
@@ -367,21 +362,6 @@ class PinnedStackController {
     }
 
     /**
-     * Sets the shelf state and height.
-     */
-    void setAdjustedForShelf(boolean adjustedForShelf, int shelfHeight) {
-        final boolean shelfShowing = adjustedForShelf && shelfHeight > 0;
-        if (shelfShowing == mIsShelfShowing && shelfHeight == mShelfHeight) {
-            return;
-        }
-
-        mIsShelfShowing = shelfShowing;
-        mShelfHeight = shelfHeight;
-        notifyShelfVisibilityChanged(shelfShowing, shelfHeight);
-        notifyMovementBoundsChanged(false /* fromImeAdjustment */, true /* fromShelfAdjustment */);
-    }
-
-    /**
      * Sets the current aspect ratio.
      */
     void setAspectRatio(float aspectRatio) {
@@ -433,16 +413,6 @@ class PinnedStackController {
         if (mPinnedStackListener != null) {
             try {
                 mPinnedStackListener.onImeVisibilityChanged(imeVisible, imeHeight);
-            } catch (RemoteException e) {
-                Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
-            }
-        }
-    }
-
-    private void notifyShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
-        if (mPinnedStackListener != null) {
-            try {
-                mPinnedStackListener.onShelfVisibilityChanged(shelfVisible, shelfHeight);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
             }
@@ -613,8 +583,6 @@ class PinnedStackController {
         pw.println();
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mImeHeight=" + mImeHeight);
-        pw.println(prefix + "  mIsShelfShowing=" + mIsShelfShowing);
-        pw.println(prefix + "  mShelfHeight=" + mShelfHeight);
         pw.println(prefix + "  mIsMinimized=" + mIsMinimized);
         pw.println(prefix + "  mAspectRatio=" + mAspectRatio);
         pw.println(prefix + "  mMinAspectRatio=" + mMinAspectRatio);
