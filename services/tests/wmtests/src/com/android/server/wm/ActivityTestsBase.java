@@ -40,6 +40,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
+import static org.mockito.ArgumentMatchers.eq;
+
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
@@ -72,6 +74,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentController;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.TaskRecord.TaskRecordFactory;
@@ -92,6 +95,7 @@ import java.util.function.Consumer;
  */
 class ActivityTestsBase {
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
+    private static final int[] TEST_USER_PROFILE_IDS = {};
 
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -471,6 +475,11 @@ class ActivityTestsBase {
             // allow background activity starts by default
             doReturn(true).when(this).isBackgroundActivityStartsEnabled();
             doNothing().when(this).updateCpuStats();
+
+            // UserManager
+            final UserManagerService ums = mock(UserManagerService.class);
+            doReturn(ums).when(this).getUserManager();
+            doReturn(TEST_USER_PROFILE_IDS).when(ums).getProfileIds(anyInt(), eq(true));
         }
 
         void setup(IntentFirewall intentFirewall, PendingIntentController intentController,
