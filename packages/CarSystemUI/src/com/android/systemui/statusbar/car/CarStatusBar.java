@@ -200,6 +200,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
         mBottomNavBarVisible = false;
 
+        // Need to initialize screen lifecycle before calling super.start - before switcher is
+        // created.
+        mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
+        mScreenLifecycle.addObserver(mScreenObserver);
+
         super.start();
         mTaskStackListener = new TaskStackListenerImpl();
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
@@ -246,9 +251,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mPowerManagerHelper.connectToCarService();
 
         mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
-
-        mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
-        mScreenLifecycle.addObserver(mScreenObserver);
     }
 
     /**
