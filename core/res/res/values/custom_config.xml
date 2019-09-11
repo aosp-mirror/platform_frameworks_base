@@ -34,4 +34,7 @@
          true will use SystemClock.elapsedRealtimeNanos() to set timestamp. -->
     <bool name="config_useSystemClockforRotationSensor">false</bool>
 
+    <!-- Whether device ignores the RSSNR signal implementation -->
+    <bool name="config_ignoreRssnrSignalLevel">false</bool>
+
 </resources>

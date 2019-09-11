@@ -30,4 +30,8 @@
 
     <!-- Rotation sensor -->
     <java-symbol type="bool" name="config_useSystemClockforRotationSensor" />
+
+    <!-- Whether device ignores the RSSNR signal implementation -->
+    <java-symbol type="bool" name="config_ignoreRssnrSignalLevel" />
+
 </resources>
