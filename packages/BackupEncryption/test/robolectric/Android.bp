@@ -23,6 +23,7 @@ android_robolectric_test {
         "backup-encryption-protos",
         "platform-test-annotations",
         "testng",
+        "truth-prebuilt",
     ],
     instrumentation_for: "BackupEncryption",
 }
