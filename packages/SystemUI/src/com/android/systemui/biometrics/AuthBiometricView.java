@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -32,6 +34,8 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -145,6 +149,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     private final Injector mInjector;
     private final Handler mHandler;
+    private final AccessibilityManager mAccessibilityManager;
     private final int mTextColorError;
     private final int mTextColorHint;
 
@@ -196,15 +201,9 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     protected abstract boolean supportsSmallDialog();
 
-    private final Runnable mResetErrorRunnable = () -> {
-        updateState(getStateForAfterError());
-        handleResetAfterError();
-    };
+    private final Runnable mResetErrorRunnable;
 
-    private final Runnable mResetHelpRunnable = () -> {
-        updateState(STATE_AUTHENTICATING);
-        handleResetAfterHelp();
-    };
+    private final Runnable mResetHelpRunnable;
 
     private final OnClickListener mBackgroundClickListener = (view) -> {
         if (mState == STATE_AUTHENTICATED) {
@@ -236,6 +235,20 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mInjector = injector;
         mInjector.mBiometricView = this;
+
+        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+
+        mResetErrorRunnable = () -> {
+            updateState(getStateForAfterError());
+            handleResetAfterError();
+            Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
+        };
+
+        mResetHelpRunnable = () -> {
+            updateState(STATE_AUTHENTICATING);
+            handleResetAfterHelp();
+            Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
+        };
     }
 
     public void setPanelController(AuthPanelController panelController) {
@@ -333,6 +346,8 @@ public abstract class AuthBiometricView extends LinearLayout {
                     super.onAnimationEnd(animation);
                     mSize = newSize;
                     mDialogSizeAnimating = false;
+                    Utils.notifyAccessibilityContentChanged(mAccessibilityManager,
+                            AuthBiometricView.this);
                 }
             });
 
@@ -348,6 +363,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         } else {
             Log.e(TAG, "Unknown transition from: " + mSize + " to: " + newSize);
         }
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
     public void updateState(@BiometricState int newState) {
@@ -369,6 +385,8 @@ public abstract class AuthBiometricView extends LinearLayout {
                     mNegativeButton.setVisibility(View.GONE);
                     mIndicatorView.setVisibility(View.INVISIBLE);
                 }
+                announceForAccessibility(getResources()
+                        .getString(R.string.biometric_dialog_authenticated));
                 mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
                         getDelayAfterAuthenticatedDurationMs());
                 break;
@@ -395,6 +413,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 break;
         }
 
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         mState = newState;
     }
 
@@ -461,6 +480,8 @@ public abstract class AuthBiometricView extends LinearLayout {
         } else {
             view.setText(string);
         }
+
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
     private void setText(TextView view, String string) {
@@ -479,6 +500,8 @@ public abstract class AuthBiometricView extends LinearLayout {
         mIndicatorView.setTextColor(mTextColorError);
         mIndicatorView.setVisibility(View.VISIBLE);
         mHandler.postDelayed(resetMessageRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
+
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
     @Override
@@ -517,6 +540,7 @@ public abstract class AuthBiometricView extends LinearLayout {
             updateState(STATE_AUTHENTICATING);
             mCallback.onAction(Callback.ACTION_BUTTON_TRY_AGAIN);
             mTryAgainButton.setVisibility(View.GONE);
+            Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         });
     }
 

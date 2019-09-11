@@ -23,7 +23,8 @@
         android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/biometric_dialog_dim_color"/>
+        android:background="@color/biometric_dialog_dim_color"
+        android:contentDescription="@string/biometric_dialog_empty_space_description"/>
 
     <View
         android:id="@+id/panel"
