@@ -502,7 +502,6 @@ java_library {
     sdk_version: "core_platform",
     static_libs: [
         "libphonenumber-platform",
-        "nist-sip",
         "tagsoup",
         "rappor",
         "libtextclassifier-java",
