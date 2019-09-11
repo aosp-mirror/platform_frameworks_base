@@ -4063,14 +4063,41 @@ public class TelephonyManager {
      * The returned set of subscriber IDs will include the subscriber ID corresponding to this
      * TelephonyManager's subId.
      *
+     * This is deprecated and {@link #getMergedSubscriberIdsFromGroup()} should be used for data
+     * usage merging purpose.
+     * TODO: remove this API.
+     *
      * @hide
      */
     @UnsupportedAppUsage
+    @Deprecated
     public @Nullable String[] getMergedSubscriberIds() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName());
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
+    }
+
+    /**
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. Unlike {@link #getMergedSubscriberIds()} this API merge subscriberIds based on
+     * subscription grouping: subscriberId of those in the same group will all be returned.
+     *
+     * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String[] getMergedSubscriberIdsFromGroup() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getMergedSubscriberIdsFromGroup(getSubId(), getOpPackageName());
+            }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -10916,7 +10943,6 @@ public class TelephonyManager {
      * @param callback Callback will be triggered once it succeeds or failed.
      *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
      *                 for more details. Pass null if don't care about the result.
-     *
      */
     public void setPreferredOpportunisticDataSubscription(int subId, boolean needValidation,
             @Nullable @CallbackExecutor Executor executor, @Nullable Consumer<Integer> callback) {
@@ -10924,6 +10950,12 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService == null) {
+                if (executor == null || callback == null) {
+                    return;
+                }
+                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                    callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                }));
                 return;
             }
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
@@ -11002,9 +11034,19 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService == null || availableNetworks == null) {
-                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                    callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
-                }));
+                if (executor == null || callback == null) {
+                    return;
+                }
+                if (iOpportunisticNetworkService == null) {
+                    /* Todo<b/130595455> passing unknown due to lack of good error codes */
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                    }));
+                } else {
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
+                    }));
+                }
                 return;
             }
             IUpdateAvailableNetworksCallback callbackStub =

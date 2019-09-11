@@ -187,6 +187,9 @@
     <string name="notification_channel_wfc">Wi-Fi calling</string>
     <!-- Telephony notification channel name for a channel containing SIM notifications -->
     <string name="notification_channel_sim">SIM status</string>
+    <!-- Telephony notification channel name for a channel containing high priority SIM notifications -->
+    <string name="notification_channel_sim_high_prio">High priority SIM status</string>
+
 
     <!-- Displayed to tell the user that peer changed TTY mode -->
     <string name="peerTtyModeFull">Peer requested TTY Mode FULL</string>
@@ -1502,16 +1505,16 @@
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=70] -->
-    <string name="permlab_manageFace">manage face authentication hardware</string>
+    <string name="permlab_manageFace">manage face unlock hardware</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
     <string name="permdesc_manageFace">Allows the app to invoke methods to add and delete facial templates for use.</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=70] -->
-    <string name="permlab_useFaceAuthentication">use face authentication hardware</string>
+    <string name="permlab_useFaceAuthentication">use face unlock hardware</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
-    <string name="permdesc_useFaceAuthentication">Allows the app to use face authentication hardware for authentication</string>
+    <string name="permdesc_useFaceAuthentication">Allows the app to use face unlock hardware for authentication</string>
 
     <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
-    <string name="face_recalibrate_notification_name">Face Authentication</string>
+    <string name="face_recalibrate_notification_name">Face unlock</string>
     <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_title">Re-enroll your face</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
@@ -1538,7 +1541,7 @@
     <!-- Message shown during face acquisition when the user is not front facing the sensor [CHAR LIMIT=50] -->
     <string name="face_acquired_poor_gaze">Please look more directly at your device.</string>
     <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_not_detected">Can\u2019t see your face. Look at the phone.</string>
+    <string name="face_acquired_not_detected">Position your face directly in front of the phone.</string>
     <!-- Message shown during face acquisition when the device is not steady [CHAR LIMIT=50] -->
     <string name="face_acquired_too_much_motion">Too much motion. Hold phone steady.</string>
     <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=50] -->
@@ -1555,8 +1558,8 @@
     <string name="face_acquired_roll_too_extreme">Turn your head a little less.</string>
     <!-- Message shown during acquisition when the user's face is obscured [CHAR LIMIT=50] -->
     <string name="face_acquired_obscured">Remove anything hiding your face.</string>
-    <!-- Message shown during acquisition when the sensor is dirty [CHAR LIMIT=50] -->
-    <string name="face_acquired_sensor_dirty">Clean the sensor at the top edge of the screen.</string>
+    <!-- Message shown during acquisition when the sensor is dirty [CHAR LIMIT=100] -->
+    <string name="face_acquired_sensor_dirty">Clean the top of your screen, including the black bar</string>
     <!-- Array containing custom messages shown during face acquisition from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="face_acquired_vendor">
     </string-array>
@@ -1564,23 +1567,23 @@
     <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=69] -->
     <string name="face_error_hw_not_available">Can\u2019t verify face. Hardware not available.</string>
     <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
-    <string name="face_error_timeout">Try face authentication again.</string>
+    <string name="face_error_timeout">Try face unlock again.</string>
     <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=69] -->
     <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
-    <string name="face_error_canceled">Face operation canceled</string>
-    <!-- Generic error message shown when the face authentication operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=54] -->
-    <string name="face_error_user_canceled">Face authentication canceled by user</string>
+    <string name="face_error_canceled">Face operation canceled.</string>
+    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=54] -->
+    <string name="face_error_user_canceled">Face unlock canceled by user.</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
     <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=71] -->
-    <string name="face_error_lockout_permanent">Too many attempts. Face authentication disabled.</string>
+    <string name="face_error_lockout_permanent">Too many attempts. Face unlock disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=52] -->
-    <string name="face_error_not_enrolled">You haven\u2019t set up face authentication</string>
-    <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=61] -->
-    <string name="face_error_hw_not_present">Face authentication is not supported on this device</string>
+    <string name="face_error_not_enrolled">You haven\u2019t set up face unlock.</string>
+    <!-- Generic error message shown when the app requests face unlock on a device without a sensor. [CHAR LIMIT=61] -->
+    <string name="face_error_hw_not_present">Face unlock is not supported on this device.</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>

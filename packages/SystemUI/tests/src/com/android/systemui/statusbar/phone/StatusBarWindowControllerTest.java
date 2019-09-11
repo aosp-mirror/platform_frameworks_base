@@ -33,6 +33,8 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +56,12 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
     private ViewGroup mStatusBarView;
     @Mock
     private IActivityManager mActivityManager;
+    @Mock
+    private SysuiStatusBarStateController mStatusBarStateController;
+    @Mock
+    private ConfigurationController mConfigurationController;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
 
     private StatusBarWindowController mStatusBarWindowController;
 
@@ -63,7 +71,8 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
 
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
-                mActivityManager, mDozeParameters);
+                mActivityManager, mDozeParameters, mStatusBarStateController,
+                mConfigurationController, mKeyguardBypassController);
         mStatusBarWindowController.add(mStatusBarView, 100 /* height */);
     }
 
@@ -88,7 +97,8 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
     @Test
     public void testOnThemeChanged_doesntCrash() {
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
-                mActivityManager, mDozeParameters);
+                mActivityManager, mDozeParameters, mStatusBarStateController,
+                mConfigurationController, mKeyguardBypassController);
         mStatusBarWindowController.onThemeChanged();
     }
 
@@ -100,7 +110,8 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
     @Test
     public void testSetForcePluginOpen_beforeStatusBarInitialization() {
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
-                mActivityManager, mDozeParameters);
+                mActivityManager, mDozeParameters, mStatusBarStateController,
+                mConfigurationController, mKeyguardBypassController);
         mStatusBarWindowController.setForcePluginOpen(true);
     }
 }

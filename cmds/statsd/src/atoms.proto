@@ -319,6 +319,8 @@ message Atom {
             217 [(log_from_module) = "permissioncontroller"];
         PermissionAppsFragmentViewed permission_apps_fragment_viewed =
             218  [(log_from_module) = "permissioncontroller"];
+        ExclusionRectStateChanged exclusion_rect_state_changed = 223;
+        BackGesture back_gesture_reported_reported = 224;
     }
 
     // Pulled events will start at field 10000.
@@ -2500,6 +2502,41 @@ message PhoneStateChanged {
     optional State state = 1;
 }
 
+message BackGesture {
+    enum BackType {
+          DEFAULT_BACK_TYPE = 0;
+          COMPLETED = 1;
+          COMPLETED_REJECTED = 2; // successful because coming from rejected area
+          INCOMPLETE_EXCLUDED = 3; // would have been successful but in the exclusion area
+          INCOMPLETE = 4;
+    }
+    optional BackType type = 1;
+
+    optional int32 y_coordinate = 2; // y coordinate for ACTION_DOWN event
+    enum WindowHorizontalLocation {
+        DEFAULT_LOCATION = 0;
+        LEFT = 1;
+        RIGHT = 2;
+    }
+    optional WindowHorizontalLocation x_location = 3;
+}
+
+message ExclusionRectStateChanged {
+    optional string component_name = 1;    // if not available, simply packageName
+    optional int32 requested_height = 2;   // px
+    optional int32 rejected_height = 3;    // px
+
+    enum WindowHorizontalLocation {
+        DEFAULT_LOCATION = 0;
+        LEFT = 1;
+        RIGHT = 2;
+    }
+    optional WindowHorizontalLocation x_location = 4;
+    optional bool landscape = 5;
+    optional bool splitscreen = 6;
+    optional int32 duration_millis = 7;
+}
+
 message LauncherUIChanged {
     optional android.stats.launcher.LauncherAction action = 1;
     optional android.stats.launcher.LauncherState src_state = 2;
@@ -3291,6 +3328,8 @@ message BiometricErrorOccurred {
     optional int32 error_info_vendor = 7;
     // Dictates if this message should trigger additional debugging.
     optional bool debug = 8;
+    // Time spent during the authentication attempt.
+    optional int64 latency_millis = 9;
 }
 
 /**

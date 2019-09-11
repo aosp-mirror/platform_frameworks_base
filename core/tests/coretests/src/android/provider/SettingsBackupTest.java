@@ -264,6 +264,7 @@ public class SettingsBackupTest {
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
                     Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
+                    Settings.Global.EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                     Settings.Global.FORCED_APP_STANDBY_ENABLED,
@@ -719,8 +720,7 @@ public class SettingsBackupTest {
                  Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS,
                  Settings.Secure.BIOMETRIC_DEBUG_ENABLED,
                  Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
-                 Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED,
-                 Settings.Secure.FACE_UNLOCK_EDUCATION_INFO_DISPLAYED);
+                 Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

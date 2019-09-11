@@ -577,7 +577,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     if (outArray != NULL) {
         outLen = MEMINFO_COUNT;
         for (int i = 0; i < outLen; i++) {
-            if (i == MEMINFO_VMALLOC_USED) {
+            if (i == MEMINFO_VMALLOC_USED && mem[i] == 0) {
                 outArray[i] = smi.ReadVmallocInfo() / 1024;
                 continue;
             }

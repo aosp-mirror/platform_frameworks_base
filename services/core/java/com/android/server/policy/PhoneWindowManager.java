@@ -2517,14 +2517,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public Animation createHiddenByKeyguardExit(boolean onWallpaper,
-            boolean goingToNotificationShade) {
+            boolean goingToNotificationShade, boolean subtleAnimation) {
         if (goingToNotificationShade) {
             return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_behind_enter_fade_in);
         }
 
-        AnimationSet set = (AnimationSet) AnimationUtils.loadAnimation(mContext, onWallpaper ?
-                    R.anim.lock_screen_behind_enter_wallpaper :
-                    R.anim.lock_screen_behind_enter);
+        final int resource;
+        if (subtleAnimation) {
+            resource = R.anim.lock_screen_behind_enter_subtle;
+        } else if (onWallpaper) {
+            resource = R.anim.lock_screen_behind_enter_wallpaper;
+        } else  {
+            resource = R.anim.lock_screen_behind_enter;
+        }
+
+        AnimationSet set = (AnimationSet) AnimationUtils.loadAnimation(mContext, resource);
 
         // TODO: Use XML interpolators when we have log interpolators available in XML.
         final List<Animation> animations = set.getAnimations();

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.util.Slog;
 import android.util.Spline;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
@@ -53,18 +54,22 @@ public class DisplayWhiteBalanceController implements
     private Callbacks mCallbacks;
 
     private AmbientSensor.AmbientBrightnessSensor mBrightnessSensor;
-    private AmbientFilter mBrightnessFilter;
+
+    @VisibleForTesting
+    AmbientFilter mBrightnessFilter;
     private AmbientSensor.AmbientColorTemperatureSensor mColorTemperatureSensor;
-    private AmbientFilter mColorTemperatureFilter;
+
+    @VisibleForTesting
+    AmbientFilter mColorTemperatureFilter;
     private DisplayWhiteBalanceThrottler mThrottler;
 
-    // When the brightness drops below a certain threshold, it affects the color temperature
-    // accuracy, so we fall back to a fixed ambient color temperature.
-    private final float mLowLightAmbientBrightnessThreshold;
     private final float mLowLightAmbientColorTemperature;
+    private final float mHighLightAmbientColorTemperature;
 
     private float mAmbientColorTemperature;
-    private float mPendingAmbientColorTemperature;
+
+    @VisibleForTesting
+    float mPendingAmbientColorTemperature;
     private float mLastAmbientColorTemperature;
 
     private ColorDisplayServiceInternal mColorDisplayServiceInternal;
@@ -78,6 +83,17 @@ public class DisplayWhiteBalanceController implements
 
     // A piecewise linear relationship between ambient and display color temperatures.
     private Spline.LinearSpline mAmbientToDisplayColorTemperatureSpline;
+
+    // In very low or very high brightness conditions ambient EQ should to set to a default
+    // instead of using mAmbientToDisplayColorTemperatureSpline. However, setting ambient EQ
+    // based on thresholds can cause the display to rapidly change color temperature. To solve
+    // this, mLowLightAmbientBrightnessToBiasSpline and mHighLightAmbientBrightnessToBiasSpline
+    // are used to smoothly interpolate from ambient color temperature to the defaults.
+    // A piecewise linear relationship between low light brightness and low light bias.
+    private Spline.LinearSpline mLowLightAmbientBrightnessToBiasSpline;
+
+    // A piecewise linear relationship between high light brightness and high light bias.
+    private Spline.LinearSpline mHighLightAmbientBrightnessToBiasSpline;
 
     /**
      * @param brightnessSensor
@@ -93,12 +109,22 @@ public class DisplayWhiteBalanceController implements
      * @param throttler
      *      The throttler used to determine whether the new display color temperature should be
      *      updated or not.
-     * @param lowLightAmbientBrightnessThreshold
-     *      The ambient brightness threshold beneath which we fall back to a fixed ambient color
-     *      temperature.
+     * @param lowLightAmbientBrightnesses
+     *      The ambient brightness used to map the ambient brightnesses to the biases used to
+     *      interpolate to lowLightAmbientColorTemperature.
+     * @param lowLightAmbientBiases
+     *      The biases used to map the ambient brightnesses to the biases used to interpolate to
+     *      lowLightAmbientColorTemperature.
      * @param lowLightAmbientColorTemperature
-     *      The ambient color temperature to which we fall back when the ambient brightness drops
-     *      beneath a certain threshold.
+     *      The ambient color temperature to which we interpolate to based on the low light curve.
+     * @param highLightAmbientBrightnesses
+     *      The ambient brightness used to map the ambient brightnesses to the biases used to
+     *      interpolate to highLightAmbientColorTemperature.
+     * @param highLightAmbientBiases
+     *      The biases used to map the ambient brightnesses to the biases used to interpolate to
+     *      highLightAmbientColorTemperature.
+     * @param highLightAmbientColorTemperature
+     *      The ambient color temperature to which we interpolate to based on the high light curve.
      * @param ambientColorTemperatures
      *      The ambient color tempeartures used to map the ambient color temperature to the display
      *      color temperature (or null if no mapping is necessary).
@@ -119,7 +145,10 @@ public class DisplayWhiteBalanceController implements
             @NonNull AmbientSensor.AmbientColorTemperatureSensor colorTemperatureSensor,
             @NonNull AmbientFilter colorTemperatureFilter,
             @NonNull DisplayWhiteBalanceThrottler throttler,
-            float lowLightAmbientBrightnessThreshold, float lowLightAmbientColorTemperature,
+            float[] lowLightAmbientBrightnesses, float[] lowLightAmbientBiases,
+            float lowLightAmbientColorTemperature,
+            float[] highLightAmbientBrightnesses, float[] highLightAmbientBiases,
+            float highLightAmbientColorTemperature,
             float[] ambientColorTemperatures, float[] displayColorTemperatures) {
         validateArguments(brightnessSensor, brightnessFilter, colorTemperatureSensor,
                 colorTemperatureFilter, throttler);
@@ -131,8 +160,8 @@ public class DisplayWhiteBalanceController implements
         mColorTemperatureSensor = colorTemperatureSensor;
         mColorTemperatureFilter = colorTemperatureFilter;
         mThrottler = throttler;
-        mLowLightAmbientBrightnessThreshold = lowLightAmbientBrightnessThreshold;
         mLowLightAmbientColorTemperature = lowLightAmbientColorTemperature;
+        mHighLightAmbientColorTemperature = highLightAmbientColorTemperature;
         mAmbientColorTemperature = -1.0f;
         mPendingAmbientColorTemperature = -1.0f;
         mLastAmbientColorTemperature = -1.0f;
@@ -140,9 +169,55 @@ public class DisplayWhiteBalanceController implements
         mAmbientColorTemperatureOverride = -1.0f;
 
         try {
+            mLowLightAmbientBrightnessToBiasSpline = new Spline.LinearSpline(
+                    lowLightAmbientBrightnesses, lowLightAmbientBiases);
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to create low light ambient brightness to bias spline.", e);
+            mLowLightAmbientBrightnessToBiasSpline = null;
+        }
+        if (mLowLightAmbientBrightnessToBiasSpline != null) {
+            if (mLowLightAmbientBrightnessToBiasSpline.interpolate(0.0f) != 0.0f ||
+                    mLowLightAmbientBrightnessToBiasSpline.interpolate(Float.POSITIVE_INFINITY)
+                    != 1.0f) {
+                Slog.d(TAG, "invalid low light ambient brightness to bias spline, "
+                        + "bias must begin at 0.0 and end at 1.0.");
+                mLowLightAmbientBrightnessToBiasSpline = null;
+            }
+        }
+
+        try {
+            mHighLightAmbientBrightnessToBiasSpline = new Spline.LinearSpline(
+                    highLightAmbientBrightnesses, highLightAmbientBiases);
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to create high light ambient brightness to bias spline.", e);
+            mHighLightAmbientBrightnessToBiasSpline = null;
+        }
+        if (mHighLightAmbientBrightnessToBiasSpline != null) {
+            if (mHighLightAmbientBrightnessToBiasSpline.interpolate(0.0f) != 0.0f ||
+                    mHighLightAmbientBrightnessToBiasSpline.interpolate(Float.POSITIVE_INFINITY)
+                    != 1.0f) {
+                Slog.d(TAG, "invalid high light ambient brightness to bias spline, "
+                        + "bias must begin at 0.0 and end at 1.0.");
+                mHighLightAmbientBrightnessToBiasSpline = null;
+            }
+        }
+
+        if (mLowLightAmbientBrightnessToBiasSpline != null &&
+                mHighLightAmbientBrightnessToBiasSpline != null) {
+            if (lowLightAmbientBrightnesses[lowLightAmbientBrightnesses.length - 1] >
+                    highLightAmbientBrightnesses[0]) {
+                Slog.d(TAG, "invalid low light and high light ambient brightness to bias spline "
+                        + "combination, defined domains must not intersect.");
+                mLowLightAmbientBrightnessToBiasSpline = null;
+                mHighLightAmbientBrightnessToBiasSpline = null;
+            }
+        }
+
+        try {
             mAmbientToDisplayColorTemperatureSpline = new Spline.LinearSpline(
                     ambientColorTemperatures, displayColorTemperatures);
         } catch (Exception e) {
+            Slog.e(TAG, "failed to create ambient to display color temperature spline.", e);
             mAmbientToDisplayColorTemperatureSpline = null;
         }
 
@@ -238,9 +313,8 @@ public class DisplayWhiteBalanceController implements
         mColorTemperatureSensor.dump(writer);
         mColorTemperatureFilter.dump(writer);
         mThrottler.dump(writer);
-        writer.println("  mLowLightAmbientBrightnessThreshold="
-                + mLowLightAmbientBrightnessThreshold);
         writer.println("  mLowLightAmbientColorTemperature=" + mLowLightAmbientColorTemperature);
+        writer.println("  mHighLightAmbientColorTemperature=" + mHighLightAmbientColorTemperature);
         writer.println("  mAmbientColorTemperature=" + mAmbientColorTemperature);
         writer.println("  mPendingAmbientColorTemperature=" + mPendingAmbientColorTemperature);
         writer.println("  mLastAmbientColorTemperature=" + mLastAmbientColorTemperature);
@@ -248,6 +322,10 @@ public class DisplayWhiteBalanceController implements
         writer.println("  mAmbientColorTemperatureOverride=" + mAmbientColorTemperatureOverride);
         writer.println("  mAmbientToDisplayColorTemperatureSpline="
                 + mAmbientToDisplayColorTemperatureSpline);
+        writer.println("  mLowLightAmbientBrightnessToBiasSpline="
+                + mLowLightAmbientBrightnessToBiasSpline);
+        writer.println("  mHighLightAmbientBrightnessToBiasSpline="
+                + mHighLightAmbientBrightnessToBiasSpline);
     }
 
     @Override // AmbientSensor.AmbientBrightnessSensor.Callbacks
@@ -276,15 +354,21 @@ public class DisplayWhiteBalanceController implements
                 mAmbientToDisplayColorTemperatureSpline.interpolate(ambientColorTemperature);
         }
 
-        final float ambientBrightness = mBrightnessFilter.getEstimate(time);
-        if (ambientBrightness < mLowLightAmbientBrightnessThreshold) {
-            if (mLoggingEnabled) {
-                Slog.d(TAG, "low light ambient brightness: " + ambientBrightness + " < "
-                        + mLowLightAmbientBrightnessThreshold
-                        + ", falling back to fixed ambient color temperature: "
-                        + ambientColorTemperature + " => " + mLowLightAmbientColorTemperature);
-            }
-            ambientColorTemperature = mLowLightAmbientColorTemperature;
+        float ambientBrightness = mBrightnessFilter.getEstimate(time);
+
+        if (ambientColorTemperature != -1.0f &&
+                mLowLightAmbientBrightnessToBiasSpline != null) {
+            float bias = mLowLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
+            ambientColorTemperature =
+                    bias * ambientColorTemperature + (1.0f - bias)
+                    * mLowLightAmbientColorTemperature;
+        }
+        if (ambientColorTemperature != -1.0f &&
+                mHighLightAmbientBrightnessToBiasSpline != null) {
+            float bias = mHighLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
+            ambientColorTemperature =
+                    (1.0f - bias) * ambientColorTemperature + bias
+                    * mHighLightAmbientColorTemperature;
         }
 
         if (mAmbientColorTemperatureOverride != -1.0f) {

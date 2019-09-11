@@ -2116,29 +2116,36 @@ public class SubscriptionManager {
     }
 
     /**
+     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     *
      * @return the list of subId's that are active,
      *         is never null but the length maybe 0.
      * @hide
      */
     @UnsupportedAppUsage
     public @NonNull int[] getActiveSubscriptionIdList() {
-        int[] subId = null;
+        return getActiveSubscriptionIdList(/* visibleOnly */ true);
+    }
 
+    /**
+     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     *
+     * @return a non-null list of subId's that are active.
+     *
+     * @hide
+     */
+    public @NonNull int[] getActiveSubscriptionIdList(boolean visibleOnly) {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subId = iSub.getActiveSubIdList(/*visibleOnly*/true);
+                int[] subId = iSub.getActiveSubIdList(visibleOnly);
+                if (subId != null) return subId;
             }
         } catch (RemoteException ex) {
             // ignore it
         }
 
-        if (subId == null) {
-            subId = new int[0];
-        }
-
-        return subId;
-
+        return new int[0];
     }
 
     /**
@@ -2989,10 +2996,10 @@ public class SubscriptionManager {
      * @param info the subscriptionInfo to check against.
      * @return true if this subscription should be visible to the API caller.
      *
+     * @hide
      */
-    private boolean isSubscriptionVisible(SubscriptionInfo info) {
+    public boolean isSubscriptionVisible(SubscriptionInfo info) {
         if (info == null) return false;
-
         // If subscription is NOT grouped opportunistic subscription, it's visible.
         if (info.getGroupUuid() == null || !info.isOpportunistic()) return true;
 

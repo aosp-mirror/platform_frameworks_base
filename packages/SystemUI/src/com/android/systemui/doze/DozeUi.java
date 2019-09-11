@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 
 import android.app.AlarmManager;
@@ -116,7 +117,7 @@ public class DozeUi implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD:
-                if (oldState == DOZE_AOD_PAUSED) {
+                if (oldState == DOZE_AOD_PAUSED || oldState == DOZE) {
                     // Whenever turning on the display, it's necessary to push a new frame.
                     // The display buffers will be empty and need to be filled.
                     mHost.dozeTimeTick();
@@ -130,6 +131,7 @@ public class DozeUi implements DozeMachine.Part {
                 break;
             case DOZE:
             case DOZE_AOD_PAUSED:
+                mHost.prepareForGentleWakeUp();
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:

@@ -1115,6 +1115,22 @@
          regularly selected color mode will be used if this value is negative. -->
     <integer name="config_accessibilityColorMode">-1</integer>
 
+    <!-- The following two arrays specify which color space to use for display composition when a
+         certain color mode is active.
+         Composition color spaces are defined in android.view.Display.COLOR_MODE_xxx, and color
+         modes are defined in ColorDisplayManager.COLOR_MODE_xxx and
+         ColorDisplayManager.VENDOR_COLOR_MODE_xxx.
+         The color space COLOR_MODE_DEFAULT (0) lets the system select the most appropriate
+         composition color space for currently displayed content. Other values (e.g.,
+         COLOR_MODE_SRGB) override system selection; these other color spaces must be supported by
+         the device for for display composition.
+         If a color mode does not have a corresponding color space specified in this array, the
+         currently set composition color space will not be modified.-->
+    <integer-array name="config_displayCompositionColorModes">
+    </integer-array>
+    <integer-array name="config_displayCompositionColorSpaces">
+    </integer-array>
+
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
          if the sensor HAL correctly handles the proximity sensor as a wake-up source.
@@ -2286,7 +2302,7 @@
          effectively and terminate the dream.  Use -1 to disable this safety feature.  -->
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
-    <integer name="config_attentionMaximumExtension">240000</integer> <!-- 4 minutes -->
+    <integer name="config_attentionMaximumExtension">330000</integer> <!-- 5 minutes and 30 sec.-->
     <!-- How long we should wait until we give up on receiving an attention API callback.  -->
     <integer name="config_attentionApiTimeout">2000</integer> <!-- 2 seconds -->
 
@@ -2319,7 +2335,7 @@
 
     <!-- If the sensor that wakes up the lock screen is available or not. -->
     <bool name="config_dozeWakeLockScreenSensorAvailable">false</bool>
-    <integer name="config_dozeWakeLockScreenDebounce">1500</integer>
+    <integer name="config_dozeWakeLockScreenDebounce">300</integer>
 
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND
@@ -3808,9 +3824,11 @@
     <integer name="config_stableDeviceDisplayWidth">-1</integer>
     <integer name="config_stableDeviceDisplayHeight">-1</integer>
 
-    <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
-         when SIM is unready. -->
-    <bool name="config_display_no_service_when_sim_unready">false</bool>
+    <!-- List of countries in which we display 'No service' on status bar
+         instead of 'Emergency calls only' when SIM is unready. -->
+    <string-array translatable="false" name="config_display_no_service_when_sim_unready">
+        <item>"DE"</item>
+    </string-array>
 
     <!-- Class names of device specific services inheriting com.android.server.SystemService. The
          classes are instantiated in the order of the array. -->
@@ -4050,14 +4068,60 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
-         The ambient brightness threshold (in lux) beneath which we fall back to a fixed ambient
-         color temperature. -->
-    <item name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" format="float" type="dimen">10.0</item>
+         A float array containing a list of ambient brightnesses, in Lux. This array,
+         together with config_displayWhiteBalanceLowLightAmbientBiases, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient brightness readings to a bias, where the bias is used to linearly interpolate
+         between ambient color temperature and
+         config_displayWhiteBalanceLowLightAmbientColorTemperature.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceLowLightAmbientBiases. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBrightnesses">
+        <item>10.0</item>
+        <item>10.0</item>
+    </array>
 
     <!-- See DisplayWhiteBalanceController.
-         The ambient color temperature (in cct) to which we fall back when the ambient brightness
-         drops beneath a certain threshold. -->
+         An array containing a list of biases. See
+         config_displayWhiteBalanceLowLightAmbientBrightnesses for additional details.
+         This array must be in the range of [0.0, 1.0]. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBiases">
+        <item>0.0</item>
+        <item>1.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we interpolate towards using the
+         the look up table generated by config_displayWhiteBalanceLowLightAmbientBrightnesses
+         and config_displayWhiteBalanceLowLightAmbientBiases. -->
     <item name="config_displayWhiteBalanceLowLightAmbientColorTemperature" format="float" type="dimen">6500.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         A float array containing a list of ambient brightnesses, in Lux. This array,
+         together with config_displayWhiteBalanceHighLightAmbientBiases, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient brightness readings to a bias, where the bias is used to linearly interpolate
+         between ambient color temperature and
+         config_displayWhiteBalanceHighLightAmbientColorTemperature.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceHighLightAmbientBiases. -->
+    <array name ="config_displayWhiteBalanceHighLightAmbientBrightnesses">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         An array containing a list of biases. See
+         config_displayWhiteBalanceHighLightAmbientBrightnesses for additional details.
+         This array must be in the range of [0.0, 1.0]. -->
+    <array name ="config_displayWhiteBalanceHighLightAmbientBiases">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we interpolate towards using the
+         the look up table generated by config_displayWhiteBalanceHighLightAmbientBrightnesses
+         and config_displayWhiteBalanceHighLightAmbientBiases. -->
+    <item name="config_displayWhiteBalanceHighLightAmbientColorTemperature" format="float" type="dimen">8000.0</item>
 
     <!-- See DisplayWhiteBalanceController.
          A float array containing a list of ambient color temperatures, in Kelvin. This array,
@@ -4093,6 +4157,15 @@
         M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
     </string>
 
+    <!-- X path for SignalDrawable as defined on a 24x24 canvas. -->
+    <string name="config_signalXPath" translatable="false">
+        M22,16.41L20.59,15l-2.09,2.09L16.41,15L15,16.41l2.09,2.09L15,20.59L16.41,22l2.09-2.08L20.59,22L22,20.59l-2.08-2.09   L22,16.41z
+    </string>
+    <!-- config_signalCutout{Height,Width}Fraction define fraction of the 24x24 canvas that
+         should be cut out to display config_signalXPath.-->
+    <item name="config_signalCutoutWidthFraction" format="float" type="dimen">11</item>
+    <item name="config_signalCutoutHeightFraction" format="float" type="dimen">11</item>
+
     <!-- A dual tone battery meter draws the perimeter path twice - once to define the shape
      and a second time clipped to the fill level to indicate charge -->
     <bool name="config_batterymeterDualTone">false</bool>
@@ -4100,6 +4173,28 @@
     <!-- The default peak refresh rate for a given device. Change this value if you want to allow
          for higher refresh rates to be automatically used out of the box -->
     <integer name="config_defaultPeakRefreshRate">60</integer>
+
+    <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
+         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         flicker could be observed at switch time. The issue is worse at the gamma lower end.
+         In addition, human eyes are more sensitive to the flicker at darker environment.
+         To prevent flicker, we only support higher refresh rates if the display brightness is above
+         a threshold. And the darker environment could have higher threshold.
+         For example, no higher refresh rate if
+             display brightness <= disp0 && ambient brightness <= amb0
+             || display brightness <= disp1 && ambient brightness <= amb1 -->
+    <integer-array translatable="false" name="config_brightnessThresholdsOfPeakRefreshRate">
+         <!--
+           <item>disp0</item>
+           <item>disp1</item>
+        -->
+    </integer-array>
+    <integer-array translatable="false" name="config_ambientThresholdsOfPeakRefreshRate">
+         <!--
+           <item>amb0</item>
+           <item>amb1</item>
+        -->
+    </integer-array>
 
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
@@ -4163,6 +4258,9 @@
     <integer-array name="config_face_acquire_vendor_biometricprompt_ignorelist" translatable="false" >
     </integer-array>
 
+    <!-- If face auth sends the user directly to home/last open app, or stays on keyguard -->
+    <bool name="config_faceAuthDismissesKeyguard">true</bool>
+
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
     only. The component must be part of a system app. -->
@@ -4178,4 +4276,8 @@
 
     <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
     <integer name="config_maxShortcutTargetsPerApp">3</integer>
+
+    <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
+         of known compatibility issues. -->
+    <string-array name="config_highRefreshRateBlacklist"></string-array>
 </resources>

@@ -375,7 +375,7 @@ public class AttentionManagerService extends SystemService {
 
     private void dumpInternal(IndentingPrintWriter ipw) {
         ipw.println("Attention Manager Service (dumpsys attention) state:\n");
-
+        ipw.println("isServiceEnabled=" + isServiceEnabled());
         ipw.println("AttentionServicePackageName=" + getServiceConfigPackage(mContext));
         ipw.println("Resolved component:");
         if (mComponentName != null) {

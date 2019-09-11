@@ -112,7 +112,7 @@
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
     <!-- Height of a small notification in the status bar-->
-    <dimen name="notification_min_height">106dp</dimen>
+    <dimen name="notification_min_height">@*android:dimen/notification_min_height</dimen>
 
     <!-- Increased height of a small notification in the status bar -->
     <dimen name="notification_min_height_increased">146dp</dimen>
@@ -182,6 +182,9 @@
 
     <!-- The padding on the bottom of the notifications on the keyguard -->
     <dimen name="keyguard_indication_bottom_padding">12sp</dimen>
+
+    <!-- The padding at start and end of indication text shown on AOD -->
+    <dimen name="keyguard_indication_text_padding">16dp</dimen>
 
     <!-- Shadows under the clock, date and other keyguard text fields -->
     <dimen name="keyguard_shadow_radius">5</dimen>
@@ -258,8 +261,8 @@
     <!-- size at which Notification icons will be drawn on Ambient Display -->
     <dimen name="status_bar_icon_drawing_size_dark">@*android:dimen/notification_header_icon_size_ambient</dimen>
 
-    <!-- size of notification icons on AOD -->
-    <dimen name="dark_shelf_icon_size">16dp</dimen>
+    <!-- size of notification icons when the notifications are hidden -->
+    <dimen name="hidden_shelf_icon_size">16dp</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
     <item type="dimen" name="status_bar_icon_drawing_alpha">90%</item>

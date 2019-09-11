@@ -37,6 +37,7 @@ import android.util.TimingsTraceLog;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.util.NotificationChannels;
@@ -215,7 +216,8 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                                 StatusBar statusBar = getComponent(StatusBar.class);
                                 if (statusBar != null) {
                                     plugin.setup(statusBar.getStatusBarWindow(),
-                                            statusBar.getNavigationBarView(), new Callback(plugin));
+                                            statusBar.getNavigationBarView(), new Callback(plugin),
+                                            DozeParameters.getInstance(getBaseContext()));
                                 }
                             }
                         });

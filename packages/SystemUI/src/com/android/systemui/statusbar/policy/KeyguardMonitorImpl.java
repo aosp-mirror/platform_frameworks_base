@@ -54,6 +54,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     private long mKeyguardFadingAwayDuration;
     private boolean mKeyguardGoingAway;
     private boolean mLaunchTransitionFadingAway;
+    private boolean mBypassFadingAnimation;
 
     /**
      */
@@ -140,15 +141,26 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
     }
 
-    public void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
-        mKeyguardFadingAway = true;
+    public void notifyKeyguardFadingAway(long delay, long fadeoutDuration, boolean isBypassFading) {
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
+        mBypassFadingAnimation = isBypassFading;
+        setKeyguardFadingAway(true);
+    }
+
+    private void setKeyguardFadingAway(boolean keyguardFadingAway) {
+        if (mKeyguardFadingAway != keyguardFadingAway) {
+            mKeyguardFadingAway = keyguardFadingAway;
+            ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).onKeyguardFadingAwayChanged();
+            }
+        }
     }
 
     public void notifyKeyguardDoneFading() {
-        mKeyguardFadingAway = false;
         mKeyguardGoingAway = false;
+        setKeyguardFadingAway(false);
     }
 
     @Override
@@ -159,6 +171,11 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     @Override
     public boolean isKeyguardGoingAway() {
         return mKeyguardGoingAway;
+    }
+
+    @Override
+    public boolean isBypassFadingAnimation() {
+        return mBypassFadingAnimation;
     }
 
     @Override

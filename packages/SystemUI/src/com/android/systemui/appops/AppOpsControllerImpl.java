@@ -61,6 +61,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
+    private boolean mListening;
 
     @GuardedBy("mActiveItems")
     private final List<AppOpItem> mActiveItems = new ArrayList<>();
@@ -93,6 +94,7 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     @VisibleForTesting
     protected void setListening(boolean listening) {
+        mListening = listening;
         if (listening) {
             mAppOps.startWatchingActive(OPS, this);
             mAppOps.startWatchingNoted(OPS, this);
@@ -279,6 +281,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("AppOpsController state:");
+        pw.println("  Listening: " + mListening);
         pw.println("  Active Items:");
         for (int i = 0; i < mActiveItems.size(); i++) {
             final AppOpItem item = mActiveItems.get(i);

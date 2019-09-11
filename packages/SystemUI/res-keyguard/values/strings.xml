@@ -407,14 +407,11 @@ number">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. 
 number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
     </plurals>
 
-    <!-- Title for default clock face that will appear in the picker app next to a preview image of
-         the clock face. [CHAR LIMIT=8] -->
-    <string name="clock_title_default" translatable="false">Default</string>
-    <!-- Title for Bubble clock face that will appear in the picker app next to a preview image of
-         the clock face. [CHAR LIMIT=8] -->
-    <string name="clock_title_bubble" translatable="false">Bubble</string>
-    <!-- Title for Stretch clock face that will appear in the picker app next to a preview image of
-         the clock face. [CHAR LIMIT=8] -->
-    <string name="clock_title_analog" translatable="false">Analog</string>
+    <!-- Name of the "Default" clock face, which is the clock face that will be shown by default. [CHAR LIMIT=15]-->
+    <string name="clock_title_default">Default</string>
+    <!-- Name of the "Bubble" clock face, which is an analog clock with hands shaped like large bubbles [CHAR LIMIT=15]-->
+    <string name="clock_title_bubble">Bubble</string>
+    <!-- Name of the "Analog" clock face [CHAR LIMIT=15]-->
+    <string name="clock_title_analog">Analog</string>
 
 </resources>

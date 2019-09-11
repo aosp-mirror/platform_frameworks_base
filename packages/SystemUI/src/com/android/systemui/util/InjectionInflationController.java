@@ -32,6 +32,7 @@ import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
@@ -136,6 +137,11 @@ public class InjectionInflationController {
          * Creates the QSCarrierGroup
          */
         QSCarrierGroup createQSCarrierGroup();
+
+        /**
+         * Creates the Shelf.
+         */
+        NotificationShelf creatNotificationShelf();
 
         /**
          * Creates the KeyguardClockSwitch.

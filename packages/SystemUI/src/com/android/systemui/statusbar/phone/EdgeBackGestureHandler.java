@@ -31,8 +31,10 @@ import android.hardware.input.InputManager;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.StatsLog;
 import android.view.Gravity;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -66,7 +68,8 @@ import java.util.concurrent.Executor;
 public class EdgeBackGestureHandler implements DisplayListener {
 
     private static final String TAG = "EdgeBackGestureHandler";
-    private static final int MAX_LONG_PRESS_TIMEOUT = 250;
+    private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
+            "gestures.back_timeout", 250);
 
     private final IPinnedStackListener.Stub mImeChangedListener = new IPinnedStackListener.Stub() {
         @Override
@@ -103,9 +106,13 @@ public class EdgeBackGestureHandler implements DisplayListener {
             new ISystemGestureExclusionListener.Stub() {
                 @Override
                 public void onSystemGestureExclusionChanged(int displayId,
-                        Region systemGestureExclusion) {
+                        Region systemGestureExclusion, Region unrestrictedOrNull) {
                     if (displayId == mDisplayId) {
-                        mMainExecutor.execute(() -> mExcludeRegion.set(systemGestureExclusion));
+                        mMainExecutor.execute(() -> {
+                            mExcludeRegion.set(systemGestureExclusion);
+                            mUnrestrictedExcludeRegion.set(unrestrictedOrNull != null
+                                    ? unrestrictedOrNull : systemGestureExclusion);
+                        });
                     }
                 }
             };
@@ -119,6 +126,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private final Executor mMainExecutor;
 
     private final Region mExcludeRegion = new Region();
+    private final Region mUnrestrictedExcludeRegion = new Region();
+
     // The edge width where touch down is allowed
     private int mEdgeWidth;
     // The slop to distinguish between horizontal and vertical motion
@@ -137,6 +146,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private final PointF mDownPoint = new PointF();
     private boolean mThresholdCrossed = false;
     private boolean mAllowGesture = false;
+    private boolean mInRejectedExclusion = false;
     private boolean mIsOnLeftEdge;
 
     private int mImeHeight = 0;
@@ -316,6 +326,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
         if (isInExcludedRegion) {
             mOverviewProxyService.notifyBackAction(false /* completed */, -1, -1,
                     false /* isButton */, !mIsOnLeftEdge);
+            StatsLog.write(StatsLog.BACK_GESTURE_REPORTED_REPORTED,
+                    StatsLog.BACK_GESTURE__TYPE__INCOMPLETE_EXCLUDED, y,
+                    mIsOnLeftEdge ? StatsLog.BACK_GESTURE__X_LOCATION__LEFT :
+                            StatsLog.BACK_GESTURE__X_LOCATION__RIGHT);
+        } else {
+            mInRejectedExclusion = mUnrestrictedExcludeRegion.contains(x, y);
         }
         return !isInExcludedRegion;
     }
@@ -323,6 +339,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private void cancelGesture(MotionEvent ev) {
         // Send action cancel to reset all the touch events
         mAllowGesture = false;
+        mInRejectedExclusion = false;
         MotionEvent cancelEv = MotionEvent.obtain(ev);
         cancelEv.setAction(MotionEvent.ACTION_CANCEL);
         mEdgePanel.handleTouch(cancelEv);
@@ -336,6 +353,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
             // either the bouncer is showing or the notification panel is hidden
             int stateFlags = mOverviewProxyService.getSystemUiStateFlags();
             mIsOnLeftEdge = ev.getX() <= mEdgeWidth + mLeftInset;
+            mInRejectedExclusion = false;
             mAllowGesture = !QuickStepContract.isBackGestureDisabled(stateFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
@@ -390,6 +408,14 @@ public class EdgeBackGestureHandler implements DisplayListener {
                 }
                 mOverviewProxyService.notifyBackAction(performAction, (int) mDownPoint.x,
                         (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
+                int backtype = performAction ? (mInRejectedExclusion
+                        ? StatsLog.BACK_GESTURE__TYPE__COMPLETED_REJECTED :
+                                StatsLog.BACK_GESTURE__TYPE__COMPLETED) :
+                                        StatsLog.BACK_GESTURE__TYPE__INCOMPLETE;
+                StatsLog.write(StatsLog.BACK_GESTURE_REPORTED_REPORTED, backtype,
+                        (int) mDownPoint.y, mIsOnLeftEdge
+                                ? StatsLog.BACK_GESTURE__X_LOCATION__LEFT :
+                                StatsLog.BACK_GESTURE__X_LOCATION__RIGHT);
             }
             if (isUp || action == MotionEvent.ACTION_CANCEL) {
                 mRegionSamplingHelper.stop();
@@ -461,7 +487,9 @@ public class EdgeBackGestureHandler implements DisplayListener {
         pw.println("EdgeBackGestureHandler:");
         pw.println("  mIsEnabled=" + mIsEnabled);
         pw.println("  mAllowGesture=" + mAllowGesture);
+        pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
+        pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
         pw.println("  mImeHeight=" + mImeHeight);
         pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mEdgeWidth=" + mEdgeWidth);

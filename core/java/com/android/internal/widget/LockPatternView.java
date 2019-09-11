@@ -627,6 +627,13 @@ public class LockPatternView extends View {
     }
 
     /**
+     * If there are any cells being drawn.
+     */
+    public boolean isEmpty() {
+        return mPattern.isEmpty();
+    }
+
+    /**
      * Clear the pattern lookup table. Also reset the line fade start times for
      * the next attempt.
      */

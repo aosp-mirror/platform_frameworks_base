@@ -16,6 +16,7 @@
 
 package com.android.systemui.assist.ui;
 
+import android.content.Context;
 import android.graphics.Path;
 
 /**
@@ -29,12 +30,11 @@ public final class CircularCornerPathRenderer extends CornerPathRenderer {
     private final int mWidth;
     private final Path mPath = new Path();
 
-    public CircularCornerPathRenderer(int cornerRadiusBottom, int cornerRadiusTop,
-            int width, int height) {
-        mCornerRadiusBottom = cornerRadiusBottom;
-        mCornerRadiusTop = cornerRadiusTop;
-        mHeight = height;
-        mWidth = width;
+    public CircularCornerPathRenderer(Context context) {
+        mCornerRadiusBottom = DisplayUtils.getCornerRadiusBottom(context);
+        mCornerRadiusTop = DisplayUtils.getCornerRadiusTop(context);
+        mHeight = DisplayUtils.getHeight(context);
+        mWidth = DisplayUtils.getWidth(context);
     }
 
     @Override // CornerPathRenderer

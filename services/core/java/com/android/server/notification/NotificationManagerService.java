@@ -397,7 +397,7 @@ public class NotificationManagerService extends SystemService {
 
     // for enabling and disabling notification pulse behavior
     boolean mScreenOn = true;
-    protected boolean mInCall = false;
+    protected boolean mInCallStateOffHook = false;
     boolean mNotificationPulseEnabled;
 
     private Uri mInCallNotificationUri;
@@ -1306,7 +1306,7 @@ public class NotificationManagerService extends SystemService {
                 mScreenOn = false;
                 updateNotificationPulse();
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
-                mInCall = TelephonyManager.EXTRA_STATE_OFFHOOK
+                mInCallStateOffHook = TelephonyManager.EXTRA_STATE_OFFHOOK
                         .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
                 updateNotificationPulse();
             } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
@@ -5724,7 +5724,7 @@ public class NotificationManagerService extends SystemService {
                     }
                     if (DBG) Slog.v(TAG, "Interrupting!");
                     if (hasValidSound) {
-                        if (mInCall) {
+                        if (isInCall()) {
                             playInCallNotification();
                             beep = true;
                         } else {
@@ -5738,7 +5738,7 @@ public class NotificationManagerService extends SystemService {
                     final boolean ringerModeSilent =
                             mAudioManager.getRingerModeInternal()
                                     == AudioManager.RINGER_MODE_SILENT;
-                    if (!mInCall && hasValidVibrate && !ringerModeSilent) {
+                    if (!isInCall() && hasValidVibrate && !ringerModeSilent) {
                         buzz = playVibration(record, vibration, hasValidSound);
                         if(buzz) {
                             mVibrateNotificationKey = key;
@@ -5826,7 +5826,7 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         // not if in call or the screen's on
-        if (mInCall || mScreenOn) {
+        if (isInCall() || mScreenOn) {
             return false;
         }
 
@@ -6927,7 +6927,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // Don't flash while we are in a call or screen is on
-        if (ledNotification == null || mInCall || mScreenOn) {
+        if (ledNotification == null || isInCall() || mScreenOn) {
             mNotificationLight.turnOff();
         } else {
             NotificationRecord.Light light = ledNotification.getLight();
@@ -7393,6 +7393,18 @@ public class NotificationManagerService extends SystemService {
                 return sbnClone;
             }
         }
+    }
+
+    private boolean isInCall() {
+        if (mInCallStateOffHook) {
+            return true;
+        }
+        int audioMode = mAudioManager.getMode();
+        if (audioMode == AudioManager.MODE_IN_CALL
+                || audioMode == AudioManager.MODE_IN_COMMUNICATION) {
+            return true;
+        }
+        return false;
     }
 
     public class NotificationAssistants extends ManagedServices {
