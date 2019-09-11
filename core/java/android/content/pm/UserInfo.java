@@ -57,7 +57,7 @@ public class UserInfo implements Parcelable {
 
     /**
      * Primary user. Only one user can have this flag set. It identifies the first human user
-     * on a device.
+     * on a device. This flag is not supported in headless system user mode.
      */
     @UnsupportedAppUsage
     public static final int FLAG_PRIMARY = 0x00000001;
