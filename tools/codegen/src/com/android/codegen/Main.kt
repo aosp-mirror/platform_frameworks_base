@@ -107,7 +107,7 @@ fun main(args: Array<String>) {
         println(CODEGEN_VERSION)
         System.exit(0)
     }
-    val file = File(args.last())
+    val file = File(args.last()).absoluteFile
     val sourceLinesNoClosingBrace = file.readLines().dropLastWhile {
         it.startsWith("}") || it.all(Char::isWhitespace)
     }
