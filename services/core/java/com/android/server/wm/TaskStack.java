@@ -1746,6 +1746,11 @@ public class TaskStack extends WindowContainer<Task> implements
             if (toBounds.width() == fromBounds.width()
                     && toBounds.height() == fromBounds.height()) {
                 intendedAnimationType = BoundsAnimationController.BOUNDS;
+            } else if (!fromFullscreen && !toBounds.equals(fromBounds)) {
+                // intendedAnimationType may have been reset at the end of RecentsAnimation,
+                // force it to BOUNDS type if we know for certain we're animating to
+                // a different bounds, especially for expand and collapse of PiP window.
+                intendedAnimationType = BoundsAnimationController.BOUNDS;
             }
         }
 
