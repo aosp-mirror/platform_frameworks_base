@@ -800,6 +800,7 @@ public final class Magnifier {
         // The surface we allocate for the magnifier content + shadow.
         private final SurfaceSession mSurfaceSession;
         private final SurfaceControl mSurfaceControl;
+        private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
         private final Surface mSurface;
         // The renderer used for the allocated surface.
         private final ThreadedRenderer.SimpleRenderer mRenderer;
@@ -1081,16 +1082,16 @@ public final class Magnifier {
                             return;
                         }
                         // Show or move the window at the content draw frame.
-                        SurfaceControl.openTransaction();
-                        mSurfaceControl.deferTransactionUntil(mSurface, frame);
+                        mTransaction.deferTransactionUntilSurface(mSurfaceControl, mSurface, frame);
                         if (updateWindowPosition) {
-                            mSurfaceControl.setPosition(pendingX, pendingY);
+                            mTransaction.setPosition(mSurfaceControl, pendingX, pendingY);
                         }
                         if (firstDraw) {
-                            mSurfaceControl.setLayer(SURFACE_Z);
-                            mSurfaceControl.show();
+                            mTransaction.setLayer(mSurfaceControl, SURFACE_Z)
+                                .show(mSurfaceControl);
+
                         }
-                        SurfaceControl.closeTransaction();
+                        mTransaction.apply();
                     };
                     mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
                 } else {
