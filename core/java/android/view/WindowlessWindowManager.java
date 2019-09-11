@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.res.Configuration;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -93,6 +94,14 @@ class WindowlessWindowManager implements IWindowSession {
     @Override
     public void remove(android.view.IWindow window) {}
 
+    private boolean isOpaque(WindowManager.LayoutParams attrs) {
+        if (attrs.surfaceInsets.left != 0 || attrs.surfaceInsets.top != 0 ||
+                attrs.surfaceInsets.right != 0 || attrs.surfaceInsets.bottom != 0) {
+            return false;
+        }
+        return !PixelFormat.formatHasAlpha(attrs.format);
+    }
+
     @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
@@ -109,7 +118,11 @@ class WindowlessWindowManager implements IWindowSession {
                     "Invalid window token (never added or removed already)");
         }
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        t.show(sc).setBufferSize(sc, requestedWidth, requestedHeight).apply();
+        t.show(sc).setBufferSize(sc,
+                requestedWidth + attrs.surfaceInsets.left + attrs.surfaceInsets.right,
+                requestedHeight + attrs.surfaceInsets.top + attrs.surfaceInsets.bottom)
+            .setOpaque(sc, isOpaque(attrs))
+            .apply();
         outSurfaceControl.copyFrom(sc);
         outFrame.set(0, 0, requestedWidth, requestedHeight);
 
