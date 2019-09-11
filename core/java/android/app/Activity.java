@@ -2469,17 +2469,13 @@ public class Activity extends ContextThemeWrapper
             getAutofillManager().onInvisibleForAutofill();
         }
 
-        if (isFinishing()) {
-            if (mAutoFillResetNeeded) {
-                getAutofillManager().onActivityFinishing();
-            } else if (mIntent != null
-                    && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
-                // Activity was launched when user tapped a link in the Autofill Save UI - since
-                // user launched another activity, the Save UI should not be restored when this
-                // activity is finished.
-                getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
-                        mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
-            }
+        if (isFinishing() && !mAutoFillResetNeeded && mIntent != null
+                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
+            // Activity was launched when user tapped a link in the Autofill Save UI - since
+            // user launched another activity, the Save UI should not be restored when this
+            // activity is finished.
+            getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
+                    mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
         }
         mEnterAnimationComplete = false;
     }
@@ -2516,6 +2512,10 @@ public class Activity extends ContextThemeWrapper
     protected void onDestroy() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onDestroy " + this);
         mCalled = true;
+
+        if (isFinishing() && mAutoFillResetNeeded) {
+            getAutofillManager().onActivityFinishing();
+        }
 
         // dismiss any dialogs we are managing.
         if (mManagedDialogs != null) {
