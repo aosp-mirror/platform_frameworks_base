@@ -1060,6 +1060,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // simulates finishing in non-focused stack in split-screen.
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
         stack.getChildAt(0).getChildAt(0).nowVisible = true;
+        stack.getChildAt(0).getChildAt(0).visible = true;
 
         topActivity.completeFinishing("test");
 
