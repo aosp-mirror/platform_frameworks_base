@@ -4356,6 +4356,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Insets mLayoutInsets;
 
     /**
+     * Briefly describes the state of the view and is primarily used for accessibility support.
+     */
+    private CharSequence mStateDescription;
+
+    /**
      * Briefly describes the view and is primarily used for accessibility support.
      */
     private CharSequence mContentDescription;
@@ -9925,6 +9930,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setImportantForAccessibility(isImportantForAccessibility());
         info.setPackageName(mContext.getPackageName());
         info.setClassName(getAccessibilityClassName());
+        info.setStateDescription(getStateDescription());
         info.setContentDescription(getContentDescription());
 
         info.setEnabled(isEnabled());
@@ -10297,6 +10303,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the {@link View}'s state description.
+     * <p>
+     * <strong>Note:</strong> Do not override this method, as it will have no
+     * effect on the state description presented to accessibility services.
+     * You must call {@link #setStateDescription(CharSequence)} to modify the
+     * state description.
+     *
+     * @return the state description
+     * @see #setStateDescription(CharSequence)
+     */
+    @ViewDebug.ExportedProperty(category = "accessibility")
+    public final @Nullable CharSequence getStateDescription() {
+        return mStateDescription;
+    }
+
+    /**
      * Returns the {@link View}'s content description.
      * <p>
      * <strong>Note:</strong> Do not override this method, as it will have no
@@ -10312,6 +10334,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @InspectableProperty
     public CharSequence getContentDescription() {
         return mContentDescription;
+    }
+
+    /**
+     * Sets the {@link View}'s state description.
+     * <p>
+     * A state description briefly describes the states of the view and is primarily used
+     * for accessibility support to determine how the states of a view should be presented to
+     * the user. It is a supplement to the boolean states (for example, checked/unchecked) and
+     * it is used for customized state description (for example, "wifi, connected, three bars").
+     * State description changes frequently while content description should change less often.
+     *
+     * @param stateDescription The state description.
+     * @see #getStateDescription()
+     */
+    @RemotableViewMethod
+    public void setStateDescription(@Nullable CharSequence stateDescription) {
+        if (mStateDescription == null) {
+            if (stateDescription == null) {
+                return;
+            }
+        } else if (mStateDescription.equals(stateDescription)) {
+            return;
+        }
+        mStateDescription = stateDescription;
+        if (!TextUtils.isEmpty(stateDescription)
+                && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
+        notifyViewAccessibilityStateChangedIfNeeded(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION);
     }
 
     /**
