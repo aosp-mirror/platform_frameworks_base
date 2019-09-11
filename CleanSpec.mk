@@ -253,6 +253,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/DynamicAndroidInstallationService)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/DefaultContainerService)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/app/CaptivePortalLogin)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/ext.jar)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************
