@@ -715,14 +715,10 @@ public class DisplayContentTests extends WindowTestsBase {
 
         activity.setRequestedOrientation(newOrientation);
 
-        final ArgumentCaptor<Configuration> captor = ArgumentCaptor.forClass(Configuration.class);
-        verify(dc.mActivityDisplay).updateDisplayOverrideConfigurationLocked(captor.capture(),
-                same(activity), anyBoolean(), same(null));
-        final Configuration newDisplayConfig = captor.getValue();
         final int expectedOrientation = newOrientation == SCREEN_ORIENTATION_PORTRAIT
                 ? Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
-        assertEquals(expectedOrientation, newDisplayConfig.orientation);
+        assertEquals(expectedOrientation, dc.getConfiguration().orientation);
     }
 
     @Test
