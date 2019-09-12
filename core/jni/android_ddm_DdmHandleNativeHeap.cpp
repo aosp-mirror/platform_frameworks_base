@@ -23,7 +23,7 @@
 #include "core_jni_helpers.h"
 
 #include <android-base/logging.h>
-#include <bionic_malloc.h>
+#include <bionic/malloc.h>
 
 #include <utils/Log.h>
 #include <utils/String8.h>
