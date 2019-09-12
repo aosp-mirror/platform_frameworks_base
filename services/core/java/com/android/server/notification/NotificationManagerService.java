@@ -5236,8 +5236,16 @@ public class NotificationManagerService extends SystemService {
             }
 
             synchronized (mNotificationLock) {
-                // Look for the notification, searching both the posted and enqueued lists.
-                NotificationRecord r = findNotificationLocked(mPkg, mTag, mId, mUserId);
+                // If the notification is currently enqueued, repost this runnable so it has a
+                // chance to notify listeners
+                if ((findNotificationByListLocked(mEnqueuedNotifications, mPkg, mTag, mId, mUserId))
+                        != null) {
+                    mHandler.post(this);
+                    return;
+                }
+                // Look for the notification in the posted list, since we already checked enqueued.
+                NotificationRecord r =
+                        findNotificationByListLocked(mNotificationList, mPkg, mTag, mId, mUserId);
                 if (r != null) {
                     // The notification was found, check if it should be removed.
 
