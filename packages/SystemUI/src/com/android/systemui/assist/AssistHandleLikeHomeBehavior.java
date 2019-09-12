@@ -20,25 +20,45 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
+
 /**
  * Assistant Handle behavior that makes Assistant handles show/hide when the home handle is
  * shown/hidden, respectively.
  */
+@Singleton
 final class AssistHandleLikeHomeBehavior implements BehaviorController {
 
-    private final StatusBarStateController.StateListener mStatusBarStateListener =
-            new StatusBarStateController.StateListener() {
+    private final WakefulnessLifecycle.Observer mWakefulnessLifecycleObserver =
+            new WakefulnessLifecycle.Observer() {
                 @Override
-                public void onDozingChanged(boolean isDozing) {
-                    handleDozingChanged(isDozing);
+                public void onStartedWakingUp() {
+                    handleDozingChanged(/* isDozing = */ true);
+                }
+
+                @Override
+                public void onFinishedWakingUp() {
+                    handleDozingChanged(/* isDozing = */ false);
+                }
+
+                @Override
+                public void onStartedGoingToSleep() {
+                    handleDozingChanged(/* isDozing = */ true);
+                }
+
+                @Override
+                public void onFinishedGoingToSleep() {
+                    handleDozingChanged(/* isDozing = */ true);
                 }
             };
     private final OverviewProxyService.OverviewProxyListener mOverviewProxyListener =
@@ -48,32 +68,39 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
             handleSystemUiStateChange(sysuiStateFlags);
         }
     };
-    private final StatusBarStateController mStatusBarStateController;
-    private final OverviewProxyService mOverviewProxyService;
+
+
+    private final Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
+    private final Lazy<OverviewProxyService> mOverviewProxyService;
 
     private boolean mIsDozing;
     private boolean mIsHomeHandleHiding;
 
     @Nullable private AssistHandleCallbacks mAssistHandleCallbacks;
 
-    AssistHandleLikeHomeBehavior() {
-        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+    @Inject
+    AssistHandleLikeHomeBehavior(
+            Lazy<WakefulnessLifecycle> wakefulnessLifecycle,
+            Lazy<OverviewProxyService> overviewProxyService) {
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mOverviewProxyService = overviewProxyService;
     }
 
     @Override
     public void onModeActivated(Context context, AssistHandleCallbacks callbacks) {
         mAssistHandleCallbacks = callbacks;
-        mIsDozing = mStatusBarStateController.isDozing();
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mOverviewProxyService.addCallback(mOverviewProxyListener);
+        mIsDozing = mWakefulnessLifecycle.get().getWakefulness()
+                != WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+        mWakefulnessLifecycle.get().addObserver(mWakefulnessLifecycleObserver);
+        mOverviewProxyService.get().addCallback(mOverviewProxyListener);
         callbackForCurrentState();
     }
 
     @Override
     public void onModeDeactivated() {
         mAssistHandleCallbacks = null;
-        mOverviewProxyService.removeCallback(mOverviewProxyListener);
+        mWakefulnessLifecycle.get().removeObserver(mWakefulnessLifecycleObserver);
+        mOverviewProxyService.get().removeCallback(mOverviewProxyListener);
     }
 
     private static boolean isHomeHandleHiding(int sysuiStateFlags) {
