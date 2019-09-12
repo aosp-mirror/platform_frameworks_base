@@ -35,3 +35,6 @@
     *;
 }
 -keep class androidx.core.app.CoreComponentFactory
+
+# Custom rules
+-keep class com.google.android.systemui.** { *; }
