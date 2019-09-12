@@ -729,7 +729,13 @@ public class ChooserActivity extends ResolverActivity {
     /**
      * Returns true if app prediction service is defined and the component exists on device.
      */
-    private boolean isAppPredictionServiceAvailable() {
+    @VisibleForTesting
+    public boolean isAppPredictionServiceAvailable() {
+        if (getPackageManager().getAppPredictionServicePackageName() == null) {
+            // Default AppPredictionService is not defined.
+            return false;
+        }
+
         final String appPredictionServiceName =
                 getString(R.string.config_defaultAppPredictionService);
         if (appPredictionServiceName == null) {
@@ -1747,8 +1753,7 @@ public class ChooserActivity extends ResolverActivity {
         if (!mIsAppPredictorComponentAvailable) {
             return null;
         }
-        if (mAppPredictor == null
-                    && getPackageManager().getAppPredictionServicePackageName() != null) {
+        if (mAppPredictor == null) {
             final IntentFilter filter = getTargetIntentFilter();
             Bundle extras = new Bundle();
             extras.putParcelable(APP_PREDICTION_INTENT_FILTER_KEY, filter);

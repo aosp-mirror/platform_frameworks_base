@@ -807,6 +807,36 @@ public class ChooserActivityTest {
                 is(testBaseScore * SHORTCUT_TARGET_SCORE_BOOST));
     }
 
+    /**
+     * The case when AppPrediction service is not defined in PackageManager is already covered
+     * as a test parameter {@link ChooserActivityTest#packageManagers}. This test is checking the
+     * case when the prediction service is defined but the component is not available on the device.
+     */
+    @Test
+    public void testIsAppPredictionServiceAvailable() {
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        if (activity.getPackageManager().getAppPredictionServicePackageName() == null) {
+            assertThat(activity.isAppPredictionServiceAvailable(), is(false));
+        } else {
+            assertThat(activity.isAppPredictionServiceAvailable(), is(true));
+
+            sOverrides.resources = Mockito.spy(activity.getResources());
+            when(sOverrides.resources.getString(R.string.config_defaultAppPredictionService))
+                    .thenReturn("ComponentNameThatDoesNotExist");
+
+            assertThat(activity.isAppPredictionServiceAvailable(), is(false));
+        }
+    }
+
     // This test is too long and too slow and should not be taken as an example for future tests.
     @Test
     public void testDirectTargetSelectionLogging() throws InterruptedException {
