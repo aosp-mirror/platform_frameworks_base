@@ -2253,10 +2253,11 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy({"mPackagesLock", "mRestrictionsLock"})
     private void fallbackToSingleUserLP() {
-        int flags = UserInfo.FLAG_SYSTEM | UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN;
-        // In headless system user mode, the primary flag is assigned to the first human user.
+        int flags = UserInfo.FLAG_SYSTEM | UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN
+                | UserInfo.FLAG_PRIMARY;
+        // In headless system user mode, headless system user is not a full user.
         if (!UserManager.isHeadlessSystemUserMode()) {
-            flags |= UserInfo.FLAG_PRIMARY | UserInfo.FLAG_FULL;
+            flags |= UserInfo.FLAG_FULL;
         }
         // Create the system user
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags);
@@ -2770,17 +2771,7 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
-                // In headless system user mode, we assign the first human user the primary flag.
-                // And if there is no device owner, we also assign the admin flag to primary user.
-                if (UserManager.isHeadlessSystemUserMode()
-                        && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
-                    flags |= UserInfo.FLAG_PRIMARY;
-                    synchronized (mUsersLock) {
-                        if (!mIsDeviceManaged) {
-                            flags |= UserInfo.FLAG_ADMIN;
-                        }
-                    }
-                }
+
                 if (!isManagedProfile) {
                     // New users cannot be system, and it's not a profile, so per-force it's FULL.
                     flags |= UserInfo.FLAG_FULL;

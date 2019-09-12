@@ -1404,7 +1404,7 @@ public class UserManager {
 
     /**
      * Used to check if this process is running under the primary user. The primary user
-     * is the first human user on a device.
+     * is the first human user on a device. This is not supported in headless system user mode.
      *
      * @return whether this process is running under the primary user.
      * @hide
