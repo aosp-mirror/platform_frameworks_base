@@ -49,11 +49,6 @@ class LocalAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
-    public int getBackgroundColor() {
-        return mSpec.getBackgroundColor();
-    }
-
-    @Override
     public void startAnimation(SurfaceControl animationLeash, Transaction t,
             OnAnimationFinishedCallback finishCallback) {
         mAnimator.startAnimation(mSpec, animationLeash, t,
@@ -97,13 +92,6 @@ class LocalAnimationAdapter implements AnimationAdapter {
          */
         default boolean getShowWallpaper() {
             return false;
-        }
-
-        /**
-         * @see AnimationAdapter#getBackgroundColor
-         */
-        default int getBackgroundColor() {
-            return 0;
         }
 
         /**

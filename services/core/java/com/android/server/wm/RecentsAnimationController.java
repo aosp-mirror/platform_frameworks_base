@@ -806,11 +806,6 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public int getBackgroundColor() {
-            return 0;
-        }
-
-        @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
             // Restore z-layering, position and stack crop until client has a chance to modify it.
