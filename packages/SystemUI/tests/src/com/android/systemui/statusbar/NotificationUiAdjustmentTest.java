@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -199,11 +200,11 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     private NotificationUiAdjustment createUiAdjustmentFromSmartActions(
             String key, List<Notification.Action> actions) {
-        return new NotificationUiAdjustment(key, actions, new CharSequence[0]);
+        return new NotificationUiAdjustment(key, actions, null);
     }
 
     private NotificationUiAdjustment createUiAdjustmentFromSmartReplies(
             String key, CharSequence[] replies) {
-        return new NotificationUiAdjustment(key, Collections.emptyList(), replies);
+        return new NotificationUiAdjustment(key, null, Arrays.asList(replies));
     }
 }

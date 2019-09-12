@@ -744,6 +744,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mHintText;
     private CharSequence mError;
     private CharSequence mPaneTitle;
+    private CharSequence mStateDescription;
     private CharSequence mContentDescription;
     private CharSequence mTooltipText;
     private String mViewIdResourceName;
@@ -2723,12 +2724,40 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Get the state description of this node.
+     *
+     * @return the state description
+     */
+    public @Nullable CharSequence getStateDescription() {
+        return mStateDescription;
+    }
+
+    /**
      * Gets the content description of this node.
      *
      * @return The content description.
      */
     public CharSequence getContentDescription() {
         return mContentDescription;
+    }
+
+
+    /**
+     * Sets the state description of this node.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param stateDescription the state description of this node.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setStateDescription(@Nullable CharSequence stateDescription) {
+        enforceNotSealed();
+        mStateDescription = (stateDescription == null) ? null
+                : stateDescription.subSequence(0, stateDescription.length());
     }
 
     /**
@@ -3373,6 +3402,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         fieldIndex++;
         if (!Objects.equals(mError, DEFAULT.mError)) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
+        if (!Objects.equals(mStateDescription, DEFAULT.mStateDescription)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (!Objects.equals(mContentDescription, DEFAULT.mContentDescription)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
@@ -3505,6 +3538,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mText);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mHintText);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mError);
+        if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mStateDescription);
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             parcel.writeCharSequence(mContentDescription);
         }
@@ -3582,6 +3616,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mOriginalText = other.mOriginalText;
         mHintText = other.mHintText;
         mError = other.mError;
+        mStateDescription = other.mStateDescription;
         mContentDescription = other.mContentDescription;
         mPaneTitle = other.mPaneTitle;
         mTooltipText = other.mTooltipText;
@@ -3706,6 +3741,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) mText = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mHintText = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mError = parcel.readCharSequence();
+        if (isBitSet(nonDefaultFields, fieldIndex++)) mStateDescription = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mContentDescription = parcel.readCharSequence();
         }
@@ -4004,6 +4040,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; text: ").append(mText);
         builder.append("; error: ").append(mError);
         builder.append("; maxTextLength: ").append(mMaxTextLength);
+        builder.append("; stateDescription: ").append(mStateDescription);
         builder.append("; contentDescription: ").append(mContentDescription);
         builder.append("; tooltipText: ").append(mTooltipText);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);

@@ -24,8 +24,18 @@ import androidx.annotation.Nullable;
 
 import java.util.concurrent.Executor;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ * Wrapper class for retrieving phenotype flag values.
+ *
+ * Can be mocked in tests for ease of testing the effects of particular values.
+ */
+@Singleton
 public class PhenotypeHelper {
 
+    @Inject
     public PhenotypeHelper() {}
 
     public long getLong(String name, long defaultValue) {

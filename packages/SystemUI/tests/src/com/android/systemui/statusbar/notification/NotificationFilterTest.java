@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -195,13 +196,16 @@ public class NotificationFilterTest extends SysuiTestCase {
 
         // test should filter out hidden notifications:
         // hidden
-        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
-        entry.suspended = true;
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSuspended(true)
+                .build();
+
         assertTrue(mNotificationFilter.shouldFilterOut(entry));
 
         // not hidden
-        entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
-        entry.suspended = false;
+        entry = new NotificationEntryBuilder()
+                .setSuspended(false)
+                .build();
         assertFalse(mNotificationFilter.shouldFilterOut(entry));
     }
 

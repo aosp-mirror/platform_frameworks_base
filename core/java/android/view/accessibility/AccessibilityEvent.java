@@ -602,6 +602,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 0x00000020;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * state description of the node as returned by
+     * {@link AccessibilityNodeInfo#getStateDescription} changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_STATE_DESCRIPTION = 0x00000040;
+
+    /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window was added.
      */
@@ -696,6 +703,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     CONTENT_CHANGE_TYPE_SUBTREE,
                     CONTENT_CHANGE_TYPE_TEXT,
                     CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION,
+                    CONTENT_CHANGE_TYPE_STATE_DESCRIPTION,
                     CONTENT_CHANGE_TYPE_PANE_TITLE,
                     CONTENT_CHANGE_TYPE_PANE_APPEARED,
                     CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
@@ -885,6 +893,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return The bit mask of change types. One or more of:
      *         <ul>
      *         <li>{@link #CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}
      *         <li>{@link #CONTENT_CHANGE_TYPE_SUBTREE}
      *         <li>{@link #CONTENT_CHANGE_TYPE_TEXT}
      *         <li>{@link #CONTENT_CHANGE_TYPE_PANE_TITLE}
@@ -906,6 +915,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         switch (type) {
             case CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION:
                 return "CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION";
+            case CONTENT_CHANGE_TYPE_STATE_DESCRIPTION:
+                return "CONTENT_CHANGE_TYPE_STATE_DESCRIPTION";
             case CONTENT_CHANGE_TYPE_SUBTREE: return "CONTENT_CHANGE_TYPE_SUBTREE";
             case CONTENT_CHANGE_TYPE_TEXT: return "CONTENT_CHANGE_TYPE_TEXT";
             case CONTENT_CHANGE_TYPE_PANE_TITLE: return "CONTENT_CHANGE_TYPE_PANE_TITLE";

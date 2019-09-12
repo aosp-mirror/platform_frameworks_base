@@ -26,8 +26,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -39,22 +37,24 @@ public class NotificationUiAdjustment {
 
     public final String key;
     public final List<Notification.Action> smartActions;
-    public final CharSequence[] smartReplies;
+    public final List<CharSequence> smartReplies;
 
     @VisibleForTesting
     NotificationUiAdjustment(
-            String key, List<Notification.Action> smartActions, CharSequence[] smartReplies) {
+            String key, List<Notification.Action> smartActions, List<CharSequence> smartReplies) {
         this.key = key;
         this.smartActions = smartActions == null
                 ? Collections.emptyList()
-                : new ArrayList<>(smartActions);
-        this.smartReplies = smartReplies == null ? new CharSequence[0] : smartReplies.clone();
+                : smartActions;
+        this.smartReplies = smartReplies == null
+                ? Collections.emptyList()
+                : smartReplies;
     }
 
     public static NotificationUiAdjustment extractFromNotificationEntry(
             NotificationEntry entry) {
         return new NotificationUiAdjustment(
-                entry.key, entry.systemGeneratedSmartActions, entry.systemGeneratedSmartReplies);
+                entry.key, entry.getSmartActions(), entry.getSmartReplies());
     }
 
     public static boolean needReinflate(
@@ -66,7 +66,7 @@ public class NotificationUiAdjustment {
         if (areDifferent(oldAdjustment.smartActions, newAdjustment.smartActions)) {
             return true;
         }
-        if (!Arrays.equals(oldAdjustment.smartReplies, newAdjustment.smartReplies)) {
+        if (!newAdjustment.smartReplies.equals(oldAdjustment.smartReplies)) {
             return true;
         }
         return false;

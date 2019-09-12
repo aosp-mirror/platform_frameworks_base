@@ -28,6 +28,7 @@ import android.app.AppOpsManager.UidState;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -36,6 +37,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
@@ -44,6 +46,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.os.AtomicDirectory;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
@@ -272,6 +275,10 @@ final class HistoricalRegistry {
 
     void dump(String prefix, PrintWriter pw, int filterUid,
               String filterPackage, int filterOp) {
+        if (!isApiEnabled()) {
+            return;
+        }
+
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 pw.println();
@@ -324,6 +331,11 @@ final class HistoricalRegistry {
     void getHistoricalOpsFromDiskRaw(int uid, @NonNull String packageName,
             @Nullable String[] opNames, long beginTimeMillis, long endTimeMillis,
             @OpFlags int flags, @NonNull RemoteCallback callback) {
+        if (!isApiEnabled()) {
+            callback.sendResult(new Bundle());
+            return;
+        }
+
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -344,6 +356,11 @@ final class HistoricalRegistry {
     void getHistoricalOps(int uid, @NonNull String packageName,
             @Nullable String[] opNames, long beginTimeMillis, long endTimeMillis,
             @OpFlags int flags, @NonNull RemoteCallback callback) {
+        if (!isApiEnabled()) {
+            callback.sendResult(new Bundle());
+            return;
+        }
+
         final long currentTimeMillis = System.currentTimeMillis();
         if (endTimeMillis == Long.MAX_VALUE) {
             endTimeMillis = currentTimeMillis;
@@ -679,6 +696,12 @@ final class HistoricalRegistry {
                 Persistence.spliceFromBeginning(op, filterScale);
             }
         }
+    }
+
+    private static boolean isApiEnabled() {
+        return Binder.getCallingUid() == Process.myUid()
+                || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED, false);
     }
 
     private static final class Persistence {

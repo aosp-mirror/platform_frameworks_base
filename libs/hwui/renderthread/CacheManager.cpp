@@ -69,8 +69,7 @@ void CacheManager::reset(sk_sp<GrContext> context) {
 
     if (context) {
         mGrContext = std::move(context);
-        mGrContext->getResourceCacheLimits(&mMaxResources, nullptr);
-        mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
+        mGrContext->setResourceCacheLimit(mMaxResourceBytes);
     }
 }
 
@@ -119,8 +118,8 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
             // limits between the background and max amounts. This causes the unlocked resources
             // that have persistent data to be purged in LRU order.
             mGrContext->purgeUnlockedResources(true);
-            mGrContext->setResourceCacheLimits(mMaxResources, mBackgroundResourceBytes);
-            mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
+            mGrContext->setResourceCacheLimit(mBackgroundResourceBytes);
+            mGrContext->setResourceCacheLimit(mMaxResourceBytes);
             SkGraphics::SetFontCacheLimit(mBackgroundCpuFontCacheBytes);
             SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
             break;

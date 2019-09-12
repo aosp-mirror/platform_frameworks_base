@@ -511,13 +511,13 @@ void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect&
 }
 
 void SkiaPipeline::dumpResourceCacheUsage() const {
-    int resources, maxResources;
-    size_t bytes, maxBytes;
+    int resources;
+    size_t bytes;
     mRenderThread.getGrContext()->getResourceCacheUsage(&resources, &bytes);
-    mRenderThread.getGrContext()->getResourceCacheLimits(&maxResources, &maxBytes);
+    size_t maxBytes = mRenderThread.getGrContext()->getResourceCacheLimit();
 
     SkString log("Resource Cache Usage:\n");
-    log.appendf("%8d items out of %d maximum items\n", resources, maxResources);
+    log.appendf("%8d items\n", resources);
     log.appendf("%8zu bytes (%.2f MB) out of %.2f MB maximum\n", bytes,
                 bytes * (1.0f / (1024.0f * 1024.0f)), maxBytes * (1.0f / (1024.0f * 1024.0f)));
 

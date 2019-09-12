@@ -73,7 +73,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
             @Override
             public void onPreEntryUpdated(NotificationEntry entry) {
                 final boolean mAmbientStateHasChanged =
-                        entry.ambient != entry.getRow().isLowPriority();
+                        entry.isAmbient() != entry.getRow().isLowPriority();
                 if (mAmbientStateHasChanged) {
                     mLowPriorityReorderingViews.add(entry);
                 }

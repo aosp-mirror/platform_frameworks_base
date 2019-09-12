@@ -1666,10 +1666,6 @@ public class ChooserActivity extends ResolverActivity {
         mServiceConnections.clear();
     }
 
-    public void onSetupVoiceInteraction() {
-        // Do nothing. We'll send the voice stuff ourselves.
-    }
-
     private void logDirectShareTargetReceived(int logCategory) {
         final long queryTime =
                 logCategory == MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER

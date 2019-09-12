@@ -5782,7 +5782,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (mHighPriorityBeforeSpeedBump) {
                 beforeSpeedBump = row.getEntry().isTopBucket();
             } else {
-                beforeSpeedBump = !row.getEntry().ambient;
+                beforeSpeedBump = !row.getEntry().isAmbient();
             }
             if (beforeSpeedBump) {
                 speedBumpIndex = currentIndex;

@@ -211,16 +211,19 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return mParentAutofillId;
     }
 
+    @Nullable
     @Override
     public AutofillId getAutofillId() {
         return mAutofillId;
     }
 
+    @Nullable
     @Override
     public CharSequence getText() {
         return mText != null ? mText.mText : null;
     }
 
+    @Nullable
     @Override
     public String getClassName() {
         return mClassName;
@@ -231,16 +234,19 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return mId;
     }
 
+    @Nullable
     @Override
     public String getIdPackage() {
         return mIdPackage;
     }
 
+    @Nullable
     @Override
     public String getIdType() {
         return mIdType;
     }
 
+    @Nullable
     @Override
     public String getIdEntry() {
         return mIdEntry;
@@ -341,21 +347,25 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return (mFlags & FLAGS_OPAQUE) != 0;
     }
 
+    @Nullable
     @Override
     public CharSequence getContentDescription() {
         return mContentDescription;
     }
 
+    @Nullable
     @Override
     public Bundle getExtras() {
         return mExtras;
     }
 
+    @Nullable
     @Override
     public String getHint() {
         return mText != null ? mText.mHint : null;
     }
 
+    @Nullable
     @Override
     public String getHintIdEntry() {
         return mHintIdEntry;
@@ -391,11 +401,13 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return mText != null ? mText.mTextStyle : 0;
     }
 
+    @Nullable
     @Override
     public int[] getTextLineCharOffsets() {
         return mText != null ? mText.mLineCharOffsets : null;
     }
 
+    @Nullable
     @Override
     public int[] getTextLineBaselines() {
         return mText != null ? mText.mLineBaselines : null;
@@ -426,6 +438,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return mMaxLength;
     }
 
+    @Nullable
     @Override
     public String getTextIdEntry() {
         return mTextIdEntry;
@@ -451,6 +464,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return mAutofillOptions;
     }
 
+    @Nullable
     @Override
     public LocaleList getLocaleList() {
         return mLocaleList;

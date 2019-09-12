@@ -1237,15 +1237,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 LocalServices.getService(
                         ActivityManagerInternal.class).getMemoryStateForProcesses();
         for (ProcessMemoryState managedProcess : managedProcessList) {
-            final long rssHighWaterMarkInBytes =
+            final int rssHighWaterMarkInKilobytes =
                     readRssHighWaterMarkFromProcfs(managedProcess.pid);
-            if (rssHighWaterMarkInBytes == 0) {
+            if (rssHighWaterMarkInKilobytes == 0) {
                 continue;
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(managedProcess.uid);
             e.writeString(managedProcess.processName);
-            e.writeLong(rssHighWaterMarkInBytes);
+            // RSS high-water mark in bytes.
+            e.writeLong((long) rssHighWaterMarkInKilobytes * 1024L);
+            e.writeInt(rssHighWaterMarkInKilobytes);
             pulledData.add(e);
         }
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
@@ -1253,11 +1255,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             final int pid = pids[i];
             final int uid = getUidForPid(pid);
             final String processName = readCmdlineFromProcfs(pid);
-            final long rssHighWaterMarkInBytes = readRssHighWaterMarkFromProcfs(pid);
+            final int rssHighWaterMarkInKilobytes = readRssHighWaterMarkFromProcfs(pid);
+            if (rssHighWaterMarkInKilobytes == 0) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(uid);
             e.writeString(processName);
-            e.writeLong(rssHighWaterMarkInBytes);
+            // RSS high-water mark in bytes.
+            e.writeLong((long) rssHighWaterMarkInKilobytes * 1024L);
+            e.writeInt(rssHighWaterMarkInKilobytes);
             pulledData.add(e);
         }
         // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.

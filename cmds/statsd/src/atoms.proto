@@ -4094,9 +4094,13 @@ message ProcessMemoryHighWaterMark {
     // Provided by ActivityManagerService or read from /proc/PID/cmdline.
     optional string process_name = 2;
 
+    // Deprecated: use rss_high_water_mark_in_kilobytes instead. This field is
+    // computed by converting kilobytes to bytes.
+    optional int64 rss_high_water_mark_in_bytes = 3 [deprecated = true];
+
     // RSS high-water mark. Peak RSS usage of the process. Read from the VmHWM field in
     // /proc/PID/status.
-    optional int64 rss_high_water_mark_in_bytes = 3;
+    optional int32 rss_high_water_mark_in_kilobytes = 4;
 }
 
 /*

@@ -241,7 +241,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
         notificationSnoozeView.setSnoozeListener(mListContainer.getSwipeActionHelper());
         notificationSnoozeView.setStatusBarNotification(sbn);
-        notificationSnoozeView.setSnoozeOptions(row.getEntry().snoozeCriteria);
+        notificationSnoozeView.setSnoozeOptions(row.getEntry().getSnoozeCriteria());
         guts.setHeightChangedListener((NotificationGuts g) -> {
             mListContainer.onHeightChanged(row, row.isShown() /* needsAnimation */);
         });
@@ -325,7 +325,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
                 isForBlockingHelper,
-                row.getEntry().importance,
+                row.getEntry().getImportance(),
                 row.getEntry().isHighPriority());
 
     }

@@ -23,6 +23,7 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -40,9 +41,7 @@ import android.graphics.drawable.Icon;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -231,15 +230,17 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
     public void testCanAlertCommon_false_suppressedForGroups() {
         ensureStateForAlertCommon();
 
-        Notification n = new Notification.Builder(getContext(), "a")
-                .setGroup("a")
-                .setGroupSummary(true)
-                .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(new Notification.Builder(getContext(), "a")
+                        .setGroup("a")
+                        .setGroupSummary(true)
+                        .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+                        .build())
+                .setImportance(IMPORTANCE_DEFAULT)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.importance = IMPORTANCE_DEFAULT;
 
         assertThat(mNotifInterruptionStateProvider.canAlertCommon(entry)).isFalse();
     }
@@ -288,7 +289,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForHeadsUpWhenDozing();
 
         NotificationEntry entry = createNotification(IMPORTANCE_DEFAULT);
-        entry.suppressedVisualEffects = SUPPRESSED_EFFECT_AMBIENT;
+        modifyRanking(entry)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_AMBIENT)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
     }
@@ -379,7 +382,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
-        entry.suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK;
+        modifyRanking(entry)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_PEEK)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
     }
@@ -481,7 +486,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForBubbleUp();
 
         NotificationEntry entry = createBubble();
-        entry.canBubble = false;
+        modifyRanking(entry)
+                .setCanBubble(false)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(entry)).isFalse();
     }
@@ -494,7 +501,9 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForBubbleUp();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
-        entry.canBubble = true;
+        modifyRanking(entry)
+                .setCanBubble(true)
+                .build();
 
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(entry)).isFalse();
     }
@@ -507,8 +516,10 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         ensureStateForBubbleUp();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
-        entry.canBubble = true;
-        entry.notification.getNotification().flags |= FLAG_BUBBLE;
+        modifyRanking(entry)
+                .setCanBubble(true)
+                .build();
+        entry.sbn().getNotification().flags |= FLAG_BUBBLE;
 
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(entry)).isFalse();
     }
@@ -549,13 +560,16 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
                 .setContentText("content text")
                 .setBubbleMetadata(data)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.notification.getNotification().flags |= FLAG_BUBBLE;
-        entry.importance = IMPORTANCE_HIGH;
-        entry.canBubble = true;
-        return entry;
+        n.flags |= FLAG_BUBBLE;
+
+        return new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(IMPORTANCE_HIGH)
+                .setCanBubble(true)
+                .build();
     }
 
     private NotificationEntry createNotification(int importance) {
@@ -563,11 +577,14 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
                 .setContentTitle("title")
                 .setContentText("content text")
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
-        entry.importance = importance;
-        return entry;
+
+        return new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .setImportance(importance)
+                .build();
     }
 
     /**

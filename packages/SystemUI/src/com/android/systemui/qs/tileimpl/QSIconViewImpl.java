@@ -14,10 +14,12 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static com.android.systemui.qs.QSColorControllerKt.colorIcon;
 import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -148,10 +150,15 @@ public class QSIconViewImpl extends QSIconView {
             iv.clearColorFilter();
         }
         if (state.state != mState) {
-            int color = getColor(state.state);
+            int color = getColor(state.state, state.colorActive);
             mState = state.state;
             if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
-                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
+                if (colorIcon()) {
+                    animateColor(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
+                } else {
+                    animateGrayScale(mTint, color, iv,
+                            () -> updateIcon(iv, state, allowAnimations));
+                }
                 mTint = color;
             } else {
                 if (iv instanceof AlphaControlledSlashImageView) {
@@ -168,8 +175,12 @@ public class QSIconViewImpl extends QSIconView {
         }
     }
 
+    protected int getColor(int state, int colorActive) {
+        return getColorForState(getContext(), state, colorActive);
+    }
+
     protected int getColor(int state) {
-        return getColorForState(getContext(), state);
+        return getColor(state, -1);
     }
 
     private void animateGrayScale(int fromColor, int toColor, ImageView iv,
@@ -192,6 +203,37 @@ public class QSIconViewImpl extends QSIconView {
                 int channel = (int) (fromChannel + (toChannel - fromChannel) * fraction);
 
                 setTint(iv, Color.argb(alpha, channel, channel, channel));
+            });
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    endRunnable.run();
+                }
+            });
+            anim.start();
+        } else {
+            setTint(iv, toColor);
+            endRunnable.run();
+        }
+    }
+
+    private void animateColor(int fromColor, int toColor, ImageView iv,
+            final Runnable endRunnable) {
+        if (iv instanceof AlphaControlledSlashImageView) {
+            ((AlphaControlledSlashImageView) iv)
+                    .setFinalImageTintList(ColorStateList.valueOf(toColor));
+        }
+        if (mAnimationEnabled && ValueAnimator.areAnimatorsEnabled()) {
+
+
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+            anim.setDuration(QS_ANIM_LENGTH);
+            anim.addUpdateListener(animation -> {
+                float fraction = animation.getAnimatedFraction();
+                int color = (int) ArgbEvaluator.getInstance().evaluate(fraction, fromColor,
+                        toColor);
+
+                setTint(iv, color);
             });
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override

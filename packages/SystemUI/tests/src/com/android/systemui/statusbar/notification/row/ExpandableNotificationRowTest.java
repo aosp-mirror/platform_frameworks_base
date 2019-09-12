@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_ALL;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_PUBLIC;
@@ -51,7 +52,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
@@ -328,11 +328,11 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // Give each child a unique channel id/name.
         int i = 0;
         for (ExpandableNotificationRow childRow : childRows) {
-            childRow.getEntry().setRanking(new RankingBuilder()
+            modifyRanking(childRow.getEntry())
                     .setChannel(
                             new NotificationChannel(
                                     "id" + i, "dinnertime" + i, IMPORTANCE_DEFAULT))
-                    .build());
+                    .build();
             i++;
         }
 

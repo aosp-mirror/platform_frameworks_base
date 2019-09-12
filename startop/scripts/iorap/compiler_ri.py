@@ -139,7 +139,9 @@ def build_protobuf(page_runs, inode2filename, filters=[]):
       continue
 
     file_id = file_id_map.get(filename)
-    if not file_id:
+    # file_id could 0, which satisfies "if file_id" and causes duplicate
+    # filename for file id 0.
+    if file_id is None:
       file_id = file_id_counter
       file_id_map[filename] = file_id_counter
       file_id_counter = file_id_counter + 1

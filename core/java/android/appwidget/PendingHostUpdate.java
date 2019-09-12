@@ -28,6 +28,7 @@ public class PendingHostUpdate implements Parcelable {
     static final int TYPE_VIEWS_UPDATE = 0;
     static final int TYPE_PROVIDER_CHANGED = 1;
     static final int TYPE_VIEW_DATA_CHANGED = 2;
+    static final int TYPE_APP_WIDGET_REMOVED = 3;
 
     final int appWidgetId;
     final int type;
@@ -51,6 +52,13 @@ public class PendingHostUpdate implements Parcelable {
         PendingHostUpdate update = new PendingHostUpdate(appWidgetId, TYPE_VIEW_DATA_CHANGED);
         update.viewId = viewId;
         return update;
+    }
+
+    /**
+     * IAppWidgetHost appWidgetRemoved implimentaion
+     */
+    public static PendingHostUpdate appWidgetRemoved(int appWidgetId) {
+        return new PendingHostUpdate(appWidgetId, TYPE_APP_WIDGET_REMOVED);
     }
 
     private PendingHostUpdate(int appWidgetId, int type) {

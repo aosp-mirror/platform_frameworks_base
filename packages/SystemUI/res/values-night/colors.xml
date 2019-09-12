@@ -83,4 +83,9 @@
     <color name="biometric_dialog_accent">#ff80cbc4</color> <!-- light teal -->
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
 
+    <color name="GM2_green_500">#FF41Af6A</color>
+    <color name="GM2_blue_500">#5195EA</color>
+    <color name="GM2_red_500">#E25142</color>
+    <color name="GM2_yellow_500">#F5C518</color>
+
 </resources>

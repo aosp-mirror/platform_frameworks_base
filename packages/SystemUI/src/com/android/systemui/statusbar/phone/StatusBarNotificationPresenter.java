@@ -224,7 +224,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mVisualStabilityManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(this,
                     notifListContainer, mCheckSaveListener, mOnSettingsClickListener);
-            // ForegroundServiceControllerListener adds its listener in its constructor
+            // ForegroundServiceNotificationListener adds its listener in its constructor
             // but we need to request it here in order for it to be instantiated.
             // TODO: figure out how to do this correctly once Dependency.get() is gone.
             Dependency.get(ForegroundServiceNotificationListener.class);

@@ -1080,6 +1080,7 @@ public class AssistStructure implements Parcelable {
          * identifier.  See {@link android.view.ViewStructure#setId ViewStructure.setId}
          * for more information.
          */
+        @Nullable
         public String getIdPackage() {
             return mIdPackage;
         }
@@ -1089,6 +1090,7 @@ public class AssistStructure implements Parcelable {
          * identifier.  See {@link android.view.ViewStructure#setId ViewStructure.setId}
          * for more information.
          */
+        @Nullable
         public String getIdType() {
             return mIdType;
         }
@@ -1098,6 +1100,7 @@ public class AssistStructure implements Parcelable {
          * identifier.  See {@link android.view.ViewStructure#setId ViewStructure.setId}
          * for more information.
          */
+        @Nullable
         public String getIdEntry() {
             return mIdEntry;
         }
@@ -1391,6 +1394,7 @@ public class AssistStructure implements Parcelable {
          * For example, a button will report "android.widget.Button" meaning it behaves
          * like a {@link android.widget.Button}.
          */
+        @Nullable
         public String getClassName() {
             return mClassName;
         }
@@ -1399,6 +1403,7 @@ public class AssistStructure implements Parcelable {
          * Returns any content description associated with the node, which semantically describes
          * its purpose for accessibility and other uses.
          */
+        @Nullable
         public CharSequence getContentDescription() {
             return mContentDescription;
         }
@@ -1473,6 +1478,7 @@ public class AssistStructure implements Parcelable {
          * Returns any text associated with the node that is displayed to the user, or null
          * if there is none.
          */
+        @Nullable
         public CharSequence getText() {
             return mText != null ? mText.mText : null;
         }
@@ -1560,6 +1566,7 @@ public class AssistStructure implements Parcelable {
          * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
          * not for autofill purposes.
          */
+        @Nullable
         public int[] getTextLineCharOffsets() {
             return mText != null ? mText.mLineCharOffsets : null;
         }
@@ -1573,6 +1580,7 @@ public class AssistStructure implements Parcelable {
          * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
          * not for autofill purposes.
          */
+        @Nullable
         public int[] getTextLineBaselines() {
             return mText != null ? mText.mLineBaselines : null;
         }
@@ -1592,6 +1600,7 @@ public class AssistStructure implements Parcelable {
          * Return additional hint text associated with the node; this is typically used with
          * a node that takes user input, describing to the user what the input means.
          */
+        @Nullable
         public String getHint() {
             return mText != null ? mText.mHint : null;
         }
@@ -1610,6 +1619,7 @@ public class AssistStructure implements Parcelable {
         /**
          * Return a Bundle containing optional vendor-specific extension information.
          */
+        @Nullable
         public Bundle getExtras() {
             return mExtras;
         }

@@ -39,8 +39,6 @@ public:
 
     int query(int what, int* value) const { return mSurface->query(what, value); }
 
-    nsecs_t getLastDequeueStartTime() const { return mSurface->getLastDequeueStartTime(); }
-
     uint64_t getNextFrameNumber() const { return mSurface->getNextFrameNumber(); }
 
     int getAndClearError() {

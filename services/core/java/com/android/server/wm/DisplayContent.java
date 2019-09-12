@@ -1056,9 +1056,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // removing from parent.
                 token.getParent().removeChild(token);
             }
-            if (prevDc.mLastFocus == mCurrentFocus) {
-                // The window has become the focus of this display, so it should not be notified
-                // that it lost focus from the previous display.
+            if (token.hasChild(prevDc.mLastFocus)) {
+                // If the reparent window token contains previous display's last focus window, means
+                // it will end up to gain window focus on the target display, so it should not be
+                // notified that it lost focus from the previous display.
                 prevDc.mLastFocus = null;
             }
         }
