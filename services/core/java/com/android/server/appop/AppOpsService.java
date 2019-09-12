@@ -825,20 +825,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int[] changedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                 final String[] changedPkgs = intent.getStringArrayExtra(
                         Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                ArraySet<ModeCallback> callbacks;
-                synchronized (AppOpsService.this) {
-                    callbacks = mOpModeWatchers.get(OP_PLAY_AUDIO);
-                    if (callbacks == null) {
-                        return;
+                for (int code : OPS_RESTRICTED_ON_SUSPEND) {
+                    ArraySet<ModeCallback> callbacks;
+                    synchronized (AppOpsService.this) {
+                        callbacks = mOpModeWatchers.get(code);
+                        if (callbacks == null) {
+                            continue;
+                        }
+                        callbacks = new ArraySet<>(callbacks);
                     }
-                    callbacks = new ArraySet<>(callbacks);
-                }
-                for (int i = 0; i < changedUids.length; i++) {
-                    final int changedUid = changedUids[i];
-                    final String changedPkg = changedPkgs[i];
-                    // We trust packagemanager to insert matching uid and packageNames in the
-                    // extras
-                    for (int code : OPS_RESTRICTED_ON_SUSPEND) {
+                    for (int i = 0; i < changedUids.length; i++) {
+                        final int changedUid = changedUids[i];
+                        final String changedPkg = changedPkgs[i];
+                        // We trust packagemanager to insert matching uid and packageNames in the
+                        // extras
                         notifyOpChanged(callbacks, code, changedUid, changedPkg);
                     }
                 }
@@ -2828,9 +2828,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private boolean isOpRestrictedDueToSuspend(int code, String packageName, int uid) {
+        if (!ArrayUtils.contains(OPS_RESTRICTED_ON_SUSPEND, code)) {
+            return false;
+        }
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        return ArrayUtils.contains(OPS_RESTRICTED_ON_SUSPEND, code)
-                && pmi.isPackageSuspended(packageName, UserHandle.getUserId(uid));
+        return pmi.isPackageSuspended(packageName, UserHandle.getUserId(uid));
     }
 
     private boolean isOpRestrictedLocked(int uid, int code, String packageName,
