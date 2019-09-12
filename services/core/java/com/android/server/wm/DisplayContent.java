@@ -942,14 +942,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
                 .setOpaque(true)
                 .setContainerLayer();
-        mWindowingLayer = b.setName("Display Root").build();
-        mOverlayLayer = b.setName("Display Overlays").build();
+        mSurfaceControl = b.setName("Root").setContainerLayer().build();
+        mWindowingLayer = b.setName("Display Windows").setParent(mSurfaceControl).build();
+        mOverlayLayer = b.setName("Display Overlays").setParent(mSurfaceControl).build();
 
-        getPendingTransaction().setLayer(mWindowingLayer, 0)
-                .setLayerStack(mWindowingLayer, mDisplayId)
+        getPendingTransaction()
+                .setLayer(mSurfaceControl, 0)
+                .setLayerStack(mSurfaceControl, mDisplayId)
+                .show(mSurfaceControl)
+                .setLayer(mWindowingLayer, 0)
                 .show(mWindowingLayer)
                 .setLayer(mOverlayLayer, 1)
-                .setLayerStack(mOverlayLayer, mDisplayId)
                 .show(mOverlayLayer);
         getPendingTransaction().apply();
 
@@ -4880,7 +4883,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPortalWindowHandle = createPortalWindowHandle(sc.toString());
         }
         getPendingTransaction().setInputWindowInfo(sc, mPortalWindowHandle)
-                .reparent(mWindowingLayer, sc).reparent(mOverlayLayer, sc);
+                .reparent(mSurfaceControl, sc);
     }
 
     /**
