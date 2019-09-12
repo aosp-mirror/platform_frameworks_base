@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.admin.DevicePolicyManager;
@@ -93,7 +91,6 @@ public class KeyguardIndicationController implements StateListener,
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTextView;
-    private KeyguardIndicationTextView mDisclosure;
     private final UserManager mUserManager;
     private final IBatteryStats mBatteryInfo;
     private final SettableWakeLock mWakeLock;
@@ -180,7 +177,6 @@ public class KeyguardIndicationController implements StateListener,
         mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         setIndicationArea(indicationArea);
-        updateDisclosure();
 
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
         mKeyguardUpdateMonitor.registerCallback(mTickReceiver);
@@ -193,7 +189,6 @@ public class KeyguardIndicationController implements StateListener,
         mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
         mInitialTextColorState = mTextView != null ?
                 mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
-        mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         updateIndication(false /* animate */);
     }
 
@@ -229,27 +224,6 @@ public class KeyguardIndicationController implements StateListener,
             mUpdateMonitorCallback = new BaseKeyguardCallback();
         }
         return mUpdateMonitorCallback;
-    }
-
-    private void updateDisclosure() {
-        if (mDevicePolicyManager == null) {
-            return;
-        }
-
-        // TODO(b/140053632)
-        if (!mDozing && whitelistIpcs(mDevicePolicyManager::isDeviceManaged)) {
-            final CharSequence organizationName =
-                    mDevicePolicyManager.getDeviceOwnerOrganizationName();
-            if (organizationName != null) {
-                mDisclosure.switchIndication(mContext.getResources().getString(
-                        R.string.do_disclosure_with_name, organizationName));
-            } else {
-                mDisclosure.switchIndication(R.string.do_disclosure_generic);
-            }
-            mDisclosure.setVisibility(View.VISIBLE);
-        } else {
-            mDisclosure.setVisibility(View.GONE);
-        }
     }
 
     public void setVisible(boolean visible) {
@@ -580,7 +554,6 @@ public class KeyguardIndicationController implements StateListener,
         }
         mDozing = dozing;
         updateIndication(false);
-        updateDisclosure();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -636,13 +609,6 @@ public class KeyguardIndicationController implements StateListener,
                 } else if (wasPluggedIn && !mPowerPluggedIn) {
                     hideTransientIndication();
                 }
-            }
-        }
-
-        @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            if (showing) {
-                updateDisclosure();
             }
         }
 
