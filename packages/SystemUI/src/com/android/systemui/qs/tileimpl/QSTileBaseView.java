@@ -36,6 +36,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.PathParser;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
@@ -43,6 +44,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -67,6 +69,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private boolean mShowRippleEffect = true;
 
     private final ImageView mBg;
+    private final TextView mDetailText;
     private final int mColorActive;
     private final int mColorInactive;
     private final int mColorDisabled;
@@ -106,6 +109,12 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER);
         mIconFrame.addView(mIcon, params);
+
+        // "..." afforadance below icon
+        mDetailText = (TextView) LayoutInflater.from(context).inflate(R.layout.qs_tile_detail_text,
+                mIconFrame, false);
+        mIconFrame.addView(mDetailText);
+
         mIconFrame.setClipChildren(false);
         mIconFrame.setClipToPadding(false);
 
@@ -161,6 +170,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
             tile.longClick();
             return true;
         });
+
+        if (tile.supportsDetailView()) {
+            mDetailText.setVisibility(View.VISIBLE);
+        }
     }
 
     public void init(OnClickListener click, OnClickListener secondaryClick,
@@ -213,6 +226,8 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
             }
             mCircleColor = circleColor;
         }
+
+        mDetailText.setTextColor(QSTileImpl.getColorForState(getContext(), state.state));
 
         mShowRippleEffect = state.showRippleEffect;
         setClickable(state.state != Tile.STATE_UNAVAILABLE);
