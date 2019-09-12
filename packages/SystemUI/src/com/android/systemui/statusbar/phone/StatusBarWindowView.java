@@ -527,6 +527,15 @@ public class StatusBarWindowView extends FrameLayout {
         }
     }
 
+    /**
+     * When {@link KeyguardBouncer} starts to be dismissed and starts to play its animation.
+     */
+    public void onBouncerPreHideAnimation() {
+        if (mLockIcon != null) {
+            mLockIcon.onBouncerPreHideAnimation();
+        }
+    }
+
     public class LayoutParams extends FrameLayout.LayoutParams {
 
         public boolean ignoreRightInset;

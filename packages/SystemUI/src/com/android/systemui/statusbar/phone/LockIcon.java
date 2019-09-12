@@ -105,6 +105,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mShowingLaunchAffordance;
     private boolean mKeyguardJustShown;
     private boolean mUpdatePending;
+    private boolean mBouncerPreHideAnimation;
 
     private final KeyguardMonitor.Callback mKeyguardMonitorCallback =
             new KeyguardMonitor.Callback() {
@@ -125,9 +126,12 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
                 @Override
                 public void onKeyguardFadingAwayChanged() {
-                    if (!mKeyguardMonitor.isKeyguardFadingAway() && mBlockUpdates) {
-                        mBlockUpdates = false;
-                        update(true /* force */);
+                    if (!mKeyguardMonitor.isKeyguardFadingAway()) {
+                        mBouncerPreHideAnimation = false;
+                        if (mBlockUpdates) {
+                            mBlockUpdates = false;
+                            update(true /* force */);
+                        }
                     }
                 }
             };
@@ -464,6 +468,14 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         }
     }
 
+    /**
+     * Animate padlock opening when bouncer challenge is solved.
+     */
+    public void onBouncerPreHideAnimation() {
+        mBouncerPreHideAnimation = true;
+        update();
+    }
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ERROR, UNLOCK, LOCK, SCANNING})
     @interface LockAnimIndex {}
@@ -511,7 +523,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
     private int getState() {
         KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-        if ((mUnlockMethodCache.canSkipBouncer() || !mKeyguardShowing
+        if ((mUnlockMethodCache.canSkipBouncer() || !mKeyguardShowing || mBouncerPreHideAnimation
                 || mKeyguardMonitor.isKeyguardGoingAway()) && !mSimLocked) {
             return STATE_LOCK_OPEN;
         } else if (mTransientBiometricsError) {

@@ -279,14 +279,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         0 /* delay */);
             } else {
                 final long duration;
+                final int delay;
                 if (needsBypassFading()) {
                     duration = KeyguardBypassController.BYPASS_PANEL_FADE_DURATION;
+                    delay = 0;
                 } else {
                     duration = AppearAnimationUtils.DEFAULT_APPEAR_DURATION / 2;
+                    delay = 120;
                 }
-                CrossFadeHelper.fadeOut(mLockIconContainer,
-                        duration /* duration */,
-                        0 /* delay */, null /* runnable */);
+                CrossFadeHelper.fadeOut(mLockIconContainer, duration, delay, null /* runnable */);
             }
         }
     }
@@ -516,7 +517,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void startPreHideAnimation(Runnable finishRunnable) {
         if (mBouncer.isShowing()) {
             mBouncer.startPreHideAnimation(finishRunnable);
-            mNotificationPanelView.onBouncerPreHideAnimation();
+            mStatusBar.onBouncerPreHideAnimation();
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }
