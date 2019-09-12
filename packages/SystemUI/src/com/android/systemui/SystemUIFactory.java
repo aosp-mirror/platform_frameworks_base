@@ -207,7 +207,7 @@ public class SystemUIFactory {
     @Singleton
     @Provides
     public EnhancedEstimates provideEnhancedEstimates(Context context) {
-        return new EnhancedEstimatesImpl();
+        return new EnhancedEstimatesImpl(context);
     }
 
     @Singleton
