@@ -110,7 +110,7 @@ public class PerformAdbRestoreTask implements Runnable {
             if (MORE_DEBUG) {
                 Slog.v(TAG, "Done consuming input tarfile.");
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to read restore input");
         } finally {
             try {
