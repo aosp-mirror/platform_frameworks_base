@@ -2266,9 +2266,9 @@ class RootActivityContainer extends ConfigurationContainer
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
             @WindowConfiguration.ActivityType int ignoreActivityType,
             @WindowConfiguration.WindowingMode int ignoreWindowingMode, int callingUid,
-            boolean allowed, boolean crossUser) {
+            boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
         mStackSupervisor.mRunningTasks.getTasks(maxNum, list, ignoreActivityType,
-                ignoreWindowingMode, mActivityDisplays, callingUid, allowed, crossUser);
+                ignoreWindowingMode, mActivityDisplays, callingUid, allowed, crossUser, profileIds);
     }
 
     void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {

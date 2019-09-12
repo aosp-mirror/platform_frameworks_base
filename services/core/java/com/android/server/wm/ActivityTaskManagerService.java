@@ -215,6 +215,7 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -2526,6 +2527,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         final boolean crossUser = isCrossUserAllowed(callingPid, callingUid);
+        final int[] profileIds = getUserManager().getProfileIds(
+                UserHandle.getUserId(callingUid), true);
+        ArraySet<Integer> callingProfileIds = new ArraySet<>();
+        for (int i = 0; i < profileIds.length; i++) {
+            callingProfileIds.add(profileIds[i]);
+        }
         ArrayList<ActivityManager.RunningTaskInfo> list = new ArrayList<>();
 
         synchronized (mGlobalLock) {
@@ -2533,7 +2540,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
             mRootActivityContainer.getRunningTasks(maxNum, list, ignoreActivityType,
-                    ignoreWindowingMode, callingUid, allowed, crossUser);
+                    ignoreWindowingMode, callingUid, allowed, crossUser, callingProfileIds);
         }
 
         return list;
