@@ -73,7 +73,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
-#include <bionic_malloc.h>
+#include <bionic/malloc.h>
 #include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
