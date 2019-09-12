@@ -362,7 +362,9 @@ public class CarrierTextController {
                 }
             }
         }
-        if (allSimsMissing) {
+        // Only create "No SIM card" if no cards with CarrierName && no wifi when some sim is READY
+        // This condition will also be true always when numSubs == 0
+        if (allSimsMissing && !anySimReadyAndInService) {
             if (numSubs != 0) {
                 // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
                 // This depends on mPlmn containing the text "Emergency calls only" when the radio
