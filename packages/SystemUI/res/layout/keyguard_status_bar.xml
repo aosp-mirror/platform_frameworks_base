@@ -31,14 +31,14 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:gravity="center_vertical|end" >
+        android:gravity="center_vertical|end"
+        android:paddingEnd="@dimen/system_icons_keyguard_padding_end" >
         <FrameLayout android:id="@+id/system_icons_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginStart="@dimen/system_icons_super_container_margin_start"
-            android:gravity="center_vertical|end"
-            android:paddingEnd="@dimen/system_icons_keyguard_padding_end" >
+            android:gravity="center_vertical|end" >
             <include layout="@layout/system_icons" />
         </FrameLayout>
 
