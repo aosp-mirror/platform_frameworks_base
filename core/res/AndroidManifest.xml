@@ -2008,6 +2008,12 @@
     <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows read access to emergency number information for ongoing calls or SMS
+         sessions.
+         @hide Used internally. -->
+    <permission android:name="android.permission.READ_ACTIVE_EMERGENCY_SESSION"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Protects the ability to register any PhoneAccount with
          PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION. This capability indicates that the PhoneAccount
          corresponds to a device SIM.
