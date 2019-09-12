@@ -439,6 +439,19 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public abstract void internalNotifyViewTreeEvent(boolean started);
 
     /**
+     * Notifies the Content Capture Service that a session has paused/resumed.
+     *
+     * @param started whether session has resumed.
+     */
+    public final void notifySessionLifecycle(boolean started) {
+        if (!isContentCaptureEnabled()) return;
+
+        internalNotifySessionLifecycle(started);
+    }
+
+    abstract void internalNotifySessionLifecycle(boolean started);
+
+    /**
      * Creates a {@link ViewStructure} for a "standard" view.
      *
      * <p>This method should be called after a visible view is laid out; the view then must populate
