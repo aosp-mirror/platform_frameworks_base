@@ -62,7 +62,7 @@
                 android:exported="false" />
 
         <activity android:name=".DeleteStagedFileOnResult"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
             android:exported="false" />
 
         <activity android:name=".PackageInstallerActivity"
