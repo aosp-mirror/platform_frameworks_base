@@ -498,8 +498,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
         display.onRequestedOverrideConfigurationChanged(c);
 
         // launch compat activity in freeform and store bounds
-        mActivity.mAppWindowToken.mOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        when(mActivity.getRequestedOrientation()).thenReturn(
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         mTask.getRequestedOverrideConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
+        mTask.setBounds(100, 100, 400, 600);
         mActivity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         mActivity.visible = true;
@@ -507,7 +509,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         final Rect bounds = new Rect(mActivity.getBounds());
         final int density = mActivity.getConfiguration().densityDpi;
-        final int windowingMode = mActivity.getWindowingMode();
 
         // change display configuration to fullscreen
         c.windowConfiguration.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
@@ -518,7 +519,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertEquals(bounds.width(), mActivity.getBounds().width());
         assertEquals(bounds.height(), mActivity.getBounds().height());
         assertEquals(density, mActivity.getConfiguration().densityDpi);
-        assertEquals(windowingMode, mActivity.getWindowingMode());
+        assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN, mActivity.getWindowingMode());
     }
 
     @Test
@@ -538,6 +539,11 @@ public class ActivityRecordTests extends ActivityTestsBase {
             return null;
         }).when(policy).getNonDecorInsetsLw(anyInt() /* rotation */, anyInt() /* width */,
                 anyInt() /* height */, any() /* displayCutout */, any() /* outInsets */);
+        // set appBounds to incorporate decor
+        final Configuration c =
+                new Configuration(mStack.getDisplay().getRequestedOverrideConfiguration());
+        c.windowConfiguration.getAppBounds().top = decorHeight;
+        mStack.getDisplay().onRequestedOverrideConfigurationChanged(c);
 
         doReturn(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
                 .when(mActivity).getRequestedOrientation();
@@ -608,7 +614,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
         mTask.getRequestedOverrideConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
-        mActivity.mAppWindowToken.mOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         mActivity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         mActivity.visible = true;
@@ -631,13 +636,16 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testSizeCompatMode_FixedScreenLayoutSizeBits() {
         final int fixedScreenLayout = Configuration.SCREENLAYOUT_LONG_NO
                 | Configuration.SCREENLAYOUT_SIZE_NORMAL;
+        final int layoutMask = Configuration.SCREENLAYOUT_LONG_MASK
+                | Configuration.SCREENLAYOUT_SIZE_MASK
+                | Configuration.SCREENLAYOUT_LAYOUTDIR_MASK;
         mTask.getRequestedOverrideConfiguration().screenLayout = fixedScreenLayout
                 | Configuration.SCREENLAYOUT_LAYOUTDIR_LTR;
         prepareFixedAspectRatioUnresizableActivity();
 
         // The initial configuration should inherit from parent.
-        assertEquals(mTask.getConfiguration().screenLayout,
-                mActivity.getConfiguration().screenLayout);
+        assertEquals(mTask.getConfiguration().screenLayout & layoutMask,
+                mActivity.getConfiguration().screenLayout & layoutMask);
 
         mTask.getConfiguration().screenLayout = Configuration.SCREENLAYOUT_LAYOUTDIR_RTL
                 | Configuration.SCREENLAYOUT_LONG_YES | Configuration.SCREENLAYOUT_SIZE_LARGE;
@@ -645,7 +653,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // The size and aspect ratio bits don't change, but the layout direction should be updated.
         assertEquals(fixedScreenLayout | Configuration.SCREENLAYOUT_LAYOUTDIR_RTL,
-                mActivity.getConfiguration().screenLayout);
+                mActivity.getConfiguration().screenLayout & layoutMask);
     }
 
     @Test
@@ -665,13 +673,18 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 | ActivityInfo.CONFIG_WINDOW_CONFIGURATION)
                         .when(display).getLastOverrideConfigurationChanges();
         mActivity.onConfigurationChanged(mTask.getConfiguration());
+        when(display.getLastOverrideConfigurationChanges()).thenCallRealMethod();
         // The override configuration should not change so it is still in size compatibility mode.
         assertTrue(mActivity.inSizeCompatMode());
 
-        // Simulate the display changes density.
-        doReturn(ActivityInfo.CONFIG_DENSITY).when(display).getLastOverrideConfigurationChanges();
+        // Change display density
+        final DisplayContent displayContent = mStack.getDisplay().mDisplayContent;
+        displayContent.mBaseDisplayDensity = (int) (0.7f * displayContent.mBaseDisplayDensity);
+        final Configuration c = new Configuration();
+        displayContent.computeScreenConfiguration(c);
         mService.mAmInternal = mock(ActivityManagerInternal.class);
-        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        mStack.getDisplay().onRequestedOverrideConfigurationChanged(c);
+
         // The override configuration should be reset and the activity's process will be killed.
         assertFalse(mActivity.inSizeCompatMode());
         verify(mActivity).restartProcessIfVisible();

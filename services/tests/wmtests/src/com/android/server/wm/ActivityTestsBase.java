@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
@@ -42,7 +43,6 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.Pair;
 import android.view.DisplayInfo;
 
 import com.android.server.AttributeCache;
@@ -388,7 +388,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private final RootActivityContainer mRootActivityContainer;
         private ActivityDisplay mDisplay;
         private int mStackId = -1;
-        private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
         private int mActivityType = ACTIVITY_TYPE_STANDARD;
         private boolean mOnTop = true;
         private boolean mCreateActivity = true;

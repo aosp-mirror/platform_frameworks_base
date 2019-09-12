@@ -403,7 +403,9 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Without limiting to be inside the parent bounds, the out screen size should keep relative
         // to the input bounds.
         final ActivityRecord.CompatDisplayInsets compatIntsets =
-                new ActivityRecord.CompatDisplayInsets(displayContent);
+                new ActivityRecord.CompatDisplayInsets(displayContent, new Rect(0, 0,
+                        displayContent.mBaseDisplayWidth, displayContent.mBaseDisplayHeight),
+                        false);
         task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatIntsets);
 
         assertEquals((shortSide - statusBarHeight) * DENSITY_DEFAULT / parentConfig.densityDpi,

@@ -2054,7 +2054,10 @@ class TaskRecord extends ConfigurationContainer {
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.
-                final int rotation = parentConfig.windowConfiguration.getRotation();
+                int rotation = inOutConfig.windowConfiguration.getRotation();
+                if (rotation == ROTATION_UNDEFINED) {
+                    rotation = parentConfig.windowConfiguration.getRotation();
+                }
                 if (rotation != ROTATION_UNDEFINED && compatInsets != null) {
                     mTmpNonDecorBounds.set(bounds);
                     mTmpStableBounds.set(bounds);

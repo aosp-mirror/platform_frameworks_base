@@ -1251,9 +1251,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // TODO(b/36505427): Maybe this call should be moved inside
             // updateOverrideConfiguration()
             task.updateOverrideConfigurationFromLaunchBounds();
-            // Make sure override configuration is up-to-date before using to create window
-            // controller.
-            updateOverrideConfiguration();
+            // Make sure size-compat is up-to-date before using to create window controller.
+            updateSizeCompatMode();
 
             task.addActivityToTop(this);
 
@@ -6488,7 +6487,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         density or bounds from its parent.
      */
     boolean inSizeCompatMode() {
-        if (!shouldUseSizeCompatMode()) {
+        if (mCompatDisplayInsets == null || !shouldUseSizeCompatMode()) {
             return false;
         }
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
@@ -6566,69 +6565,54 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
-    private void updateOverrideConfiguration() {
-        final Configuration overrideConfig = mTmpConfig;
-        overrideConfig.setTo(getRequestedOverrideConfiguration());
-
-        if (shouldUseSizeCompatMode()) {
-            if (mCompatDisplayInsets != null) {
-                // The override configuration is set only once in size compatibility mode.
-                return;
-            }
-            final Configuration parentConfig = getParent().getConfiguration();
-            if (!hasProcess() && !isConfigurationCompatible(parentConfig)) {
-                // Don't compute when launching in fullscreen and the fixed orientation is not the
-                // current orientation. It is more accurately to compute the override bounds from
-                // the updated configuration after the fixed orientation is applied.
-                return;
-            }
-
-            // Ensure the screen related fields are set. It is used to prevent activity relaunch
-            // when moving between displays. For screenWidthDp and screenWidthDp, because they
-            // are relative to bounds and density, they will be calculated in
-            // {@link TaskRecord#computeConfigResourceOverrides} and the result will also be
-            // relatively fixed.
-            overrideConfig.colorMode = parentConfig.colorMode;
-            overrideConfig.densityDpi = parentConfig.densityDpi;
-            overrideConfig.screenLayout = parentConfig.screenLayout
-                    & (Configuration.SCREENLAYOUT_LONG_MASK
-                            | Configuration.SCREENLAYOUT_SIZE_MASK);
-            // The smallest screen width is the short side of screen bounds. Because the bounds
-            // and density won't be changed, smallestScreenWidthDp is also fixed.
-            overrideConfig.smallestScreenWidthDp = parentConfig.smallestScreenWidthDp;
-
-            // The role of CompatDisplayInsets is like the override bounds.
-            final ActivityDisplay display = getDisplay();
-            if (display != null) {
-                if (display.inFreeformWindowingMode()) {
-                    // in freeform, apps in compat mode still launch in windows so don't want to
-                    // use display bounds, but rather use TaskRecord bounds.
-                    if (getTaskRecord() != null) {
-                        mCompatDisplayInsets = new CompatDisplayInsets(getTaskRecord());
-                    }
-                } else if (display.mDisplayContent != null) {
-                    mCompatDisplayInsets = new CompatDisplayInsets(display.mDisplayContent);
-                }
-            }
-        } else {
-            // We must base this on the parent configuration, because we set our override
-            // configuration's appBounds based on the result of this method. If we used our own
-            // configuration, it would be influenced by past invocations.
-
-            // inherits from parent by default
-            mTmpBounds.set(getRequestedOverrideBounds());
-            applyAspectRatio(mTmpBounds, getParent().getWindowConfiguration().getAppBounds());
-
-            if (mTmpBounds.equals(getRequestedOverrideBounds())) {
-                // The bounds is not changed or the activity is resizable (both the 2 bounds are
-                // empty).
-                return;
-            }
-
-            overrideConfig.windowConfiguration.setBounds(mTmpBounds);
+    private void updateSizeCompatMode() {
+        if (mCompatDisplayInsets != null || !shouldUseSizeCompatMode()) {
+            // The override configuration is set only once in size compatibility mode.
+            return;
+        }
+        final Configuration parentConfig = getParent().getConfiguration();
+        if (!hasProcess() && !isConfigurationCompatible(parentConfig)) {
+            // Don't compute when launching in fullscreen and the fixed orientation is not the
+            // current orientation. It is more accurately to compute the override bounds from
+            // the updated configuration after the fixed orientation is applied.
+            return;
         }
 
-        onRequestedOverrideConfigurationChanged(overrideConfig);
+        Configuration overrideConfig = getRequestedOverrideConfiguration();
+        final Configuration fullConfig = getConfiguration();
+
+        // Ensure the screen related fields are set. It is used to prevent activity relaunch
+        // when moving between displays. For screenWidthDp and screenWidthDp, because they
+        // are relative to bounds and density, they will be calculated in
+        // {@link TaskRecord#computeConfigResourceOverrides} and the result will also be
+        // relatively fixed.
+        overrideConfig.colorMode = fullConfig.colorMode;
+        overrideConfig.densityDpi = fullConfig.densityDpi;
+        overrideConfig.screenLayout = fullConfig.screenLayout
+                & (Configuration.SCREENLAYOUT_LONG_MASK
+                        | Configuration.SCREENLAYOUT_SIZE_MASK);
+        // The smallest screen width is the short side of screen bounds. Because the bounds
+        // and density won't be changed, smallestScreenWidthDp is also fixed.
+        overrideConfig.smallestScreenWidthDp = fullConfig.smallestScreenWidthDp;
+        if (info.isFixedOrientation()) {
+            // lock rotation too. When in size-compat, onConfigurationChanged will watch for and
+            // apply runtime rotation changes.
+            overrideConfig.windowConfiguration.setRotation(
+                    fullConfig.windowConfiguration.getRotation());
+        }
+
+        // The role of CompatDisplayInsets is like the override bounds.
+        final ActivityDisplay display = getDisplay();
+        if (display != null) {
+            mCompatDisplayInsets = new CompatDisplayInsets(display.mDisplayContent,
+                    getWindowConfiguration().getBounds(),
+                    getWindowConfiguration().tasksAreFloating());
+        }
+    }
+
+    private void clearSizeCompatMode() {
+        mCompatDisplayInsets = null;
+        onRequestedOverrideConfigurationChanged(EMPTY);
     }
 
     @Override
@@ -6649,13 +6633,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfiguration) {
+        Configuration resolvedConfig = getResolvedOverrideConfiguration();
         if (mCompatDisplayInsets != null) {
             resolveSizeCompatModeConfiguration(newParentConfiguration);
         } else {
             super.resolveOverrideConfiguration(newParentConfiguration);
+            applyAspectRatio(resolvedConfig.windowConfiguration.getBounds(),
+                    newParentConfiguration.windowConfiguration.getAppBounds(),
+                    newParentConfiguration.windowConfiguration.getBounds());
             // If the activity has override bounds, the relative configuration (e.g. screen size,
             // layout) needs to be resolved according to the bounds.
-            if (task != null && !matchParentBounds()) {
+            if (task != null && !resolvedConfig.windowConfiguration.getBounds().isEmpty()) {
                 task.computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
                         newParentConfiguration);
             }
@@ -6673,50 +6661,49 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * inheriting the parent bounds.
      */
     private void resolveSizeCompatModeConfiguration(Configuration newParentConfiguration) {
+        super.resolveOverrideConfiguration(newParentConfiguration);
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
 
-        final int parentRotation = newParentConfiguration.windowConfiguration.getRotation();
-        final int parentOrientation = newParentConfiguration.orientation;
-        int orientation = getConfiguration().orientation;
-        if (orientation != parentOrientation && isConfigurationCompatible(newParentConfiguration)) {
-            // The activity is compatible to apply the orientation change or it requests different
-            // fixed orientation.
-            orientation = parentOrientation;
-        } else {
-            final int requestedOrientation = getRequestedConfigurationOrientation();
-            if (requestedOrientation != ORIENTATION_UNDEFINED) {
-                orientation = requestedOrientation;
-            }
-        }
-
-        super.resolveOverrideConfiguration(newParentConfiguration);
-
-        Rect containingAppBounds = new Rect();
         Rect parentBounds = new Rect(newParentConfiguration.windowConfiguration.getBounds());
+
+        int orientation = getRequestedConfigurationOrientation();
+        if (orientation == ORIENTATION_UNDEFINED) {
+            orientation = newParentConfiguration.orientation;
+        }
+        int rotation = resolvedConfig.windowConfiguration.getRotation();
+        if (rotation == ROTATION_UNDEFINED) {
+            rotation = newParentConfiguration.windowConfiguration.getRotation();
+        }
 
         // Use compat insets to lock width and height. We should not use the parent width and height
         // because apps in compat mode should have a constant width and height. The compat insets
         // are locked when the app is first launched and are never changed after that, so we can
         // rely on them to contain the original and unchanging width and height of the app.
         final Rect compatDisplayBounds = mTmpBounds;
-        mCompatDisplayInsets.getDisplayBoundsByOrientation(compatDisplayBounds, orientation);
-        containingAppBounds.set(0, 0, compatDisplayBounds.width(), compatDisplayBounds.height());
+        mCompatDisplayInsets.getDisplayBoundsByRotation(compatDisplayBounds, rotation);
+        final Rect containingAppBounds = new Rect();
+        mCompatDisplayInsets.getFrameByOrientation(containingAppBounds, orientation);
 
-        resolvedBounds.set(containingAppBounds);
+        // Center containingAppBounds horizontally and aligned to top of parent. Both
+        // are usually the same unless the app was frozen with an orientation letterbox.
+        int left = compatDisplayBounds.left + compatDisplayBounds.width() / 2
+                - containingAppBounds.width() / 2;
+        resolvedBounds.set(left, compatDisplayBounds.top, left + containingAppBounds.width(),
+                compatDisplayBounds.top + containingAppBounds.height());
 
-        if (parentRotation != ROTATION_UNDEFINED) {
+        if (rotation != ROTATION_UNDEFINED) {
             // Ensure the parent and container bounds won't overlap with insets.
             TaskRecord.intersectWithInsetsIfFits(containingAppBounds, compatDisplayBounds,
-                    mCompatDisplayInsets.mNonDecorInsets[parentRotation]);
+                    mCompatDisplayInsets.mNonDecorInsets[rotation]);
             TaskRecord.intersectWithInsetsIfFits(parentBounds, compatDisplayBounds,
-                    mCompatDisplayInsets.mNonDecorInsets[parentRotation]);
+                    mCompatDisplayInsets.mNonDecorInsets[rotation]);
         }
 
-        applyAspectRatio(resolvedBounds, containingAppBounds);
+        applyAspectRatio(resolvedBounds, containingAppBounds, compatDisplayBounds);
 
         // Center horizontally in parent and align to top of parent - this is a UX choice
-        final int left = parentBounds.left + parentBounds.width() / 2 - resolvedBounds.width() / 2;
+        left = parentBounds.left + parentBounds.width() / 2 - resolvedBounds.width() / 2;
         resolvedBounds.set(left, parentBounds.top, left + resolvedBounds.width(),
                 parentBounds.top + resolvedBounds.height());
 
@@ -6813,6 +6800,33 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        if (mCompatDisplayInsets != null) {
+            Configuration overrideConfig = getRequestedOverrideConfiguration();
+            // Adapt to changes in orientation locking. The app is still non-resizable, but
+            // it can change which orientation is fixed. If the fixed orientation changes,
+            // update the rotation used on the "compat" display
+            boolean wasFixedOrient =
+                    overrideConfig.windowConfiguration.getRotation() != ROTATION_UNDEFINED;
+            int requestedOrient = getRequestedConfigurationOrientation();
+            if (requestedOrient != ORIENTATION_UNDEFINED
+                    && requestedOrient != getConfiguration().orientation
+                    // The task orientation depends on the top activity orientation, so it
+                    // should match. If it doesn't, just wait until it does.
+                    && requestedOrient == getParent().getConfiguration().orientation
+                    && (overrideConfig.windowConfiguration.getRotation()
+                            != getParent().getWindowConfiguration().getRotation())) {
+                overrideConfig.windowConfiguration.setRotation(
+                        getParent().getWindowConfiguration().getRotation());
+                onRequestedOverrideConfigurationChanged(overrideConfig);
+                return;
+            } else if (wasFixedOrient && requestedOrient == ORIENTATION_UNDEFINED
+                    && (overrideConfig.windowConfiguration.getRotation()
+                            != ROTATION_UNDEFINED)) {
+                overrideConfig.windowConfiguration.setRotation(ROTATION_UNDEFINED);
+                onRequestedOverrideConfigurationChanged(overrideConfig);
+                return;
+            }
+        }
         final int prevWinMode = getWindowingMode();
         mTmpPrevBounds.set(getBounds());
         super.onConfigurationChanged(newParentConfig);
@@ -6837,6 +6851,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mSizeCompatScale = 1f;
                 updateSurfacePosition();
             }
+        } else if (overrideBounds.isEmpty()) {
+            mSizeCompatBounds = null;
+            mSizeCompatScale = 1f;
+            updateSurfacePosition();
         }
 
         adjustPinnedStackAndInitChangeTransitionIfNeeded(prevWinMode, getWindowingMode());
@@ -6855,7 +6873,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (visible) {
             // It may toggle the UI for user to restart the size compatibility mode activity.
             display.handleActivitySizeCompatModeIfNeeded(this);
-        } else if (shouldUseSizeCompatMode()) {
+        } else if (mCompatDisplayInsets != null) {
             // The override changes can only be obtained from display, because we don't have the
             // difference of full configuration in each hierarchy.
             final int displayChanges = display.getLastOverrideConfigurationChanges();
@@ -6923,18 +6941,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * made to outBounds.
      */
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
-    private void applyAspectRatio(Rect outBounds, Rect containingAppBounds) {
+    private void applyAspectRatio(Rect outBounds, Rect containingAppBounds,
+            Rect containingBounds) {
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getActivityStack();
         final float minAspectRatio = info.minAspectRatio;
 
-        if (task == null || stack == null || task.inMultiWindowMode()
+        if (task == null || stack == null || (inMultiWindowMode() && !shouldUseSizeCompatMode())
                 || (maxAspectRatio == 0 && minAspectRatio == 0)
                 || isInVrUiMode(getConfiguration())) {
-            // We don't set override configuration if that activity task isn't fullscreen. I.e. the
-            // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
-            // the activity. This is indicated by an empty {@link outBounds}. We also don't set it
-            // if we are in VR mode.
+            // We don't enforce aspect ratio if the activity task is in multiwindow unless it
+            // is in size-compat mode. We also don't set it if we are in VR mode.
             return;
         }
 
@@ -6999,7 +7016,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Also account for the left / top insets (e.g. from display cutouts), which will be clipped
         // away later in {@link TaskRecord#computeConfigResourceOverrides()}. Otherwise, the app
         // bounds would end up too small.
-        outBounds.set(0, 0, activityWidth + containingAppBounds.left,
+        outBounds.set(containingBounds.left, containingBounds.top,
+                activityWidth + containingAppBounds.left,
                 activityHeight + containingAppBounds.top);
     }
 
@@ -7062,7 +7080,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mLastReportedDisplayId = newDisplayId;
         }
         // TODO(b/36505427): Is there a better place to do this?
-        updateOverrideConfiguration();
+        updateSizeCompatMode();
 
         // Short circuit: if the two full configurations are equal (the common case), then there is
         // nothing to do.  We test the full configuration instead of the global and merged override
@@ -7353,13 +7371,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Reset the existing override configuration so it can be updated according to the latest
         // configuration.
-        getRequestedOverrideConfiguration().unset();
-        getResolvedOverrideConfiguration().unset();
-        mCompatDisplayInsets = null;
+        clearSizeCompatMode();
         if (visible) {
             // Configuration will be ensured when becoming visible, so if it is already visible,
             // then the manual update is needed.
-            updateOverrideConfiguration();
+            updateSizeCompatMode();
         }
 
         if (!attachedToProcess()) {
@@ -7738,8 +7754,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * compatibility mode activity compute the configuration without relying on its current display.
      */
     static class CompatDisplayInsets {
-        final int mDisplayWidth;
-        final int mDisplayHeight;
+        private final int mDisplayWidth;
+        private final int mDisplayHeight;
+        private final int mWidth;
+        private final int mHeight;
 
         /**
          * The nonDecorInsets for each rotation. Includes the navigation bar and cutout insets. It
@@ -7753,9 +7771,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
          */
         final Rect[] mStableInsets = new Rect[4];
 
-        CompatDisplayInsets(DisplayContent display) {
+        /**
+         * Sets bounds to {@link TaskRecord} bounds. For apps in freeform, the task bounds are the
+         * parent bounds from the app's perspective. No insets because within a window.
+         */
+        CompatDisplayInsets(DisplayContent display, Rect activityBounds, boolean isFloating) {
             mDisplayWidth = display.mBaseDisplayWidth;
             mDisplayHeight = display.mBaseDisplayHeight;
+            mWidth = activityBounds.width();
+            mHeight = activityBounds.height();
+            if (isFloating) {
+                Rect emptyRect = new Rect();
+                for (int rotation = 0; rotation < 4; rotation++) {
+                    mNonDecorInsets[rotation] = emptyRect;
+                    mStableInsets[rotation] = emptyRect;
+                }
+                return;
+            }
             final DisplayPolicy policy = display.getDisplayPolicy();
             for (int rotation = 0; rotation < 4; rotation++) {
                 mNonDecorInsets[rotation] = new Rect();
@@ -7771,20 +7803,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
-        /**
-         * Sets bounds to {@link TaskRecord} bounds. For apps in freeform, the task bounds are the
-         * parent bounds from the app's perspective. No insets because within a window.
-         */
-        CompatDisplayInsets(TaskRecord taskRecord) {
-            Rect taskBounds = taskRecord.getConfiguration().windowConfiguration.getBounds();
-            mDisplayWidth = taskBounds.width();
-            mDisplayHeight = taskBounds.height();
-            for (int rotation = 0; rotation < 4; rotation++) {
-                mNonDecorInsets[rotation] = new Rect();
-                mStableInsets[rotation] = new Rect();
-            }
-        }
-
         void getDisplayBoundsByRotation(Rect outBounds, int rotation) {
             final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
             final int dw = rotated ? mDisplayHeight : mDisplayWidth;
@@ -7792,9 +7810,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             outBounds.set(0, 0, dw, dh);
         }
 
-        void getDisplayBoundsByOrientation(Rect outBounds, int orientation) {
-            final int longSide = Math.max(mDisplayWidth, mDisplayHeight);
-            final int shortSide = Math.min(mDisplayWidth, mDisplayHeight);
+        void getFrameByOrientation(Rect outBounds, int orientation) {
+            final int longSide = Math.max(mWidth, mHeight);
+            final int shortSide = Math.min(mWidth, mHeight);
             final boolean isLandscape = orientation == ORIENTATION_LANDSCAPE;
             outBounds.set(0, 0, isLandscape ? longSide : shortSide,
                     isLandscape ? shortSide : longSide);
