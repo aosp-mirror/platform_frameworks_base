@@ -294,7 +294,7 @@
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_try_again">Try again</string>
     <!-- Content description for empty spaces that are not taken by the biometric dialog. Clicking on these areas will cancel authentication and dismiss the biometric dialog [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_empty_space_description">Empty region, tap to cancel authentication</string>
+    <string name="biometric_dialog_empty_space_description">Tap to cancel authentication</string>
     <!-- Content description for the face icon when the device is not authenticating anymore [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_face_icon_description_idle">Please try again</string>
     <!-- Content description for the face icon when the device is authenticating [CHAR LIMIT=NONE] -->
@@ -305,6 +305,8 @@
     <string name="biometric_dialog_face_icon_description_confirmed">Confirmed</string>
     <!-- Message shown when a biometric is authenticated, waiting for the user to confirm authentication [CHAR LIMIT=40]-->
     <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
+    <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_authenticated">Authenticated</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>

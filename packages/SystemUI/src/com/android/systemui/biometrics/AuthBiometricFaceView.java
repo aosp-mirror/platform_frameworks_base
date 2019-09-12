@@ -111,8 +111,12 @@ public class AuthBiometricFaceView extends AuthBiometricView {
                         R.string.biometric_dialog_face_icon_description_confirmed));
             } else if (lastStateIsErrorIcon && newState == STATE_IDLE) {
                 animateOnce(R.drawable.face_dialog_error_to_idle);
+                mIconView.setContentDescription(mContext.getString(
+                        R.string.biometric_dialog_face_icon_description_idle));
             } else if (lastStateIsErrorIcon && newState == STATE_AUTHENTICATED) {
                 animateOnce(R.drawable.face_dialog_dark_to_checkmark);
+                mIconView.setContentDescription(mContext.getString(
+                        R.string.biometric_dialog_face_icon_description_authenticated));
             } else if (newState == STATE_ERROR && lastState != STATE_ERROR) {
                 animateOnce(R.drawable.face_dialog_dark_to_error);
             } else if (lastState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
@@ -125,6 +129,8 @@ public class AuthBiometricFaceView extends AuthBiometricView {
                         R.string.biometric_dialog_face_icon_description_authenticated));
             } else if (newState == STATE_IDLE) {
                 showStaticDrawable(R.drawable.face_dialog_idle_static);
+                mIconView.setContentDescription(mContext.getString(
+                        R.string.biometric_dialog_face_icon_description_idle));
             } else {
                 Log.w(TAG, "Unhandled state: " + newState);
             }
@@ -160,6 +166,11 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     @Override
     protected void handleResetAfterHelp() {
         resetErrorView(mContext, mIndicatorView);
+    }
+
+    @Override
+    protected boolean supportsSmallDialog() {
+        return true;
     }
 
     @Override

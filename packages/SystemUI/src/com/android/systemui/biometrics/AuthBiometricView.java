@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -32,6 +34,8 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -92,6 +96,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         int ACTION_USER_CANCELED = 2;
         int ACTION_BUTTON_NEGATIVE = 3;
         int ACTION_BUTTON_TRY_AGAIN = 4;
+        int ACTION_ERROR = 5;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -136,10 +141,15 @@ public abstract class AuthBiometricView extends LinearLayout {
         public ImageView getIconView() {
             return mBiometricView.findViewById(R.id.biometric_icon);
         }
+
+        public int getDelayAfterError() {
+            return BiometricPrompt.HIDE_DIALOG_DELAY;
+        }
     }
 
     private final Injector mInjector;
     private final Handler mHandler;
+    private final AccessibilityManager mAccessibilityManager;
     private final int mTextColorError;
     private final int mTextColorHint;
 
@@ -186,15 +196,14 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     protected abstract void handleResetAfterHelp();
 
-    private final Runnable mResetErrorRunnable = () -> {
-        updateState(getStateForAfterError());
-        handleResetAfterError();
-    };
+    /**
+     * @return true if the dialog supports {@link AuthDialog.DialogSize#SIZE_SMALL}
+     */
+    protected abstract boolean supportsSmallDialog();
 
-    private final Runnable mResetHelpRunnable = () -> {
-        updateState(STATE_AUTHENTICATING);
-        handleResetAfterHelp();
-    };
+    private final Runnable mResetErrorRunnable;
+
+    private final Runnable mResetHelpRunnable;
 
     private final OnClickListener mBackgroundClickListener = (view) -> {
         if (mState == STATE_AUTHENTICATED) {
@@ -226,6 +235,20 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mInjector = injector;
         mInjector.mBiometricView = this;
+
+        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+
+        mResetErrorRunnable = () -> {
+            updateState(getStateForAfterError());
+            handleResetAfterError();
+            Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
+        };
+
+        mResetHelpRunnable = () -> {
+            updateState(STATE_AUTHENTICATING);
+            handleResetAfterHelp();
+            Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
+        };
     }
 
     public void setPanelController(AuthPanelController panelController) {
@@ -250,7 +273,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     @VisibleForTesting
     void updateSize(@AuthDialog.DialogSize int newSize) {
-        Log.v(TAG, "Current: " + mSize + " New: " + newSize);
+        Log.v(TAG, "Current size: " + mSize + " New size: " + newSize);
         if (newSize == AuthDialog.SIZE_SMALL) {
             mTitleView.setVisibility(View.GONE);
             mSubtitleView.setVisibility(View.GONE);
@@ -323,6 +346,8 @@ public abstract class AuthBiometricView extends LinearLayout {
                     super.onAnimationEnd(animation);
                     mSize = newSize;
                     mDialogSizeAnimating = false;
+                    Utils.notifyAccessibilityContentChanged(mAccessibilityManager,
+                            AuthBiometricView.this);
                 }
             });
 
@@ -338,6 +363,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         } else {
             Log.e(TAG, "Unknown transition from: " + mSize + " to: " + newSize);
         }
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
     public void updateState(@BiometricState int newState) {
@@ -359,6 +385,8 @@ public abstract class AuthBiometricView extends LinearLayout {
                     mNegativeButton.setVisibility(View.GONE);
                     mIndicatorView.setVisibility(View.INVISIBLE);
                 }
+                announceForAccessibility(getResources()
+                        .getString(R.string.biometric_dialog_authenticated));
                 mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
                         getDelayAfterAuthenticatedDurationMs());
                 break;
@@ -385,6 +413,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 break;
         }
 
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         mState = newState;
     }
 
@@ -406,8 +435,18 @@ public abstract class AuthBiometricView extends LinearLayout {
         updateState(STATE_ERROR);
     }
 
+    public void onError(String error) {
+        showTemporaryMessage(error, mResetErrorRunnable);
+        updateState(STATE_ERROR);
+
+        mHandler.postDelayed(() -> {
+            mCallback.onAction(Callback.ACTION_ERROR);
+        }, mInjector.getDelayAfterError());
+    }
+
     public void onHelp(String help) {
         if (mSize != AuthDialog.SIZE_MEDIUM) {
+            Log.w(TAG, "Help received in size: " + mSize);
             return;
         }
         showTemporaryMessage(help, mResetHelpRunnable);
@@ -441,6 +480,8 @@ public abstract class AuthBiometricView extends LinearLayout {
         } else {
             view.setText(string);
         }
+
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
     private void setText(TextView view, String string) {
@@ -459,6 +500,8 @@ public abstract class AuthBiometricView extends LinearLayout {
         mIndicatorView.setTextColor(mTextColorError);
         mIndicatorView.setVisibility(View.VISIBLE);
         mHandler.postDelayed(resetMessageRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
+
+        Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
     @Override
@@ -497,6 +540,7 @@ public abstract class AuthBiometricView extends LinearLayout {
             updateState(STATE_AUTHENTICATING);
             mCallback.onAction(Callback.ACTION_BUTTON_TRY_AGAIN);
             mTryAgainButton.setVisibility(View.GONE);
+            Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         });
     }
 
@@ -527,15 +571,6 @@ public abstract class AuthBiometricView extends LinearLayout {
             // Restore positive button state
             mTryAgainButton.setVisibility(
                     mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY));
-
-            // Restore indicator text state
-            final String indicatorText =
-                    mSavedState.getString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING);
-            if (mSavedState.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_HELP_SHOWING)) {
-                onHelp(indicatorText);
-            } else if (mSavedState.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING)) {
-                onAuthenticationFailed(indicatorText);
-            }
         }
     }
 
@@ -600,9 +635,20 @@ public abstract class AuthBiometricView extends LinearLayout {
         if (mIconOriginalY == 0) {
             mIconOriginalY = mIconView.getY();
             if (mSavedState == null) {
-                updateSize(mRequireConfirmation ? AuthDialog.SIZE_MEDIUM : AuthDialog.SIZE_SMALL);
+                updateSize(!mRequireConfirmation && supportsSmallDialog() ? AuthDialog.SIZE_SMALL
+                        : AuthDialog.SIZE_MEDIUM);
             } else {
                 updateSize(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_DIALOG_SIZE));
+
+                // Restore indicator text state only after size has been restored
+                final String indicatorText =
+                        mSavedState.getString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING);
+                if (mSavedState.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_HELP_SHOWING)) {
+                    onHelp(indicatorText);
+                } else if (mSavedState.getBoolean(
+                        AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING)) {
+                    onAuthenticationFailed(indicatorText);
+                }
             }
         }
     }

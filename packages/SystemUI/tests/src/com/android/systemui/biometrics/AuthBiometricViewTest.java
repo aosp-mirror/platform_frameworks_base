@@ -164,6 +164,17 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void testError_sendsActionError() {
+        initDialog(mContext, mCallback, new MockInjector());
+        final String testError = "testError";
+        mBiometricView.onError(testError);
+        waitForIdleSync();
+
+        verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_ERROR);
+        assertEquals(AuthBiometricView.STATE_ERROR, mBiometricView.mState);
+    }
+
+    @Test
     public void testBackgroundClicked_sendsActionUserCanceled() {
         initDialog(mContext, mCallback, new MockInjector());
 
@@ -255,7 +266,9 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         assertEquals(View.VISIBLE, tryAgainButton.getVisibility());
         assertEquals(AuthBiometricView.STATE_ERROR, mBiometricView.mState);
         assertEquals(View.VISIBLE, mBiometricView.mIndicatorView.getVisibility());
-        assertEquals(failureMessage, mBiometricView.mIndicatorView.getText());
+
+        // TODO: Test restored text. Currently cannot test this, since it gets restored only after
+        // dialog size is known.
     }
 
     private Bundle buildBiometricPromptBundle() {
@@ -320,6 +333,11 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         public ImageView getIconView() {
             return mIconView;
         }
+
+        @Override
+        public int getDelayAfterError() {
+            return 0; // Keep this at 0 for tests to invoke callback immediately.
+        }
     }
 
     private class TestableBiometricView extends AuthBiometricView {
@@ -346,6 +364,11 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         @Override
         protected void handleResetAfterHelp() {
 
+        }
+
+        @Override
+        protected boolean supportsSmallDialog() {
+            return false;
         }
     }
 }

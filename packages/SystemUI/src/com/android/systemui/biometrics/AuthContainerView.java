@@ -19,12 +19,16 @@ package com.android.systemui.biometrics;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
+import android.os.UserManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -55,12 +59,12 @@ public class AuthContainerView extends LinearLayout
     private static final int ANIMATION_DURATION_SHOW_MS = 250;
     private static final int ANIMATION_DURATION_AWAY_MS = 350; // ms
 
-    private static final int STATE_UNKNOWN = 0;
-    private static final int STATE_ANIMATING_IN = 1;
-    private static final int STATE_PENDING_DISMISS = 2;
-    private static final int STATE_SHOWING = 3;
-    private static final int STATE_ANIMATING_OUT = 4;
-    private static final int STATE_GONE = 5;
+    static final int STATE_UNKNOWN = 0;
+    static final int STATE_ANIMATING_IN = 1;
+    static final int STATE_PENDING_DISMISS = 2;
+    static final int STATE_SHOWING = 3;
+    static final int STATE_ANIMATING_OUT = 4;
+    static final int STATE_GONE = 5;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATE_UNKNOWN, STATE_ANIMATING_IN, STATE_PENDING_DISMISS, STATE_SHOWING,
@@ -86,6 +90,9 @@ public class AuthContainerView extends LinearLayout
     @VisibleForTesting final WakefulnessLifecycle mWakefulnessLifecycle;
 
     private @ContainerState int mContainerState = STATE_UNKNOWN;
+
+    // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
+    @Nullable @AuthDialogCallback.DismissedReason Integer mPendingCallbackReason;
 
     static class Config {
         Context mContext;
@@ -136,7 +143,8 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        public AuthContainerView build(int modalityMask) { // TODO
+        public AuthContainerView build(int modalityMask) {
+            mConfig.mModalityMask = modalityMask;
             return new AuthContainerView(mConfig);
         }
     }
@@ -157,6 +165,9 @@ public class AuthContainerView extends LinearLayout
                     break;
                 case AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN:
                     mConfig.mCallback.onTryAgainPressed();
+                    break;
+                case AuthBiometricView.Callback.ACTION_ERROR:
+                    animateAway(AuthDialogCallback.DISMISSED_ERROR);
                     break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
@@ -181,14 +192,36 @@ public class AuthContainerView extends LinearLayout
         mContainerView = (ViewGroup) factory.inflate(
                 R.layout.auth_container_view, this, false /* attachToRoot */);
 
-        // TODO: Depends on modality
-        mBiometricView = (AuthBiometricFaceView)
-                factory.inflate(R.layout.auth_biometric_face_view, null, false);
+        mPanelView = mContainerView.findViewById(R.id.panel);
+        mPanelController = new AuthPanelController(mContext, mPanelView);
+
+        // TODO: Update with new controllers if multi-modal authentication can occur simultaneously
+        if (config.mModalityMask == BiometricAuthenticator.TYPE_FINGERPRINT) {
+            mBiometricView = (AuthBiometricFingerprintView)
+                    factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+        } else if (config.mModalityMask == BiometricAuthenticator.TYPE_FACE) {
+            mBiometricView = (AuthBiometricFaceView)
+                    factory.inflate(R.layout.auth_biometric_face_view, null, false);
+        } else {
+            Log.e(TAG, "Unsupported modality mask: " + config.mModalityMask);
+            mBiometricView = null;
+            mBackgroundView = null;
+            mScrollView = null;
+            return;
+        }
 
         mBackgroundView = mContainerView.findViewById(R.id.background);
 
-        mPanelView = mContainerView.findViewById(R.id.panel);
-        mPanelController = new AuthPanelController(mContext, mPanelView);
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        if (userManager.isManagedProfile(mConfig.mUserId)) {
+            final Drawable image = getResources().getDrawable(R.drawable.work_challenge_background,
+                    mContext.getTheme());
+            image.setColorFilter(dpm.getOrganizationColorForUser(mConfig.mUserId),
+                    PorterDuff.Mode.DARKEN);
+            mBackgroundView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            mBackgroundView.setImageDrawable(image);
+        }
 
         mBiometricView.setRequireConfirmation(mConfig.mRequireConfirmation);
         mBiometricView.setPanelController(mPanelController);
@@ -281,13 +314,13 @@ public class AuthContainerView extends LinearLayout
         if (animate) {
             animateAway(false /* sendReason */, 0 /* reason */);
         } else {
-            mWindowManager.removeView(this);
+            removeWindowIfAttached();
         }
     }
 
     @Override
     public void dismissFromSystemServer() {
-        mWindowManager.removeView(this);
+        removeWindowIfAttached();
     }
 
     @Override
@@ -307,11 +340,12 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onError(String error) {
-
+        mBiometricView.onError(error);
     }
 
     @Override
     public void onSaveState(@NonNull Bundle outState) {
+        outState.putInt(AuthDialog.KEY_CONTAINER_STATE, mContainerState);
         mBiometricView.onSaveState(outState);
     }
 
@@ -338,12 +372,15 @@ public class AuthContainerView extends LinearLayout
         }
         mContainerState = STATE_ANIMATING_OUT;
 
+        if (sendReason) {
+            mPendingCallbackReason = reason;
+        } else {
+            mPendingCallbackReason = null;
+        }
+
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
-            mWindowManager.removeView(this);
-            if (sendReason) {
-                mConfig.mCallback.onDismissed(reason);
-            }
+            removeWindowIfAttached();
         };
 
         postOnAnimation(() -> {
@@ -367,6 +404,24 @@ public class AuthContainerView extends LinearLayout
                     .withLayer()
                     .start();
         });
+    }
+
+    private void sendPendingCallbackIfNotNull() {
+        Log.d(TAG, "pendingCallback: " + mPendingCallbackReason);
+        if (mPendingCallbackReason != null) {
+            mConfig.mCallback.onDismissed(mPendingCallbackReason);
+            mPendingCallbackReason = null;
+        }
+    }
+
+    private void removeWindowIfAttached() {
+        sendPendingCallbackIfNotNull();
+
+        if (mContainerState == STATE_GONE) {
+            return;
+        }
+        mContainerState = STATE_GONE;
+        mWindowManager.removeView(this);
     }
 
     private void onDialogAnimatedIn() {

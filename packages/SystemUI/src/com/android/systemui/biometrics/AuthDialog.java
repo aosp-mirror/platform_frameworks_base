@@ -29,6 +29,9 @@ import java.lang.annotation.RetentionPolicy;
  * Interface for the biometric dialog UI.
  */
 public interface AuthDialog {
+
+    String KEY_CONTAINER_STATE = "container_state";
+
     String KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY = "try_agian_visibility";
     String KEY_BIOMETRIC_STATE = "state";
     String KEY_BIOMETRIC_INDICATOR_STRING = "indicator_string"; // error / help / hint
