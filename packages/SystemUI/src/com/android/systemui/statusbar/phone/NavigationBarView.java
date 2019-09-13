@@ -909,7 +909,7 @@ public class NavigationBarView extends FrameLayout implements
     }
 
     public void showPinningEscapeToast() {
-        mScreenPinningNotify.showEscapeToast(isRecentsButtonVisible());
+        mScreenPinningNotify.showEscapeToast(isRecentsButtonVisible(), isGesturalMode(mNavBarMode));
     }
 
     public boolean isVertical() {

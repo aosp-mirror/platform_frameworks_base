@@ -42,16 +42,16 @@ public class ScreenPinningNotify {
 
     /** Show "Screen pinned" toast. */
     public void showPinningStartToast() {
-        makeAllUserToastAndShow(R.string.screen_pinning_start);
+        makeAllUserToastAndShow(mContext.getString(R.string.screen_pinning_start));
     }
 
     /** Show "Screen unpinned" toast. */
     public void showPinningExitToast() {
-        makeAllUserToastAndShow(R.string.screen_pinning_exit);
+        makeAllUserToastAndShow(mContext.getString(R.string.screen_pinning_exit));
     }
 
     /** Show a toast that describes the gesture the user should use to escape pinned mode. */
-    public void showEscapeToast(boolean isRecentsButtonVisible) {
+    public void showEscapeToast(boolean isRecentsButtonVisible, boolean isGesturalMode) {
         long showToastTime = SystemClock.elapsedRealtime();
         if ((showToastTime - mLastShowToastTime) < SHOW_TOAST_MINIMUM_INTERVAL) {
             Slog.i(TAG, "Ignore toast since it is requested in very short interval.");
@@ -60,14 +60,17 @@ public class ScreenPinningNotify {
         if (mLastToast != null) {
             mLastToast.cancel();
         }
+        String gesturalText = mContext.getString(R.string.screen_pinning_title) +
+                "\n\n" + mContext.getString(R.string.screen_pinning_description_gestural);
         mLastToast = makeAllUserToastAndShow(isRecentsButtonVisible
-                ? R.string.screen_pinning_toast
-                : R.string.screen_pinning_toast_recents_invisible);
+                ? mContext.getString(R.string.screen_pinning_toast)
+                : isGesturalMode ? gesturalText
+                : mContext.getString(R.string.screen_pinning_toast_recents_invisible));
         mLastShowToastTime = showToastTime;
     }
 
-    private Toast makeAllUserToastAndShow(int resId) {
-        Toast toast = SysUIToast.makeText(mContext, resId, Toast.LENGTH_LONG);
+    private Toast makeAllUserToastAndShow(String text) {
+        Toast toast = SysUIToast.makeText(mContext, text, Toast.LENGTH_LONG);
         toast.show();
         return toast;
     }
