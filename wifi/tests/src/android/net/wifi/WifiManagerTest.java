@@ -973,25 +973,6 @@ public class WifiManagerTest {
     }
 
     /**
-     * Verify that calls WifiServiceImpl to set country code when no exception happens.
-     */
-    @Test
-    public void testSetWifiCountryCode() throws Exception {
-        mWifiManager.setCountryCode(TEST_COUNTRY_CODE);
-        verify(mWifiService).setCountryCode(TEST_COUNTRY_CODE);
-    }
-
-    /**
-     * Verify that WifiManager.setCountryCode() rethrows exceptions if caller does not
-     * have necessary permissions.
-     */
-    @Test(expected = SecurityException.class)
-    public void testSetWifiCountryCodeFailedOnSecurityException() throws Exception {
-        doThrow(new SecurityException()).when(mWifiService).setCountryCode(anyString());
-        mWifiManager.setCountryCode(TEST_COUNTRY_CODE);
-    }
-
-    /**
      * Test that calls to get the current WPS config token return null and do not have any
      * interactions with WifiServiceImpl.
      */

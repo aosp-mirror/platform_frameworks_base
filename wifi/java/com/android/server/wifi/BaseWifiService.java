@@ -205,7 +205,7 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @removed */
     public void setCountryCode(String country) {
         throw new UnsupportedOperationException();
     }

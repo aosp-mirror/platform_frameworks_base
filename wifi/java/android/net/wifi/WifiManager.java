@@ -2490,25 +2490,6 @@ public class WifiManager {
     }
 
     /**
-     * Set the country code.
-     * @param countryCode country code in ISO 3166 format.
-     *
-     * @hide
-     */
-    public void setCountryCode(@NonNull String country) {
-        try {
-            IWifiManager iWifiManager = getIWifiManager();
-            if (iWifiManager == null) {
-                if (TextUtils.isEmpty(country)) return;
-                throw new RemoteException("Wifi service is not running");
-            }
-            iWifiManager.setCountryCode(country);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
     * get the country code.
     * @return the country code in ISO 3166 format.
     *
