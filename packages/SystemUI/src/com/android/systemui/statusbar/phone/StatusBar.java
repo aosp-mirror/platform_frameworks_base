@@ -197,6 +197,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineInitializer;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
@@ -389,6 +390,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Inject
     @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
     boolean mAllowNotificationLongPress;
+    @Inject
+    protected NotifPipelineInitializer mNotifPipelineInitializer;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -1129,6 +1132,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
         mNotificationListController.bind();
+
+        mNotifPipelineInitializer.initialize(mNotificationListener);
     }
 
     /**
