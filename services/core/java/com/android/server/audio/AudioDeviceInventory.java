@@ -159,7 +159,6 @@ public class AudioDeviceInventory {
     }
 
     // only public for mocking/spying
-    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     @VisibleForTesting
     public void onSetA2dpSinkConnectionState(@NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo,
             @AudioService.BtProfileConnectionState int state) {
@@ -284,7 +283,6 @@ public class AudioDeviceInventory {
         }
     }
 
-    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ void onBluetoothA2dpActiveDeviceChange(
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo, int event) {
         final BluetoothDevice btDevice = btInfo.getBtDevice();
@@ -557,7 +555,6 @@ public class AudioDeviceInventory {
     }
 
     // only public for mocking/spying
-    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     @VisibleForTesting
     public void setBluetoothA2dpDeviceConnectionState(
             @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
