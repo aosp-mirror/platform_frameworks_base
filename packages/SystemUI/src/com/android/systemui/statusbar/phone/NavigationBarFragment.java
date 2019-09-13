@@ -86,8 +86,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
@@ -174,7 +174,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public int mDisplayId;
     private boolean mIsOnDefaultDisplay;
     public boolean mHomeBlockedThisTouch;
-    private ScreenDecorations mScreenDecorations;
+
+    /** Only for default display */
+    @Nullable
+    private AssistHandleViewController mAssistHandlerViewController;
 
     private Handler mHandler = Dependency.get(Dependency.MAIN_HANDLER);
 
@@ -357,17 +360,22 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mDisabledFlags2 |= StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS;
         }
         setDisabled2Flags(mDisabledFlags2);
-
-        mScreenDecorations = SysUiServiceProvider.getComponent(getContext(),
-                ScreenDecorations.class);
-        getBarTransitions().addDarkIntensityListener(mScreenDecorations);
+        if (mIsOnDefaultDisplay) {
+            mAssistHandlerViewController =
+                new AssistHandleViewController(mHandler, mNavigationBarView);
+            getBarTransitions().addDarkIntensityListener(mAssistHandlerViewController);
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         if (mNavigationBarView != null) {
-            mNavigationBarView.getBarTransitions().removeDarkIntensityListener(mScreenDecorations);
+            if (mIsOnDefaultDisplay) {
+                mNavigationBarView.getBarTransitions()
+                        .removeDarkIntensityListener(mAssistHandlerViewController);
+                mAssistHandlerViewController = null;
+            }
             mNavigationBarView.getBarTransitions().destroy();
             mNavigationBarView.getLightTransitionsController().destroy(getContext());
         }
@@ -1017,6 +1025,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavigationBarView.setLayoutTransitionsEnabled(false);
         mNavigationBarView.postDelayed(() -> mNavigationBarView.setLayoutTransitionsEnabled(true),
                 delay + StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
+    }
+
+    @Nullable
+    public AssistHandleViewController getAssistHandlerViewController() {
+        return mAssistHandlerViewController;
     }
 
     /**
