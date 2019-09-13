@@ -1152,7 +1152,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s के साथ चित्र कैप्चर करें"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"चित्र कैप्चर करें"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"इस कार्रवाई के लिए डिफ़ॉल्‍ट के तौर पर इस्तेमाल करें"</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"किसी भिन्न ऐप्स का उपयोग करें"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"किसी दूसरे ऐप्लिकेशन का इस्तेमाल करें"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"सिस्‍टम सेटिंग और डाउनलोड किए गए ऐप में डिफ़ॉल्‍ट साफ़ करें."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"कोई कार्रवाई चुनें"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB डिवाइस के लिए कोई ऐप्स  चुनें"</string>
