@@ -251,6 +251,12 @@
     <permission android:name="com.breel.wallpapers.notifications"/>
     <uses-permission android:name="com.breel.wallpapers.notifications"/>
 
+    <!-- Smart space -->
+    <uses-permission android:name="com.google.android.apps.nexuslauncher.permission.QSB"/>
+    <protected-broadcast android:name="com.google.android.systemui.smartspace.ENABLE_UPDATE"/>
+    <protected-broadcast android:name="com.google.android.systemui.smartspace.EXPIRE_EVENT"/>
+    <protected-broadcast android:name="com.google.android.systemui.smartspace.CLICK_EVENT"/>
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
@@ -639,7 +645,12 @@
                 android:resource="@xml/fileprovider" />
         </provider>
 
-        <provider android:name=".keyguard.KeyguardSliceProvider"
+        <provider android:name="com.google.android.systemui.keyguard.KeyguardSliceProvider"
+                  android:authorities="com.android.systemui.keyguard.disabled"
+                  android:enabled="false">
+        </provider>
+
+        <provider android:name="com.google.android.systemui.keyguard.KeyguardSliceProviderGoogle"
                   android:authorities="com.android.systemui.keyguard"
                   android:grantUriPermissions="true"
                   android:exported="true">

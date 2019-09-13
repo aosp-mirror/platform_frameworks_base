@@ -1,0 +1,92 @@
+syntax = "proto2";
+
+package SmartspaceProto;
+
+option java_package = "com.google.android.systemui.smartspace";
+option java_outer_classname = "SmartspaceProto";
+
+message SmartspaceUpdate {
+    message SmartspaceCard {
+        message ExpiryCriteria {
+            required int64 expirationTimeMillis = 1;
+            required int32 maxImpressions = 2;
+        }
+
+        message Image {
+            required string key = 1;
+            required string gsaResourceName = 2;
+            required string uri = 3;
+        }
+
+        message Message {
+            message FormattedText {
+                message FormatParam {
+                    enum FormatParamArgs {
+                        SOMETHING0 = 0;
+                        SOMETHING1 = 1;
+                        SOMETHING2 = 2;
+                        SOMETHING3 = 3;
+                    }
+
+                    required string text = 1;
+                    required int32 truncateLocation = 2;
+                    required FormatParamArgs formatParamArgs = 3;
+                    required bool updateTimeLocally = 4;
+                }
+
+                required string text = 1;
+                required int32 truncateLocation = 2;
+                repeated FormatParam formatParam = 3;
+            }
+
+            required FormattedText title = 1;
+            required FormattedText subtitle = 2;
+        }
+
+        message TapAction {
+            enum ActionType {
+                ACTION0 = 0;
+                ACTION1 = 1;
+                ACTION2 = 2;
+            }
+
+            required ActionType actionType = 1;
+            required string intent = 2;
+        }
+
+        enum CardType {
+            CARD0 = 0;
+            CARD1 = 1;
+            CARD2 = 2;
+            CARD3 = 3;
+            CARD4 = 4;
+            CARD5 = 5;
+            CARD6 = 6;
+        }
+
+        required bool shouldDiscard = 1;
+        required int32 cardId = 2;
+        required Message preEvent = 3;
+        required Message duringEvent = 4;
+        required Message postEvent = 5;
+        required Image icon = 6;
+        required CardType cardType = 7;
+        required TapAction tapAction = 8;
+        required int64 updateTimeMillis = 9;
+        required int64 eventTimeMillis = 10;
+        required int64 eventDurationMillis = 11;
+        required ExpiryCriteria expiryCriteria = 12;
+        required int32 cardPriority =13;
+    }
+
+    repeated SmartspaceCard card = 1;
+}
+
+message CardWrapper {
+    required SmartspaceUpdate.SmartspaceCard card = 1;
+    required int64 publishTime = 2;
+    required int64 gsaUpdateTime = 3;
+    required int32 gsaVersionCode = 4;
+    required bytes icon = 5;
+    required bool isIconGrayscale = 6;
+}

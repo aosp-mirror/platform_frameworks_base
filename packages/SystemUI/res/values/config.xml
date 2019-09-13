@@ -30,7 +30,7 @@
 
     <!-- Component to be used as the status bar service.  Must implement the IStatusBar
      interface.  This name is in the ComponentName flattened format (package/class)  -->
-    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
+    <string name="config_statusBarComponent" translatable="false">com.google.android.systemui.statusbar.phone.StatusBarGoogle</string>
 
     <!-- Component to be used as the recents implementation.  Must implement the
      RecentsImplementation interface.  This name is in the ComponentName flattened format
