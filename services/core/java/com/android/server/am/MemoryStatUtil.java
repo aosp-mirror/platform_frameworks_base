@@ -63,8 +63,6 @@ public final class MemoryStatUtil {
     private static final Pattern CACHE_IN_BYTES = Pattern.compile("total_cache (\\d+)");
     private static final Pattern SWAP_IN_BYTES = Pattern.compile("total_swap (\\d+)");
 
-    private static final Pattern RSS_HIGH_WATERMARK_IN_KILOBYTES =
-            Pattern.compile("VmHWM:\\s*(\\d+)\\s*kB");
     private static final Pattern PROCFS_RSS_IN_KILOBYTES =
             Pattern.compile("VmRSS:\\s*(\\d+)\\s*kB");
     private static final Pattern PROCFS_ANON_RSS_IN_KILOBYTES =
@@ -110,15 +108,6 @@ public final class MemoryStatUtil {
         final String statPath = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
         final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
         return parseMemoryStatFromProcfs(readFileContents(statPath), readFileContents(statusPath));
-    }
-
-    /**
-     * Reads RSS high-water mark of a process from procfs. Returns value of the VmHWM field in
-     * /proc/PID/status in kilobytes or 0 if not available.
-     */
-    public static int readRssHighWaterMarkFromProcfs(int pid) {
-        final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
-        return parseVmHWMFromProcfs(readFileContents(statusPath));
     }
 
     /**
@@ -202,19 +191,6 @@ public final class MemoryStatUtil {
             return null;
         }
     }
-
-    /**
-     * Parses RSS high-water mark out from the contents of the /proc/pid/status file in procfs. The
-     * returned value is in kilobytes.
-     */
-    @VisibleForTesting
-    static int parseVmHWMFromProcfs(String procStatusContents) {
-        if (procStatusContents == null || procStatusContents.isEmpty()) {
-            return 0;
-        }
-        return (int) tryParseLong(RSS_HIGH_WATERMARK_IN_KILOBYTES, procStatusContents);
-    }
-
 
     /**
      * Parses cmdline out of the contents of the /proc/pid/cmdline file in procfs.
