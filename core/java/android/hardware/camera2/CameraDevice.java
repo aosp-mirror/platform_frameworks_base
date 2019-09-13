@@ -1249,7 +1249,9 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>The mute mode is a system-wide setting. When multiple CameraDevice objects
      * are setting different modes, the system will pick a the mode that's union of
-     * all modes set by CameraDevice.</p>
+     * all modes set by CameraDevice. Applications can also use
+     * {@link #getCameraAudioRestriction} to query current system-wide camera
+     * mute mode in effect.</p>
      *
      * <p>The mute settings from this CameraDevice will be automatically removed when the
      * CameraDevice is closed or the application is disconnected from the camera.</p>
@@ -1275,7 +1277,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>Application can use this method to retrieve the system-wide camera audio restriction
      * settings described in {@link #setCameraAudioRestriction}.</p>
      *
-     * @return The system-wide mute mode setting resulting from this call
+     * @return The current system-wide mute mode setting in effect
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
