@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.android.server.backup.encryption.keys;
+
+import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -46,15 +48,27 @@ public class TertiaryKeyRotationTracker {
      */
     public static TertiaryKeyRotationTracker getInstance(Context context) {
         return new TertiaryKeyRotationTracker(
-                context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE));
+                context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE),
+                MAX_BACKUPS_UNTIL_TERTIARY_KEY_ROTATION);
     }
 
     private final SharedPreferences mSharedPreferences;
+    private final int mMaxBackupsTillRotation;
 
-    /** New instance, storing data in {@code mSharedPreferences}. */
+    /**
+     * New instance, storing data in {@code sharedPreferences} and initializing backup countdown to
+     * {@code maxBackupsTillRotation}.
+     */
     @VisibleForTesting
-    TertiaryKeyRotationTracker(SharedPreferences sharedPreferences) {
+    TertiaryKeyRotationTracker(SharedPreferences sharedPreferences, int maxBackupsTillRotation) {
+        checkArgument(
+                maxBackupsTillRotation >= 0,
+                String.format(
+                        Locale.US,
+                        "maxBackupsTillRotation should be non-negative but was %d",
+                        maxBackupsTillRotation));
         mSharedPreferences = sharedPreferences;
+        mMaxBackupsTillRotation = maxBackupsTillRotation;
     }
 
     /**
@@ -63,7 +77,7 @@ public class TertiaryKeyRotationTracker {
      * @param packageName The package name of the app.
      */
     public boolean isKeyRotationDue(String packageName) {
-        return getBackupsSinceRotation(packageName) >= MAX_BACKUPS_UNTIL_TERTIARY_KEY_ROTATION;
+        return getBackupsSinceRotation(packageName) >= mMaxBackupsTillRotation;
     }
 
     /**
@@ -84,7 +98,7 @@ public class TertiaryKeyRotationTracker {
                             packageName,
                             Math.max(
                                     0,
-                                    MAX_BACKUPS_UNTIL_TERTIARY_KEY_ROTATION
+                                    mMaxBackupsTillRotation
                                             - backupsSinceRotation)));
         }
     }
@@ -102,7 +116,7 @@ public class TertiaryKeyRotationTracker {
     public void markAllForRotation() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         for (String packageName : mSharedPreferences.getAll().keySet()) {
-            editor.putInt(packageName, MAX_BACKUPS_UNTIL_TERTIARY_KEY_ROTATION);
+            editor.putInt(packageName, mMaxBackupsTillRotation);
         }
         editor.apply();
     }
