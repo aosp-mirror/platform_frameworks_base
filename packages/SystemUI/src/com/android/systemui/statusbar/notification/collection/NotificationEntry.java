@@ -94,6 +94,20 @@ public final class NotificationEntry {
     public StatusBarNotification notification;
     private Ranking mRanking;
 
+
+    /*
+     * Bookkeeping members
+     */
+
+    /** List of lifetime extenders that are extending the lifetime of this notification. */
+    final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
+
+
+    /*
+    * Old members
+    * TODO: Remove every member beneath this line if possible
+    */
+
     public boolean noisy;
     public StatusBarIconView icon;
     public StatusBarIconView expandedIcon;

@@ -87,6 +87,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
@@ -102,7 +103,7 @@ import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.car.hvac.TemperatureView;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotifPipelineInitializer;
+import com.android.systemui.statusbar.notification.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
@@ -138,6 +139,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import dagger.Lazy;
 
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
@@ -251,6 +254,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Inject
     public CarStatusBar(
             Context context,
+            FeatureFlags featureFlags,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -265,7 +269,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowNotificationLongPress,
-            NotifPipelineInitializer notifPipelineInitializer,
+            Lazy<NewNotifPipeline> newNotifPipeline,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
@@ -307,6 +311,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotifLog notifLog) {
         super(
                 context,
+                featureFlags,
                 lightBarController,
                 autoHideController,
                 keyguardUpdateMonitor,
@@ -321,7 +326,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 dynamicPrivacyController,
                 bypassHeadsUpNotifier,
                 allowNotificationLongPress,
-                notifPipelineInitializer,
+                newNotifPipeline,
                 falsingManager,
                 broadcastDispatcher,
                 remoteInputQuickSettingsDisabler,

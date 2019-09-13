@@ -179,6 +179,7 @@ import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -198,7 +199,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotifPipelineInitializer;
+import com.android.systemui.statusbar.notification.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
@@ -246,6 +247,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
 import dagger.Subcomponent;
 
 @Singleton
@@ -370,6 +372,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final Object mQueueLock = new Object();
 
+    private final FeatureFlags mFeatureFlags;
     private final StatusBarIconController mIconController;
     private final DozeLog mDozeLog;
     private final InjectionInflationController mInjectionInflater;
@@ -381,7 +384,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     private final boolean mAllowNotificationLongPress;
-    private final NotifPipelineInitializer mNotifPipelineInitializer;
+    private final Lazy<NewNotifPipeline> mNewNotifPipeline;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
@@ -621,6 +624,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Inject
     public StatusBar(
             Context context,
+            FeatureFlags featureFlags,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -635,7 +639,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowNotificationLongPress,
-            NotifPipelineInitializer notifPipelineInitializer,
+            Lazy<NewNotifPipeline> newNotifPipeline,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
@@ -676,6 +680,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
             NotifLog notifLog) {
         super(context);
+        mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -690,7 +695,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDynamicPrivacyController = dynamicPrivacyController;
         mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
         mAllowNotificationLongPress = allowNotificationLongPress;
-        mNotifPipelineInitializer = notifPipelineInitializer;
+        mNewNotifPipeline = newNotifPipeline;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
@@ -1210,7 +1215,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
         mNotificationListController.bind();
 
-        mNotifPipelineInitializer.initialize(mNotificationListener);
+        if (mFeatureFlags.isNewNotifPipelineEnabled()) {
+            mNewNotifPipeline.get().initialize(mNotificationListener);
+        }
     }
 
     /**
