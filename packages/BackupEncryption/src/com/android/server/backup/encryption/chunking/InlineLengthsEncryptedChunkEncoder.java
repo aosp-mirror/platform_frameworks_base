@@ -17,7 +17,7 @@
 package com.android.server.backup.encryption.chunking;
 
 import com.android.server.backup.encryption.chunk.ChunkOrderingType;
-import com.android.server.backup.encryption.chunk.ChunksMetadataProto;
+import com.android.server.backup.encryption.protos.nano.ChunksMetadataProto;
 
 import java.io.IOException;
 

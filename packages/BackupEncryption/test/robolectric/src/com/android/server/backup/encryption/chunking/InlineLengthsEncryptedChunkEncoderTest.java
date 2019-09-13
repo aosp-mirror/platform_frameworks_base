@@ -24,7 +24,7 @@ import static org.mockito.Mockito.mock;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.backup.encryption.chunk.ChunkHash;
-import com.android.server.backup.encryption.chunk.ChunksMetadataProto;
+import com.android.server.backup.encryption.protos.nano.ChunksMetadataProto;
 
 import org.junit.Before;
 import org.junit.Test;
