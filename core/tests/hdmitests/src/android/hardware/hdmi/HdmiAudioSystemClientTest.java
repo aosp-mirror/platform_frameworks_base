@@ -194,6 +194,16 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
+        public void addHdmiControlStatusChangeListener(
+                final IHdmiControlStatusChangeListener listener) {
+        }
+
+        @Override
+        public void removeHdmiControlStatusChangeListener(
+                final IHdmiControlStatusChangeListener listener) {
+        }
+
+        @Override
         public void addHotplugEventListener(final IHdmiHotplugEventListener listener) {
         }
 
