@@ -2000,10 +2000,10 @@ public final class QuotaController extends StateController {
         private static final long DEFAULT_MAX_EXECUTION_TIME_MS =
                 4 * HOUR_IN_MILLIS;
         private static final long DEFAULT_RATE_LIMITING_WINDOW_MS =
-                10 * MINUTE_IN_MILLIS;
+                MINUTE_IN_MILLIS;
         private static final int DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW = 20;
-        private static final int DEFAULT_MAX_JOB_COUNT_ACTIVE = // 20/window = 120/hr = 1/session
-                DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
+        private static final int DEFAULT_MAX_JOB_COUNT_ACTIVE =
+                75; // 75/window = 450/hr = 1/session
         private static final int DEFAULT_MAX_JOB_COUNT_WORKING = // 120/window = 60/hr = 12/session
                 (int) (60.0 * DEFAULT_WINDOW_SIZE_WORKING_MS / HOUR_IN_MILLIS);
         private static final int DEFAULT_MAX_JOB_COUNT_FREQUENT = // 200/window = 25/hr = 25/session
@@ -2011,7 +2011,7 @@ public final class QuotaController extends StateController {
         private static final int DEFAULT_MAX_JOB_COUNT_RARE = // 48/window = 2/hr = 16/session
                 (int) (2.0 * DEFAULT_WINDOW_SIZE_RARE_MS / HOUR_IN_MILLIS);
         private static final int DEFAULT_MAX_SESSION_COUNT_ACTIVE =
-                20; // 120/hr
+                75; // 450/hr
         private static final int DEFAULT_MAX_SESSION_COUNT_WORKING =
                 10; // 5/hr
         private static final int DEFAULT_MAX_SESSION_COUNT_FREQUENT =
@@ -2165,7 +2165,7 @@ public final class QuotaController extends StateController {
             mResolver = resolver;
             mResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS), false, this);
-            updateConstants();
+            onChange(true, null);
         }
 
         @Override
