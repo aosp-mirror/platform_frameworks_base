@@ -21,8 +21,6 @@ import android.app.Service;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Process;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.AppComponentFactory;
@@ -60,9 +58,6 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
                         SystemUIFactory.createFromConfig(context);
                         SystemUIFactory.getInstance().getRootComponent().inject(
                                 SystemUIAppComponentFactory.this);
-                        Log.d(TAG, "Initialized during Application creation in Process "
-                                + Process.myPid() + ", Thread " + Process.myTid());
-                        Log.d(TAG, "mComponentHelper: " + mComponentHelper);
                     }
             );
         }
@@ -83,8 +78,6 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
                         SystemUIFactory.createFromConfig(context);
                         SystemUIFactory.getInstance().getRootComponent().inject(
                                 contentProvider);
-                        Log.d(TAG, "Initialized during ContentProvider creation in Process "
-                                + Process.myPid() + ", Thread " + Process.myTid());
                     }
             );
         }
@@ -98,10 +91,10 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
             @NonNull ClassLoader cl, @NonNull String className, Intent intent)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         if (mComponentHelper == null) {
-            // Everything is about to crash if this is true, but that is inevitable. We either crash
-            // here or crash lower in the stack. Better to crash early!
-            Log.wtf(TAG, "Uninitialized mComponentHelper in Process" + Process.myPid() + ", Thread "
-                    + Process.myTid());
+            // This shouldn't happen, but does when a device is freshly formatted.
+            // Bug filed against framework to take a look: http://b/141008541
+            SystemUIFactory.getInstance().getRootComponent().inject(
+                    SystemUIAppComponentFactory.this);
         }
         Service service = mComponentHelper.resolveService(className);
         if (service != null) {
