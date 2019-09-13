@@ -156,7 +156,7 @@ public class AttentionDetector {
             final UserSwitchObserver observer = new UserSwitchObserver();
             ActivityManager.getService().registerUserSwitchObserver(observer, TAG);
         } catch (RemoteException e) {
-             // Shouldn't happen since in-process.
+            // Shouldn't happen since in-process.
         }
 
         context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
@@ -172,12 +172,13 @@ public class AttentionDetector {
     public long updateUserActivity(long nextScreenDimming) {
         if (nextScreenDimming == mLastActedOnNextScreenDimming
                 || !mIsSettingEnabled
-                || !isAttentionServiceSupported()
                 || mWindowManager.isKeyguardShowingAndNotOccluded()) {
             return nextScreenDimming;
         }
 
-        if (!serviceHasSufficientPermissions()) {
+        if (!isAttentionServiceSupported() || !serviceHasSufficientPermissions()) {
+            // Turns off adaptive sleep in settings for all users if attention service is not
+            // available. The setting itself should also be grayed out in this case.
             Settings.System.putInt(mContentResolver, ADAPTIVE_SLEEP, 0);
             return nextScreenDimming;
         }
