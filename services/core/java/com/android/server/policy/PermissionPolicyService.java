@@ -65,8 +65,8 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
+
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -308,6 +308,8 @@ public final class PermissionPolicyService extends SystemService {
             } catch (InterruptedException e) {
                 /* ignore */
             }
+
+            permissionControllerManager.updateUserSensitive();
 
             packageManagerInternal.setRuntimePermissionsFingerPrint(Build.FINGERPRINT, userId);
         }

@@ -190,6 +190,18 @@ public abstract class PermissionControllerService extends Service {
     public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable callback);
 
     /**
+     * Called by system to update the
+     * {@link PackageManager}{@code .FLAG_PERMISSION_USER_SENSITIVE_WHEN_*} flags for permissions.
+     * <p>
+     * This is typically when creating a new user or upgrading either system or
+     * permission controller package.
+     */
+    @BinderThread
+    public void onUpdateUserSensitive() {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
+    /**
      * Set the runtime permission state from a device admin.
      *
      * @param callerPackageName The package name of the admin requesting the change
@@ -379,6 +391,14 @@ public abstract class PermissionControllerService extends Service {
                         null);
 
                 onGrantOrUpgradeDefaultRuntimePermissions(() -> callback.complete(true));
+            }
+
+            @Override
+            public void updateUserSensitive(AndroidFuture callback) {
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                onUpdateUserSensitive();
+                callback.complete(null);
             }
         };
     }
