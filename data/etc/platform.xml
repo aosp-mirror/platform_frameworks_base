@@ -206,6 +206,10 @@
                       targetSdk="29">
         <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     </split-permission>
+    <split-permission name="android.permission.READ_EXTERNAL_STORAGE"
+                      targetSdk="29">
+        <new-permission name="android.permission.ACCESS_MEDIA_LOCATION" />
+    </split-permission>
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->
