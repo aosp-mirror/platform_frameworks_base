@@ -7235,6 +7235,13 @@ package android.telephony {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
   }
 
+  public class CallerInfo {
+    method @Nullable public android.net.Uri getContactDisplayPhotoUri();
+    method public long getContactId();
+    method @Nullable public String getName();
+    method @Nullable public String getPhoneNumber();
+  }
+
   public class CarrierConfigManager {
     method @NonNull public static android.os.PersistableBundle getDefaultConfig();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void overrideConfig(int, @Nullable android.os.PersistableBundle);
