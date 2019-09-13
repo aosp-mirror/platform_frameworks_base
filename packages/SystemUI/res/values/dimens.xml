@@ -457,6 +457,7 @@
     <dimen name="qs_page_indicator_width">16dp</dimen>
     <dimen name="qs_page_indicator_height">8dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
+    <dimen name="qs_tile_detail_padding">3dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
