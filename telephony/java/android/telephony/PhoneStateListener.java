@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -366,6 +367,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
     public static final int LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER           = 0x10000000;
 
@@ -378,6 +380,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
     public static final int LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER            = 0x20000000;
 
@@ -869,6 +872,7 @@ public class PhoneStateListener {
      *                              to.
      * @hide
      */
+    @SystemApi
     public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
         // default implementation empty
     }
@@ -879,6 +883,7 @@ public class PhoneStateListener {
      * @param sentEmergencyNumber the emergency number {@link EmergencyNumber} the SMS is sent to.
      * @hide
      */
+    @SystemApi
     public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
         // default implementation empty
     }
