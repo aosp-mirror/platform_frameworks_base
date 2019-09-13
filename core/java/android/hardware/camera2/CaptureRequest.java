@@ -880,11 +880,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @throws IllegalArgumentException if the physical camera id is not valid
          *
          * @param key The metadata field to write.
-         * @param value The value to set the field to, which must be of a matching
+         * @param value The value to set the field to, which must be of a matching type to the key.
          * @param physicalCameraId A valid physical camera Id. The valid camera Ids can be obtained
          *                         via calls to {@link CameraCharacteristics#getPhysicalCameraIds}.
          * @return The builder object.
-         * type to the key.
          */
         public <T> Builder setPhysicalCameraKey(@NonNull Key<T> key, T value,
                 @NonNull String physicalCameraId) {
