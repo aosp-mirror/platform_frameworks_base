@@ -1112,13 +1112,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(modemInfo.getTimestamp());
             e.writeLong(modemInfo.getSleepTimeMillis());
             e.writeLong(modemInfo.getIdleTimeMillis());
-            e.writeLong(modemInfo.getTxTimeMillis()[0]);
-            e.writeLong(modemInfo.getTxTimeMillis()[1]);
-            e.writeLong(modemInfo.getTxTimeMillis()[2]);
-            e.writeLong(modemInfo.getTxTimeMillis()[3]);
-            e.writeLong(modemInfo.getTxTimeMillis()[4]);
-            e.writeLong(modemInfo.getRxTimeMillis());
-            e.writeLong(modemInfo.getEnergyUsed());
+            e.writeLong(modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis());
+            e.writeLong(modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis());
+            e.writeLong(modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis());
+            e.writeLong(modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis());
+            e.writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis());
+            e.writeLong(modemInfo.getReceiveTimeMillis());
             pulledData.add(e);
         }
     }

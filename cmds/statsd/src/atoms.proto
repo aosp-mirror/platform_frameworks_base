@@ -3968,7 +3968,7 @@ message ModemActivityInfo {
     // rx time in ms at power level 5
     optional uint64 controller_rx_time_millis = 9;
     // product of current(mA), voltage(V) and time(ms)
-    optional uint64 energy_used = 10;
+    optional uint64 energy_used = 10 [deprecated=true];
 }
 
 /**
