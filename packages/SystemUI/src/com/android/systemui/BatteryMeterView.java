@@ -67,6 +67,8 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.text.NumberFormat;
 
+import com.android.internal.util.custom.cutout.CutoutUtils;
+
 public class BatteryMeterView extends LinearLayout implements
         BatteryStateChangeCallback, Tunable, DarkReceiver, ConfigurationListener {
 
@@ -101,6 +103,9 @@ public class BatteryMeterView extends LinearLayout implements
     private DualToneHandler mDualToneHandler;
     private int mUser;
 
+    // Cutout
+    private boolean mHasBigCutout;
+
     /**
      * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
      */
@@ -133,6 +138,7 @@ public class BatteryMeterView extends LinearLayout implements
         atts.recycle();
 
         mSettingObserver = new SettingObserver(new Handler(context.getMainLooper()));
+        mHasBigCutout = CutoutUtils.hasBigCutout(context);
         mShowPercentAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
 
@@ -386,7 +392,7 @@ public class BatteryMeterView extends LinearLayout implements
                 .getIntForUser(getContext().getContentResolver(),
                 SHOW_BATTERY_PERCENT, 0, mUser);
 
-        if ((mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
+        if ((!mHasBigCutout && mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
                 || mShowPercentMode == MODE_ON || mShowPercentMode == MODE_ESTIMATE) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
@@ -415,6 +421,7 @@ public class BatteryMeterView extends LinearLayout implements
 
     @Override
     public void onOverlayChanged() {
+        mHasBigCutout = CutoutUtils.hasBigCutout(getContext());
         mShowPercentAvailable = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
         updateShowPercent();
