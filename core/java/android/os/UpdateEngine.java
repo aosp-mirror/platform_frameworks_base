@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
@@ -320,8 +321,8 @@ public class UpdateEngine {
      * <p>See {@link #applyPayload(String)} for {@code offset}, {@code size} and
      * {@code headerKeyValuePairs} parameters.
      */
-    public void applyPayload(FileDescriptor fd, long offset, long size,
-            String[] headerKeyValuePairs) {
+    public void applyPayload(@NonNull FileDescriptor fd, long offset, long size,
+            @NonNull String[] headerKeyValuePairs) {
         try {
             mUpdateEngine.applyPayloadFd(fd, offset, size, headerKeyValuePairs);
         } catch (RemoteException e) {
