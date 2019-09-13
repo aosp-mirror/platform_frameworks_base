@@ -16,14 +16,30 @@
 
 package com.android.server.rollback;
 
+import static com.android.server.rollback.RollbackManagerServiceImpl.sendFailure;
+
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
+import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
+import android.content.rollback.RollbackManager;
+import android.os.Binder;
+import android.os.ParcelFileDescriptor;
+import android.os.UserManager;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.ParseException;
@@ -41,6 +57,9 @@ import java.util.List;
  * {@link PackageRollbackInfo} objects held within.
  */
 class Rollback {
+
+    private static final String TAG = "RollbackManager";
+
     @IntDef(flag = true, prefix = { "ROLLBACK_STATE_" }, value = {
             ROLLBACK_STATE_ENABLING,
             ROLLBACK_STATE_AVAILABLE,
@@ -234,19 +253,171 @@ class Rollback {
     }
 
     /**
-     * Sets the state of the rollback to AVAILABLE.
+     * Changes the state of the rollback to AVAILABLE. This also changes the timestamp to the
+     * current time and saves the rollback.
      */
     @GuardedBy("getLock")
-    void setAvailable() {
+    void makeAvailable() {
+        // TODO: What if the rollback has since been expired, for example due
+        // to a new package being installed. Won't this revive an expired
+        // rollback? Consider adding a ROLLBACK_STATE_EXPIRED to address this.
         mState = ROLLBACK_STATE_AVAILABLE;
+        mTimestamp = Instant.now();
+        RollbackStore.saveRollback(this);
     }
 
     /**
-     * Sets the state of the rollback to COMMITTED.
+     * Commits the rollback.
      */
     @GuardedBy("getLock")
-    void setCommitted() {
-        mState = ROLLBACK_STATE_COMMITTED;
+    void commit(final Context context, List<VersionedPackage> causePackages,
+            String callerPackageName, IntentSender statusReceiver) {
+
+        if (!isAvailable()) {
+            sendFailure(context, statusReceiver,
+                    RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+                    "Rollback unavailable");
+            return;
+        }
+
+        // Get a context to use to install the downgraded version of the package.
+        Context pkgContext;
+        try {
+            pkgContext = context.createPackageContext(callerPackageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
+                    "Invalid callerPackageName");
+            return;
+        }
+
+        PackageManager pm = pkgContext.getPackageManager();
+        try {
+            PackageInstaller packageInstaller = pm.getPackageInstaller();
+            PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
+                    PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+            parentParams.setRequestDowngrade(true);
+            parentParams.setMultiPackage();
+            if (isStaged()) {
+                parentParams.setStaged();
+            }
+
+            int parentSessionId = packageInstaller.createSession(parentParams);
+            PackageInstaller.Session parentSession = packageInstaller.openSession(
+                    parentSessionId);
+
+            for (PackageRollbackInfo info : info.getPackages()) {
+                PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                        PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                // TODO: We can't get the installerPackageName for apex
+                // (b/123920130). Is it okay to ignore the installer package
+                // for apex?
+                if (!info.isApex()) {
+                    String installerPackageName =
+                            pm.getInstallerPackageName(info.getPackageName());
+                    if (installerPackageName != null) {
+                        params.setInstallerPackageName(installerPackageName);
+                    }
+                }
+                params.setRequestDowngrade(true);
+                params.setRequiredInstalledVersionCode(
+                        info.getVersionRolledBackFrom().getLongVersionCode());
+                if (isStaged()) {
+                    params.setStaged();
+                }
+                if (info.isApex()) {
+                    params.setInstallAsApex();
+                }
+                int sessionId = packageInstaller.createSession(params);
+                PackageInstaller.Session session = packageInstaller.openSession(sessionId);
+                File[] packageCodePaths = RollbackStore.getPackageCodePaths(
+                        this, info.getPackageName());
+                if (packageCodePaths == null) {
+                    sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
+                            "Backup copy of package inaccessible");
+                    return;
+                }
+
+                for (File packageCodePath : packageCodePaths) {
+                    try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCodePath,
+                            ParcelFileDescriptor.MODE_READ_ONLY)) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            session.write(packageCodePath.getName(), 0,
+                                    packageCodePath.length(),
+                                    fd);
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+                }
+                parentSession.addChildSessionId(sessionId);
+            }
+
+            final LocalIntentReceiver receiver = new LocalIntentReceiver(
+                    (Intent result) -> {
+                        int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                                PackageInstaller.STATUS_FAILURE);
+                        if (status != PackageInstaller.STATUS_SUCCESS) {
+                            // Committing the rollback failed, but we still have all the info we
+                            // need to try rolling back again, so restore the rollback state to how
+                            // it was before we tried committing.
+                            // TODO: Should we just kill this rollback if commit failed?
+                            // Why would we expect commit not to fail again?
+                            // TODO: Could this cause a rollback to be resurrected
+                            // if it should otherwise have expired by now?
+                            synchronized (mLock) {
+                                mState = ROLLBACK_STATE_AVAILABLE;
+                                mRestoreUserDataInProgress = false;
+                            }
+                            sendFailure(context, statusReceiver,
+                                    RollbackManager.STATUS_FAILURE_INSTALL,
+                                    "Rollback downgrade install failed: "
+                                            + result.getStringExtra(
+                                            PackageInstaller.EXTRA_STATUS_MESSAGE));
+                            return;
+                        }
+
+                        synchronized (mLock) {
+                            if (!isStaged()) {
+                                // All calls to restoreUserData should have
+                                // completed by now for a non-staged install.
+                                mRestoreUserDataInProgress = false;
+                            }
+
+                            info.setCommittedSessionId(parentSessionId);
+                            info.getCausePackages().addAll(causePackages);
+                            RollbackStore.deletePackageCodePaths(this);
+                            RollbackStore.saveRollback(this);
+                        }
+
+                        // Send success.
+                        try {
+                            final Intent fillIn = new Intent();
+                            fillIn.putExtra(
+                                    RollbackManager.EXTRA_STATUS, RollbackManager.STATUS_SUCCESS);
+                            statusReceiver.sendIntent(context, 0, fillIn, null, null);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Nowhere to send the result back to, so don't bother.
+                        }
+
+                        Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
+
+                        for (UserInfo userInfo : UserManager.get(context).getUsers(true)) {
+                            context.sendBroadcastAsUser(broadcast,
+                                    userInfo.getUserHandle(),
+                                    Manifest.permission.MANAGE_ROLLBACKS);
+                        }
+                    }
+            );
+
+            mState = ROLLBACK_STATE_COMMITTED;
+            mRestoreUserDataInProgress = true;
+            parentSession.commit(receiver.getIntentSender());
+        } catch (IOException e) {
+            Slog.e(TAG, "Rollback failed", e);
+            sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
+                    "IOException: " + e.toString());
+        }
     }
 
     /**

@@ -23,11 +23,14 @@ import android.content.rollback.PackageRollbackInfo;
 import android.util.IntArray;
 import android.util.SparseLongArray;
 
+import com.google.common.collect.Range;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -61,24 +64,21 @@ public class RollbackUnitTest {
     }
 
     @Test
-    public void rollbackStateChanges() {
+    public void rollbackMadeAvailable() {
         Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
 
         assertThat(rollback.isEnabling()).isTrue();
         assertThat(rollback.isAvailable()).isFalse();
         assertThat(rollback.isCommitted()).isFalse();
 
-        rollback.setAvailable();
+        Instant availableTime = Instant.now();
+        rollback.makeAvailable();
 
         assertThat(rollback.isEnabling()).isFalse();
         assertThat(rollback.isAvailable()).isTrue();
         assertThat(rollback.isCommitted()).isFalse();
 
-        rollback.setCommitted();
-
-        assertThat(rollback.isEnabling()).isFalse();
-        assertThat(rollback.isAvailable()).isFalse();
-        assertThat(rollback.isCommitted()).isTrue();
+        assertThat(rollback.getTimestamp()).isIn(Range.closed(availableTime, Instant.now()));
     }
 
     @Test
