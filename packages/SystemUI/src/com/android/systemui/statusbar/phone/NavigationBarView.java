@@ -643,6 +643,9 @@ public class NavigationBarView extends FrameLayout implements
         } else if (pinningActive) {
             disableBack = disableRecent = false;
         }
+        if (pinningActive && isGesturalMode(mNavBarMode)){
+            disableBack = true;
+        }
 
         ViewGroup navButtons = getCurrentView().findViewById(R.id.nav_buttons);
         if (navButtons != null) {
