@@ -53,7 +53,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.content.Context;
@@ -1919,7 +1918,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void restoreRuntimePermissions(@NonNull byte[] backup, @NonNull UserHandle user) {
         synchronized (mLock) {
             mHasNoDelayedPermBackup.delete(user.getIdentifier());
-            mPermissionControllerManager.restoreRuntimePermissionBackup(backup, user);
+            mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(backup, user);
         }
     }
 
@@ -1940,7 +1939,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 return;
             }
 
-            mPermissionControllerManager.restoreDelayedRuntimePermissionBackup(packageName, user,
+            mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName, user,
                     mContext.getMainExecutor(), (hasMoreBackup) -> {
                         if (hasMoreBackup) {
                             return;

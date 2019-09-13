@@ -3511,6 +3511,13 @@
     <permission android:name="android.permission.GET_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows the system to restore runtime permission state. This might grant
+    permissions, hence this is a more scoped, less powerful variant of GRANT_RUNTIME_PERMISSIONS.
+    Among other restrictions this cannot override user choices.
+    @hide -->
+    <permission android:name="android.permission.RESTORE_RUNTIME_PERMISSIONS"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to change policy_fixed permissions.
     @hide -->
     <permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY"

@@ -31,8 +31,8 @@ oneway interface IPermissionController {
     void revokeRuntimePermissions(in Bundle request, boolean doDryRun, int reason,
             String callerPackageName, in AndroidFuture callback);
     void getRuntimePermissionBackup(in UserHandle user, in ParcelFileDescriptor pipe);
-    void restoreRuntimePermissionBackup(in UserHandle user, in ParcelFileDescriptor pipe);
-    void restoreDelayedRuntimePermissionBackup(String packageName, in UserHandle user,
+    void stageAndApplyRuntimePermissionsBackup(in UserHandle user, in ParcelFileDescriptor pipe);
+    void applyStagedRuntimePermissionBackup(String packageName, in UserHandle user,
             in AndroidFuture callback);
     void getAppPermissions(String packageName, in AndroidFuture callback);
     void revokeRuntimePermission(String packageName, String permissionName);
