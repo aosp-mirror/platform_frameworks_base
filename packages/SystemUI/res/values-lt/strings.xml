@@ -511,7 +511,7 @@
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"„<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ naudoja „<xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>“ įrenginiui tvarkyti."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Administrat. gali stebėti ir tvark. nustat., įmonės prieigos par., progr., su įreng. susietus duomenis ir įreng. vietovės inform."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Sužinoti daugiau"</string>
+    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Sužinokite daugiau"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Esate prisijungę prie programos „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Atidaryti VPN nustatymus"</string>
