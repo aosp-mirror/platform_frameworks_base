@@ -1005,7 +1005,7 @@ public class Build {
      * Custom fingerprint
      * @hide
      */
-    public static final String PROP_CUSTOM_FINGERPRINT = "org.pixelexperience.fingerprint";
+    public static final String PROP_CUSTOM_FINGERPRINT = "org.atom.fingerprint";
 
     /**
      * Custom fingerprint
