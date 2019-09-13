@@ -951,6 +951,8 @@ void SoundChannel::process(int event, void *info, unsigned long toggle)
         ALOGV("process %p channel %d event %s",
               this, mChannelID, (event == AudioTrack::EVENT_UNDERRUN) ? "UNDERRUN" :
                       "BUFFER_END");
+        // Only BUFFER_END should happen as we use static tracks.
+        setVolume_l(0.f, 0.f);  // set volume to 0 to indicate no need to ramp volume down.
         mSoundPool->addToStopList(this);
     } else if (event == AudioTrack::EVENT_LOOP_END) {
         ALOGV("End loop %p channel %d", this, mChannelID);
@@ -966,14 +968,18 @@ void SoundChannel::process(int event, void *info, unsigned long toggle)
 bool SoundChannel::doStop_l()
 {
     if (mState != IDLE) {
-        setVolume_l(0, 0);
         ALOGV("stop");
-        // Since we're forcibly halting the previously playing content,
-        // we sleep here to ensure the volume is ramped down before we stop the track.
-        // Ideally the sleep time is the mixer period, or an approximation thereof
-        // (Fast vs Normal tracks are different).
-        // TODO: consider pausing instead of stop here.
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        if (mLeftVolume != 0.f || mRightVolume != 0.f) {
+            setVolume_l(0.f, 0.f);
+            if (mSoundPool->attributes()->usage != AUDIO_USAGE_GAME) {
+                // Since we're forcibly halting the previously playing content,
+                // we sleep here to ensure the volume is ramped down before we stop the track.
+                // Ideally the sleep time is the mixer period, or an approximation thereof
+                // (Fast vs Normal tracks are different).
+                ALOGV("sleeping: ChannelID:%d  SampleID:%d", mChannelID, mSample->sampleID());
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            }
+        }
         mAudioTrack->stop();
         mPrevSampleID = mSample->sampleID();
         mSample.clear();
