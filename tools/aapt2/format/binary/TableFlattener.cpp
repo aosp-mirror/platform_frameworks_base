@@ -228,14 +228,15 @@ class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, ResourceTablePackage* package,
                    const std::map<size_t, std::string>* shared_libs, bool use_sparse_entries,
-                   bool collapse_key_stringpool, const std::set<std::string>& whitelisted_resources)
+                   bool collapse_key_stringpool,
+                   const std::set<ResourceName>& name_collapse_exemptions)
       : context_(context),
         diag_(context->GetDiagnostics()),
         package_(package),
         shared_libs_(shared_libs),
         use_sparse_entries_(use_sparse_entries),
         collapse_key_stringpool_(collapse_key_stringpool),
-        whitelisted_resources_(whitelisted_resources) {
+        name_collapse_exemptions_(name_collapse_exemptions) {
   }
 
   bool FlattenPackage(BigBuffer* buffer) {
@@ -652,11 +653,12 @@ class PackageFlattener {
 
       for (ResourceEntry* entry : sorted_entries) {
         uint32_t local_key_index;
+        ResourceName resource_name({}, type->type, entry->name);
         if (!collapse_key_stringpool_ ||
-            whitelisted_resources_.find(entry->name) != whitelisted_resources_.end()) {
+            name_collapse_exemptions_.find(resource_name) != name_collapse_exemptions_.end()) {
           local_key_index = (uint32_t)key_pool_.MakeRef(entry->name).index();
         } else {
-          // resource isn't whitelisted, add it as obfuscated value
+          // resource isn't exempt from collapse, add it as obfuscated value
           local_key_index = (uint32_t)key_pool_.MakeRef(obfuscated_resource_name).index();
         }
         // Group values by configuration.
@@ -712,7 +714,7 @@ class PackageFlattener {
   StringPool type_pool_;
   StringPool key_pool_;
   bool collapse_key_stringpool_;
-  const std::set<std::string>& whitelisted_resources_;
+  const std::set<ResourceName>& name_collapse_exemptions_;
 };
 
 }  // namespace
@@ -760,7 +762,7 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
     PackageFlattener flattener(context, package.get(), &table->included_packages_,
                                options_.use_sparse_entries, options_.collapse_key_stringpool,
-                               options_.whitelisted_resources);
+                               options_.name_collapse_exemptions);
     if (!flattener.FlattenPackage(&package_buffer)) {
       return false;
     }
