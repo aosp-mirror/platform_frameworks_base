@@ -46,6 +46,7 @@ import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.LongSparseArray;
 
@@ -53,7 +54,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.AtomicFile;
 import com.android.server.LocalServices;
 import com.android.server.pm.permission.PermissionSettings;
 
