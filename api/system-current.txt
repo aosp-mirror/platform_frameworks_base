@@ -5471,7 +5471,7 @@ package android.os {
   public class UpdateEngine {
     ctor public UpdateEngine();
     method public void applyPayload(String, long, long, String[]);
-    method public void applyPayload(java.io.FileDescriptor, long, long, String[]);
+    method public void applyPayload(@NonNull java.io.FileDescriptor, long, long, @NonNull String[]);
     method public boolean bind(android.os.UpdateEngineCallback, android.os.Handler);
     method public boolean bind(android.os.UpdateEngineCallback);
     method public void cancel();
