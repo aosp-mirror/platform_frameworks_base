@@ -46,9 +46,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class UserInfo implements Parcelable {
 
-    /** 16 bits for user type */
-    public static final int FLAG_MASK_USER_TYPE = 0x0000FFFF;
-
     /**
      * *************************** NOTE ***************************
      * These flag values CAN NOT CHANGE because they are written
