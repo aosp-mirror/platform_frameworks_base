@@ -22,7 +22,7 @@
 namespace {
 
 static jint runSelfTest(JNIEnv* env, jobject /* clazz */) {
-    return BORINGSSL_self_test();
+    return FIPS_mode();
 }
 
 static const JNINativeMethod methods[] = {
