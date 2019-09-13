@@ -1999,6 +1999,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return LocalServices.getService(LockSettingsInternal.class);
         }
 
+        boolean hasUserSetupCompleted(DevicePolicyData userData) {
+            return userData.mUserSetupComplete;
+        }
+
         boolean isBuildDebuggable() {
             return Build.IS_DEBUGGABLE;
         }
@@ -8271,7 +8275,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return true;
         }
-        return getUserData(userHandle).mUserSetupComplete;
+        return mInjector.hasUserSetupCompleted(getUserData(userHandle));
     }
 
     private boolean hasPaired(int userHandle) {
