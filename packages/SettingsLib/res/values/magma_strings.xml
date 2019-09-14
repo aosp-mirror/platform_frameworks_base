@@ -25,4 +25,7 @@
     <!-- Bottom margin size when fingerprint in display is active -->
     <dimen name="keyguard_indication_margin_bottom_fingerprint_in_display">30dp</dimen>
 
+    <!-- Deep sleep info -->
+    <string name="status_deep_sleep">(Deep sleep: %1$d%2$s)</string>
+
 </resources>
