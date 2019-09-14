@@ -167,14 +167,14 @@
     <color name="system_notification_accent_color">#ff607D8B</color>
 
     <!-- Default user icon colors -->
-    <color name="user_icon_1">#ff00bcd4</color><!-- cyan 500 -->
-    <color name="user_icon_2">#ff3f51b5</color><!-- indigo 500 -->
-    <color name="user_icon_3">#ff4285f4</color><!-- blue 500 -->
-    <color name="user_icon_4">#ffe91e63</color><!-- pink 500 -->
-    <color name="user_icon_5">#ff0f9d58</color><!-- green 500 -->
-    <color name="user_icon_6">#ff8bc34a</color><!-- light green 500 -->
-    <color name="user_icon_7">#ffff9800</color><!-- orange 500 -->
-    <color name="user_icon_8">#ffff5722</color><!-- deep orange 500 -->
+    <color name="user_icon_1">@android:color/accent_device_default_light</color>
+    <color name="user_icon_2">#ff5c6bc0</color>
+    <color name="user_icon_3">#ff26a69a</color>
+    <color name="user_icon_4">#ffec407a</color>
+    <color name="user_icon_5">#ff33ac71</color>
+    <color name="user_icon_6">#ff8bc34a</color>
+    <color name="user_icon_7">#ffff9800</color>
+    <color name="user_icon_8">#ffff7043</color>
     <color name="user_icon_default_gray">#ff9e9e9e</color><!-- gray 500 -->
     <color name="user_icon_default_white">#ffffffff</color><!-- white -->
 
