@@ -62,6 +62,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 import android.util.MutableLong;
 import android.util.SparseBooleanArray;
 
@@ -952,7 +953,6 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testRecentsComponent_allowApiAccessWithoutPermissions() {
         doReturn(PackageManager.PERMISSION_DENIED).when(mTestService)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
-
         // Set the recents component and ensure that the following calls do not fail
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.GRANT);
         doTestRecentTasksApis(true /* expectNoSecurityException */);
@@ -1301,10 +1301,10 @@ public class RecentTasksTest extends ActivityTestsBase {
         @Override
         void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
                 int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
-                int callingUid, boolean allowed, boolean crossUser) {
+                int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
             mLastAllowed = allowed;
             super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, activityDisplays,
-                    callingUid, allowed, crossUser);
+                    callingUid, allowed, crossUser, profileIds);
         }
     }
 }

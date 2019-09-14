@@ -1152,7 +1152,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s ಜೊತೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ಈ ಕ್ರಿಯೆಗೆ ಡಿಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ."</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"ಬೇರೆಯ ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಿ"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"ಬೇರೊಂದು ಆ್ಯಪ್ ಬಳಸಿ"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳು &gt; ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾದ ಡಿಫಾಲ್ಟ್‌‌ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB ಸಾಧನಕ್ಕೆ ಅಪ್ಲಿಕೇಶನ್‌‌ವೊಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>

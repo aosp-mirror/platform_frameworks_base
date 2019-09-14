@@ -17,8 +17,6 @@
 package com.android.systemui;
 
 import android.app.Application;
-import android.app.Service;
-import android.content.Intent;
 
 import androidx.core.app.CoreComponentFactory;
 
@@ -51,26 +49,5 @@ public class SystemUIAppComponentFactory extends CoreComponentFactory {
         }
 
         return app;
-    }
-
-    @Override
-    public Service instantiateService(ClassLoader cl, String className, Intent intent)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        Service service = mComponentHelper.resolve(className);
-        if (service != null) {
-            return checkCompatWrapper(service);
-        }
-        return super.instantiateService(cl, className, intent);
-    }
-
-    static <T> T checkCompatWrapper(T obj) {
-        if (obj instanceof CompatWrapped) {
-            T wrapper = (T) ((CompatWrapped) obj).getWrapper();
-            if (wrapper != null) {
-                return wrapper;
-            }
-        }
-
-        return obj;
     }
 }

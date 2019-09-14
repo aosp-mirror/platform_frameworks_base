@@ -5228,7 +5228,7 @@ class ActivityStack extends ConfigurationContainer {
      */
     void getRunningTasks(List<TaskRecord> tasksOut, @ActivityType int ignoreActivityType,
             @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed,
-            boolean crossUser) {
+            boolean crossUser, ArraySet<Integer> profileIds) {
         boolean focusedStack = mRootActivityContainer.getTopDisplayFocusedStack() == this;
         boolean topTask = true;
         int userId = UserHandle.getUserId(callingUid);
@@ -5239,8 +5239,9 @@ class ActivityStack extends ConfigurationContainer {
                 continue;
             }
             if (task.effectiveUid != callingUid) {
-                if (task.userId != userId && !crossUser) {
-                    // Skip if the caller does not have cross user permission
+                if (task.userId != userId && !crossUser && !profileIds.contains(task.userId)) {
+                    // Skip if the caller does not have cross user permission or cannot access
+                    // the task's profile
                     continue;
                 }
                 if (!allowed && !task.isActivityTypeHome()) {

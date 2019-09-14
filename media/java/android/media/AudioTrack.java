@@ -1184,8 +1184,15 @@ public class AudioTrack extends PlayerBase
             int bufferSizeInBytes, int mode) {
         // If no attributes, OK
         // otherwise check attributes for USAGE_MEDIA and CONTENT_UNKNOWN, MUSIC, or MOVIE.
+        // Only consider flags that are not compatible with FLAG_DEEP_BUFFER. We include
+        // FLAG_DEEP_BUFFER because if set the request is explicit and
+        // shouldEnablePowerSaving() should return false.
+        final int flags = attributes.getAllFlags()
+                & (AudioAttributes.FLAG_DEEP_BUFFER | AudioAttributes.FLAG_LOW_LATENCY
+                    | AudioAttributes.FLAG_HW_AV_SYNC | AudioAttributes.FLAG_BEACON);
+
         if (attributes != null &&
-                (attributes.getAllFlags() != 0  // cannot have any special flags
+                (flags != 0  // cannot have any special flags
                 || attributes.getUsage() != AudioAttributes.USAGE_MEDIA
                 || (attributes.getContentType() != AudioAttributes.CONTENT_TYPE_UNKNOWN
                     && attributes.getContentType() != AudioAttributes.CONTENT_TYPE_MUSIC
