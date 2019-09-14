@@ -18,6 +18,7 @@ package android.accessibilityservice;
 
 import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
+import android.accessibilityservice.AccessibilityButtonController.AccessibilityButtonCallback;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
@@ -322,6 +323,14 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK = 0x00000400;
 
+    /**
+     * This flag indicates that the accessibility service will handle the shortcut action itself.
+     * A callback {@link AccessibilityButtonCallback#onClicked(AccessibilityButtonController)} is
+     * called when the user presses the accessibility shortcut. Otherwise, the service is enabled
+     * or disabled by the system instead.
+     */
+    public static final int FLAG_HANDLE_SHORTCUT = 0x00000800;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -423,6 +432,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FLAG_ENABLE_ACCESSIBILITY_VOLUME
      * @see #FLAG_REQUEST_ACCESSIBILITY_BUTTON
      * @see #FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK
+     * @see #FLAG_HANDLE_SHORTCUT
      */
     public int flags;
 
@@ -1103,6 +1113,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_FINGERPRINT_GESTURES";
             case FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK:
                 return "FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK";
+            case FLAG_HANDLE_SHORTCUT:
+                return "FLAG_HANDLE_SHORTCUT";
             default:
                 return null;
         }
