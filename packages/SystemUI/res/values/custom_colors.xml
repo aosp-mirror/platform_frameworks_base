@@ -1,5 +1,12 @@
 <resources>
     <!-- Color of the FOD view -->
     <color name="config_fodColor">#00ff00</color>
+
+    <!-- Color for the Assistant invocation lights -->
+    <color name="edge_light_blue">#ff4185f4</color>
+    <color name="edge_light_green">#ff3aa853</color>
+    <color name="edge_light_red">#ffea4234</color>
+    <color name="edge_light_yellow">#fffbbc06</color>
+
 </resources>
 
