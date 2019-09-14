@@ -18,6 +18,7 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:hasRoundedCorners="true"
     android:shareInterpolator="false"
     android:zAdjustment="top">
     <alpha
