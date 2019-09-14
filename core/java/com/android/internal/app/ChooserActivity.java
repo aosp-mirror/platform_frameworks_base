@@ -797,6 +797,11 @@ public class ChooserActivity extends ResolverActivity {
             clipboardManager.setPrimaryClip(clipData);
             Toast.makeText(getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
 
+            // Log share completion via copy
+            LogMaker targetLogMaker = new LogMaker(
+                    MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SYSTEM_TARGET).setSubtype(1);
+            getMetricsLogger().write(targetLogMaker);
+
             finish();
         }
     }
