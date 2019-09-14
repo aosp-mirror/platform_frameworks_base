@@ -21,6 +21,10 @@ package android {
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 
+  public static final class Manifest.permission_group {
+    field public static final String UNDEFINED = "android.permission-group.UNDEFINED";
+  }
+
   public static final class R.bool {
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
   }
