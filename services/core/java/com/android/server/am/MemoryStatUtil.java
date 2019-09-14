@@ -26,17 +26,12 @@ import android.os.SystemProperties;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,8 +56,6 @@ public final class MemoryStatUtil {
     private static final String PROC_STATUS_FILE_FMT = "/proc/%d/status";
     /** Path to procfs cmdline file. Used with pid: /proc/pid/cmdline. */
     private static final String PROC_CMDLINE_FILE_FMT = "/proc/%d/cmdline";
-    /** Path to debugfs file for the system ion heap. */
-    private static final String DEBUG_SYSTEM_ION_HEAP_FILE = "/sys/kernel/debug/ion/heaps/system";
 
     private static final Pattern PGFAULT = Pattern.compile("total_pgfault (\\d+)");
     private static final Pattern PGMAJFAULT = Pattern.compile("total_pgmajfault (\\d+)");
@@ -78,11 +71,6 @@ public final class MemoryStatUtil {
             Pattern.compile("RssAnon:\\s*(\\d+)\\s*kB");
     private static final Pattern PROCFS_SWAP_IN_KILOBYTES =
             Pattern.compile("VmSwap:\\s*(\\d+)\\s*kB");
-
-    private static final Pattern ION_HEAP_SIZE_IN_BYTES =
-            Pattern.compile("\n\\s*total\\s*(\\d+)\\s*\n");
-    private static final Pattern PROCESS_ION_HEAP_SIZE_IN_BYTES =
-            Pattern.compile("\n\\s+\\S+\\s+(\\d+)\\s+(\\d+)");
 
     private static final int PGFAULT_INDEX = 9;
     private static final int PGMAJFAULT_INDEX = 11;
@@ -142,26 +130,6 @@ public final class MemoryStatUtil {
     public static String readCmdlineFromProcfs(int pid) {
         final String path = String.format(Locale.US, PROC_CMDLINE_FILE_FMT, pid);
         return parseCmdlineFromProcfs(readFileContents(path));
-    }
-
-    /**
-     * Reads size of the system ion heap from debugfs.
-     *
-     * Returns value of the total size in bytes of the system ion heap from
-     * /sys/kernel/debug/ion/heaps/system.
-     */
-    public static long readSystemIonHeapSizeFromDebugfs() {
-        return parseIonHeapSizeFromDebugfs(readFileContents(DEBUG_SYSTEM_ION_HEAP_FILE));
-    }
-
-    /**
-     * Reads process allocation sizes on the system ion heap from debugfs.
-     *
-     * Returns values of allocation sizes in bytes on the system ion heap from
-     * /sys/kernel/debug/ion/heaps/system.
-     */
-    public static List<IonAllocations> readProcessSystemIonHeapSizesFromDebugfs() {
-        return parseProcessIonHeapSizesFromDebugfs(readFileContents(DEBUG_SYSTEM_ION_HEAP_FILE));
     }
 
     private static String readFileContents(String path) {
@@ -266,55 +234,6 @@ public final class MemoryStatUtil {
     }
 
     /**
-     * Parses the ion heap size from the contents of a file under /sys/kernel/debug/ion/heaps in
-     * debugfs. The returned value is in bytes.
-     */
-    @VisibleForTesting
-    static long parseIonHeapSizeFromDebugfs(String contents) {
-        if (contents == null || contents.isEmpty()) {
-            return 0;
-        }
-        return tryParseLong(ION_HEAP_SIZE_IN_BYTES, contents);
-    }
-
-    /**
-     * Parses per-process allocation sizes on the ion heap from the contents of a file under
-     * /sys/kernel/debug/ion/heaps in debugfs.
-     */
-    @VisibleForTesting
-    static List<IonAllocations> parseProcessIonHeapSizesFromDebugfs(String contents) {
-        if (contents == null || contents.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final Matcher m = PROCESS_ION_HEAP_SIZE_IN_BYTES.matcher(contents);
-        final SparseArray<IonAllocations> entries = new SparseArray<>();
-        while (m.find()) {
-            try {
-                final int pid = Integer.parseInt(m.group(1));
-                final long sizeInBytes = Long.parseLong(m.group(2));
-                IonAllocations allocations = entries.get(pid);
-                if (allocations == null) {
-                    allocations = new IonAllocations();
-                    entries.put(pid, allocations);
-                }
-                allocations.pid = pid;
-                allocations.totalSizeInBytes += sizeInBytes;
-                allocations.count += 1;
-                allocations.maxSizeInBytes = Math.max(allocations.maxSizeInBytes, sizeInBytes);
-            } catch (NumberFormatException e) {
-                Slog.e(TAG, "Failed to parse value", e);
-            }
-        }
-
-        final List<IonAllocations> result = new ArrayList<>(entries.size());
-        for (int i = 0; i < entries.size(); i++) {
-            result.add(entries.valueAt(i));
-        }
-        return result;
-    }
-
-    /**
      * Returns whether per-app memcg is available on device.
      */
     static boolean hasMemcg() {
@@ -350,41 +269,5 @@ public final class MemoryStatUtil {
         public long swapInBytes;
         /** Device time when the processes started. */
         public long startTimeNanos;
-    }
-
-    /** Summary information about process ion allocations. */
-    public static final class IonAllocations {
-        /** PID these allocations belong to. */
-        public int pid;
-        /** Size of all individual allocations added together. */
-        public long totalSizeInBytes;
-        /** Number of allocations. */
-        public int count;
-        /** Size of the largest allocation. */
-        public long maxSizeInBytes;
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            IonAllocations that = (IonAllocations) o;
-            return pid == that.pid && totalSizeInBytes == that.totalSizeInBytes
-                    && count == that.count && maxSizeInBytes == that.maxSizeInBytes;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(pid, totalSizeInBytes, count, maxSizeInBytes);
-        }
-
-        @Override
-        public String toString() {
-            return "IonAllocations{"
-                    + "pid=" + pid
-                    + ", totalSizeInBytes=" + totalSizeInBytes
-                    + ", count=" + count
-                    + ", maxSizeInBytes=" + maxSizeInBytes
-                    + '}';
-        }
     }
 }

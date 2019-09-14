@@ -31,7 +31,7 @@ import android.view.WindowManager;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.Transaction;
+import android.view.SurfaceControl.Transaction;
 
 import java.util.List;
 
@@ -156,7 +156,7 @@ interface IWindowSession {
      * is null if there is no sync required.
      */
     @UnsupportedAppUsage
-    void finishDrawing(IWindow window, in Transaction postDrawTransaction);
+    void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
 
     @UnsupportedAppUsage
     void setInTouchMode(boolean showFocus);

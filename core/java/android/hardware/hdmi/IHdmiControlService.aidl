@@ -19,6 +19,7 @@ package android.hardware.hdmi;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
@@ -41,6 +42,8 @@ interface IHdmiControlService {
     HdmiDeviceInfo getActiveSource();
     void oneTouchPlay(IHdmiControlCallback callback);
     void queryDisplayStatus(IHdmiControlCallback callback);
+    void addHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
+    void removeHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
     void removeHotplugEventListener(IHdmiHotplugEventListener listener);
     void addDeviceEventListener(IHdmiDeviceEventListener listener);

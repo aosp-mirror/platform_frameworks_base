@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
+import android.util.ArraySet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,7 +41,7 @@ class RunningTasks {
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
             @WindowingMode int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
-            int callingUid, boolean allowed, boolean crossUser) {
+            int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -55,7 +56,7 @@ class RunningTasks {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 mTmpStackTasks.clear();
                 stack.getRunningTasks(mTmpStackTasks, ignoreActivityType, ignoreWindowingMode,
-                        callingUid, allowed, crossUser);
+                        callingUid, allowed, crossUser, profileIds);
                 mTmpSortedSet.addAll(mTmpStackTasks);
             }
         }

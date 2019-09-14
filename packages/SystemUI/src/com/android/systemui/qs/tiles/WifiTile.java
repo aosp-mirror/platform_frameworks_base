@@ -118,6 +118,11 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     @Override
+    public boolean supportsDetailView() {
+        return getDetailAdapter() != null && mQSSettingsPanelOption == QSSettingsPanel.OPEN_CLICK;
+    }
+
+    @Override
     protected void handleClick() {
         if (mQSSettingsPanelOption == QSSettingsPanel.OPEN_CLICK) {
             mActivityStarter.postStartActivityDismissingKeyguard(WIFI_PANEL, 0);

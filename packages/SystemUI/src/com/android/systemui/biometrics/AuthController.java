@@ -46,8 +46,8 @@ import java.util.List;
  */
 public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         AuthDialogCallback {
-    private static final String USE_NEW_DIALOG =
-            "com.android.systemui.biometrics.AuthController.USE_NEW_DIALOG";
+    private static final String DISABLE_NEW_DIALOG =
+            "com.android.systemui.biometrics.AuthController.DISABLE_NEW_DIALOG";
 
     private static final String TAG = "BiometricPrompt/AuthController";
     private static final boolean DEBUG = true;
@@ -305,14 +305,19 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             mCurrentDialog.dismissWithoutCallback(false /* animate */);
             mCurrentDialog = null;
 
-            showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
+            // Only show the dialog if necessary. If it was animating out, the dialog is supposed
+            // to send its pending callback immediately.
+            if (savedState.getInt(AuthDialog.KEY_CONTAINER_STATE)
+                    != AuthContainerView.STATE_ANIMATING_OUT) {
+                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
+            }
         }
     }
 
     protected AuthDialog buildDialog(Bundle biometricPromptBundle, boolean requireConfirmation,
             int userId, int type, String opPackageName, boolean skipIntro) {
         if (Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), USE_NEW_DIALOG, userId, 0) != 0) {
+                mContext.getContentResolver(), DISABLE_NEW_DIALOG, userId, 0) == 0) {
             return new AuthContainerView.Builder(mContext)
                     .setCallback(this)
                     .setBiometricPromptBundle(biometricPromptBundle)

@@ -42,8 +42,9 @@ object ProtoLogTool {
 
         command.javaSourceArgs.forEach { path ->
             val file = File(path)
-            val code = StaticJavaParser.parse(file)
-            val outSrc = transformer.processClass(code)
+            val text = file.readText()
+            val code = StaticJavaParser.parse(text)
+            val outSrc = transformer.processClass(text, code)
             val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
                     .get().nameAsString else ""
             val newPath = pack.replace('.', '/') + '/' + file.name

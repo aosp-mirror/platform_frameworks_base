@@ -599,4 +599,16 @@ public final class PermissionControllerManager {
             }
         }, executor);
     }
+
+    /**
+     * @see PermissionControllerService#onUpdateUserSensitive()
+     * @hide
+     */
+    public void updateUserSensitive() {
+        mRemoteService.postAsync(service -> {
+            AndroidFuture<Void> future = new AndroidFuture<>();
+            service.updateUserSensitive(future);
+            return future;
+        });
+    }
 }

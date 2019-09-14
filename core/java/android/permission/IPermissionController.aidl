@@ -42,4 +42,5 @@ oneway interface IPermissionController {
     void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName, String packageName,
                 String permission, int grantState, in AndroidFuture callback);
     void grantOrUpgradeDefaultRuntimePermissions(in AndroidFuture callback);
+    void updateUserSensitive(in AndroidFuture callback);
 }

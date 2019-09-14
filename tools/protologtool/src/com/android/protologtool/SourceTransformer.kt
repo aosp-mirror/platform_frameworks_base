@@ -130,6 +130,8 @@ class SourceTransformer(
         // Append blank lines to preserve line numbering in file (to allow debugging)
         val newLines = LexicalPreservingPrinter.print(parentStmt).count { c -> c == '\n' }
         val newStmt = printedIfStmt.substringBeforeLast('}') + ("\n".repeat(newLines)) + '}'
+        // pre-workaround code, see explanation below
+        /*
         val inlinedIfStmt = StaticJavaParser.parseStatement(newStmt)
         LexicalPreservingPrinter.setup(inlinedIfStmt)
         // Replace the original call.
@@ -137,6 +139,27 @@ class SourceTransformer(
             // Should never happen
             throw RuntimeException("Unable to process log call $call " +
                     "- unable to replace the call.")
+        }
+        */
+        /** Workaround for a bug in JavaParser (AST tree invalid after replacing a node when using
+         * LexicalPreservingPrinter (https://github.com/javaparser/javaparser/issues/2290).
+         * Replace the code below with the one commended-out above one the issue is resolved. */
+        if (!parentStmt.range.isPresent) {
+            // Should never happen
+            throw RuntimeException("Unable to process log call $call " +
+                    "- unable to replace the call.")
+        }
+        val range = parentStmt.range.get()
+        val begin = range.begin.line - 1
+        val oldLines = processedCode.subList(begin, range.end.line)
+        val oldCode = oldLines.joinToString("\n")
+        val newCode = oldCode.replaceRange(
+                offsets[begin] + range.begin.column - 1,
+                oldCode.length - oldLines.lastOrNull()!!.length +
+                        range.end.column + offsets[range.end.line - 1], newStmt)
+        newCode.split("\n").forEachIndexed { idx, line ->
+            offsets[begin + idx] += line.length - processedCode[begin + idx].length
+            processedCode[begin + idx] = line
         }
     }
 
@@ -153,10 +176,19 @@ class SourceTransformer(
 
     private val protoLogImplClassNode =
             StaticJavaParser.parseExpression<FieldAccessExpr>(protoLogImplClassName)
+    private var processedCode: MutableList<String> = mutableListOf()
+    private var offsets: IntArray = IntArray(0)
 
-    fun processClass(compilationUnit: CompilationUnit): String {
+    fun processClass(
+        code: String,
+        compilationUnit: CompilationUnit =
+               StaticJavaParser.parse(code)
+    ): String {
+        processedCode = code.split('\n').toMutableList()
+        offsets = IntArray(processedCode.size)
         LexicalPreservingPrinter.setup(compilationUnit)
         protoLogCallProcessor.process(compilationUnit, this)
-        return LexicalPreservingPrinter.print(compilationUnit)
+        // return LexicalPreservingPrinter.print(compilationUnit)
+        return processedCode.joinToString("\n")
     }
 }

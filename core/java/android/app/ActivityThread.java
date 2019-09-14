@@ -3983,14 +3983,24 @@ public final class ActivityThread extends ClientTransactionHandler {
                 data.info.applicationInfo, data.compatInfo);
         Service service = null;
         try {
-            if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
-
-            ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
-            Application app = packageInfo.makeApplication(false, mInstrumentation);
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
             service = packageInfo.getAppFactory()
                     .instantiateService(cl, data.info.name, data.intent);
+        } catch (Exception e) {
+            if (!mInstrumentation.onException(service, e)) {
+                throw new RuntimeException(
+                    "Unable to instantiate service " + data.info.name
+                    + ": " + e.toString(), e);
+            }
+        }
+
+        try {
+            if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
+
+            ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
             context.setOuterContext(service);
+
+            Application app = packageInfo.makeApplication(false, mInstrumentation);
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());
             service.onCreate();

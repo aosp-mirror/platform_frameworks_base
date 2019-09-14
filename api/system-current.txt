@@ -140,6 +140,7 @@ package android {
     field public static final String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
+    field public static final String READ_ACTIVE_EMERGENCY_SESSION = "android.permission.READ_ACTIVE_EMERGENCY_SESSION";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
@@ -5515,7 +5516,7 @@ package android.os {
   public class UpdateEngine {
     ctor public UpdateEngine();
     method public void applyPayload(String, long, long, String[]);
-    method public void applyPayload(java.io.FileDescriptor, long, long, String[]);
+    method public void applyPayload(@NonNull java.io.FileDescriptor, long, long, @NonNull String[]);
     method public boolean bind(android.os.UpdateEngineCallback, android.os.Handler);
     method public boolean bind(android.os.UpdateEngineCallback);
     method public void cancel();
@@ -5707,6 +5708,7 @@ package android.permission {
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @BinderThread public void onUpdateUserSensitive();
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
@@ -7234,6 +7236,13 @@ package android.telephony {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
   }
 
+  public class CallerInfo {
+    method @Nullable public android.net.Uri getContactDisplayPhotoUri();
+    method public long getContactId();
+    method @Nullable public String getName();
+    method @Nullable public String getPhoneNumber();
+  }
+
   public class CarrierConfigManager {
     method @NonNull public static android.os.PersistableBundle getDefaultConfig();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void overrideConfig(int, @Nullable android.os.PersistableBundle);
@@ -7726,6 +7735,24 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
+  public final class ModemActivityInfo implements android.os.Parcelable {
+    ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
+    method public int describeContents();
+    method public int getIdleTimeMillis();
+    method public int getReceiveTimeMillis();
+    method public int getSleepTimeMillis();
+    method public long getTimestamp();
+    method @NonNull public java.util.List<android.telephony.ModemActivityInfo.TransmitPower> getTransmitPowerInfo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
+    field public static final int TX_POWER_LEVELS = 5; // 0x5
+  }
+
+  public class ModemActivityInfo.TransmitPower {
+    method @NonNull public android.util.Range<java.lang.Integer> getPowerRangeInDbm();
+    method public int getTimeInMillis();
+  }
+
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getAccessNetworkTechnology();
@@ -7827,6 +7854,8 @@ package android.telephony {
     field public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES = 134217728; // 0x8000000
+    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER = 268435456; // 0x10000000
+    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER = 536870912; // 0x20000000
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000

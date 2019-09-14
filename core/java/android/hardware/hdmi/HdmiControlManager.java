@@ -734,6 +734,28 @@ public final class HdmiControlManager {
             mHotplugEventListeners = new ArrayMap<>();
 
     /**
+     * Listener used to get HDMI Control (CEC) status (enabled/disabled) and the connected display
+     * status.
+     * @hide
+     */
+    public interface HdmiControlStatusChangeListener {
+        /**
+         * Called when HDMI Control (CEC) is enabled/disabled.
+         *
+         * @param isCecEnabled status of HDMI Control
+         * {@link android.provider.Settings.Global#HDMI_CONTROL_ENABLED}: {@code true} if enabled.
+         * @param isCecAvailable status of CEC support of the connected display (the TV).
+         * {@code true} if supported.
+         *
+         * Note: Value of isCecAvailable is only valid when isCecEnabled is true.
+         **/
+        void onStatusChange(boolean isCecEnabled, boolean isCecAvailable);
+    }
+
+    private final ArrayMap<HdmiControlStatusChangeListener, IHdmiControlStatusChangeListener>
+            mHdmiControlStatusChangeListeners = new ArrayMap<>();
+
+    /**
      * Listener used to get vendor-specific commands.
      */
     public interface VendorCommandListener {
@@ -826,4 +848,73 @@ public final class HdmiControlManager {
             }
         };
     }
+
+    /**
+     * Adds a listener to get informed of {@link HdmiControlStatusChange}.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHdmiControlStatusChangeListener(HdmiControlStatusChangeListener)}.
+     *
+     * @param listener {@link HdmiControlStatusChangeListener} instance
+     * @see HdmiControlManager#removeHdmiControlStatusChangeListener(
+     * HdmiControlStatusChangeListener)
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHdmiControlStatusChangeListener(HdmiControlStatusChangeListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        if (mHdmiControlStatusChangeListeners.containsKey(listener)) {
+            Log.e(TAG, "listener is already registered");
+            return;
+        }
+        IHdmiControlStatusChangeListener wrappedListener =
+                getHdmiControlStatusChangeListenerWrapper(listener);
+        mHdmiControlStatusChangeListeners.put(listener, wrappedListener);
+        try {
+            mService.addHdmiControlStatusChangeListener(wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a listener to stop getting informed of {@link HdmiControlStatusChange}.
+     *
+     * @param listener {@link HdmiControlStatusChangeListener} instance to be removed
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void removeHdmiControlStatusChangeListener(HdmiControlStatusChangeListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        IHdmiControlStatusChangeListener wrappedListener =
+                mHdmiControlStatusChangeListeners.remove(listener);
+        if (wrappedListener == null) {
+            Log.e(TAG, "tried to remove not-registered listener");
+            return;
+        }
+        try {
+            mService.removeHdmiControlStatusChangeListener(wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private IHdmiControlStatusChangeListener getHdmiControlStatusChangeListenerWrapper(
+            final HdmiControlStatusChangeListener listener) {
+        return new IHdmiControlStatusChangeListener.Stub() {
+            @Override
+            public void onStatusChange(boolean isCecEnabled, boolean isCecAvailable) {
+                listener.onStatusChange(isCecEnabled, isCecAvailable);
+            }
+        };
+    }
+
 }

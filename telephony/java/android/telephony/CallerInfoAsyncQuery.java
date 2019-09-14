@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony;
+package android.telephony;
 
 import android.app.ActivityManager;
 import android.content.AsyncQueryHandler;
@@ -31,9 +31,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.PhoneLookup;
-import android.telephony.PhoneNumberUtils;
-import android.telephony.Rlog;
-import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 
 import dalvik.annotation.compat.UnsupportedAppUsage;
@@ -346,16 +343,16 @@ public class CallerInfoAsyncQuery {
 
                     // Use the number entered by the user for display.
                     if (!TextUtils.isEmpty(cw.number)) {
-                        mCallerInfo.phoneNumber = PhoneNumberUtils.formatNumber(cw.number,
+                        mCallerInfo.setPhoneNumber(PhoneNumberUtils.formatNumber(cw.number,
                                 mCallerInfo.normalizedNumber,
-                                CallerInfo.getCurrentCountryIso(mContext));
+                                CallerInfo.getCurrentCountryIso(mContext)));
                     }
 
                     // This condition refer to the google default code for geo.
                     // If the number exists in Contacts, the CallCard would never show
                     // the geo description, so it would be unnecessary to query it.
                     if (ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION) {
-                        if (TextUtils.isEmpty(mCallerInfo.name)) {
+                        if (TextUtils.isEmpty(mCallerInfo.getName())) {
                             if (DBG) Rlog.d(LOG_TAG, "start querying geo description");
                             cw.event = EVENT_GET_GEO_DESCRIPTION;
                             startQuery(token, cw, null, null, null, null, null);

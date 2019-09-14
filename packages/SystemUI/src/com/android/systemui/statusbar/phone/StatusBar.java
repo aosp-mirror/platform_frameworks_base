@@ -4539,6 +4539,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     /**
+     * When {@link KeyguardBouncer} starts to be dismissed, playing its animation.
+     */
+    public void onBouncerPreHideAnimation() {
+        mNotificationPanel.onBouncerPreHideAnimation();
+        mStatusBarWindow.onBouncerPreHideAnimation();
+    }
+
+    /**
      * @return a PackageManger for userId or if userId is < 0 (USER_ALL etc) then
      *         return PackageManager for mContext
      */

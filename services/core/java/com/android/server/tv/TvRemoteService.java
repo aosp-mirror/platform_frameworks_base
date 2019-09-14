@@ -19,6 +19,7 @@ package com.android.server.tv;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.Looper;
 import android.os.Message;
 import android.util.ArrayMap;
@@ -91,7 +92,7 @@ public class TvRemoteService extends SystemService implements Watchdog.Monitor {
     }
 
     // Incoming calls.
-    private void openInputBridgeInternalLocked(TvRemoteProviderProxy provider, IBinder token,
+    private void openInputBridgeInternalLocked(TvRemoteProviderProxy provider, final IBinder token,
                                                String name, int width, int height,
                                                int maxPointers) {
         if (DEBUG) {
@@ -113,6 +114,21 @@ public class TvRemoteService extends SystemService implements Watchdog.Monitor {
             mBridgeMap.put(token, inputBridge);
             mProviderMap.put(token, provider);
 
+            try {
+                token.linkToDeath(new IBinder.DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        synchronized (mLock) {
+                            closeInputBridgeInternalLocked(token);
+                        }
+                    }
+                }, 0);
+            } catch (RemoteException e) {
+                if (DEBUG) Slog.d(TAG, "Token is already dead");
+                closeInputBridgeInternalLocked(token);
+                return;
+            }
+
             // Respond back with success.
             informInputBridgeConnected(token);
 
@@ -133,8 +149,8 @@ public class TvRemoteService extends SystemService implements Watchdog.Monitor {
         }
 
         mBridgeMap.remove(token);
+        mProviderMap.remove(token);
     }
-
 
     private void clearInputBridgeInternalLocked(IBinder token) {
         if (DEBUG) {
@@ -275,7 +291,6 @@ public class TvRemoteService extends SystemService implements Watchdog.Monitor {
             synchronized (mLock) {
                 if (mProviderList.contains(provider)) {
                     mService.closeInputBridgeInternalLocked(token);
-                    mProviderMap.remove(token);
                 }
             }
         }

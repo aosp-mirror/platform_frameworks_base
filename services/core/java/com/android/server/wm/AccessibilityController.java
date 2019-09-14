@@ -1246,6 +1246,11 @@ final class AccessibilityController {
         private boolean windowMattersToAccessibility(WindowState windowState,
                 Region regionInScreen, Region unaccountedSpace,
                 HashSet<Integer> skipRemainingWindowsForTasks) {
+            final RecentsAnimationController controller = mService.getRecentsAnimationController();
+            if (controller != null && controller.shouldIgnoreForAccessibility(windowState)) {
+                return false;
+            }
+
             if (windowState.isFocused()) {
                 return true;
             }

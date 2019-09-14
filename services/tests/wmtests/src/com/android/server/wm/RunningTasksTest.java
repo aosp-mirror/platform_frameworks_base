@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 
 import androidx.test.filters.MediumTest;
 
@@ -44,6 +45,8 @@ import java.util.ArrayList;
 @MediumTest
 @Presubmit
 public class RunningTasksTest extends ActivityTestsBase {
+
+    private static final ArraySet<Integer> PROFILE_IDS = new ArraySet<>();
 
     private RunningTasks mRunningTasks;
 
@@ -77,7 +80,8 @@ public class RunningTasksTest extends ActivityTestsBase {
         final int numFetchTasks = 5;
         ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
         mRunningTasks.getTasks(5, tasks, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED,
-                displays, -1 /* callingUid */, true /* allowed */, true /*crossUser */);
+                displays, -1 /* callingUid */, true /* allowed */, true /*crossUser */,
+                PROFILE_IDS);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < numFetchTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);
@@ -87,7 +91,8 @@ public class RunningTasksTest extends ActivityTestsBase {
         // and does not crash
         tasks.clear();
         mRunningTasks.getTasks(100, tasks, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED,
-                displays, -1 /* callingUid */, true /* allowed */, true /* crossUser */);
+                displays, -1 /* callingUid */, true /* allowed */, true /* crossUser */,
+                PROFILE_IDS);
         assertThat(tasks).hasSize(numTasks);
         for (int i = 0; i < numTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);

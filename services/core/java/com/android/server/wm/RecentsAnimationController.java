@@ -760,6 +760,11 @@ public class RecentsAnimationController implements DeathRecipient {
         return false;
     }
 
+    boolean shouldIgnoreForAccessibility(WindowState windowState) {
+        final Task task = windowState.getTask();
+        return task != null && isAnimatingTask(task) && !isTargetApp(windowState.mAppToken);
+    }
+
     @VisibleForTesting
     class TaskAnimationAdapter implements AnimationAdapter {
 
