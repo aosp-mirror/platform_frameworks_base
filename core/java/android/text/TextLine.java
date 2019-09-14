@@ -276,7 +276,6 @@ public class TextLine {
         final int runCount = mDirections.getRunCount();
         for (int runIndex = 0; runIndex < runCount; runIndex++) {
             final int runStart = mDirections.getRunStart(runIndex);
-            if (runStart >= mLen) break;
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
@@ -361,7 +360,6 @@ public class TextLine {
         float h = 0;
         for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
             final int runStart = mDirections.getRunStart(runIndex);
-            if (runStart >= mLen) break;
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
@@ -419,7 +417,6 @@ public class TextLine {
         float h = 0;
         for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
             final int runStart = mDirections.getRunStart(runIndex);
-            if (runStart > mLen) break;
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
