@@ -444,8 +444,8 @@
 
     <dimen name="qs_tile_height">106dp</dimen>
     <dimen name="qs_tile_layout_margin_side">6dp</dimen>
-    <dimen name="qs_tile_margin_horizontal">18dp</dimen>
-    <dimen name="qs_tile_margin_vertical">24dp</dimen>
+    <dimen name="qs_tile_margin_horizontal">10dp</dimen>
+    <dimen name="qs_tile_margin_vertical">12dp</dimen>
     <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
     <dimen name="qs_tile_margin_top_bottom_negative">-12dp</dimen>
     <!-- The height of the qs customize header. Should be
@@ -453,15 +453,15 @@
          (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (12dp))
     -->
     <dimen name="qs_customize_header_min_height">46dp</dimen>
-    <dimen name="qs_tile_margin_top">18dp</dimen>
+    <dimen name="qs_tile_margin_top">14dp</dimen>
     <dimen name="qs_tile_background_size">44dp</dimen>
-    <dimen name="qs_quick_tile_size">48dp</dimen>
-    <dimen name="qs_quick_tile_padding">12dp</dimen>
+    <dimen name="qs_quick_tile_size">52dp</dimen>
+    <dimen name="qs_quick_tile_padding">16dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
     <dimen name="qs_header_tile_margin_horizontal">4dp</dimen>
     <dimen name="qs_page_indicator_width">16dp</dimen>
     <dimen name="qs_page_indicator_height">8dp</dimen>
-    <dimen name="qs_tile_icon_size">24dp</dimen>
+    <dimen name="qs_tile_icon_size">20dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
