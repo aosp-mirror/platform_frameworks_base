@@ -1021,7 +1021,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppStopped: " + this);
         mAppStopped = true;
         // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(this);
+        mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(mActivityComponent);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -1705,10 +1705,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return;
         }
 
-        if (prevWinMode != WINDOWING_MODE_UNDEFINED && winMode == WINDOWING_MODE_PINNED) {
-            // Entering PiP from fullscreen, reset the snap fraction
-            mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(this);
-        } else if (prevWinMode == WINDOWING_MODE_PINNED && winMode != WINDOWING_MODE_UNDEFINED
+        if (prevWinMode == WINDOWING_MODE_PINNED && winMode != WINDOWING_MODE_UNDEFINED
                 && !isHidden()) {
             // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
             // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
@@ -1726,8 +1723,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     stackBounds = mTmpRect;
                     pinnedStack.getBounds(stackBounds);
                 }
-                mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(this,
-                        stackBounds);
+                mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(
+                        mActivityComponent, stackBounds);
             }
         } else if (shouldStartChangeTransition(prevWinMode, winMode)) {
             initializeChangeTransition(mTmpPrevBounds);
