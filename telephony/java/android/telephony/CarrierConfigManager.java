@@ -2791,6 +2791,14 @@ public class CarrierConfigManager {
             "opportunistic_network_data_switch_exit_hysteresis_time_long";
 
     /**
+     * Controls whether to do ping test before switching data to opportunistic network.
+     * This carrier config is used to disable this feature.
+     * @hide
+     */
+    public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL =
+            "ping_test_before_data_switch_bool";
+
+    /**
      * Indicates zero or more emergency number prefix(es), because some carrier requires
      * if users dial an emergency number address with a specific prefix, the combination of the
      * prefix and the address is also a valid emergency number to dial. For example, an emergency
@@ -3566,6 +3574,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
+        sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
