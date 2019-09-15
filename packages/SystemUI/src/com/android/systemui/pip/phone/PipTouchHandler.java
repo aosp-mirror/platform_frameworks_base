@@ -48,6 +48,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.R;
+import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
@@ -75,6 +76,7 @@ public class PipTouchHandler {
     private final IActivityTaskManager mActivityTaskManager;
     private final ViewConfiguration mViewConfig;
     private final PipMenuListener mMenuListener = new PipMenuListener();
+    private final PipBoundsHandler mPipBoundsHandler;
     private IPinnedStackController mPinnedStackController;
 
     private final PipMenuActivityController mMenuController;
@@ -178,7 +180,8 @@ public class PipTouchHandler {
 
     public PipTouchHandler(Context context, IActivityManager activityManager,
             IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
-            InputConsumerController inputConsumerController) {
+            InputConsumerController inputConsumerController,
+            PipBoundsHandler pipBoundsHandler) {
 
         // Initialize the Pip input consumer
         mContext = context;
@@ -211,6 +214,8 @@ public class PipTouchHandler {
         inputConsumerController.setInputListener(this::handleTouchEvent);
         inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
         onRegistrationChanged(inputConsumerController.isRegistered());
+
+        mPipBoundsHandler = pipBoundsHandler;
     }
 
     public void setTouchEnabled(boolean enabled) {
@@ -787,14 +792,8 @@ public class PipTouchHandler {
         mMovementBounds = isMenuExpanded
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
-        try {
-            if (mPinnedStackController != null) {
-                mPinnedStackController.setMinEdgeSize(
-                        isMenuExpanded ? mExpandedShortestEdgeSize : 0);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not set minimized state", e);
-        }
+        mPipBoundsHandler.setMinEdgeSize(
+                isMenuExpanded ? mExpandedShortestEdgeSize : 0);
     }
 
     /**
