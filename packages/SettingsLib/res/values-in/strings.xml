@@ -336,8 +336,8 @@
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Buat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktifkan jendela berformat bebas"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Aktifkan dukungan untuk jendela eksperimental berformat bebas."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Sandi backup desktop"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Saat ini backup desktop sepenuhnya tidak dilindungi"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Sandi cadangan desktop"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Saat ini cadangan desktop penuh tidak dilindungi"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Ketuk guna mengubah atau menghapus sandi untuk cadangan lengkap desktop"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Sandi cadangan baru telah disetel"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Sandi baru dan konfirmasinya tidak cocok."</string>
