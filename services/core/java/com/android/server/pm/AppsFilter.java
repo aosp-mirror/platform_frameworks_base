@@ -467,7 +467,9 @@ class AppsFilter {
         for (int user : users) {
             pw.append("    User ").append(Integer.toString(user)).println(":");
             final HashMap<String, Set<String>> queryMapForUser = mImplicitlyQueryable.get(user);
-            dumpQueriesMap(pw, filteringPackageName, queryMapForUser, "      ");
+            if (queryMapForUser != null) {
+                dumpQueriesMap(pw, filteringPackageName, queryMapForUser, "      ");
+            }
         }
     }
 
