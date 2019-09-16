@@ -24,10 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.metrics.LogMaker;
 import android.os.Handler;
@@ -39,16 +35,16 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.Preconditions;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
-import java.util.function.IntConsumer;
+import java.util.function.Consumer;
 
 /**
  * Handles triggers for ambient state changes.
@@ -67,13 +63,15 @@ public class DozeTriggers implements DozeMachine.Part {
      */
     private static boolean sWakeDisplaySensorState = true;
 
+    private static final int PROXIMITY_TIMEOUT_DELAY_MS = 500;
+
     private final Context mContext;
     private final DozeMachine mMachine;
     private final DozeSensors mDozeSensors;
     private final DozeHost mDozeHost;
     private final AmbientDisplayConfiguration mConfig;
     private final DozeParameters mDozeParameters;
-    private final SensorManager mSensorManager;
+    private final AsyncSensorManager mSensorManager;
     private final Handler mHandler;
     private final WakeLock mWakeLock;
     private final boolean mAllowPulseTriggers;
@@ -81,6 +79,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final TriggerReceiver mBroadcastReceiver = new TriggerReceiver();
     private final DockEventListener mDockEventListener = new DockEventListener();
     private final DockManager mDockManager;
+    private final ProximitySensor.ProximityCheck mProxCheck;
 
     private long mNotificationPulseTime;
     private boolean mPulsePending;
@@ -89,7 +88,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AlarmManager alarmManager, AmbientDisplayConfiguration config,
-            DozeParameters dozeParameters, SensorManager sensorManager, Handler handler,
+            DozeParameters dozeParameters, AsyncSensorManager sensorManager, Handler handler,
             WakeLock wakeLock, boolean allowPulseTriggers, DockManager dockManager) {
         mContext = context;
         mMachine = machine;
@@ -105,6 +104,9 @@ public class DozeTriggers implements DozeMachine.Part {
                 dozeParameters.getPolicy());
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
+        mProxCheck = new ProximitySensor.ProximityCheck(
+                new ProximitySensor(mContext, mSensorManager, null),
+                mHandler);
     }
 
     private void onNotification(Runnable onPulseSuppressedListener) {
@@ -134,25 +136,27 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    private void proximityCheckThenCall(IntConsumer callback,
+    private void proximityCheckThenCall(Consumer<Boolean> callback,
             boolean alreadyPerformedProxCheck,
             int reason) {
-        Boolean cachedProxFar = mDozeSensors.isProximityCurrentlyFar();
+        Boolean cachedProxNear = mDozeSensors.isProximityCurrentlyNear();
         if (alreadyPerformedProxCheck) {
-            callback.accept(ProximityCheck.RESULT_NOT_CHECKED);
-        } else if (cachedProxFar != null) {
-            callback.accept(cachedProxFar ? ProximityCheck.RESULT_FAR : ProximityCheck.RESULT_NEAR);
+            callback.accept(null);
+        } else if (cachedProxNear != null) {
+            callback.accept(cachedProxNear);
         } else {
             final long start = SystemClock.uptimeMillis();
-            new ProximityCheck() {
-                @Override
-                public void onProximityResult(int result) {
-                    final long end = SystemClock.uptimeMillis();
-                    DozeLog.traceProximityResult(mContext, result == RESULT_NEAR,
-                            end - start, reason);
-                    callback.accept(result);
-                }
-            }.check();
+            mProxCheck.check(PROXIMITY_TIMEOUT_DELAY_MS, near -> {
+                final long end = SystemClock.uptimeMillis();
+                DozeLog.traceProximityResult(
+                        mContext,
+                        near == null ? false : near,
+                        end - start,
+                        reason);
+                callback.accept(near);
+                mWakeLock.release(TAG);
+            });
+            mWakeLock.acquire(TAG);
         }
     }
 
@@ -178,7 +182,7 @@ public class DozeTriggers implements DozeMachine.Part {
             }
         } else {
             proximityCheckThenCall((result) -> {
-                if (result == ProximityCheck.RESULT_NEAR) {
+                if (result) {
                     // In pocket, drop event.
                     return;
                 }
@@ -267,7 +271,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
         if (wake) {
             proximityCheckThenCall((result) -> {
-                if (result == ProximityCheck.RESULT_NEAR) {
+                if (result) {
                     // In pocket, drop event.
                     return;
                 }
@@ -376,7 +380,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
         mPulsePending = true;
         proximityCheckThenCall((result) -> {
-            if (result == ProximityCheck.RESULT_NEAR) {
+            if (result) {
                 // in pocket, abort pulse
                 DozeLog.tracePulseDropped(mContext, "inPocket");
                 mPulsePending = false;
@@ -412,102 +416,9 @@ public class DozeTriggers implements DozeMachine.Part {
         pw.print(" notificationPulseTime=");
         pw.println(Formatter.formatShortElapsedTime(mContext, mNotificationPulseTime));
 
-        pw.print(" pulsePending="); pw.println(mPulsePending);
+        pw.println(" pulsePending=" + mPulsePending);
         pw.println("DozeSensors:");
         mDozeSensors.dump(pw);
-    }
-
-    /**
-     * @see DozeSensors.ProxSensor
-     */
-    private abstract class ProximityCheck implements SensorEventListener, Runnable {
-        private static final int TIMEOUT_DELAY_MS = 500;
-
-        protected static final int RESULT_UNKNOWN = 0;
-        protected static final int RESULT_NEAR = 1;
-        protected static final int RESULT_FAR = 2;
-        protected static final int RESULT_NOT_CHECKED = 3;
-
-        private boolean mRegistered;
-        private boolean mFinished;
-        private float mMaxRange;
-        private boolean mUsingBrightnessSensor;
-
-        protected abstract void onProximityResult(int result);
-
-        public void check() {
-            Preconditions.checkState(!mFinished && !mRegistered);
-            Sensor sensor = DozeSensors.findSensorWithType(mSensorManager,
-                    mContext.getString(R.string.doze_brightness_sensor_type));
-            mUsingBrightnessSensor = sensor != null;
-            if (sensor == null) {
-                sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-            }
-            if (sensor == null) {
-                if (DozeMachine.DEBUG) Log.d(TAG, "ProxCheck: No sensor found");
-                finishWithResult(RESULT_UNKNOWN);
-                return;
-            }
-            mDozeSensors.setDisableSensorsInterferingWithProximity(true);
-
-            mMaxRange = sensor.getMaximumRange();
-            mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL, 0,
-                    mHandler);
-            mHandler.postDelayed(this, TIMEOUT_DELAY_MS);
-            mWakeLock.acquire(TAG);
-            mRegistered = true;
-        }
-
-        /**
-         * @see DozeSensors.ProxSensor#onSensorChanged(SensorEvent)
-         */
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            if (event.values.length == 0) {
-                if (DozeMachine.DEBUG) Log.d(TAG, "ProxCheck: Event has no values!");
-                finishWithResult(RESULT_UNKNOWN);
-            } else {
-                if (DozeMachine.DEBUG) {
-                    Log.d(TAG, "ProxCheck: Event: value=" + event.values[0] + " max=" + mMaxRange);
-                }
-                final boolean isNear;
-                if (mUsingBrightnessSensor) {
-                    // The custom brightness sensor is gated by the proximity sensor and will
-                    // return 0 whenever prox is covered.
-                    isNear = event.values[0] == 0;
-                } else {
-                    isNear = event.values[0] < mMaxRange;
-                }
-                finishWithResult(isNear ? RESULT_NEAR : RESULT_FAR);
-            }
-        }
-
-        @Override
-        public void run() {
-            if (DozeMachine.DEBUG) Log.d(TAG, "ProxCheck: No event received before timeout");
-            finishWithResult(RESULT_UNKNOWN);
-        }
-
-        private void finishWithResult(int result) {
-            if (mFinished) return;
-            boolean wasRegistered = mRegistered;
-            if (mRegistered) {
-                mHandler.removeCallbacks(this);
-                mSensorManager.unregisterListener(this);
-                mDozeSensors.setDisableSensorsInterferingWithProximity(false);
-                mRegistered = false;
-            }
-            onProximityResult(result);
-            if (wasRegistered) {
-                mWakeLock.release(TAG);
-            }
-            mFinished = true;
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            // noop
-        }
     }
 
     private class TriggerReceiver extends BroadcastReceiver {
