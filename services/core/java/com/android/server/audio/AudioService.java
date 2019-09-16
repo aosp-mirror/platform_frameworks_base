@@ -1905,16 +1905,9 @@ public class AudioService extends IAudioService.Stub
                         }
                     }
 
-                    if (mHdmiAudioSystemClient != null &&
-                            mHdmiSystemAudioSupported &&
-                            streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                            (oldIndex != newIndex || isMuteAdjust)) {
-                        final long identity = Binder.clearCallingIdentity();
-                        mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
-                                isMuteAdjust, getStreamVolume(AudioSystem.STREAM_MUSIC),
-                                getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
-                                isStreamMute(AudioSystem.STREAM_MUSIC));
-                        Binder.restoreCallingIdentity(identity);
+                    if (streamTypeAlias == AudioSystem.STREAM_MUSIC
+                            && (oldIndex != newIndex || isMuteAdjust)) {
+                        maybeSendSystemAudioStatusCommand(isMuteAdjust);
                     }
                 }
             }
@@ -1925,12 +1918,35 @@ public class AudioService extends IAudioService.Stub
 
     // Called after a delay when volume down is pressed while muted
     private void onUnmuteStream(int stream, int flags) {
-        VolumeStreamState streamState = mStreamStates[stream];
-        streamState.mute(false);
+        boolean wasMuted;
+        synchronized (VolumeStreamState.class) {
+            final VolumeStreamState streamState = mStreamStates[stream];
+            wasMuted = streamState.mute(false); // if unmuting causes a change, it was muted
 
-        final int device = getDeviceForStream(stream);
-        final int index = mStreamStates[stream].getIndex(device);
-        sendVolumeUpdate(stream, index, index, flags, device);
+            final int device = getDeviceForStream(stream);
+            final int index = streamState.getIndex(device);
+            sendVolumeUpdate(stream, index, index, flags, device);
+        }
+        if (stream == AudioSystem.STREAM_MUSIC && wasMuted) {
+            synchronized (mHdmiClientLock) {
+                maybeSendSystemAudioStatusCommand(true);
+            }
+        }
+    }
+
+    @GuardedBy("mHdmiClientLock")
+    private void maybeSendSystemAudioStatusCommand(boolean isMuteAdjust) {
+        if (mHdmiAudioSystemClient == null
+                || !mHdmiSystemAudioSupported) {
+            return;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
+                isMuteAdjust, getStreamVolume(AudioSystem.STREAM_MUSIC),
+                getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
+                isStreamMute(AudioSystem.STREAM_MUSIC));
+        Binder.restoreCallingIdentity(identity);
     }
 
     private void setSystemAudioVolume(int oldVolume, int newVolume, int maxVolume, int flags) {
@@ -2343,17 +2359,9 @@ public class AudioService extends IAudioService.Stub
             }
         }
         synchronized (mHdmiClientLock) {
-            if (mHdmiManager != null &&
-                    mHdmiAudioSystemClient != null &&
-                    mHdmiSystemAudioSupported &&
-                    streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                    (oldIndex != index)) {
-                final long identity = Binder.clearCallingIdentity();
-                mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
-                        false, getStreamVolume(AudioSystem.STREAM_MUSIC),
-                        getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
-                        isStreamMute(AudioSystem.STREAM_MUSIC));
-                Binder.restoreCallingIdentity(identity);
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC
+                    && (oldIndex != index)) {
+                maybeSendSystemAudioStatusCommand(false);
             }
         }
         sendVolumeUpdate(streamType, oldIndex, index, flags, device);
@@ -4683,7 +4691,12 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        public void mute(boolean state) {
+        /**
+         * Mute/unmute the stream
+         * @param state the new mute state
+         * @return true if the mute state was changed
+         */
+        public boolean mute(boolean state) {
             boolean changed = false;
             synchronized (VolumeStreamState.class) {
                 if (state != mIsMuted) {
@@ -4708,6 +4721,7 @@ public class AudioService extends IAudioService.Stub
                 intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
                 sendBroadcastToAll(intent);
             }
+            return changed;
         }
 
         public int getStreamType() {
