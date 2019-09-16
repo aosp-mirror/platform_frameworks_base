@@ -16,8 +16,6 @@
 
 package com.android.systemui.biometrics;
 
-import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -25,6 +23,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
@@ -34,7 +33,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -42,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 
 import java.lang.annotation.Retention;
@@ -97,6 +97,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         int ACTION_BUTTON_NEGATIVE = 3;
         int ACTION_BUTTON_TRY_AGAIN = 4;
         int ACTION_ERROR = 5;
+        int ACTION_USE_DEVICE_CREDENTIAL = 6;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -145,6 +146,10 @@ public abstract class AuthBiometricView extends LinearLayout {
         public int getDelayAfterError() {
             return BiometricPrompt.HIDE_DIALOG_DELAY;
         }
+
+        public int getAnimationDuration() {
+            return AuthDialog.ANIMATE_DURATION_MS;
+        }
     }
 
     private final Injector mInjector;
@@ -156,6 +161,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private AuthPanelController mPanelController;
     private Bundle mBundle;
     private boolean mRequireConfirmation;
+    private int mUserId;
     @AuthDialog.DialogSize int mSize = AuthDialog.SIZE_UNKNOWN;
 
     private TextView mTitleView;
@@ -212,6 +218,9 @@ public abstract class AuthBiometricView extends LinearLayout {
         } else if (mSize == AuthDialog.SIZE_SMALL) {
             Log.w(TAG, "Ignoring background click during small dialog");
             return;
+        } else if (mSize == AuthDialog.SIZE_LARGE) {
+            Log.w(TAG, "Ignoring background click during large dialog");
+            return;
         }
         mCallback.onAction(Callback.ACTION_USER_CANCELED);
     };
@@ -267,6 +276,10 @@ public abstract class AuthBiometricView extends LinearLayout {
         backgroundView.setOnClickListener(mBackgroundClickListener);
     }
 
+    public void setUserId(int userId) {
+        mUserId = userId;
+    }
+
     public void setRequireConfirmation(boolean requireConfirmation) {
         mRequireConfirmation = requireConfirmation;
     }
@@ -305,10 +318,9 @@ public abstract class AuthBiometricView extends LinearLayout {
 
             // Animate the text
             final ValueAnimator opacityAnimator = ValueAnimator.ofFloat(0, 1);
-            opacityAnimator.setDuration(AuthDialog.ANIMATE_DURATION_MS);
+            opacityAnimator.setDuration(mInjector.getAnimationDuration());
             opacityAnimator.addUpdateListener((animation) -> {
                 final float opacity = (float) animation.getAnimatedValue();
-
                 mTitleView.setAlpha(opacity);
                 mIndicatorView.setAlpha(opacity);
                 mNegativeButton.setAlpha(opacity);
@@ -324,7 +336,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
             // Choreograph together
             final AnimatorSet as = new AnimatorSet();
-            as.setDuration(AuthDialog.ANIMATE_DURATION_MS);
+            as.setDuration(mInjector.getAnimationDuration());
             as.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -360,6 +372,36 @@ public abstract class AuthBiometricView extends LinearLayout {
             mPanelController.updateForContentDimensions(mMediumWidth, mMediumHeight,
                     false /* animate */);
             mSize = newSize;
+        } else if (newSize == AuthDialog.SIZE_LARGE) {
+            final ValueAnimator opacityAnimator = ValueAnimator.ofFloat(1, 0);
+            opacityAnimator.setDuration(mInjector.getAnimationDuration());
+            opacityAnimator.addUpdateListener((animation) -> {
+                final float opacity = (float) animation.getAnimatedValue();
+                mTitleView.setAlpha(opacity);
+                mSubtitleView.setAlpha(opacity);
+                mDescriptionView.setAlpha(opacity);
+                mIconView.setAlpha(opacity);
+                mIndicatorView.setAlpha(opacity);
+                mNegativeButton.setAlpha(opacity);
+            });
+            opacityAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    AuthBiometricView view = AuthBiometricView.this;
+                    if (view.getParent() != null) {
+                        ((ViewGroup) view.getParent()).removeView(view);
+                    }
+                    mSize = newSize;
+                }
+            });
+
+            mPanelController.setUseFullScreen(true);
+            mPanelController.updateForContentDimensions(
+                    mPanelController.getContainerWidth(),
+                    mPanelController.getContainerHeight(),
+                    true /* animate */);
+            opacityAnimator.start();
         } else {
             Log.e(TAG, "Unknown transition from: " + mSize + " to: " + newSize);
         }
@@ -528,7 +570,12 @@ public abstract class AuthBiometricView extends LinearLayout {
             if (mState == STATE_PENDING_CONFIRMATION) {
                 mCallback.onAction(Callback.ACTION_USER_CANCELED);
             } else {
-                mCallback.onAction(Callback.ACTION_BUTTON_NEGATIVE);
+                if (isDeviceCredentialAllowed()) {
+                    updateSize(AuthDialog.SIZE_LARGE);
+                    mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
+                } else {
+                    mCallback.onAction(Callback.ACTION_BUTTON_NEGATIVE);
+                }
             }
         });
 
@@ -557,7 +604,33 @@ public abstract class AuthBiometricView extends LinearLayout {
     @VisibleForTesting
     void onAttachedToWindowInternal() {
         setText(mTitleView, mBundle.getString(BiometricPrompt.KEY_TITLE));
-        setText(mNegativeButton, mBundle.getString(BiometricPrompt.KEY_NEGATIVE_TEXT));
+
+        final String negativeText;
+        if (isDeviceCredentialAllowed()) {
+            final LockPatternUtils lpu = new LockPatternUtils(mContext);
+            switch (lpu.getKeyguardStoredPasswordQuality(mUserId)) {
+                case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
+                    negativeText = getResources().getString(R.string.biometric_dialog_use_pattern);
+                    break;
+                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                    negativeText = getResources().getString(R.string.biometric_dialog_use_pin);
+                    break;
+                case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+                case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+                    negativeText = getResources().getString(R.string.biometric_dialog_use_password);
+                    break;
+                default:
+                    negativeText = getResources().getString(R.string.biometric_dialog_use_password);
+                    break;
+            }
+
+        } else {
+            negativeText = mBundle.getString(BiometricPrompt.KEY_NEGATIVE_TEXT);
+        }
+        setText(mNegativeButton, negativeText);
 
         setTextOrHide(mSubtitleView, mBundle.getString(BiometricPrompt.KEY_SUBTITLE));
         setTextOrHide(mDescriptionView, mBundle.getString(BiometricPrompt.KEY_DESCRIPTION));
@@ -654,5 +727,9 @@ public abstract class AuthBiometricView extends LinearLayout {
                 }
             }
         }
+    }
+
+    private boolean isDeviceCredentialAllowed() {
+        return mBundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
     }
 }

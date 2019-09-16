@@ -311,6 +311,13 @@
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
 
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pin) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_pin">Use PIN</string>
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pattern) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_pattern">Use pattern</string>
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pass) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_password">Use password</string>
+
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->

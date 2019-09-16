@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Outline;
@@ -24,7 +25,6 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 
 import com.android.systemui.R;
-import com.android.systemui.biometrics.AuthDialog;
 
 /**
  * Controls the back panel and its animations for the BiometricPrompt UI.
@@ -32,12 +32,14 @@ import com.android.systemui.biometrics.AuthDialog;
 public class AuthPanelController extends ViewOutlineProvider {
 
     private static final String TAG = "BiometricPrompt/AuthPanelController";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private final Context mContext;
     private final View mPanelView;
     private final float mCornerRadius;
     private final int mBiometricMargin;
+
+    private boolean mUseFullScreen;
 
     private int mContainerWidth;
     private int mContainerHeight;
@@ -49,11 +51,15 @@ public class AuthPanelController extends ViewOutlineProvider {
     public void getOutline(View view, Outline outline) {
         final int left = (mContainerWidth - mContentWidth) / 2;
         final int right = mContainerWidth - left;
+
+        final int margin = mUseFullScreen ? 0 : mBiometricMargin;
+        final float cornerRadius = mUseFullScreen ? 0 : mCornerRadius;
+
         final int top = mContentHeight < mContainerHeight
-                ? mContainerHeight - mContentHeight - mBiometricMargin
-                : mBiometricMargin;
-        final int bottom = mContainerHeight - mBiometricMargin;
-        outline.setRoundRect(left, top, right, bottom, mCornerRadius);
+                ? mContainerHeight - mContentHeight - margin
+                : margin;
+        final int bottom = mContainerHeight - margin;
+        outline.setRoundRect(left, top, right, bottom, cornerRadius);
     }
 
     public void setContainerDimensions(int containerWidth, int containerHeight) {
@@ -62,6 +68,10 @@ public class AuthPanelController extends ViewOutlineProvider {
         }
         mContainerWidth = containerWidth;
         mContainerHeight = containerHeight;
+    }
+
+    public void setUseFullScreen(boolean fullScreen) {
+        mUseFullScreen = fullScreen;
     }
 
     public void updateForContentDimensions(int contentWidth, int contentHeight, boolean animate) {
@@ -78,17 +88,34 @@ public class AuthPanelController extends ViewOutlineProvider {
 
         if (animate) {
             ValueAnimator heightAnimator = ValueAnimator.ofInt(mContentHeight, contentHeight);
-            heightAnimator.setDuration(AuthDialog.ANIMATE_DURATION_MS);
             heightAnimator.addUpdateListener((animation) -> {
                 mContentHeight = (int) animation.getAnimatedValue();
                 mPanelView.invalidateOutline();
             });
             heightAnimator.start();
+
+            ValueAnimator widthAnimator = ValueAnimator.ofInt(mContentWidth, contentWidth);
+            widthAnimator.addUpdateListener((animation) -> {
+                mContentWidth = (int) animation.getAnimatedValue();
+            });
+
+            AnimatorSet as = new AnimatorSet();
+            as.setDuration(AuthDialog.ANIMATE_DURATION_MS);
+            as.play(heightAnimator).with(widthAnimator);
+            as.start();
         } else {
             mContentWidth = contentWidth;
             mContentHeight = contentHeight;
             mPanelView.invalidateOutline();
         }
+    }
+
+    int getContainerWidth() {
+        return mContainerWidth;
+    }
+
+    int getContainerHeight() {
+        return mContainerHeight;
     }
 
     AuthPanelController(Context context, View panelView) {

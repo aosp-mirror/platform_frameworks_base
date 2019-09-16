@@ -25,6 +25,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -169,6 +170,9 @@ public class AuthContainerView extends LinearLayout
                 case AuthBiometricView.Callback.ACTION_ERROR:
                     animateAway(AuthDialogCallback.DISMISSED_ERROR);
                     break;
+                case AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL:
+                    Log.v(TAG, "ACTION_USE_DEVICE_CREDENTIAL");
+                    break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
             }
@@ -228,6 +232,7 @@ public class AuthContainerView extends LinearLayout
         mBiometricView.setBiometricPromptBundle(config.mBiometricPromptBundle);
         mBiometricView.setCallback(mBiometricCallback);
         mBiometricView.setBackgroundView(mBackgroundView);
+        mBiometricView.setUserId(mConfig.mUserId);
 
         mScrollView = mContainerView.findViewById(R.id.scrollview);
         mScrollView.addView(mBiometricView);
@@ -404,6 +409,11 @@ public class AuthContainerView extends LinearLayout
                     .withLayer()
                     .start();
         });
+    }
+
+    private boolean isDeviceCredentialAllowed() {
+        return mConfig.mBiometricPromptBundle.getBoolean(
+                BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
     }
 
     private void sendPendingCallbackIfNotNull() {
