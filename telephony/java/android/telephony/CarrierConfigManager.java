@@ -108,6 +108,19 @@ public class CarrierConfigManager {
             "call_forwarding_visibility_bool";
 
     /**
+     * Boolean indicating if carrier supports call forwarding option "When unreachable".
+     *
+     * {@code true}: Call forwarding option "When unreachable" is supported.
+     * {@code false}: Call forwarding option "When unreachable" is not supported. Option will be
+     * greyed out in the UI.
+     *
+     * By default this value is true.
+     * @hide
+     */
+    public static final String KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL =
+            "call_forwarding_when_unreachable_supported_bool";
+
+    /**
      * Boolean indicating if the "Caller ID" item is visible in the Additional Settings menu.
      * true means visible. false means gone.
      * @hide
@@ -3244,6 +3257,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_PASSWORD_CHANGE_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
+        sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
