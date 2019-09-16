@@ -16,11 +16,13 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.Dependency.BG_HANDLER;
+import static com.android.systemui.Dependency.BG_HANDLER_NAME;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.util.AttributeSet;
@@ -53,6 +55,7 @@ public class QSCarrierGroup extends LinearLayout implements
      */
     private static final int SIM_SLOTS = 3;
     private final NetworkController mNetworkController;
+    private final Handler mBgHandler;
 
     private View[] mCarrierDividers = new View[SIM_SLOTS - 1];
     private QSCarrier[] mCarrierGroups = new QSCarrier[SIM_SLOTS];
@@ -65,17 +68,20 @@ public class QSCarrierGroup extends LinearLayout implements
 
     @Inject
     public QSCarrierGroup(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            NetworkController networkController, ActivityStarter activityStarter) {
+            NetworkController networkController, ActivityStarter activityStarter,
+            @Named(BG_HANDLER_NAME) Handler handler) {
         super(context, attrs);
         mNetworkController = networkController;
         mActivityStarter = activityStarter;
+        mBgHandler = handler;
     }
 
     @VisibleForTesting
     public QSCarrierGroup(Context context, AttributeSet attrs) {
         this(context, attrs,
                 Dependency.get(NetworkController.class),
-                Dependency.get(ActivityStarter.class));
+                Dependency.get(ActivityStarter.class),
+                Dependency.get(BG_HANDLER));
     }
 
     @Override
@@ -115,8 +121,7 @@ public class QSCarrierGroup extends LinearLayout implements
             return;
         }
         mListening = listening;
-        // TODO(b/140053526)
-        whitelistIpcs(this::updateListeners);
+        mBgHandler.post(this::updateListeners);
     }
 
     @Override
