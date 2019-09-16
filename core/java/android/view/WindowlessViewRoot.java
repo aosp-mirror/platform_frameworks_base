@@ -21,12 +21,15 @@ import android.content.Context;
 import android.view.SurfaceControl;
 import android.view.View;
 
+import android.annotation.TestApi;
+
 /**
  * Utility class for adding a view hierarchy to a SurfaceControl.
  *
  * See WindowlessWmTest for example usage.
  * @hide
  */
+@TestApi
 public class WindowlessViewRoot {
     ViewRootImpl mViewRoot;
     WindowlessWindowManager mWm;
