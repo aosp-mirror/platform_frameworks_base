@@ -120,6 +120,7 @@ import com.google.android.collect.Lists;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -178,6 +179,20 @@ public class ChooserActivity extends ResolverActivity {
     private static final boolean USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS = true;
     private static final boolean USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS = true;
 
+    public static final int TARGET_TYPE_DEFAULT = 0;
+    public static final int TARGET_TYPE_CHOOSER_TARGET = 1;
+    public static final int TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER = 2;
+    public static final int TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE = 3;
+
+    @IntDef(flag = false, prefix = { "TARGET_TYPE_" }, value = {
+            TARGET_TYPE_DEFAULT,
+            TARGET_TYPE_CHOOSER_TARGET,
+            TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER,
+            TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ShareTargetType {}
+
     /**
      * The transition time between placeholders for direct share to a message
      * indicating that non are available.
@@ -218,9 +233,9 @@ public class ChooserActivity extends ResolverActivity {
     private int mCurrAvailableWidth = 0;
 
     /** {@link ChooserActivity#getBaseScore} */
-    private static final float CALLER_TARGET_SCORE_BOOST = 900.f;
+    public static final float CALLER_TARGET_SCORE_BOOST = 900.f;
     /** {@link ChooserActivity#getBaseScore} */
-    private static final float SHORTCUT_TARGET_SCORE_BOOST = 90.f;
+    public static final float SHORTCUT_TARGET_SCORE_BOOST = 90.f;
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
     // TODO: Update to handle landscape instead of using static value
     private static final int MAX_RANKED_TARGETS = 4;
@@ -443,7 +458,7 @@ public class ChooserActivity extends ResolverActivity {
                     }
                     if (sri.resultTargets != null) {
                         mChooserListAdapter.addServiceResults(sri.originalTarget,
-                                sri.resultTargets, false);
+                                sri.resultTargets, TARGET_TYPE_CHOOSER_TARGET);
                     }
                     unbindService(sri.connection);
                     sri.connection.destroy();
@@ -474,7 +489,7 @@ public class ChooserActivity extends ResolverActivity {
                     final ServiceResultInfo resultInfo = (ServiceResultInfo) msg.obj;
                     if (resultInfo.resultTargets != null) {
                         mChooserListAdapter.addServiceResults(resultInfo.originalTarget,
-                                resultInfo.resultTargets, true);
+                                resultInfo.resultTargets, msg.arg1);
                     }
                     break;
 
@@ -1214,7 +1229,7 @@ public class ChooserActivity extends ResolverActivity {
         mChooserListAdapter = (ChooserListAdapter) adapter;
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
             mChooserListAdapter.addServiceResults(null, Lists.newArrayList(mCallerChooserTargets),
-                    false);
+                    TARGET_TYPE_DEFAULT);
         }
         mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
         if (listView != null) {
@@ -1560,6 +1575,10 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
+        // If |appTargets| is not null, results are from AppPredictionService and already sorted.
+        final int shortcutType = (appTargets == null ? TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER :
+                TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE);
+
         // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
         // for direct share targets. After ShareSheet is refactored we should use the
         // ShareShortcutInfos directly.
@@ -1587,6 +1606,7 @@ public class ChooserActivity extends ResolverActivity {
             final Message msg = Message.obtain();
             msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
             msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null);
+            msg.arg1 = shortcutType;
             mChooserHandler.sendMessage(msg);
             resultMessageSent = true;
         }
@@ -2677,7 +2697,7 @@ public class ChooserActivity extends ResolverActivity {
          * if score is too low.
          */
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
-                boolean isShortcutResult) {
+                @ShareTargetType int targetType) {
             if (DEBUG) {
                 Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
                         + " targets");
@@ -2687,9 +2707,12 @@ public class ChooserActivity extends ResolverActivity {
                 return;
             }
 
-            final float baseScore = getBaseScore(origTarget, isShortcutResult);
+            final float baseScore = getBaseScore(origTarget, targetType);
             Collections.sort(targets, mBaseTargetComparator);
 
+            final boolean isShortcutResult =
+                    (targetType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER
+                            || targetType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE);
             final int maxTargets = isShortcutResult ? mMaxShortcutTargetsPerApp
                                        : MAX_CHOOSER_TARGETS_PER_APP;
             float lastScore = 0;
@@ -2740,17 +2763,17 @@ public class ChooserActivity extends ResolverActivity {
           *   <li>Legacy direct share targets
           * </ol>
           */
-        private float getBaseScore(DisplayResolveInfo target, boolean isShortcutResult) {
+        public float getBaseScore(DisplayResolveInfo target, @ShareTargetType int targetType) {
             if (target == null) {
                 return CALLER_TARGET_SCORE_BOOST;
             }
 
-            if (isShortcutResult && getAppPredictorForDirectShareIfEnabled() != null) {
+            if (targetType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE) {
                 return SHORTCUT_TARGET_SCORE_BOOST;
             }
 
             float score = super.getScore(target);
-            if (isShortcutResult) {
+            if (targetType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER) {
                 return score * SHORTCUT_TARGET_SCORE_BOOST;
             }
 
