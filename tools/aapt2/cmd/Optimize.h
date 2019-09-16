@@ -104,11 +104,13 @@ class OptimizeCommand : public Command {
         "Enables encoding sparse entries using a binary search tree.\n"
             "This decreases APK size at the cost of resource retrieval performance.",
         &options_.table_flattener_options.use_sparse_entries);
-    AddOptionalSwitch("--enable-resource-obfuscation",
-        "Enables obfuscation of key string pool to single value",
+    AddOptionalSwitch("--collapse-resource-names",
+        "Collapses resource names to a single value in the key string pool. Resources can \n"
+            "be exempted using the \"no_collapse\" directive in a file specified by "
+            "--resources-config-path.",
         &options_.table_flattener_options.collapse_key_stringpool);
-    AddOptionalSwitch("--enable-resource-path-shortening",
-        "Enables shortening of the path of the resources inside the APK.",
+    AddOptionalSwitch("--shorten-resource-paths",
+        "Shortens the paths of resources inside the APK.",
         &options_.shorten_resource_paths);
     AddOptionalFlag("--resource-path-shortening-map",
         "Path to output the map of old resource paths to shortened paths.",
