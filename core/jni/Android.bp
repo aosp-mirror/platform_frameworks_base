@@ -42,10 +42,6 @@ cc_library_shared {
     ],
 
     include_dirs: [
-        // we need to access the private Bionic header
-        // <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
-        "bionic/libc/private",
-
         "external/skia/include/private",
         "frameworks/base/media/jni",
         "system/media/camera/include",
@@ -277,6 +273,7 @@ cc_library_shared {
                 "libnativewindow",
             ],
             generated_sources: ["android_util_StatsLogInternal.cpp"],
+            header_libs: ["bionic_libc_platform_headers"],
         },
         host: {
             cflags: [
