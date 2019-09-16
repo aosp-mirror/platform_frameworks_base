@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,10 +29,10 @@ import android.view.InsetsState.InternalInsetType;
 public class InsetsSourceControl implements Parcelable {
 
     private final @InternalInsetType int mType;
-    private final SurfaceControl mLeash;
+    private final @Nullable SurfaceControl mLeash;
     private final Point mSurfacePosition;
 
-    public InsetsSourceControl(@InternalInsetType int type, SurfaceControl leash,
+    public InsetsSourceControl(@InternalInsetType int type, @Nullable SurfaceControl leash,
             Point surfacePosition) {
         mType = type;
         mLeash = leash;
@@ -42,7 +43,13 @@ public class InsetsSourceControl implements Parcelable {
         return mType;
     }
 
-    public SurfaceControl getLeash() {
+    /**
+     * Gets the leash for controlling insets source. If the system is controlling the insets source,
+     * for example, transient bars, the client will receive fake controls without leash in it.
+     *
+     * @return the leash.
+     */
+    public @Nullable SurfaceControl getLeash() {
         return mLeash;
     }
 

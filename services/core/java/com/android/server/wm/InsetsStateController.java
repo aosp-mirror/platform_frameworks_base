@@ -20,6 +20,8 @@ import static android.view.InsetsState.InternalInsetType;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.ViewRootImpl.sNewInsetsMode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,6 +49,10 @@ class InsetsStateController {
     private final ArrayMap<InsetsControlTarget, ArrayList<Integer>> mControlTargetTypeMap =
             new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mTypeControlTargetMap = new SparseArray<>();
+
+    /** @see #onControlFakeTargetChanged */
+    private final SparseArray<InsetsControlTarget> mTypeFakeControlTargetMap = new SparseArray<>();
+
     private final ArraySet<InsetsControlTarget> mPendingControlChanged = new ArraySet<>();
 
     private final Consumer<WindowState> mDispatchInsetsChanged = w -> {
@@ -93,7 +99,7 @@ class InsetsStateController {
         final int size = controlled.size();
         final InsetsSourceControl[] result = new InsetsSourceControl[size];
         for (int i = 0; i < size; i++) {
-            result[i] = mProviders.get(controlled.get(i)).getControl();
+            result[i] = mProviders.get(controlled.get(i)).getControl(target);
         }
         return result;
     }
@@ -157,7 +163,8 @@ class InsetsStateController {
 
     void notifyControlRevoked(@NonNull InsetsControlTarget previousControlTarget,
             InsetsSourceProvider provider) {
-        removeFromControlMaps(previousControlTarget, provider.getSource().getType());
+        removeFromControlMaps(previousControlTarget, provider.getSource().getType(),
+                false /* fake */);
     }
 
     private void onControlChanged(@InternalInsetType int type,
@@ -175,17 +182,47 @@ class InsetsStateController {
         }
         provider.updateControlForTarget(target, false /* force */);
         if (previous != null) {
-            removeFromControlMaps(previous, type);
+            removeFromControlMaps(previous, type, false /* fake */);
             mPendingControlChanged.add(previous);
         }
         if (target != null) {
-            addToControlMaps(target, type);
+            addToControlMaps(target, type, false /* fake */);
             mPendingControlChanged.add(target);
         }
     }
 
+    /**
+     * The fake target saved here will be used to pretend to the app that it's still under control
+     * of the bars while it's not really, but we still need to find out the apps intentions around
+     * showing/hiding. For example, when the transient bars are showing, and the fake target
+     * requests to show system bars, the transient state will be aborted.
+     */
+    void onControlFakeTargetChanged(@InternalInsetType  int type,
+            @Nullable InsetsControlTarget fakeTarget) {
+        if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
+            return;
+        }
+        final InsetsControlTarget previous = mTypeFakeControlTargetMap.get(type);
+        if (fakeTarget == previous) {
+            return;
+        }
+        final InsetsSourceProvider provider = mProviders.get(type);
+        if (provider == null) {
+            return;
+        }
+        provider.updateControlForFakeTarget(fakeTarget);
+        if (previous != null) {
+            removeFromControlMaps(previous, type, true /* fake */);
+            mPendingControlChanged.add(previous);
+        }
+        if (fakeTarget != null) {
+            addToControlMaps(fakeTarget, type, true /* fake */);
+            mPendingControlChanged.add(fakeTarget);
+        }
+    }
+
     private void removeFromControlMaps(@NonNull InsetsControlTarget target,
-            @InternalInsetType int type) {
+            @InternalInsetType int type, boolean fake) {
         final ArrayList<Integer> array = mControlTargetTypeMap.get(target);
         if (array == null) {
             return;
@@ -194,15 +231,23 @@ class InsetsStateController {
         if (array.isEmpty()) {
             mControlTargetTypeMap.remove(target);
         }
-        mTypeControlTargetMap.remove(type);
+        if (fake) {
+            mTypeFakeControlTargetMap.remove(type);
+        } else {
+            mTypeControlTargetMap.remove(type);
+        }
     }
 
     private void addToControlMaps(@NonNull InsetsControlTarget target,
-            @InternalInsetType int type) {
+            @InternalInsetType int type, boolean fake) {
         final ArrayList<Integer> array = mControlTargetTypeMap.computeIfAbsent(target,
                 key -> new ArrayList<>());
         array.add(type);
-        mTypeControlTargetMap.put(type, target);
+        if (fake) {
+            mTypeFakeControlTargetMap.put(type, target);
+        } else {
+            mTypeControlTargetMap.put(type, target);
+        }
     }
 
     void notifyControlChanged(InsetsControlTarget target) {

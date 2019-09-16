@@ -51,8 +51,11 @@ class InsetsSourceProvider {
     private final @NonNull InsetsSource mSource;
     private final DisplayContent mDisplayContent;
     private final InsetsStateController mStateController;
+    private final InsetsSourceControl mFakeControl;
     private @Nullable InsetsSourceControl mControl;
     private @Nullable InsetsControlTarget mControlTarget;
+    private @Nullable InsetsControlTarget mFakeControlTarget;
+
     private @Nullable ControlAdapter mAdapter;
     private WindowState mWin;
     private TriConsumer<DisplayFrames, WindowState, Rect> mFrameProvider;
@@ -73,6 +76,8 @@ class InsetsSourceProvider {
         mSource = source;
         mDisplayContent = displayContent;
         mStateController = stateController;
+        mFakeControl = new InsetsSourceControl(source.getType(), null /* leash */,
+                new Point());
 
         final int type = source.getType();
         if (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR) {
@@ -150,6 +155,16 @@ class InsetsSourceProvider {
                 && !mWin.mGivenInsetsPending);
     }
 
+    /**
+     * @see InsetsStateController#onControlFakeTargetChanged(int, InsetsControlTarget)
+     */
+    void updateControlForFakeTarget(@Nullable InsetsControlTarget fakeTarget) {
+        if (fakeTarget == mFakeControlTarget) {
+            return;
+        }
+        mFakeControlTarget = fakeTarget;
+    }
+
     void updateControlForTarget(@Nullable InsetsControlTarget target, boolean force) {
         if (mWin == null) {
             mControlTarget = target;
@@ -199,8 +214,14 @@ class InsetsSourceProvider {
         mSource.setVisible(mServerVisible && mClientVisible);
     }
 
-    InsetsSourceControl getControl() {
-        return mControl;
+    InsetsSourceControl getControl(InsetsControlTarget target) {
+        if (target == mControlTarget) {
+            return mControl;
+        }
+        if (target == mFakeControlTarget) {
+            return mFakeControl;
+        }
+        return null;
     }
 
     boolean isClientVisible() {
@@ -257,5 +278,5 @@ class InsetsSourceProvider {
         @Override
         public void writeToProto(ProtoOutputStream proto) {
         }
-    };
+    }
 }
