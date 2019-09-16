@@ -24,6 +24,12 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.internal.app.ChooserActivity.CALLER_TARGET_SCORE_BOOST;
+import static com.android.internal.app.ChooserActivity.SHORTCUT_TARGET_SCORE_BOOST;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_CHOOSER_TARGET;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_DEFAULT;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER;
 import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -770,6 +776,37 @@ public class ChooserActivityTest {
         onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
     }
 
+    @Test
+    public void testGetBaseScore() {
+        final float testBaseScore = 0.89f;
+
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        when(sOverrides.resolverListController.getScore(Mockito.isA(
+                ResolverActivity.DisplayResolveInfo.class))).thenReturn(testBaseScore);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        final ResolverActivity.DisplayResolveInfo testDri =
+                activity.createTestDisplayResolveInfo(sendIntent,
+                ResolverDataProvider.createResolveInfo(3, 0), "testLabel", "testInfo", sendIntent);
+        final ChooserActivity.ChooserListAdapter adapter = activity.getAdapter();
+
+        assertThat(adapter.getBaseScore(null, 0), is(CALLER_TARGET_SCORE_BOOST));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_DEFAULT), is(testBaseScore));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_CHOOSER_TARGET), is(testBaseScore));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE),
+                is(SHORTCUT_TARGET_SCORE_BOOST));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER),
+                is(testBaseScore * SHORTCUT_TARGET_SCORE_BOOST));
+    }
+
     // This test is too long and too slow and should not be taken as an example for future tests.
     @Test
     public void testDirectTargetSelectionLogging() throws InterruptedException {
@@ -800,7 +837,7 @@ public class ChooserActivityTest {
                                 "testInfo",
                                 sendIntent),
                         serviceTargets,
-                        false)
+                        TARGET_TYPE_CHOOSER_TARGET)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -866,7 +903,7 @@ public class ChooserActivityTest {
                                 "testInfo",
                                 sendIntent),
                         serviceTargets,
-                        false)
+                        TARGET_TYPE_CHOOSER_TARGET)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -927,7 +964,7 @@ public class ChooserActivityTest {
                                 "testInfo",
                                 sendIntent),
                         serviceTargets,
-                        false)
+                        TARGET_TYPE_CHOOSER_TARGET)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
