@@ -20,25 +20,25 @@ import static com.android.compatibility.common.util.SystemUtil.runShellCommand;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+
+import androidx.annotation.VisibleForTesting;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Captures screen contents and saves it as a mp4 video file.
  */
 public class ScreenRecorder implements ITransitionMonitor {
     @VisibleForTesting
-    static final Path DEFAULT_OUTPUT_PATH = OUTPUT_DIR.resolve("transition.mp4");
+    public static final Path DEFAULT_OUTPUT_PATH = OUTPUT_DIR.resolve("transition.mp4");
     private static final String TAG = "FLICKER";
     private Thread recorderThread;
 
     @VisibleForTesting
-    static Path getPath(String testTag) {
+    public static Path getPath(String testTag) {
         return OUTPUT_DIR.resolve(testTag + ".mp4");
     }
 
@@ -69,8 +69,10 @@ public class ScreenRecorder implements ITransitionMonitor {
     @Override
     public Path save(String testTag) {
         try {
-            return Files.move(DEFAULT_OUTPUT_PATH, getPath(testTag),
+            Path targetPath = Files.move(DEFAULT_OUTPUT_PATH, getPath(testTag),
                     REPLACE_EXISTING);
+            Log.i(TAG, "Video saved to " + targetPath.toString());
+            return targetPath;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

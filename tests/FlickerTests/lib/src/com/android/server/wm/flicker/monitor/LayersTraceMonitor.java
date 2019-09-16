@@ -16,21 +16,22 @@
 
 package com.android.server.wm.flicker.monitor;
 
-import android.os.IBinder;
-import android.os.Parcel;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.util.Log;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 /**
  * Captures Layers trace from SurfaceFlinger.
  */
 public class LayersTraceMonitor extends TraceMonitor {
-    private static final String TAG = "LayersTraceMonitor";
-    private IBinder mSurfaceFlinger = ServiceManager.getService("SurfaceFlinger");
+    private IWindowManager mWm = WindowManagerGlobal.getWindowManagerService();
 
     public LayersTraceMonitor() {
-        traceFileName = "layers_trace.pb";
+        this(OUTPUT_DIR.toString());
+    }
+
+    public LayersTraceMonitor(String outputDir) {
+        super(outputDir, "layers_trace.pb");
     }
 
     @Override
@@ -45,30 +46,19 @@ public class LayersTraceMonitor extends TraceMonitor {
 
     @Override
     public boolean isEnabled() throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken("android.ui.ISurfaceComposer");
-        mSurfaceFlinger.transact(/* LAYER_TRACE_STATUS_CODE */ 1026,
-                data, reply, 0 /* flags */);
-        return reply.readBoolean();
+        try {
+            return mWm.isLayerTracing();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void setEnabled(boolean isEnabled) {
-        Parcel data = null;
         try {
-            if (mSurfaceFlinger != null) {
-                data = Parcel.obtain();
-                data.writeInterfaceToken("android.ui.ISurfaceComposer");
-                data.writeInt(isEnabled ? 1 : 0);
-                mSurfaceFlinger.transact( /* LAYER_TRACE_CONTROL_CODE */ 1025,
-                        data, null, 0 /* flags */);
-            }
+            mWm.setLayerTracing(isEnabled);
         } catch (RemoteException e) {
-            Log.e(TAG, "Could not set layer tracing." + e.toString());
-        } finally {
-            if (data != null) {
-                data.recycle();
-            }
+            e.printStackTrace();
         }
     }
 }

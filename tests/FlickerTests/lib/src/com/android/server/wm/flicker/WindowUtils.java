@@ -28,9 +28,9 @@ import androidx.test.InstrumentationRegistry;
 /**
  * Helper functions to retrieve system window sizes and positions.
  */
-class WindowUtils {
+public class WindowUtils {
 
-    static Rect getDisplayBounds() {
+    public static Rect getDisplayBounds() {
         Point display = new Point();
         WindowManager wm =
                 (WindowManager) InstrumentationRegistry.getContext().getSystemService(
@@ -46,7 +46,7 @@ class WindowUtils {
         return wm.getDefaultDisplay().getRotation();
     }
 
-    static Rect getDisplayBounds(int requestedRotation) {
+    public static Rect getDisplayBounds(int requestedRotation) {
         Rect displayBounds = getDisplayBounds();
         int currentDisplayRotation = getCurrentRotation();
 
@@ -66,7 +66,7 @@ class WindowUtils {
     }
 
 
-    static Rect getAppPosition(int requestedRotation) {
+    public static Rect getAppPosition(int requestedRotation) {
         Rect displayBounds = getDisplayBounds();
         int currentDisplayRotation = getCurrentRotation();
 
@@ -85,7 +85,7 @@ class WindowUtils {
         return new Rect(0, 0, displayBounds.width(), displayBounds.height());
     }
 
-    static Rect getStatusBarPosition(int requestedRotation) {
+    public static Rect getStatusBarPosition(int requestedRotation) {
         Resources resources = InstrumentationRegistry.getContext().getResources();
         String resourceName;
         Rect displayBounds = getDisplayBounds();
@@ -104,7 +104,7 @@ class WindowUtils {
         return new Rect(0, 0, width, height);
     }
 
-    static Rect getNavigationBarPosition(int requestedRotation) {
+    public static Rect getNavigationBarPosition(int requestedRotation) {
         Resources resources = InstrumentationRegistry.getContext().getResources();
         Rect displayBounds = getDisplayBounds();
         int displayWidth = Math.min(displayBounds.width(), displayBounds.height());
@@ -129,13 +129,13 @@ class WindowUtils {
         }
     }
 
-    static int getNavigationBarHeight() {
+    public static int getNavigationBarHeight() {
         Resources resources = InstrumentationRegistry.getContext().getResources();
         int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
         return resources.getDimensionPixelSize(resourceId);
     }
 
-    static int getDockedStackDividerInset() {
+    public static int getDockedStackDividerInset() {
         Resources resources = InstrumentationRegistry.getContext().getResources();
         int resourceId = resources.getIdentifier("docked_stack_divider_insets", "dimen",
                 "android");
