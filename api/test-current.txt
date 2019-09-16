@@ -920,6 +920,10 @@ package android.hardware.camera2 {
     field public static final int SESSION_OPERATION_MODE_VENDOR_START = 32768; // 0x8000
   }
 
+  public final class CameraManager {
+    method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
+  }
+
 }
 
 package android.hardware.display {
