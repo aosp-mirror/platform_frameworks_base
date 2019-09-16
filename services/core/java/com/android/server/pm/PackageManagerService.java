@@ -18822,7 +18822,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             if (removedAppId >= 0) {
                 packageSender.sendPackageBroadcast(Intent.ACTION_UID_REMOVED,
-                    null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
+                        removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
                     null, null, broadcastUsers, instantUserIds);
             }
         }
