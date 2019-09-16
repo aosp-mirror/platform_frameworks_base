@@ -80,10 +80,12 @@ public class PackageWatchdog {
             "watchdog_explicit_health_check_enabled";
 
     // Duration to count package failures before it resets to 0
-    private static final int DEFAULT_TRIGGER_FAILURE_DURATION_MS =
+    @VisibleForTesting
+    static final int DEFAULT_TRIGGER_FAILURE_DURATION_MS =
             (int) TimeUnit.MINUTES.toMillis(1);
     // Number of package failures within the duration above before we notify observers
-    private static final int DEFAULT_TRIGGER_FAILURE_COUNT = 5;
+    @VisibleForTesting
+    static final int DEFAULT_TRIGGER_FAILURE_COUNT = 5;
     // Whether explicit health checks are enabled or not
     private static final boolean DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED = true;
 
@@ -722,7 +724,7 @@ public class PackageWatchdog {
                     PROPERTY_WATCHDOG_TRIGGER_DURATION_MILLIS,
                     DEFAULT_TRIGGER_FAILURE_DURATION_MS);
             if (mTriggerFailureDurationMs <= 0) {
-                mTriggerFailureDurationMs = DEFAULT_TRIGGER_FAILURE_COUNT;
+                mTriggerFailureDurationMs = DEFAULT_TRIGGER_FAILURE_DURATION_MS;
             }
 
             setExplicitHealthCheckEnabled(DeviceConfig.getBoolean(
