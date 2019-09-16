@@ -182,7 +182,7 @@ class KeyguardController {
             return;
         }
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "keyguardGoingAway");
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             setKeyguardGoingAway(true);
             EventLog.writeEvent(EventLogTags.AM_SET_KEYGUARD_SHOWN,
@@ -204,7 +204,7 @@ class KeyguardController {
             mWindowManager.executeAppTransition();
         } finally {
             Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "keyguardGoingAway: surfaceLayout");
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
 
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -330,7 +330,7 @@ class KeyguardController {
 
         mWindowManager.onKeyguardOccludedChanged(isDisplayOccluded(DEFAULT_DISPLAY));
         if (isKeyguardLocked()) {
-            mWindowManager.deferSurfaceLayout();
+            mService.deferWindowLayout();
             try {
                 mRootActivityContainer.getDefaultDisplay().mDisplayContent
                         .prepareAppTransition(resolveOccludeTransit(),
@@ -340,7 +340,7 @@ class KeyguardController {
                 mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
             } finally {
-                mWindowManager.continueSurfaceLayout();
+                mService.continueWindowLayout();
             }
         }
         dismissDockedStackIfNeeded();

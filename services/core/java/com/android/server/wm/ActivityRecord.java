@@ -1703,7 +1703,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 // is not visible if it only contains finishing activities.
                 && mRootActivityContainer.isTopDisplayFocusedStack(stack);
 
-        mAtmService.mWindowManager.deferSurfaceLayout();
+        mAtmService.deferWindowLayout();
         try {
             makeFinishingLocked();
             final TaskRecord task = getTaskRecord();
@@ -1809,7 +1809,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
             return FINISH_RESULT_REQUESTED;
         } finally {
-            mAtmService.mWindowManager.continueSurfaceLayout();
+            mAtmService.continueWindowLayout();
         }
     }
 
@@ -2547,6 +2547,8 @@ final class ActivityRecord extends ConfigurationContainer {
             return;
         }
         mAppWindowToken.setVisibility(visible, mDeferHidingClient);
+        mAtmService.addWindowLayoutReasons(
+                ActivityTaskManagerService.LAYOUT_REASON_VISIBILITY_CHANGED);
         mStackSupervisor.getActivityMetricsLogger().notifyVisibilityChanged(this);
     }
 

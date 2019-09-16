@@ -2775,21 +2775,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Starts deferring layout passes. Useful when doing multiple changes but to optimize
-     * performance, only one layout pass should be done. This can be called multiple times, and
-     * layouting will be resumed once the last caller has called
-     * {@link #continueSurfaceLayout}.
-     */
-    void deferSurfaceLayout() {
-        mWindowPlacerLocked.deferLayout();
-    }
-
-    /** Resumes layout passes after deferring them. See {@link #deferSurfaceLayout()} */
-    void continueSurfaceLayout() {
-        mWindowPlacerLocked.continueLayout();
-    }
-
-    /**
      * Notifies activity manager that some Keyguard flags have changed and that it needs to
      * reevaluate the visibilities of the activities.
      * @param callback Runnable to be called when activity manager is done reevaluating visibilities

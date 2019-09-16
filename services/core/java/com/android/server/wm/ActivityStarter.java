@@ -1400,7 +1400,7 @@ class ActivityStarter {
         int result = START_CANCELED;
         final ActivityStack startedActivityStack;
         try {
-            mService.mWindowManager.deferSurfaceLayout();
+            mService.deferWindowLayout();
             result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
                     startFlags, doResume, options, inTask, outActivity, restrictedBgActivity);
         } finally {
@@ -1436,7 +1436,7 @@ class ActivityStarter {
                     startedActivityStack.remove();
                 }
             }
-            mService.mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
 
         postStartActivityProcessing(r, result, startedActivityStack);

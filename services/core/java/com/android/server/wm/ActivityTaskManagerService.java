@@ -124,6 +124,7 @@ import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -597,6 +598,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * This changes between TOP and TOP_SLEEPING to following mSleeping.
      */
     int mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            LAYOUT_REASON_CONFIG_CHANGED,
+            LAYOUT_REASON_VISIBILITY_CHANGED,
+    })
+    @interface LayoutReason {}
+    static final int LAYOUT_REASON_CONFIG_CHANGED = 0x1;
+    static final int LAYOUT_REASON_VISIBILITY_CHANGED = 0x2;
+
+    /** The reasons to perform surface placement. */
+    @LayoutReason
+    private int mLayoutReasons;
 
     // Whether we should show our dialogs (ANR, crash, etc) or just perform their default action
     // automatically. Important for devices without direct input devices.
@@ -4388,17 +4402,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(CHANGE_CONFIGURATION, "updateConfiguration()");
 
         synchronized (mGlobalLock) {
-            if (values == null && mWindowManager != null) {
+            if (mWindowManager == null) {
+                Slog.w(TAG, "Skip updateConfiguration because mWindowManager isn't set");
+                return false;
+            }
+
+            if (values == null) {
                 // sentinel: fetch the current configuration from the window manager
                 values = mWindowManager.computeNewConfiguration(DEFAULT_DISPLAY);
             }
 
-            if (mWindowManager != null) {
-                final Message msg = PooledLambda.obtainMessage(
-                        ActivityManagerInternal::updateOomLevelsForDisplay, mAmInternal,
-                        DEFAULT_DISPLAY);
-                mH.sendMessage(msg);
-            }
+            mH.sendMessage(PooledLambda.obtainMessage(
+                    ActivityManagerInternal::updateOomLevelsForDisplay, mAmInternal,
+                    DEFAULT_DISPLAY));
 
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -5099,9 +5115,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         int changes = 0;
         boolean kept = true;
 
-        if (mWindowManager != null) {
-            mWindowManager.deferSurfaceLayout();
-        }
+        deferWindowLayout();
         try {
             if (values != null) {
                 changes = updateGlobalConfigurationLocked(values, initLocale, persistent, userId,
@@ -5110,9 +5124,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
         } finally {
-            if (mWindowManager != null) {
-                mWindowManager.continueSurfaceLayout();
-            }
+            continueWindowLayout();
         }
 
         if (result != null) {
@@ -5238,6 +5250,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 deferResume);
 
         return changes;
+    }
+
+    /** @see WindowSurfacePlacer#deferLayout */
+    void deferWindowLayout() {
+        if (!mWindowManager.mWindowPlacerLocked.isLayoutDeferred()) {
+            // Reset the reasons at the first entrance because we only care about the changes in the
+            // deferred scope.
+            mLayoutReasons = 0;
+        }
+
+        mWindowManager.mWindowPlacerLocked.deferLayout();
+    }
+
+    /** @see WindowSurfacePlacer#continueLayout */
+    void continueWindowLayout() {
+        mWindowManager.mWindowPlacerLocked.continueLayout(mLayoutReasons != 0);
+        if (DEBUG_ALL && !mWindowManager.mWindowPlacerLocked.isLayoutDeferred()) {
+            Slog.i(TAG, "continueWindowLayout reason=" + mLayoutReasons);
+        }
+    }
+
+    /**
+     * If a reason is added between {@link #deferWindowLayout} and {@link #continueWindowLayout},
+     * it will make sure {@link WindowSurfacePlacer#performSurfacePlacement} is called when the last
+     * defer count is gone.
+     */
+    void addWindowLayoutReasons(@LayoutReason int reasons) {
+        mLayoutReasons |= reasons;
     }
 
     private void updateEventDispatchingLocked(boolean booted) {
@@ -6667,7 +6707,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 if (!restarting && hasVisibleActivities) {
-                    mWindowManager.deferSurfaceLayout();
+                    deferWindowLayout();
                     try {
                         if (!mRootActivityContainer.resumeFocusedStacksTopActivities()) {
                             // If there was nothing to resume, and we are not already restarting
@@ -6678,7 +6718,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                     !PRESERVE_WINDOWS);
                         }
                     } finally {
-                        mWindowManager.continueSurfaceLayout();
+                        continueWindowLayout();
                     }
                 }
             }
