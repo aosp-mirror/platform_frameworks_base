@@ -27,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -540,8 +541,10 @@ class WindowStateAnimator {
             return null;
         }
 
-        if (WindowManagerService.localLOGV) Slog.v(TAG, "Got surface: " + mSurfaceController
-                + ", set left=" + w.getFrameLw().left + " top=" + w.getFrameLw().top);
+        if (DEBUG) {
+            Slog.v(TAG, "Got surface: " + mSurfaceController
+                    + ", set left=" + w.getFrameLw().left + " top=" + w.getFrameLw().top);
+        }
 
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
@@ -552,7 +555,7 @@ class WindowStateAnimator {
 
         mLastHidden = true;
 
-        if (WindowManagerService.localLOGV) Slog.v(TAG, "Created surface " + this);
+        if (DEBUG) Slog.v(TAG, "Created surface " + this);
         return mSurfaceController;
     }
 
@@ -745,11 +748,11 @@ class WindowStateAnimator {
                 mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
             }
 
-            if ((DEBUG_ANIM || WindowManagerService.localLOGV)
-                    && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
-                    TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
-                    + " screen=" + (screenAnimation ?
-                            screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
+            if ((DEBUG_ANIM || DEBUG) && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) {
+                Slog.v(TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
+                                + " screen=" + (screenAnimation
+                        ? screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
+            }
             return;
         } else if (mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
             return;
@@ -762,9 +765,10 @@ class WindowStateAnimator {
             return;
         }
 
-        if (WindowManagerService.localLOGV) Slog.v(
-                TAG, "computeShownFrameLocked: " + this +
-                " not attached, mAlpha=" + mAlpha);
+        if (DEBUG) {
+            Slog.v(TAG, "computeShownFrameLocked: " + this
+                    + " not attached, mAlpha=" + mAlpha);
+        }
 
         mShownAlpha = mAlpha;
         mHaveMatrix = false;
