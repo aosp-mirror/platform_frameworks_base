@@ -765,7 +765,38 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     /**
-     * Test for: @{link DevicePolicyManager#reportPasswordChanged}
+     * Test for: {@link DevicePolicyManager#setPasswordHistoryLength(ComponentName, int)}
+     *
+     * Validates that when the password history length is set, it is persisted after rebooting
+     */
+    public void testSaveAndLoadPasswordHistoryLength_persistedAfterReboot() throws Exception {
+        int passwordHistoryLength = 2;
+
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // Install admin1 on system user.
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+
+        // Set admin1 to active admin and device owner
+        dpm.setActiveAdmin(admin1, false);
+        dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM);
+
+        // Save password history length
+        dpm.setPasswordHistoryLength(admin1, passwordHistoryLength);
+
+        assertEquals(dpm.getPasswordHistoryLength(admin1), passwordHistoryLength);
+
+        initializeDpms();
+        reset(mContext.spiedContext);
+
+        // Password history length should persist after rebooted
+        assertEquals(dpm.getPasswordHistoryLength(admin1), passwordHistoryLength);
+    }
+
+    /**
+     * Test for: {@link DevicePolicyManager#reportPasswordChanged}
      *
      * Validates that when the password for a user changes, the notification broadcast intent
      * {@link DeviceAdminReceiver#ACTION_PASSWORD_CHANGED} is sent to managed profile owners, in
