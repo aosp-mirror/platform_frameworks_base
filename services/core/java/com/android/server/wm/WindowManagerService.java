@@ -297,7 +297,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
     static final boolean PROFILE_ORIENTATION = false;
-    static final boolean localLOGV = DEBUG;
 
     /** How much to multiply the policy's type layer, to reserve room
      * for multiple windows of the same type and Z-ordering adjustment
@@ -1671,8 +1670,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
 
-            if (localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addWindow: New client "
-                    + client.asBinder() + ": window=" + win + " Callers=" + Debug.getCallers(5));
+            if (DEBUG || DEBUG_ADD_REMOVE) {
+                Slog.v(TAG_WM, "addWindow: New client " + client.asBinder()
+                        + ": window=" + win + " Callers=" + Debug.getCallers(5));
+            }
 
             if (win.isVisibleOrAdding() && displayContent.updateOrientation()) {
                 displayContent.sendNewConfiguration();
@@ -2339,16 +2340,18 @@ public class WindowManagerService extends IWindowManager.Stub
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             outInsetsState.set(displayContent.getInsetsStateController().getInsetsForDispatch(win));
-            if (localLOGV) Slog.v(
-                TAG_WM, "Relayout given client " + client.asBinder()
-                + ", requestedWidth=" + requestedWidth
-                + ", requestedHeight=" + requestedHeight
-                + ", viewVisibility=" + viewVisibility
-                + "\nRelayout returning frame=" + outFrame
-                + ", surface=" + outSurfaceControl);
+            if (DEBUG) {
+                Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
+                                + ", requestedWidth=" + requestedWidth
+                                + ", requestedHeight=" + requestedHeight
+                                + ", viewVisibility=" + viewVisibility
+                                + "\nRelayout returning frame=" + outFrame
+                                + ", surface=" + outSurfaceControl);
+            }
 
-            if (localLOGV || DEBUG_FOCUS) Slog.v(
-                TAG_WM, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
+            if (DEBUG || DEBUG_FOCUS) {
+                Slog.v(TAG_WM, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
+            }
 
             result |= mInTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
 
@@ -5227,7 +5230,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowState windowForClientLocked(Session session, IBinder client, boolean throwOnError) {
         WindowState win = mWindowMap.get(client);
-        if (localLOGV) Slog.v(TAG_WM, "Looking up client " + client + ": " + win);
+        if (DEBUG) Slog.v(TAG_WM, "Looking up client " + client + ": " + win);
         if (win == null) {
             if (throwOnError) {
                 throw new IllegalArgumentException(

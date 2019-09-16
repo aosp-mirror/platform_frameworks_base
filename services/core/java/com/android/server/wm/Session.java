@@ -24,6 +24,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -227,8 +228,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void finishDrawing(IWindow window,
             @Nullable SurfaceControl.Transaction postDrawTransaction) {
-        if (WindowManagerService.localLOGV) Slog.v(
-            TAG_WM, "IWindow finishDrawing called for " + window);
+        if (DEBUG) Slog.v(TAG_WM, "IWindow finishDrawing called for " + window);
         mService.finishDrawingWindow(this, window, postDrawTransaction);
     }
 
@@ -474,8 +474,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mPackageName = packageName;
         mRelayoutTag = "relayoutWindow: " + mPackageName;
         if (mSurfaceSession == null) {
-            if (WindowManagerService.localLOGV) Slog.v(
-                TAG_WM, "First window added to " + this + ", creating SurfaceSession");
+            if (DEBUG) {
+                Slog.v(TAG_WM, "First window added to " + this + ", creating SurfaceSession");
+            }
             mSurfaceSession = new SurfaceSession();
             if (SHOW_TRANSACTIONS) Slog.i(
                     TAG_WM, "  NEW SURFACE SESSION " + mSurfaceSession);
@@ -565,8 +566,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             return;
         }
 
-        if (WindowManagerService.localLOGV) Slog.v(TAG_WM, "Last window removed from " + this
-                + ", destroying " + mSurfaceSession);
+        if (DEBUG) {
+            Slog.v(TAG_WM, "Last window removed from " + this
+                    + ", destroying " + mSurfaceSession);
+        }
         if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  KILL SURFACE SESSION " + mSurfaceSession);
         try {
             mSurfaceSession.kill();

@@ -103,7 +103,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.localLOGV;
 
 import android.Manifest.permission;
 import android.annotation.NonNull;
@@ -2597,7 +2596,7 @@ public class DisplayPolicy {
         }
         final int fl = PolicyControl.getWindowFlags(null,
                 mTopFullscreenOpaqueWindowState.getAttrs());
-        if (localLOGV) {
+        if (WindowManagerDebugConfig.DEBUG) {
             Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw());
             Slog.d(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs()
                     + " lp.flags=0x" + Integer.toHexString(fl));
