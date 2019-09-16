@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
@@ -50,9 +49,10 @@ public class QuickQSPanel extends QSPanel {
 
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
     private static final String TAG = "QuickQSPanel";
+    // Start it at 6 so a non-zero value can be obtained statically.
+    private static int sDefaultMaxTiles = 6;
 
     private boolean mDisabledByPolicy;
-    private static int mDefaultMaxTiles;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
 
@@ -69,7 +69,7 @@ public class QuickQSPanel extends QSPanel {
             }
             removeView((View) mTileLayout);
         }
-        mDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+        sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
         mTileLayout = new HeaderTileLayout(context);
         mTileLayout.setListening(mListening);
         addView((View) mTileLayout, 0 /* Between brightness and footer */);
@@ -155,14 +155,31 @@ public class QuickQSPanel extends QSPanel {
     private final Tunable mNumTiles = new Tunable() {
         @Override
         public void onTuningChanged(String key, String newValue) {
-            setMaxTiles(getNumQuickTiles(mContext));
+            setMaxTiles(parseNumTiles(newValue));
         }
     };
 
-    public static int getNumQuickTiles(Context context) {
-        // TODO(b/140052679)
-        return whitelistIpcs(() ->
-                Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, mDefaultMaxTiles));
+    public int getNumQuickTiles() {
+        return mMaxTiles;
+    }
+
+    /**
+     * Parses the String setting into the number of tiles. Defaults to {@code mDefaultMaxTiles}
+     *
+     * @param numTilesValue value of the setting to parse
+     * @return parsed value of numTilesValue OR {@code mDefaultMaxTiles} on error
+     */
+    public static int parseNumTiles(String numTilesValue) {
+        try {
+            return Integer.parseInt(numTilesValue);
+        } catch (NumberFormatException e) {
+            // Couldn't read an int from the new setting value. Use default.
+            return sDefaultMaxTiles;
+        }
+    }
+
+    public static int getDefaultMaxTiles() {
+        return sDefaultMaxTiles;
     }
 
     void setDisabledByPolicy(boolean disabled) {
