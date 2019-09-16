@@ -46,6 +46,8 @@ import android.service.usb.UsbProfileGroupSettingsManagerProto;
 import android.service.usb.UsbSettingsAccessoryPreferenceProto;
 import android.service.usb.UsbSettingsDevicePreferenceProto;
 import android.service.usb.UserPackageProto;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -70,6 +72,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.ProtocolException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,9 +105,19 @@ class UsbProfileGroupSettingsManager {
     @GuardedBy("mLock")
     private final HashMap<DeviceFilter, UserPackage> mDevicePreferenceMap = new HashMap<>();
 
+    /** Maps DeviceFilter to set of UserPackages not to ask for launch preference anymore */
+    @GuardedBy("mLock")
+    private final ArrayMap<DeviceFilter, ArraySet<UserPackage>> mDevicePreferenceDeniedMap =
+            new ArrayMap<>();
+
     /** Maps AccessoryFilter to user preferred application package */
     @GuardedBy("mLock")
     private final HashMap<AccessoryFilter, UserPackage> mAccessoryPreferenceMap = new HashMap<>();
+
+    /** Maps AccessoryFilter to set of UserPackages not to ask for launch preference anymore */
+    @GuardedBy("mLock")
+    private final ArrayMap<AccessoryFilter, ArraySet<UserPackage>> mAccessoryPreferenceDeniedMap =
+            new ArrayMap<>();
 
     private final Object mLock = new Object();
 
@@ -248,11 +261,11 @@ class UsbProfileGroupSettingsManager {
     }
 
     /**
-     * Remove all defaults for a user.
+     * Remove all defaults and denied packages for a user.
      *
-     * @param userToRemove The user the defaults belong to.
+     * @param userToRemove The user
      */
-    void removeAllDefaultsForUser(@NonNull UserHandle userToRemove) {
+    void removeUser(@NonNull UserHandle userToRemove) {
         synchronized (mLock) {
             boolean needToPersist = false;
             Iterator<Map.Entry<DeviceFilter, UserPackage>> devicePreferenceIt = mDevicePreferenceMap
@@ -277,6 +290,28 @@ class UsbProfileGroupSettingsManager {
                 }
             }
 
+            int numEntries = mDevicePreferenceDeniedMap.size();
+            for (int i = 0; i < numEntries; i++) {
+                ArraySet<UserPackage> userPackages = mDevicePreferenceDeniedMap.valueAt(i);
+                for (int j = userPackages.size() - 1; j >= 0; j--) {
+                    if (userPackages.valueAt(j).user.equals(userToRemove)) {
+                        userPackages.removeAt(j);
+                        needToPersist = true;
+                    }
+                }
+            }
+
+            numEntries = mAccessoryPreferenceDeniedMap.size();
+            for (int i = 0; i < numEntries; i++) {
+                ArraySet<UserPackage> userPackages = mAccessoryPreferenceDeniedMap.valueAt(i);
+                for (int j = userPackages.size() - 1; j >= 0; j--) {
+                    if (userPackages.valueAt(j).user.equals(userToRemove)) {
+                        userPackages.removeAt(j);
+                        needToPersist = true;
+                    }
+                }
+            }
+
             if (needToPersist) {
                 scheduleWriteSettingsLocked();
             }
@@ -284,7 +319,7 @@ class UsbProfileGroupSettingsManager {
     }
 
     private void readPreference(XmlPullParser parser)
-            throws XmlPullParserException, IOException {
+            throws IOException, XmlPullParserException {
         String packageName = null;
 
         // If not set, assume it to be the parent profile
@@ -315,6 +350,67 @@ class UsbProfileGroupSettingsManager {
             }
         }
         XmlUtils.nextElement(parser);
+    }
+
+    private void readPreferenceDeniedList(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        int outerDepth = parser.getDepth();
+        if (!XmlUtils.nextElementWithin(parser, outerDepth)) {
+            return;
+        }
+
+        if ("usb-device".equals(parser.getName())) {
+            DeviceFilter filter = DeviceFilter.read(parser);
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                if ("user-package".equals(parser.getName())) {
+                    try {
+                        int userId = XmlUtils.readIntAttribute(parser, "user");
+
+                        String packageName = XmlUtils.readStringAttribute(parser, "package");
+                        if (packageName == null) {
+                            Slog.e(TAG, "Unable to parse package name");
+                        }
+
+                        ArraySet<UserPackage> set = mDevicePreferenceDeniedMap.get(filter);
+                        if (set == null) {
+                            set = new ArraySet<>();
+                            mDevicePreferenceDeniedMap.put(filter, set);
+                        }
+                        set.add(new UserPackage(packageName, UserHandle.of(userId)));
+                    } catch (ProtocolException e) {
+                        Slog.e(TAG, "Unable to parse user id", e);
+                    }
+                }
+            }
+        } else if ("usb-accessory".equals(parser.getName())) {
+            AccessoryFilter filter = AccessoryFilter.read(parser);
+
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                if ("user-package".equals(parser.getName())) {
+                    try {
+                        int userId = XmlUtils.readIntAttribute(parser, "user");
+
+                        String packageName = XmlUtils.readStringAttribute(parser, "package");
+                        if (packageName == null) {
+                            Slog.e(TAG, "Unable to parse package name");
+                        }
+
+                        ArraySet<UserPackage> set = mAccessoryPreferenceDeniedMap.get(filter);
+                        if (set == null) {
+                            set = new ArraySet<>();
+                            mAccessoryPreferenceDeniedMap.put(filter, set);
+                        }
+                        set.add(new UserPackage(packageName, UserHandle.of(userId)));
+                    } catch (ProtocolException e) {
+                        Slog.e(TAG, "Unable to parse user id", e);
+                    }
+                }
+            }
+        }
+
+        while (parser.getDepth() > outerDepth) {
+            parser.nextTag(); // ignore unknown tags
+        }
     }
 
     /**
@@ -373,6 +469,8 @@ class UsbProfileGroupSettingsManager {
                 String tagName = parser.getName();
                 if ("preference".equals(tagName)) {
                     readPreference(parser);
+                } else if ("preference-denied-list".equals(tagName)) {
+                    readPreferenceDeniedList(parser);
                 } else {
                     XmlUtils.nextElement(parser);
                 }
@@ -434,6 +532,46 @@ class UsbProfileGroupSettingsManager {
                                         getSerial(mAccessoryPreferenceMap.get(filter).user)));
                         filter.write(serializer);
                         serializer.endTag(null, "preference");
+                    }
+
+                    int numEntries = mDevicePreferenceDeniedMap.size();
+                    for (int i = 0; i < numEntries; i++) {
+                        DeviceFilter filter = mDevicePreferenceDeniedMap.keyAt(i);
+                        ArraySet<UserPackage> userPackageSet = mDevicePreferenceDeniedMap
+                                .valueAt(i);
+                        serializer.startTag(null, "preference-denied-list");
+                        filter.write(serializer);
+
+                        int numUserPackages = userPackageSet.size();
+                        for (int j = 0; j < numUserPackages; j++) {
+                            UserPackage userPackage = userPackageSet.valueAt(j);
+                            serializer.startTag(null, "user-package");
+                            serializer.attribute(null, "user",
+                                    String.valueOf(getSerial(userPackage.user)));
+                            serializer.attribute(null, "package", userPackage.packageName);
+                            serializer.endTag(null, "user-package");
+                        }
+                        serializer.endTag(null, "preference-denied-list");
+                    }
+
+                    numEntries = mAccessoryPreferenceDeniedMap.size();
+                    for (int i = 0; i < numEntries; i++) {
+                        AccessoryFilter filter = mAccessoryPreferenceDeniedMap.keyAt(i);
+                        ArraySet<UserPackage> userPackageSet =
+                                mAccessoryPreferenceDeniedMap.valueAt(i);
+                        serializer.startTag(null, "preference-denied-list");
+                        filter.write(serializer);
+
+                        int numUserPackages = userPackageSet.size();
+                        for (int j = 0; j < numUserPackages; j++) {
+                            UserPackage userPackage = userPackageSet.valueAt(j);
+                            serializer.startTag(null, "user-package");
+                            serializer.attribute(null, "user",
+                                    String.valueOf(getSerial(userPackage.user)));
+                            serializer.attribute(null, "package", userPackage.packageName);
+                            serializer.endTag(null, "user-package");
+                        }
+                        serializer.endTag(null, "preference-denied-list");
                     }
 
                     serializer.endTag(null, "settings");
@@ -834,6 +972,25 @@ class UsbProfileGroupSettingsManager {
     private void resolveActivity(@NonNull Intent intent, @NonNull ArrayList<ResolveInfo> matches,
             @Nullable ActivityInfo defaultActivity, @Nullable UsbDevice device,
             @Nullable UsbAccessory accessory) {
+        // Remove all matches which are on the denied list
+        ArraySet deniedPackages = null;
+        if (device != null) {
+            deniedPackages = mDevicePreferenceDeniedMap.get(new DeviceFilter(device));
+        } else if (accessory != null) {
+            deniedPackages = mAccessoryPreferenceDeniedMap.get(new AccessoryFilter(accessory));
+        }
+        if (deniedPackages != null) {
+            for (int i = matches.size() - 1; i >= 0; i--) {
+                ResolveInfo match = matches.get(i);
+                String packageName = match.activityInfo.packageName;
+                UserHandle user = UserHandle
+                        .getUserHandleForUid(match.activityInfo.applicationInfo.uid);
+                if (deniedPackages.contains(new UserPackage(packageName, user))) {
+                    matches.remove(i);
+                }
+            }
+        }
+
         // don't show the resolver activity if there are no choices available
         if (matches.size() == 0) {
             if (accessory != null) {
@@ -1071,6 +1228,156 @@ class UsbProfileGroupSettingsManager {
             }
             if (changed) {
                 scheduleWriteSettingsLocked();
+            }
+        }
+    }
+
+    /**
+     * Add package to the denied for handling a device
+     *
+     * @param device the device to add to the denied
+     * @param packageNames the packages to not become handler
+     * @param user the user
+     */
+    void addDevicePackagesToDenied(@NonNull UsbDevice device, @NonNull String[] packageNames,
+            @NonNull UserHandle user) {
+        if (packageNames.length == 0) {
+            return;
+        }
+        DeviceFilter filter = new DeviceFilter(device);
+
+        synchronized (mLock) {
+            ArraySet<UserPackage> userPackages;
+            if (mDevicePreferenceDeniedMap.containsKey(filter)) {
+                userPackages = mDevicePreferenceDeniedMap.get(filter);
+            } else {
+                userPackages = new ArraySet<>();
+                mDevicePreferenceDeniedMap.put(filter, userPackages);
+            }
+
+            boolean shouldWrite = false;
+            for (String packageName : packageNames) {
+                UserPackage userPackage = new UserPackage(packageName, user);
+                if (!userPackages.contains(userPackage)) {
+                    userPackages.add(userPackage);
+                    shouldWrite = true;
+                }
+            }
+
+            if (shouldWrite) {
+                scheduleWriteSettingsLocked();
+            }
+        }
+    }
+
+    /**
+     * Add package to the denied for handling a accessory
+     *
+     * @param accessory the accessory to add to the denied
+     * @param packageNames the packages to not become handler
+     * @param user the user
+     */
+    void addAccessoryPackagesToDenied(@NonNull UsbAccessory accessory,
+            @NonNull String[] packageNames, @NonNull UserHandle user) {
+        if (packageNames.length == 0) {
+            return;
+        }
+        AccessoryFilter filter = new AccessoryFilter(accessory);
+
+        synchronized (mLock) {
+            ArraySet<UserPackage> userPackages;
+            if (mAccessoryPreferenceDeniedMap.containsKey(filter)) {
+                userPackages = mAccessoryPreferenceDeniedMap.get(filter);
+            } else {
+                userPackages = new ArraySet<>();
+                mAccessoryPreferenceDeniedMap.put(filter, userPackages);
+            }
+
+            boolean shouldWrite = false;
+            for (String packageName : packageNames) {
+                UserPackage userPackage = new UserPackage(packageName, user);
+                if (!userPackages.contains(userPackage)) {
+                    userPackages.add(userPackage);
+                    shouldWrite = true;
+                }
+            }
+
+            if (shouldWrite) {
+                scheduleWriteSettingsLocked();
+            }
+        }
+    }
+
+    /**
+     * Remove UserPackage from the denied for handling a device
+     *
+     * @param device the device to remove denied packages from
+     * @param packageName the packages to remove
+     * @param user the user
+     */
+    void removeDevicePackagesFromDenied(@NonNull UsbDevice device, @NonNull String[] packageNames,
+            @NonNull UserHandle user) {
+        DeviceFilter filter = new DeviceFilter(device);
+
+        synchronized (mLock) {
+            ArraySet<UserPackage> userPackages = mDevicePreferenceDeniedMap.get(filter);
+
+            if (userPackages != null) {
+                boolean shouldWrite = false;
+                for (String packageName : packageNames) {
+                    UserPackage userPackage = new UserPackage(packageName, user);
+
+                    if (userPackages.contains(userPackage)) {
+                        userPackages.remove(userPackage);
+                        shouldWrite = true;
+
+                        if (userPackages.size() == 0) {
+                            mDevicePreferenceDeniedMap.remove(filter);
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldWrite) {
+                    scheduleWriteSettingsLocked();
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove UserPackage from the denied for handling a accessory
+     *
+     * @param accessory the accessory to remove denied packages from
+     * @param packageName the packages to remove
+     * @param user the user
+     */
+    void removeAccessoryPackagesFromDenied(@NonNull UsbAccessory accessory,
+            @NonNull String[] packageNames, @NonNull UserHandle user) {
+        AccessoryFilter filter = new AccessoryFilter(accessory);
+
+        synchronized (mLock) {
+            ArraySet<UserPackage> userPackages = mAccessoryPreferenceDeniedMap.get(filter);
+
+            if (userPackages != null) {
+                boolean shouldWrite = false;
+                for (String packageName : packageNames) {
+                    UserPackage userPackage = new UserPackage(packageName, user);
+
+                    if (userPackages.contains(userPackage)) {
+                        userPackages.remove(userPackage);
+                        shouldWrite = true;
+
+                        if (userPackages.size() == 0) {
+                            mAccessoryPreferenceDeniedMap.remove(filter);
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldWrite) {
+                    scheduleWriteSettingsLocked();
+                }
             }
         }
     }

@@ -55,6 +55,18 @@ interface IUsbManager
      */
     void setAccessoryPackage(in UsbAccessory accessory, String packageName, int userId);
 
+    /* Adds packages to the set of "denied and don't ask again" launch preferences for a device */
+    void addDevicePackagesToPreferenceDenied(in UsbDevice device, in String[] packageNames, in UserHandle user);
+
+    /* Adds packages to the set of "denied and don't ask again" launch preferences for an accessory */
+    void addAccessoryPackagesToPreferenceDenied(in UsbAccessory accessory, in String[] packageNames, in UserHandle user);
+
+    /* Removes packages from the set of "denied and don't ask again" launch preferences for a device */
+    void removeDevicePackagesFromPreferenceDenied(in UsbDevice device, in String[] packageNames, in UserHandle user);
+
+    /* Removes packages from the set of "denied and don't ask again" launch preferences for an accessory */
+    void removeAccessoryPackagesFromPreferenceDenied(in UsbAccessory device, in String[] packageNames, in UserHandle user);
+
     /* Sets the persistent permission granted state for USB device
      */
     void setDevicePersistentPermission(in UsbDevice device, int uid, in UserHandle user, boolean shouldBeGranted);
