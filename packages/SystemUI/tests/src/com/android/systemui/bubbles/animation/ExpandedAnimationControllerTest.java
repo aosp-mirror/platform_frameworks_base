@@ -71,6 +71,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     @Test
+    @Ignore
     public void testExpansionAndCollapse() throws InterruptedException {
         Runnable afterExpand = Mockito.mock(Runnable.class);
         mExpandedController.expandFromStack(afterExpand);
@@ -88,6 +89,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     @Test
+    @Ignore
     public void testOnChildAdded() throws InterruptedException {
         expand();
 
@@ -100,6 +102,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     @Test
+    @Ignore
     public void testOnChildRemoved() throws InterruptedException {
         expand();
 
@@ -111,6 +114,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     @Test
+    @Ignore
     public void testBubbleDraggedNotDismissedSnapsBack() throws InterruptedException {
         expand();
 
@@ -128,6 +132,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     @Test
+    @Ignore
     public void testBubbleDismissed() throws InterruptedException {
         expand();
 
