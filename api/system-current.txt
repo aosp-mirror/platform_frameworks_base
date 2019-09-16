@@ -5542,6 +5542,11 @@ package android.net.wifi {
     field @Deprecated public byte id;
   }
 
+  public class ScanResult implements android.os.Parcelable {
+    field public static final int KEY_MGMT_WAPI_CERT = 14; // 0xe
+    field public static final int KEY_MGMT_WAPI_PSK = 13; // 0xd
+  }
+
   public final class SoftApConfiguration implements android.os.Parcelable {
     method public int describeContents();
     method public int getBand();
@@ -5639,6 +5644,8 @@ package android.net.wifi {
   }
 
   @Deprecated public static class WifiConfiguration.KeyMgmt {
+    field @Deprecated public static final int WAPI_CERT = 14; // 0xe
+    field @Deprecated public static final int WAPI_PSK = 13; // 0xd
     field @Deprecated public static final int WPA2_PSK = 4; // 0x4
   }
 
@@ -5675,10 +5682,12 @@ package android.net.wifi {
     method @NonNull public String getCaPath();
     method @NonNull public String getClientCertificateAlias();
     method public int getOcsp();
+    method @Nullable public String getWapiCertSuite();
     method public void setCaCertificateAliases(@Nullable String[]);
     method public void setCaPath(@Nullable String);
     method public void setClientCertificateAlias(@Nullable String);
     method public void setOcsp(int);
+    method public void setWapiCertSuite(@Nullable String);
     field public static final int OCSP_NONE = 0; // 0x0
     field public static final int OCSP_REQUEST_CERT_STATUS = 1; // 0x1
     field public static final int OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS = 3; // 0x3

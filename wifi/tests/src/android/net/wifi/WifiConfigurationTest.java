@@ -317,6 +317,16 @@ public class WifiConfigurationTest {
         config.allowedKeyManagement.clear();
         config.allowedKeyManagement.set(KeyMgmt.NONE);
         assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.NONE], config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_PSK);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WAPI_PSK],
+                config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_CERT);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WAPI_CERT],
+                config.getSsidAndSecurityTypeString());
     }
 
     /**

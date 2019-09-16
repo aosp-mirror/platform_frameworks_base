@@ -2225,6 +2225,8 @@ public class WifiManager {
     public static final long WIFI_FEATURE_MBO              = 0x800000000L; // MBO Support
     /** @hide */
     public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
+    /** @hide */
+    public static final long WIFI_FEATURE_WAPI             = 0x2000000000L; // WAPI
 
     private long getSupportedFeatures() {
         try {
@@ -4958,6 +4960,13 @@ public class WifiManager {
      */
     public boolean isEasyConnectSupported() {
         return isFeatureSupported(WIFI_FEATURE_DPP);
+    }
+
+    /**
+     * @return true if this device supports WAPI.
+     */
+    public boolean isWapiSupported() {
+        return isFeatureSupported(WIFI_FEATURE_WAPI);
     }
 
     /**

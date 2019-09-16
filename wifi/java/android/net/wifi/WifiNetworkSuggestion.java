@@ -122,6 +122,16 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * Whether the setIsUserAllowedToManuallyConnect have been called.
          */
         private boolean mIsUserAllowedBeenSet;
+        /**
+         * Pre-shared key for use with WAPI-PSK networks.
+         */
+        private @Nullable String mWapiPskPassphrase;
+
+        /**
+         * The enterprise configuration details specifying the EAP method,
+         * certificates and other settings associated with the WAPI networks.
+         */
+        private @Nullable WifiEnterpriseConfig mWapiEnterpriseConfig;
 
         public Builder() {
             mSsid = null;
@@ -140,6 +150,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsUserAllowedBeenSet = false;
             mPriority = UNASSIGNED_PRIORITY;
             mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
+            mWapiPskPassphrase = null;
+            mWapiEnterpriseConfig = null;
         }
 
         /**
@@ -294,6 +306,39 @@ public final class WifiNetworkSuggestion implements Parcelable {
         }
 
         /**
+         * Set the ASCII WAPI passphrase for this network. Needed for authenticating to
+         * WAPI-PSK networks.
+         *
+         * @param passphrase passphrase of the network.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         * @throws IllegalArgumentException if the passphrase is not ASCII encodable.
+         *
+         */
+        public @NonNull Builder setWapiPassphrase(@NonNull String passphrase) {
+            checkNotNull(passphrase);
+            final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
+            if (!asciiEncoder.canEncode(passphrase)) {
+                throw new IllegalArgumentException("passphrase not ASCII encodable");
+            }
+            mWapiPskPassphrase = passphrase;
+            return this;
+        }
+
+        /**
+         * Set the associated enterprise configuration for this network. Needed for authenticating
+         * to WAPI-CERT networks. See {@link WifiEnterpriseConfig} for description.
+         *
+         * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setWapiEnterpriseConfig(
+                @NonNull WifiEnterpriseConfig enterpriseConfig) {
+            checkNotNull(enterpriseConfig);
+            mWapiEnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
+            return this;
+        }
+
+        /**
          * Specifies whether this represents a hidden network.
          * <p>
          * <li>If not set, defaults to false (i.e not a hidden network).</li>
@@ -413,6 +458,13 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 configuration.enterpriseConfig = mWpa3EnterpriseConfig;
             } else if (mIsEnhancedOpen) { // OWE network
                 configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OWE);
+            } else if (!TextUtils.isEmpty(mWapiPskPassphrase)) { // WAPI-PSK network.
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_WAPI_PSK);
+                // WifiConfiguration.preSharedKey needs quotes around ASCII password.
+                configuration.preSharedKey = "\"" + mWapiPskPassphrase + "\"";
+            } else if (mWapiEnterpriseConfig != null) { // WAPI-CERT network
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_WAPI_CERT);
+                configuration.enterpriseConfig = mWapiEnterpriseConfig;
             } else { // Open network
                 configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OPEN);
             }
@@ -446,13 +498,16 @@ public final class WifiNetworkSuggestion implements Parcelable {
             numSecurityTypes += mIsEnhancedOpen ? 1 : 0;
             numSecurityTypes += !TextUtils.isEmpty(mWpa2PskPassphrase) ? 1 : 0;
             numSecurityTypes += !TextUtils.isEmpty(mWpa3SaePassphrase) ? 1 : 0;
+            numSecurityTypes += !TextUtils.isEmpty(mWapiPskPassphrase) ? 1 : 0;
             numSecurityTypes += mWpa2EnterpriseConfig != null ? 1 : 0;
             numSecurityTypes += mWpa3EnterpriseConfig != null ? 1 : 0;
+            numSecurityTypes += mWapiEnterpriseConfig != null ? 1 : 0;
             numSecurityTypes += mPasspointConfiguration != null ? 1 : 0;
             if (numSecurityTypes > 1) {
                 throw new IllegalStateException("only one of setIsEnhancedOpen, setWpa2Passphrase,"
-                        + "setWpa3Passphrase, setWpa2EnterpriseConfig, setWpa3EnterpriseConfig"
-                        + "or setPasspointConfig can be invoked for network suggestion");
+                        + " setWpa3Passphrase, setWpa2EnterpriseConfig, setWpa3EnterpriseConfig"
+                        + " setWapiPassphrase, setWapiCertSuite, setIsWapiCertSuiteAuto"
+                        + " or setPasspointConfig can be invoked for network suggestion");
             }
         }
 

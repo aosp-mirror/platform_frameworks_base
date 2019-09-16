@@ -2075,4 +2075,18 @@ public class WifiManagerTest {
         verify(mWifiService).calculateSignalLevel(Integer.MAX_VALUE);
         assertEquals(4, actual);
     }
+
+    /*
+     * Test behavior of isWapiSupported
+     * @throws Exception
+     */
+    @Test
+    public void testIsWapiSupported() throws Exception {
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(WifiManager.WIFI_FEATURE_WAPI));
+        assertTrue(mWifiManager.isWapiSupported());
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(~WifiManager.WIFI_FEATURE_WAPI));
+        assertFalse(mWifiManager.isWapiSupported());
+    }
 }

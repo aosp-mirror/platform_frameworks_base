@@ -41,6 +41,36 @@ import java.util.Map;
  */
 public class WifiEnterpriseConfig implements Parcelable {
 
+    /** Key prefix for WAPI AS certificates. */
+    public static final String WAPI_AS_CERTIFICATE = "WAPIAS_";
+
+    /** Key prefix for WAPI user certificates. */
+    public static final String WAPI_USER_CERTIFICATE = "WAPIUSR_";
+
+    /**
+     * Intent extra: name for WAPI AS certificates
+     */
+    public static final String EXTRA_WAPI_AS_CERTIFICATE_NAME =
+            "android.net.wifi.extra.WAPI_AS_CERTIFICATE_NAME";
+
+    /**
+     * Intent extra: data for WAPI AS certificates
+     */
+    public static final String EXTRA_WAPI_AS_CERTIFICATE_DATA =
+            "android.net.wifi.extra.WAPI_AS_CERTIFICATE_DATA";
+
+    /**
+     * Intent extra: name for WAPI AS certificates
+     */
+    public static final String EXTRA_WAPI_USER_CERTIFICATE_NAME =
+            "android.net.wifi.extra.WAPI_USER_CERTIFICATE_NAME";
+
+    /**
+     * Intent extra: data for WAPI AS certificates
+     */
+    public static final String EXTRA_WAPI_USER_CERTIFICATE_DATA =
+            "android.net.wifi.extra.WAPI_USER_CERTIFICATE_DATA";
+
     /** @hide */
     public static final String EMPTY_VALUE         = "NULL";
     /** @hide */
@@ -61,6 +91,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String DOM_SUFFIX_MATCH_KEY = "domain_suffix_match";
     /** @hide */
     public static final String OPP_KEY_CACHING     = "proactive_key_caching";
+
     /**
      * String representing the keystore OpenSSL ENGINE's ID.
      * @hide
@@ -130,6 +161,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String PLMN_KEY            = "plmn";
     /** @hide */
     public static final String CA_CERT_ALIAS_DELIMITER = " ";
+    /** @hide */
+    public static final String WAPI_CERT_SUITE_KEY = "wapi_cert_suite";
 
     /**
      * Do not use OCSP stapling (TLS certificate status extension)
@@ -348,9 +381,12 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int AKA_PRIME = 6;
         /** Hotspot 2.0 r2 OSEN */
         public static final int UNAUTH_TLS = 7;
+        /** WAPI Certificate */
+        public static final int WAPI_CERT = 8;
         /** @hide */
         public static final String[] strings =
-                { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA", "AKA'", "WFA-UNAUTH-TLS" };
+                { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA", "AKA'", "WFA-UNAUTH-TLS",
+                        "WAPI_CERT" };
 
         /** Prevent initialization */
         private Eap() {}
@@ -494,6 +530,10 @@ public class WifiEnterpriseConfig implements Parcelable {
     public void setEapMethod(int eapMethod) {
         switch (eapMethod) {
             /** Valid methods */
+            case Eap.WAPI_CERT:
+                mEapMethod = eapMethod;
+                setPhase2Method(Phase2.NONE);
+                break;
             case Eap.TLS:
             case Eap.UNAUTH_TLS:
                 setPhase2Method(Phase2.NONE);
@@ -1312,5 +1352,30 @@ public class WifiEnterpriseConfig implements Parcelable {
             }
         }
         return false;
+    }
+
+    /**
+     * Set the WAPI certificate suite name on wpa_supplicant.
+     *
+     * If this field is not specified, WAPI-CERT uses ASU ID from WAI packet
+     * as the certificate suite name automatically.
+     *
+     * @param wapiCertSuite The name for WAPI certificate suite, or null/empty string to clear.
+     * @hide
+     */
+    @SystemApi
+    public void setWapiCertSuite(@Nullable String wapiCertSuite) {
+        setFieldValue(WAPI_CERT_SUITE_KEY, wapiCertSuite);
+    }
+
+    /**
+     * Get the WAPI certificate suite name
+     * @return the certificate suite name
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public String getWapiCertSuite() {
+        return getFieldValue(WAPI_CERT_SUITE_KEY);
     }
 }
