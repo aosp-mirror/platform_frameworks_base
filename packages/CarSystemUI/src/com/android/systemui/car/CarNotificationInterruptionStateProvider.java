@@ -18,6 +18,8 @@ package com.android.systemui.car;
 
 import android.content.Context;
 
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -30,8 +32,10 @@ public class CarNotificationInterruptionStateProvider extends
         NotificationInterruptionStateProvider {
 
     @Inject
-    public CarNotificationInterruptionStateProvider(Context context) {
-        super(context);
+    public CarNotificationInterruptionStateProvider(Context context,
+            NotificationFilter filter,
+            StatusBarStateController stateController) {
+        super(context, filter, stateController);
     }
 
     @Override

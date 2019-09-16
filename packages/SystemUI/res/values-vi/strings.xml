@@ -55,11 +55,11 @@
     <string name="label_view" msgid="6304565553218192990">"Xem"</string>
     <string name="always_use_device" msgid="4015357883336738417">"Luôn mở <xliff:g id="APPLICATION">%1$s</xliff:g> khi kết nối <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Luôn mở <xliff:g id="APPLICATION">%1$s</xliff:g> khi kết nối <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Cho phép gỡ lỗi qua USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Cho phép gỡ lỗi USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Tệp tham chiếu khóa RSA của máy tính là:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Luôn cho phép từ máy tính này"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Cho phép"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Không cho phép chế độ gỡ lỗi qua USB"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Tính năng gỡ lỗi USB không được phép"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi USB. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Đã tắt cổng USB"</string>
     <string name="usb_contaminant_message" msgid="7379089091591609111">"Để bảo vệ thiết bị của bạn khỏi chất lỏng hay mảnh vỡ, cổng USB sẽ tắt và không phát hiện được bất kỳ phụ kiện nào.\n\nBạn sẽ nhận được thông báo khi có thể sử dụng lại cổng USB."</string>

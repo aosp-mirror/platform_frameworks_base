@@ -16,7 +16,9 @@
 
 package com.android.systemui.bubbles.animation;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.view.View;
@@ -26,10 +28,13 @@ import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 import com.google.android.collect.Sets;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Set;
 
 /**
@@ -46,24 +51,26 @@ public class ExpandedAnimationController
      */
     private static final int ANIMATE_TRANSLATION_FACTOR = 4;
 
-    /** How much to scale down bubbles when they're animating in/out. */
-    private static final float ANIMATE_SCALE_PERCENT = 0.5f;
+    /** Duration of the expand/collapse target path animation. */
+    private static final int EXPAND_COLLAPSE_TARGET_ANIM_DURATION = 175;
 
-    /** The stack position to collapse back to in {@link #collapseBackToStack}. */
-    private PointF mCollapseToPoint;
+    /** Stiffness for the expand/collapse path-following animation. */
+    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
 
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
-    /** Spacing between bubbles in the expanded state. */
-    private float mBubblePaddingPx;
+    /** Space between status bar and bubbles in the expanded state. */
+    private float mBubblePaddingTop;
     /** Size of each bubble. */
     private float mBubbleSizePx;
     /** Height of the status bar. */
     private float mStatusBarHeight;
     /** Size of display. */
     private Point mDisplaySize;
-    /** Size of dismiss target at bottom of screen. */
-    private float mPipDismissHeight;
+    /** Max number of bubbles shown in row above expanded view.*/
+    private int mBubblesMaxRendered;
+    /** Width of current screen orientation. */
+    private float mScreenWidth;
 
     /** Whether the dragged-out bubble is in the dismiss target. */
     private boolean mIndividualBubbleWithinDismissTarget = false;
@@ -86,10 +93,14 @@ public class ExpandedAnimationController
     private boolean mSpringingBubbleToTouch = false;
 
     private int mExpandedViewPadding;
+    private float mLauncherGridDiff;
 
-    public ExpandedAnimationController(Point displaySize, int expandedViewPadding) {
+    public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
+            int orientation) {
         mDisplaySize = displaySize;
+        updateOrientation(orientation);
         mExpandedViewPadding = expandedViewPadding;
+        mLauncherGridDiff = 30f;
     }
 
     /**
@@ -109,7 +120,7 @@ public class ExpandedAnimationController
         mAnimatingExpand = true;
         mAfterExpand = after;
 
-        startOrUpdateExpandAnimation();
+        startOrUpdatePathAnimation(true /* expanding */);
     }
 
     /** Animate collapsing the bubbles back to their stacked position. */
@@ -119,43 +130,107 @@ public class ExpandedAnimationController
         mAfterCollapse = after;
         mCollapsePoint = collapsePoint;
 
-        startOrUpdateCollapseAnimation();
+        startOrUpdatePathAnimation(false /* expanding */);
     }
 
-    private void startOrUpdateExpandAnimation() {
-        animationsForChildrenFromIndex(
-                0, /* startIndex */
-                (index, animation) -> animation.position(getBubbleLeft(index), getExpandedY()))
-                .startAll(() -> {
-                    mAnimatingExpand = false;
-
-                    if (mAfterExpand != null) {
-                        mAfterExpand.run();
-                    }
-
-                    mAfterExpand = null;
-                });
+    /**
+     * Update effective screen width based on current orientation.
+     * @param orientation Landscape or portrait.
+     */
+    public void updateOrientation(int orientation) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mScreenWidth = mDisplaySize.y;
+        } else {
+            mScreenWidth = mDisplaySize.x;
+        }
+        if (mLayout != null) {
+            Resources res = mLayout.getContext().getResources();
+            mStatusBarHeight = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.status_bar_height);
+            mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        }
     }
 
-    private void startOrUpdateCollapseAnimation() {
-        // Stack to the left if we're going to the left, or right if not.
-        final float sideMultiplier = mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x) ? -1 : 1;
-        animationsForChildrenFromIndex(
-                0, /* startIndex */
-                (index, animation) -> {
-                    animation.position(
-                            mCollapsePoint.x + (sideMultiplier * index * mStackOffsetPx),
-                            mCollapsePoint.y);
-                })
-                .startAll(() -> {
-                    mAnimatingCollapse = false;
+    /**
+     * Animates the bubbles along a curved path, either to expand them along the top or collapse
+     * them back into a stack.
+     */
+    private void startOrUpdatePathAnimation(boolean expanding) {
+        Runnable after;
 
-                    if (mAfterCollapse != null) {
-                        mAfterCollapse.run();
-                    }
+        if (expanding) {
+            after = () -> {
+                mAnimatingExpand = false;
 
-                    mAfterCollapse = null;
-                });
+                if (mAfterExpand != null) {
+                    mAfterExpand.run();
+                }
+
+                mAfterExpand = null;
+            };
+        } else {
+            after = () -> {
+                mAnimatingCollapse = false;
+
+                if (mAfterCollapse != null) {
+                    mAfterCollapse.run();
+                }
+
+                mAfterCollapse = null;
+            };
+        }
+
+        // Animate each bubble individually, since each path will end in a different spot.
+        animationsForChildrenFromIndex(0, (index, animation) -> {
+            final View bubble = mLayout.getChildAt(index);
+
+            // Start a path at the bubble's current position.
+            final Path path = new Path();
+            path.moveTo(bubble.getTranslationX(), bubble.getTranslationY());
+
+            final float expandedY = getExpandedY();
+            if (expanding) {
+                // If we're expanding, first draw a line from the bubble's current position to the
+                // top of the screen.
+                path.lineTo(bubble.getTranslationX(), expandedY);
+
+                // Then, draw a line across the screen to the bubble's resting position.
+                path.lineTo(getBubbleLeft(index), expandedY);
+            } else {
+                final float sideMultiplier =
+                        mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x) ? -1 : 1;
+                final float stackedX = mCollapsePoint.x + (sideMultiplier * index * mStackOffsetPx);
+
+                // If we're collapsing, draw a line from the bubble's current position to the side
+                // of the screen where the bubble will be stacked.
+                path.lineTo(stackedX, expandedY);
+
+                // Then, draw a line down to the stack position.
+                path.lineTo(stackedX, mCollapsePoint.y);
+            }
+
+            // The lead bubble should be the bubble with the longest distance to travel when we're
+            // expanding, and the bubble with the shortest distance to travel when we're collapsing.
+            // During expansion from the left side, the last bubble has to travel to the far right
+            // side, so we have it lead and 'pull' the rest of the bubbles into place. From the
+            // right side, the first bubble is traveling to the top left, so it leads. During
+            // collapse to the left, the first bubble has the shortest travel time back to the stack
+            // position, so it leads (and vice versa).
+            final boolean firstBubbleLeads =
+                    (expanding && !mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
+                            || (!expanding && mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x));
+            final int startDelay = firstBubbleLeads
+                    ? (index * 10)
+                    : ((mLayout.getChildCount() - index) * 10);
+
+            animation
+                    .followAnimatedTargetAlongPath(
+                            path,
+                            EXPAND_COLLAPSE_TARGET_ANIM_DURATION /* targetAnimDuration */,
+                            Interpolators.LINEAR /* targetAnimInterpolator */)
+                    .withStartDelay(startDelay)
+                    .withStiffness(EXPAND_COLLAPSE_ANIM_STIFFNESS);
+        }).startAll(after);
     }
 
     /** Prepares the given bubble to be dragged out. */
@@ -265,6 +340,7 @@ public class ExpandedAnimationController
     public void onGestureFinished() {
         mBubbleDraggedOutEnough = false;
         mBubbleDraggingOut = null;
+        updateBubblePositions();
     }
 
     /**
@@ -276,41 +352,38 @@ public class ExpandedAnimationController
                 0, (i, anim) -> anim.translationY(getExpandedY())).startAll(after);
     }
 
-    /**
-     * Animates the bubbles, starting at the given index, to the left or right by the given number
-     * of bubble widths. Passing zero for numBubbleWidths will animate the bubbles to their normal
-     * positions.
-     */
-    private void animateStackByBubbleWidthsStartingFrom(int numBubbleWidths, int startIndex) {
-        animationsForChildrenFromIndex(
-                startIndex,
-                (index, animation) ->
-                        animation.translationX(getXForChildAtIndex(index + numBubbleWidths)))
-            .startAll();
-    }
-
     /** The Y value of the row of expanded bubbles. */
     public float getExpandedY() {
         if (mLayout == null || mLayout.getRootWindowInsets() == null) {
             return 0;
         }
         final WindowInsets insets = mLayout.getRootWindowInsets();
-        return mBubblePaddingPx + Math.max(
+        return mBubblePaddingTop + Math.max(
             mStatusBarHeight,
             insets.getDisplayCutout() != null
                 ? insets.getDisplayCutout().getSafeInsetTop()
                 : 0);
     }
 
+    /** Description of current animation controller state. */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("ExpandedAnimationController state:");
+        pw.print("  isActive:          "); pw.println(isActiveController());
+        pw.print("  animatingExpand:   "); pw.println(mAnimatingExpand);
+        pw.print("  animatingCollapse: "); pw.println(mAnimatingCollapse);
+        pw.print("  bubbleInDismiss:   "); pw.println(mIndividualBubbleWithinDismissTarget);
+        pw.print("  springingBubble:   "); pw.println(mSpringingBubbleToTouch);
+    }
+
     @Override
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
         final Resources res = layout.getResources();
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubblePaddingPx = res.getDimensionPixelSize(R.dimen.bubble_padding);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mPipDismissHeight = res.getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height);
+        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
 
         // Ensure that all child views are at 1x scale, and visible, in case they were animating
         // in.
@@ -351,11 +424,11 @@ public class ExpandedAnimationController
         // If a bubble is added while the expand/collapse animations are playing, update the
         // animation to include the new bubble.
         if (mAnimatingExpand) {
-            startOrUpdateExpandAnimation();
+            startOrUpdatePathAnimation(true /* expanding */);
         } else if (mAnimatingCollapse) {
-            startOrUpdateCollapseAnimation();
+            startOrUpdatePathAnimation(false /* expanding */);
         } else {
-            child.setTranslationX(getXForChildAtIndex(index));
+            child.setTranslationX(getBubbleLeft(index));
             animationForChild(child)
                     .translationY(
                             getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR, /* from */
@@ -389,6 +462,12 @@ public class ExpandedAnimationController
     @Override
     void onChildReordered(View child, int oldIndex, int newIndex) {
         updateBubblePositions();
+
+        // We expect reordering during collapse, since we'll put the last selected bubble on top.
+        // Update the collapse animation so they end up in the right stacked positions.
+        if (mAnimatingCollapse) {
+            startOrUpdatePathAnimation(false /* expanding */);
+        }
     }
 
     private void updateBubblePositions() {
@@ -411,35 +490,53 @@ public class ExpandedAnimationController
         }
     }
 
-    /** Returns the appropriate X translation value for a bubble at the given index. */
-    private float getXForChildAtIndex(int index) {
-        return mBubblePaddingPx + (mBubbleSizePx + mBubblePaddingPx) * index;
-    }
-
     /**
      * @param index Bubble index in row.
      * @return Bubble left x from left edge of screen.
      */
     public float getBubbleLeft(int index) {
-        float bubbleLeftFromRowLeft = index * (mBubbleSizePx + mBubblePaddingPx);
-        return getRowLeft() + bubbleLeftFromRowLeft;
+        final float bubbleFromRowLeft = index * (mBubbleSizePx + getSpaceBetweenBubbles());
+        return getRowLeft() + bubbleFromRowLeft;
     }
 
     private float getRowLeft() {
         if (mLayout == null) {
             return 0;
         }
+
         int bubbleCount = mLayout.getChildCount();
 
-        // Width calculations.
-        double bubble = bubbleCount * mBubbleSizePx;
-        float gap = (bubbleCount - 1) * mBubblePaddingPx;
-        float row = gap + (float) bubble;
+        final float totalBubbleWidth = bubbleCount * mBubbleSizePx;
+        final float totalGapWidth = (bubbleCount - 1) * getSpaceBetweenBubbles();
+        final float rowWidth = totalGapWidth + totalBubbleWidth;
 
-        float halfRow = row / 2f;
-        float centerScreen = mDisplaySize.x / 2;
-        float rowLeftFromScreenLeft = centerScreen - halfRow;
+        final float centerScreen = mScreenWidth / 2f;
+        final float halfRow = rowWidth / 2f;
+        final float rowLeft = centerScreen - halfRow;
 
-        return rowLeftFromScreenLeft;
+        return rowLeft;
+    }
+
+    /**
+     * @return Space between bubbles in row above expanded view.
+     */
+    private float getSpaceBetweenBubbles() {
+        /**
+         * Ordered left to right:
+         *  Screen edge
+         *      [mExpandedViewPadding]
+         *  Expanded view edge
+         *      [launcherGridDiff] --- arbitrary value until launcher exports widths
+         *  Launcher's app icon grid edge that we must match
+         */
+        final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
+        final float maxRowWidth = mScreenWidth - rowMargins;
+
+        final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;
+        final float totalGapWidth = maxRowWidth - totalBubbleWidth;
+
+        final int gapCount = mBubblesMaxRendered - 1;
+        final float gapWidth = totalGapWidth / gapCount;
+        return gapWidth;
     }
 }

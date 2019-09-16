@@ -194,7 +194,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Sdílené připojení přes Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim Letadlo."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN je zapnuto."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Chybí SIM karta"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Není vložena SIM karta"</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Probíhá změna sítě operátora"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Otevřít podrobnosti o baterii"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Stav baterie: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
