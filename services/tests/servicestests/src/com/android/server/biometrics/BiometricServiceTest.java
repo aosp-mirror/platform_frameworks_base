@@ -333,7 +333,7 @@ public class BiometricServiceTest {
 
         // SystemUI sends callback with dismissed reason
         mBiometricService.mInternalReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED);
+                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
         waitForIdle();
         // HAT sent to keystore
         verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
@@ -362,7 +362,7 @@ public class BiometricServiceTest {
 
         // SystemUI sends confirm, HAT is sent to keystore and client is notified.
         mBiometricService.mInternalReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_CONFIRMED);
+                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
         waitForIdle();
         verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
         verify(mReceiver1).onAuthenticationSucceeded();
@@ -546,6 +546,31 @@ public class BiometricServiceTest {
                 eq(BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS),
                 eq(ERROR_UNABLE_TO_PROCESS));
         assertNull(mBiometricService.mCurrentAuthSession);
+    }
+
+    @Test
+    public void testErrorFromHal_whileShowingDeviceCredential_doesntNotifySystemUI()
+            throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */);
+
+        mBiometricService.mInternalReceiver.onDeviceCredentialPressed();
+        waitForIdle();
+
+        assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
+                mBiometricService.mCurrentAuthSession.mState);
+        verify(mReceiver1, never()).onError(anyInt(), anyString());
+
+        mBiometricService.mInternalReceiver.onError(
+                getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                ERROR_CANCELED);
+        waitForIdle();
+
+        assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
+                mBiometricService.mCurrentAuthSession.mState);
+        verify(mReceiver1, never()).onError(anyInt(), anyString());
     }
 
     @Test

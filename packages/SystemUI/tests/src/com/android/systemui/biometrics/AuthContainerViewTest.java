@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -54,7 +55,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
     public void testActionAuthenticated_sendsDismissedAuthenticated() {
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_AUTHENTICATED);
-        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_AUTHENTICATED));
+        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED));
     }
 
     @Test
@@ -83,6 +84,17 @@ public class AuthContainerViewTest extends SysuiTestCase {
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_ERROR);
         verify(mCallback).onDismissed(AuthDialogCallback.DISMISSED_ERROR);
+    }
+
+    @Test
+    public void testActionUseDeviceCredential_sendsOnDeviceCredentialPressed() {
+        mAuthContainer.mBiometricCallback.onAction(
+                AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL);
+        verify(mCallback).onDeviceCredentialPressed();
+
+        // Credential view is attached to the frame layout
+        waitForIdleSync();
+        assertEquals(mAuthContainer.mFrameLayout, mAuthContainer.mCredentialView.getParent());
     }
 
     private class TestableAuthContainer extends AuthContainerView {

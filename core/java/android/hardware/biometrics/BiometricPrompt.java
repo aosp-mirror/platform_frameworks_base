@@ -95,7 +95,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
-    public static final int DISMISSED_REASON_CONFIRMED = 1;
+    public static final int DISMISSED_REASON_BIOMETRIC_CONFIRMED = 1;
 
     /**
      * Dialog is done animating away after user clicked on the button set via
@@ -114,7 +114,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * Authenticated, confirmation not required. Dialog animated away.
      * @hide
      */
-    public static final int DISMISSED_REASON_CONFIRM_NOT_REQUIRED = 4;
+    public static final int DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED = 4;
 
     /**
      * Error message shown on SystemUI. When BiometricService receives this, the UI is already
@@ -128,6 +128,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final int DISMISSED_REASON_SERVER_REQUESTED = 6;
+
+    /**
+     * @hide
+     */
+    public static final int DISMISSED_REASON_CREDENTIAL_CONFIRMED = 7;
 
     private static class ButtonInfo {
         Executor executor;
@@ -368,7 +373,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @Override
         public void onDialogDismissed(int reason) throws RemoteException {
             // Check the reason and invoke OnClickListener(s) if necessary
-            if (reason == DISMISSED_REASON_CONFIRMED) {
+            if (reason == DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
                 mPositiveButtonInfo.executor.execute(() -> {
                     mPositiveButtonInfo.listener.onClick(null, DialogInterface.BUTTON_POSITIVE);
                 });

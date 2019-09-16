@@ -105,6 +105,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
+    public void onDeviceCredentialPressed() {
+        try {
+            mReceiver.onDeviceCredentialPressed();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException when handling credential button", e);
+        }
+    }
+
+    @Override
     public void onDismissed(@DismissedReason int reason) {
         switch (reason) {
             case AuthDialogCallback.DISMISSED_USER_CANCELED:
@@ -116,11 +125,12 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 break;
 
             case AuthDialogCallback.DISMISSED_BUTTON_POSITIVE:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CONFIRMED);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
                 break;
 
-            case AuthDialogCallback.DISMISSED_AUTHENTICATED:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED);
+            case AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED:
+                sendResultAndCleanUp(
+                        BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
                 break;
 
             case AuthDialogCallback.DISMISSED_ERROR:
@@ -129,6 +139,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
             case AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
+                break;
+
+            case AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED:
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
                 break;
 
             default:

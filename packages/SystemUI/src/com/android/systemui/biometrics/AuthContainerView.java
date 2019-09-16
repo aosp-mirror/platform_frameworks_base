@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -78,12 +79,14 @@ public class AuthContainerView extends LinearLayout
     private final AuthPanelController mPanelController;
     private final Interpolator mLinearOutSlowIn;
     @VisibleForTesting final BiometricCallback mBiometricCallback;
+    private final CredentialCallback mCredentialCallback;
 
-    private final ViewGroup mContainerView;
+    @VisibleForTesting final FrameLayout mFrameLayout;
     private final AuthBiometricView mBiometricView;
+    @VisibleForTesting AuthCredentialView mCredentialView;
 
     private final ImageView mBackgroundView;
-    private final ScrollView mScrollView;
+    private final ScrollView mBiometricScrollView;
     private final View mPanelView;
 
     private final float mTranslationY;
@@ -156,7 +159,7 @@ public class AuthContainerView extends LinearLayout
         public void onAction(int action) {
             switch (action) {
                 case AuthBiometricView.Callback.ACTION_AUTHENTICATED:
-                    animateAway(AuthDialogCallback.DISMISSED_AUTHENTICATED);
+                    animateAway(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED);
                     break;
                 case AuthBiometricView.Callback.ACTION_USER_CANCELED:
                     animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
@@ -171,11 +174,19 @@ public class AuthContainerView extends LinearLayout
                     animateAway(AuthDialogCallback.DISMISSED_ERROR);
                     break;
                 case AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL:
-                    Log.v(TAG, "ACTION_USE_DEVICE_CREDENTIAL");
+                    mConfig.mCallback.onDeviceCredentialPressed();
+                    showCredentialView();
                     break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
             }
+        }
+    }
+
+    final class CredentialCallback implements AuthCredentialView.Callback {
+        @Override
+        public void onCredentialMatched() {
+            animateAway(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED);
         }
     }
 
@@ -191,12 +202,13 @@ public class AuthContainerView extends LinearLayout
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mBiometricCallback = new BiometricCallback();
+        mCredentialCallback = new CredentialCallback();
 
         final LayoutInflater factory = LayoutInflater.from(mContext);
-        mContainerView = (ViewGroup) factory.inflate(
+        mFrameLayout = (FrameLayout) factory.inflate(
                 R.layout.auth_container_view, this, false /* attachToRoot */);
 
-        mPanelView = mContainerView.findViewById(R.id.panel);
+        mPanelView = mFrameLayout.findViewById(R.id.panel);
         mPanelController = new AuthPanelController(mContext, mPanelView);
 
         // TODO: Update with new controllers if multi-modal authentication can occur simultaneously
@@ -210,11 +222,11 @@ public class AuthContainerView extends LinearLayout
             Log.e(TAG, "Unsupported modality mask: " + config.mModalityMask);
             mBiometricView = null;
             mBackgroundView = null;
-            mScrollView = null;
+            mBiometricScrollView = null;
             return;
         }
 
-        mBackgroundView = mContainerView.findViewById(R.id.background);
+        mBackgroundView = mFrameLayout.findViewById(R.id.background);
 
         UserManager userManager = mContext.getSystemService(UserManager.class);
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
@@ -234,9 +246,9 @@ public class AuthContainerView extends LinearLayout
         mBiometricView.setBackgroundView(mBackgroundView);
         mBiometricView.setUserId(mConfig.mUserId);
 
-        mScrollView = mContainerView.findViewById(R.id.scrollview);
-        mScrollView.addView(mBiometricView);
-        addView(mContainerView);
+        mBiometricScrollView = mFrameLayout.findViewById(R.id.biometric_scrollview);
+        mBiometricScrollView.addView(mBiometricView);
+        addView(mFrameLayout);
 
         setOnKeyListener((v, keyCode, event) -> {
             if (keyCode != KeyEvent.KEYCODE_BACK) {
@@ -250,6 +262,16 @@ public class AuthContainerView extends LinearLayout
 
         setFocusableInTouchMode(true);
         requestFocus();
+    }
+
+    private void showCredentialView() {
+        final LayoutInflater factory = LayoutInflater.from(mContext);
+        mCredentialView = (AuthCredentialView) factory.inflate(
+                R.layout.auth_credential_view, null, false);
+        mCredentialView.setUser(mConfig.mUserId);
+        mCredentialView.setCallback(mCredentialCallback);
+        mCredentialView.setBiometricPromptBundle(mConfig.mBiometricPromptBundle);
+        mFrameLayout.addView(mCredentialView);
     }
 
     @Override
@@ -270,7 +292,7 @@ public class AuthContainerView extends LinearLayout
             // The background panel and content are different views since we need to be able to
             // animate them separately in other places.
             mPanelView.setY(mTranslationY);
-            mScrollView.setY(mTranslationY);
+            mBiometricScrollView.setY(mTranslationY);
 
             setAlpha(0f);
             postOnAnimation(() -> {
@@ -281,7 +303,7 @@ public class AuthContainerView extends LinearLayout
                         .withLayer()
                         .withEndAction(this::onDialogAnimatedIn)
                         .start();
-                mScrollView.animate()
+                mBiometricScrollView.animate()
                         .translationY(0)
                         .setDuration(ANIMATION_DURATION_SHOW_MS)
                         .setInterpolator(mLinearOutSlowIn)
@@ -396,12 +418,20 @@ public class AuthContainerView extends LinearLayout
                     .withLayer()
                     .withEndAction(endActionRunnable)
                     .start();
-            mScrollView.animate()
+            mBiometricScrollView.animate()
                     .translationY(mTranslationY)
                     .setDuration(ANIMATION_DURATION_AWAY_MS)
                     .setInterpolator(mLinearOutSlowIn)
                     .withLayer()
                     .start();
+            if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
+                mCredentialView.animate()
+                        .translationY(mTranslationY)
+                        .setDuration(ANIMATION_DURATION_AWAY_MS)
+                        .setInterpolator(mLinearOutSlowIn)
+                        .withLayer()
+                        .start();
+            }
             animate()
                     .alpha(0f)
                     .setDuration(ANIMATION_DURATION_AWAY_MS)

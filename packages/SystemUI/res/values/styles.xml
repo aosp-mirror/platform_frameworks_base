@@ -314,6 +314,12 @@
         <item name="*android:errorColor">?android:attr/colorError</item>
     </style>
 
+    <style name="LockPatternStyleBiometricPrompt">
+        <item name="*android:regularColor">?android:attr/colorForeground</item>
+        <item name="*android:successColor">?android:attr/colorForeground</item>
+        <item name="*android:errorColor">?android:attr/colorError</item>
+    </style>
+
     <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>

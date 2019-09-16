@@ -364,7 +364,12 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         }
 
         @Override
-        public int getAnimationDuration() {
+        public int getMediumToLargeAnimationDurationMs() {
+            return 0;
+        }
+
+        @Override
+        public int getAnimateCredentialStartDelayMs() {
             return 0;
         }
     }

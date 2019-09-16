@@ -93,6 +93,7 @@ public class BiometricService extends SystemService {
     private static final int MSG_AUTHENTICATE = 9;
     private static final int MSG_CANCEL_AUTHENTICATION = 10;
     private static final int MSG_ON_AUTHENTICATION_TIMED_OUT = 11;
+    private static final int MSG_ON_DEVICE_CREDENTIAL_PRESSED = 12;
     private static final int[] FEATURE_ID = {
         TYPE_FINGERPRINT,
         TYPE_IRIS,
@@ -132,6 +133,10 @@ public class BiometricService extends SystemService {
      * Biometric error, waiting for SysUI to finish animation
      */
     static final int STATE_ERROR_PENDING_SYSUI = 7;
+    /**
+     * Device credential in AuthController is showing
+     */
+    static final int STATE_SHOWING_DEVICE_CREDENTIAL = 8;
 
     final class AuthSession {
         // Map of Authenticator/Cookie pairs. We expect to receive the cookies back from
@@ -323,6 +328,11 @@ public class BiometricService extends SystemService {
 
                 case MSG_ON_AUTHENTICATION_TIMED_OUT: {
                     handleAuthenticationTimedOut((String) msg.obj /* errorMessage */);
+                    break;
+                }
+
+                case MSG_ON_DEVICE_CREDENTIAL_PRESSED: {
+                    handleOnDeviceCredentialPressed();
                     break;
                 }
 
@@ -544,6 +554,11 @@ public class BiometricService extends SystemService {
         @Override
         public void onTryAgainPressed() {
             mHandler.sendEmptyMessage(MSG_ON_TRY_AGAIN_PRESSED);
+        }
+
+        @Override
+        public void onDeviceCredentialPressed() {
+            mHandler.sendEmptyMessage(MSG_ON_DEVICE_CREDENTIAL_PRESSED);
         }
     };
 
@@ -958,7 +973,7 @@ public class BiometricService extends SystemService {
     }
 
     private void logDialogDismissed(int reason) {
-        if (reason == BiometricPrompt.DISMISSED_REASON_CONFIRMED) {
+        if (reason == BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
             // Explicit auth, authentication confirmed.
             // Latency in this case is authenticated -> confirmed. <Biometric>Service
             // should have the first half (first acquired -> authenticated).
@@ -1133,6 +1148,9 @@ public class BiometricService extends SystemService {
                     mCurrentAuthSession.mClientReceiver.onError(error, message);
                     mStatusBarService.hideBiometricDialog();
                     mCurrentAuthSession = null;
+                } else if (mCurrentAuthSession.mState == STATE_SHOWING_DEVICE_CREDENTIAL) {
+                    Slog.d(TAG, "Biometric canceled, ignoring from state: "
+                            + mCurrentAuthSession.mState);
                 } else {
                     Slog.e(TAG, "Impossible session error state: "
                             + mCurrentAuthSession.mState);
@@ -1183,9 +1201,12 @@ public class BiometricService extends SystemService {
 
         try {
             switch (reason) {
-                case BiometricPrompt.DISMISSED_REASON_CONFIRMED:
-                case BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED:
-                    mKeyStore.addAuthToken(mCurrentAuthSession.mTokenEscrow);
+                case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
+                case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
+                case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
+                    if (mCurrentAuthSession.mTokenEscrow != null) {
+                        mKeyStore.addAuthToken(mCurrentAuthSession.mTokenEscrow);
+                    }
                     mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded();
                     break;
 
@@ -1238,6 +1259,20 @@ public class BiometricService extends SystemService {
                 mCurrentAuthSession.mCallingPid,
                 mCurrentAuthSession.mCallingUserId,
                 mCurrentAuthSession.mModality);
+    }
+
+    private void handleOnDeviceCredentialPressed() {
+        Slog.d(TAG, "onDeviceCredentialPressed");
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "Auth session null");
+            return;
+        }
+
+        // Cancel authentication. Skip the token/package check since we are cancelling
+        // from system server. The interface is permission protected so this is fine.
+        cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+
+        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
     }
 
     private void handleOnReadyForAuthentication(int cookie, boolean requireConfirmation,

@@ -40,17 +40,38 @@ public interface AuthDialog {
     String KEY_BIOMETRIC_DIALOG_SIZE = "size";
 
     int SIZE_UNKNOWN = 0;
+    /**
+     * Minimal UI, showing only biometric icon.
+     */
     int SIZE_SMALL = 1;
+    /**
+     * Normal-sized biometric UI, showing title, icon, buttons, etc.
+     */
     int SIZE_MEDIUM = 2;
+    /**
+     * Full-screen credential UI.
+     */
     int SIZE_LARGE = 3;
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SIZE_UNKNOWN, SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE})
     @interface DialogSize {}
 
     /**
-     * Animation duration, e.g. small to medium dialog, icon translation, etc.
+     * Animation duration, from small to medium dialog, including back panel, icon translation, etc
      */
-    int ANIMATE_DURATION_MS = 150;
+    int ANIMATE_SMALL_TO_MEDIUM_DURATION_MS = 150;
+    /**
+     * Animation duration from medium to large dialog, including biometric fade out, back panel, etc
+     */
+    int ANIMATE_MEDIUM_TO_LARGE_DURATION_MS = 450;
+    /**
+     * Delay before notifying {@link AuthCredentialView} to start animating in.
+     */
+    int ANIMATE_CREDENTIAL_START_DELAY_MS = ANIMATE_MEDIUM_TO_LARGE_DURATION_MS * 2 / 3;
+    /**
+     * Animation duration when sliding in credential UI
+     */
+    int ANIMATE_CREDENTIAL_INITIAL_DURATION_MS = 150;
 
     /**
      * Show the dialog.

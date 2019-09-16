@@ -117,14 +117,15 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testSendsReasonConfirmed_whenDismissedByButtonPositive() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
         mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CONFIRMED);
+        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
     }
 
     @Test
     public void testSendsReasonConfirmNotRequired_whenDismissedByAuthenticated() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_AUTHENTICATED);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED);
+        verify(mReceiver).onDialogDismissed(
+                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
     }
 
     @Test
@@ -135,10 +136,18 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSendsReasonDismissedBySystemServer_whenDismissedByServer() throws Exception {
+    public void testSendsReasonServerRequested_whenDismissedByServer() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
         mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
+    }
+
+    @Test
+    public void testSendsReasonCredentialConfirmed_whenDeviceCredentialAuthenticated()
+            throws Exception {
+        showDialog(BiometricPrompt.TYPE_FACE);
+        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED);
+        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
     }
 
     // Statusbar tests

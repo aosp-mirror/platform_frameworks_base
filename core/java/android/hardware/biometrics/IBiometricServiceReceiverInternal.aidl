@@ -38,4 +38,6 @@ oneway interface IBiometricServiceReceiverInternal {
     void onDialogDismissed(int reason);
     // Notifies that the user has pressed the "try again" button on SystemUI
     void onTryAgainPressed();
+    // Notifies that the user has pressed the "use password" button on SystemUI
+    void onDeviceCredentialPressed();
 }
