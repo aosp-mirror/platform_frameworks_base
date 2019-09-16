@@ -27,7 +27,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
@@ -46,7 +45,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -68,16 +66,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
-    private final String ORGANIZATION_NAME = "organization";
-
-    private String mDisclosureWithOrganization;
-
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private ViewGroup mIndicationArea;
-    @Mock
-    private KeyguardIndicationTextView mDisclosure;
     @Mock
     private LockIcon mLockIcon;
     @Mock
@@ -107,11 +99,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
-        mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
-                ORGANIZATION_NAME);
 
-        when(mIndicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure))
-                .thenReturn(mDisclosure);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
 
         mWakeLock = new WakeLockFake();
@@ -124,72 +112,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
                 mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
                 mUnlockMethodCache, mStatusBarStateController, mKeyguardUpdateMonitor);
-    }
-
-    @Test
-    public void unmanaged() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
-        createController();
-
-        verify(mDisclosure).setVisibility(View.GONE);
-        verifyNoMoreInteractions(mDisclosure);
-    }
-
-    @Test
-    public void managedNoOwnerName() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
-        createController();
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
-        verifyNoMoreInteractions(mDisclosure);
-    }
-
-    @Test
-    public void managedOwnerName() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
-        createController();
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
-        verifyNoMoreInteractions(mDisclosure);
-    }
-
-    @Test
-    public void updateOnTheFly() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
-        createController();
-
-        final KeyguardUpdateMonitorCallback monitor = mController.getKeyguardCallback();
-        reset(mDisclosure);
-
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
-        monitor.onKeyguardVisibilityChanged(true);
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
-        verifyNoMoreInteractions(mDisclosure);
-        reset(mDisclosure);
-
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
-        monitor.onKeyguardVisibilityChanged(false);
-        monitor.onKeyguardVisibilityChanged(true);
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
-        verifyNoMoreInteractions(mDisclosure);
-        reset(mDisclosure);
-
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
-        monitor.onKeyguardVisibilityChanged(false);
-        monitor.onKeyguardVisibilityChanged(true);
-
-        verify(mDisclosure).setVisibility(View.GONE);
-        verifyNoMoreInteractions(mDisclosure);
     }
 
     @Test
