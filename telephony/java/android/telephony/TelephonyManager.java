@@ -4541,6 +4541,17 @@ public class TelephonyManager {
     }
 
     /**
+     * Sim activation type: voice
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_TYPE_VOICE = 0;
+    /**
+     * Sim activation type: data
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_TYPE_DATA = 1;
+
+    /**
      * Initial SIM activation state, unknown. Not set by any carrier apps.
      * @hide
      */
@@ -5066,6 +5077,17 @@ public class TelephonyManager {
      * Data connection is active, but physical link is down
      */
     public static final int DATA_ACTIVITY_DORMANT = 0x00000004;
+
+    /** @hide */
+    @IntDef(prefix = {"DATA_"}, value = {
+        DATA_ACTIVITY_NONE,
+        DATA_ACTIVITY_IN,
+        DATA_ACTIVITY_OUT,
+        DATA_ACTIVITY_INOUT,
+        DATA_ACTIVITY_DORMANT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataActivityType{}
 
     /**
      * Returns a constant indicating the type of activity on a data connection

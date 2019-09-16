@@ -947,13 +947,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyCallState(int state, String phoneNumber) {
+    public void notifyCallStateForAllSubs(int state, String phoneNumber) {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
 
         if (VDBG) {
-            log("notifyCallState: state=" + state + " phoneNumber=" + phoneNumber);
+            log("notifyCallStateForAllSubs: state=" + state + " phoneNumber=" + phoneNumber);
         }
 
         synchronized (mRecords) {
@@ -980,13 +980,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
 
-    public void notifyCallStateForPhoneId(int phoneId, int subId, int state,
-                String incomingNumber) {
+    public void notifyCallState(int phoneId, int subId, int state, String incomingNumber) {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
         if (VDBG) {
-            log("notifyCallStateForPhoneId: subId=" + subId
+            log("notifyCallState: subId=" + subId
                 + " state=" + state + " incomingNumber=" + incomingNumber);
         }
         synchronized (mRecords) {
@@ -1080,10 +1079,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 switch (activationType) {
-                    case PhoneConstants.SIM_ACTIVATION_TYPE_VOICE:
+                    case TelephonyManager.SIM_ACTIVATION_TYPE_VOICE:
                         mVoiceActivationState[phoneId] = activationState;
                         break;
-                    case PhoneConstants.SIM_ACTIVATION_TYPE_DATA:
+                    case TelephonyManager.SIM_ACTIVATION_TYPE_DATA:
                         mDataActivationState[phoneId] = activationState;
                         break;
                     default:
@@ -1096,7 +1095,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 + " state=" + activationState);
                     }
                     try {
-                        if ((activationType == PhoneConstants.SIM_ACTIVATION_TYPE_VOICE) &&
+                        if ((activationType == TelephonyManager.SIM_ACTIVATION_TYPE_VOICE) &&
                                 r.matchPhoneStateListenerEvent(
                                         PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE) &&
                                 idMatch(r.subId, subId, phoneId)) {
@@ -1107,7 +1106,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             }
                             r.callback.onVoiceActivationStateChanged(activationState);
                         }
-                        if ((activationType == PhoneConstants.SIM_ACTIVATION_TYPE_DATA) &&
+                        if ((activationType == TelephonyManager.SIM_ACTIVATION_TYPE_DATA) &&
                                 r.matchPhoneStateListenerEvent(
                                         PhoneStateListener.LISTEN_DATA_ACTIVATION_STATE) &&
                                 idMatch(r.subId, subId, phoneId)) {
@@ -1227,7 +1226,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCellInfoForSubscriber(int subId, List<CellInfo> cellInfo) {
-        if (!checkNotifyPermission("notifyCellInfo()")) {
+        if (!checkNotifyPermission("notifyCellInfoForSubscriber()")) {
             return;
         }
         if (VDBG) {
@@ -1244,7 +1243,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                         try {
                             if (DBG_LOC) {
-                                log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
+                                log("notifyCellInfoForSubscriber: mCellInfo=" + cellInfo
+                                    + " r=" + r);
                             }
                             r.callback.onCellInfoChanged(cellInfo);
                         } catch (RemoteException ex) {

@@ -89,10 +89,6 @@ public class PhoneConstants {
     @UnsupportedAppUsage
     public static final int PRESENTATION_PAYPHONE = 4;   // show pay phone info
 
-    // Sim activation type
-    public static final int SIM_ACTIVATION_TYPE_VOICE = 0;
-    public static final int SIM_ACTIVATION_TYPE_DATA = 1;
-
     public static final String PHONE_NAME_KEY = "phoneName";
     public static final String DATA_NETWORK_TYPE_KEY = "networkType";
     public static final String DATA_FAILURE_CAUSE_KEY = "failCause";

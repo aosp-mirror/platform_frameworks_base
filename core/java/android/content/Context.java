@@ -4708,6 +4708,14 @@ public abstract class Context {
     public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.telephony.TelephonyRegistryManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
