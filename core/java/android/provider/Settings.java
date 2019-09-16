@@ -8811,13 +8811,6 @@ public final class Settings {
                 "location_ignore_settings_package_whitelist";
 
         /**
-         * Whether to disable location status callbacks in preparation for deprecation.
-         * @hide
-         */
-        public static final String LOCATION_DISABLE_STATUS_CALLBACKS =
-                "location_disable_status_callbacks";
-
-        /**
          * Maximum staleness allowed for last location when returned to clients with only foreground
          * location permissions.
          * @hide

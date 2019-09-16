@@ -256,17 +256,6 @@ public abstract class LocationProviderBase {
     /**
      * This method will no longer be invoked.
      *
-     * Returns a information on the status of this provider.
-     * <p>{@link android.location.LocationProvider#OUT_OF_SERVICE} is returned if the provider is
-     * out of service, and this is not expected to change in the near
-     * future; {@link android.location.LocationProvider#TEMPORARILY_UNAVAILABLE} is returned if
-     * the provider is temporarily unavailable but is expected to be
-     * available shortly; and {@link android.location.LocationProvider#AVAILABLE} is returned
-     * if the provider is currently available.
-     *
-     * <p>If extras is non-null, additional status information may be
-     * added to it in the form of provider-specific key/value pairs.
-     *
      * @deprecated This callback will be never be invoked on Android Q and above. This method should
      * only be implemented in location providers that need to support SDKs below Android Q. This
      * method may be removed in the future.
@@ -278,15 +267,6 @@ public abstract class LocationProviderBase {
 
     /**
      * This method will no longer be invoked.
-     *
-     * Returns the time at which the status was last updated. It is the
-     * responsibility of the provider to appropriately set this value using
-     * {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
-     * there is a status update that it wishes to broadcast to all its
-     * listeners. The provider should be careful not to broadcast
-     * the same status again.
-     *
-     * @return time of last status update in millis since last reboot
      *
      * @deprecated This callback will be never be invoked on Android Q and above. This method should
      * only be implemented in location providers that need to support SDKs below Android Q. This
@@ -329,16 +309,6 @@ public abstract class LocationProviderBase {
         @Override
         public void setRequest(ProviderRequest request, WorkSource ws) {
             onSetRequest(new ProviderRequestUnbundled(request), ws);
-        }
-
-        @Override
-        public int getStatus(Bundle extras) {
-            return onGetStatus(extras);
-        }
-
-        @Override
-        public long getStatusUpdateTime() {
-            return onGetStatusUpdateTime();
         }
 
         @Override

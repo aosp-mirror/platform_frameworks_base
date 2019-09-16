@@ -37,7 +37,6 @@ import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
@@ -279,15 +278,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private final Object mLock = new Object();
 
-    // current status
-    private int mStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
-
-    // time for last status update
-    private long mStatusUpdateTime = SystemClock.elapsedRealtime();
-
-    // turn off GPS fix icon if we haven't received a fix in 10 seconds
-    private static final long RECENT_FIX_TIMEOUT = 10 * 1000;
-
     // stop trying if we do not receive a fix within 60 seconds
     private static final int NO_FIX_TIMEOUT = 60 * 1000;
 
@@ -485,7 +475,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     break;
                 case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
                 case TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
-                    subscriptionOrCarrierConfigChanged(context);
+                    subscriptionOrCarrierConfigChanged();
                     break;
             }
         }
@@ -500,7 +490,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mGnssMetrics.resetConstellationTypes();
     }
 
-    private void subscriptionOrCarrierConfigChanged(Context context) {
+    private void subscriptionOrCarrierConfigChanged() {
         if (DEBUG) Log.d(TAG, "received SIM related action: ");
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
@@ -1010,24 +1000,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @Override
-    public int getStatus(Bundle extras) {
-        mLocationExtras.setBundle(extras);
-        return mStatus;
-    }
-
-    private void updateStatus(int status) {
-        if (status != mStatus) {
-            mStatus = status;
-            mStatusUpdateTime = SystemClock.elapsedRealtime();
-        }
-    }
-
-    @Override
-    public long getStatusUpdateTime() {
-        return mStatusUpdateTime;
-    }
-
-    @Override
     public void onSetRequest(ProviderRequest request, WorkSource source) {
         sendMessage(SET_REQUEST, 0, new GpsRequest(request, source));
     }
@@ -1266,7 +1238,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
             mLocationExtras.reset();
             mFixRequestTime = SystemClock.elapsedRealtime();
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
@@ -1290,7 +1261,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mLastPositionMode = null;
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
             mLocationExtras.reset();
         }
     }
@@ -1381,7 +1351,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mGnssStatusListenerHelper.onFirstFix(mTimeToFirstFix);
         }
 
-        if (mStarted && mStatus != LocationProvider.AVAILABLE) {
+        if (mStarted) {
             // For devices that use framework scheduling, a timer may be set to ensure we don't
             // spend too much power searching for a location, when the requested update rate is
             // slow.
@@ -1389,8 +1359,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval < NO_FIX_TIMEOUT) {
                 mAlarmManager.cancel(mTimeoutIntent);
             }
-
-            updateStatus(LocationProvider.AVAILABLE);
         }
 
         if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
@@ -1504,11 +1472,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
         // return number of sats used in fix instead of total reported
         mLocationExtras.set(usedInFixCount, meanCn0, maxCn0);
-
-        if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
-                SystemClock.elapsedRealtime() - mLastFixTime > RECENT_FIX_TIMEOUT) {
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
-        }
 
         mGnssMetrics.logSvStatus(info.mSvCount, info.mSvidWithFlags, info.mSvCarrierFreqs);
     }

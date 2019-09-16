@@ -107,10 +107,6 @@ interface ILocationManager
     List<LocationRequest> getTestProviderCurrentRequests(String provider, String opPackageName);
     LocationTime getGnssTimeMillis();
 
-    // --- deprecated ---
-    void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime,
-            String opPackageName);
-
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
     // --- internal ---
