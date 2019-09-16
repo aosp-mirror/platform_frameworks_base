@@ -34,6 +34,7 @@ import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.ProximitySensor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,8 +47,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class FalsingManagerProxyTest extends SysuiTestCase {
-    @Mock
+    @Mock(stubOnly = true)
     PluginManager mPluginManager;
+    @Mock(stubOnly = true)
+    ProximitySensor mProximitySensor;
     private Handler mHandler;
     private FalsingManagerProxy mProxy;
     private DeviceConfigProxy mDeviceConfig;
@@ -73,7 +76,8 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
 
     @Test
     public void test_brightLineFalsingManagerDisabled() {
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mDeviceConfig);
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
+                mDeviceConfig);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
     }
 
@@ -82,13 +86,15 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "true", false);
         mTestableLooper.processAllMessages();
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mDeviceConfig);
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
+                mDeviceConfig);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(BrightLineFalsingManager.class));
     }
 
     @Test
     public void test_brightLineFalsingManagerToggled() throws InterruptedException {
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mDeviceConfig);
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
+                mDeviceConfig);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
 
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
