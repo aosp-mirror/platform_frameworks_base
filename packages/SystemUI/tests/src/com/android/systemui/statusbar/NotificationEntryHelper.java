@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -25,6 +26,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 public class NotificationEntryHelper {
     public static ModifiedRankingBuilder modifyRanking(NotificationEntry entry) {
         return new ModifiedRankingBuilder(entry);
+    }
+
+    public static ModifiedSbnBuilder modifySbn(NotificationEntry entry) {
+        return new ModifiedSbnBuilder(entry);
     }
 
     public static class ModifiedRankingBuilder extends RankingBuilder {
@@ -40,6 +45,22 @@ public class NotificationEntryHelper {
             final Ranking ranking = super.build();
             mTarget.setRanking(ranking);
             return ranking;
+        }
+    }
+
+    public static class ModifiedSbnBuilder extends SbnBuilder {
+        private final NotificationEntry mTarget;
+
+        private ModifiedSbnBuilder(NotificationEntry target) {
+            super(target.sbn());
+            mTarget = target;
+        }
+
+        @Override
+        public StatusBarNotification build() {
+            final StatusBarNotification sbn = super.build();
+            mTarget.setNotification(sbn);
+            return sbn;
         }
     }
 }

@@ -63,7 +63,6 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
 
     private TestableNotificationRemoteInputManager mRemoteInputManager;
-    private StatusBarNotification mSbn;
     private NotificationEntry mEntry;
     private RemoteInputHistoryExtender mRemoteInputHistoryExtender;
     private SmartReplyHistoryExtender mSmartReplyHistoryExtender;
@@ -78,9 +77,13 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 () -> mock(ShadeController.class),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()));
-        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
-                0, new Notification(), UserHandle.CURRENT, null, 0);
-        mEntry = NotificationEntry.buildForTest(mSbn);
+        mEntry = new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setUid(TEST_UID)
+                .setNotification(new Notification())
+                .setUser(UserHandle.CURRENT)
+                .build();
         mEntry.setRow(mRow);
 
         mRemoteInputManager.setUpWithPresenterForTest(mCallback,
@@ -94,7 +97,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testPerformOnRemoveNotification() {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
-        mRemoteInputManager.onPerformRemoveNotification(mEntry, mSbn.getKey());
+        mRemoteInputManager.onPerformRemoveNotification(mEntry, mEntry.key());
 
         verify(mController).removeRemoteInput(mEntry, null);
     }
@@ -175,7 +178,9 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         // Setup a notification entry with 1 remote input.
         StatusBarNotification newSbn =
                 mRemoteInputManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
-        NotificationEntry entry = NotificationEntry.buildForTest(newSbn);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(newSbn)
+                .build();
 
         // Try rebuilding to add another reply.
         newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(entry, "Reply 2", true);

@@ -24,8 +24,6 @@ import android.app.Notification;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.metrics.LogMaker;
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -39,6 +37,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
@@ -84,29 +83,35 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     @Test
     public void testHeadsUp_disabledStatusBar() {
         Notification n = new Notification.Builder(getContext(), "a").build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .build();
         mCommandQueue.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_EXPAND, 0,
                 false /* animate */);
         TestableLooper.get(this).processAllMessages();
 
         assertFalse("The panel shouldn't allow heads up while disabled",
-                mStatusBar.canHeadsUp(entry, sbn));
+                mStatusBar.canHeadsUp(entry, entry.sbn()));
     }
 
     @Test
     public void testHeadsUp_disabledNotificationShade() {
         Notification n = new Notification.Builder(getContext(), "a").build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .build();
         mCommandQueue.disable(DEFAULT_DISPLAY, 0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
                 false /* animate */);
         TestableLooper.get(this).processAllMessages();
 
         assertFalse("The panel shouldn't allow heads up while notitifcation shade disabled",
-                mStatusBar.canHeadsUp(entry, sbn));
+                mStatusBar.canHeadsUp(entry, entry.sbn()));
     }
 
     @Test

@@ -38,7 +38,6 @@ import java.util.ArrayList;
 public class NotificationEntryBuilder {
     private final SbnBuilder mSbnBuilder = new SbnBuilder();
     private final RankingBuilder mRankingBuilder = new RankingBuilder();
-
     private StatusBarNotification mSbn = null;
 
     public NotificationEntry build() {
@@ -193,7 +192,17 @@ public class NotificationEntryBuilder {
         return this;
     }
 
+    public NotificationEntryBuilder setSmartActions(Notification.Action... smartActions) {
+        mRankingBuilder.setSmartActions(smartActions);
+        return this;
+    }
+
     public NotificationEntryBuilder setSmartReplies(ArrayList<CharSequence> smartReplies) {
+        mRankingBuilder.setSmartReplies(smartReplies);
+        return this;
+    }
+
+    public NotificationEntryBuilder setSmartReplies(CharSequence... smartReplies) {
         mRankingBuilder.setSmartReplies(smartReplies);
         return this;
     }

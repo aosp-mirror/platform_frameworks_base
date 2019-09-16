@@ -28,9 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.NotificationChannel;
 import android.provider.Settings;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -40,7 +38,7 @@ import android.view.ViewGroup;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -61,11 +59,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mRow = mock(ExpandableNotificationRow.class);
-        NotificationEntry entry = new NotificationEntry(
-                mock(StatusBarNotification.class),
-                new RankingBuilder()
-                        .setChannel(mock(NotificationChannel.class))
-                        .build());
+        NotificationEntry entry = new NotificationEntryBuilder().build();
         when(mRow.getEntry()).thenReturn(entry);
     }
 
@@ -74,7 +68,6 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
     }
-
 
     @Test
     public void testAttachDetach() {

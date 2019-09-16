@@ -393,8 +393,12 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     private void entryRemoved(StatusBarNotification notification) {
-        mEntryListener.onEntryRemoved(NotificationEntry.buildForTest(notification),
-                null, false);
+        mEntryListener.onEntryRemoved(
+                new NotificationEntryBuilder()
+                        .setSbn(notification)
+                        .build(),
+                null,
+                false);
     }
 
     private void entryAdded(StatusBarNotification notification, int importance) {

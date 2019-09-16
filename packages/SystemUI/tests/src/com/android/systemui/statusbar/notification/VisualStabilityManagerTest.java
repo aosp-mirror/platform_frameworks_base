@@ -25,13 +25,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -62,7 +62,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
 
         mVisualStabilityManager.setUpWithPresenter(mock(NotificationPresenter.class));
         mVisualStabilityManager.setVisibilityLocationProvider(mLocationProvider);
-        mEntry = NotificationEntry.buildForTest(mock(StatusBarNotification.class));
+        mEntry = new NotificationEntryBuilder().build();
         mEntry.setRow(mRow);
 
         when(mRow.getEntry()).thenReturn(mEntry);

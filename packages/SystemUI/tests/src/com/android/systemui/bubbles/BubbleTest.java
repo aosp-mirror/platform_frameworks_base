@@ -19,19 +19,16 @@ package com.android.systemui.bubbles;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.os.Bundle;
-import android.service.notification.NotificationListenerService.Ranking;
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import org.junit.Before;
@@ -45,8 +42,6 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 public class BubbleTest extends SysuiTestCase {
     @Mock
-    private StatusBarNotification mStatusBarNotification;
-    @Mock
     private Notification mNotif;
 
     private NotificationEntry mEntry;
@@ -57,25 +52,13 @@ public class BubbleTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mStatusBarNotification.getKey()).thenReturn("key");
-        when(mStatusBarNotification.getNotification()).thenReturn(mNotif);
-        when(mStatusBarNotification.getUser()).thenReturn(new UserHandle(0));
         mExtras = new Bundle();
         mNotif.extras = mExtras;
 
-        mEntry = NotificationEntry.buildForTest(mStatusBarNotification);
+        mEntry = new NotificationEntryBuilder()
+                .setNotification(mNotif)
+                .build();
         mBubble = new Bubble(mContext, mEntry);
-    }
-
-    @Test
-    public void testInitialization() {
-        final Ranking ranking = new Ranking();
-
-        final NotificationEntry entry = new NotificationEntry(mStatusBarNotification, ranking);
-
-        assertEquals("key", entry.key());
-        assertEquals(mStatusBarNotification, entry.sbn());
-        assertEquals(ranking, entry.ranking());
     }
 
     @Test

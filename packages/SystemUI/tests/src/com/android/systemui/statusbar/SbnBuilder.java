@@ -37,6 +37,22 @@ public class SbnBuilder {
     private String mOverrideGroupKey;
     private long mPostTime;
 
+    public SbnBuilder() {
+    }
+
+    public SbnBuilder(StatusBarNotification source) {
+        mPkg = source.getPackageName();
+        mOpPkg = source.getOpPkg();
+        mId = source.getId();
+        mTag = source.getTag();
+        mUid = source.getUid();
+        mInitialPid = source.getInitialPid();
+        mNotification = source.getNotification();
+        mUser = source.getUser();
+        mOverrideGroupKey = source.getOverrideGroupKey();
+        mPostTime = source.getPostTime();
+    }
+
     public StatusBarNotification build() {
         return new StatusBarNotification(
                 mPkg,

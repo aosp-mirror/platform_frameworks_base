@@ -24,9 +24,9 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -76,22 +76,18 @@ public final class NotificationGroupTestHelper {
                 .setGroupSummary(isSummary)
                 .setGroup(TEST_GROUP_ID)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification(
-                TEST_PACKAGE_NAME /* pkg */,
-                TEST_PACKAGE_NAME,
-                id,
-                null /* tag */,
-                0, /* uid */
-                0 /* initialPid */,
-                notif,
-                new UserHandle(ActivityManager.getCurrentUser()),
-                null /* overrideGroupKey */,
-                0 /* postTime */);
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setId(id)
+                .setNotification(notif)
+                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
+                .build();
+
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
         entry.setRow(row);
         when(row.getEntry()).thenReturn(entry);
-        when(row.getStatusBarNotification()).thenReturn(sbn);
+        when(row.getStatusBarNotification()).thenReturn(entry.sbn());
         when(row.isInflationFlagSet(anyInt())).thenReturn(true);
         return entry;
     }

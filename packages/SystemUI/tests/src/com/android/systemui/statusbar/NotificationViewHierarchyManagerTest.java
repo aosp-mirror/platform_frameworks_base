@@ -120,7 +120,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
     private NotificationEntry createEntry() throws Exception {
         ExpandableNotificationRow row = mHelper.createRow();
-        NotificationEntry entry = NotificationEntry.buildForTest(row.getStatusBarNotification());
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(row.getStatusBarNotification())
+                .build();
         entry.setRow(row);
         return entry;
     }
