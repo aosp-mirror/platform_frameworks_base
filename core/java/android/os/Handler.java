@@ -295,6 +295,10 @@ public class Handler {
     /** {@hide} */
     @NonNull
     public String getTraceName(@NonNull Message message) {
+        if (message.callback instanceof TraceNameSupplier) {
+            return ((TraceNameSupplier) message.callback).getTraceName();
+        }
+
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getName()).append(": ");
         if (message.callback != null) {
