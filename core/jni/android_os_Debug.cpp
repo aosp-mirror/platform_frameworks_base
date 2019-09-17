@@ -34,7 +34,7 @@
 #include <vector>
 
 #include <android-base/logging.h>
-#include <bionic_malloc.h>
+#include <bionic/malloc.h>
 #include <debuggerd/client.h>
 #include <log/log.h>
 #include <utils/misc.h>
