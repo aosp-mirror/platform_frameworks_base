@@ -66,8 +66,8 @@ public class PinnedStackControllerTest extends WindowTestsBase {
 
         verify(mIPinnedStackListener).onImeVisibilityChanged(false, 0);
         verify(mIPinnedStackListener).onShelfVisibilityChanged(false, 0);
-        verify(mIPinnedStackListener).onMovementBoundsChanged(any(), eq(false),
-                eq(false));
+        verify(mIPinnedStackListener).onMovementBoundsChanged(any(), any(), any(), eq(false),
+                eq(false), anyInt());
         verify(mIPinnedStackListener).onActionsChanged(any());
         verify(mIPinnedStackListener).onMinimizedStateChanged(anyBoolean());
 
@@ -75,8 +75,8 @@ public class PinnedStackControllerTest extends WindowTestsBase {
 
         mWm.setShelfHeight(true, SHELF_HEIGHT);
         verify(mIPinnedStackListener).onShelfVisibilityChanged(true, SHELF_HEIGHT);
-        verify(mIPinnedStackListener).onMovementBoundsChanged(any(), eq(false),
-                eq(true));
+        verify(mIPinnedStackListener).onMovementBoundsChanged(any(), any(), any(), eq(false),
+                eq(true), anyInt());
         verify(mIPinnedStackListener, never()).onImeVisibilityChanged(anyBoolean(), anyInt());
     }
 }

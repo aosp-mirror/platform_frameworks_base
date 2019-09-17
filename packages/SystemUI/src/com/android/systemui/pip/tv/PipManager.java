@@ -19,10 +19,13 @@ package com.android.systemui.pip.tv;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
+import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -43,15 +46,16 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
-import android.view.DisplayInfo;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.BasePipManager;
-import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 
@@ -107,8 +111,9 @@ public class PipManager implements BasePipManager {
     private int mSuspendPipResizingReason;
 
     private Context mContext;
-    private PipBoundsHandler mPipBoundsHandler;
+    private IActivityManager mActivityManager;
     private IActivityTaskManager mActivityTaskManager;
+    private IWindowManager mWindowManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
     private int mResumeResizePinnedStackRunnableState = STATE_NO_PIP;
@@ -130,16 +135,11 @@ public class PipManager implements BasePipManager {
     private PipNotification mPipNotification;
     private ParceledListSlice mCustomActions;
 
-    // Used to calculate the movement bounds
-    private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
-    private final Rect mTmpInsetBounds = new Rect();
-    private final Rect mTmpNormalBounds = new Rect();
-
     // Keeps track of the IME visibility to adjust the PiP when the IME is visible
     private boolean mImeVisible;
     private int mImeHeightAdjustment;
 
-    private final PinnedStackListener mPinnedStackListener = new PipManagerPinnedStackListener();
+    private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
@@ -181,7 +181,11 @@ public class PipManager implements BasePipManager {
     /**
      * Handler for messages from the PIP controller.
      */
-    private class PipManagerPinnedStackListener extends PinnedStackListener {
+    private class PinnedStackListener extends IPinnedStackListener.Stub {
+
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {}
+
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             if (mState == STATE_PIP) {
@@ -201,13 +205,17 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment,
-                boolean fromShelfAdjustment) {
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {}
+
+        @Override
+        public void onMinimizedStateChanged(boolean isMinimized) {}
+
+        @Override
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
             mHandler.post(() -> {
-                // Populate the inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
-                mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                        animatingBounds, mTmpDisplayInfo);
-                mDefaultPipBounds.set(animatingBounds);
+                mDefaultPipBounds.set(normalBounds);
             });
         }
 
@@ -233,8 +241,10 @@ public class PipManager implements BasePipManager {
         }
         mInitialized = true;
         mContext = context;
-        mPipBoundsHandler = new PipBoundsHandler(context);
+
+        mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
+        mWindowManager = WindowManagerGlobal.getWindowManagerService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
@@ -281,7 +291,7 @@ public class PipManager implements BasePipManager {
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
 
         try {
-            WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
+            mWindowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }

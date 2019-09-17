@@ -38,6 +38,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -445,7 +446,12 @@ class ActivityTestsBase {
             final ActivityStackSupervisor supervisor = mRootActivityContainer.mStackSupervisor;
             if (mWindowingMode == WINDOWING_MODE_PINNED) {
                 stack = new ActivityStack(mDisplay, stackId, supervisor,
-                        mWindowingMode, ACTIVITY_TYPE_STANDARD, mOnTop);
+                        mWindowingMode, ACTIVITY_TYPE_STANDARD, mOnTop) {
+                    @Override
+                    Rect getDefaultPictureInPictureBounds(float aspectRatio) {
+                        return new Rect(50, 50, 100, 100);
+                    }
+                };
             } else {
                 stack = new ActivityStack(mDisplay, stackId, supervisor,
                         mWindowingMode, mActivityType, mOnTop);

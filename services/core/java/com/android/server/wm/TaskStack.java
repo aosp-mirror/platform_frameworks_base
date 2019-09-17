@@ -1661,6 +1661,40 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     /**
+     * @return the current stack bounds transformed to the given {@param aspectRatio}. If
+     *         the default bounds is {@code null}, then the {@param aspectRatio} is applied to the
+     *         default bounds.
+     */
+    Rect getPictureInPictureBounds(float aspectRatio, Rect stackBounds) {
+        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
+            return null;
+        }
+
+        final DisplayContent displayContent = getDisplayContent();
+        if (displayContent == null) {
+            return null;
+        }
+
+        if (!inPinnedWindowingMode()) {
+            return null;
+        }
+
+        final PinnedStackController pinnedStackController =
+                displayContent.getPinnedStackController();
+        if (stackBounds == null) {
+            // Calculate the aspect ratio bounds from the default bounds
+            stackBounds = pinnedStackController.getDefaultOrLastSavedBounds();
+        }
+
+        if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
+            return pinnedStackController.transformBoundsToAspectRatio(stackBounds, aspectRatio,
+                    true /* useCurrentMinEdgeSize */);
+        } else {
+            return stackBounds;
+        }
+    }
+
+    /**
      * Animates the pinned stack.
      */
     void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds,
@@ -1737,11 +1771,6 @@ public class TaskStack extends WindowContainer<Task> implements
             return;
         }
 
-        final DisplayContent displayContent = getDisplayContent();
-        if (displayContent == null) {
-            return;
-        }
-
         if (!inPinnedWindowingMode()) {
             return;
         }
@@ -1752,10 +1781,13 @@ public class TaskStack extends WindowContainer<Task> implements
         if (Float.compare(aspectRatio, pinnedStackController.getAspectRatio()) == 0) {
             return;
         }
-
-        // Notify the pinned stack controller about aspect ratio change.
-        // This would result a callback delivered from SystemUI to WM to start animation,
-        // if the bounds are ought to be altered due to aspect ratio change.
+        getAnimationOrCurrentBounds(mTmpFromBounds);
+        mTmpToBounds.set(mTmpFromBounds);
+        getPictureInPictureBounds(aspectRatio, mTmpToBounds);
+        if (!mTmpToBounds.equals(mTmpFromBounds)) {
+            animateResizePinnedStack(mTmpToBounds, null /* sourceHintBounds */,
+                    -1 /* duration */, false /* fromFullscreen */);
+        }
         pinnedStackController.setAspectRatio(
                 pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)
                         ? aspectRatio : -1f);
