@@ -812,7 +812,6 @@ public class PackageWatchdog {
      */
     private static class ObserverInternal {
         public final String name;
-        //TODO(b/120598832): Add getter for mPackages
         @GuardedBy("mLock")
         public final ArrayMap<String, MonitoredPackage> packages = new ArrayMap<>();
         @Nullable
