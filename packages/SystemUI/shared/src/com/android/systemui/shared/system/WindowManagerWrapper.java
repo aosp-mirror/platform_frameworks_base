@@ -27,12 +27,12 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.IPinnedStackListener;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.shared.recents.view.RecentsTransition;
+import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 
 public class WindowManagerWrapper {
 
@@ -212,7 +212,7 @@ public class WindowManagerWrapper {
      * Adds a pinned stack listener, which will receive updates from the window manager service
      * along with any other pinned stack listeners that were added via this method.
      */
-    public void addPinnedStackListener(IPinnedStackListener listener) throws RemoteException {
+    public void addPinnedStackListener(PinnedStackListener listener) throws RemoteException {
         mPinnedStackListenerForwarder.addListener(listener);
         WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
                 DEFAULT_DISPLAY, mPinnedStackListenerForwarder);
@@ -221,7 +221,7 @@ public class WindowManagerWrapper {
     /**
      * Removes a pinned stack listener.
      */
-    public void removePinnedStackListener(IPinnedStackListener listener) {
+    public void removePinnedStackListener(PinnedStackListener listener) {
         mPinnedStackListenerForwarder.removeListener(listener);
     }
 }
