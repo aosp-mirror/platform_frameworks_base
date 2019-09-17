@@ -19291,12 +19291,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             // null permissions means all permissions are targeted
             return (mPermissions == null || ArrayUtils.contains(mPermissions, permission));
         }
-
-        @Override
-        public String toString() {
-            return "ShellDelegate{targetPackageName=" + mTargetPackageName
-                    + ", permissions=" + mPermissions + "}";
-        }
     }
 
     /**
