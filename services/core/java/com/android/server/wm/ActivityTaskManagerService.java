@@ -6063,6 +6063,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return allUids.contains(uid);
     }
 
+    void notifySingleTaskDisplayEmpty(int displayId) {
+        mTaskChangeNotificationController.notifySingleTaskDisplayEmpty(displayId);
+    }
+
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
 
