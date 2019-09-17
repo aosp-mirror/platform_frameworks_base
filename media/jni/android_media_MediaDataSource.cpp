@@ -106,7 +106,8 @@ ssize_t JMediaDataSource::readAt(off64_t offset, size_t size) {
     }
 
     ALOGV("readAt %lld / %zu => %d.", (long long)offset, size, numread);
-    env->GetByteArrayRegion(mByteArrayObj, 0, numread, (jbyte*)mMemory->pointer());
+    env->GetByteArrayRegion(mByteArrayObj, 0, numread,
+        (jbyte*)mMemory->unsecurePointer());
     return numread;
 }
 

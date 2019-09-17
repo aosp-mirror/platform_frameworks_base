@@ -649,7 +649,7 @@ static jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const T 
         if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
             sizeInBytes = track->sharedBuffer()->size();
         }
-        memcpy(track->sharedBuffer()->pointer(), data + offsetInSamples, sizeInBytes);
+        memcpy(track->sharedBuffer()->unsecurePointer(), data + offsetInSamples, sizeInBytes);
         written = sizeInBytes;
     }
     if (written >= 0) {

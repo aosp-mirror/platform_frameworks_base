@@ -61,7 +61,7 @@ public:
     audio_channel_mask_t channelMask() { return mChannelMask; }
     size_t size() { return mSize; }
     int state() { return mState; }
-    uint8_t* data() { return static_cast<uint8_t*>(mData->pointer()); }
+    uint8_t* data() { return static_cast<uint8_t*>(mData->unsecurePointer()); }
     status_t doLoad();
     void startLoad() { mState = LOADING; }
     sp<IMemory> getIMemory() { return mData; }
