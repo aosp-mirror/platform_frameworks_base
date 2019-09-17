@@ -955,6 +955,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             updateReportedVisibilityLocked();
         }
 
+        // Reset the last saved PiP snap fraction on removal.
+        mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(mActivityComponent);
+
         mRemovingFromDisplay = false;
     }
 
