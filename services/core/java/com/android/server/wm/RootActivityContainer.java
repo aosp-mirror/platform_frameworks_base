@@ -959,6 +959,10 @@ class RootActivityContainer extends ConfigurationContainer
         // Need to make sure the pinned stack exist so we can resize it below...
         stack = display.getOrCreateStack(WINDOWING_MODE_PINNED, r.getActivityType(), ON_TOP);
 
+        // Calculate the target bounds here before the task is reparented back into pinned windowing
+        // mode (which will reset the saved bounds)
+        final Rect destBounds = stack.getDefaultPictureInPictureBounds(aspectRatio);
+
         try {
             final TaskRecord task = r.getTaskRecord();
             // Resize the pinned stack to match the current size of the task the activity we are
@@ -997,14 +1001,9 @@ class RootActivityContainer extends ConfigurationContainer
             mService.continueWindowLayout();
         }
 
-        // Notify the pinned stack controller to prepare the PiP animation, expect callback
-        // delivered from SystemUI to WM to start the animation.
-        final PinnedStackController pinnedStackController =
-                display.mDisplayContent.getPinnedStackController();
-        pinnedStackController.prepareAnimation(sourceHintBounds, aspectRatio,
-                null /* stackBounds */);
+        stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
+                true /* fromFullscreen */);
 
-        // TODO: revisit the following statement after the animation is moved from WM to SysUI.
         // Update the visibility of all activities after the they have been reparented to the new
         // stack.  This MUST run after the animation above is scheduled to ensure that the windows
         // drawn signal is scheduled after the bounds animation start call on the bounds animator

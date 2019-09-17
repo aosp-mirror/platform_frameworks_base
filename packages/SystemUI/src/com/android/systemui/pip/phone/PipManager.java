@@ -32,16 +32,14 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Pair;
-import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.BasePipManager;
-import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
-import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 
@@ -60,12 +58,8 @@ public class PipManager implements BasePipManager {
     private IActivityTaskManager mActivityTaskManager;
     private Handler mHandler = new Handler();
 
-    private final PinnedStackListener mPinnedStackListener = new PipManagerPinnedStackListener();
-    private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
-    private final Rect mTmpInsetBounds = new Rect();
-    private final Rect mTmpNormalBounds = new Rect();
+    private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
-    private PipBoundsHandler mPipBoundsHandler;
     private InputConsumerController mInputConsumerController;
     private PipMenuActivityController mMenuController;
     private PipMediaController mMediaController;
@@ -125,11 +119,11 @@ public class PipManager implements BasePipManager {
     /**
      * Handler for messages from the PIP controller.
      */
-    private class PipManagerPinnedStackListener extends PinnedStackListener {
+    private class PinnedStackListener extends IPinnedStackListener.Stub {
+
         @Override
         public void onListenerRegistered(IPinnedStackController controller) {
             mHandler.post(() -> {
-                mPipBoundsHandler.setPinnedStackController(controller);
                 mTouchHandler.setPinnedStackController(controller);
             });
         }
@@ -137,7 +131,6 @@ public class PipManager implements BasePipManager {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mHandler.post(() -> {
-                mPipBoundsHandler.onImeVisibilityChanged(imeVisible, imeHeight);
                 mTouchHandler.onImeVisibilityChanged(imeVisible, imeHeight);
             });
         }
@@ -145,66 +138,31 @@ public class PipManager implements BasePipManager {
         @Override
         public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
             mHandler.post(() -> {
-                mPipBoundsHandler.onShelfVisibilityChanged(shelfVisible, shelfHeight);
-                mTouchHandler.onShelfVisibilityChanged(shelfVisible, shelfHeight);
+               mTouchHandler.onShelfVisibilityChanged(shelfVisible, shelfHeight);
             });
         }
 
         @Override
         public void onMinimizedStateChanged(boolean isMinimized) {
             mHandler.post(() -> {
-                mPipBoundsHandler.onMinimizedStateChanged(isMinimized);
                 mTouchHandler.setMinimizedState(isMinimized, true /* fromController */);
             });
         }
 
         @Override
-        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment,
-                boolean fromShelfAdjustment) {
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
             mHandler.post(() -> {
-                // Populate the inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
-                mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                        animatingBounds, mTmpDisplayInfo);
-                mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                        animatingBounds, fromImeAdjustment, fromShelfAdjustment,
-                        mTmpDisplayInfo.rotation);
+                mTouchHandler.onMovementBoundsChanged(insetBounds, normalBounds, animatingBounds,
+                        fromImeAdjustment, fromShelfAdjustment, displayRotation);
             });
         }
 
         @Override
         public void onActionsChanged(ParceledListSlice actions) {
-            mHandler.post(() -> mMenuController.setAppActions(actions));
-        }
-
-        @Override
-        public void onSaveReentrySnapFraction(ComponentName componentName, Rect bounds) {
-            mHandler.post(() -> mPipBoundsHandler.onSaveReentrySnapFraction(componentName, bounds));
-        }
-
-        @Override
-        public void onResetReentrySnapFraction(ComponentName componentName) {
-            mHandler.post(() -> mPipBoundsHandler.onResetReentrySnapFraction(componentName));
-        }
-
-        @Override
-        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-            mHandler.post(() -> mPipBoundsHandler.onDisplayInfoChanged(displayInfo));
-        }
-
-        @Override
-        public void onConfigurationChanged() {
-            mHandler.post(() -> mPipBoundsHandler.onConfigurationChanged());
-        }
-
-        @Override
-        public void onAspectRatioChanged(float aspectRatio) {
-            mHandler.post(() -> mPipBoundsHandler.onAspectRatioChanged(aspectRatio));
-        }
-
-        @Override
-        public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect bounds) {
             mHandler.post(() -> {
-                mPipBoundsHandler.onPrepareAnimation(sourceRectHint, aspectRatio, bounds);
+                mMenuController.setAppActions(actions);
             });
         }
     }
@@ -226,13 +184,12 @@ public class PipManager implements BasePipManager {
         }
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
-        mPipBoundsHandler = new PipBoundsHandler(context);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager);
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, mActivityTaskManager,
-                mMenuController, mInputConsumerController, mPipBoundsHandler);
+                mMenuController, mInputConsumerController);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
 
@@ -295,6 +252,5 @@ public class PipManager implements BasePipManager {
         mInputConsumerController.dump(pw, innerPrefix);
         mMenuController.dump(pw, innerPrefix);
         mTouchHandler.dump(pw, innerPrefix);
-        mPipBoundsHandler.dump(pw, innerPrefix);
     }
 }
