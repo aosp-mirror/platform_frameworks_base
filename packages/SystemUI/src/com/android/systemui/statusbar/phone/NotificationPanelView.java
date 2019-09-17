@@ -102,6 +102,7 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -177,12 +178,22 @@ public class NotificationPanelView extends PanelView implements
     @VisibleForTesting
     final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
+
+                @Override
+                public void onBiometricAuthenticated(int userId,
+                        BiometricSourceType biometricSourceType) {
+                    if (mFirstBypassAttempt && mUpdateMonitor.isUnlockingWithBiometricAllowed()) {
+                        mDelayShowingKeyguardStatusBar = true;
+                    }
+                }
+
                 @Override
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
                     boolean keyguardOrShadeLocked = mBarState == StatusBarState.KEYGUARD
                             || mBarState == StatusBarState.SHADE_LOCKED;
-                    if (!running && mFirstBypassAttempt && keyguardOrShadeLocked && !mDozing) {
+                    if (!running && mFirstBypassAttempt && keyguardOrShadeLocked && !mDozing
+                            && !mDelayShowingKeyguardStatusBar) {
                         mFirstBypassAttempt = false;
                         animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                     }
@@ -191,6 +202,17 @@ public class NotificationPanelView extends PanelView implements
                 @Override
                 public void onFinishedGoingToSleep(int why) {
                     mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
+                    mDelayShowingKeyguardStatusBar = false;
+                }
+            };
+    private final KeyguardMonitor.Callback mKeyguardMonitorCallback =
+            new KeyguardMonitor.Callback() {
+                @Override
+                public void onKeyguardFadingAwayChanged() {
+                    if (!mKeyguardMonitor.isKeyguardFadingAway()) {
+                        mFirstBypassAttempt = false;
+                        mDelayShowingKeyguardStatusBar = false;
+                    }
                 }
             };
 
@@ -413,7 +435,17 @@ public class NotificationPanelView extends PanelView implements
     private boolean mShowingKeyguardHeadsUp;
     private boolean mAllowExpandForSmallExpansion;
     private Runnable mExpandAfterLayoutRunnable;
+
+    /**
+     * If face auth with bypass is running for the first time after you turn on the screen.
+     * (From aod or screen off)
+     */
     private boolean mFirstBypassAttempt;
+    /**
+     * If auth happens successfully during {@code mFirstBypassAttempt}, and we should wait until
+     * the keyguard is dismissed to show the status bar.
+     */
+    private boolean mDelayShowingKeyguardStatusBar;
 
     private PluginManager mPluginManager;
     private FrameLayout mPluginFrame;
@@ -450,6 +482,7 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
+        mKeyguardMonitor.addCallback(mKeyguardMonitorCallback);
         dynamicPrivacyController.addListener(this);
 
         mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);
@@ -2391,7 +2424,8 @@ public class NotificationPanelView extends PanelView implements
                 * mKeyguardStatusBarAnimateAlpha;
         newAlpha *= 1.0f - mKeyguardHeadsUpShowingAmount;
         mKeyguardStatusBar.setAlpha(newAlpha);
-        boolean hideForBypass = mFirstBypassAttempt && mUpdateMonitor.shouldListenForFace();
+        boolean hideForBypass = mFirstBypassAttempt && mUpdateMonitor.shouldListenForFace()
+                || mDelayShowingKeyguardStatusBar;
         mKeyguardStatusBar.setVisibility(newAlpha != 0f && !mDozing && !hideForBypass
                 ? VISIBLE : INVISIBLE);
     }
