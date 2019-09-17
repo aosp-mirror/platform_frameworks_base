@@ -9421,7 +9421,8 @@ package android.telephony.ims.stub {
     method public void onReady();
     method public final void onSendSmsResult(int, int, int, int) throws java.lang.RuntimeException;
     method public final void onSmsReceived(int, String, byte[]) throws java.lang.RuntimeException;
-    method public final void onSmsStatusReportReceived(int, int, String, byte[]) throws java.lang.RuntimeException;
+    method @Deprecated public final void onSmsStatusReportReceived(int, int, String, byte[]) throws java.lang.RuntimeException;
+    method public final void onSmsStatusReportReceived(int, String, byte[]) throws java.lang.RuntimeException;
     method public void sendSms(int, int, String, String, boolean, byte[]);
     field public static final int DELIVER_STATUS_ERROR_GENERIC = 2; // 0x2
     field public static final int DELIVER_STATUS_ERROR_NO_MEMORY = 3; // 0x3
