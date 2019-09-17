@@ -765,6 +765,45 @@ public class PackageWatchdogTest {
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_B);
     }
 
+    /**
+     * Test default monitoring duration is used when PackageWatchdog#startObservingHealth is offered
+     * an invalid durationMs.
+     */
+    @Test
+    public void testInvalidMonitoringDuration_beforeExpiry() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), -1);
+        // Note: Don't move too close to the expiration time otherwise the handler will be thrashed
+        // by PackageWatchdog#scheduleNextSyncStateLocked which keeps posting runnables with very
+        // small timeouts.
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS - 100);
+        raiseFatalFailureAndDispatch(watchdog,
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+
+        // We should receive APP_A since the observer hasn't expired
+        assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
+    }
+
+    /**
+     * Test default monitoring duration is used when PackageWatchdog#startObservingHealth is offered
+     * an invalid durationMs.
+     */
+    @Test
+    public void testInvalidMonitoringDuration_afterExpiry() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), -1);
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS + 1);
+        raiseFatalFailureAndDispatch(watchdog,
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+
+        // We should receive nothing since the observer has expired
+        assertThat(observer.mHealthCheckFailedPackages).isEmpty();
+    }
+
     /** Test we are notified when enough failures are triggered within any window. */
     @Test
     public void testFailureTriggerWindow() {
