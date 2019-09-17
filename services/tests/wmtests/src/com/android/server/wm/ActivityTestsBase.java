@@ -139,6 +139,8 @@ class ActivityTestsBase {
         private int mScreenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
         private boolean mLaunchTaskBehind;
         private int mConfigChanges;
+        private int mLaunchedFromPid;
+        private int mLaunchedFromUid;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -214,6 +216,16 @@ class ActivityTestsBase {
             return this;
         }
 
+        ActivityBuilder setLaunchedFromPid(int pid) {
+            mLaunchedFromPid = pid;
+            return this;
+        }
+
+        ActivityBuilder setLaunchedFromUid(int uid) {
+            mLaunchedFromUid = uid;
+            return this;
+        }
+
         ActivityRecord build() {
             if (mComponent == null) {
                 final int id = sCurrentActivityId++;
@@ -250,10 +262,11 @@ class ActivityTestsBase {
             }
 
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
-                    0 /* launchedFromPid */, 0, null, intent, null,
-                    aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
-                    0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
-                    mService.mStackSupervisor, options, null /* sourceRecord */);
+                    mLaunchedFromPid /* launchedFromPid */, mLaunchedFromUid /* launchedFromUid */,
+                    null, intent, null, aInfo /*aInfo*/, new Configuration(), null /* resultTo */,
+                    null /* resultWho */, 0 /* reqCode */, false /*componentSpecified*/,
+                    false /* rootVoiceInteraction */, mService.mStackSupervisor, options,
+                    null /* sourceRecord */);
             spyOn(activity);
             if (mTaskRecord != null) {
                 // fullscreen value is normally read from resources in ctor, so for testing we need

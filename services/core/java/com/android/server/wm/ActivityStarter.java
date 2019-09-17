@@ -2542,7 +2542,8 @@ class ActivityStarter {
             final boolean onTop =
                     (aOptions == null || !aOptions.getAvoidMoveToFront()) && !mLaunchTaskBehind;
             final ActivityStack stack =
-                    mRootActivityContainer.getLaunchStack(r, aOptions, task, onTop, mLaunchParams);
+                    mRootActivityContainer.getLaunchStack(r, aOptions, task, onTop, mLaunchParams,
+                            mRequest.realCallingPid, mRequest.realCallingUid);
             return stack;
         }
         // Otherwise handle adjacent launch.
@@ -2660,11 +2661,24 @@ class ActivityStarter {
         return this;
     }
 
+    /**
+     * Sets the pid of the caller who originally started the activity.
+     *
+     * Normally, the pid/uid would be the calling pid from the binder call.
+     * However, in case of a {@link PendingIntent}, the pid/uid pair of the caller is considered
+     * the original entity that created the pending intent, in contrast to setRealCallingPid/Uid,
+     * which represents the entity who invoked pending intent via {@link PendingIntent#send}.
+     */
     ActivityStarter setCallingPid(int pid) {
         mRequest.callingPid = pid;
         return this;
     }
 
+    /**
+     * Sets the uid of the caller who originally started the activity.
+     *
+     * @see #setCallingPid
+     */
     ActivityStarter setCallingUid(int uid) {
         mRequest.callingUid = uid;
         return this;
@@ -2675,11 +2689,25 @@ class ActivityStarter {
         return this;
     }
 
+    /**
+     * Sets the pid of the caller who requested to launch the activity.
+     *
+     * The pid/uid represents the caller who launches the activity in this request.
+     * It will almost same as setCallingPid/Uid except when processing {@link PendingIntent}:
+     * the pid/uid will be the caller who called {@link PendingIntent#send()}.
+     *
+     * @see #setCallingPid
+     */
     ActivityStarter setRealCallingPid(int pid) {
         mRequest.realCallingPid = pid;
         return this;
     }
 
+    /**
+     * Sets the uid of the caller who requested to launch the activity.
+     *
+     * @see #setRealCallingPid
+     */
     ActivityStarter setRealCallingUid(int uid) {
         mRequest.realCallingUid = uid;
         return this;
