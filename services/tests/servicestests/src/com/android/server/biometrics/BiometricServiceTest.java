@@ -55,6 +55,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.security.KeyStore;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+
 import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
 
@@ -65,9 +68,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-
-import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.SmallTest;
 
 @SmallTest
 public class BiometricServiceTest {
@@ -727,8 +727,7 @@ public class BiometricServiceTest {
                 0 /* userId */,
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
-                createTestBiometricPromptBundle(requireConfirmation),
-                null /* IBiometricConfirmDeviceCredentialCallback */);
+                createTestBiometricPromptBundle(requireConfirmation));
     }
 
     private static Bundle createTestBiometricPromptBundle(boolean requireConfirmation) {
