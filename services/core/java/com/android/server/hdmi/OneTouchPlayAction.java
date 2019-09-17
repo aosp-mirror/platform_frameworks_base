@@ -77,7 +77,6 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(), mTargetAddress));
         broadcastActiveSource();
         queryDevicePowerStatus();
-        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
@@ -99,6 +98,7 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
     }
 
     private void queryDevicePowerStatus() {
+        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
                 mTargetAddress));
     }
