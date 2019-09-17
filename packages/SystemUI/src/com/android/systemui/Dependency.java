@@ -97,7 +97,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -221,7 +221,7 @@ public class Dependency {
     @Inject Lazy<FlashlightController> mFlashlightController;
     @Inject Lazy<UserSwitcherController> mUserSwitcherController;
     @Inject Lazy<UserInfoController> mUserInfoController;
-    @Inject Lazy<KeyguardMonitor> mKeyguardMonitor;
+    @Inject Lazy<KeyguardStateController> mKeyguardMonitor;
     @Inject Lazy<KeyguardUpdateMonitor> mKeyguardUpdateMonitor;
     @Inject Lazy<BatteryController> mBatteryController;
     @Inject Lazy<NightDisplayListener> mNightDisplayListener;
@@ -355,7 +355,7 @@ public class Dependency {
 
         mProviders.put(FlashlightController.class, mFlashlightController::get);
 
-        mProviders.put(KeyguardMonitor.class, mKeyguardMonitor::get);
+        mProviders.put(KeyguardStateController.class, mKeyguardMonitor::get);
 
         mProviders.put(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor::get);
 

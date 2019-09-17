@@ -48,8 +48,8 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.FlashlightControllerImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -146,7 +146,8 @@ public abstract class DependencyBinder {
     /**
      */
     @Binds
-    public abstract KeyguardMonitor provideKeyguardMonitor(KeyguardMonitorImpl controllerImpl);
+    public abstract KeyguardStateController provideKeyguardMonitor(
+            KeyguardStateControllerImpl controllerImpl);
 
     /**
      */

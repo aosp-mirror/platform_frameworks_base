@@ -23,6 +23,7 @@ import android.provider.Settings
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -31,7 +32,7 @@ import javax.inject.Singleton
 @Singleton
 class KeyguardBypassController {
 
-    private val unlockMethodCache: UnlockMethodCache
+    private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController
     private var hasFaceFeature: Boolean
 
@@ -47,7 +48,7 @@ class KeyguardBypassController {
      * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
      */
     var bypassEnabled: Boolean = false
-        get() = field && unlockMethodCache.isFaceAuthEnabled
+        get() = field && mKeyguardStateController.isFaceAuthEnabled
         private set
 
     var bouncerShowing: Boolean = false
@@ -66,9 +67,10 @@ class KeyguardBypassController {
         context: Context,
         tunerService: TunerService,
         statusBarStateController: StatusBarStateController,
-        lockscreenUserManager: NotificationLockscreenUserManager
+        lockscreenUserManager: NotificationLockscreenUserManager,
+        keyguardStateController: KeyguardStateController
     ) {
-        unlockMethodCache = UnlockMethodCache.getInstance(context)
+        this.mKeyguardStateController = keyguardStateController
         this.statusBarStateController = statusBarStateController
 
         hasFaceFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)

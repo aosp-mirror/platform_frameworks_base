@@ -17,10 +17,6 @@ package com.android.systemui.statusbar;
 
 import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_FADING;
-import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
-import static com.android.systemui.statusbar.phone.BiometricUnlockController
-        .MODE_WAKE_AND_UNLOCK_PULSING;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_MEDIA_FAKE_ARTWORK;
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_LOCKSCREEN_WALLPAPER;
 import static com.android.systemui.statusbar.phone.StatusBar.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
@@ -67,7 +63,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -94,7 +90,8 @@ public class NotificationMediaManager implements Dumpable {
     private final StatusBarStateController mStatusBarStateController
             = Dependency.get(StatusBarStateController.class);
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
-    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final KeyguardStateController mKeyguardStateController = Dependency.get(
+            KeyguardStateController.class);
     private final KeyguardBypassController mKeyguardBypassController;
     private static final HashSet<Integer> PAUSED_MEDIA_STATES = new HashSet<>();
     static {
@@ -461,7 +458,7 @@ public class NotificationMediaManager implements Dumpable {
 
         boolean wakeAndUnlock = mBiometricUnlockController != null
             && mBiometricUnlockController.isWakeAndUnlock();
-        if (mKeyguardMonitor.isLaunchTransitionFadingAway() || wakeAndUnlock) {
+        if (mKeyguardStateController.isLaunchTransitionFadingAway() || wakeAndUnlock) {
             mBackdrop.setVisibility(View.INVISIBLE);
             Trace.endSection();
             return;
@@ -599,7 +596,7 @@ public class NotificationMediaManager implements Dumpable {
                 boolean cannotAnimateDoze = shadeController != null
                         && shadeController.isDozing()
                         && !ScrimState.AOD.getAnimateChange();
-                boolean needsBypassFading = mKeyguardMonitor.isBypassFadingAnimation();
+                boolean needsBypassFading = mKeyguardStateController.isBypassFadingAnimation();
                 if (((mBiometricUnlockController != null && mBiometricUnlockController.getMode()
                         == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
                                 || cannotAnimateDoze) && !needsBypassFading)
@@ -626,10 +623,12 @@ public class NotificationMediaManager implements Dumpable {
                                 mBackdropBack.setImageDrawable(null);
                                 mHandler.post(mHideBackdropFront);
                             });
-                    if (mKeyguardMonitor.isKeyguardFadingAway()) {
+                    if (mKeyguardStateController.isKeyguardFadingAway()) {
                         mBackdrop.animate()
-                                .setDuration(mKeyguardMonitor.getShortenedFadingAwayDuration())
-                                .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
+                                .setDuration(
+                                        mKeyguardStateController.getShortenedFadingAwayDuration())
+                                .setStartDelay(
+                                        mKeyguardStateController.getKeyguardFadingAwayDelay())
                                 .setInterpolator(Interpolators.LINEAR)
                                 .start();
                     }

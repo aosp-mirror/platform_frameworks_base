@@ -71,7 +71,7 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -104,7 +104,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private ShadeController mShadeController;
     @Mock
-    private KeyguardMonitor mKeyguardMonitor;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private Handler mHandler;
     @Mock
@@ -167,7 +167,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 mock(StatusBarStateController.class), mock(KeyguardManager.class),
                 mock(IDreamManager.class), mRemoteInputManager,
                 mock(StatusBarRemoteInputCallback.class), mock(NotificationGroupManager.class),
-                mock(NotificationLockscreenUserManager.class), mShadeController, mKeyguardMonitor,
+                mock(NotificationLockscreenUserManager.class), mShadeController,
+                mKeyguardStateController,
                 mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
                 mock(LockPatternUtils.class), mHandler, mHandler, mActivityIntentHelper,
                 mBubbleController);
@@ -200,7 +201,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         sbn.getNotification().contentIntent = mContentIntent;
         sbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 
-        when(mKeyguardMonitor.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mShadeController.isOccluded()).thenReturn(true);
 
         // When
@@ -263,7 +264,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // Given
         sbn.getNotification().contentIntent = null;
-        when(mKeyguardMonitor.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mShadeController.isOccluded()).thenReturn(true);
 
         // When
@@ -293,7 +294,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // Given
         sbn.getNotification().contentIntent = mContentIntent;
-        when(mKeyguardMonitor.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mShadeController.isOccluded()).thenReturn(true);
 
         // When

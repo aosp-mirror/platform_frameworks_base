@@ -51,8 +51,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.AccessibilityController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
@@ -79,7 +79,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private AccessibilityController mAccessibilityController;
     @Mock
-    private UnlockMethodCache mUnlockMethodCache;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -111,7 +111,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         }
         mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
                 mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
-                mUnlockMethodCache, mStatusBarStateController, mKeyguardUpdateMonitor);
+                mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor);
     }
 
     @Test
@@ -187,7 +187,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void unlockMethodCache_listenerUpdatesIndication() {
+    public void updateMonitor_listenerUpdatesIndication() {
         createController();
         String restingIndication = "Resting indication";
 
@@ -203,14 +203,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         reset(mKeyguardUpdateMonitor);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
-        mController.onUnlockMethodStateChanged();
+        mController.onUnlockedChanged();
         assertThat(mTextView.getText()).isEqualTo(restingIndication);
     }
 
     @Test
-    public void unlockMethodCache_listener() {
+    public void updateMonitor_listener() {
         createController();
-        verify(mUnlockMethodCache).addListener(eq(mController));
+        verify(mKeyguardStateController).addCallback(eq(mController));
         verify(mStatusBarStateController).addCallback(eq(mController));
         verify(mKeyguardUpdateMonitor, times(2)).registerCallback(any());
     }

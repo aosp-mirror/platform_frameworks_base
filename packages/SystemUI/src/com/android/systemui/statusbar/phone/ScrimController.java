@@ -47,7 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.ViewState;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -129,7 +129,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     protected final ScrimView mScrimBehind;
     protected final ScrimView mScrimForBubble;
 
-    private final UnlockMethodCache mUnlockMethodCache;
+    private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
     private final AlarmTimeout mTimeTicker;
@@ -187,7 +187,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, ScrimView scrimForBubble,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-            AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
+            AlarmManager alarmManager, KeyguardStateController keyguardStateController) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mScrimForBubble = scrimForBubble;
@@ -196,8 +196,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mScrimVisibleListener = scrimVisibleListener;
 
         mContext = scrimBehind.getContext();
-        mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
-        mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
+        mKeyguardStateController = keyguardStateController;
+        mDarkenWhileDragging = !mKeyguardStateController.canDismissLockScreen();
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
@@ -210,11 +210,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // to make sure that text on top of it is legible.
         mScrimBehindAlpha = mScrimBehindAlphaResValue;
         mDozeParameters = dozeParameters;
-        keyguardMonitor.addCallback(new KeyguardMonitor.Callback() {
+        keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
-                setKeyguardFadingAway(keyguardMonitor.isKeyguardFadingAway(),
-                        keyguardMonitor.getKeyguardFadingAwayDuration());
+                setKeyguardFadingAway(keyguardStateController.isKeyguardFadingAway(),
+                        keyguardStateController.getKeyguardFadingAwayDuration());
             }
         });
 
@@ -367,7 +367,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     public void onTrackingStarted() {
         mTracking = true;
-        mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
+        mDarkenWhileDragging = !mKeyguardStateController.canDismissLockScreen();
     }
 
     public void onExpandingFinished() {

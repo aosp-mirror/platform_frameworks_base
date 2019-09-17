@@ -47,8 +47,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.RemoteInputView;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -59,7 +58,8 @@ import javax.inject.Singleton;
 public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         StatusBarStateController.StateListener {
 
-    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final KeyguardStateController mKeyguardStateController = Dependency.get(
+            KeyguardStateController.class);
     private final SysuiStatusBarStateController mStatusBarStateController =
             (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
     private final NotificationLockscreenUserManager mLockscreenUserManager =
@@ -165,7 +165,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     @Override
     public void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row,
             View clickedView) {
-        if (mKeyguardMonitor.isShowing()) {
+        if (mKeyguardStateController.isShowing()) {
             onLockedRemoteInput(row, clickedView);
         } else {
             if (row.isChildInGroup() && !row.areChildrenExpanded()) {

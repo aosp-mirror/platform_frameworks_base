@@ -39,7 +39,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.function.BiConsumer;
@@ -89,7 +89,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             };
     private boolean mAnimationsEnabled = true;
     Point mPoint;
-    private KeyguardMonitor mKeyguardMonitor;
+    private KeyguardStateController mKeyguardStateController;
 
 
     public HeadsUpAppearanceController(
@@ -160,7 +160,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mWakeUpCoordinator = wakeUpCoordinator;
         wakeUpCoordinator.addListener(this);
         mCommandQueue = getComponent(headsUpStatusBarView.getContext(), CommandQueue.class);
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
     }
 
 
@@ -378,7 +378,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         boolean canShow = !mIsExpanded && notificationsShown;
         if (mBypassController.getBypassEnabled() &&
                 (mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                        || mKeyguardMonitor.isKeyguardGoingAway())
+                        || mKeyguardStateController.isKeyguardGoingAway())
                 && notificationsShown) {
             canShow = true;
         }

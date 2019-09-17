@@ -212,7 +212,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -222,7 +221,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -246,7 +246,7 @@ import javax.inject.Named;
 import dagger.Subcomponent;
 
 public class StatusBar extends SystemUI implements DemoMode,
-        ActivityStarter, OnUnlockMethodChangedListener,
+        ActivityStarter, KeyguardStateController.Callback,
         OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener, ShadeController,
@@ -358,7 +358,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected StatusBarWindowController mStatusBarWindowController;
-    protected UnlockMethodCache mUnlockMethodCache;
     @VisibleForTesting
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
@@ -377,6 +376,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     NotificationWakeUpCoordinator mWakeUpCoordinator;
     @Inject
     KeyguardBypassController mKeyguardBypassController;
+    @Inject
+    KeyguardStateController mKeyguardStateController;
     @Inject
     protected HeadsUpManagerPhone mHeadsUpManager;
     @Inject
@@ -545,7 +546,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         + "mStatusBarKeyguardViewManager was null");
                 return;
             }
-            if (mKeyguardMonitor.isKeyguardFadingAway()) {
+            if (mKeyguardStateController.isKeyguardFadingAway()) {
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }
         }
@@ -559,7 +560,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     protected UserSwitcherController mUserSwitcherController;
     private NetworkController mNetworkController;
-    private KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
     private BatteryController mBatteryController;
     protected boolean mPanelExpanded;
     private UiModeManager mUiModeManager;
@@ -786,8 +786,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController);
         mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
 
-        mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
-        mUnlockMethodCache.addListener(this);
+        mKeyguardStateController.addCallback(this);
         startKeyguard();
 
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
@@ -959,7 +958,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                 }, DozeParameters.getInstance(mContext),
                 mContext.getSystemService(AlarmManager.class),
-                mKeyguardMonitor);
+                mKeyguardStateController);
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
         mDozeScrimController = new DozeScrimController(DozeParameters.getInstance(context));
@@ -1116,7 +1115,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
                 mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
                 mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
-                mLockscreenUserManager, mShadeController, mKeyguardMonitor,
+                mLockscreenUserManager, mShadeController, mKeyguardStateController,
                 mNotificationInterruptionStateProvider, mMetricsLogger,
                 new LockPatternUtils(mContext), Dependency.get(MAIN_HANDLER),
                 Dependency.get(BG_HANDLER), mActivityIntentHelper, mBubbleController);
@@ -1257,8 +1256,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mBiometricUnlockController = new BiometricUnlockController(mContext,
                 mDozeScrimController, keyguardViewMediator,
-                mScrimController, this, UnlockMethodCache.getInstance(mContext),
-                new Handler(), mKeyguardUpdateMonitor, mKeyguardBypassController);
+                mScrimController, this, mKeyguardStateController, new Handler(),
+                mKeyguardUpdateMonitor, mKeyguardBypassController);
         putComponent(BiometricUnlockController.class, mBiometricUnlockController);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
@@ -1374,7 +1373,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Asks {@link KeyguardUpdateMonitor} to run face auth.
      */
     public void requestFaceAuth() {
-        if (!mUnlockMethodCache.canSkipBouncer()) {
+        if (!mKeyguardStateController.canDismissLockScreen()) {
             mKeyguardUpdateMonitor.requestFaceAuth();
         }
     }
@@ -1558,9 +1557,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         logStateToEventlog();
     }
 
-    @Override  // UnlockMethodCache.OnUnlockMethodChangedListener
-    public void onUnlockMethodStateChanged() {
-        // Unlock method state changed. Notify KeguardMonitor
+    @Override
+    public void onUnlockedChanged() {
         updateKeyguardState();
         logStateToEventlog();
     }
@@ -1621,10 +1619,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             // There are no longer any notifications to show.  We should end the pulse now.
             mDozeScrimController.pulseOutNow();
         }
-    }
-
-    public boolean isKeyguardCurrentlySecure() {
-        return !mUnlockMethodCache.canSkipBouncer();
     }
 
     public void setPanelExpanded(boolean isExpanded) {
@@ -1818,8 +1812,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void handleSystemKey(int key) {
         if (SPEW) Log.d(TAG, "handleNavigationKey: " + key);
-        if (!mCommandQueue.panelsEnabled() || !mKeyguardMonitor.isDeviceInteractive()
-                || mKeyguardMonitor.isShowing() && !mKeyguardMonitor.isOccluded()) {
+        if (!mCommandQueue.panelsEnabled() || !mKeyguardUpdateMonitor.isDeviceInteractive()
+                || mKeyguardStateController.isShowing() && !mKeyguardStateController.isOccluded()) {
             return;
         }
 
@@ -2428,10 +2422,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLightBarController.dump(fd, pw, args);
         }
 
-        if (mUnlockMethodCache != null) {
-            mUnlockMethodCache.dump(pw);
-        }
-
         if (mKeyguardBypassController != null) {
             mKeyguardBypassController.dump(pw);
         }
@@ -2684,7 +2674,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone) {
         if (mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_ASLEEP
-                && mUnlockMethodCache.canSkipBouncer()
+                && mKeyguardStateController.canDismissLockScreen()
                 && !mStatusBarStateController.leaveOpenOnKeyguardHide()
                 && isPulsing()) {
             // Reuse the biometric wake-and-unlock transition if we dismiss keyguard from a pulse.
@@ -2827,14 +2817,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         boolean isShowing = mStatusBarKeyguardViewManager.isShowing();
         boolean isOccluded = mStatusBarKeyguardViewManager.isOccluded();
         boolean isBouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
-        boolean isSecure = mUnlockMethodCache.isMethodSecure();
-        boolean canSkipBouncer = mUnlockMethodCache.canSkipBouncer();
+        boolean isSecure = mKeyguardStateController.isMethodSecure();
+        boolean unlocked = mKeyguardStateController.canDismissLockScreen();
         int stateFingerprint = getLoggingFingerprint(mState,
                 isShowing,
                 isOccluded,
                 isBouncerShowing,
                 isSecure,
-                canSkipBouncer);
+                unlocked);
         if (stateFingerprint != mLastLoggedStateFingerprint) {
             if (mStatusBarStateLog == null) {
                 mStatusBarStateLog = new LogMaker(MetricsEvent.VIEW_UNKNOWN);
@@ -2848,7 +2838,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     isOccluded ? 1 : 0,
                     isBouncerShowing ? 1 : 0,
                     isSecure ? 1 : 0,
-                    canSkipBouncer ? 1 : 0);
+                    unlocked ? 1 : 0);
             mLastLoggedStateFingerprint = stateFingerprint;
         }
     }
@@ -3048,7 +3038,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void showKeyguardImpl() {
         mIsKeyguard = true;
-        if (mKeyguardMonitor.isLaunchTransitionFadingAway()) {
+        if (mKeyguardStateController.isLaunchTransitionFadingAway()) {
             mNotificationPanel.animate().cancel();
             onLaunchTransitionFadingEnded();
         }
@@ -3080,7 +3070,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
-        mKeyguardMonitor.setLaunchTransitionFadingAway(false);
+        mKeyguardStateController.setLaunchTransitionFadingAway(false);
         mPresenter.updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
@@ -3105,7 +3095,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         mLaunchTransitionEndRunnable = endRunnable;
         Runnable hideRunnable = () -> {
-            mKeyguardMonitor.setLaunchTransitionFadingAway(true);
+            mKeyguardStateController.setLaunchTransitionFadingAway(true);
             if (beforeFading != null) {
                 beforeFading.run();
             }
@@ -3198,7 +3188,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (!mStatusBarStateController.isKeyguardRequested()) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             }
-            long delay = mKeyguardMonitor.calculateGoingToFullShadeDelay();
+            long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
             mNotificationPanel.animateToFullShade(delay);
             if (mDraggedDownEntry != null) {
                 mDraggedDownEntry.setUserLocked(false);
@@ -3240,7 +3230,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void keyguardGoingAway() {
         // Treat Keyguard exit animation as an app transition to achieve nice transition for status
         // bar.
-        mKeyguardMonitor.notifyKeyguardGoingAway(true);
+        mKeyguardStateController.notifyKeyguardGoingAway(true);
         mCommandQueue.appTransitionPending(mDisplayId, true /* forced */);
     }
 
@@ -3260,14 +3250,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue.appTransitionStarting(mDisplayId,
                     startTime - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
                     LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
-        mKeyguardMonitor.notifyKeyguardFadingAway(delay, fadeoutDuration, isBypassFading);
+        mKeyguardStateController.notifyKeyguardFadingAway(delay, fadeoutDuration, isBypassFading);
     }
 
     /**
      * Notifies that the Keyguard fading away animation is done.
      */
     public void finishKeyguardFadingAway() {
-        mKeyguardMonitor.notifyKeyguardDoneFading();
+        mKeyguardStateController.notifyKeyguardDoneFading();
         mScrimController.setExpansionAffectsAlpha(true);
     }
 
@@ -3513,8 +3503,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateKeyguardState() {
-        mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mUnlockMethodCache.isMethodSecure(),
+        mKeyguardStateController.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
+                mKeyguardStateController.isMethodSecure(),
                 mStatusBarKeyguardViewManager.isOccluded());
     }
 
@@ -3562,7 +3552,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            if (!expand && !mUnlockMethodCache.canSkipBouncer()) {
+            if (!expand && !mKeyguardStateController.canDismissLockScreen()) {
                 showBouncer(false /* scrimmed */);
             }
         }
@@ -3786,7 +3776,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void showScreenPinningRequest(int taskId) {
-        if (mKeyguardMonitor.isShowing()) {
+        if (mKeyguardStateController.isShowing()) {
             // Don't allow apps to trigger this from keyguard.
             return;
         }
@@ -3909,7 +3899,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // We don't want to end up in KEYGUARD state when we're unlocking with
         // fingerprint from doze. We should cross fade directly from black.
         boolean unlocking = mBiometricUnlockController.isWakeAndUnlock()
-                || mKeyguardMonitor.isKeyguardFadingAway();
+                || mKeyguardStateController.isKeyguardFadingAway();
 
         // Do not animate the scrim expansion when triggered by the fingerprint sensor.
         mScrimController.setExpansionAffectsAlpha(

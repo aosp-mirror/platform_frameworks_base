@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -127,7 +128,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private final KeyguardBypassController mKeyguardBypassController;
     private PowerManager.WakeLock mWakeLock;
     private final KeyguardUpdateMonitor mUpdateMonitor;
-    private final UnlockMethodCache mUnlockMethodCache;
+    private final KeyguardStateController mKeyguardStateController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final Context mContext;
     private final int mWakeUpDelay;
@@ -150,11 +151,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             KeyguardViewMediator keyguardViewMediator,
             ScrimController scrimController,
             StatusBar statusBar,
-            UnlockMethodCache unlockMethodCache, Handler handler,
+            KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController keyguardBypassController) {
         this(context, dozeScrimController, keyguardViewMediator, scrimController, statusBar,
-                unlockMethodCache, handler, keyguardUpdateMonitor,
+                keyguardStateController, handler, keyguardUpdateMonitor,
                 context.getResources()
                         .getInteger(com.android.internal.R.integer.config_wakeUpDelayDoze),
                 keyguardBypassController);
@@ -162,14 +163,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
 
     @VisibleForTesting
     protected BiometricUnlockController(Context context,
-                                     DozeScrimController dozeScrimController,
-                                     KeyguardViewMediator keyguardViewMediator,
-                                     ScrimController scrimController,
-                                     StatusBar statusBar,
-                                     UnlockMethodCache unlockMethodCache, Handler handler,
-                                     KeyguardUpdateMonitor keyguardUpdateMonitor,
-                                     int wakeUpDelay,
-                                     KeyguardBypassController keyguardBypassController) {
+            DozeScrimController dozeScrimController, KeyguardViewMediator keyguardViewMediator,
+            ScrimController scrimController, StatusBar statusBar,
+            KeyguardStateController keyguardStateController, Handler handler,
+            KeyguardUpdateMonitor keyguardUpdateMonitor, int wakeUpDelay,
+            KeyguardBypassController keyguardBypassController) {
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -182,7 +180,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mKeyguardViewMediator = keyguardViewMediator;
         mScrimController = scrimController;
         mStatusBar = statusBar;
-        mUnlockMethodCache = unlockMethodCache;
+        mKeyguardStateController = keyguardStateController;
         mHandler = handler;
         mWakeUpDelay = wakeUpDelay;
         mKeyguardBypassController = keyguardBypassController;
@@ -416,7 +414,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                 return MODE_ONLY_WAKE;
             } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
                 return MODE_WAKE_AND_UNLOCK_PULSING;
-            } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
+            } else if (unlockingAllowed || !mKeyguardStateController.isMethodSecure()) {
                 return MODE_WAKE_AND_UNLOCK;
             } else {
                 return MODE_SHOW_BOUNCER;

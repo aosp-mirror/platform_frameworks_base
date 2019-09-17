@@ -57,7 +57,7 @@ import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -82,7 +82,7 @@ public class PhoneStatusBarPolicy
                 Listener,
                 ZenModeController.Callback,
                 DeviceProvisionedListener,
-                KeyguardMonitor.Callback,
+                KeyguardStateController.Callback,
                 PrivacyItemController.Callback,
                 LocationController.LocationChangeCallback {
     private static final String TAG = "PhoneStatusBarPolicy";
@@ -119,7 +119,7 @@ public class PhoneStatusBarPolicy
     private final DataSaverController mDataSaver;
     private final ZenModeController mZenController;
     private final DeviceProvisionedController mProvisionedController;
-    private final KeyguardMonitor mKeyguardMonitor;
+    private final KeyguardStateController mKeyguardStateController;
     private final LocationController mLocationController;
     private final PrivacyItemController mPrivacyItemController;
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
@@ -152,7 +152,7 @@ public class PhoneStatusBarPolicy
         mDataSaver = Dependency.get(DataSaverController.class);
         mZenController = Dependency.get(ZenModeController.class);
         mProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mLocationController = Dependency.get(LocationController.class);
         mPrivacyItemController = Dependency.get(PrivacyItemController.class);
         mSensorPrivacyController = Dependency.get(SensorPrivacyController.class);
@@ -256,7 +256,7 @@ public class PhoneStatusBarPolicy
         mHotspot.addCallback(mHotspotCallback);
         mNextAlarmController.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
-        mKeyguardMonitor.addCallback(this);
+        mKeyguardStateController.addCallback(this);
         mPrivacyItemController.addCallback(this);
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
@@ -472,8 +472,8 @@ public class PhoneStatusBarPolicy
                 boolean isManagedProfile = mUserManager.isManagedProfile(userId);
                 mHandler.post(() -> {
                     final boolean showIcon;
-                    if (isManagedProfile &&
-                            (!mKeyguardMonitor.isShowing() || mKeyguardMonitor.isOccluded())) {
+                    if (isManagedProfile && (!mKeyguardStateController.isShowing()
+                            || mKeyguardStateController.isOccluded())) {
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 R.drawable.stat_sys_managed_profile_status,

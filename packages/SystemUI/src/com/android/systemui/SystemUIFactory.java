@@ -47,8 +47,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.volume.VolumeDialogComponent;
 
 import java.util.function.Consumer;
@@ -136,10 +135,11 @@ public class SystemUIFactory {
             LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardBouncer.BouncerExpansionCallback expansionCallback,
-            FalsingManager falsingManager, KeyguardBypassController bypassController) {
+            KeyguardStateController keyguardStateController, FalsingManager falsingManager,
+            KeyguardBypassController bypassController) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
                 dismissCallbackRegistry, falsingManager,
-                expansionCallback, UnlockMethodCache.getInstance(context),
+                expansionCallback, keyguardStateController,
                 Dependency.get(KeyguardUpdateMonitor.class), bypassController,
                 new Handler(Looper.getMainLooper()));
     }
@@ -149,9 +149,9 @@ public class SystemUIFactory {
             LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-            AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
+            AlarmManager alarmManager, KeyguardStateController keyguardStateController) {
         return new ScrimController(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
-                scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
+                scrimVisibleListener, dozeParameters, alarmManager, keyguardStateController);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,

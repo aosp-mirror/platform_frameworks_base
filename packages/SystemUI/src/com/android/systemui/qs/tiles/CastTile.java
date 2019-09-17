@@ -45,7 +45,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
     private final CastController mController;
     private final CastDetailAdapter mDetailAdapter;
-    private final KeyguardMonitor mKeyguard;
+    private final KeyguardStateController mKeyguard;
     private final NetworkController mNetworkController;
     private final Callback mCallback = new Callback();
     private final ActivityStarter mActivityStarter;
@@ -69,12 +69,13 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private boolean mWifiConnected;
 
     @Inject
-    public CastTile(QSHost host, CastController castController, KeyguardMonitor keyguardMonitor,
-            NetworkController networkController, ActivityStarter activityStarter) {
+    public CastTile(QSHost host, CastController castController,
+            KeyguardStateController keyguardStateController, NetworkController networkController,
+            ActivityStarter activityStarter) {
         super(host);
         mController = castController;
         mDetailAdapter = new CastDetailAdapter();
-        mKeyguard = keyguardMonitor;
+        mKeyguard = keyguardStateController;
         mNetworkController = networkController;
         mActivityStarter = activityStarter;
         mController.observe(this, mCallback);
@@ -257,7 +258,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 }
             };
 
-    private final class Callback implements CastController.Callback, KeyguardMonitor.Callback {
+    private final class Callback implements CastController.Callback,
+            KeyguardStateController.Callback {
         @Override
         public void onCastDevicesChanged() {
             refreshState();

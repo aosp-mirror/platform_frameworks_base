@@ -39,7 +39,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -296,14 +296,16 @@ public class TileServices extends IQSService.Stub {
 
     @Override
     public boolean isLocked() {
-        KeyguardMonitor keyguardMonitor = Dependency.get(KeyguardMonitor.class);
-        return keyguardMonitor.isShowing();
+        KeyguardStateController keyguardStateController =
+                Dependency.get(KeyguardStateController.class);
+        return keyguardStateController.isShowing();
     }
 
     @Override
     public boolean isSecure() {
-        KeyguardMonitor keyguardMonitor = Dependency.get(KeyguardMonitor.class);
-        return keyguardMonitor.isSecure() && keyguardMonitor.isShowing();
+        KeyguardStateController keyguardStateController =
+                Dependency.get(KeyguardStateController.class);
+        return keyguardStateController.isMethodSecure() && keyguardStateController.isShowing();
     }
 
     private CustomTile getTileForToken(IBinder token) {

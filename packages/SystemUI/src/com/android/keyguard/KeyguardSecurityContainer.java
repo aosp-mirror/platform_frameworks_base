@@ -49,7 +49,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.InjectionInflationController;
 
 public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSecurityView {
@@ -94,7 +94,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private final SpringAnimation mSpringAnimation;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final KeyguardUpdateMonitor mUpdateMonitor;
-    private final UnlockMethodCache mUnlockMethodCache;
+    private final KeyguardStateController mKeyguardStateController;
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private float mLastTouchY = -1;
@@ -134,8 +134,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
         mInjectionInflationController =  new InjectionInflationController(
             SystemUIFactory.getInstance().getRootComponent());
-        mUnlockMethodCache = UnlockMethodCache.getInstance(context);
         mViewConfiguration = ViewConfiguration.get(context);
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
     }
 
     public void setSecurityCallback(SecurityCallback callback) {
@@ -272,7 +272,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
      */
     private void updateBiometricRetry() {
         SecurityMode securityMode = getSecurityMode();
-        mSwipeUpToRetry = mUnlockMethodCache.isFaceAuthEnabled()
+        mSwipeUpToRetry = mKeyguardStateController.isFaceAuthEnabled()
                 && securityMode != SecurityMode.SimPin
                 && securityMode != SecurityMode.SimPuk
                 && securityMode != SecurityMode.None;

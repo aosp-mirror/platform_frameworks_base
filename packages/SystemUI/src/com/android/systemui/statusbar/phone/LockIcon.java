@@ -53,7 +53,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
@@ -68,9 +68,8 @@ import javax.inject.Named;
  */
 public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChangedListener,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
-        UnlockMethodCache.OnUnlockMethodChangedListener,
-        NotificationWakeUpCoordinator.WakeUpListener, ViewTreeObserver.OnPreDrawListener,
-        OnHeadsUpChangedListener {
+        KeyguardStateController.Callback, NotificationWakeUpCoordinator.WakeUpListener,
+        ViewTreeObserver.OnPreDrawListener, OnHeadsUpChangedListener {
 
     private static final int STATE_LOCKED = 0;
     private static final int STATE_LOCK_OPEN = 1;
@@ -78,11 +77,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private static final int STATE_BIOMETRICS_ERROR = 3;
     private final ConfigurationController mConfigurationController;
     private final StatusBarStateController mStatusBarStateController;
-    private final UnlockMethodCache mUnlockMethodCache;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final AccessibilityController mAccessibilityController;
     private final DockManager mDockManager;
-    private final KeyguardMonitor mKeyguardMonitor;
+    private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mBypassController;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -107,13 +105,13 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mUpdatePending;
     private boolean mBouncerPreHideAnimation;
 
-    private final KeyguardMonitor.Callback mKeyguardMonitorCallback =
-            new KeyguardMonitor.Callback() {
+    private final KeyguardStateController.Callback mKeyguardMonitorCallback =
+            new KeyguardStateController.Callback() {
                 @Override
                 public void onKeyguardShowingChanged() {
                     boolean force = false;
                     boolean wasShowing = mKeyguardShowing;
-                    mKeyguardShowing = mKeyguardMonitor.isShowing();
+                    mKeyguardShowing = mKeyguardStateController.isShowing();
                     if (!wasShowing && mKeyguardShowing && mBlockUpdates) {
                         mBlockUpdates = false;
                         force = true;
@@ -126,13 +124,18 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
                 @Override
                 public void onKeyguardFadingAwayChanged() {
-                    if (!mKeyguardMonitor.isKeyguardFadingAway()) {
+                    if (!mKeyguardStateController.isKeyguardFadingAway()) {
                         mBouncerPreHideAnimation = false;
                         if (mBlockUpdates) {
                             mBlockUpdates = false;
                             update(true /* force */);
                         }
                     }
+                }
+
+                @Override
+                public void onUnlockedChanged() {
+                    update();
                 }
             };
     private final DockManager.DockEventListener mDockEventListener =
@@ -181,19 +184,18 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             AccessibilityController accessibilityController,
             KeyguardBypassController bypassController,
             NotificationWakeUpCoordinator wakeUpCoordinator,
-            KeyguardMonitor keyguardMonitor,
+            KeyguardStateController keyguardStateController,
             @Nullable DockManager dockManager,
             HeadsUpManagerPhone headsUpManager) {
         super(context, attrs);
         mContext = context;
-        mUnlockMethodCache = UnlockMethodCache.getInstance(context);
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mAccessibilityController = accessibilityController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
         mBypassController = bypassController;
         mWakeUpCoordinator = wakeUpCoordinator;
-        mKeyguardMonitor = keyguardMonitor;
+        mKeyguardStateController = keyguardStateController;
         mDockManager = dockManager;
         mHeadsUpManager = headsUpManager;
     }
@@ -203,9 +205,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         super.onAttachedToWindow();
         mStatusBarStateController.addCallback(this);
         mConfigurationController.addCallback(this);
-        mKeyguardMonitor.addCallback(mKeyguardMonitorCallback);
+        mKeyguardStateController.addCallback(mKeyguardMonitorCallback);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
-        mUnlockMethodCache.addListener(this);
         mWakeUpCoordinator.addListener(this);
         mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
         if (mDockManager != null) {
@@ -221,9 +222,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mStatusBarStateController.removeCallback(this);
         mConfigurationController.removeCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
-        mKeyguardMonitor.removeCallback(mKeyguardMonitorCallback);
+        mKeyguardStateController.removeCallback(mKeyguardMonitorCallback);
         mWakeUpCoordinator.removeListener(this);
-        mUnlockMethodCache.removeListener(this);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
         }
@@ -370,15 +370,15 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     }
 
     private boolean canBlockUpdates() {
-        return mKeyguardShowing || mKeyguardMonitor.isKeyguardFadingAway();
+        return mKeyguardShowing || mKeyguardStateController.isKeyguardFadingAway();
     }
 
     private void updateClickability() {
         if (mAccessibilityController == null) {
             return;
         }
-        boolean canLock = mUnlockMethodCache.isMethodSecure()
-                && mUnlockMethodCache.canSkipBouncer();
+        boolean canLock = mKeyguardStateController.isMethodSecure()
+                && mKeyguardStateController.canDismissLockScreen();
         boolean clickToUnlock = mAccessibilityController.isAccessibilityEnabled();
         setClickable(clickToUnlock);
         setLongClickable(canLock && !clickToUnlock);
@@ -523,8 +523,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
     private int getState() {
         KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-        if ((mUnlockMethodCache.canSkipBouncer() || !mKeyguardShowing || mBouncerPreHideAnimation
-                || mKeyguardMonitor.isKeyguardGoingAway()) && !mSimLocked) {
+        if ((mKeyguardStateController.canDismissLockScreen() || !mKeyguardShowing
+                || mKeyguardStateController.isKeyguardGoingAway()) && !mSimLocked) {
             return STATE_LOCK_OPEN;
         } else if (mTransientBiometricsError) {
             return STATE_BIOMETRICS_ERROR;
@@ -580,11 +580,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     public void onLocaleListChanged() {
         setContentDescription(getContext().getText(R.string.accessibility_unlock_button));
         update(true /* force */);
-    }
-
-    @Override
-    public void onUnlockMethodStateChanged() {
-        update();
     }
 
     /**

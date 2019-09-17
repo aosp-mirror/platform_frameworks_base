@@ -28,7 +28,7 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 
 /**
@@ -100,7 +100,7 @@ public class SystemUIDialog extends AlertDialog {
     }
 
     public static void setWindowOnTop(Dialog dialog) {
-        if (Dependency.get(KeyguardMonitor.class).isShowing()) {
+        if (Dependency.get(KeyguardStateController.class).isShowing()) {
             dialog.getWindow().setType(LayoutParams.TYPE_STATUS_BAR_PANEL);
         } else {
             dialog.getWindow().setType(LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
