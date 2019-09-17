@@ -869,11 +869,19 @@ public class UsageStatsDatabase {
                 UsageStatsXml.write(out, stats);
                 break;
             case 4:
-                UsageStatsProto.write(out, stats);
+                try {
+                    UsageStatsProto.write(out, stats);
+                } catch (IOException | IllegalArgumentException e) {
+                    Slog.e(TAG, "Unable to write interval stats to proto.", e);
+                }
                 break;
             case 5:
                 stats.obfuscateData(packagesTokenData);
-                UsageStatsProtoV2.write(out, stats);
+                try {
+                    UsageStatsProtoV2.write(out, stats);
+                } catch (IOException | IllegalArgumentException e) {
+                    Slog.e(TAG, "Unable to write interval stats to proto.", e);
+                }
                 break;
             default:
                 throw new RuntimeException(
@@ -920,10 +928,18 @@ public class UsageStatsDatabase {
                 UsageStatsXml.read(in, statsOut);
                 break;
             case 4:
-                UsageStatsProto.read(in, statsOut);
+                try {
+                    UsageStatsProto.read(in, statsOut);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Unable to read interval stats from proto.", e);
+                }
                 break;
             case 5:
-                UsageStatsProtoV2.read(in, statsOut);
+                try {
+                    UsageStatsProtoV2.read(in, statsOut);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Unable to read interval stats from proto.", e);
+                }
                 statsOut.deobfuscateData(packagesTokenData);
                 break;
             default:
@@ -974,6 +990,8 @@ public class UsageStatsDatabase {
             UsageStatsProtoV2.writeObfuscatedData(fos, mPackagesTokenData);
             file.finishWrite(fos);
             fos = null;
+        } catch (IOException | IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write obfuscated data to proto.", e);
         } finally {
             file.failWrite(fos);
         }

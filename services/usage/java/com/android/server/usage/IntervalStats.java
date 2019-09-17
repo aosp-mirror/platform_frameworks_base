@@ -45,6 +45,7 @@ import android.content.res.Configuration;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoInputStream;
@@ -55,6 +56,8 @@ import java.io.IOException;
 import java.util.List;
 
 public class IntervalStats {
+    private static final String TAG = "IntervalStats";
+
     public static final int CURRENT_MAJOR_VERSION = 1;
     public static final int CURRENT_MINOR_VERSION = 1;
     public int majorVersion = CURRENT_MAJOR_VERSION;
@@ -453,6 +456,10 @@ public class IntervalStats {
             final UsageStats usageStats = packageStatsObfuscated.valueAt(statsIndex);
             usageStats.mPackageName = packagesTokenData.getString(packageToken,
                     PackagesTokenData.PACKAGE_NAME_INDEX);
+            if (usageStats.mPackageName == null) {
+                Slog.e(TAG, "Unable to parse usage stats package " + packageToken);
+                continue;
+            }
 
             // Update chooser counts
             final int chooserActionsSize = usageStats.mChooserCountsObfuscated.size();
@@ -460,6 +467,11 @@ public class IntervalStats {
                 final ArrayMap<String, Integer> categoryCountsMap = new ArrayMap<>();
                 final int actionToken = usageStats.mChooserCountsObfuscated.keyAt(actionIndex);
                 final String action = packagesTokenData.getString(packageToken, actionToken);
+                if (action == null) {
+                    Slog.i(TAG, "Unable to parse chooser action " + actionToken
+                            + " for package " + packageToken);
+                    continue;
+                }
                 final SparseIntArray categoryCounts =
                         usageStats.mChooserCountsObfuscated.valueAt(actionIndex);
                 final int categoriesSize = categoryCounts.size();
@@ -467,6 +479,11 @@ public class IntervalStats {
                     final int categoryToken = categoryCounts.keyAt(categoryIndex);
                     final String category = packagesTokenData.getString(packageToken,
                             categoryToken);
+                    if (category == null) {
+                        Slog.i(TAG, "Unable to parse chooser category " + categoryToken
+                                + " for package " + packageToken);
+                        continue;
+                    }
                     categoryCountsMap.put(category, categoryCounts.valueAt(categoryIndex));
                 }
                 usageStats.mChooserCounts.put(action, categoryCountsMap);
@@ -481,22 +498,39 @@ public class IntervalStats {
      * shortcut or notification channel tokens.
      */
     private void deobfuscateEvents(PackagesTokenData packagesTokenData) {
-        final int eventsSize = this.events.size();
-        for (int i = 0; i < eventsSize; i++) {
+        for (int i = this.events.size() - 1; i >= 0; i--) {
             final Event event = this.events.get(i);
             final int packageToken = event.mPackageToken;
             event.mPackage = packagesTokenData.getString(packageToken,
                     PackagesTokenData.PACKAGE_NAME_INDEX);
+            if (event.mPackage == null) {
+                Slog.e(TAG, "Unable to parse event package " + packageToken);
+                this.events.remove(i);
+                continue;
+            }
+
             if (event.mClassToken != PackagesTokenData.UNASSIGNED_TOKEN) {
                 event.mClass = packagesTokenData.getString(packageToken, event.mClassToken);
+                if (event.mClass == null) {
+                    Slog.i(TAG, "Unable to parse class " + event.mClassToken
+                            + " for package " + packageToken);
+                }
             }
             if (event.mTaskRootPackageToken != PackagesTokenData.UNASSIGNED_TOKEN) {
                 event.mTaskRootPackage = packagesTokenData.getString(packageToken,
                         event.mTaskRootPackageToken);
+                if (event.mTaskRootPackage == null) {
+                    Slog.i(TAG, "Unable to parse task root package " + event.mTaskRootPackageToken
+                            + " for package " + packageToken);
+                }
             }
             if (event.mTaskRootClassToken != PackagesTokenData.UNASSIGNED_TOKEN) {
                 event.mTaskRootClass = packagesTokenData.getString(packageToken,
                         event.mTaskRootClassToken);
+                if (event.mTaskRootClass == null) {
+                    Slog.i(TAG, "Unable to parse task root class " + event.mTaskRootClassToken
+                            + " for package " + packageToken);
+                }
             }
             switch (event.mEventType) {
                 case CONFIGURATION_CHANGE:
@@ -507,10 +541,23 @@ public class IntervalStats {
                 case SHORTCUT_INVOCATION:
                     event.mShortcutId = packagesTokenData.getString(packageToken,
                             event.mShortcutIdToken);
+                    if (event.mShortcutId == null) {
+                        Slog.e(TAG, "Unable to parse shortcut " + event.mShortcutIdToken
+                                + " for package " + packageToken);
+                        this.events.remove(i);
+                        continue;
+                    }
                     break;
                 case NOTIFICATION_INTERRUPTION:
                     event.mNotificationChannelId = packagesTokenData.getString(packageToken,
                             event.mNotificationChannelIdToken);
+                    if (event.mNotificationChannelId == null) {
+                        Slog.e(TAG, "Unable to parse notification channel "
+                                + event.mNotificationChannelIdToken + " for package "
+                                + packageToken);
+                        this.events.remove(i);
+                        continue;
+                    }
                     break;
             }
         }

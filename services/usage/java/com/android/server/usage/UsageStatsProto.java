@@ -120,10 +120,14 @@ final class UsageStatsProto {
                             IntervalStatsProto.UsageStats.APP_LAUNCH_COUNT);
                     break;
                 case (int) IntervalStatsProto.UsageStats.CHOOSER_ACTIONS:
-                    final long chooserToken = proto.start(
-                            IntervalStatsProto.UsageStats.CHOOSER_ACTIONS);
-                    loadChooserCounts(proto, stats);
-                    proto.end(chooserToken);
+                    try {
+                        final long chooserToken = proto.start(
+                                IntervalStatsProto.UsageStats.CHOOSER_ACTIONS);
+                        loadChooserCounts(proto, stats);
+                        proto.end(chooserToken);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read chooser counts for " + stats.mPackageName, e);
+                    }
                     break;
                 case (int) IntervalStatsProto.UsageStats.LAST_TIME_SERVICE_USED_MS:
                     // Time attributes stored is an offset of the beginTime.
@@ -153,20 +157,24 @@ final class UsageStatsProto {
     }
 
     private static void loadCountAndTime(ProtoInputStream proto, long fieldId,
-            IntervalStats.EventTracker tracker) throws IOException {
-        final long token = proto.start(fieldId);
-        while (true) {
-            switch (proto.nextField()) {
-                case (int) IntervalStatsProto.CountAndTime.COUNT:
-                    tracker.count = proto.readInt(IntervalStatsProto.CountAndTime.COUNT);
-                    break;
-                case (int) IntervalStatsProto.CountAndTime.TIME_MS:
-                    tracker.duration = proto.readLong(IntervalStatsProto.CountAndTime.TIME_MS);
-                    break;
-                case ProtoInputStream.NO_MORE_FIELDS:
-                    proto.end(token);
-                    return;
+            IntervalStats.EventTracker tracker) {
+        try {
+            final long token = proto.start(fieldId);
+            while (true) {
+                switch (proto.nextField()) {
+                    case (int) IntervalStatsProto.CountAndTime.COUNT:
+                        tracker.count = proto.readInt(IntervalStatsProto.CountAndTime.COUNT);
+                        break;
+                    case (int) IntervalStatsProto.CountAndTime.TIME_MS:
+                        tracker.duration = proto.readLong(IntervalStatsProto.CountAndTime.TIME_MS);
+                        break;
+                    case ProtoInputStream.NO_MORE_FIELDS:
+                        proto.end(token);
+                        return;
+                }
             }
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to read event tracker " + fieldId, e);
         }
     }
 
@@ -306,7 +314,7 @@ final class UsageStatsProto {
     }
 
     private static void writeStringPool(ProtoOutputStream proto, final IntervalStats stats)
-            throws IOException {
+            throws IllegalArgumentException {
         final long token = proto.start(IntervalStatsProto.STRINGPOOL);
         final int size = stats.mStringCache.size();
         proto.write(IntervalStatsProto.StringPool.SIZE, size);
@@ -317,7 +325,8 @@ final class UsageStatsProto {
     }
 
     private static void writeUsageStats(ProtoOutputStream proto, long fieldId,
-            final IntervalStats stats, final UsageStats usageStats) throws IOException {
+            final IntervalStats stats, final UsageStats usageStats)
+            throws IllegalArgumentException {
         final long token = proto.start(fieldId);
         // Write the package name first, so loadUsageStats can avoid creating an extra object
         final int packageIndex = stats.mStringCache.indexOf(usageStats.mPackageName);
@@ -347,12 +356,16 @@ final class UsageStatsProto {
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_VISIBLE_MS,
                 usageStats.mTotalTimeVisible);
         proto.write(IntervalStatsProto.UsageStats.APP_LAUNCH_COUNT, usageStats.mAppLaunchCount);
-        writeChooserCounts(proto, usageStats);
+        try {
+            writeChooserCounts(proto, usageStats);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write chooser counts for " + usageStats.mPackageName, e);
+        }
         proto.end(token);
     }
 
     private static void writeCountAndTime(ProtoOutputStream proto, long fieldId, int count,
-            long time) throws IOException {
+            long time) throws IllegalArgumentException {
         final long token = proto.start(fieldId);
         proto.write(IntervalStatsProto.CountAndTime.COUNT, count);
         proto.write(IntervalStatsProto.CountAndTime.TIME_MS, time);
@@ -361,7 +374,7 @@ final class UsageStatsProto {
 
 
     private static void writeChooserCounts(ProtoOutputStream proto, final UsageStats usageStats)
-            throws IOException {
+            throws IllegalArgumentException {
         if (usageStats == null || usageStats.mChooserCounts == null
                 || usageStats.mChooserCounts.keySet().isEmpty()) {
             return;
@@ -381,7 +394,7 @@ final class UsageStatsProto {
     }
 
     private static void writeCountsForAction(ProtoOutputStream proto,
-            ArrayMap<String, Integer> counts) throws IOException {
+            ArrayMap<String, Integer> counts) throws IllegalArgumentException {
         final int countsSize = counts.size();
         for (int i = 0; i < countsSize; i++) {
             String key = counts.keyAt(i);
@@ -397,7 +410,7 @@ final class UsageStatsProto {
 
     private static void writeConfigStats(ProtoOutputStream proto, long fieldId,
             final IntervalStats stats, final ConfigurationStats configStats, boolean isActive)
-            throws IOException {
+            throws IllegalArgumentException {
         final long token = proto.start(fieldId);
         configStats.mConfiguration.writeToProto(proto, IntervalStatsProto.Configuration.CONFIG);
         proto.write(IntervalStatsProto.Configuration.LAST_TIME_ACTIVE_MS,
@@ -410,7 +423,7 @@ final class UsageStatsProto {
     }
 
     private static void writeEvent(ProtoOutputStream proto, long fieldId, final IntervalStats stats,
-            final UsageEvents.Event event) throws IOException {
+            final UsageEvents.Event event) throws IllegalArgumentException {
         final long token = proto.start(fieldId);
         final int packageIndex = stats.mStringCache.indexOf(event.mPackage);
         if (packageIndex >= 0) {
@@ -541,17 +554,33 @@ final class UsageStatsProto {
                             statsOut.keyguardHiddenTracker);
                     break;
                 case (int) IntervalStatsProto.STRINGPOOL:
-                    stringPool = readStringPool(proto);
-                    statsOut.mStringCache.addAll(stringPool);
+                    try {
+                        stringPool = readStringPool(proto);
+                        statsOut.mStringCache.addAll(stringPool);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read string pool from proto.", e);
+                    }
                     break;
                 case (int) IntervalStatsProto.PACKAGES:
-                    loadUsageStats(proto, IntervalStatsProto.PACKAGES, statsOut, stringPool);
+                    try {
+                        loadUsageStats(proto, IntervalStatsProto.PACKAGES, statsOut, stringPool);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read some usage stats from proto.", e);
+                    }
                     break;
                 case (int) IntervalStatsProto.CONFIGURATIONS:
-                    loadConfigStats(proto, IntervalStatsProto.CONFIGURATIONS, statsOut);
+                    try {
+                        loadConfigStats(proto, IntervalStatsProto.CONFIGURATIONS, statsOut);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read some configuration stats from proto.", e);
+                    }
                     break;
                 case (int) IntervalStatsProto.EVENT_LOG:
-                    loadEvent(proto, IntervalStatsProto.EVENT_LOG, statsOut, stringPool);
+                    try {
+                        loadEvent(proto, IntervalStatsProto.EVENT_LOG, statsOut, stringPool);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read some events from proto.", e);
+                    }
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     if (statsOut.endTime == 0) {
@@ -570,37 +599,58 @@ final class UsageStatsProto {
      * @param proto The serializer to which to write the packageStats data.
      * @param stats The stats object to write to the XML file.
      */
-    public static void write(OutputStream out, IntervalStats stats) throws IOException {
+    public static void write(OutputStream out, IntervalStats stats)
+            throws IOException, IllegalArgumentException {
         final ProtoOutputStream proto = new ProtoOutputStream(out);
         proto.write(IntervalStatsProto.END_TIME_MS, stats.endTime - stats.beginTime);
         proto.write(IntervalStatsProto.MAJOR_VERSION, stats.majorVersion);
         proto.write(IntervalStatsProto.MINOR_VERSION, stats.minorVersion);
         // String pool should be written before the rest of the usage stats
-        writeStringPool(proto, stats);
+        try {
+            writeStringPool(proto, stats);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write string pool to proto.", e);
+        }
 
-        writeCountAndTime(proto, IntervalStatsProto.INTERACTIVE, stats.interactiveTracker.count,
-                stats.interactiveTracker.duration);
-        writeCountAndTime(proto, IntervalStatsProto.NON_INTERACTIVE,
-                stats.nonInteractiveTracker.count, stats.nonInteractiveTracker.duration);
-        writeCountAndTime(proto, IntervalStatsProto.KEYGUARD_SHOWN,
-                stats.keyguardShownTracker.count, stats.keyguardShownTracker.duration);
-        writeCountAndTime(proto, IntervalStatsProto.KEYGUARD_HIDDEN,
-                stats.keyguardHiddenTracker.count, stats.keyguardHiddenTracker.duration);
+        try {
+            writeCountAndTime(proto, IntervalStatsProto.INTERACTIVE, stats.interactiveTracker.count,
+                    stats.interactiveTracker.duration);
+            writeCountAndTime(proto, IntervalStatsProto.NON_INTERACTIVE,
+                    stats.nonInteractiveTracker.count, stats.nonInteractiveTracker.duration);
+            writeCountAndTime(proto, IntervalStatsProto.KEYGUARD_SHOWN,
+                    stats.keyguardShownTracker.count, stats.keyguardShownTracker.duration);
+            writeCountAndTime(proto, IntervalStatsProto.KEYGUARD_HIDDEN,
+                    stats.keyguardHiddenTracker.count, stats.keyguardHiddenTracker.duration);
+        }  catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write some interval stats trackers to proto.", e);
+        }
 
         final int statsCount = stats.packageStats.size();
         for (int i = 0; i < statsCount; i++) {
-            writeUsageStats(proto, IntervalStatsProto.PACKAGES, stats,
-                    stats.packageStats.valueAt(i));
+            try {
+                writeUsageStats(proto, IntervalStatsProto.PACKAGES, stats,
+                        stats.packageStats.valueAt(i));
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to write some usage stats to proto.", e);
+            }
         }
         final int configCount = stats.configurations.size();
         for (int i = 0; i < configCount; i++) {
             boolean active = stats.activeConfiguration.equals(stats.configurations.keyAt(i));
-            writeConfigStats(proto, IntervalStatsProto.CONFIGURATIONS, stats,
-                    stats.configurations.valueAt(i), active);
+            try {
+                writeConfigStats(proto, IntervalStatsProto.CONFIGURATIONS, stats,
+                        stats.configurations.valueAt(i), active);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to write some configuration stats to proto.", e);
+            }
         }
         final int eventCount = stats.events.size();
         for (int i = 0; i < eventCount; i++) {
-            writeEvent(proto, IntervalStatsProto.EVENT_LOG, stats, stats.events.get(i));
+            try {
+                writeEvent(proto, IntervalStatsProto.EVENT_LOG, stats, stats.events.get(i));
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to write some events to proto.", e);
+            }
         }
 
         proto.flush();

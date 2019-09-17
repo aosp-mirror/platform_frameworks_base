@@ -16,6 +16,7 @@
 package com.android.server.usage;
 
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
@@ -107,9 +108,17 @@ public final class PackagesTokenData {
      *
      * @param packageToken the package token for which this token belongs to
      * @param token the token whose string needs to be fetched
-     * @return the string representing the given token
+     * @return the string representing the given token or {@code null} if not found
      */
     public String getString(int packageToken, int token) {
-        return tokensToPackagesMap.get(packageToken).get(token);
+        try {
+            return tokensToPackagesMap.get(packageToken).get(token);
+        } catch (NullPointerException npe) {
+            Slog.e("PackagesTokenData",
+                    "Unable to find tokenized strings for package " + packageToken, npe);
+            return null;
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 }

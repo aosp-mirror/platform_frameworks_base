@@ -19,6 +19,7 @@ import android.app.usage.ConfigurationStats;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoInputStream;
@@ -62,9 +63,13 @@ final class UsageStatsProtoV2 {
                             UsageStatsObfuscatedProto.APP_LAUNCH_COUNT);
                     break;
                 case (int) UsageStatsObfuscatedProto.CHOOSER_ACTIONS:
-                    final long token = proto.start(UsageStatsObfuscatedProto.CHOOSER_ACTIONS);
-                    loadChooserCounts(proto, stats);
-                    proto.end(token);
+                    try {
+                        final long token = proto.start(UsageStatsObfuscatedProto.CHOOSER_ACTIONS);
+                        loadChooserCounts(proto, stats);
+                        proto.end(token);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read chooser counts for " + stats.mPackageToken);
+                    }
                     break;
                 case (int) UsageStatsObfuscatedProto.LAST_TIME_SERVICE_USED_MS:
                     stats.mLastTimeForegroundServiceUsed = beginTime + proto.readLong(
@@ -93,21 +98,26 @@ final class UsageStatsProtoV2 {
     }
 
     private static void loadCountAndTime(ProtoInputStream proto, long fieldId,
-            IntervalStats.EventTracker tracker) throws IOException {
-        final long token = proto.start(fieldId);
-        while (true) {
-            switch (proto.nextField()) {
-                case (int) IntervalStatsObfuscatedProto.CountAndTime.COUNT:
-                    tracker.count = proto.readInt(IntervalStatsObfuscatedProto.CountAndTime.COUNT);
-                    break;
-                case (int) IntervalStatsObfuscatedProto.CountAndTime.TIME_MS:
-                    tracker.duration = proto.readLong(
-                            IntervalStatsObfuscatedProto.CountAndTime.TIME_MS);
-                    break;
-                case ProtoInputStream.NO_MORE_FIELDS:
-                    proto.end(token);
-                    return;
+            IntervalStats.EventTracker tracker) {
+        try {
+            final long token = proto.start(fieldId);
+            while (true) {
+                switch (proto.nextField()) {
+                    case (int) IntervalStatsObfuscatedProto.CountAndTime.COUNT:
+                        tracker.count = proto.readInt(
+                                IntervalStatsObfuscatedProto.CountAndTime.COUNT);
+                        break;
+                    case (int) IntervalStatsObfuscatedProto.CountAndTime.TIME_MS:
+                        tracker.duration = proto.readLong(
+                                IntervalStatsObfuscatedProto.CountAndTime.TIME_MS);
+                        break;
+                    case ProtoInputStream.NO_MORE_FIELDS:
+                        proto.end(token);
+                        return;
+                }
             }
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to read event tracker " + fieldId, e);
         }
     }
 
@@ -278,7 +288,7 @@ final class UsageStatsProtoV2 {
     }
 
     private static void writeUsageStats(ProtoOutputStream proto, final long beginTime,
-            final UsageStats stats) throws IOException {
+            final UsageStats stats) throws IllegalArgumentException {
         // Time attributes stored as an offset of the beginTime.
         proto.write(UsageStatsObfuscatedProto.PACKAGE_TOKEN, stats.mPackageToken + 1);
         proto.write(UsageStatsObfuscatedProto.LAST_TIME_ACTIVE_MS, stats.mLastTimeUsed - beginTime);
@@ -291,11 +301,15 @@ final class UsageStatsProtoV2 {
                 stats.mLastTimeVisible - beginTime);
         proto.write(UsageStatsObfuscatedProto.TOTAL_TIME_VISIBLE_MS, stats.mTotalTimeVisible);
         proto.write(UsageStatsObfuscatedProto.APP_LAUNCH_COUNT, stats.mAppLaunchCount);
-        writeChooserCounts(proto, stats);
+        try {
+            writeChooserCounts(proto, stats);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write chooser counts for " + stats.mPackageName, e);
+        }
     }
 
     private static void writeCountAndTime(ProtoOutputStream proto, long fieldId, int count,
-            long time) throws IOException {
+            long time) throws IllegalArgumentException {
         final long token = proto.start(fieldId);
         proto.write(IntervalStatsObfuscatedProto.CountAndTime.COUNT, count);
         proto.write(IntervalStatsObfuscatedProto.CountAndTime.TIME_MS, time);
@@ -303,7 +317,7 @@ final class UsageStatsProtoV2 {
     }
 
     private static void writeChooserCounts(ProtoOutputStream proto, final UsageStats stats)
-            throws IOException {
+            throws IllegalArgumentException {
         if (stats == null || stats.mChooserCountsObfuscated.size() == 0) {
             return;
         }
@@ -322,7 +336,7 @@ final class UsageStatsProtoV2 {
     }
 
     private static void writeCountsForAction(ProtoOutputStream proto, SparseIntArray counts)
-            throws IOException {
+            throws IllegalArgumentException {
         final int countsSize = counts.size();
         for (int i = 0; i < countsSize; i++) {
             final int category = counts.keyAt(i);
@@ -339,7 +353,8 @@ final class UsageStatsProtoV2 {
     }
 
     private static void writeConfigStats(ProtoOutputStream proto, final long statsBeginTime,
-            final ConfigurationStats configStats, boolean isActive) throws IOException {
+            final ConfigurationStats configStats, boolean isActive)
+            throws IllegalArgumentException {
         configStats.mConfiguration.writeToProto(proto,
                 IntervalStatsObfuscatedProto.Configuration.CONFIG);
         proto.write(IntervalStatsObfuscatedProto.Configuration.LAST_TIME_ACTIVE_MS,
@@ -351,7 +366,7 @@ final class UsageStatsProtoV2 {
     }
 
     private static void writeEvent(ProtoOutputStream proto, final long statsBeginTime,
-            final UsageEvents.Event event) throws IOException {
+            final UsageEvents.Event event) throws IllegalArgumentException {
         proto.write(EventObfuscatedProto.PACKAGE_TOKEN, event.mPackageToken + 1);
         if (event.mClassToken != PackagesTokenData.UNASSIGNED_TOKEN) {
             proto.write(EventObfuscatedProto.CLASS_TOKEN, event.mClassToken + 1);
@@ -429,25 +444,39 @@ final class UsageStatsProtoV2 {
                             stats.keyguardHiddenTracker);
                     break;
                 case (int) IntervalStatsObfuscatedProto.PACKAGES:
-                    final long packagesToken = proto.start(IntervalStatsObfuscatedProto.PACKAGES);
-                    UsageStats usageStats = parseUsageStats(proto, stats.beginTime);
-                    if (usageStats.mPackageToken != PackagesTokenData.UNASSIGNED_TOKEN) {
-                        stats.packageStatsObfuscated.put(usageStats.mPackageToken, usageStats);
+                    try {
+                        final long packagesToken = proto.start(
+                                IntervalStatsObfuscatedProto.PACKAGES);
+                        UsageStats usageStats = parseUsageStats(proto, stats.beginTime);
+                        if (usageStats.mPackageToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                            stats.packageStatsObfuscated.put(usageStats.mPackageToken, usageStats);
+                        }
+                        proto.end(packagesToken);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read some usage stats from proto.", e);
                     }
-                    proto.end(packagesToken);
                     break;
                 case (int) IntervalStatsObfuscatedProto.CONFIGURATIONS:
-                    final long configsToken = proto.start(
-                            IntervalStatsObfuscatedProto.CONFIGURATIONS);
-                    loadConfigStats(proto, stats);
-                    proto.end(configsToken);
+                    try {
+                        final long configsToken = proto.start(
+                                IntervalStatsObfuscatedProto.CONFIGURATIONS);
+                        loadConfigStats(proto, stats);
+                        proto.end(configsToken);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read some configuration stats from proto.", e);
+                    }
                     break;
                 case (int) IntervalStatsObfuscatedProto.EVENT_LOG:
-                    final long eventsToken = proto.start(IntervalStatsObfuscatedProto.EVENT_LOG);
-                    UsageEvents.Event event = parseEvent(proto, stats.beginTime);
-                    proto.end(eventsToken);
-                    if (event != null) {
-                        stats.events.insert(event);
+                    try {
+                        final long eventsToken = proto.start(
+                                IntervalStatsObfuscatedProto.EVENT_LOG);
+                        UsageEvents.Event event = parseEvent(proto, stats.beginTime);
+                        proto.end(eventsToken);
+                        if (event != null) {
+                            stats.events.insert(event);
+                        }
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to read some events from proto.", e);
                     }
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
@@ -466,39 +495,56 @@ final class UsageStatsProtoV2 {
      * @param out the output stream to which to write the interval stats data.
      * @param stats the interval stats object to write to the proto file.
      */
-    public static void write(OutputStream out, IntervalStats stats) throws IOException {
+    public static void write(OutputStream out, IntervalStats stats)
+            throws IOException, IllegalArgumentException {
         final ProtoOutputStream proto = new ProtoOutputStream(out);
         proto.write(IntervalStatsObfuscatedProto.END_TIME_MS, stats.endTime - stats.beginTime);
         proto.write(IntervalStatsObfuscatedProto.MAJOR_VERSION, stats.majorVersion);
         proto.write(IntervalStatsObfuscatedProto.MINOR_VERSION, stats.minorVersion);
 
-        writeCountAndTime(proto, IntervalStatsObfuscatedProto.INTERACTIVE,
-                stats.interactiveTracker.count, stats.interactiveTracker.duration);
-        writeCountAndTime(proto, IntervalStatsObfuscatedProto.NON_INTERACTIVE,
-                stats.nonInteractiveTracker.count, stats.nonInteractiveTracker.duration);
-        writeCountAndTime(proto, IntervalStatsObfuscatedProto.KEYGUARD_SHOWN,
-                stats.keyguardShownTracker.count, stats.keyguardShownTracker.duration);
-        writeCountAndTime(proto, IntervalStatsObfuscatedProto.KEYGUARD_HIDDEN,
-                stats.keyguardHiddenTracker.count, stats.keyguardHiddenTracker.duration);
+        try {
+            writeCountAndTime(proto, IntervalStatsObfuscatedProto.INTERACTIVE,
+                    stats.interactiveTracker.count, stats.interactiveTracker.duration);
+            writeCountAndTime(proto, IntervalStatsObfuscatedProto.NON_INTERACTIVE,
+                    stats.nonInteractiveTracker.count, stats.nonInteractiveTracker.duration);
+            writeCountAndTime(proto, IntervalStatsObfuscatedProto.KEYGUARD_SHOWN,
+                    stats.keyguardShownTracker.count, stats.keyguardShownTracker.duration);
+            writeCountAndTime(proto, IntervalStatsObfuscatedProto.KEYGUARD_HIDDEN,
+                    stats.keyguardHiddenTracker.count, stats.keyguardHiddenTracker.duration);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write some interval stats trackers to proto.", e);
+        }
 
         final int statsCount = stats.packageStatsObfuscated.size();
         for (int i = 0; i < statsCount; i++) {
-            final long token = proto.start(IntervalStatsObfuscatedProto.PACKAGES);
-            writeUsageStats(proto, stats.beginTime, stats.packageStatsObfuscated.valueAt(i));
-            proto.end(token);
+            try {
+                final long token = proto.start(IntervalStatsObfuscatedProto.PACKAGES);
+                writeUsageStats(proto, stats.beginTime, stats.packageStatsObfuscated.valueAt(i));
+                proto.end(token);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to write some usage stats to proto.", e);
+            }
         }
         final int configCount = stats.configurations.size();
         for (int i = 0; i < configCount; i++) {
             boolean active = stats.activeConfiguration.equals(stats.configurations.keyAt(i));
-            final long token = proto.start(IntervalStatsObfuscatedProto.CONFIGURATIONS);
-            writeConfigStats(proto, stats.beginTime, stats.configurations.valueAt(i), active);
-            proto.end(token);
+            try {
+                final long token = proto.start(IntervalStatsObfuscatedProto.CONFIGURATIONS);
+                writeConfigStats(proto, stats.beginTime, stats.configurations.valueAt(i), active);
+                proto.end(token);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to write some configuration stats to proto.", e);
+            }
         }
         final int eventCount = stats.events.size();
         for (int i = 0; i < eventCount; i++) {
-            final long token = proto.start(IntervalStatsObfuscatedProto.EVENT_LOG);
-            writeEvent(proto, stats.beginTime, stats.events.get(i));
-            proto.end(token);
+            try {
+                final long token = proto.start(IntervalStatsObfuscatedProto.EVENT_LOG);
+                writeEvent(proto, stats.beginTime, stats.events.get(i));
+                proto.end(token);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to write some events to proto.", e);
+            }
         }
 
         proto.flush();
@@ -559,7 +605,7 @@ final class UsageStatsProtoV2 {
      * @param packagesTokenData the packages data object holding the data to write.
      */
     static void writeObfuscatedData(OutputStream out, PackagesTokenData packagesTokenData)
-            throws IOException {
+            throws IOException, IllegalArgumentException {
         final ProtoOutputStream proto = new ProtoOutputStream(out);
         proto.write(ObfuscatedPackagesProto.COUNTER, packagesTokenData.counter);
 
@@ -660,16 +706,61 @@ final class UsageStatsProtoV2 {
         while (true) {
             switch (proto.nextField()) {
                 case (int) IntervalStatsObfuscatedProto.PENDING_EVENTS:
-                    final long token = proto.start(IntervalStatsObfuscatedProto.PENDING_EVENTS);
-                    UsageEvents.Event event = parsePendingEvent(proto);
-                    proto.end(token);
-                    if (event != null) {
-                        events.add(event);
+                    try {
+                        final long token = proto.start(IntervalStatsObfuscatedProto.PENDING_EVENTS);
+                        UsageEvents.Event event = parsePendingEvent(proto);
+                        proto.end(token);
+                        if (event != null) {
+                            events.add(event);
+                        }
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to parse some pending events from proto.", e);
                     }
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     return;
             }
+        }
+    }
+
+    private static void writePendingEvent(ProtoOutputStream proto, UsageEvents.Event event)
+            throws IllegalArgumentException {
+        proto.write(PendingEventProto.PACKAGE_NAME, event.mPackage);
+        if (event.mClass != null) {
+            proto.write(PendingEventProto.CLASS_NAME, event.mClass);
+        }
+        proto.write(PendingEventProto.TIME_MS, event.mTimeStamp);
+        proto.write(PendingEventProto.FLAGS, event.mFlags);
+        proto.write(PendingEventProto.TYPE, event.mEventType);
+        proto.write(PendingEventProto.INSTANCE_ID, event.mInstanceId);
+        if (event.mTaskRootPackage != null) {
+            proto.write(PendingEventProto.TASK_ROOT_PACKAGE, event.mTaskRootPackage);
+        }
+        if (event.mTaskRootClass != null) {
+            proto.write(PendingEventProto.TASK_ROOT_CLASS, event.mTaskRootClass);
+        }
+        switch (event.mEventType) {
+            case UsageEvents.Event.CONFIGURATION_CHANGE:
+                if (event.mConfiguration != null) {
+                    event.mConfiguration.writeToProto(proto, PendingEventProto.CONFIG);
+                }
+                break;
+            case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
+                if (event.mBucketAndReason != 0) {
+                    proto.write(PendingEventProto.STANDBY_BUCKET, event.mBucketAndReason);
+                }
+                break;
+            case UsageEvents.Event.SHORTCUT_INVOCATION:
+                if (event.mShortcutId != null) {
+                    proto.write(PendingEventProto.SHORTCUT_ID, event.mShortcutId);
+                }
+                break;
+            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                if (event.mNotificationChannelId != null) {
+                    proto.write(PendingEventProto.NOTIFICATION_CHANNEL_ID,
+                            event.mNotificationChannelId);
+                }
+                break;
         }
     }
 
@@ -680,50 +771,17 @@ final class UsageStatsProtoV2 {
      * @param events the list of pending events.
      */
     static void writePendingEvents(OutputStream out, LinkedList<UsageEvents.Event> events)
-            throws IOException {
+            throws IOException, IllegalArgumentException {
         final ProtoOutputStream proto = new ProtoOutputStream(out);
         final int eventCount = events.size();
         for (int i = 0; i < eventCount; i++) {
-            final long token = proto.start(IntervalStatsObfuscatedProto.PENDING_EVENTS);
-            final UsageEvents.Event event = events.get(i);
-            proto.write(PendingEventProto.PACKAGE_NAME, event.mPackage);
-            if (event.mClass != null) {
-                proto.write(PendingEventProto.CLASS_NAME, event.mClass);
+            try {
+                final long token = proto.start(IntervalStatsObfuscatedProto.PENDING_EVENTS);
+                writePendingEvent(proto, events.get(i));
+                proto.end(token);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to write some pending events to proto.", e);
             }
-            proto.write(PendingEventProto.TIME_MS, event.mTimeStamp);
-            proto.write(PendingEventProto.FLAGS, event.mFlags);
-            proto.write(PendingEventProto.TYPE, event.mEventType);
-            proto.write(PendingEventProto.INSTANCE_ID, event.mInstanceId);
-            if (event.mTaskRootPackage != null) {
-                proto.write(PendingEventProto.TASK_ROOT_PACKAGE, event.mTaskRootPackage);
-            }
-            if (event.mTaskRootClass != null) {
-                proto.write(PendingEventProto.TASK_ROOT_CLASS, event.mTaskRootClass);
-            }
-            switch (event.mEventType) {
-                case UsageEvents.Event.CONFIGURATION_CHANGE:
-                    if (event.mConfiguration != null) {
-                        event.mConfiguration.writeToProto(proto, PendingEventProto.CONFIG);
-                    }
-                    break;
-                case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
-                    if (event.mBucketAndReason != 0) {
-                        proto.write(PendingEventProto.STANDBY_BUCKET, event.mBucketAndReason);
-                    }
-                    break;
-                case UsageEvents.Event.SHORTCUT_INVOCATION:
-                    if (event.mShortcutId != null) {
-                        proto.write(PendingEventProto.SHORTCUT_ID, event.mShortcutId);
-                    }
-                    break;
-                case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
-                    if (event.mNotificationChannelId != null) {
-                        proto.write(PendingEventProto.NOTIFICATION_CHANNEL_ID,
-                                event.mNotificationChannelId);
-                    }
-                    break;
-            }
-            proto.end(token);
         }
         proto.flush();
     }

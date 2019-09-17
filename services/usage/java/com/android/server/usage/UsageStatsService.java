@@ -654,7 +654,7 @@ public class UsageStatsService extends SystemService implements
             af.finishWrite(fos);
             fos = null;
             pendingEvents.clear();
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             Slog.e(TAG, "Failed to write " + pendingEventsFile.getAbsolutePath()
                     + " for user " + userId);
         } finally {
