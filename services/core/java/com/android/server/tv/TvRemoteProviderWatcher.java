@@ -45,7 +45,7 @@ final class TvRemoteProviderWatcher {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
 
     private final Context mContext;
-    private final ProviderMethods mProvider;
+    private final TvRemoteProviderProxy.ProviderMethods mProvider;
     private final Handler mHandler;
     private final PackageManager mPackageManager;
     private final ArrayList<TvRemoteProviderProxy> mProviderProxies = new ArrayList<>();
@@ -54,10 +54,10 @@ final class TvRemoteProviderWatcher {
 
     private boolean mRunning;
 
-    public TvRemoteProviderWatcher(Context context, ProviderMethods provider, Handler handler) {
+    TvRemoteProviderWatcher(Context context, TvRemoteProviderProxy.ProviderMethods provider) {
         mContext = context;
         mProvider = provider;
-        mHandler = handler;
+        mHandler = new Handler(true);
         mUserId = UserHandle.myUserId();
         mPackageManager = context.getPackageManager();
         mUnbundledServicePackage = context.getString(
@@ -116,12 +116,11 @@ final class TvRemoteProviderWatcher {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
                     TvRemoteProviderProxy providerProxy =
-                            new TvRemoteProviderProxy(mContext,
+                            new TvRemoteProviderProxy(mContext, mProvider,
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     mUserId, serviceInfo.applicationInfo.uid);
                     providerProxy.start();
                     mProviderProxies.add(targetIndex++, providerProxy);
-                    mProvider.addProvider(providerProxy);
                 } else if (sourceIndex >= targetIndex) {
                     TvRemoteProviderProxy provider = mProviderProxies.get(sourceIndex);
                     provider.start(); // restart the provider if needed
@@ -135,7 +134,6 @@ final class TvRemoteProviderWatcher {
         if (targetIndex < mProviderProxies.size()) {
             for (int i = mProviderProxies.size() - 1; i >= targetIndex; i--) {
                 TvRemoteProviderProxy providerProxy = mProviderProxies.get(i);
-                mProvider.removeProvider(providerProxy);
                 mProviderProxies.remove(providerProxy);
                 providerProxy.stop();
             }
@@ -212,10 +210,4 @@ final class TvRemoteProviderWatcher {
             scanPackages();
         }
     };
-
-    public interface ProviderMethods {
-        void addProvider(TvRemoteProviderProxy providerProxy);
-
-        void removeProvider(TvRemoteProviderProxy providerProxy);
-    }
 }
