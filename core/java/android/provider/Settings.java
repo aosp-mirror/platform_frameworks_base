@@ -14363,8 +14363,7 @@ public final class Settings {
         }
 
         /**
-          * Subscription to be used for voice call on a multi sim device. The supported values
-          * are 0 = SUB1, 1 = SUB2 and etc.
+          * Subscription Id to be used for voice call on a multi sim device.
           * @hide
           */
         public static final String MULTI_SIM_VOICE_CALL_SUBSCRIPTION = "multi_sim_voice_call";
@@ -14378,15 +14377,13 @@ public final class Settings {
         public static final String MULTI_SIM_VOICE_PROMPT = "multi_sim_voice_prompt";
 
         /**
-          * Subscription to be used for data call on a multi sim device. The supported values
-          * are 0 = SUB1, 1 = SUB2 and etc.
+          * Subscription Id to be used for data call on a multi sim device.
           * @hide
           */
         public static final String MULTI_SIM_DATA_CALL_SUBSCRIPTION = "multi_sim_data_call";
 
         /**
-          * Subscription to be used for SMS on a multi sim device. The supported values
-          * are 0 = SUB1, 1 = SUB2 and etc.
+          * Subscription Id to be used for SMS on a multi sim device.
           * @hide
           */
         public static final String MULTI_SIM_SMS_SUBSCRIPTION = "multi_sim_sms";
