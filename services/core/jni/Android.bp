@@ -57,10 +57,13 @@ cc_library_static {
     ],
 
     include_dirs: [
-        "bionic/libc/private",
         "frameworks/base/libs",
         "frameworks/native/services",
         "system/gatekeeper/include",
+    ],
+
+    header_libs: [
+        "bionic_libc_platform_headers",
     ],
 }
 
