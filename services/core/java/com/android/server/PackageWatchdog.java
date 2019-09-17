@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -969,6 +970,9 @@ public class PackageWatchdog {
     class MonitoredPackage {
         //TODO(b/120598832): VersionedPackage?
         private final String mName;
+        // Times when package failures happen sorted in ascending order
+        @GuardedBy("mLock")
+        private final LongArrayQueue mFailureHistory = new LongArrayQueue();
         // One of STATE_[ACTIVE|INACTIVE|PASSED|FAILED]. Updated on construction and after
         // methods that could change the health check state: handleElapsedTimeLocked and
         // tryPassHealthCheckLocked
@@ -988,12 +992,6 @@ public class PackageWatchdog {
         // of the package, see #getHealthCheckStateLocked
         @GuardedBy("mLock")
         private long mHealthCheckDurationMs = Long.MAX_VALUE;
-        // System uptime of first package failure
-        @GuardedBy("mLock")
-        private long mUptimeStartMs;
-        // Number of failures since mUptimeStartMs
-        @GuardedBy("mLock")
-        private int mFailures;
 
         MonitoredPackage(String name, long durationMs, boolean hasPassedHealthCheck) {
             this(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck);
@@ -1028,20 +1026,17 @@ public class PackageWatchdog {
          */
         @GuardedBy("mLock")
         public boolean onFailureLocked() {
+            // Sliding window algorithm: find out if there exists a window containing failures >=
+            // mTriggerFailureCount.
             final long now = mSystemClock.uptimeMillis();
-            final long duration = now - mUptimeStartMs;
-            if (duration > mTriggerFailureDurationMs) {
-                // TODO(b/120598832): Reseting to 1 is not correct
-                // because there may be more than 1 failure in the last trigger window from now
-                // This is the RescueParty impl, will leave for now
-                mFailures = 1;
-                mUptimeStartMs = now;
-            } else {
-                mFailures++;
+            mFailureHistory.addLast(now);
+            while (now - mFailureHistory.peekFirst() > mTriggerFailureDurationMs) {
+                // Prune values falling out of the window
+                mFailureHistory.removeFirst();
             }
-            boolean failed = mFailures >= mTriggerFailureCount;
+            boolean failed = mFailureHistory.size() >= mTriggerFailureCount;
             if (failed) {
-                mFailures = 0;
+                mFailureHistory.clear();
             }
             return failed;
         }
