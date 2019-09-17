@@ -1790,7 +1790,6 @@
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />
   <java-symbol type="anim" name="screen_rotate_0_exit" />
-  <java-symbol type="anim" name="screen_rotate_0_frame" />
   <java-symbol type="anim" name="screen_rotate_180_enter" />
   <java-symbol type="anim" name="screen_rotate_180_exit" />
   <java-symbol type="anim" name="screen_rotate_180_frame" />
@@ -1966,6 +1965,7 @@
   <java-symbol type="integer" name="config_virtualKeyQuietTimeMillis" />
   <java-symbol type="integer" name="config_brightness_ramp_rate_fast" />
   <java-symbol type="integer" name="config_brightness_ramp_rate_slow" />
+  <java-symbol type="integer" name="config_screen_rotation_color_transition" />
   <java-symbol type="layout" name="am_compat_mode_dialog" />
   <java-symbol type="layout" name="launch_warning" />
   <java-symbol type="layout" name="safe_mode" />

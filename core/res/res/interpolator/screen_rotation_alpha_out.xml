@@ -15,11 +15,8 @@
   ~ limitations under the License.
   -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shareInterpolator="false">
-    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-        android:interpolator="@interpolator/screen_rotation_alpha_in"
-        android:fillEnabled="true"
-        android:fillBefore="true" android:fillAfter="true"
-        android:duration="@android:integer/config_screen_rotation_fade_in" />
-</set>
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.57"
+    android:controlY1="0"
+    android:controlX2="0.71"
+    android:controlY2=".43"/>
