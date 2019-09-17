@@ -54,6 +54,7 @@ class SurfaceAnimator {
     final Animatable mAnimatable;
     private final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
     @VisibleForTesting
+    @Nullable
     final Runnable mAnimationFinishedCallback;
     private boolean mAnimationStartDelayed;
 
@@ -262,7 +263,7 @@ class SurfaceAnimator {
             if (!mAnimationStartDelayed && forwardCancel) {
                 animation.onAnimationCancelled(leash);
             }
-            if (!restarting) {
+            if (!restarting && mAnimationFinishedCallback != null) {
                 mAnimationFinishedCallback.run();
             }
         }
