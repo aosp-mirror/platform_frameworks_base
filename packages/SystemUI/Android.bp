@@ -76,6 +76,16 @@ android_library {
     plugins: ["dagger2-compiler-2.19"],
 }
 
+filegroup {
+    name: "SystemUI-tests-utils",
+    srcs: [
+        "tests/src/com/android/systemui/statusbar/NotificationEntryBuilder.java",
+        "tests/src/com/android/systemui/statusbar/RankingBuilder.java",
+        "tests/src/com/android/systemui/statusbar/SbnBuilder.java",
+    ],
+    path: "tests/src",
+}
+
 android_library {
     name: "SystemUI-tests",
     manifest: "tests/AndroidManifest.xml",
