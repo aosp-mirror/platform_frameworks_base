@@ -24,7 +24,7 @@
 #include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
 
-#include <bionic_malloc.h>
+#include <bionic/malloc.h>
 
 #include <cutils/properties.h>
 #include <utils/Log.h>

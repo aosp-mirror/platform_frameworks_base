@@ -218,10 +218,6 @@ cc_library_shared {
     ],
 
     include_dirs: [
-        // we need to access the private Bionic header
-        // <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
-        "bionic/libc/private",
-
         "external/skia/include/private",
         "external/skia/src/codec",
         "external/skia/src/core",
@@ -232,6 +228,8 @@ cc_library_shared {
         "system/media/camera/include",
         "system/media/private/camera/include",
     ],
+
+    header_libs: ["bionic_libc_platform_headers"],
 
     static_libs: [
         "libasync_safe",
