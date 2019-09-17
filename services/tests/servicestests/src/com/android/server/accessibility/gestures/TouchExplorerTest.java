@@ -74,7 +74,7 @@ public class TouchExplorerTest {
     private TouchExplorer mTouchExplorer;
     private long mLastDownTime = Integer.MIN_VALUE;
 
-    // mock package-private AccessibilityGestureDetector class
+    // mock package-private GestureManifold class
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
@@ -108,7 +108,7 @@ public class TouchExplorerTest {
     public void setUp() {
         Context context = InstrumentationRegistry.getContext();
         AccessibilityManagerService ams = new AccessibilityManagerService(context);
-        AccessibilityGestureDetector detector = mock(AccessibilityGestureDetector.class);
+        GestureManifold detector = mock(GestureManifold.class);
         mCaptor = new EventCaptor();
         mTouchExplorer = new TouchExplorer(context, ams, detector);
         mTouchExplorer.setNext(mCaptor);

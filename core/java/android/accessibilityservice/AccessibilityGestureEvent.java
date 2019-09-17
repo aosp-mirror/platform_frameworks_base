@@ -17,6 +17,8 @@
 package android.accessibilityservice;
 
 
+import static android.accessibilityservice.AccessibilityService.GESTURE_DOUBLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_SWIPE_DOWN;
 import static android.accessibilityservice.AccessibilityService.GESTURE_SWIPE_DOWN_AND_LEFT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_SWIPE_DOWN_AND_RIGHT;
@@ -58,6 +60,8 @@ public final class AccessibilityGestureEvent implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = { "GESTURE_" }, value = {
+            GESTURE_DOUBLE_TAP,
+            GESTURE_DOUBLE_TAP_AND_HOLD,
             GESTURE_SWIPE_UP,
             GESTURE_SWIPE_UP_AND_LEFT,
             GESTURE_SWIPE_UP_AND_DOWN,
