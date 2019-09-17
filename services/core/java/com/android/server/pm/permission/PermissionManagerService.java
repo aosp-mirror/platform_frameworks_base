@@ -4302,7 +4302,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
             synchronized (mLock) {
                 mCheckPermissionDelegate = delegate;
-                Slog.d(TAG, "CheckPermissionDelegate set to " + delegate);
             }
         }
 
