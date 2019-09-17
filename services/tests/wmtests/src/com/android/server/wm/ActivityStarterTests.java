@@ -501,7 +501,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityStarter starter = prepareStarter(0);
 
         final LockTaskController lockTaskController = mService.getLockTaskController();
-        doReturn(true).when(lockTaskController).isInLockTaskMode();
         doReturn(true).when(lockTaskController).isLockTaskModeViolation(any());
 
         final int result = starter.setReason("testTaskModeViolation").execute();
