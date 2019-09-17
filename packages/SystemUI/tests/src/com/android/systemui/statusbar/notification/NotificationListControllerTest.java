@@ -73,7 +73,7 @@ public class NotificationListControllerTest extends SysuiTestCase {
     private DeviceProvisionedListener mProvisionedListener;
 
     // TODO: Remove this once EntryManager no longer needs to be mocked
-    private NotificationData mNotificationData = new NotificationData();
+    private NotificationData mNotificationData = new NotificationData(mContext);
 
     private int mNextNotifId = 0;
 

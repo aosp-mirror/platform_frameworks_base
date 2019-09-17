@@ -64,7 +64,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mRoundnessManager = new NotificationRoundnessManager(mBypassController);
+        mRoundnessManager = new NotificationRoundnessManager(mBypassController, mContext);
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext());
         mFirst = testHelper.createRow();

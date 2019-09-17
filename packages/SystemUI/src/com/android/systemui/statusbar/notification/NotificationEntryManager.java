@@ -124,7 +124,7 @@ public class NotificationEntryManager implements
 
     @Inject
     public NotificationEntryManager(Context context) {
-        mNotificationData = new NotificationData();
+        mNotificationData = new NotificationData(context);
     }
 
     /** Adds a {@link NotificationEntryListener}. */

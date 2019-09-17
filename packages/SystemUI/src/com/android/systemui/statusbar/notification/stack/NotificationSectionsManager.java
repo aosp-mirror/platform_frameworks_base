@@ -18,6 +18,10 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.provider.Settings;
@@ -34,23 +38,31 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
+import java.lang.annotation.Retention;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Manages the boundaries of the two notification sections (high priority and low priority). Also
  * shows/hides the headers for those sections where appropriate.
  *
  * TODO: Move remaining sections logic from NSSL into this class.
  */
-class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvider {
+public class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvider {
+
+    private static final String TAG = "NotifSectionsManager";
+    private static final boolean DEBUG = false;
+
     private final NotificationStackScrollLayout mParent;
     private final ActivityStarter mActivityStarter;
     private final StatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
-    private final boolean mUseMultipleSections;
+    private final int mNumberOfSections;
 
     private boolean mInitialized = false;
     private SectionHeaderView mGentleHeader;
     private boolean mGentleHeaderVisible = false;
-    @Nullable private ExpandableNotificationRow mFirstGentleNotif;
+
     @Nullable private View.OnClickListener mOnClearGentleNotifsClickListener;
 
     NotificationSectionsManager(
@@ -58,12 +70,21 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             ActivityStarter activityStarter,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
-            boolean useMultipleSections) {
+            int numberOfSections) {
         mParent = parent;
         mActivityStarter = activityStarter;
         mStatusBarStateController = statusBarStateController;
         mConfigurationController = configurationController;
-        mUseMultipleSections = useMultipleSections;
+        mNumberOfSections = numberOfSections;
+    }
+
+    NotificationSection[] createSectionsForBuckets(int[] buckets) {
+        NotificationSection[] sections = new NotificationSection[buckets.length];
+        for (int i = 0; i < buckets.length; i++) {
+            sections[i] = new NotificationSection(mParent, buckets[i] /* bucket */);
+        }
+
+        return sections;
     }
 
     /** Must be called before use. */
@@ -111,8 +132,38 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
     }
 
     @Override
-    public boolean beginsSection(View view) {
-        return view == getFirstLowPriorityChild();
+    public boolean beginsSection(@NonNull View view, @Nullable View previous) {
+        boolean begin = false;
+        if (view instanceof ExpandableNotificationRow) {
+            if (previous instanceof ExpandableNotificationRow) {
+                // If we're drawing the first non-person notification, break out a section
+                ExpandableNotificationRow curr = (ExpandableNotificationRow) view;
+                ExpandableNotificationRow prev = (ExpandableNotificationRow) previous;
+
+                begin =  curr.getEntry().getBucket() != prev.getEntry().getBucket();
+            }
+        }
+
+        if (!begin) {
+            begin = view == mGentleHeader;
+        }
+
+        return begin;
+    }
+
+    private boolean isUsingMultipleSections() {
+        return mNumberOfSections > 1;
+    }
+
+    private @PriorityBucket int getBucket(ActivatableNotificationView view)
+            throws IllegalArgumentException {
+        if (view instanceof ExpandableNotificationRow) {
+            return ((ExpandableNotificationRow) view).getEntry().getBucket();
+        } else if (view == mGentleHeader) {
+            return BUCKET_SILENT;
+        }
+
+        throw new IllegalArgumentException("I don't know how to find a bucket for this view :(");
     }
 
     /**
@@ -120,11 +171,10 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
      * bookkeeping and adds/moves/removes section headers if appropriate.
      */
     void updateSectionBoundaries() {
-        if (!mUseMultipleSections) {
+        if (!isUsingMultipleSections()) {
             return;
         }
 
-        mFirstGentleNotif = null;
         int firstGentleNotifIndex = -1;
 
         final int n = mParent.getChildCount();
@@ -133,9 +183,8 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             if (child instanceof ExpandableNotificationRow
                     && child.getVisibility() != View.GONE) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!row.getEntry().isTopBucket()) {
+                if (row.getEntry().getBucket() == BUCKET_SILENT) {
                     firstGentleNotifIndex = i;
-                    mFirstGentleNotif = row;
                     break;
                 }
             }
@@ -184,78 +233,73 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
     }
 
     /**
-     * Updates the boundaries (as tracked by their first and last views) of the high and low
-     * priority sections.
+     * Updates the boundaries (as tracked by their first and last views) of the priority sections.
      *
      * @return {@code true} If the last view in the top section changed (so we need to animate).
      */
-    boolean updateFirstAndLastViewsInSections(
-            final NotificationSection highPrioritySection,
-            final NotificationSection lowPrioritySection,
-            ActivatableNotificationView firstChild,
-            ActivatableNotificationView lastChild) {
-        if (mUseMultipleSections) {
-            ActivatableNotificationView previousLastHighPriorityChild =
-                    highPrioritySection.getLastVisibleChild();
-            ActivatableNotificationView previousFirstLowPriorityChild =
-                    lowPrioritySection.getFirstVisibleChild();
-            ActivatableNotificationView lastHighPriorityChild = getLastHighPriorityChild();
-            ActivatableNotificationView firstLowPriorityChild = getFirstLowPriorityChild();
-            if (lastHighPriorityChild != null && firstLowPriorityChild != null) {
-                highPrioritySection.setFirstVisibleChild(firstChild);
-                highPrioritySection.setLastVisibleChild(lastHighPriorityChild);
-                lowPrioritySection.setFirstVisibleChild(firstLowPriorityChild);
-                lowPrioritySection.setLastVisibleChild(lastChild);
-            } else if (lastHighPriorityChild != null) {
-                highPrioritySection.setFirstVisibleChild(firstChild);
-                highPrioritySection.setLastVisibleChild(lastChild);
-                lowPrioritySection.setFirstVisibleChild(null);
-                lowPrioritySection.setLastVisibleChild(null);
-            } else {
-                highPrioritySection.setFirstVisibleChild(null);
-                highPrioritySection.setLastVisibleChild(null);
-                lowPrioritySection.setFirstVisibleChild(firstChild);
-                lowPrioritySection.setLastVisibleChild(lastChild);
+    boolean updateFirstAndLastViewsForAllSections(
+            NotificationSection[] sections,
+            List<ActivatableNotificationView> children) {
+
+        if (sections.length <= 0 || children.size() <= 0) {
+            for (NotificationSection s : sections) {
+                s.setFirstVisibleChild(null);
+                s.setLastVisibleChild(null);
             }
-            return lastHighPriorityChild != previousLastHighPriorityChild
-                    || firstLowPriorityChild != previousFirstLowPriorityChild;
-        } else {
-            highPrioritySection.setFirstVisibleChild(firstChild);
-            highPrioritySection.setLastVisibleChild(lastChild);
             return false;
         }
+
+        boolean changed = false;
+        ArrayList<ActivatableNotificationView> viewsInBucket = new ArrayList<>();
+        for (NotificationSection s : sections) {
+            int filter = s.getBucket();
+            viewsInBucket.clear();
+
+            //TODO: do this in a single pass, and more better
+            for (ActivatableNotificationView v : children)  {
+                if (getBucket(v) == filter) {
+                    viewsInBucket.add(v);
+                }
+
+                if (viewsInBucket.size() >= 1) {
+                    changed |= s.setFirstVisibleChild(viewsInBucket.get(0));
+                    changed |= s.setLastVisibleChild(viewsInBucket.get(viewsInBucket.size() - 1));
+                } else {
+                    changed |= s.setFirstVisibleChild(null);
+                    changed |= s.setLastVisibleChild(null);
+                }
+            }
+        }
+
+        if (DEBUG) {
+            logSections(sections);
+        }
+
+        return changed;
     }
+
+    private void logSections(NotificationSection[] sections) {
+        for (int i = 0; i < sections.length; i++) {
+            NotificationSection s = sections[i];
+            ActivatableNotificationView first = s.getFirstVisibleChild();
+            String fs = first == null ? "(null)"
+                    :  (first instanceof ExpandableNotificationRow)
+                            ? ((ExpandableNotificationRow) first).getEntry().key
+                            : Integer.toHexString(System.identityHashCode(first));
+            ActivatableNotificationView last = s.getLastVisibleChild();
+            String ls = last == null ? "(null)"
+                    :  (last instanceof ExpandableNotificationRow)
+                            ? ((ExpandableNotificationRow) last).getEntry().key
+                            : Integer.toHexString(System.identityHashCode(last));
+            android.util.Log.d(TAG, "updateSections: f=" + fs + " s=" + i);
+            android.util.Log.d(TAG, "updateSections: l=" + ls + " s=" + i);
+        }
+    }
+
 
     @VisibleForTesting
     SectionHeaderView getGentleHeaderView() {
         return mGentleHeader;
-    }
-
-    @Nullable
-    private ActivatableNotificationView getFirstLowPriorityChild() {
-        if (mGentleHeaderVisible) {
-            return mGentleHeader;
-        } else {
-            return mFirstGentleNotif;
-        }
-    }
-
-    @Nullable
-    private ActivatableNotificationView getLastHighPriorityChild() {
-        ActivatableNotificationView lastChildBeforeGap = null;
-        int childCount = mParent.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = mParent.getChildAt(i);
-            if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!row.getEntry().isTopBucket()) {
-                    break;
-                } else {
-                    lastChildBeforeGap = row;
-                }
-            }
-        }
-        return lastChildBeforeGap;
     }
 
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
@@ -279,4 +323,20 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             mOnClearGentleNotifsClickListener.onClick(v);
         }
     }
+
+    /**
+     * For now, declare the available notification buckets (sections) here so that other
+     * presentation code can decide what to do based on an entry's buckets
+     *
+     */
+    @Retention(SOURCE)
+    @IntDef(prefix = { "BUCKET_" }, value = {
+            BUCKET_PEOPLE,
+            BUCKET_ALERTING,
+            BUCKET_SILENT
+    })
+    public @interface PriorityBucket {}
+    public static final int BUCKET_PEOPLE = 0;
+    public static final int BUCKET_ALERTING = 1;
+    public static final int BUCKET_SILENT = 2;
 }
