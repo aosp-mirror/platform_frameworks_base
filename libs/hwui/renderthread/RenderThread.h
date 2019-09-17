@@ -17,33 +17,32 @@
 #ifndef RENDERTHREAD_H_
 #define RENDERTHREAD_H_
 
-#include "RenderTask.h"
+#include <GrContext.h>
+#include <SkBitmap.h>
+#include <cutils/compiler.h>
+#include <thread/ThreadBase.h>
+#include <utils/Looper.h>
+#include <utils/Thread.h>
+
+#include <memory>
+#include <mutex>
+#include <set>
 
 #include "CacheManager.h"
 #include "ProfileDataContainer.h"
+#include "RenderTask.h"
 #include "TimeLord.h"
 #include "WebViewFunctorManager.h"
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
 
-#include <GrContext.h>
-#include <SkBitmap.h>
-#include <cutils/compiler.h>
-#include <utils/Looper.h>
-#include <utils/Thread.h>
-
-#include <thread/ThreadBase.h>
-#include <memory>
-#include <mutex>
-#include <set>
-
 namespace android {
 
 class Bitmap;
-class AutoBackendTextureRelease;
 
 namespace uirenderer {
 
+class AutoBackendTextureRelease;
 class Readback;
 class RenderState;
 class TestUtils;
@@ -137,7 +136,7 @@ private:
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
     friend class DummyVsyncSource;
-    friend class android::AutoBackendTextureRelease;
+    friend class android::uirenderer::AutoBackendTextureRelease;
     friend class android::uirenderer::TestUtils;
     friend class android::uirenderer::WebViewFunctor;
     friend class android::uirenderer::skiapipeline::VkFunctorDrawHandler;

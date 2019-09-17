@@ -179,6 +179,7 @@ cc_library_shared {
                 "android_hardware_UsbRequest.cpp",
                 "android_hardware_location_ActivityRecognitionHardware.cpp",
                 "android_util_FileObserver.cpp",
+                "android/graphics/SurfaceTexture.cpp",
                 "android/opengl/poly_clip.cpp", // TODO: .arm
                 "android/opengl/util.cpp",
                 "android_server_NetworkManagementSocketTagger.cpp",
@@ -431,7 +432,6 @@ cc_library_static {
                 "android/graphics/GIFMovie.cpp",
                 "android/graphics/Movie.cpp",
                 "android/graphics/MovieImpl.cpp",
-                "android/graphics/SurfaceTexture.cpp",
                 "android/graphics/pdf/PdfDocument.cpp",
                 "android/graphics/pdf/PdfEditor.cpp",
                 "android/graphics/pdf/PdfRenderer.cpp",

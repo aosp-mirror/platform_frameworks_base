@@ -19,20 +19,25 @@
 #include <SkColorFilter.h>
 #include <SkImage.h>
 #include <SkMatrix.h>
+#include <android/hardware_buffer.h>
 #include <cutils/compiler.h>
-#include <map>
-#include <system/graphics.h>
-#include <utils/StrongPointer.h>
+// TODO: Use public SurfaceTexture APIs once available and include public NDK header file instead.
+#include <gui/surfacetexture/surface_texture_platform.h>
 
-#include "renderstate/RenderState.h"
-#include "surfacetexture/SurfaceTexture.h"
+#include <map>
+#include <memory>
+
 #include "Layer.h"
 #include "Rect.h"
+#include "renderstate/RenderState.h"
 
 namespace android {
 namespace uirenderer {
 
+class AutoBackendTextureRelease;
 class RenderState;
+
+typedef std::unique_ptr<ASurfaceTexture> AutoTextureRelease;
 
 // Container to hold the properties a layer should be set to at the start
 // of a render pass
@@ -64,7 +69,7 @@ public:
         return false;
     }
 
-    ANDROID_API void setSurfaceTexture(const sp<SurfaceTexture>& consumer);
+    ANDROID_API void setSurfaceTexture(AutoTextureRelease&& consumer);
 
     ANDROID_API void updateTexImage() { mUpdateTexImage = true; }
 
@@ -92,6 +97,39 @@ protected:
     void onContextDestroyed() override;
 
 private:
+    /**
+     * ImageSlot contains the information and object references that
+     * DeferredLayerUpdater maintains about a slot. Slot id comes from
+     * ASurfaceTexture_dequeueBuffer. Usually there are at most 3 slots active at a time.
+     */
+    class ImageSlot {
+    public:
+        ~ImageSlot() { clear(); }
+
+        sk_sp<SkImage> createIfNeeded(AHardwareBuffer* buffer, android_dataspace dataspace,
+                                      bool forceCreate, GrContext* context);
+
+    private:
+        void clear();
+
+        // the dataspace associated with the current image
+        android_dataspace mDataspace = HAL_DATASPACE_UNKNOWN;
+
+        AHardwareBuffer* mBuffer = nullptr;
+
+        /**
+         * mTextureRelease may outlive DeferredLayerUpdater, if the last ref is held by an SkImage.
+         * DeferredLayerUpdater holds one ref to mTextureRelease, which is decremented by "clear".
+         */
+        AutoBackendTextureRelease* mTextureRelease = nullptr;
+    };
+
+    /**
+     * DeferredLayerUpdater stores the SkImages that have been allocated by the BufferQueue
+     * for each buffer slot.
+     */
+    std::map<int, ImageSlot> mImageSlots;
+
     RenderState& mRenderState;
 
     // Generic properties
@@ -101,7 +139,7 @@ private:
     sk_sp<SkColorFilter> mColorFilter;
     int mAlpha = 255;
     SkBlendMode mMode = SkBlendMode::kSrcOver;
-    sp<SurfaceTexture> mSurfaceTexture;
+    AutoTextureRelease mSurfaceTexture;
     SkMatrix* mTransform;
     bool mGLContextAttached;
     bool mUpdateTexImage;
