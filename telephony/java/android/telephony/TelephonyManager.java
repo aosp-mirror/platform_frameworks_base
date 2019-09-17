@@ -271,9 +271,6 @@ public class TelephonyManager {
     private SubscriptionManager mSubscriptionManager;
     private TelephonyScanManager mTelephonyScanManager;
 
-    private static String multiSimConfig =
-            SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG);
-
     /** Enum indicating multisim variants
      *  DSDS - Dual SIM Dual Standby
      *  DSDA - Dual SIM Dual Active
@@ -433,8 +430,7 @@ public class TelephonyManager {
     /** {@hide} */
     @UnsupportedAppUsage
     public boolean isMultiSimEnabled() {
-        return (multiSimConfig.equals("dsds") || multiSimConfig.equals("dsda") ||
-            multiSimConfig.equals("tsts"));
+        return getPhoneCount() > 1;
     }
 
     //
@@ -6550,11 +6546,7 @@ public class TelephonyManager {
     public int getSimCount() {
         // FIXME Need to get it from Telephony Dev Controller when that gets implemented!
         // and then this method shouldn't be used at all!
-        if(isMultiSimEnabled()) {
-            return getPhoneCount();
-        } else {
-            return 1;
-        }
+        return getPhoneCount();
     }
 
     /**
