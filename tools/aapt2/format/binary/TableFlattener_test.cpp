@@ -518,7 +518,7 @@ TEST_F(TableFlattenerTest, LongSharedLibraryPackageNameIsIllegal) {
   ASSERT_FALSE(Flatten(context.get(), {}, table.get(), &result));
 }
 
-TEST_F(TableFlattenerTest, ObfuscatingResourceNamesNoWhitelistSucceeds) {
+TEST_F(TableFlattenerTest, ObfuscatingResourceNamesNoNameCollapseExemptionsSucceeds) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.test", 0x7f)
@@ -572,7 +572,7 @@ TEST_F(TableFlattenerTest, ObfuscatingResourceNamesNoWhitelistSucceeds) {
                      ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
 }
 
-TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithWhitelistSucceeds) {
+TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithNameCollapseExemptionsSucceeds) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.test", 0x7f)
@@ -591,21 +591,22 @@ TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithWhitelistSucceeds) {
 
   TableFlattenerOptions options;
   options.collapse_key_stringpool = true;
-  options.whitelisted_resources.insert("test");
-  options.whitelisted_resources.insert("three");
+  options.name_collapse_exemptions.insert(ResourceName({}, ResourceType::kId, "one"));
+  options.name_collapse_exemptions.insert(ResourceName({}, ResourceType::kString, "test"));
   ResTable res_table;
 
   ASSERT_TRUE(Flatten(context_.get(), options, table.get(), &res_table));
 
-  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/one",
                      ResourceId(0x7f020000), {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 
   EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
                      ResourceId(0x7f020001), {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 
-  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/three", ResourceId(0x7f020002), {},
-                     Res_value::TYPE_REFERENCE, 0x7f020000u, 0u));
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
+                     ResourceId(0x7f020002), {}, Res_value::TYPE_REFERENCE, 0x7f020000u, 0u));
 
+  // Note that this resource is also named "one", but it's a different type, so gets obfuscated.
   EXPECT_TRUE(Exists(&res_table, "com.app.test:integer/0_resource_name_obfuscated",
                      ResourceId(0x7f030000), {}, Res_value::TYPE_INT_DEC, 1u,
                      ResTable_config::CONFIG_VERSION));

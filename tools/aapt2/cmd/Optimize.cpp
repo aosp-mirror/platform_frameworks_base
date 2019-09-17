@@ -53,9 +53,9 @@ using ::android::ConfigDescription;
 using ::android::ResTable_config;
 using ::android::StringPiece;
 using ::android::base::ReadFileToString;
-using ::android::base::WriteStringToFile;
 using ::android::base::StringAppendF;
 using ::android::base::StringPrintf;
+using ::android::base::WriteStringToFile;
 
 namespace aapt {
 
@@ -300,29 +300,7 @@ class Optimizer {
   OptimizeContext* context_;
 };
 
-bool ExtractObfuscationWhitelistFromConfig(const std::string& path, OptimizeContext* context,
-                                           OptimizeOptions* options) {
-  std::string contents;
-  if (!ReadFileToString(path, &contents, true)) {
-    context->GetDiagnostics()->Error(DiagMessage()
-                                     << "failed to parse whitelist from config file: " << path);
-    return false;
-  }
-  for (StringPiece resource_name : util::Tokenize(contents, ',')) {
-    options->table_flattener_options.whitelisted_resources.insert(
-        resource_name.to_string());
-  }
-  return true;
-}
-
-bool ExtractConfig(const std::string& path, OptimizeContext* context,
-                                    OptimizeOptions* options) {
-  std::string content;
-  if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
-    context->GetDiagnostics()->Error(DiagMessage(path) << "failed reading whitelist");
-    return false;
-  }
-
+bool ParseConfig(const std::string& content, IAaptContext* context, OptimizeOptions* options) {
   size_t line_no = 0;
   for (StringPiece line : util::Tokenize(content, '\n')) {
     line_no++;
@@ -351,13 +329,22 @@ bool ExtractConfig(const std::string& path, OptimizeContext* context,
     for (StringPiece directive : util::Tokenize(directives, ',')) {
       if (directive == "remove") {
         options->resources_blacklist.insert(resource_name.ToResourceName());
-      } else if (directive == "no_obfuscate") {
-        options->table_flattener_options.whitelisted_resources.insert(
-            resource_name.entry.to_string());
+      } else if (directive == "no_collapse" || directive == "no_obfuscate") {
+        options->table_flattener_options.name_collapse_exemptions.insert(
+            resource_name.ToResourceName());
       }
     }
   }
   return true;
+}
+
+bool ExtractConfig(const std::string& path, IAaptContext* context, OptimizeOptions* options) {
+  std::string content;
+  if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
+    context->GetDiagnostics()->Error(DiagMessage(path) << "failed reading config file");
+    return false;
+  }
+  return ParseConfig(content, context, options);
 }
 
 bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
@@ -464,15 +451,6 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
     if (!ParseSplitParameter(split_arg, diag, &options_.split_paths.back(),
         &options_.split_constraints.back())) {
       return 1;
-    }
-  }
-
-  if (options_.table_flattener_options.collapse_key_stringpool) {
-    if (whitelist_path_) {
-      std::string& path = whitelist_path_.value();
-      if (!ExtractObfuscationWhitelistFromConfig(path, &context, &options_)) {
-        return 1;
-      }
     }
   }
 
