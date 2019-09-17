@@ -804,7 +804,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         updateElevation();
         mAllowUpdateElevation = true;
 
-        if (changed && mResizeMode == RESIZE_MODE_DOCKED_DIVIDER) {
+        if (changed
+                && (mResizeMode == RESIZE_MODE_DOCKED_DIVIDER
+                    || mDrawLegacyNavigationBarBackground)) {
             getViewRootImpl().requestInvalidateRootRenderNode();
         }
     }

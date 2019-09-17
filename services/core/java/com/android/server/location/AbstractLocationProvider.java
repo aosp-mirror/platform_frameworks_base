@@ -18,7 +18,6 @@ package com.android.server.location;
 
 import android.content.Context;
 import android.location.Location;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.WorkSource;
 
@@ -132,26 +131,4 @@ public abstract class AbstractLocationProvider {
      * thread.
      */
     public abstract void dump(FileDescriptor fd, PrintWriter pw, String[] args);
-
-    /**
-     * Invoked by the location service to retrieve the current status of the provider. May be
-     * invoked from any thread.
-     *
-     * @deprecated Will be removed in a future release.
-     */
-    @Deprecated
-    public int getStatus(Bundle extras) {
-        return LocationProvider.AVAILABLE;
-    }
-
-    /**
-     * Invoked by the location service to retrieve the last update time of the status of the
-     * provider. May be invoked from any thread.
-     *
-     * @deprecated Will be removed in a future release.
-     */
-    @Deprecated
-    public long getStatusUpdateTime() {
-        return 0;
-    }
 }

@@ -31,14 +31,15 @@ import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class InsetsSourceProviderTest extends WindowTestsBase {
 
     private InsetsSource mSource = new InsetsSource(TYPE_TOP_BAR);
@@ -53,7 +54,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testPostLayout() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         topBar.getFrameLw().set(0, 0, 500, 100);
         topBar.mHasSurface = true;
         mProvider.setWindow(topBar, null);
@@ -66,7 +67,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testPostLayout_invisible() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         topBar.getFrameLw().set(0, 0, 500, 100);
         mProvider.setWindow(topBar, null);
         mProvider.onPostLayout();
@@ -76,7 +77,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testPostLayout_frameProvider() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         topBar.getFrameLw().set(0, 0, 500, 100);
         mProvider.setWindow(topBar,
                 (displayFrames, windowState, rect) -> {
@@ -88,19 +89,32 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testUpdateControlForTarget() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         topBar.getFrameLw().set(0, 0, 500, 100);
         mProvider.setWindow(topBar, null);
         mProvider.updateControlForTarget(target, false /* force */);
-        assertNotNull(mProvider.getControl());
+        assertNotNull(mProvider.getControl(target));
         mProvider.updateControlForTarget(null, false /* force */);
-        assertNull(mProvider.getControl());
+        assertNull(mProvider.getControl(target));
+    }
+
+    @Test
+    public void testUpdateControlForFakeTarget() {
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
+        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        topBar.getFrameLw().set(0, 0, 500, 100);
+        mProvider.setWindow(topBar, null);
+        mProvider.updateControlForFakeTarget(target);
+        assertNotNull(mProvider.getControl(target));
+        assertNull(mProvider.getControl(target).getLeash());
+        mProvider.updateControlForFakeTarget(null);
+        assertNull(mProvider.getControl(target));
     }
 
     @Test
     public void testInsetsModified() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         topBar.getFrameLw().set(0, 0, 500, 100);
         mProvider.setWindow(topBar, null);
@@ -113,7 +127,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testInsetsModified_noControl() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         topBar.getFrameLw().set(0, 0, 500, 100);
         mProvider.setWindow(topBar, null);

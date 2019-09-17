@@ -27,6 +27,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifySbn;
 import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_CHANNEL;
 import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_IMPORTANCE;
 import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_RANK;
@@ -70,7 +71,10 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -83,9 +87,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @SmallTest
@@ -98,8 +100,8 @@ public class NotificationDataTest extends SysuiTestCase {
     private static final NotificationChannel NOTIFICATION_CHANNEL =
             new NotificationChannel("id", "name", NotificationChannel.USER_LOCKED_IMPORTANCE);
 
-    private final StatusBarNotification mMockStatusBarNotification =
-            mock(StatusBarNotification.class);
+    private NotificationEntry mEntry;
+
     @Mock
     ForegroundServiceController mFsc;
     @Mock
@@ -113,9 +115,10 @@ public class NotificationDataTest extends SysuiTestCase {
     public void setUp() throws Exception {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
-        when(mMockStatusBarNotification.getUid()).thenReturn(UID_NORMAL);
-        when(mMockStatusBarNotification.cloneLight()).thenReturn(mMockStatusBarNotification);
-        when(mMockStatusBarNotification.getKey()).thenReturn("mock_key");
+
+        mEntry = new NotificationEntryBuilder()
+                .setUid(UID_NORMAL)
+                .build();
 
         when(mMockPackageManager.checkUidPermission(
                 eq(Manifest.permission.NOTIFICATION_DURING_SETUP),
@@ -231,57 +234,57 @@ public class NotificationDataTest extends SysuiTestCase {
     public void testIsExemptFromDndVisualSuppression_foreground() {
         initStatusBarNotification(false);
 
-        Notification n = mMockStatusBarNotification.getNotification();
-        n.flags = Notification.FLAG_FOREGROUND_SERVICE;
-        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
-        entry.setRow(mRow);
-        mNotificationData.add(entry);
+        mEntry.sbn().getNotification().flags = Notification.FLAG_FOREGROUND_SERVICE;
+        mEntry.setRow(mRow);
+        mNotificationData.add(mEntry);
         Bundle override = new Bundle();
         override.putInt(OVERRIDE_VIS_EFFECTS, 255);
-        mNotificationData.rankingOverrides.put(entry.key, override);
+        mNotificationData.rankingOverrides.put(mEntry.key, override);
 
-        assertTrue(entry.isExemptFromDndVisualSuppression());
-        assertFalse(entry.shouldSuppressAmbient());
+        assertTrue(mEntry.isExemptFromDndVisualSuppression());
+        assertFalse(mEntry.shouldSuppressAmbient());
     }
 
     @Test
     public void testIsExemptFromDndVisualSuppression_media() {
         initStatusBarNotification(false);
-        Notification n = mMockStatusBarNotification.getNotification();
+        Notification n = mEntry.sbn().getNotification();
         Notification.Builder nb = Notification.Builder.recoverBuilder(mContext, n);
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
         n = nb.build();
-        when(mMockStatusBarNotification.getNotification()).thenReturn(n);
-        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
-        entry.setRow(mRow);
-        mNotificationData.add(entry);
+        modifySbn(mEntry)
+                .setNotification(n)
+                .build();
+        mEntry.setRow(mRow);
+        mNotificationData.add(mEntry);
         Bundle override = new Bundle();
         override.putInt(OVERRIDE_VIS_EFFECTS, 255);
-        mNotificationData.rankingOverrides.put(entry.key, override);
+        mNotificationData.rankingOverrides.put(mEntry.key, override);
 
-        assertTrue(entry.isExemptFromDndVisualSuppression());
-        assertFalse(entry.shouldSuppressAmbient());
+        assertTrue(mEntry.isExemptFromDndVisualSuppression());
+        assertFalse(mEntry.shouldSuppressAmbient());
     }
 
     @Test
     public void testIsExemptFromDndVisualSuppression_system() {
         initStatusBarNotification(false);
-        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
-        entry.setRow(mRow);
-        entry.mIsSystemNotification = true;
-        mNotificationData.add(entry);
+        mEntry.setRow(mRow);
+        mEntry.mIsSystemNotification = true;
+        mNotificationData.add(mEntry);
         Bundle override = new Bundle();
         override.putInt(OVERRIDE_VIS_EFFECTS, 255);
-        mNotificationData.rankingOverrides.put(entry.key, override);
+        mNotificationData.rankingOverrides.put(mEntry.key, override);
 
-        assertTrue(entry.isExemptFromDndVisualSuppression());
-        assertFalse(entry.shouldSuppressAmbient());
+        assertTrue(mEntry.isExemptFromDndVisualSuppression());
+        assertFalse(mEntry.shouldSuppressAmbient());
     }
 
     @Test
     public void testIsNotExemptFromDndVisualSuppression_hiddenCategories() {
         initStatusBarNotification(false);
-        NotificationEntry entry = NotificationEntry.buildForTest(mMockStatusBarNotification);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setUid(UID_NORMAL)
+                .build();
         entry.setRow(mRow);
         entry.mIsSystemNotification = true;
         Bundle override = new Bundle();
@@ -289,58 +292,65 @@ public class NotificationDataTest extends SysuiTestCase {
         mNotificationData.rankingOverrides.put(entry.key, override);
         mNotificationData.add(entry);
 
-        when(mMockStatusBarNotification.getNotification()).thenReturn(
-                new Notification.Builder(mContext, "").setCategory(CATEGORY_CALL).build());
-
+        modifySbn(entry)
+                .setNotification(
+                        new Notification.Builder(mContext, "").setCategory(CATEGORY_CALL).build())
+                .build();
         assertFalse(entry.isExemptFromDndVisualSuppression());
         assertTrue(entry.shouldSuppressAmbient());
 
-        when(mMockStatusBarNotification.getNotification()).thenReturn(
-                new Notification.Builder(mContext, "").setCategory(CATEGORY_REMINDER).build());
-
+        modifySbn(entry)
+                .setNotification(
+                        new Notification.Builder(mContext, "")
+                                .setCategory(CATEGORY_REMINDER)
+                                .build())
+                .build();
         assertFalse(entry.isExemptFromDndVisualSuppression());
 
-        when(mMockStatusBarNotification.getNotification()).thenReturn(
-                new Notification.Builder(mContext, "").setCategory(CATEGORY_ALARM).build());
-
+        modifySbn(entry)
+                .setNotification(
+                        new Notification.Builder(mContext, "").setCategory(CATEGORY_ALARM).build())
+                .build();
         assertFalse(entry.isExemptFromDndVisualSuppression());
 
-        when(mMockStatusBarNotification.getNotification()).thenReturn(
-                new Notification.Builder(mContext, "").setCategory(CATEGORY_EVENT).build());
-
+        modifySbn(entry)
+                .setNotification(
+                        new Notification.Builder(mContext, "").setCategory(CATEGORY_EVENT).build())
+                .build();
         assertFalse(entry.isExemptFromDndVisualSuppression());
 
-        when(mMockStatusBarNotification.getNotification()).thenReturn(
-                new Notification.Builder(mContext, "").setCategory(CATEGORY_MESSAGE).build());
-
+        modifySbn(entry)
+                .setNotification(
+                        new Notification.Builder(mContext, "")
+                                .setCategory(CATEGORY_MESSAGE)
+                                .build())
+                .build();
         assertFalse(entry.isExemptFromDndVisualSuppression());
     }
 
     @Test
     public void testCreateNotificationDataEntry_RankingUpdate() {
-        Ranking ranking = mock(Ranking.class);
-        initStatusBarNotification(false);
+        StatusBarNotification sbn = new SbnBuilder().build();
+        sbn.getNotification().actions =
+                new Notification.Action[] { createContextualAction("appGeneratedAction") };
 
-        List<Notification.Action> appGeneratedSmartActions =
-                Collections.singletonList(createContextualAction("appGeneratedAction"));
-        mMockStatusBarNotification.getNotification().actions =
-                appGeneratedSmartActions.toArray(new Notification.Action[0]);
-
-        List<Notification.Action> systemGeneratedSmartActions =
-                Collections.singletonList(createAction("systemGeneratedAction"));
-        when(ranking.getSmartActions()).thenReturn(systemGeneratedSmartActions);
-
-        when(ranking.getChannel()).thenReturn(NOTIFICATION_CHANNEL);
-
-        when(ranking.getUserSentiment()).thenReturn(Ranking.USER_SENTIMENT_NEGATIVE);
+        ArrayList<Notification.Action> systemGeneratedSmartActions =
+                createActions("systemGeneratedAction");
 
         SnoozeCriterion snoozeCriterion = new SnoozeCriterion("id", "explanation", "confirmation");
         ArrayList<SnoozeCriterion> snoozeCriterions = new ArrayList<>();
         snoozeCriterions.add(snoozeCriterion);
-        when(ranking.getSnoozeCriteria()).thenReturn(snoozeCriterions);
+
+        Ranking ranking = new RankingBuilder()
+                .setKey(sbn.getKey())
+                .setSmartActions(systemGeneratedSmartActions)
+                .setChannel(NOTIFICATION_CHANNEL)
+                .setUserSentiment(Ranking.USER_SENTIMENT_NEGATIVE)
+                .setSnoozeCriteria(snoozeCriterions)
+                .build();
 
         NotificationEntry entry =
-                new NotificationEntry(mMockStatusBarNotification, ranking);
+                new NotificationEntry(sbn, ranking);
 
         assertEquals(systemGeneratedSmartActions, entry.getSmartActions());
         assertEquals(NOTIFICATION_CHANNEL, entry.getChannel());
@@ -366,10 +376,15 @@ public class NotificationDataTest extends SysuiTestCase {
         Notification notification = new Notification.Builder(mContext, "test")
                 .addExtras(bundle)
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
-                notification, mContext.getUser(), "", 0);
 
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(notification)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
         entry.setHasSentReply();
 
         assertTrue(entry.isLastMessageFromReply());
@@ -472,9 +487,14 @@ public class NotificationDataTest extends SysuiTestCase {
         Notification aN = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle(""))
                 .build();
-        StatusBarNotification aSbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
-                aN, mContext.getUser(), "", 0);
-        NotificationEntry a = NotificationEntry.buildForTest(aSbn);
+        NotificationEntry a = new NotificationEntryBuilder()
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(aN)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
         a.setRow(mock(ExpandableNotificationRow.class));
         a.setIsHighPriority(false);
 
@@ -486,9 +506,14 @@ public class NotificationDataTest extends SysuiTestCase {
         Notification bN = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle(""))
                 .build();
-        StatusBarNotification bSbn = new StatusBarNotification("pkg2", "pkg2", 0, "tag", 0, 0,
-                bN, mContext.getUser(), "", 0);
-        NotificationEntry b = NotificationEntry.buildForTest(bSbn);
+        NotificationEntry b = new NotificationEntryBuilder()
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(bN)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
         b.setIsHighPriority(true);
         b.setRow(mock(ExpandableNotificationRow.class));
 
@@ -507,9 +532,14 @@ public class NotificationDataTest extends SysuiTestCase {
         Notification aN = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle(""))
                 .build();
-        StatusBarNotification aSbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
-                aN, mContext.getUser(), "", 0);
-        NotificationEntry a = NotificationEntry.buildForTest(aSbn);
+        NotificationEntry a = new NotificationEntryBuilder()
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(aN)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
         a.setRow(mock(ExpandableNotificationRow.class));
         a.setIsHighPriority(false);
 
@@ -521,9 +551,14 @@ public class NotificationDataTest extends SysuiTestCase {
         Notification bN = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle(""))
                 .build();
-        StatusBarNotification bSbn = new StatusBarNotification("pkg2", "pkg2", 0, "tag", 0, 0,
-                bN, mContext.getUser(), "", 0);
-        NotificationEntry b = NotificationEntry.buildForTest(bSbn);
+        NotificationEntry b = new NotificationEntryBuilder()
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(bN)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
         b.setRow(mock(ExpandableNotificationRow.class));
         b.setIsHighPriority(false);
 
@@ -540,23 +575,19 @@ public class NotificationDataTest extends SysuiTestCase {
 
         Notification notification = new Notification.Builder(mContext, "test")
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification(
-                "pkg",
-                "pkg",
-                0,
-                "tag",
-                0,
-                0,
-                notification,
-                mContext.getUser(),
-                "",
-                0);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(notification)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
 
         Bundle override = new Bundle();
         override.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_DEFAULT);
-        mNotificationData.rankingOverrides.put(sbn.getKey(), override);
+        mNotificationData.rankingOverrides.put(entry.key(), override);
 
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.setRow(mRow);
         mNotificationData.add(entry);
 
@@ -567,23 +598,20 @@ public class NotificationDataTest extends SysuiTestCase {
     public void testSort_properlySetsIsNotTopBucket() {
         Notification notification = new Notification.Builder(mContext, "test")
                 .build();
-        StatusBarNotification sbn = new StatusBarNotification(
-                "pkg",
-                "pkg",
-                0,
-                "tag",
-                0,
-                0,
-                notification,
-                mContext.getUser(),
-                "",
-                0);
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(notification)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
 
         Bundle override = new Bundle();
         override.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_LOW);
-        mNotificationData.rankingOverrides.put(sbn.getKey(), override);
+        mNotificationData.rankingOverrides.put(entry.key(), override);
 
-        NotificationEntry entry = NotificationEntry.buildForTest(sbn);
         entry.setRow(mRow);
 
         mNotificationData.add(entry);
@@ -597,7 +625,9 @@ public class NotificationDataTest extends SysuiTestCase {
         Notification notification = new Notification.Builder(mContext, "test")
                 .addExtras(bundle)
                 .build();
-        when(mMockStatusBarNotification.getNotification()).thenReturn(notification);
+        modifySbn(mEntry)
+                .setNotification(notification)
+                .build();
     }
 
     public static class TestableNotificationData extends NotificationData {
@@ -684,6 +714,11 @@ public class NotificationDataTest extends SysuiTestCase {
                                 ? overrides.getCharSequenceArrayList(OVERRIDE_SMART_REPLIES)
                                 : currentReplies,
                         overrides.getBoolean(OVERRIDE_BUBBLE, outRanking.canBubble()));
+            } else {
+                outRanking.populate(
+                        new RankingBuilder()
+                                .setKey(key)
+                                .build());
             }
             return true;
         }
@@ -703,5 +738,13 @@ public class NotificationDataTest extends SysuiTestCase {
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 title,
                 PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0)).build();
+    }
+
+    private ArrayList<Notification.Action> createActions(String... titles) {
+        ArrayList<Notification.Action> actions = new ArrayList<>();
+        for (String title : titles) {
+            actions.add(createAction(title));
+        }
+        return actions;
     }
 }

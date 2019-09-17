@@ -24,14 +24,14 @@ import java.util.function.Function;
  * results. Assertions are functions that are applied over a single trace entry and returns a
  * result which includes a detailed reason if the assertion fails.
  */
-class Assertions {
+public class Assertions {
     /**
      * Checks assertion on a single trace entry.
      *
      * @param <T> trace entry type to perform the assertion on.
      */
     @FunctionalInterface
-    interface TraceAssertion<T> extends Function<T, Result> {
+    public interface TraceAssertion<T> extends Function<T, Result> {
         /**
          * Returns an assertion that represents the logical negation of this assertion.
          *
@@ -46,7 +46,7 @@ class Assertions {
      * Checks assertion on a single layers trace entry.
      */
     @FunctionalInterface
-    interface LayersTraceAssertion extends TraceAssertion<LayersTrace.Entry> {
+    public interface LayersTraceAssertion extends TraceAssertion<LayersTrace.Entry> {
 
     }
 
@@ -54,11 +54,11 @@ class Assertions {
      * Utility class to store assertions with an identifier to help generate more useful debug
      * data when dealing with multiple assertions.
      */
-    static class NamedAssertion<T> {
-        final TraceAssertion<T> assertion;
-        final String name;
+    public static class NamedAssertion<T> {
+        public final TraceAssertion<T> assertion;
+        public final String name;
 
-        NamedAssertion(TraceAssertion<T> assertion, String name) {
+        public NamedAssertion(TraceAssertion<T> assertion, String name) {
             this.assertion = assertion;
             this.name = name;
         }
@@ -67,21 +67,21 @@ class Assertions {
     /**
      * Contains the result of an assertion including the reason for failed assertions.
      */
-    static class Result {
-        static final String NEGATION_PREFIX = "!";
-        final boolean success;
-        final long timestamp;
-        final String assertionName;
-        final String reason;
+    public static class Result {
+        public static final String NEGATION_PREFIX = "!";
+        public final boolean success;
+        public final long timestamp;
+        public final String assertionName;
+        public final String reason;
 
-        Result(boolean success, long timestamp, String assertionName, String reason) {
+        public Result(boolean success, long timestamp, String assertionName, String reason) {
             this.success = success;
             this.timestamp = timestamp;
             this.assertionName = assertionName;
             this.reason = reason;
         }
 
-        Result(boolean success, String reason) {
+        public Result(boolean success, String reason) {
             this.success = success;
             this.reason = reason;
             this.assertionName = "";
@@ -91,7 +91,7 @@ class Assertions {
         /**
          * Returns the negated {@code Result} and adds a negation prefix to the assertion name.
          */
-        Result negate() {
+        public Result negate() {
             String negatedAssertionName;
             if (this.assertionName.startsWith(NEGATION_PREFIX)) {
                 negatedAssertionName = this.assertionName.substring(NEGATION_PREFIX.length() + 1);
@@ -101,11 +101,11 @@ class Assertions {
             return new Result(!this.success, this.timestamp, negatedAssertionName, this.reason);
         }
 
-        boolean passed() {
+        public boolean passed() {
             return this.success;
         }
 
-        boolean failed() {
+        public boolean failed() {
             return !this.success;
         }
 

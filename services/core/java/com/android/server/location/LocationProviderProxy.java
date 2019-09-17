@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -187,22 +186,6 @@ public class LocationProviderProxy extends AbstractLocationProvider {
                 pw.println("additional packages=" + mProviderPackages);
             }
         }
-    }
-
-    @Override
-    public int getStatus(Bundle extras) {
-        return mServiceWatcher.runOnBinderBlocking(binder -> {
-            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            return service.getStatus(extras);
-        }, LocationProvider.TEMPORARILY_UNAVAILABLE);
-    }
-
-    @Override
-    public long getStatusUpdateTime() {
-        return mServiceWatcher.runOnBinderBlocking(binder -> {
-            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            return service.getStatusUpdateTime();
-        }, 0L);
     }
 
     @Override

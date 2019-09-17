@@ -30,7 +30,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
@@ -41,6 +40,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -222,19 +222,14 @@ public class NotificationListControllerTest extends SysuiTestCase {
                 .setContentTitle("Title")
                 .setContentText("Text");
 
-        StatusBarNotification notification =
-                new StatusBarNotification(
-                        TEST_PACKAGE_NAME,
-                        TEST_PACKAGE_NAME,
-                        mNextNotifId,
-                        null,
-                        TEST_UID,
-                        0,
-                        n.build(),
-                        new UserHandle(ActivityManager.getCurrentUser()),
-                        null,
-                        0);
-        return NotificationEntry.buildForTest(notification);
+        return new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setId(mNextNotifId)
+                .setUid(TEST_UID)
+                .setNotification(n.build())
+                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
+                .build();
     }
 
     private static final String TEST_PACKAGE_NAME = "test";

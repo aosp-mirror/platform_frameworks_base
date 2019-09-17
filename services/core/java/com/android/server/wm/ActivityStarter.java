@@ -1400,7 +1400,7 @@ class ActivityStarter {
         int result = START_CANCELED;
         final ActivityStack startedActivityStack;
         try {
-            mService.mWindowManager.deferSurfaceLayout();
+            mService.deferWindowLayout();
             result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
                     startFlags, doResume, options, inTask, outActivity, restrictedBgActivity);
         } finally {
@@ -1436,7 +1436,7 @@ class ActivityStarter {
                     startedActivityStack.remove();
                 }
             }
-            mService.mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
 
         postStartActivityProcessing(r, result, startedActivityStack);
@@ -1535,6 +1535,11 @@ class ActivityStarter {
             final TaskRecord taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
                     ? mSourceRecord.getTaskRecord() : null;
             setNewTask(taskToAffiliate);
+            if (mService.getLockTaskController().isLockTaskModeViolation(
+                    mStartActivity.getTaskRecord())) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
         } else if (mAddingToTask) {
             addOrReparentStartingActivity(targetTask, "adding to task");
         }
@@ -1654,9 +1659,8 @@ class ActivityStarter {
         final boolean isNewClearTask =
                 (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                         == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
-        if (mService.getLockTaskController().isInLockTaskMode() && (newTask
-                || mService.getLockTaskController().isLockTaskModeViolation(targetTask,
-                isNewClearTask))) {
+        if (!newTask && mService.getLockTaskController().isLockTaskModeViolation(targetTask,
+                isNewClearTask)) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }

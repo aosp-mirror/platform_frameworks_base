@@ -15262,7 +15262,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final int uid = getUidFromIntent(intent);
                             if (uid >= 0) {
                                 mBatteryStatsService.removeUid(uid);
-                                mAppOpsService.uidRemoved(uid);
+                                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                                    mAppOpsService.resetAllModes(UserHandle.getUserId(uid),
+                                            intent.getData().getSchemeSpecificPart());
+                                } else {
+                                    mAppOpsService.uidRemoved(uid);
+                                }
                             }
                             break;
                         case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
@@ -19290,6 +19295,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         private boolean isTargetPermission(@NonNull String permission) {
             // null permissions means all permissions are targeted
             return (mPermissions == null || ArrayUtils.contains(mPermissions, permission));
+        }
+
+        @Override
+        public String toString() {
+            return "ShellDelegate{targetPackageName=" + mTargetPackageName
+                    + ", permissions=" + mPermissions + "}";
         }
     }
 

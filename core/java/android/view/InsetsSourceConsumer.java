@@ -167,7 +167,7 @@ public class InsetsSourceConsumer {
     }
 
     private void applyHiddenToControl() {
-        if (mSourceControl == null) {
+        if (mSourceControl == null || mSourceControl.getLeash() == null) {
             return;
         }
 

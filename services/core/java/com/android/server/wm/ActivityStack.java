@@ -757,7 +757,6 @@ class ActivityStack extends ConfigurationContainer {
             return;
         }
 
-        final WindowManagerService wm = mService.mWindowManager;
         final ActivityRecord topActivity = getTopActivity();
 
         // For now, assume that the Stack's windowing mode is what will actually be used
@@ -779,7 +778,7 @@ class ActivityStack extends ConfigurationContainer {
                     topTask.taskId, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN, packageName);
         }
 
-        wm.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             if (!animate && topActivity != null) {
                 mStackSupervisor.mNoAnimActivities.add(topActivity);
@@ -850,7 +849,7 @@ class ActivityStack extends ConfigurationContainer {
                 // If task moved to docked stack - show recents if needed.
                 mService.mWindowManager.showRecentApps();
             }
-            wm.continueSurfaceLayout();
+            mService.continueWindowLayout();
         }
 
         if (!deferEnsuringVisibility) {
@@ -1750,11 +1749,11 @@ class ActivityStack extends ConfigurationContainer {
             if (mPausingActivity == r) {
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSED: " + r
                         + (timeout ? " (due to timeout)" : " (pause complete)"));
-                mService.mWindowManager.deferSurfaceLayout();
+                mService.deferWindowLayout();
                 try {
                     completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
                 } finally {
-                    mService.mWindowManager.continueSurfaceLayout();
+                    mService.continueWindowLayout();
                 }
                 return;
             } else {
@@ -4360,7 +4359,7 @@ class ActivityStack extends ConfigurationContainer {
         }
 
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "stack.resize_" + mStackId);
-        mWindowManager.deferSurfaceLayout();
+        mService.deferWindowLayout();
         try {
             // Update override configurations of all tasks in the stack.
             final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
@@ -4384,7 +4383,7 @@ class ActivityStack extends ConfigurationContainer {
                         topRunningActivityLocked(), preserveWindows);
             }
         } finally {
-            mWindowManager.continueSurfaceLayout();
+            mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
     }

@@ -21,9 +21,7 @@ import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
-import static android.location.LocationProvider.AVAILABLE;
 import static android.os.PowerManager.locationPowerSaveModeToString;
-import static android.provider.Settings.Global.LOCATION_DISABLE_STATUS_CALLBACKS;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
@@ -1088,34 +1086,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             pw.decreaseIndent();
         }
 
-        @GuardedBy("mLock")
-        public long getStatusUpdateTimeLocked() {
-            if (mProvider != null) {
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    return mProvider.getStatusUpdateTime();
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            } else {
-                return 0;
-            }
-        }
-
-        @GuardedBy("mLock")
-        public int getStatusLocked(Bundle extras) {
-            if (mProvider != null) {
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    return mProvider.getStatus(extras);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            } else {
-                return AVAILABLE;
-            }
-        }
-
         @Override
         public void onReportLocation(Location location) {
             synchronized (mLock) {
@@ -1324,18 +1294,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             super.setRequest(request, workSource);
             mCurrentRequest = request;
         }
-
-        @GuardedBy("mLock")
-        public void setStatusLocked(int status, Bundle extras, long updateTime) {
-            if (mProvider != null) {
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    ((MockProvider) mProvider).setStatus(status, extras, updateTime);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        }
     }
 
     /**
@@ -1514,34 +1472,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return mListener;
             }
             throw new IllegalStateException("Request for non-existent listener");
-        }
-
-        public boolean callStatusChangedLocked(String provider, int status, Bundle extras) {
-            if (mListener != null) {
-                try {
-                    mListener.onStatusChanged(provider, status, extras);
-                    // call this after broadcasting so we do not increment
-                    // if we throw an exception.
-                    incrementPendingBroadcastsLocked();
-                } catch (RemoteException e) {
-                    return false;
-                }
-            } else {
-                Intent statusChanged = new Intent();
-                statusChanged.putExtras(new Bundle(extras));
-                statusChanged.putExtra(LocationManager.KEY_STATUS_CHANGED, status);
-                try {
-                    mPendingIntent.send(mContext, 0, statusChanged, this, mHandler,
-                            getResolutionPermission(mAllowedResolutionLevel),
-                            PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
-                    // call this after broadcasting so we do not increment
-                    // if we throw an exception.
-                    incrementPendingBroadcastsLocked();
-                } catch (PendingIntent.CanceledException e) {
-                    return false;
-                }
-            }
-            return true;
         }
 
         public boolean callLocationChangedLocked(Location location) {
@@ -2296,7 +2226,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         private final Receiver mReceiver;
         private boolean mIsForegroundUid;
         private Location mLastFixBroadcast;
-        private long mLastStatusBroadcast;
         private Throwable mStackTrace;  // for debugging only
 
         /**
@@ -3406,26 +3335,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }
 
-            // TODO: location provider status callbacks have been disabled and deprecated, and are
-            // guarded behind this setting now. should be removed completely post-Q
-            if (Settings.Global.getInt(mContext.getContentResolver(),
-                    LOCATION_DISABLE_STATUS_CALLBACKS, 1) == 0) {
-                long newStatusUpdateTime = provider.getStatusUpdateTimeLocked();
-                Bundle extras = new Bundle();
-                int status = provider.getStatusLocked(extras);
-
-                long prevStatusUpdateTime = r.mLastStatusBroadcast;
-                if ((newStatusUpdateTime > prevStatusUpdateTime)
-                        && (prevStatusUpdateTime != 0 || status != AVAILABLE)) {
-
-                    r.mLastStatusBroadcast = newStatusUpdateTime;
-                    if (!receiver.callStatusChangedLocked(provider.getName(), status, extras)) {
-                        receiverDead = true;
-                        Slog.w(TAG, "RemoteException calling onStatusChanged on " + receiver);
-                    }
-                }
-            }
-
             // track expired records
             if (r.mRealRequest.getNumUpdates() <= 0 || r.mRealRequest.getExpireAt() < now) {
                 if (deadUpdateRecords == null) {
@@ -3621,23 +3530,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             ((MockLocationProvider) testProvider).setEnabledLocked(enabled);
-        }
-    }
-
-    @Override
-    public void setTestProviderStatus(String providerName, int status, Bundle extras,
-            long updateTime, String opPackageName) {
-        if (!canCallerAccessMockLocation(opPackageName)) {
-            return;
-        }
-
-        synchronized (mLock) {
-            LocationProvider testProvider = getLocationProviderLocked(providerName);
-            if (testProvider == null || !testProvider.isMock()) {
-                throw new IllegalArgumentException("Provider \"" + providerName + "\" unknown");
-            }
-
-            ((MockLocationProvider) testProvider).setStatusLocked(status, extras, updateTime);
         }
     }
 

@@ -130,7 +130,7 @@ class UsbSettingsManager {
                 // it from all profile groups.
                 int numProfileGroups = mSettingsByProfileGroup.size();
                 for (int i = 0; i < numProfileGroups; i++) {
-                    mSettingsByProfileGroup.valueAt(i).removeAllDefaultsForUser(userToRemove);
+                    mSettingsByProfileGroup.valueAt(i).removeUser(userToRemove);
                 }
             }
         }

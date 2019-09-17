@@ -34,8 +34,8 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.ProximitySensor;
 
 import java.io.PrintWriter;
 
@@ -51,6 +51,9 @@ import javax.inject.Singleton;
 @Singleton
 public class FalsingManagerProxy implements FalsingManager {
 
+    private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";
+
+    private final ProximitySensor mProximitySensor;
     private FalsingManager mInternalFalsingManager;
     private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener;
     private final DeviceConfigProxy mDeviceConfig;
@@ -58,7 +61,11 @@ public class FalsingManagerProxy implements FalsingManager {
 
     @Inject
     FalsingManagerProxy(Context context, PluginManager pluginManager,
-            @Named(MAIN_HANDLER_NAME) Handler handler, DeviceConfigProxy deviceConfig) {
+            @Named(MAIN_HANDLER_NAME) Handler handler,
+            ProximitySensor proximitySensor,
+            DeviceConfigProxy deviceConfig) {
+        mProximitySensor = proximitySensor;
+        mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
         mDeviceConfig = deviceConfig;
         mDeviceConfigListener =
                 properties -> onDeviceConfigPropertiesChanged(context, properties.getNamespace());
@@ -113,8 +120,8 @@ public class FalsingManagerProxy implements FalsingManager {
         } else {
             mInternalFalsingManager = new BrightLineFalsingManager(
                     new FalsingDataProvider(context.getResources().getDisplayMetrics()),
-                    Dependency.get(AsyncSensorManager.class),
                     Dependency.get(KeyguardUpdateMonitor.class),
+                    mProximitySensor,
                     mDeviceConfig
             );
         }

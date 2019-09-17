@@ -299,17 +299,7 @@ public class NotificationTestHelper {
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);
         row.setAboveShelfChangedListener(aboveShelf -> {});
-        StatusBarNotification sbn = new StatusBarNotification(
-                pkg,
-                pkg,
-                mId++,
-                null /* tag */,
-                uid,
-                2000 /* initialPid */,
-                notification,
-                userHandle,
-                null /* overrideGroupKey */,
-                System.currentTimeMillis());
+
         final NotificationChannel channel =
                 new NotificationChannel(
                         notification.getChannelId(),
@@ -317,14 +307,20 @@ public class NotificationTestHelper {
                         importance);
         channel.setBlockableSystem(true);
 
-        NotificationEntry entry = new NotificationEntry(
-                sbn,
-                new RankingBuilder()
-                        .setKey(sbn.getKey())
-                        .setChannel(channel)
-                        .build());
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg(pkg)
+                .setOpPkg(pkg)
+                .setId(mId++)
+                .setUid(uid)
+                .setInitialPid(2000)
+                .setNotification(notification)
+                .setUser(userHandle)
+                .setPostTime(System.currentTimeMillis())
+                .setChannel(channel)
+                .build();
+
         entry.setRow(row);
-        entry.createIcons(mContext, sbn);
+        entry.createIcons(mContext, entry.sbn());
         row.setEntry(entry);
         row.getNotificationInflater().addInflationFlags(extraInflationFlags);
         NotificationContentInflaterTest.runThenWaitForInflation(

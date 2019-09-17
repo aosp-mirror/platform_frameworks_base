@@ -361,6 +361,78 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void addDevicePackagesToPreferenceDenied(UsbDevice device, String[] packageNames,
+            UserHandle user) {
+        device = Preconditions.checkNotNull(device);
+        packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
+        user = Preconditions.checkNotNull(user);
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mSettingsManager.getSettingsForProfileGroup(user)
+                    .addDevicePackagesToDenied(device, packageNames, user);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void addAccessoryPackagesToPreferenceDenied(UsbAccessory accessory,
+            String[] packageNames, UserHandle user) {
+        accessory = Preconditions.checkNotNull(accessory);
+        packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
+        user = Preconditions.checkNotNull(user);
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mSettingsManager.getSettingsForProfileGroup(user)
+                    .addAccessoryPackagesToDenied(accessory, packageNames, user);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void removeDevicePackagesFromPreferenceDenied(UsbDevice device, String[] packageNames,
+            UserHandle user) {
+        device = Preconditions.checkNotNull(device);
+        packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
+        user = Preconditions.checkNotNull(user);
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mSettingsManager.getSettingsForProfileGroup(user)
+                    .removeDevicePackagesFromDenied(device, packageNames, user);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void removeAccessoryPackagesFromPreferenceDenied(UsbAccessory accessory,
+            String[] packageNames, UserHandle user) {
+        accessory = Preconditions.checkNotNull(accessory);
+        packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
+        user = Preconditions.checkNotNull(user);
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mSettingsManager.getSettingsForProfileGroup(user)
+                    .removeAccessoryPackagesFromDenied(accessory, packageNames, user);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
     public void setDevicePersistentPermission(UsbDevice device, int uid, UserHandle user,
             boolean shouldBeGranted) {
         device = Preconditions.checkNotNull(device);

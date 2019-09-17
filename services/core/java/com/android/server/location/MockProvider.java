@@ -19,8 +19,6 @@ package com.android.server.location;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.location.Location;
-import android.location.LocationProvider;
-import android.os.Bundle;
 import android.os.WorkSource;
 
 import com.android.internal.location.ProviderProperties;
@@ -38,9 +36,6 @@ public class MockProvider extends AbstractLocationProvider {
 
     private boolean mEnabled;
     @Nullable private Location mLocation;
-    private int mStatus;
-    private long mStatusUpdateTime;
-    private Bundle mExtras;
 
     public MockProvider(Context context,
             LocationProviderManager locationProviderManager, ProviderProperties properties) {
@@ -48,9 +43,6 @@ public class MockProvider extends AbstractLocationProvider {
 
         mEnabled = true;
         mLocation = null;
-        mStatus = LocationProvider.AVAILABLE;
-        mStatusUpdateTime = 0;
-        mExtras = null;
 
         setProperties(properties);
     }
@@ -72,13 +64,6 @@ public class MockProvider extends AbstractLocationProvider {
         }
     }
 
-    /** Sets the status for this mock provider. */
-    public void setStatus(int status, Bundle extras, long updateTime) {
-        mStatus = status;
-        mStatusUpdateTime = updateTime;
-        mExtras = extras;
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("last location=" + mLocation);
@@ -86,19 +71,4 @@ public class MockProvider extends AbstractLocationProvider {
 
     @Override
     public void onSetRequest(ProviderRequest request, WorkSource source) {}
-
-    @Override
-    public int getStatus(Bundle extras) {
-        if (mExtras != null) {
-            extras.clear();
-            extras.putAll(mExtras);
-        }
-
-        return mStatus;
-    }
-
-    @Override
-    public long getStatusUpdateTime() {
-        return mStatusUpdateTime;
-    }
 }

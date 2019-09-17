@@ -4070,32 +4070,54 @@ public class PackageParser {
                         intentInfo, outError)) {
                     return false;
                 }
-                Intent intent = new Intent();
-                if (intentInfo.countActions() != 1) {
-                    outError[0] = "intent tags must contain exactly one action.";
-                    return false;
-                }
-                intent.setAction(intentInfo.getAction(0));
-                for (int i = 0, max = intentInfo.countCategories(); i < max; i++) {
-                    intent.addCategory(intentInfo.getCategory(i));
-                }
+
                 Uri data = null;
                 String dataType = null;
-                if (intentInfo.countDataTypes() > 1) {
+                String host = "";
+                final int numActions = intentInfo.countActions();
+                final int numSchemes = intentInfo.countDataSchemes();
+                final int numTypes = intentInfo.countDataTypes();
+                final int numHosts = intentInfo.getHosts().length;
+                if ((numSchemes == 0 && numTypes == 0 && numActions == 0)) {
+                    outError[0] = "intent tags must contain either an action or data.";
+                    return false;
+                }
+                if (numActions > 1) {
+                    outError[0] = "intent tag may have at most one action.";
+                    return false;
+                }
+                if (numTypes > 1) {
                     outError[0] = "intent tag may have at most one data type.";
                     return false;
                 }
-                if (intentInfo.countDataSchemes() > 1) {
+                if (numSchemes > 1) {
                     outError[0] = "intent tag may have at most one data scheme.";
                     return false;
                 }
-                if (intentInfo.countDataTypes() == 1) {
-                    data = Uri.fromParts(intentInfo.getDataType(0), "", null);
+                if (numHosts > 1) {
+                    outError[0] = "intent tag may have at most one data host.";
+                    return false;
                 }
-                if (intentInfo.countDataSchemes() == 1) {
-                    dataType = intentInfo.getDataScheme(0);
+                Intent intent = new Intent();
+                for (int i = 0, max = intentInfo.countCategories(); i < max; i++) {
+                    intent.addCategory(intentInfo.getCategory(i));
+                }
+                if (numHosts == 1) {
+                    host = intentInfo.getHosts()[0];
+                }
+                if (numSchemes == 1) {
+                    data = new Uri.Builder()
+                            .scheme(intentInfo.getDataScheme(0))
+                            .authority(host)
+                            .build();
+                }
+                if (numTypes == 1) {
+                    dataType = intentInfo.getDataType(0);
                 }
                 intent.setDataAndType(data, dataType);
+                if (numActions == 1) {
+                    intent.setAction(intentInfo.getAction(0));
+                }
                 owner.mQueriesIntents = ArrayUtils.add(owner.mQueriesIntents, intent);
             } else if (parser.getName().equals("package")) {
                 final TypedArray sa = res.obtainAttributes(parser,

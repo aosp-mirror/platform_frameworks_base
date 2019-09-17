@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.monitor;
 
-import static com.android.server.wm.flicker.AutomationUtils.wakeUpAndGoToHomeScreen;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.wakeUpAndGoToHomeScreen;
 
 import androidx.test.InstrumentationRegistry;
 

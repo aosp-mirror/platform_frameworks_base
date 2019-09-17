@@ -297,7 +297,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
     static final boolean PROFILE_ORIENTATION = false;
-    static final boolean localLOGV = DEBUG;
 
     /** How much to multiply the policy's type layer, to reserve room
      * for multiple windows of the same type and Z-ordering adjustment
@@ -1671,8 +1670,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
 
-            if (localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addWindow: New client "
-                    + client.asBinder() + ": window=" + win + " Callers=" + Debug.getCallers(5));
+            if (DEBUG || DEBUG_ADD_REMOVE) {
+                Slog.v(TAG_WM, "addWindow: New client " + client.asBinder()
+                        + ": window=" + win + " Callers=" + Debug.getCallers(5));
+            }
 
             if (win.isVisibleOrAdding() && displayContent.updateOrientation()) {
                 displayContent.sendNewConfiguration();
@@ -2339,16 +2340,18 @@ public class WindowManagerService extends IWindowManager.Stub
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             outInsetsState.set(displayContent.getInsetsStateController().getInsetsForDispatch(win));
-            if (localLOGV) Slog.v(
-                TAG_WM, "Relayout given client " + client.asBinder()
-                + ", requestedWidth=" + requestedWidth
-                + ", requestedHeight=" + requestedHeight
-                + ", viewVisibility=" + viewVisibility
-                + "\nRelayout returning frame=" + outFrame
-                + ", surface=" + outSurfaceControl);
+            if (DEBUG) {
+                Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
+                                + ", requestedWidth=" + requestedWidth
+                                + ", requestedHeight=" + requestedHeight
+                                + ", viewVisibility=" + viewVisibility
+                                + "\nRelayout returning frame=" + outFrame
+                                + ", surface=" + outSurfaceControl);
+            }
 
-            if (localLOGV || DEBUG_FOCUS) Slog.v(
-                TAG_WM, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
+            if (DEBUG || DEBUG_FOCUS) {
+                Slog.v(TAG_WM, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
+            }
 
             result |= mInTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
 
@@ -2772,21 +2775,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         true /* includingParents */);
             }
         }
-    }
-
-    /**
-     * Starts deferring layout passes. Useful when doing multiple changes but to optimize
-     * performance, only one layout pass should be done. This can be called multiple times, and
-     * layouting will be resumed once the last caller has called
-     * {@link #continueSurfaceLayout}.
-     */
-    void deferSurfaceLayout() {
-        mWindowPlacerLocked.deferLayout();
-    }
-
-    /** Resumes layout passes after deferring them. See {@link #deferSurfaceLayout()} */
-    void continueSurfaceLayout() {
-        mWindowPlacerLocked.continueLayout();
     }
 
     /**
@@ -5242,7 +5230,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowState windowForClientLocked(Session session, IBinder client, boolean throwOnError) {
         WindowState win = mWindowMap.get(client);
-        if (localLOGV) Slog.v(TAG_WM, "Looking up client " + client + ": " + win);
+        if (DEBUG) Slog.v(TAG_WM, "Looking up client " + client + ": " + win);
         if (win == null) {
             if (throwOnError) {
                 throw new IllegalArgumentException(
@@ -7759,5 +7747,65 @@ public class WindowManagerService extends IWindowManager.Stub
         // do any further management so we just release the java ref and let the
         // InputDispatcher hold the last ref.
         inputChannel.release();
+    }
+
+    /** Return whether layer tracing is enabled */
+    public boolean isLayerTracing() {
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
+                "isLayerTracing");
+        long token = Binder.clearCallingIdentity();
+        try {
+            Parcel data = null;
+            Parcel reply = null;
+            try {
+                IBinder sf = ServiceManager.getService("SurfaceFlinger");
+                if (sf != null) {
+                    reply = Parcel.obtain();
+                    data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    sf.transact(/* LAYER_TRACE_STATUS_CODE */ 1026, data, reply, 0 /* flags */);
+                    return reply.readBoolean();
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get layer tracing");
+            } finally {
+                if (data != null) {
+                    data.recycle();
+                }
+                if (reply != null) {
+                    reply.recycle();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return false;
+    }
+
+    /** Enable or disable layer tracing */
+    public void setLayerTracing(boolean enabled) {
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
+                "setLayerTracing");
+        long token = Binder.clearCallingIdentity();
+        try {
+            Parcel data = null;
+            try {
+                IBinder sf = ServiceManager.getService("SurfaceFlinger");
+                if (sf != null) {
+                    data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    data.writeInt(enabled ? 1 : 0);
+                    sf.transact(/* LAYER_TRACE_CONTROL_CODE */ 1025, data, null, 0 /* flags */);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set layer tracing");
+            } finally {
+                if (data != null) {
+                    data.recycle();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 }

@@ -100,6 +100,7 @@ import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -2920,9 +2921,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWmService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
         }
 
-        if (DEBUG_FOCUS_LIGHT || mWmService.localLOGV) Slog.v(TAG_WM, "Changing focus from "
-                + mCurrentFocus + " to " + newFocus + " displayId=" + getDisplayId()
-                + " Callers=" + Debug.getCallers(4));
+        if (DEBUG_FOCUS_LIGHT || DEBUG) {
+            Slog.v(TAG_WM, "Changing focus from "
+                    + mCurrentFocus + " to " + newFocus + " displayId=" + getDisplayId()
+                    + " Callers=" + Debug.getCallers(4));
+        }
         final WindowState oldFocus = mCurrentFocus;
         mCurrentFocus = newFocus;
         mLosingFocus.remove(newFocus);

@@ -155,7 +155,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         } else if (MOVE_FULL_ROWS.equals(key)) {
             mFullRows = TunerService.parseIntegerSwitch(newValue, true);
         } else if (QuickQSPanel.NUM_QUICK_TILES.equals(key)) {
-            mNumQuickTiles = mQuickQsPanel.getNumQuickTiles(mQs.getContext());
+            mNumQuickTiles = QuickQSPanel.parseNumTiles(newValue);
             clearAnimationState();
         }
         updateAnimators();
