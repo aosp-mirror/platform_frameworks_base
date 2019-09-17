@@ -894,8 +894,10 @@ metalava_framework_docs_args += " --replace-documentation " +
 
 packages_to_document = [
     "android",
+    "dalvik",
     "java",
     "javax",
+    "junit",
     "org.apache.http",
     "org.json",
     "org.w3c.dom",
