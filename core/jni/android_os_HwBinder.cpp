@@ -152,7 +152,7 @@ status_t JHwBinder::onTransact(
         uint32_t flags,
         TransactCallback callback) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    bool isOneway = (flags & TF_ONE_WAY) != 0;
+    bool isOneway = (flags & IBinder::FLAG_ONEWAY) != 0;
     ScopedLocalRef<jobject> replyObj(env, nullptr);
     sp<JHwParcel> replyContext = nullptr;
 
