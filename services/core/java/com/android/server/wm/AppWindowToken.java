@@ -2503,14 +2503,18 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     public SurfaceControl getAnimationLeashParent() {
-        // All normal app transitions take place in an animation layer which is below the pinned
-        // stack but may be above the parent stacks of the given animating apps.
         // For transitions in the pinned stack (menu activity) we just let them occur as a child
         // of the pinned stack.
-        if (!inPinnedWindowingMode()) {
-            return getAppAnimationLayer();
-        } else {
+        // All normal app transitions take place in an animation layer which is below the pinned
+        // stack but may be above the parent stacks of the given animating apps by default. When
+        // a new hierarchical animation is enabled, we just let them occur as a child of the parent
+        // stack, i.e. the hierarchy of the surfaces is unchanged.
+        if (inPinnedWindowingMode()) {
             return getStack().getSurfaceControl();
+        } else if (WindowManagerService.sHierarchicalAnimations) {
+            return super.getAnimationLeashParent();
+        } else {
+            return getAppAnimationLayer();
         }
     }
 

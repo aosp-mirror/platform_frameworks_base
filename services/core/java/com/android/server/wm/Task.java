@@ -613,6 +613,9 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
     @Override
     public SurfaceControl getAnimationLeashParent() {
+        if (!WindowManagerService.sHierarchicalAnimations) {
+            return super.getAnimationLeashParent();
+        }
         // Currently, only the recents animation will create animation leashes for tasks. In this
         // case, reparent the task to the home animation layer while it is being animated to allow
         // the home activity to reorder the app windows relative to its own.
