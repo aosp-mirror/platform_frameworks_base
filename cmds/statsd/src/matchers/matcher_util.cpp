@@ -358,9 +358,10 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
 
 bool matchesSimple(const UidMap& uidMap, const SimpleAtomMatcher& simpleMatcher,
                    const LogEvent& event) {
-    if (simpleMatcher.field_value_matcher_size() <= 0) {
-        return event.GetTagId() == simpleMatcher.atom_id();
+    if (event.GetTagId() != simpleMatcher.atom_id()) {
+        return false;
     }
+
     for (const auto& matcher : simpleMatcher.field_value_matcher()) {
         if (!matchesSimple(uidMap, matcher, event.getValues(), 0, event.getValues().size(), 0)) {
             return false;
