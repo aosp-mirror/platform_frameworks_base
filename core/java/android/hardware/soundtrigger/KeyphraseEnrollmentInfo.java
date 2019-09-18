@@ -58,8 +58,8 @@ public class KeyphraseEnrollmentInfo {
      */
     private static final String VOICE_KEYPHRASE_META_DATA = "android.voice_enrollment";
     /**
-     * Intent Action: for managing the keyphrases for hotword detection.
-     * This needs to be defined by a service that supports enrolling users for hotword/keyphrase
+     * Activity Action: Show activity for managing the keyphrases for hotword detection.
+     * This needs to be defined by an activity that supports enrolling users for hotword/keyphrase
      * detection.
      */
     public static final String ACTION_MANAGE_VOICE_KEYPHRASES =
@@ -101,7 +101,7 @@ public class KeyphraseEnrollmentInfo {
         // Find the apps that supports enrollment for hotword keyhphrases,
         // Pick a privileged app and obtain the information about the supported keyphrases
         // from its metadata.
-        List<ResolveInfo> ris = pm.queryIntentServices(
+        List<ResolveInfo> ris = pm.queryIntentActivities(
                 new Intent(ACTION_MANAGE_VOICE_KEYPHRASES), PackageManager.MATCH_DEFAULT_ONLY);
         if (ris == null || ris.isEmpty()) {
             // No application capable of enrolling for voice keyphrases is present.
@@ -116,11 +116,11 @@ public class KeyphraseEnrollmentInfo {
         for (ResolveInfo ri : ris) {
             try {
                 ApplicationInfo ai = pm.getApplicationInfo(
-                        ri.serviceInfo.packageName, PackageManager.GET_META_DATA);
+                        ri.activityInfo.packageName, PackageManager.GET_META_DATA);
                 if ((ai.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) == 0) {
                     // The application isn't privileged (/system/priv-app).
                     // The enrollment application needs to be a privileged system app.
-                    Slog.w(TAG, ai.packageName + " is not a privileged system app");
+                    Slog.w(TAG, ai.packageName + "is not a privileged system app");
                     continue;
                 }
                 if (!Manifest.permission.MANAGE_VOICE_KEYPHRASES.equals(ai.permission)) {
@@ -130,8 +130,6 @@ public class KeyphraseEnrollmentInfo {
                     continue;
                 }
 
-                Slog.i(TAG, ai.packageName + " added to keyphrase");
-
                 KeyphraseMetadata metadata =
                         getKeyphraseMetadataFromApplicationInfo(pm, ai, parseErrors);
                 if (metadata != null) {
@@ -139,7 +137,7 @@ public class KeyphraseEnrollmentInfo {
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 String error = "error parsing voice enrollment meta-data for "
-                        + ri.serviceInfo.packageName;
+                        + ri.activityInfo.packageName;
                 parseErrors.add(error + ": " + e);
                 Slog.w(TAG, error, e);
             }
@@ -292,7 +290,7 @@ public class KeyphraseEnrollmentInfo {
     }
 
     /**
-     * Returns an intent to launch an service that manages the given keyphrase
+     * Returns an intent to launch an activity that manages the given keyphrase
      * for the locale.
      *
      * @param action The enrollment related action that this intent is supposed to perform.
