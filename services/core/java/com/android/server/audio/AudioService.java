@@ -1582,12 +1582,13 @@ public class AudioService extends IAudioService.Stub
         setMicrophoneMuteNoCallerCheck(currentUser);
     }
 
-    private int rescaleIndex(int index, int srcStream, int dstStream) {
-        int srcRange =
-                mStreamStates[srcStream].getMaxIndex() - mStreamStates[srcStream].getMinIndex();
-        int dstRange =
-                mStreamStates[dstStream].getMaxIndex() - mStreamStates[dstStream].getMinIndex();
+    private int getIndexRange(int streamType) {
+        return (mStreamStates[streamType].getMaxIndex() - mStreamStates[streamType].getMinIndex());
+    }
 
+    private int rescaleIndex(int index, int srcStream, int dstStream) {
+        int srcRange = getIndexRange(srcStream);
+        int dstRange = getIndexRange(dstStream);
         if (srcRange == 0) {
             Log.e(TAG, "rescaleIndex : index range should not be zero");
             return mStreamStates[dstStream].getMinIndex();
@@ -1596,6 +1597,17 @@ public class AudioService extends IAudioService.Stub
         return mStreamStates[dstStream].getMinIndex()
                 + ((index - mStreamStates[srcStream].getMinIndex()) * dstRange + srcRange / 2)
                 / srcRange;
+    }
+
+    private int rescaleStep(int step, int srcStream, int dstStream) {
+        int srcRange = getIndexRange(srcStream);
+        int dstRange = getIndexRange(dstStream);
+        if (srcRange == 0) {
+            Log.e(TAG, "rescaleStep : index range should not be zero");
+            return 0;
+        }
+
+        return ((step * dstRange + srcRange / 2) / srcRange);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1774,7 +1786,7 @@ public class AudioService extends IAudioService.Stub
             }
         } else {
             // convert one UI step (+/-1) into a number of internal units on the stream alias
-            step = rescaleIndex(10, streamType, streamTypeAlias);
+            step = rescaleStep(10, streamType, streamTypeAlias);
         }
 
         // If either the client forces allowing ringer modes for this adjustment,
