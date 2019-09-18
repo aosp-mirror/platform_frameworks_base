@@ -42,7 +42,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="24dp"
-        android:paddingBottom="48dp"
         android:paddingTop="8dp"
         android:gravity="@integer/biometric_dialog_text_gravity"
         android:textSize="16sp"
@@ -52,6 +51,7 @@
         android:id="@+id/biometric_icon"
         android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
         android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
+        android:paddingTop="48dp"
         android:layout_gravity="center_horizontal"
         android:scaleType="fitXY" />
 
