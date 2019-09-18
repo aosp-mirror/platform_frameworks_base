@@ -1667,7 +1667,8 @@ class RootActivityContainer extends ConfigurationContainer
 
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop) {
-        return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */);
+        return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */,
+                -1 /* no realCallingPid */, -1 /* no realCallingUid */);
     }
 
     /**
@@ -1676,13 +1677,16 @@ class RootActivityContainer extends ConfigurationContainer
      * @param r The activity we are trying to launch. Can be null.
      * @param options The activity options used to the launch. Can be null.
      * @param candidateTask The possible task the activity might be launched in. Can be null.
-     * @params launchParams The resolved launch params to use.
+     * @param launchParams The resolved launch params to use.
+     * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
+     * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
      *
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop,
-            @Nullable LaunchParamsController.LaunchParams launchParams) {
+            @Nullable LaunchParamsController.LaunchParams launchParams, int realCallingPid,
+            int realCallingUid) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
         //Rect bounds = null;
@@ -1713,7 +1717,14 @@ class RootActivityContainer extends ConfigurationContainer
         if (launchParams != null && launchParams.mPreferredDisplayId != INVALID_DISPLAY) {
             displayId = launchParams.mPreferredDisplayId;
         }
-        if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
+        final boolean canLaunchOnDisplayFromStartRequest =
+                realCallingPid != 0 && realCallingUid > 0 && r != null
+                        && mStackSupervisor.canPlaceEntityOnDisplay(displayId, realCallingPid,
+                        realCallingUid, r.info);
+        // Checking if the activity's launch caller, or the realCallerId of the activity from
+        // start request (i.e. PendingIntent caller) is allowed to launch on the display.
+        if (displayId != INVALID_DISPLAY && (canLaunchOnDisplay(r, displayId)
+                || canLaunchOnDisplayFromStartRequest)) {
             if (r != null) {
                 stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options,
                         launchParams);
