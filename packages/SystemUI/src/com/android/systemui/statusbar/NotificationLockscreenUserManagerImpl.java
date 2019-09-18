@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -316,7 +317,7 @@ public class NotificationLockscreenUserManagerImpl implements
         boolean exceedsPriorityThreshold;
         if (NotificationUtils.useNewInterruptionModel(mContext)
                 && hideSilentNotificationsOnLockscreen()) {
-            exceedsPriorityThreshold = entry.isTopBucket();
+            exceedsPriorityThreshold = entry.getBucket() != BUCKET_SILENT;
         } else {
             exceedsPriorityThreshold =
                     !getEntryManager().getNotificationData().isAmbient(entry.key);

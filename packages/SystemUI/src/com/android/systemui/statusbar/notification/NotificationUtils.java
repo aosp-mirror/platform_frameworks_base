@@ -36,6 +36,7 @@ public class NotificationUtils {
     private static final int[] sLocationOffset = new int[2];
 
     @Nullable private static Boolean sUseNewInterruptionModel = null;
+    @Nullable private static Boolean sUsePeopleFiltering = null;
 
     public static boolean isGrayscale(ImageView v, ContrastColorUtil colorUtil) {
         Object isGrayscale = v.getTag(R.id.icon_is_grayscale);
@@ -86,5 +87,18 @@ public class NotificationUtils {
                     NOTIFICATION_NEW_INTERRUPTION_MODEL, 1) != 0;
         }
         return sUseNewInterruptionModel;
+    }
+
+    /**
+     * Caches and returns the value of the people filtering setting. Cannot change except through
+     * process restarts.
+     */
+    public static boolean usePeopleFiltering(Context context) {
+        if (sUsePeopleFiltering == null) {
+            sUsePeopleFiltering = context.getResources().getBoolean(
+                    R.bool.config_usePeopleFiltering);
+        }
+
+        return sUsePeopleFiltering;
     }
 }

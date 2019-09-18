@@ -396,8 +396,12 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
     // Call native method to retrieve a video frame
     VideoFrame *videoFrame = NULL;
     sp<IMemory> frameMemory = retriever->getFrameAtTime(timeUs, option);
+    // TODO: Using unsecurePointer() has some associated security pitfalls
+    //       (see declaration for details).
+    //       Either document why it is safe in this case or address the
+    //       issue (e.g. by copying).
     if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
-        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+        videoFrame = static_cast<VideoFrame *>(frameMemory->unsecurePointer());
     }
     if (videoFrame == NULL) {
         ALOGE("getFrameAtTime: videoFrame is a NULL pointer");
@@ -423,7 +427,11 @@ static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
     VideoFrame *videoFrame = NULL;
     sp<IMemory> frameMemory = retriever->getImageAtIndex(index, colorFormat);
     if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
-        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+        // TODO: Using unsecurePointer() has some associated security pitfalls
+        //       (see declaration for details).
+        //       Either document why it is safe in this case or address the
+        //       issue (e.g. by copying).
+        videoFrame = static_cast<VideoFrame *>(frameMemory->unsecurePointer());
     }
     if (videoFrame == NULL) {
         ALOGE("getImageAtIndex: videoFrame is a NULL pointer");
@@ -454,7 +462,11 @@ static jobject android_media_MediaMetadataRetriever_getThumbnailImageAtIndex(
     sp<IMemory> frameMemory = retriever->getImageAtIndex(
             index, colorFormat, true /*metaOnly*/, true /*thumbnail*/);
     if (frameMemory != 0) {
-        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+        // TODO: Using unsecurePointer() has some associated security pitfalls
+        //       (see declaration for details).
+        //       Either document why it is safe in this case or address the
+        //       issue (e.g. by copying).
+        videoFrame = static_cast<VideoFrame *>(frameMemory->unsecurePointer());
         int32_t thumbWidth = videoFrame->mWidth;
         int32_t thumbHeight = videoFrame->mHeight;
         videoFrame = NULL;
@@ -467,7 +479,11 @@ static jobject android_media_MediaMetadataRetriever_getThumbnailImageAtIndex(
                 || thumbPixels * 6 >= maxPixels) {
             frameMemory = retriever->getImageAtIndex(
                     index, colorFormat, false /*metaOnly*/, true /*thumbnail*/);
-            videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+            // TODO: Using unsecurePointer() has some associated security pitfalls
+            //       (see declaration for details).
+            //       Either document why it is safe in this case or address the
+            //       issue (e.g. by copying).
+            videoFrame = static_cast<VideoFrame *>(frameMemory->unsecurePointer());
 
             if (thumbPixels > maxPixels) {
                 int downscale = ceil(sqrt(thumbPixels / (float)maxPixels));
@@ -514,11 +530,15 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
     size_t i = 0;
     for (; i < numFrames; i++) {
         sp<IMemory> frame = retriever->getFrameAtIndex(frameIndex + i, colorFormat);
-        if (frame == NULL || frame->pointer() == NULL) {
+        if (frame == NULL || frame->unsecurePointer() == NULL) {
             ALOGE("video frame at index %zu is a NULL pointer", frameIndex + i);
             break;
         }
-        VideoFrame *videoFrame = static_cast<VideoFrame *>(frame->pointer());
+        // TODO: Using unsecurePointer() has some associated security pitfalls
+        //       (see declaration for details).
+        //       Either document why it is safe in this case or address the
+        //       issue (e.g. by copying).
+        VideoFrame *videoFrame = static_cast<VideoFrame *>(frame->unsecurePointer());
         jobject bitmapObj = getBitmapFromVideoFrame(env, videoFrame, -1, -1, outColorType);
         env->CallBooleanMethod(arrayList, fields.arrayListAdd, bitmapObj);
         env->DeleteLocalRef(bitmapObj);
@@ -551,7 +571,11 @@ static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
     // the method name to getEmbeddedPicture().
     sp<IMemory> albumArtMemory = retriever->extractAlbumArt();
     if (albumArtMemory != 0) {  // cast the shared structure to a MediaAlbumArt object
-        mediaAlbumArt = static_cast<MediaAlbumArt *>(albumArtMemory->pointer());
+        // TODO: Using unsecurePointer() has some associated security pitfalls
+        //       (see declaration for details).
+        //       Either document why it is safe in this case or address the
+        //       issue (e.g. by copying).
+        mediaAlbumArt = static_cast<MediaAlbumArt *>(albumArtMemory->unsecurePointer());
     }
     if (mediaAlbumArt == NULL) {
         ALOGE("getEmbeddedPicture: Call to getEmbeddedPicture failed.");

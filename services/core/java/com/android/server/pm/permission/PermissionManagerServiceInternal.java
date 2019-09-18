@@ -445,4 +445,13 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     /** Called when a new user has been created. */
     public abstract void onNewUserCreated(@UserIdInt int userId);
+
+    /**
+     * Compute an app op mode based on its runtime permission state.
+     *
+     * @param uid the uid for the app op
+     * @param permissionName the permission name for the app op
+     * @return the computed mode
+     */
+    public abstract int computeRuntimePermissionAppOpMode(int uid, @NonNull String permissionName);
 }

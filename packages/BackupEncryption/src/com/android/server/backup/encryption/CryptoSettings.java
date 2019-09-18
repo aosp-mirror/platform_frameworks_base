@@ -30,6 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.security.KeyStoreException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * State about encrypted backups that needs to be remembered.
@@ -50,6 +51,9 @@ public class CryptoSettings {
         KEY_NEXT_SECONDARY_ALIAS,
         SECONDARY_KEY_LAST_ROTATED_AT
     };
+
+    private static final long DEFAULT_SECONDARY_KEY_ROTATION_PERIOD =
+            TimeUnit.MILLISECONDS.convert(31, TimeUnit.DAYS);
 
     private static final String KEY_ANCESTRAL_SECONDARY_KEY_VERSION =
             "ancestral_secondary_key_version";
@@ -200,6 +204,11 @@ public class CryptoSettings {
                 .edit()
                 .putString(KEY_ANCESTRAL_SECONDARY_KEY_VERSION, ancestralSecondaryKeyVersion)
                 .apply();
+    }
+
+    /** The number of milliseconds between secondary key rotation */
+    public long backupSecondaryKeyRotationIntervalMs() {
+        return DEFAULT_SECONDARY_KEY_ROTATION_PERIOD;
     }
 
     /** Deletes all crypto settings related to backup (as opposed to restore). */

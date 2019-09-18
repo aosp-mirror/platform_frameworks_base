@@ -78,10 +78,6 @@ class OptimizeCommand : public Command {
             "All the resources that would be unused on devices of the given densities will be \n"
             "removed from the APK.",
         &target_densities_);
-    AddOptionalFlag("--whitelist-path",
-        "Path to the whitelist.cfg file containing whitelisted resources \n"
-            "whose names should not be altered in final resource tables.",
-        &whitelist_path_);
     AddOptionalFlag("--resources-config-path",
         "Path to the resources.cfg file containing the list of resources and \n"
             "directives to each resource. \n"
@@ -127,7 +123,6 @@ class OptimizeCommand : public Command {
                                const std::string &file_path);
 
   Maybe<std::string> config_path_;
-  Maybe<std::string> whitelist_path_;
   Maybe<std::string> resources_config_path_;
   Maybe<std::string> target_densities_;
   std::vector<std::string> configs_;

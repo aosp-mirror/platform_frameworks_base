@@ -147,7 +147,7 @@ public class ImsSmsImplBase {
      *               {@link SmsMessage#FORMAT_3GPP2}.
      * @param smsc the Short Message Service Center address.
      * @param isRetry whether it is a retry of an already attempted message or not.
-     * @param pdu PDUs representing the contents of the message.
+     * @param pdu PDU representing the contents of the message.
      */
     public void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
             byte[] pdu) {
@@ -166,27 +166,29 @@ public class ImsSmsImplBase {
      * provider.
      *
      * @param token token provided in {@link #onSmsReceived(int, String, byte[])}
+     * @param messageRef the message reference
      * @param result result of delivering the message. Valid values are:
      *  {@link #DELIVER_STATUS_OK},
      *  {@link #DELIVER_STATUS_ERROR_GENERIC},
      *  {@link #DELIVER_STATUS_ERROR_NO_MEMORY},
      *  {@link #DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED}
-     * @param messageRef the message reference
      */
-    public void acknowledgeSms(int token, @DeliverStatusResult int messageRef, int result) {
+    public void acknowledgeSms(int token, int messageRef, @DeliverStatusResult int result) {
         Log.e(LOG_TAG, "acknowledgeSms() not implemented.");
     }
 
     /**
      * This method will be triggered by the platform after
-     * {@link #onSmsStatusReportReceived(int, int, String, byte[])} has been called to provide the
+     * {@link #onSmsStatusReportReceived(int, int, String, byte[])} or
+     * {@link #onSmsStatusReportReceived(int, String, byte[])} has been called to provide the
      * result to the IMS provider.
      *
-     * @param token token provided in {@link #sendSms(int, int, String, String, boolean, byte[])}
+     * @param token token provided in {@link #onSmsStatusReportReceived(int, int, String, byte[])}
+     *              or {@link #onSmsStatusReportReceived(int, String, byte[])}
+     * @param messageRef the message reference
      * @param result result of delivering the message. Valid values are:
      *  {@link #STATUS_REPORT_STATUS_OK},
      *  {@link #STATUS_REPORT_STATUS_ERROR}
-     * @param messageRef the message reference
      */
     public void acknowledgeSmsReport(int token, int messageRef, @StatusReportResult int result) {
         Log.e(LOG_TAG, "acknowledgeSmsReport() not implemented.");
@@ -204,7 +206,7 @@ public class ImsSmsImplBase {
      *              callbacks for this message.
      * @param format the format of the message. Valid values are {@link SmsMessage#FORMAT_3GPP} and
      * {@link SmsMessage#FORMAT_3GPP2}.
-     * @param pdu PDUs representing the contents of the message.
+     * @param pdu PDU representing the contents of the message.
      * @throws RuntimeException if called before {@link #onReady()} is triggered.
      */
     public final void onSmsReceived(int token, String format, byte[] pdu) throws RuntimeException {
@@ -285,26 +287,75 @@ public class ImsSmsImplBase {
     }
 
     /**
-     * Sets the status report of the sent message.
+     * This method should be triggered by the IMS providers when the status report of the sent
+     * message is received. The platform will handle the report and notify the IMS provider of the
+     * result by calling {@link #acknowledgeSmsReport(int, int, int)}.
      *
+     * This method must not be called before {@link #onReady()} is called or the call will fail. If
+     * the platform is not available, {@link #acknowledgeSmsReport(int, int, int)} will be called
+     * with the {@link #STATUS_REPORT_STATUS_ERROR} result code.
      * @param token token provided in {@link #sendSms(int, int, String, String, boolean, byte[])}
      * @param messageRef the message reference.
      * @param format the format of the message. Valid values are {@link SmsMessage#FORMAT_3GPP} and
-     * {@link SmsMessage#FORMAT_3GPP2}.
-     * @param pdu PDUs representing the content of the status report.
+     *               {@link SmsMessage#FORMAT_3GPP2}.
+     * @param pdu PDU representing the content of the status report.
      * @throws RuntimeException if called before {@link #onReady()} is triggered
+     *
+     * @deprecated Use {@link #onSmsStatusReportReceived(int, String, byte[])} instead without the
+     * message reference.
      */
+    @Deprecated
     public final void onSmsStatusReportReceived(int token, int messageRef, String format,
-            byte[] pdu) throws RuntimeException{
+            byte[] pdu) throws RuntimeException {
         synchronized (mLock) {
             if (mListener == null) {
                 throw new RuntimeException("Feature not ready.");
             }
             try {
-                mListener.onSmsStatusReportReceived(token, messageRef, format, pdu);
+                mListener.onSmsStatusReportReceived(token, format, pdu);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Can not process sms status report: " + e.getMessage());
                 acknowledgeSmsReport(token, messageRef, STATUS_REPORT_STATUS_ERROR);
+            }
+        }
+    }
+
+    /**
+     * This method should be triggered by the IMS providers when the status report of the sent
+     * message is received. The platform will handle the report and notify the IMS provider of the
+     * result by calling {@link #acknowledgeSmsReport(int, int, int)}.
+     *
+     * This method must not be called before {@link #onReady()} is called or the call will fail. If
+     * the platform is not available, {@link #acknowledgeSmsReport(int, int, int)} will be called
+     * with the {@link #STATUS_REPORT_STATUS_ERROR} result code.
+     * @param token unique token generated by IMS providers that the platform will use to trigger
+     *              callbacks for this message.
+     * @param format the format of the message. Valid values are {@link SmsMessage#FORMAT_3GPP} and
+     *               {@link SmsMessage#FORMAT_3GPP2}.
+     * @param pdu PDU representing the content of the status report.
+     * @throws RuntimeException if called before {@link #onReady()} is triggered
+     */
+    public final void onSmsStatusReportReceived(int token, String format, byte[] pdu)
+            throws RuntimeException {
+        synchronized (mLock) {
+            if (mListener == null) {
+                throw new RuntimeException("Feature not ready.");
+            }
+            try {
+                mListener.onSmsStatusReportReceived(token, format, pdu);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Can not process sms status report: " + e.getMessage());
+                SmsMessage message = SmsMessage.createFromPdu(pdu, format);
+                if (message != null && message.mWrappedSmsMessage != null) {
+                    acknowledgeSmsReport(
+                            token,
+                            message.mWrappedSmsMessage.mMessageRef,
+                            STATUS_REPORT_STATUS_ERROR);
+                } else {
+                    Log.w(LOG_TAG,
+                            "onSmsStatusReportReceivedWithoutMessageRef: Invalid pdu entered.");
+                    acknowledgeSmsReport(token, 0, STATUS_REPORT_STATUS_ERROR);
+                }
             }
         }
     }

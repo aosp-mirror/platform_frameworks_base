@@ -18,7 +18,6 @@ package com.android.systemui.pip;
 
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -47,6 +46,9 @@ public class PipBoundsHandler {
     private static final String TAG = PipBoundsHandler.class.getSimpleName();
     private static final float INVALID_SNAP_FRACTION = -1f;
 
+    // System.identityHashCode guarantees zero for null object.
+    private static final int INVALID_SYSTEM_IDENTITY_TOKEN = 0;
+
     private final Context mContext;
     private final IWindowManager mWindowManager;
     private final PipSnapAlgorithm mSnapAlgorithm;
@@ -56,7 +58,7 @@ public class PipBoundsHandler {
     private final Point mTmpDisplaySize = new Point();
 
     private IPinnedStackController mPinnedStackController;
-    private ComponentName mLastPipComponentName;
+    private int mLastPipToken;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
 
     private float mDefaultAspectRatio;
@@ -78,11 +80,8 @@ public class PipBoundsHandler {
         mContext = context;
         mSnapAlgorithm = new PipSnapAlgorithm(context);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
-        reloadResources();
-        // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
-        // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
-        // triggers a configuration change and the resources to be reloaded.
         mAspectRatio = mDefaultAspectRatio;
+        reloadResources();
     }
 
     /**
@@ -162,27 +161,27 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Responds to IPinnedStackListener on saving reentry snap fraction
-     * for a given {@link ComponentName}.
+     * Responds to IPinnedStackListener on saving reentry snap fraction for a given token.
+     * Token should be generated via {@link System#identityHashCode(Object)}
      */
-    public void onSaveReentrySnapFraction(ComponentName componentName, Rect bounds) {
-        mReentrySnapFraction = getSnapFraction(bounds);
-        mLastPipComponentName = componentName;
+    public void onSaveReentrySnapFraction(int token, Rect stackBounds) {
+        mReentrySnapFraction = getSnapFraction(stackBounds);
+        mLastPipToken = token;
     }
 
     /**
-     * Responds to IPinnedStackListener on resetting reentry snap fraction
-     * for a given {@link ComponentName}.
+     * Responds to IPinnedStackListener on resetting reentry snap fraction for a given token.
+     * Token should be generated via {@link System#identityHashCode(Object)}
      */
-    public void onResetReentrySnapFraction(ComponentName componentName) {
-        if (componentName.equals(mLastPipComponentName)) {
+    public void onResetReentrySnapFraction(int token) {
+        if (mLastPipToken == token) {
             onResetReentrySnapFractionUnchecked();
         }
     }
 
     private void onResetReentrySnapFractionUnchecked() {
         mReentrySnapFraction = INVALID_SNAP_FRACTION;
-        mLastPipComponentName = null;
+        mLastPipToken = INVALID_SYSTEM_IDENTITY_TOKEN;
     }
 
     /**
@@ -213,28 +212,24 @@ public class PipBoundsHandler {
     /**
      * Responds to IPinnedStackListener on preparing the pinned stack animation.
      */
-    public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect bounds) {
-        final Rect destinationBounds;
-        if (bounds == null) {
-            destinationBounds = getDefaultBounds(mReentrySnapFraction);
+    public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect stackBounds) {
+        final Rect targetStackBounds;
+        if (stackBounds == null) {
+            targetStackBounds = getDefaultBounds(mReentrySnapFraction);
         } else {
-            destinationBounds = new Rect(bounds);
+            targetStackBounds = new Rect();
+            targetStackBounds.set(stackBounds);
         }
         if (isValidPictureInPictureAspectRatio(aspectRatio)) {
-            transformBoundsToAspectRatio(destinationBounds, aspectRatio,
-                    false /* useCurrentMinEdgeSize */);
+            transformBoundsToAspectRatio(targetStackBounds, aspectRatio,
+                    true /* useCurrentMinEdgeSize */);
         }
-        if (destinationBounds.equals(bounds)) {
+        if (targetStackBounds.equals(stackBounds)) {
             return;
         }
         mAspectRatio = aspectRatio;
         onResetReentrySnapFractionUnchecked();
-        try {
-            mPinnedStackController.startAnimation(destinationBounds, sourceRectHint,
-                    -1 /* animationDuration */);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to start PiP animation from SysUI", e);
-        }
+        // TODO: callback Window Manager on starting animation with calculated bounds
     }
 
     /**
@@ -363,7 +358,6 @@ public class PipBoundsHandler {
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mReentrySnapFraction=" + mReentrySnapFraction);
         pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
         pw.println(innerPrefix + "mDefaultAspectRatio=" + mDefaultAspectRatio);

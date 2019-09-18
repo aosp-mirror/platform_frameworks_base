@@ -21,6 +21,7 @@ import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
+import static android.app.Notification.EXTRA_MESSAGES;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
@@ -28,6 +29,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
 
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -38,6 +41,7 @@ import android.app.Person;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
@@ -58,6 +62,7 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +104,7 @@ public final class NotificationEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
+    private final List<Person> mAssociatedPeople = new ArrayList<>();
 
     /**
      * If {@link android.app.RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
@@ -140,12 +146,11 @@ public final class NotificationEntry {
      */
     private boolean mHighPriority;
 
-    private boolean mIsTopBucket;
-
     private boolean mSensitive = true;
     private Runnable mOnSensitiveChangedListener;
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
+    private int mBucket = BUCKET_ALERTING;
 
     public NotificationEntry(
             @NonNull StatusBarNotification sbn,
@@ -173,11 +178,12 @@ public final class NotificationEntry {
      * TODO: Make this package-private
      */
     public void setNotification(StatusBarNotification sbn) {
-        if (!sbn.getKey().equals(key)) {
+        if (sbn.getKey() != null && key != null && !sbn.getKey().equals(key)) {
             throw new IllegalArgumentException("New key " + sbn.getKey()
                     + " doesn't match existing key " + key);
         }
         notification = sbn;
+        updatePeopleList();
     }
 
     /**
@@ -263,20 +269,39 @@ public final class NotificationEntry {
         this.mHighPriority = highPriority;
     }
 
-    /**
-     * @return True if the notif should appear in the "top" or "important" section of notifications
-     * (as opposed to the "bottom" or "silent" section). This is usually the same as
-     * {@link #isHighPriority()}, but there are certain exceptions, such as media notifs.
-     */
-    public boolean isTopBucket() {
-        return mIsTopBucket;
-    }
-    public void setIsTopBucket(boolean isTopBucket) {
-        mIsTopBucket = isTopBucket;
-    }
-
     public boolean isBubble() {
         return (notification.getNotification().flags & FLAG_BUBBLE) != 0;
+    }
+
+    private void updatePeopleList() {
+        mAssociatedPeople.clear();
+
+        Bundle extras = notification.getNotification().extras;
+        if (extras == null) {
+            return;
+        }
+
+        List<Person> p = extras.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST);
+
+        if (p != null) {
+            mAssociatedPeople.addAll(p);
+        }
+
+        if (Notification.MessagingStyle.class.equals(
+                notification.getNotification().getNotificationStyle())) {
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                for (Notification.MessagingStyle.Message message :
+                        Notification.MessagingStyle.Message
+                                .getMessagesFromBundleArray(messages)) {
+                    mAssociatedPeople.add(message.getSenderPerson());
+                }
+            }
+        }
+    }
+
+    boolean hasAssociatedPeople() {
+        return mAssociatedPeople.size() > 0;
     }
 
     /**
@@ -293,6 +318,15 @@ public final class NotificationEntry {
         if (row != null) {
             row.reset();
         }
+    }
+
+    @NotificationSectionsManager.PriorityBucket
+    public int getBucket() {
+        return mBucket;
+    }
+
+    public void setBucket(@NotificationSectionsManager.PriorityBucket int bucket) {
+        mBucket = bucket;
     }
 
     public ExpandableNotificationRow getRow() {

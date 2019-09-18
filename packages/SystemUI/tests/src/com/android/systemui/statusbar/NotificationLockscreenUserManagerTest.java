@@ -19,11 +19,12 @@ package com.android.systemui.statusbar;
 import static android.content.Intent.ACTION_USER_SWITCHED;
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -166,7 +167,10 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1);
         when(mNotificationData.isHighPriority(any())).thenReturn(false);
 
-        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(mock(NotificationEntry.class)));
+        NotificationEntry entry = new NotificationEntryBuilder().build();
+        entry.setBucket(BUCKET_SILENT);
+
+        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
     }
 
     @Test
@@ -179,7 +183,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
         when(mNotificationData.isHighPriority(any())).thenReturn(false);
 
-        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(mock(NotificationEntry.class)));
+        NotificationEntry entry = new NotificationEntryBuilder().build();
+        entry.setBucket(BUCKET_SILENT);
+        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
     }
 
     private class TestNotificationLockscreenUserManager

@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
  * bounds change.
  */
 class NotificationSection {
+    private @NotificationSectionsManager.PriorityBucket int mBucket;
     private View mOwningView;
     private Rect mBounds = new Rect();
     private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
@@ -43,8 +44,9 @@ class NotificationSection {
     private ActivatableNotificationView mFirstVisibleChild;
     private ActivatableNotificationView mLastVisibleChild;
 
-    NotificationSection(View owningView) {
+    NotificationSection(View owningView, @NotificationSectionsManager.PriorityBucket int bucket) {
         mOwningView = owningView;
+        mBucket = bucket;
     }
 
     public void cancelAnimators() {
@@ -70,6 +72,11 @@ class NotificationSection {
 
     public boolean areBoundsAnimating() {
         return mBottomAnimator != null || mTopAnimator != null;
+    }
+
+    @NotificationSectionsManager.PriorityBucket
+    public int getBucket() {
+        return mBucket;
     }
 
     public void startBackgroundAnimation(boolean animateTop, boolean animateBottom) {
@@ -199,12 +206,16 @@ class NotificationSection {
         return mLastVisibleChild;
     }
 
-    public void setFirstVisibleChild(ActivatableNotificationView child) {
+    public boolean setFirstVisibleChild(ActivatableNotificationView child) {
+        boolean changed = mFirstVisibleChild != child;
         mFirstVisibleChild = child;
+        return changed;
     }
 
-    public void setLastVisibleChild(ActivatableNotificationView child) {
+    public boolean setLastVisibleChild(ActivatableNotificationView child) {
+        boolean changed = mLastVisibleChild != child;
         mLastVisibleChild = child;
+        return changed;
     }
 
     public void resetCurrentBounds() {
@@ -291,5 +302,4 @@ class NotificationSection {
         mBounds.bottom = bottom;
         return bottom;
     }
-
 }

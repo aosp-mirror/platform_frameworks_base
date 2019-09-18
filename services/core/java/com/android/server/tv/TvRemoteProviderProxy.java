@@ -23,7 +23,6 @@ import android.content.ServiceConnection;
 import android.media.tv.ITvRemoteProvider;
 import android.media.tv.ITvRemoteServiceInput;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -49,7 +48,6 @@ final class TvRemoteProviderProxy implements ServiceConnection {
     private final ComponentName mComponentName;
     private final int mUserId;
     private final int mUid;
-    private final Handler mHandler;
 
     /**
      * State guarded by mLock.
@@ -65,15 +63,14 @@ final class TvRemoteProviderProxy implements ServiceConnection {
     private boolean mRunning;
     private boolean mBound;
     private Connection mActiveConnection;
-    private boolean mConnectionReady;
 
-    public TvRemoteProviderProxy(Context context, ComponentName componentName, int userId,
-                                 int uid) {
+    TvRemoteProviderProxy(Context context, ProviderMethods provider,
+                          ComponentName componentName, int userId, int uid) {
         mContext = context;
+        mProviderMethods = provider;
         mComponentName = componentName;
         mUserId = userId;
         mUid = uid;
-        mHandler = new Handler();
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -82,11 +79,6 @@ final class TvRemoteProviderProxy implements ServiceConnection {
         pw.println(prefix + "  mRunning=" + mRunning);
         pw.println(prefix + "  mBound=" + mBound);
         pw.println(prefix + "  mActiveConnection=" + mActiveConnection);
-        pw.println(prefix + "  mConnectionReady=" + mConnectionReady);
-    }
-
-    public void setProviderSink(ProviderMethods provider) {
-        mProviderMethods = provider;
     }
 
     public boolean hasComponentName(String packageName, String className) {
@@ -101,7 +93,7 @@ final class TvRemoteProviderProxy implements ServiceConnection {
             }
 
             mRunning = true;
-            updateBinding();
+            bind();
         }
     }
 
@@ -112,29 +104,17 @@ final class TvRemoteProviderProxy implements ServiceConnection {
             }
 
             mRunning = false;
-            updateBinding();
+            unbind();
         }
     }
 
     public void rebindIfDisconnected() {
         synchronized (mLock) {
-            if (mActiveConnection == null && shouldBind()) {
+            if (mActiveConnection == null && mRunning) {
                 unbind();
                 bind();
             }
         }
-    }
-
-    private void updateBinding() {
-        if (shouldBind()) {
-            bind();
-        } else {
-            unbind();
-        }
-    }
-
-    private boolean shouldBind() {
-        return mRunning;
     }
 
     private void bind() {
@@ -208,48 +188,19 @@ final class TvRemoteProviderProxy implements ServiceConnection {
         disconnect();
     }
 
-
-    private void onConnectionReady(Connection connection) {
-        synchronized (mLock) {
-            if (DEBUG) Slog.d(TAG, "onConnectionReady");
-            if (mActiveConnection == connection) {
-                if (DEBUG) Slog.d(TAG, "mConnectionReady = true");
-                mConnectionReady = true;
-            }
-        }
-    }
-
-    private void onConnectionDied(Connection connection) {
-        if (mActiveConnection == connection) {
-            if (DEBUG) Slog.d(TAG, this + ": Service connection died");
-            disconnect();
-        }
-    }
-
     private void disconnect() {
         synchronized (mLock) {
             if (mActiveConnection != null) {
-                mConnectionReady = false;
                 mActiveConnection.dispose();
                 mActiveConnection = null;
             }
         }
     }
 
-    // Provider helpers
-    public void inputBridgeConnected(IBinder token) {
-        synchronized (mLock) {
-            if (DEBUG) Slog.d(TAG, this + ": inputBridgeConnected token: " + token);
-            if (mConnectionReady) {
-                mActiveConnection.onInputBridgeConnected(token);
-            }
-        }
-    }
-
-    public interface ProviderMethods {
+    interface ProviderMethods {
         // InputBridge
-        void openInputBridge(TvRemoteProviderProxy provider, IBinder token, String name,
-                             int width, int height, int maxPointers);
+        boolean openInputBridge(TvRemoteProviderProxy provider, IBinder token, String name,
+                                int width, int height, int maxPointers);
 
         void closeInputBridge(TvRemoteProviderProxy provider, IBinder token);
 
@@ -267,7 +218,7 @@ final class TvRemoteProviderProxy implements ServiceConnection {
         void sendPointerSync(TvRemoteProviderProxy provider, IBinder token);
     }
 
-    private final class Connection implements IBinder.DeathRecipient {
+    private final class Connection {
         private final ITvRemoteProvider mTvRemoteProvider;
         private final RemoteServiceInputProvider mServiceInputProvider;
 
@@ -279,24 +230,16 @@ final class TvRemoteProviderProxy implements ServiceConnection {
         public boolean register() {
             if (DEBUG) Slog.d(TAG, "Connection::register()");
             try {
-                mTvRemoteProvider.asBinder().linkToDeath(this, 0);
                 mTvRemoteProvider.setRemoteServiceInputSink(mServiceInputProvider);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onConnectionReady(Connection.this);
-                    }
-                });
                 return true;
             } catch (RemoteException ex) {
-                binderDied();
+                dispose();
+                return false;
             }
-            return false;
         }
 
         public void dispose() {
             if (DEBUG) Slog.d(TAG, "Connection::dispose()");
-            mTvRemoteProvider.asBinder().unlinkToDeath(this, 0);
             mServiceInputProvider.dispose();
         }
 
@@ -310,16 +253,6 @@ final class TvRemoteProviderProxy implements ServiceConnection {
             }
         }
 
-        @Override
-        public void binderDied() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onConnectionDied(Connection.this);
-                }
-            });
-        }
-
         void openInputBridge(final IBinder token, final String name, final int width,
                              final int height, final int maxPointers) {
             synchronized (mLock) {
@@ -330,9 +263,9 @@ final class TvRemoteProviderProxy implements ServiceConnection {
                     }
                     final long idToken = Binder.clearCallingIdentity();
                     try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.openInputBridge(TvRemoteProviderProxy.this, token,
-                                    name, width, height, maxPointers);
+                        if (mProviderMethods.openInputBridge(TvRemoteProviderProxy.this, token,
+                                                             name, width, height, maxPointers)) {
+                            onInputBridgeConnected(token);
                         }
                     } finally {
                         Binder.restoreCallingIdentity(idToken);
@@ -356,9 +289,7 @@ final class TvRemoteProviderProxy implements ServiceConnection {
                     }
                     final long idToken = Binder.clearCallingIdentity();
                     try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.closeInputBridge(TvRemoteProviderProxy.this, token);
-                        }
+                        mProviderMethods.closeInputBridge(TvRemoteProviderProxy.this, token);
                     } finally {
                         Binder.restoreCallingIdentity(idToken);
                     }
@@ -381,9 +312,7 @@ final class TvRemoteProviderProxy implements ServiceConnection {
                     }
                     final long idToken = Binder.clearCallingIdentity();
                     try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.clearInputBridge(TvRemoteProviderProxy.this, token);
-                        }
+                        mProviderMethods.clearInputBridge(TvRemoteProviderProxy.this, token);
                     } finally {
                         Binder.restoreCallingIdentity(idToken);
                     }
@@ -412,10 +341,7 @@ final class TvRemoteProviderProxy implements ServiceConnection {
                     }
                     final long idToken = Binder.clearCallingIdentity();
                     try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.sendKeyDown(TvRemoteProviderProxy.this, token,
-                                    keyCode);
-                        }
+                        mProviderMethods.sendKeyDown(TvRemoteProviderProxy.this, token, keyCode);
                     } finally {
                         Binder.restoreCallingIdentity(idToken);
                     }
@@ -438,9 +364,7 @@ final class TvRemoteProviderProxy implements ServiceConnection {
                     }
                     final long idToken = Binder.clearCallingIdentity();
                     try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.sendKeyUp(TvRemoteProviderProxy.this, token, keyCode);
-                        }
+                        mProviderMethods.sendKeyUp(TvRemoteProviderProxy.this, token, keyCode);
                     } finally {
                         Binder.restoreCallingIdentity(idToken);
                     }
@@ -463,10 +387,8 @@ final class TvRemoteProviderProxy implements ServiceConnection {
                     }
                     final long idToken = Binder.clearCallingIdentity();
                     try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.sendPointerDown(TvRemoteProviderProxy.this, token,
-                                    pointerId, x, y);
-                        }
+                        mProviderMethods.sendPointerDown(TvRemoteProviderProxy.this, token,
+                                pointerId, x, y);
                     } finally {
                         Binder.restoreCallingIdentity(idToken);
                     }
@@ -489,10 +411,8 @@ final class TvRemoteProviderProxy implements ServiceConnection {
                     }
                     final long idToken = Binder.clearCallingIdentity();
                     try {
-                        if (mProviderMethods != null) {
-                            mProviderMethods.sendPointerUp(TvRemoteProviderProxy.this, token,
-                                    pointerId);
-                        }
+                        mProviderMethods.sendPointerUp(TvRemoteProviderProxy.this, token,
+                                pointerId);
                     } finally {
                         Binder.restoreCallingIdentity(idToken);
                     }

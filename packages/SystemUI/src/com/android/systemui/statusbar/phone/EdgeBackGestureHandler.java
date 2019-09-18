@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -35,6 +36,8 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.StatsLog;
 import android.view.Gravity;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 import android.view.ISystemGestureExclusionListener;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -54,7 +57,6 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 
@@ -70,12 +72,34 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
             "gestures.back_timeout", 250);
 
-    private final PinnedStackListener mImeChangedListener = new PinnedStackListener() {
+    private final IPinnedStackListener.Stub mImeChangedListener = new IPinnedStackListener.Stub() {
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {
+        }
+
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             // No need to thread jump, assignments are atomic
             mImeHeight = imeVisible ? imeHeight : 0;
             // TODO: Probably cancel any existing gesture
+        }
+
+        @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+        }
+
+        @Override
+        public void onMinimizedStateChanged(boolean isMinimized) {
+        }
+
+        @Override
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
+        }
+
+        @Override
+        public void onActionsChanged(ParceledListSlice actions) {
         }
     };
 

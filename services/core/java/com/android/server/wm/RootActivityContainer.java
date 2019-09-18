@@ -959,6 +959,10 @@ class RootActivityContainer extends ConfigurationContainer
         // Need to make sure the pinned stack exist so we can resize it below...
         stack = display.getOrCreateStack(WINDOWING_MODE_PINNED, r.getActivityType(), ON_TOP);
 
+        // Calculate the target bounds here before the task is reparented back into pinned windowing
+        // mode (which will reset the saved bounds)
+        final Rect destBounds = stack.getDefaultPictureInPictureBounds(aspectRatio);
+
         try {
             final TaskRecord task = r.getTaskRecord();
             // Resize the pinned stack to match the current size of the task the activity we are
@@ -997,14 +1001,9 @@ class RootActivityContainer extends ConfigurationContainer
             mService.continueWindowLayout();
         }
 
-        // Notify the pinned stack controller to prepare the PiP animation, expect callback
-        // delivered from SystemUI to WM to start the animation.
-        final PinnedStackController pinnedStackController =
-                display.mDisplayContent.getPinnedStackController();
-        pinnedStackController.prepareAnimation(sourceHintBounds, aspectRatio,
-                null /* stackBounds */);
+        stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
+                true /* fromFullscreen */);
 
-        // TODO: revisit the following statement after the animation is moved from WM to SysUI.
         // Update the visibility of all activities after the they have been reparented to the new
         // stack.  This MUST run after the animation above is scheduled to ensure that the windows
         // drawn signal is scheduled after the bounds animation start call on the bounds animator
@@ -1615,7 +1614,8 @@ class RootActivityContainer extends ConfigurationContainer
 
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop) {
-        return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */);
+        return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */,
+                -1 /* no realCallingPid */, -1 /* no realCallingUid */);
     }
 
     /**
@@ -1624,13 +1624,16 @@ class RootActivityContainer extends ConfigurationContainer
      * @param r The activity we are trying to launch. Can be null.
      * @param options The activity options used to the launch. Can be null.
      * @param candidateTask The possible task the activity might be launched in. Can be null.
-     * @params launchParams The resolved launch params to use.
+     * @param launchParams The resolved launch params to use.
+     * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
+     * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
      *
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop,
-            @Nullable LaunchParamsController.LaunchParams launchParams) {
+            @Nullable LaunchParamsController.LaunchParams launchParams, int realCallingPid,
+            int realCallingUid) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
         //Rect bounds = null;
@@ -1661,7 +1664,15 @@ class RootActivityContainer extends ConfigurationContainer
         if (launchParams != null && launchParams.mPreferredDisplayId != INVALID_DISPLAY) {
             displayId = launchParams.mPreferredDisplayId;
         }
-        if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
+        final boolean canLaunchOnDisplayFromStartRequest =
+                realCallingPid != 0 && realCallingUid > 0 && r != null
+                        && mStackSupervisor.canPlaceEntityOnDisplay(displayId, realCallingPid,
+                        realCallingUid, r.info);
+        // Checking if the activity's launch caller, or the realCallerId of the activity from
+        // start request (i.e. entity that invokes PendingIntent) is allowed to launch on the
+        // display.
+        if (displayId != INVALID_DISPLAY && (canLaunchOnDisplay(r, displayId)
+                || canLaunchOnDisplayFromStartRequest)) {
             if (r != null) {
                 stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options,
                         launchParams);

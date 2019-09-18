@@ -16,8 +16,6 @@
 
 package android.view;
 
-import android.graphics.Rect;
-
 /**
  * An interface to the PinnedStackController to update it of state changes, and to query
  * information based on the current state.
@@ -32,17 +30,15 @@ interface IPinnedStackController {
     oneway void setIsMinimized(boolean isMinimized);
 
     /**
+     * Notifies the controller of the current min edge size, this is needed to allow the system to
+     * properly calculate the aspect ratio of the expanded PIP.  The given {@param minEdgeSize} is
+     * always bounded to be larger than the default minEdgeSize, so the caller can call this method
+     * with 0 to reset to the default size.
+     */
+    oneway void setMinEdgeSize(int minEdgeSize);
+
+    /**
      * @return what WM considers to be the current device rotation.
      */
     int getDisplayRotation();
-
-    /**
-     * Notifies the controller to actually start the PiP animation.
-     * The bounds would be calculated based on the last save reentry fraction internally.
-     * {@param destinationBounds} is the stack bounds of the final PiP window
-     * and {@param sourceRectHint} is the source bounds hint used when entering picture-in-picture,
-     * expect the same bound passed via IPinnedStackListener#onPrepareAnimation.
-     * {@param animationDuration} suggests the animation duration transitioning to PiP window.
-     */
-    void startAnimation(in Rect destinationBounds, in Rect sourceRectHint, int animationDuration);
 }

@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -86,6 +87,8 @@ public class PackageWatchdog {
     // Number of package failures within the duration above before we notify observers
     @VisibleForTesting
     static final int DEFAULT_TRIGGER_FAILURE_COUNT = 5;
+    @VisibleForTesting
+    static final long DEFAULT_OBSERVING_DURATION_MS = TimeUnit.DAYS.toMillis(2);
     // Whether explicit health checks are enabled or not
     private static final boolean DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED = true;
 
@@ -224,8 +227,10 @@ public class PackageWatchdog {
      * check state will be reset to a default depending on if the package is contained in
      * {@link mPackagesWithExplicitHealthCheckEnabled}.
      *
-     * @throws IllegalArgumentException if {@code packageNames} is empty
-     * or {@code durationMs} is less than 1
+     * <p>If {@code packageNames} is empty, this will be a no-op.
+     *
+     * <p>If {@code durationMs} is less than 1, a default monitoring duration
+     * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
      */
     public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
@@ -234,9 +239,9 @@ public class PackageWatchdog {
             return;
         }
         if (durationMs < 1) {
-            // TODO: Instead of failing, monitor for default? 48hrs?
-            throw new IllegalArgumentException("Invalid duration " + durationMs + "ms for observer "
+            Slog.wtf(TAG, "Invalid duration " + durationMs + "ms for observer "
                     + observer.getName() + ". Not observing packages " + packageNames);
+            durationMs = DEFAULT_OBSERVING_DURATION_MS;
         }
 
         List<MonitoredPackage> packages = new ArrayList<>();
@@ -969,6 +974,9 @@ public class PackageWatchdog {
     class MonitoredPackage {
         //TODO(b/120598832): VersionedPackage?
         private final String mName;
+        // Times when package failures happen sorted in ascending order
+        @GuardedBy("mLock")
+        private final LongArrayQueue mFailureHistory = new LongArrayQueue();
         // One of STATE_[ACTIVE|INACTIVE|PASSED|FAILED]. Updated on construction and after
         // methods that could change the health check state: handleElapsedTimeLocked and
         // tryPassHealthCheckLocked
@@ -988,12 +996,6 @@ public class PackageWatchdog {
         // of the package, see #getHealthCheckStateLocked
         @GuardedBy("mLock")
         private long mHealthCheckDurationMs = Long.MAX_VALUE;
-        // System uptime of first package failure
-        @GuardedBy("mLock")
-        private long mUptimeStartMs;
-        // Number of failures since mUptimeStartMs
-        @GuardedBy("mLock")
-        private int mFailures;
 
         MonitoredPackage(String name, long durationMs, boolean hasPassedHealthCheck) {
             this(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck);
@@ -1028,20 +1030,17 @@ public class PackageWatchdog {
          */
         @GuardedBy("mLock")
         public boolean onFailureLocked() {
+            // Sliding window algorithm: find out if there exists a window containing failures >=
+            // mTriggerFailureCount.
             final long now = mSystemClock.uptimeMillis();
-            final long duration = now - mUptimeStartMs;
-            if (duration > mTriggerFailureDurationMs) {
-                // TODO(b/120598832): Reseting to 1 is not correct
-                // because there may be more than 1 failure in the last trigger window from now
-                // This is the RescueParty impl, will leave for now
-                mFailures = 1;
-                mUptimeStartMs = now;
-            } else {
-                mFailures++;
+            mFailureHistory.addLast(now);
+            while (now - mFailureHistory.peekFirst() > mTriggerFailureDurationMs) {
+                // Prune values falling out of the window
+                mFailureHistory.removeFirst();
             }
-            boolean failed = mFailures >= mTriggerFailureCount;
+            boolean failed = mFailureHistory.size() >= mTriggerFailureCount;
             if (failed) {
-                mFailures = 0;
+                mFailureHistory.clear();
             }
             return failed;
         }

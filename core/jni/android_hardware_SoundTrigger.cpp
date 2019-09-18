@@ -606,12 +606,12 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
         goto exit;
     }
     memory = memoryDealer->allocate(offset + size);
-    if (memory == 0 || memory->pointer() == NULL) {
+    if (memory == 0 || memory->unsecurePointer() == NULL) {
         status = SOUNDTRIGGER_STATUS_ERROR;
         goto exit;
     }
 
-    nSoundModel = (struct sound_trigger_sound_model *)memory->pointer();
+    nSoundModel = (struct sound_trigger_sound_model *)memory->unsecurePointer();
 
     nSoundModel->type = type;
     nSoundModel->uuid = nUuid;
@@ -737,18 +737,18 @@ android_hardware_SoundTrigger_startRecognition(JNIEnv *env, jobject thiz,
         return SOUNDTRIGGER_STATUS_ERROR;
     }
     sp<IMemory> memory = memoryDealer->allocate(totalSize);
-    if (memory == 0 || memory->pointer() == NULL) {
+    if (memory == 0 || memory->unsecurePointer() == NULL) {
         return SOUNDTRIGGER_STATUS_ERROR;
     }
     if (dataSize != 0) {
-        memcpy((char *)memory->pointer() + sizeof(struct sound_trigger_recognition_config),
+        memcpy((char *)memory->unsecurePointer() + sizeof(struct sound_trigger_recognition_config),
                 nData,
                 dataSize);
         env->ReleaseByteArrayElements(jData, nData, 0);
     }
     env->DeleteLocalRef(jData);
     struct sound_trigger_recognition_config *config =
-                                    (struct sound_trigger_recognition_config *)memory->pointer();
+                                    (struct sound_trigger_recognition_config *)memory->unsecurePointer();
     config->data_size = dataSize;
     config->data_offset = sizeof(struct sound_trigger_recognition_config);
     config->capture_requested = env->GetBooleanField(jConfig,

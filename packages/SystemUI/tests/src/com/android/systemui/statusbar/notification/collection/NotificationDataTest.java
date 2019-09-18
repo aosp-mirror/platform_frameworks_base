@@ -32,6 +32,8 @@ import static com.android.systemui.statusbar.notification.collection.Notificatio
 import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_IMPORTANCE;
 import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_RANK;
 import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_VIS_EFFECTS;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -48,6 +50,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -136,7 +139,7 @@ public class NotificationDataTest extends SysuiTestCase {
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
-        mNotificationData = new TestableNotificationData();
+        mNotificationData = new TestableNotificationData(mContext);
         mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class));
         mRow = new NotificationTestHelper(getContext()).createRow();
         Dependency.get(InitController.class).executePostInitTasks();
@@ -527,8 +530,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
     @Test
     public void testSort_samePriorityUsesNMSRank() {
-        // NMS rank says A and then B. But A is not high priority and B is, so B should sort in
-        // front
+        // NMS rank says A and then B, and they are the same priority so use that rank
         Notification aN = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle(""))
                 .build();
@@ -571,8 +573,7 @@ public class NotificationDataTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSort_properlySetsIsTopBucket() {
-
+    public void testSort_properlySetsAlertingBucket() {
         Notification notification = new Notification.Builder(mContext, "test")
                 .build();
         NotificationEntry entry = new NotificationEntryBuilder()
@@ -591,11 +592,11 @@ public class NotificationDataTest extends SysuiTestCase {
         entry.setRow(mRow);
         mNotificationData.add(entry);
 
-        assertTrue(entry.isTopBucket());
+        assertEquals(entry.getBucket(), BUCKET_ALERTING);
     }
 
     @Test
-    public void testSort_properlySetsIsNotTopBucket() {
+    public void testSort_properlySetsSilentBucket() {
         Notification notification = new Notification.Builder(mContext, "test")
                 .build();
 
@@ -613,10 +614,9 @@ public class NotificationDataTest extends SysuiTestCase {
         mNotificationData.rankingOverrides.put(entry.key(), override);
 
         entry.setRow(mRow);
-
         mNotificationData.add(entry);
 
-        assertFalse(entry.isTopBucket());
+        assertEquals(entry.getBucket(), BUCKET_SILENT);
     }
 
     private void initStatusBarNotification(boolean allowDuringSetup) {
@@ -631,8 +631,8 @@ public class NotificationDataTest extends SysuiTestCase {
     }
 
     public static class TestableNotificationData extends NotificationData {
-        public TestableNotificationData() {
-            super();
+        public TestableNotificationData(Context context) {
+            super(context);
         }
 
         public static final String OVERRIDE_RANK = "r";

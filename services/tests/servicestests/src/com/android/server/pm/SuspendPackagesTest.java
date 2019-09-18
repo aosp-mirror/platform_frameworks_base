@@ -18,7 +18,10 @@ package com.android.server.pm;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.opToName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -39,7 +42,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
 import android.content.res.Resources;
-import android.media.AudioAttributes;
 import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.Handler;
@@ -553,28 +555,42 @@ public class SuspendPackagesTest {
     }
 
     @Test
-    public void testAudioOpBlockedOnSuspend() throws Exception {
+    public void testCameraBlockedOnSuspend() throws Exception {
+        assertOpBlockedOnSuspend(OP_CAMERA);
+    }
+
+    @Test
+    public void testPlayAudioBlockedOnSuspend() throws Exception {
+        assertOpBlockedOnSuspend(OP_PLAY_AUDIO);
+    }
+
+    @Test
+    public void testRecordAudioBlockedOnSuspend() throws Exception {
+        assertOpBlockedOnSuspend(OP_RECORD_AUDIO);
+    }
+
+    private void assertOpBlockedOnSuspend(int code) throws Exception {
         final IAppOpsService iAppOps = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         final CountDownLatch latch = new CountDownLatch(1);
         final IAppOpsCallback watcher = new IAppOpsCallback.Stub() {
             @Override
             public void opChanged(int op, int uid, String packageName) {
-                if (op == OP_PLAY_AUDIO && packageName.equals(TEST_APP_PACKAGE_NAME)) {
+                if (op == code && packageName.equals(TEST_APP_PACKAGE_NAME)) {
                     latch.countDown();
                 }
             }
         };
-        iAppOps.startWatchingMode(OP_PLAY_AUDIO, TEST_APP_PACKAGE_NAME, watcher);
+        iAppOps.startWatchingMode(code, TEST_APP_PACKAGE_NAME, watcher);
         final int testPackageUid = mPackageManager.getPackageUid(TEST_APP_PACKAGE_NAME, 0);
-        int audioOpMode = iAppOps.checkAudioOperation(OP_PLAY_AUDIO,
-                AudioAttributes.USAGE_UNKNOWN, testPackageUid, TEST_APP_PACKAGE_NAME);
-        assertEquals("Audio muted for unsuspended package", MODE_ALLOWED, audioOpMode);
+        int opMode = iAppOps.checkOperation(code, testPackageUid, TEST_APP_PACKAGE_NAME);
+        assertEquals("Op " + opToName(code) + " disallowed for unsuspended package", MODE_ALLOWED,
+                opMode);
         suspendTestPackage(null, null, null);
         assertTrue("AppOpsWatcher did not callback", latch.await(5, TimeUnit.SECONDS));
-        audioOpMode = iAppOps.checkAudioOperation(OP_PLAY_AUDIO,
-                AudioAttributes.USAGE_UNKNOWN, testPackageUid, TEST_APP_PACKAGE_NAME);
-        assertEquals("Audio not muted for suspended package", MODE_IGNORED, audioOpMode);
+        opMode = iAppOps.checkOperation(code, testPackageUid, TEST_APP_PACKAGE_NAME);
+        assertEquals("Op " + opToName(code) + " allowed for suspended package", MODE_IGNORED,
+                opMode);
         iAppOps.stopWatchingMode(watcher);
     }
 

@@ -765,6 +765,78 @@ public class PackageWatchdogTest {
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_B);
     }
 
+    /**
+     * Test default monitoring duration is used when PackageWatchdog#startObservingHealth is offered
+     * an invalid durationMs.
+     */
+    @Test
+    public void testInvalidMonitoringDuration_beforeExpiry() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), -1);
+        // Note: Don't move too close to the expiration time otherwise the handler will be thrashed
+        // by PackageWatchdog#scheduleNextSyncStateLocked which keeps posting runnables with very
+        // small timeouts.
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS - 100);
+        raiseFatalFailureAndDispatch(watchdog,
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+
+        // We should receive APP_A since the observer hasn't expired
+        assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
+    }
+
+    /**
+     * Test default monitoring duration is used when PackageWatchdog#startObservingHealth is offered
+     * an invalid durationMs.
+     */
+    @Test
+    public void testInvalidMonitoringDuration_afterExpiry() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), -1);
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS + 1);
+        raiseFatalFailureAndDispatch(watchdog,
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+
+        // We should receive nothing since the observer has expired
+        assertThat(observer.mHealthCheckFailedPackages).isEmpty();
+    }
+
+    /** Test we are notified when enough failures are triggered within any window. */
+    @Test
+    public void testFailureTriggerWindow() {
+        adoptShellPermissions(
+                Manifest.permission.WRITE_DEVICE_CONFIG,
+                Manifest.permission.READ_DEVICE_CONFIG);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(3), /*makeDefault*/false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_DURATION_MILLIS,
+                Integer.toString(1000), /*makeDefault*/false);
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), Long.MAX_VALUE);
+        // Raise 2 failures at t=0 and t=900 respectively
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+        moveTimeForwardAndDispatch(900);
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // Raise 2 failures at t=1100
+        moveTimeForwardAndDispatch(200);
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        mTestLooper.dispatchAll();
+
+        // We should receive APP_A since there are 3 failures within 1000ms window
+        assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
