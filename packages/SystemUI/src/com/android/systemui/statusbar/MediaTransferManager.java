@@ -18,12 +18,19 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.FeatureFlagUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.android.internal.R;
 import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
@@ -51,7 +58,8 @@ public class MediaTransferManager {
             }
 
             ViewParent parent = view.getParent();
-            StatusBarNotification statusBarNotification = getNotificationForParent(parent);
+            StatusBarNotification statusBarNotification =
+                    getRowForParent(parent).getStatusBarNotification();
             final Intent intent = new Intent()
                     .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
                     .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
@@ -60,21 +68,21 @@ public class MediaTransferManager {
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         }
-
-        private StatusBarNotification getNotificationForParent(ViewParent parent) {
-            while (parent != null) {
-                if (parent instanceof ExpandableNotificationRow) {
-                    return ((ExpandableNotificationRow) parent).getStatusBarNotification();
-                }
-                parent = parent.getParent();
-            }
-            return null;
-        }
     };
 
     public MediaTransferManager(Context context) {
         mContext = context;
         mActivityStarter = Dependency.get(ActivityStarter.class);
+    }
+
+    private ExpandableNotificationRow getRowForParent(ViewParent parent) {
+        while (parent != null) {
+            if (parent instanceof ExpandableNotificationRow) {
+                return ((ExpandableNotificationRow) parent);
+            }
+            parent = parent.getParent();
+        }
+        return null;
     }
 
     /**
@@ -95,5 +103,23 @@ public class MediaTransferManager {
 
         view.setVisibility(View.VISIBLE);
         view.setOnClickListener(mOnClickHandler);
+
+        ExpandableNotificationRow enr = getRowForParent(view.getParent());
+        int color = enr.getNotificationHeader().getOriginalIconColor();
+        ColorStateList tintList = ColorStateList.valueOf(color);
+
+        // Update the outline color
+        LinearLayout viewLayout = (LinearLayout) view;
+        RippleDrawable bkgDrawable = (RippleDrawable) viewLayout.getBackground();
+        GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
+        rect.setStroke(2, color);
+
+        // Update the image color
+        ImageView image = view.findViewById(R.id.media_seamless_image);
+        image.setImageTintList(tintList);
+
+        // Update the text color
+        TextView text = view.findViewById(R.id.media_seamless_text);
+        text.setTextColor(tintList);
     }
 }
