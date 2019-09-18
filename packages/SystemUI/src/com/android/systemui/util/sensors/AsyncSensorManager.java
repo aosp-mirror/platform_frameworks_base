@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util;
+package com.android.systemui.util.sensors;
 
 import android.content.Context;
 import android.hardware.HardwareBuffer;
@@ -56,23 +56,31 @@ public class AsyncSensorManager extends SensorManager
 
     private final SensorManager mInner;
     private final List<Sensor> mSensorCache;
-    private final HandlerThread mHandlerThread = new HandlerThread("async_sensor");
-    @VisibleForTesting final Handler mHandler;
+    private final Handler mHandler;
     private final List<SensorManagerPlugin> mPlugins;
 
     @Inject
     public AsyncSensorManager(Context context, PluginManager pluginManager) {
-        this(context.getSystemService(SensorManager.class), pluginManager);
+        this(context.getSystemService(SensorManager.class), pluginManager, null);
     }
 
     @VisibleForTesting
-    AsyncSensorManager(SensorManager sensorManager, PluginManager pluginManager) {
+    public AsyncSensorManager(
+            SensorManager sensorManager, PluginManager pluginManager, Handler handler) {
         mInner = sensorManager;
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        if (handler == null) {
+            HandlerThread handlerThread = new HandlerThread("async_sensor");
+            handlerThread.start();
+            mHandler = new Handler(handlerThread.getLooper());
+        } else {
+            mHandler = handler;
+        }
         mSensorCache = mInner.getSensorList(Sensor.TYPE_ALL);
         mPlugins = new ArrayList<>();
-        pluginManager.addPluginListener(this, SensorManagerPlugin.class, true /* allowMultiple */);
+        if (pluginManager != null) {
+            pluginManager.addPluginListener(this, SensorManagerPlugin.class,
+                    true /* allowMultiple */);
+        }
     }
 
     @Override

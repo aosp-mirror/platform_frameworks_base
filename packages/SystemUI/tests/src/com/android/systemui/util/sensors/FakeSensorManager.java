@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.utils.hardware;
+package com.android.systemui.util.sensors;
 
 import android.content.Context;
 import android.hardware.HardwareBuffer;
@@ -54,7 +54,7 @@ public class FakeSensorManager extends SensorManager {
 
     public static final String TAP_SENSOR_TYPE = "tapSensorType";
 
-    private final MockProximitySensor mMockProximitySensor;
+    private final FakeProximitySensor mFakeProximitySensor;
     private final FakeGenericSensor mFakeLightSensor;
     private final FakeGenericSensor mFakeTapSensor;
     private final FakeGenericSensor[] mSensors;
@@ -68,14 +68,14 @@ public class FakeSensorManager extends SensorManager {
         }
 
         mSensors = new FakeGenericSensor[]{
-                mMockProximitySensor = new MockProximitySensor(proxSensor),
+                mFakeProximitySensor = new FakeProximitySensor(proxSensor),
                 mFakeLightSensor = new FakeGenericSensor(createSensor(Sensor.TYPE_LIGHT, null)),
                 mFakeTapSensor = new FakeGenericSensor(createSensor(99, TAP_SENSOR_TYPE))
         };
     }
 
-    public MockProximitySensor getMockProximitySensor() {
-        return mMockProximitySensor;
+    public FakeProximitySensor getFakeProximitySensor() {
+        return mFakeProximitySensor;
     }
 
     public FakeGenericSensor getFakeLightSensor() {
@@ -231,9 +231,9 @@ public class FakeSensorManager extends SensorManager {
         setter.invoke(sensor, type);
     }
 
-    public class MockProximitySensor extends FakeGenericSensor {
+    public class FakeProximitySensor extends FakeGenericSensor {
 
-        private MockProximitySensor(Sensor sensor) {
+        private FakeProximitySensor(Sensor sensor) {
             super(sensor);
         }
 

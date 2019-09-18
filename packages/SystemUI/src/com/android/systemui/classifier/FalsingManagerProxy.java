@@ -20,6 +20,7 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.DeviceConfig;
@@ -35,7 +36,7 @@ import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.ProximitySensor;
+import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.io.PrintWriter;
 
@@ -66,6 +67,7 @@ public class FalsingManagerProxy implements FalsingManager {
             DeviceConfigProxy deviceConfig) {
         mProximitySensor = proximitySensor;
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
+        mProximitySensor.setSensorDelay(SensorManager.SENSOR_DELAY_GAME);
         mDeviceConfig = deviceConfig;
         mDeviceConfigListener =
                 properties -> onDeviceConfigPropertiesChanged(context, properties.getNamespace());

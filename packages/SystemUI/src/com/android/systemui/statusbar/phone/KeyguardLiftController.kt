@@ -24,7 +24,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dependency
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.Assert
-import com.android.systemui.util.AsyncSensorManager
+import com.android.systemui.util.sensors.AsyncSensorManager
 
 class KeyguardLiftController constructor(
     private val statusBarStateController: StatusBarStateController,

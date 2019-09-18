@@ -15,6 +15,7 @@
 package com.android.systemui;
 
 import android.annotation.Nullable;
+import android.app.AlarmManager;
 import android.app.INotificationManager;
 import android.content.res.Configuration;
 import android.hardware.SensorPrivacyManager;
@@ -110,10 +111,10 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
+import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -314,6 +315,7 @@ public class Dependency {
     @Inject Lazy<INotificationManager> mINotificationManager;
     @Inject Lazy<FalsingManager> mFalsingManager;
     @Inject Lazy<SysUiState> mSysUiStateFlagsContainer;
+    @Inject Lazy<AlarmManager> mAlarmManager;
 
     @Inject
     public Dependency() {
@@ -508,6 +510,7 @@ public class Dependency {
         mProviders.put(INotificationManager.class, mINotificationManager::get);
         mProviders.put(FalsingManager.class, mFalsingManager::get);
         mProviders.put(SysUiState.class, mSysUiStateFlagsContainer::get);
+        mProviders.put(AlarmManager.class, mAlarmManager::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add
