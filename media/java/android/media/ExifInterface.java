@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -1448,6 +1449,37 @@ public class ExifInterface {
         }
         mIsInputStream = true;
         loadAttributes(inputStream);
+    }
+
+    /**
+     * Returns whether ExifInterface currently supports parsing data from the specified mime type
+     * or not.
+     *
+     * @param mimeType the string value of mime type
+     */
+    public static boolean isSupportedMimeType(@NonNull String mimeType) {
+        if (mimeType == null) {
+            throw new NullPointerException("mimeType shouldn't be null");
+        }
+
+        switch (mimeType.toLowerCase(Locale.ROOT)) {
+            case "image/jpeg":
+            case "image/x-adobe-dng":
+            case "image/x-canon-cr2":
+            case "image/x-nikon-nef":
+            case "image/x-nikon-nrw":
+            case "image/x-sony-arw":
+            case "image/x-panasonic-rw2":
+            case "image/x-olympus-orf":
+            case "image/x-pentax-pef":
+            case "image/x-samsung-srw":
+            case "image/x-fuji-raf":
+            case "image/heic":
+            case "image/heif":
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
