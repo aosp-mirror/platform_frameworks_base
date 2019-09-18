@@ -16,20 +16,14 @@
 
 package com.android.systemui;
 
-import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -72,9 +66,6 @@ public class ForegroundServiceNotificationListener {
                 removeNotification(entry.notification);
             }
         });
-
-        notificationEntryManager.addNotificationLifetimeExtender(
-                new ForegroundServiceNotificationListener.ForegroundServiceLifetimeExtender());
     }
 
     /**
@@ -152,66 +143,5 @@ public class ForegroundServiceNotificationListener {
                     return true;
                 },
                 true /* create if not found */);
-    }
-
-    /**
-     * Extends the lifetime of foreground notification services such that they show for at least
-     * five seconds
-     */
-    public static class ForegroundServiceLifetimeExtender implements NotificationLifetimeExtender {
-
-        private static final String TAG = "FGSLifetimeExtender";
-        @VisibleForTesting
-        static final int MIN_FGS_TIME_MS = 5000;
-
-        private NotificationSafeToRemoveCallback mNotificationSafeToRemoveCallback;
-        private ArraySet<NotificationEntry> mManagedEntries = new ArraySet<>();
-        private Handler mHandler = new Handler(Looper.getMainLooper());
-
-        public ForegroundServiceLifetimeExtender() {
-        }
-
-        @Override
-        public void setCallback(@NonNull NotificationSafeToRemoveCallback callback) {
-            mNotificationSafeToRemoveCallback = callback;
-        }
-
-        @Override
-        public boolean shouldExtendLifetime(@NonNull NotificationEntry entry) {
-            if ((entry.notification.getNotification().flags
-                    & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
-                return false;
-            }
-
-            long currentTime = System.currentTimeMillis();
-            return currentTime - entry.notification.getPostTime() < MIN_FGS_TIME_MS;
-        }
-
-        @Override
-        public boolean shouldExtendLifetimeForPendingNotification(
-                @NonNull NotificationEntry entry) {
-            return shouldExtendLifetime(entry);
-        }
-
-        @Override
-        public void setShouldManageLifetime(
-                @NonNull NotificationEntry entry, boolean shouldManage) {
-            if (!shouldManage) {
-                mManagedEntries.remove(entry);
-                return;
-            }
-
-            mManagedEntries.add(entry);
-
-            Runnable r = () -> {
-                if (mManagedEntries.contains(entry)) {
-                    if (mNotificationSafeToRemoveCallback != null) {
-                        mNotificationSafeToRemoveCallback.onSafeToRemove(entry.key);
-                    }
-                    mManagedEntries.remove(entry);
-                }
-            };
-            mHandler.postDelayed(r, MIN_FGS_TIME_MS);
-        }
     }
 }
