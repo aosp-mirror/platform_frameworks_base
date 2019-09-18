@@ -43,7 +43,6 @@ android_test {
 
     libs: [
         "android.test.runner",
-        "telephony-common",
         "testables",
         "org.apache.http.legacy",
         "android.test.base",
