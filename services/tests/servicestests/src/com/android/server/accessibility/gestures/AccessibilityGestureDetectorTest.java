@@ -176,6 +176,6 @@ public class AccessibilityGestureDetectorTest {
 
         // Check that correct gesture was recognized.
         verify(mResultListener).onGestureCompleted(
-                argThat(gestureInfo -> gestureInfo.getGestureId() == gestureId));
+                argThat(gestureEvent -> gestureEvent.getGestureId() == gestureId));
     }
 }

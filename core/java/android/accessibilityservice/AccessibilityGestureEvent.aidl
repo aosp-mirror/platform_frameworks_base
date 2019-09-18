@@ -16,4 +16,4 @@
 
 package android.accessibilityservice;
 
-parcelable AccessibilityGestureInfo;
+parcelable AccessibilityGestureEvent;

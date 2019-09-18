@@ -382,7 +382,7 @@ public abstract class AccessibilityService extends Service {
         void onServiceConnected();
         void init(int connectionId, IBinder windowToken);
         /** The detected gesture information for different displays */
-        boolean onGesture(AccessibilityGestureInfo gestureInfo);
+        boolean onGesture(AccessibilityGestureEvent gestureInfo);
         boolean onKeyEvent(KeyEvent event);
         /** Magnification changed callbacks for different displays */
         void onMagnificationChanged(int displayId, @NonNull Region region,
@@ -517,7 +517,7 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Called by {@link #onGesture(AccessibilityGestureInfo)} when the user performs a specific
+     * Called by {@link #onGesture(AccessibilityGestureEvent)} when the user performs a specific
      * gesture on the default display.
      *
      * <strong>Note:</strong> To receive gestures an accessibility service must
@@ -528,7 +528,7 @@ public abstract class AccessibilityService extends Service {
      * @param gestureId The unique id of the performed gesture.
      *
      * @return Whether the gesture was handled.
-     * @deprecated Override {@link #onGesture(AccessibilityGestureInfo)} instead.
+     * @deprecated Override {@link #onGesture(AccessibilityGestureEvent)} instead.
      *
      * @see #GESTURE_SWIPE_UP
      * @see #GESTURE_SWIPE_UP_AND_LEFT
@@ -564,14 +564,14 @@ public abstract class AccessibilityService extends Service {
      * <strong>Note:</strong> The default implementation calls {@link #onGesture(int)} when the
      * touch screen is default display.
      *
-     * @param gestureInfo The information of gesture.
+     * @param gestureEvent The information of gesture.
      *
      * @return Whether the gesture was handled.
      *
      */
-    public boolean onGesture(@NonNull AccessibilityGestureInfo gestureInfo) {
-        if (gestureInfo.getDisplayId() == Display.DEFAULT_DISPLAY) {
-            onGesture(gestureInfo.getGestureId());
+    public boolean onGesture(@NonNull AccessibilityGestureEvent gestureEvent) {
+        if (gestureEvent.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            onGesture(gestureEvent.getGestureId());
         }
         return false;
     }
@@ -1725,8 +1725,8 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
-            public boolean onGesture(AccessibilityGestureInfo gestureInfo) {
-                return AccessibilityService.this.onGesture(gestureInfo);
+            public boolean onGesture(AccessibilityGestureEvent gestureEvent) {
+                return AccessibilityService.this.onGesture(gestureEvent);
             }
 
             @Override
@@ -1826,7 +1826,7 @@ public abstract class AccessibilityService extends Service {
         }
 
         @Override
-        public void onGesture(AccessibilityGestureInfo gestureInfo) {
+        public void onGesture(AccessibilityGestureEvent gestureInfo) {
             Message message = mCaller.obtainMessageO(DO_ON_GESTURE, gestureInfo);
             mCaller.sendMessage(message);
         }
@@ -1942,7 +1942,7 @@ public abstract class AccessibilityService extends Service {
 
                 case DO_ON_GESTURE: {
                     if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        mCallback.onGesture((AccessibilityGestureInfo) message.obj);
+                        mCallback.onGesture((AccessibilityGestureEvent) message.obj);
                     }
                 } return;
 
