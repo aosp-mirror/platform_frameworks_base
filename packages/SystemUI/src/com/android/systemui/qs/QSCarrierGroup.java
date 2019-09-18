@@ -204,7 +204,7 @@ public class QSCarrierGroup extends LinearLayout implements
     @Override
     public void setMobileDataIndicators(NetworkController.IconState statusIcon,
             NetworkController.IconState qsIcon, int statusType,
-            int qsType, boolean activityIn, boolean activityOut,
+            int qsType, boolean activityIn, boolean activityOut, int volteId,
             String typeContentDescription,
             String description, boolean isWide, int subId, boolean roaming) {
         int slotIndex = getSlotIndex(subId);
