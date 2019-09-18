@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.telecom.Logging.Session;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IConnectionServiceAdapter;
@@ -2671,5 +2672,14 @@ public abstract class ConnectionService extends Service {
         synchronized (mIdSyncRoot) {
             return ++mId;
         }
+    }
+
+    /**
+     * Returns this handler, ONLY FOR TESTING.
+     * @hide
+     */
+    @VisibleForTesting
+    public Handler getHandler() {
+        return mHandler;
     }
 }
