@@ -129,7 +129,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                         mKeyguardBypassController);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator,
                 mKeyguardBypassController, mHeadsUpManager,
-                mock(NotificationRoundnessManager.class));
+                mock(NotificationRoundnessManager.class), mStatusBarStateController);
         mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler,
                 mKeyguardBypassController);
         mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);
