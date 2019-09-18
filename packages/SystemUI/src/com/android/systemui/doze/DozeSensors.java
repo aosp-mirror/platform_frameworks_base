@@ -48,7 +48,6 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
-import com.android.systemui.util.sensors.SensorRateLimiter;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
@@ -150,8 +149,6 @@ public class DozeSensors {
 
         mProximitySensor = new ProximitySensor(
                 context, sensorManager, Dependency.get(PluginManager.class));
-        new SensorRateLimiter(mProximitySensor, mAlarmManager, policy.proxCooldownTriggerMs,
-                policy.proxCooldownPeriodMs, "prox_sensor");
 
         mProximitySensor.register(
                 proximityEvent -> mProxCallback.accept(!proximityEvent.getNear()));

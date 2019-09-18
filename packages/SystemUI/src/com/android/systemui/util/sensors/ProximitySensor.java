@@ -37,7 +37,7 @@ import javax.inject.Inject;
 /**
  * Simple wrapper around SensorManager customized for the Proximity sensor.
  */
-public class ProximitySensor implements LimitableSensor {
+public class ProximitySensor {
     private static final String TAG = "ProxSensor";
     private static final boolean DEBUG = false;
 
@@ -51,8 +51,6 @@ public class ProximitySensor implements LimitableSensor {
     private int mSensorDelay = SensorManager.SENSOR_DELAY_NORMAL;
     private boolean mPaused;
     private boolean mRegistered;
-    private SensorRateLimiter mRateLimiter;
-    private boolean mRateLimited = false;
 
     private SensorEventListener mSensorEventListener = new SensorEventListener() {
         @Override
@@ -109,14 +107,6 @@ public class ProximitySensor implements LimitableSensor {
         registerInternal();
     }
 
-    /**
-     * Supply a {@link SensorRateLimiter} to help limit power usage.
-     */
-    @Override
-    public void setRateLimiter(SensorRateLimiter rateLimiter) {
-        mRateLimiter = rateLimiter;
-    }
-
     private Sensor findBrightnessSensor(Context context) {
         String sensorType = context.getString(R.string.doze_brightness_sensor_type);
         List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
@@ -129,19 +119,6 @@ public class ProximitySensor implements LimitableSensor {
         }
 
         return sensor;
-    }
-
-    /**
-     * Registers/unregisters the proximity sensor with the SensorManager.
-     */
-    @Override
-    public void setRateLimited(boolean limited) {
-        mRateLimited = limited;
-        if (mRateLimited) {
-            unregisterInternal();
-        } else {
-            registerInternal();
-        }
     }
 
     /**
@@ -177,7 +154,7 @@ public class ProximitySensor implements LimitableSensor {
     }
 
     private void registerInternal() {
-        if (mRegistered || mRateLimited || mPaused || mListeners.isEmpty()) {
+        if (mRegistered || mPaused || mListeners.isEmpty()) {
             return;
         }
         logDebug("Registering sensor listener");
@@ -224,15 +201,12 @@ public class ProximitySensor implements LimitableSensor {
         }
         mLastEvent = new ProximityEvent(near, event.timestamp);
         alertListeners();
-        if (mRateLimiter != null) {
-            mRateLimiter.onSensorEvent(mLastEvent.getTimestampMs());
-        }
     }
 
     @Override
     public String toString() {
-        return String.format("{registered=%s, paused=%s, near=%s, rateLimiter=%s, sensor=%s}",
-                isRegistered(), mPaused, isNear(), mRateLimiter, mSensor);
+        return String.format("{registered=%s, paused=%s, near=%s, sensor=%s}",
+                isRegistered(), mPaused, isNear(), mSensor);
     }
 
     /**

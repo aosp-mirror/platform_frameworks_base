@@ -164,49 +164,6 @@ public class ProximitySensorTest extends SysuiTestCase {
         assertFalse(mProximitySensor.isRegistered());
     }
 
-
-    @Test
-    public void testRateLimit() {
-        TestableListener listener = new TestableListener();
-
-        assertFalse(mProximitySensor.isRegistered());
-        mProximitySensor.register(listener);
-        waitForSensorManager();
-        assertTrue(mProximitySensor.isRegistered());
-        assertNull(listener.mLastEvent);
-
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
-
-        mProximitySensor.setRateLimited(true);
-        waitForSensorManager();
-        assertFalse(mProximitySensor.isRegistered());
-
-        // More events do nothing when rate limited.
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
-        mFakeProximitySensor.sendProximityResult(false);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
-
-        mProximitySensor.setRateLimited(false);
-        waitForSensorManager();
-        assertTrue(mProximitySensor.isRegistered());
-        // Still matches our previous call
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
-
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 2);
-
-        mProximitySensor.unregister(listener);
-        waitForSensorManager();
-        assertFalse(mProximitySensor.isRegistered());
-    }
-
     @Test
     public void testAlertListeners() {
         TestableListener listenerA = new TestableListener();
