@@ -231,8 +231,8 @@ class AccessibilityUserState {
             // the new mode. That happens when we start up after a reboot, and we don't want
             // to overwrite the value we had from when we first started controlling the setting.
             if (getSoftKeyboardValueFromSettings() != SHOW_MODE_IGNORE_HARD_KEYBOARD) {
-                setOriginalHardKeyboardValue(getSecureInt(
-                        Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0) != 0);
+                setOriginalHardKeyboardValue(getSecureIntForUser(
+                        Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0, mUserId) != 0);
             }
             putSecureIntForUser(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 1, mUserId);
         } else if (mSoftKeyboardShowMode == SHOW_MODE_IGNORE_HARD_KEYBOARD) {
@@ -261,7 +261,7 @@ class AccessibilityUserState {
      */
     void reconcileSoftKeyboardModeWithSettingsLocked() {
         final boolean showWithHardKeyboardSettings =
-                getSecureInt(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0) != 0;
+                getSecureIntForUser(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0, mUserId) != 0;
         if (mSoftKeyboardShowMode == SHOW_MODE_IGNORE_HARD_KEYBOARD) {
             if (!showWithHardKeyboardSettings) {
                 // The user has overridden the setting. Respect that and prevent further changes
@@ -322,23 +322,23 @@ class AccessibilityUserState {
     }
 
     private void setUserOverridesHardKeyboardSetting() {
-        final int softKeyboardSetting = getSecureInt(
-                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO);
+        final int softKeyboardSetting = getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO, mUserId);
         putSecureIntForUser(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
                 softKeyboardSetting | SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN,
                 mUserId);
     }
 
     private boolean hasUserOverriddenHardKeyboardSetting() {
-        final int softKeyboardSetting = getSecureInt(
-                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO);
+        final int softKeyboardSetting = getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO, mUserId);
         return (softKeyboardSetting & SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN)
                 != 0;
     }
 
     private void setOriginalHardKeyboardValue(boolean originalHardKeyboardValue) {
-        final int oldSoftKeyboardSetting = getSecureInt(
-                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO);
+        final int oldSoftKeyboardSetting = getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO, mUserId);
         final int newSoftKeyboardSetting = oldSoftKeyboardSetting
                 & (~SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE)
                 | ((originalHardKeyboardValue) ? SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE : 0);
@@ -347,8 +347,8 @@ class AccessibilityUserState {
     }
 
     private void saveSoftKeyboardValueToSettings(int softKeyboardShowMode) {
-        final int oldSoftKeyboardSetting = getSecureInt(
-                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO);
+        final int oldSoftKeyboardSetting = getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO, mUserId);
         final int newSoftKeyboardSetting = oldSoftKeyboardSetting & (~SHOW_MODE_MASK)
                 | softKeyboardShowMode;
         putSecureIntForUser(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
@@ -356,12 +356,14 @@ class AccessibilityUserState {
     }
 
     private int getSoftKeyboardValueFromSettings() {
-        return getSecureInt(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO)
+        return getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO, mUserId)
                 & SHOW_MODE_MASK;
     }
 
     private boolean getOriginalHardKeyboardValue() {
-        return (getSecureInt(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO)
+        return (getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, SHOW_MODE_AUTO, mUserId)
                 & SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE) != 0;
     }
 
@@ -374,8 +376,8 @@ class AccessibilityUserState {
         }
     }
 
-    private int getSecureInt(String key, int def) {
-        return Settings.Secure.getInt(mContext.getContentResolver(), key, def);
+    private int getSecureIntForUser(String key, int def, int userId) {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(), key, def, userId);
     }
 
     private void putSecureIntForUser(String key, int value, int userId) {

@@ -168,8 +168,8 @@ public class AccessibilityUserStateTest {
         mUserState.reconcileSoftKeyboardModeWithSettingsLocked();
 
         assertEquals(SHOW_MODE_AUTO, mUserState.getSoftKeyboardShowModeLocked());
-        assertEquals(SHOW_MODE_AUTO,
-                getSecureInt(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE));
+        assertEquals(SHOW_MODE_AUTO, getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, USER_ID));
         assertNull(mUserState.getServiceChangingSoftKeyboardModeLocked());
     }
 
@@ -187,7 +187,7 @@ public class AccessibilityUserStateTest {
         mUserState.reconcileSoftKeyboardModeWithSettingsLocked();
 
         assertEquals(SHOW_MODE_AUTO | SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN,
-                getSecureInt(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE));
+                getSecureIntForUser(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, USER_ID));
         assertNull(mUserState.getServiceChangingSoftKeyboardModeLocked());
     }
 
@@ -252,7 +252,7 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.setSoftKeyboardModeLocked(SHOW_MODE_IGNORE_HARD_KEYBOARD, null));
 
         assertEquals(SHOW_MODE_IGNORE_HARD_KEYBOARD | SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE,
-                getSecureInt(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE));
+                getSecureIntForUser(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, USER_ID));
     }
 
     @Test
@@ -264,7 +264,8 @@ public class AccessibilityUserStateTest {
 
         assertTrue(mUserState.setSoftKeyboardModeLocked(SHOW_MODE_AUTO, null));
 
-        assertEquals(STATE_SHOW_IME, getSecureInt(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD));
+        assertEquals(STATE_SHOW_IME, getSecureIntForUser(
+                Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, USER_ID));
     }
 
     @Test
@@ -272,8 +273,8 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.setSoftKeyboardModeLocked(SHOW_MODE_HIDDEN, COMPONENT_NAME));
 
         assertEquals(SHOW_MODE_HIDDEN, mUserState.getSoftKeyboardShowModeLocked());
-        assertEquals(SHOW_MODE_HIDDEN,
-                getSecureInt(Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE));
+        assertEquals(SHOW_MODE_HIDDEN, getSecureIntForUser(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, USER_ID));
         assertEquals(COMPONENT_NAME, mUserState.getServiceChangingSoftKeyboardModeLocked());
     }
 
@@ -286,8 +287,8 @@ public class AccessibilityUserStateTest {
         verify(mMockConnection).notifySoftKeyboardShowModeChangedLocked(eq(SHOW_MODE_HIDDEN));
     }
 
-    private int getSecureInt(String key) {
-        return Settings.Secure.getInt(mMockResolver, key, -1);
+    private int getSecureIntForUser(String key, int userId) {
+        return Settings.Secure.getIntForUser(mMockResolver, key, -1, userId);
     }
 
     private void putSecureIntForUser(String key, int value, int userId) {
