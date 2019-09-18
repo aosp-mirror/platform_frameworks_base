@@ -45,7 +45,7 @@ cc_library {
         "libidmap2/RawPrintVisitor.cpp",
         "libidmap2/ResourceUtils.cpp",
         "libidmap2/Result.cpp",
-        "libidmap2/Xml.cpp",
+        "libidmap2/XmlParser.cpp",
         "libidmap2/ZipFile.cpp",
     ],
     export_include_dirs: ["include"],
@@ -99,7 +99,7 @@ cc_test {
         "tests/RawPrintVisitorTests.cpp",
         "tests/ResourceUtilsTests.cpp",
         "tests/ResultTests.cpp",
-        "tests/XmlTests.cpp",
+        "tests/XmlParserTests.cpp",
         "tests/ZipFileTests.cpp",
     ],
     required: [

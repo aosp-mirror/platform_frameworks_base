@@ -22,18 +22,18 @@
 #include "androidfw/StringPiece.h"
 #include "androidfw/Util.h"
 #include "idmap2/Result.h"
-#include "idmap2/Xml.h"
+#include "idmap2/XmlParser.h"
 #include "idmap2/ZipFile.h"
 
 using android::StringPiece16;
 using android::idmap2::Result;
-using android::idmap2::Xml;
+using android::idmap2::XmlParser;
 using android::idmap2::ZipFile;
 using android::util::Utf16ToUtf8;
 
 namespace android::idmap2::utils {
 
-Result<std::string> ResToTypeEntryName(const AssetManager2& am, ResourceId resid) {
+Result<std::string> ResToTypeEntryName(const AssetManager2& am, uint32_t resid) {
   AssetManager2::ResourceName name;
   if (!am.GetResourceName(resid, &name)) {
     return Error("no resource 0x%08x in asset manager", resid);
@@ -65,42 +65,55 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
     return Error("failed to uncompress AndroidManifest.xml from %s", path.c_str());
   }
 
-  std::unique_ptr<const Xml> xml = Xml::Create(entry->buf, entry->size);
+  Result<std::unique_ptr<const XmlParser>> xml = XmlParser::Create(entry->buf, entry->size);
   if (!xml) {
     return Error("failed to parse AndroidManifest.xml from %s", path.c_str());
   }
 
+  auto manifest_it = (*xml)->tree_iterator();
+  if (manifest_it->event() != XmlParser::Event::START_TAG || manifest_it->name() != "manifest") {
+    return Error("root element tag is not <manifest> in AndroidManifest.xml of %s", path.c_str());
+  }
+
+  auto overlay_it = std::find_if(manifest_it.begin(), manifest_it.end(), [](const auto& it) {
+    return it.event() == XmlParser::Event::START_TAG && it.name() == "overlay";
+  });
+
   OverlayManifestInfo info{};
-  const auto tag = xml->FindTag("overlay");
-  if (!tag) {
-    if (assert_overlay) {
-      return Error("<overlay> missing from AndroidManifest.xml of %s", path.c_str());
+  if (overlay_it == manifest_it.end()) {
+    if (!assert_overlay) {
+      return info;
     }
-    return info;
+    return Error("<overlay> missing from AndroidManifest.xml of %s", path.c_str());
   }
 
-  auto iter = tag->find("targetPackage");
-  if (iter == tag->end()) {
-    if (assert_overlay) {
-      return Error("android:targetPackage missing from <overlay> of %s", path.c_str());
-    }
+  if (auto result_str = overlay_it->GetAttributeStringValue("targetPackage")) {
+    info.target_package = *result_str;
   } else {
-    info.target_package = iter->second;
+    return Error("android:targetPackage missing from <overlay> of %s: %s", path.c_str(),
+                 result_str.GetErrorMessage().c_str());
   }
 
-  iter = tag->find("targetName");
-  if (iter != tag->end()) {
-    info.target_name = iter->second;
+  if (auto result_str = overlay_it->GetAttributeStringValue("targetName")) {
+    info.target_name = *result_str;
   }
 
-  iter = tag->find("isStatic");
-  if (iter != tag->end()) {
-    info.is_static = std::stoul(iter->second) != 0U;
+  if (auto result_value = overlay_it->GetAttributeValue("isStatic")) {
+    if ((*result_value).dataType >= Res_value::TYPE_FIRST_INT &&
+        (*result_value).dataType <= Res_value::TYPE_LAST_INT) {
+      info.is_static = (*result_value).data != 0U;
+    } else {
+      return Error("android:isStatic is not a boolean in AndroidManifest.xml of %s", path.c_str());
+    }
   }
 
-  iter = tag->find("priority");
-  if (iter != tag->end()) {
-    info.priority = std::stoi(iter->second);
+  if (auto result_value = overlay_it->GetAttributeValue("priority")) {
+    if ((*result_value).dataType >= Res_value::TYPE_FIRST_INT &&
+        (*result_value).dataType <= Res_value::TYPE_LAST_INT) {
+      info.priority = (*result_value).data;
+    } else {
+      return Error("android:priority is not an integer in AndroidManifest.xml of %s", path.c_str());
+    }
   }
 
   iter = tag->find("requiredSystemPropertyName");
