@@ -2669,7 +2669,10 @@ public class DevicePolicyManager {
      * only imposed if the administrator has also requested either {@link #PASSWORD_QUALITY_NUMERIC}
      * , {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX}, {@link #PASSWORD_QUALITY_ALPHABETIC},
      * {@link #PASSWORD_QUALITY_ALPHANUMERIC}, or {@link #PASSWORD_QUALITY_COMPLEX} with
-     * {@link #setPasswordQuality}.
+     * {@link #setPasswordQuality}. If an app targeting SDK level
+     * {@link android.os.Build.VERSION_CODES#R} and above enforces this constraint without settings
+     * password quality to one of these values first, this method will throw
+     * {@link IllegalStateException}.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always treated as empty.
@@ -2684,9 +2687,12 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param length The new desired minimum password length. A value of 0 means there is no
-     *            restriction.
+     *     restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
-     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     *     does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the calling app is targeting SDK level
+     *     {@link android.os.Build.VERSION_CODES#R} and above and didn't set a sufficient password
+     *     quality requirement prior to calling this method.
      */
     public void setPasswordMinimumLength(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -2738,7 +2744,10 @@ public class DevicePolicyManager {
      * place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
      * setting this value. This constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. If an app targeting
+     * SDK level {@link android.os.Build.VERSION_CODES#R} and above enforces this constraint without
+     * settings password quality to {@link #PASSWORD_QUALITY_COMPLEX} first, this method will throw
+     * {@link IllegalStateException}. The default value is 0.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always treated as empty.
@@ -2756,6 +2765,9 @@ public class DevicePolicyManager {
      *            A value of 0 means there is no restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
      *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the calling app is targeting SDK level
+     *     {@link android.os.Build.VERSION_CODES#R} and above and didn't set a sufficient password
+     *     quality requirement prior to calling this method.
      */
     public void setPasswordMinimumUpperCase(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -2814,7 +2826,10 @@ public class DevicePolicyManager {
      * place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
      * setting this value. This constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. If an app targeting
+     * SDK level {@link android.os.Build.VERSION_CODES#R} and above enforces this constraint without
+     * settings password quality to {@link #PASSWORD_QUALITY_COMPLEX} first, this method will throw
+     * {@link IllegalStateException}. The default value is 0.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always treated as empty.
@@ -2832,6 +2847,9 @@ public class DevicePolicyManager {
      *            A value of 0 means there is no restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
      *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the calling app is targeting SDK level
+     *     {@link android.os.Build.VERSION_CODES#R} and above and didn't set a sufficient password
+     *     quality requirement prior to calling this method.
      */
     public void setPasswordMinimumLowerCase(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -2890,7 +2908,10 @@ public class DevicePolicyManager {
      * immediately. To prompt the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
      * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This constraint is
      * only imposed if the administrator has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
-     * {@link #setPasswordQuality}. The default value is 1.
+     * {@link #setPasswordQuality}. If an app targeting SDK level
+     * {@link android.os.Build.VERSION_CODES#R} and above enforces this constraint without settings
+     * password quality to {@link #PASSWORD_QUALITY_COMPLEX} first, this method will throw
+     * {@link IllegalStateException}. The default value is 1.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always treated as empty.
@@ -2908,6 +2929,9 @@ public class DevicePolicyManager {
      *            0 means there is no restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
      *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the calling app is targeting SDK level
+     *     {@link android.os.Build.VERSION_CODES#R} and above and didn't set a sufficient password
+     *     quality requirement prior to calling this method.
      */
     public void setPasswordMinimumLetters(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -2965,7 +2989,10 @@ public class DevicePolicyManager {
      * place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
      * setting this value. This constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 1.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. If an app targeting
+     * SDK level {@link android.os.Build.VERSION_CODES#R} and above enforces this constraint without
+     * settings password quality to {@link #PASSWORD_QUALITY_COMPLEX} first, this method will throw
+     * {@link IllegalStateException}. The default value is 1.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always treated as empty.
@@ -2983,6 +3010,9 @@ public class DevicePolicyManager {
      *            value of 0 means there is no restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
      *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the calling app is targeting SDK level
+     *     {@link android.os.Build.VERSION_CODES#R} and above and didn't set a sufficient password
+     *     quality requirement prior to calling this method.
      */
     public void setPasswordMinimumNumeric(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -3040,7 +3070,10 @@ public class DevicePolicyManager {
      * immediately. To prompt the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
      * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This constraint is
      * only imposed if the administrator has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
-     * {@link #setPasswordQuality}. The default value is 1.
+     * {@link #setPasswordQuality}. If an app targeting SDK level
+     * {@link android.os.Build.VERSION_CODES#R} and above enforces this constraint without settings
+     * password quality to {@link #PASSWORD_QUALITY_COMPLEX} first, this method will throw
+     * {@link IllegalStateException}. The default value is 1.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always treated as empty.
@@ -3058,6 +3091,9 @@ public class DevicePolicyManager {
      *            0 means there is no restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
      *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the calling app is targeting SDK level
+     *     {@link android.os.Build.VERSION_CODES#R} and above and didn't set a sufficient password
+     *     quality requirement prior to calling this method.
      */
     public void setPasswordMinimumSymbols(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -3114,7 +3150,10 @@ public class DevicePolicyManager {
      * one, so the change does not take place immediately. To prompt the user for a new password,
      * use {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
      * setting this value. This constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. If an app targeting
+     * SDK level {@link android.os.Build.VERSION_CODES#R} and above enforces this constraint without
+     * settings password quality to {@link #PASSWORD_QUALITY_COMPLEX} first, this method will throw
+     * {@link IllegalStateException}. The default value is 0.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always treated as empty.
@@ -3132,6 +3171,9 @@ public class DevicePolicyManager {
      *            0 means there is no restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
      *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the calling app is targeting SDK level
+     *     {@link android.os.Build.VERSION_CODES#R} and above and didn't set a sufficient password
+     *     quality requirement prior to calling this method.
      */
     public void setPasswordMinimumNonLetter(@NonNull ComponentName admin, int length) {
         if (mService != null) {
