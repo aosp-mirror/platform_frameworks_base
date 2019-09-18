@@ -2003,6 +2003,13 @@ interface ITelephony {
      */
     int getRadioHalVersion();
 
+    /**
+     * Returns true if the specified type of application (e.g. {@link #APPTYPE_CSIM} is present
+     * on the UICC card.
+     * @hide
+     */
+    boolean isApplicationOnUicc(int subId, int appType);
+
     boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
 
     boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
