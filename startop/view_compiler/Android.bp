@@ -25,6 +25,7 @@ cc_defaults {
         "slicer",
     ],
     static_libs: [
+        "libcutils",
         "libtinyxml2",
         "liblog",
         "libutils",
