@@ -1522,6 +1522,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayList<Notification.Action> mSmartActions;
         private ArrayList<CharSequence> mSmartReplies;
         private boolean mCanBubble;
+        private boolean mVisuallyInterruptive;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1553,6 +1554,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeTypedList(mSmartActions, flags);
             out.writeCharSequenceList(mSmartReplies);
             out.writeBoolean(mCanBubble);
+            out.writeBoolean(mVisuallyInterruptive);
         }
 
         /** @hide */
@@ -1585,6 +1587,7 @@ public abstract class NotificationListenerService extends Service {
             mSmartActions = in.createTypedArrayList(Notification.Action.CREATOR);
             mSmartReplies = in.readCharSequenceList();
             mCanBubble = in.readBoolean();
+            mVisuallyInterruptive = in.readBoolean();
         }
 
 
@@ -1772,6 +1775,11 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /** @hide */
+        public boolean visuallyInterruptive() {
+            return mVisuallyInterruptive;
+        }
+
+        /** @hide */
         public boolean isNoisy() {
             return mNoisy;
         }
@@ -1787,7 +1795,8 @@ public abstract class NotificationListenerService extends Service {
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
                 int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
-                ArrayList<CharSequence> smartReplies, boolean canBubble) {
+                ArrayList<CharSequence> smartReplies, boolean canBubble,
+                boolean visuallyInterruptive) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1808,6 +1817,7 @@ public abstract class NotificationListenerService extends Service {
             mSmartActions = smartActions;
             mSmartReplies = smartReplies;
             mCanBubble = canBubble;
+            mVisuallyInterruptive = visuallyInterruptive;
         }
 
         /**
@@ -1832,7 +1842,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mNoisy,
                     other.mSmartActions,
                     other.mSmartReplies,
-                    other.mCanBubble);
+                    other.mCanBubble,
+                    other.mVisuallyInterruptive);
         }
 
         /**

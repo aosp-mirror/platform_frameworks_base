@@ -141,6 +141,12 @@ public final class NotificationEntry {
     private boolean hasSentReply;
 
     /**
+     * Whether this notification has changed in visual appearance since the previous post.
+     * New notifications are interruptive by default.
+     */
+    public boolean isVisuallyInterruptive;
+
+    /**
      * Whether this notification is shown to the user as a high priority notification: visible on
      * the lock screen/status bar and in the top section in the shade.
      */
@@ -205,6 +211,7 @@ public final class NotificationEntry {
                     + " doesn't match existing key " + key);
         }
         mRanking = ranking;
+        isVisuallyInterruptive = ranking.visuallyInterruptive();
     }
 
     public NotificationChannel getChannel() {
@@ -243,6 +250,7 @@ public final class NotificationEntry {
     public boolean canBubble() {
         return mRanking.canBubble();
     }
+
 
     public @NonNull List<Notification.Action> getSmartActions() {
         return mRanking.getSmartActions();
