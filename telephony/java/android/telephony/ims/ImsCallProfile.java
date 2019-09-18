@@ -309,6 +309,37 @@ public final class ImsCallProfile implements Parcelable {
     public @CallRestrictCause int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
 
     /**
+     * The VERSTAT for an incoming call's phone number.
+     */
+    private @VerificationStatus int mCallerNumberVerificationStatus;
+
+    /**
+     * Indicates that the network could not perform verification.
+     */
+    public static final int VERIFICATION_STATUS_NOT_VERIFIED = 0;
+
+    /**
+     * Indicates that verification by the network passed.  This indicates there is a high likelihood
+     * that the call originated from a valid source.
+     */
+    public static final int VERIFICATION_STATUS_PASSED = 1;
+
+    /**
+     * Indicates that verification by the network failed.  This indicates there is a high likelihood
+     * that the call did not originate from a valid source.
+     */
+    public static final int VERIFICATION_STATUS_FAILED = 2;
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "VERIFICATION_STATUS_", value = {
+            VERIFICATION_STATUS_NOT_VERIFIED,
+            VERIFICATION_STATUS_PASSED,
+            VERIFICATION_STATUS_FAILED
+    })
+    public @interface VerificationStatus {}
+
+    /**
      * The emergency service categories, only valid if {@link #getServiceType} returns
      * {@link #SERVICE_TYPE_EMERGENCY}
      *
@@ -539,6 +570,29 @@ public final class ImsCallProfile implements Parcelable {
         mMediaProfile = profile.mMediaProfile;
     }
 
+    /**
+     * Sets the verification status for the phone number of an incoming call as identified in
+     * ATIS-1000082.
+     * <p>
+     * The ImsService should parse the verstat information from the SIP INVITE headers for the call
+     * to determine this information.  It is typically found in the P-Asserted-Identity OR From
+     * header fields.
+     * @param callerNumberVerificationStatus the new verification status.
+     */
+    public void setCallerNumberVerificationStatus(
+            @VerificationStatus int callerNumberVerificationStatus) {
+        mCallerNumberVerificationStatus = callerNumberVerificationStatus;
+    }
+
+    /**
+     * Gets the verification status for the phone number of an incoming call as identified in
+     * ATIS-1000082.
+     * @return the verification status.
+     */
+    public @VerificationStatus int getCallerNumberVerificationStatus() {
+        return mCallerNumberVerificationStatus;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -551,7 +605,8 @@ public final class ImsCallProfile implements Parcelable {
                 + ", emergencyCallRouting=" + mEmergencyCallRouting
                 + ", emergencyCallTesting=" + mEmergencyCallTesting
                 + ", hasKnownUserIntentEmergency=" + mHasKnownUserIntentEmergency
-                + ", mRestrictCause=" + mRestrictCause + " }";
+                + ", mRestrictCause=" + mRestrictCause
+                + ", mCallerNumberVerstat= " + mCallerNumberVerificationStatus + " }";
     }
 
     @Override
@@ -572,6 +627,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeBoolean(mEmergencyCallTesting);
         out.writeBoolean(mHasKnownUserIntentEmergency);
         out.writeInt(mRestrictCause);
+        out.writeInt(mCallerNumberVerificationStatus);
     }
 
     private void readFromParcel(Parcel in) {
@@ -585,6 +641,7 @@ public final class ImsCallProfile implements Parcelable {
         mEmergencyCallTesting = in.readBoolean();
         mHasKnownUserIntentEmergency = in.readBoolean();
         mRestrictCause = in.readInt();
+        mCallerNumberVerificationStatus = in.readInt();
     }
 
     public static final @android.annotation.NonNull Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
