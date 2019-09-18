@@ -243,7 +243,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToPulsing_withFrontAlphaUpdates() {
+    public void transitionToPulsing() {
         // Pre-condition
         // Need to go to AoD first because PULSING doesn't change
         // the back scrim opacity - otherwise it would hide AoD wallpapers.
@@ -267,22 +267,11 @@ public class ScrimControllerTest extends SysuiTestCase {
                 true /* behind */,
                 false /* bubble */);
 
-        // ... and when ambient goes dark, front scrim should be semi-transparent
-        mScrimController.setAodFrontScrimAlpha(0.5f);
-        mScrimController.finishAnimationsImmediately();
-        // Front scrim should be semi-transparent
-        assertScrimAlpha(SEMI_TRANSPARENT /* front */,
-                OPAQUE /* back */,
-                TRANSPARENT /* bubble */);
-
         mScrimController.setWakeLockScreenSensorActive(true);
         mScrimController.finishAnimationsImmediately();
-        assertScrimAlpha(SEMI_TRANSPARENT /* front */,
+        assertScrimAlpha(TRANSPARENT /* front */,
                 SEMI_TRANSPARENT /* back */,
                 TRANSPARENT /* bubble */);
-
-        // Reset value since enums are static.
-        mScrimController.setAodFrontScrimAlpha(0f);
     }
 
     @Test
