@@ -15,8 +15,10 @@
  */
 
 syntax = "proto2";
-package com.android.server.backup.encryption.chunk;
 
+package android_backup_crypto;
+
+option java_package = "com.android.server.backup.encryption.protos";
 option java_outer_classname = "ChunksMetadataProto";
 
 // Cipher type with which the chunks are encrypted. For now we only support AES/GCM/NoPadding, but

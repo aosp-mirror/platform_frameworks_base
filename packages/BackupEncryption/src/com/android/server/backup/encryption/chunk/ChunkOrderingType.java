@@ -16,9 +16,9 @@
 
 package com.android.server.backup.encryption.chunk;
 
-import static com.android.server.backup.encryption.chunk.ChunksMetadataProto.CHUNK_ORDERING_TYPE_UNSPECIFIED;
-import static com.android.server.backup.encryption.chunk.ChunksMetadataProto.EXPLICIT_STARTS;
-import static com.android.server.backup.encryption.chunk.ChunksMetadataProto.INLINE_LENGTHS;
+import static com.android.server.backup.encryption.protos.nano.ChunksMetadataProto.CHUNK_ORDERING_TYPE_UNSPECIFIED;
+import static com.android.server.backup.encryption.protos.nano.ChunksMetadataProto.EXPLICIT_STARTS;
+import static com.android.server.backup.encryption.protos.nano.ChunksMetadataProto.INLINE_LENGTHS;
 
 import android.annotation.IntDef;
 
