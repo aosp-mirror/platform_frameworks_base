@@ -503,8 +503,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * device is dozing when the light sensor is on.
      */
     public void setAodFrontScrimAlpha(float alpha) {
-        if (((mState == ScrimState.AOD && mDozeParameters.getAlwaysOn())
-                || mState == ScrimState.PULSING) && mInFrontAlpha != alpha) {
+        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()
+                && mInFrontAlpha != alpha) {
             mInFrontAlpha = alpha;
             updateScrims();
         }
