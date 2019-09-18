@@ -23380,11 +23380,24 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void grantEphemeralAccess(int userId, Intent intent,
-                int targetAppId, int ephemeralAppId) {
+        public void grantImplicitAccess(int userId, Intent intent,
+                int callingAppId, int targetAppId) {
             synchronized (mLock) {
-                mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
-                        targetAppId, ephemeralAppId);
+                final PackageParser.Package callingPackage = getPackage(
+                        UserHandle.getUid(userId, callingAppId));
+                final PackageParser.Package targetPackage = getPackage(
+                        UserHandle.getUid(userId, targetAppId));
+                if (callingPackage == null || targetPackage == null) {
+                    return;
+                }
+
+                if (isInstantApp(callingPackage.packageName, userId)) {
+                    mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
+                            callingAppId, targetAppId);
+                } else {
+                    mAppsFilter.grantImplicitAccess(
+                            callingPackage.packageName, targetPackage.packageName, userId);
+                }
             }
         }
 

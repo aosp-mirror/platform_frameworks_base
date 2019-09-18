@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.AppIdInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -321,25 +322,24 @@ public abstract class PackageManagerInternal {
             Bundle verificationBundle, int userId);
 
     /**
-     * Grants access to the package metadata for an ephemeral application.
+     * Grants implicit access based on an interaction between two apps. This grants the target app
+     * access to the calling application's package metadata.
      * <p>
-     * When an ephemeral application explicitly tries to interact with a full
-     * install application [via an activity, service or provider that has been
-     * exposed using the {@code visibleToInstantApp} attribute], the normal
-     * application must be able to see metadata about the connecting ephemeral
-     * app. If the ephemeral application uses an implicit intent [ie action VIEW,
-     * category BROWSABLE], it remains hidden from the launched activity.
+     * When an application explicitly tries to interact with another application [via an
+     * activity, service or provider that is either declared in the caller's
+     * manifest via the {@code <queries>} tag or has been exposed via the target apps manifest using
+     * the {@code visibleToInstantApp} attribute], the target application must be able to see
+     * metadata about the calling app. If the calling application uses an implicit intent [ie
+     * action VIEW, category BROWSABLE], it remains hidden from the launched app.
      * <p>
-     * If the {@code sourceUid} is not for an ephemeral app or {@code targetUid}
-     * is not for a fully installed app, this method will be a no-op.
-     *
      * @param userId the user
      * @param intent the intent that triggered the grant
-     * @param targetAppId The app ID of the fully installed application
-     * @param ephemeralAppId The app ID of the ephemeral application
+     * @param callingAppId The app ID of the calling application
+     * @param targetAppId The app ID of the target application
      */
-    public abstract void grantEphemeralAccess(int userId, Intent intent,
-            int targetAppId, int ephemeralAppId);
+    public abstract void grantImplicitAccess(
+            @UserIdInt int userId, Intent intent, @AppIdInt int callingAppId,
+            @AppIdInt int targetAppId);
 
     public abstract boolean isInstantAppInstallerComponent(ComponentName component);
     /**

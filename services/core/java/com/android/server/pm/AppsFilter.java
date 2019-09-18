@@ -246,25 +246,25 @@ class AppsFilter {
     }
 
     /**
-     * Marks that a package initiated an interaction with another package, granting visibility of
-     * the prior from the former.
+     * Grants access based on an interaction between a calling and target package, granting
+     * visibility of the caller from the target.
      *
-     * @param initiatingPackage the package initiating the interaction
+     * @param callingPackage    the package initiating the interaction
      * @param targetPackage     the package being interacted with and thus gaining visibility of the
      *                          initiating package.
      * @param userId            the user in which this interaction was taking place
      */
-    private void markAppInteraction(
-            PackageSetting initiatingPackage, PackageSetting targetPackage, int userId) {
+    public void grantImplicitAccess(
+            String callingPackage, String targetPackage, int userId) {
         HashMap<String, Set<String>> currentUser = mImplicitlyQueryable.get(userId);
         if (currentUser == null) {
             currentUser = new HashMap<>();
             mImplicitlyQueryable.put(userId, currentUser);
         }
-        if (!currentUser.containsKey(targetPackage.pkg.packageName)) {
-            currentUser.put(targetPackage.pkg.packageName, new HashSet<>());
+        if (!currentUser.containsKey(targetPackage)) {
+            currentUser.put(targetPackage, new HashSet<>());
         }
-        currentUser.get(targetPackage.pkg.packageName).add(initiatingPackage.pkg.packageName);
+        currentUser.get(targetPackage).add(callingPackage);
     }
 
     public void onSystemReady() {
@@ -374,8 +374,6 @@ class AppsFilter {
             callingPkgSetting = (PackageSetting) callingSetting;
             if (!shouldFilterApplicationInternal(callingPkgSetting, targetPkgSetting,
                     userId)) {
-                // TODO: actually base this on a start / launch (not just a query)
-                markAppInteraction(callingPkgSetting, targetPkgSetting, userId);
                 return false;
             }
         } else if (callingSetting instanceof SharedUserSetting) {
@@ -386,8 +384,6 @@ class AppsFilter {
                     final PackageSetting packageSetting = packageSettings.valueAt(i);
                     if (!shouldFilterApplicationInternal(packageSetting, targetPkgSetting,
                             userId)) {
-                        // TODO: actually base this on a start / launch (not just a query)
-                        markAppInteraction(packageSetting, targetPkgSetting, userId);
                         return false;
                     }
                     if (callingPkgSetting == null && packageSetting.pkg != null) {

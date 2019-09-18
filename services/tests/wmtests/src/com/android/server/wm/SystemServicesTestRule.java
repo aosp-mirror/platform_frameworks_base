@@ -231,7 +231,7 @@ public class SystemServicesTestRule implements TestRule {
                 new AMTestInjector(mContext, mHandlerThread), mHandlerThread);
         spyOn(mAmService);
         doReturn(mock(IPackageManager.class)).when(mAmService).getPackageManager();
-        doNothing().when(mAmService).grantEphemeralAccessLocked(
+        doNothing().when(mAmService).grantImplicitAccess(
                 anyInt(), any(), anyInt(), anyInt());
 
         // ActivityManagerInternal
