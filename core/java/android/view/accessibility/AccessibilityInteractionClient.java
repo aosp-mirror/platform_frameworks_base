@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -267,12 +268,14 @@ public final class AccessibilityInteractionClient
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                List<AccessibilityWindowInfo> windows = sAccessibilityCache.getWindows();
-                if (windows != null) {
+                SparseArray<List<AccessibilityWindowInfo>> allWindows =
+                        sAccessibilityCache.getWindowsOnAllDisplays();
+                List<AccessibilityWindowInfo> windows;
+                if (allWindows != null) {
                     if (DEBUG) {
                         Log.i(LOG_TAG, "Windows cache hit");
                     }
-                    return windows;
+                    return allWindows.valueAt(Display.DEFAULT_DISPLAY);
                 }
                 if (DEBUG) {
                     Log.i(LOG_TAG, "Windows cache miss");
@@ -284,7 +287,9 @@ public final class AccessibilityInteractionClient
                     Binder.restoreCallingIdentity(identityToken);
                 }
                 if (windows != null) {
-                    sAccessibilityCache.setWindows(windows);
+                    allWindows = new SparseArray<>();
+                    allWindows.put(Display.DEFAULT_DISPLAY, windows);
+                    sAccessibilityCache.setWindowsOnAllDisplays(allWindows);
                     return windows;
                 }
             } else {
