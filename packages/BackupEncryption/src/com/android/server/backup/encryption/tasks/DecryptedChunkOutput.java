@@ -19,6 +19,7 @@ package com.android.server.backup.encryption.tasks;
 import java.io.Closeable;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Accepts the plaintext bytes of decrypted chunks and writes them to some output. Also keeps track
@@ -30,7 +31,7 @@ public interface DecryptedChunkOutput extends Closeable {
      *
      * @return {@code this}, to allow use with try-with-resources
      */
-    DecryptedChunkOutput open() throws IOException;
+    DecryptedChunkOutput open() throws IOException, NoSuchAlgorithmException;
 
     /**
      * Writes the plaintext bytes of chunk to whatever output the implementation chooses. Also
@@ -43,12 +44,13 @@ public interface DecryptedChunkOutput extends Closeable {
      *     at index 0.
      * @param length The length in bytes of the plaintext contained in {@code plaintextBuffer}.
      */
-    void processChunk(byte[] plaintextBuffer, int length) throws IOException, InvalidKeyException;
+    void processChunk(byte[] plaintextBuffer, int length)
+            throws IOException, InvalidKeyException, NoSuchAlgorithmException;
 
     /**
      * Returns the message digest of all the chunks processed by {@link #processChunk}.
      *
      * <p>You must call {@link Closeable#close()} before calling this method.
      */
-    byte[] getDigest();
+    byte[] getDigest() throws NoSuchAlgorithmException;
 }
