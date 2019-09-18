@@ -16,11 +16,12 @@
 
 package android.security;
 
+import android.annotation.UnsupportedAppUsage;
+
 import com.android.org.bouncycastle.util.io.pem.PemObject;
 import com.android.org.bouncycastle.util.io.pem.PemReader;
 import com.android.org.bouncycastle.util.io.pem.PemWriter;
 
-import android.annotation.UnsupportedAppUsage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -90,9 +91,9 @@ public class Credentials {
     public static final String EXTRA_INSTALL_AS_UID = "install_as_uid";
 
     /**
-     * Intent extra: name for the user's private key.
+     * Intent extra: name for the user's key pair.
      */
-    public static final String EXTRA_USER_PRIVATE_KEY_NAME = "user_private_key_name";
+    public static final String EXTRA_USER_KEY_ALIAS = "user_key_pair_name";
 
     /**
      * Intent extra: data for the user's private key in PEM-encoded PKCS#8.
@@ -100,19 +101,9 @@ public class Credentials {
     public static final String EXTRA_USER_PRIVATE_KEY_DATA = "user_private_key_data";
 
     /**
-     * Intent extra: name for the user's certificate.
-     */
-    public static final String EXTRA_USER_CERTIFICATE_NAME = "user_certificate_name";
-
-    /**
      * Intent extra: data for the user's certificate in PEM-encoded X.509.
      */
     public static final String EXTRA_USER_CERTIFICATE_DATA = "user_certificate_data";
-
-    /**
-     * Intent extra: name for CA certificate chain
-     */
-    public static final String EXTRA_CA_CERTIFICATES_NAME = "ca_certificates_name";
 
     /**
      * Intent extra: data for CA certificate chain in PEM-encoded X.509.
