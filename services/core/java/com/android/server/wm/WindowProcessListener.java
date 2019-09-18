@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import android.util.proto.ProtoOutputStream;
-import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 
 /**

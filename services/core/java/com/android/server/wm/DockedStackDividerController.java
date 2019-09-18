@@ -36,7 +36,6 @@ import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
 import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -141,8 +140,6 @@ public class DockedStackDividerController {
     float mLastDividerProgress;
     private final DividerSnapAlgorithm[] mSnapAlgorithmForRotation = new DividerSnapAlgorithm[4];
     private boolean mImeHideRequested;
-    private final Rect mLastDimLayerRect = new Rect();
-    private float mLastDimLayerAlpha;
     private TaskStack mDimmedStack;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
@@ -653,14 +650,6 @@ public class DockedStackDividerController {
             mDimmedStack = null;
             stack.stopDimming();
         }
-    }
-
-    /**
-     * @return The layer used for dimming the apps when dismissing docked/fullscreen stack. Just
-     *         above all application surfaces.
-     */
-    private int getResizeDimLayer() {
-        return (mWindow != null) ? mWindow.mLayer - 1 : LAYER_OFFSET_DIM;
     }
 
     /**

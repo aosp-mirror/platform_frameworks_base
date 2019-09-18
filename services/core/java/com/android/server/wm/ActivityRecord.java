@@ -2202,7 +2202,9 @@ final class ActivityRecord extends ConfigurationContainer {
         stack.removeTimeoutsForActivity(this);
         // Clean-up activities are no longer relaunching (e.g. app process died). Notify window
         // manager so it can update its bookkeeping.
-        mAtmService.mWindowManager.notifyAppRelaunchesCleared(appToken);
+        if (mAppWindowToken != null) {
+            mAppWindowToken.clearRelaunching();
+        }
     }
 
     /**
@@ -2960,6 +2962,11 @@ final class ActivityRecord extends ConfigurationContainer {
         final ActivityDisplay display = r.getDisplay();
         if (display != null) {
             display.handleActivitySizeCompatModeIfNeeded(r);
+        }
+
+        if (r.mAppWindowToken != null) {
+            r.mAppWindowToken.getDisplayContent().mUnknownAppVisibilityController
+                    .notifyAppResumedFinished(r.mAppWindowToken);
         }
     }
 
@@ -4311,7 +4318,9 @@ final class ActivityRecord extends ConfigurationContainer {
                     "Moving to " + (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + this
                             + " callers=" + Debug.getCallers(6));
             forceNewConfig = false;
-            mStackSupervisor.activityRelaunchingLocked(this);
+            if (mAppWindowToken != null) {
+                mAppWindowToken.startRelaunching();
+            }
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
                     pendingNewIntents, configChangeFlags,
                     new MergedConfiguration(mAtmService.getGlobalConfiguration(),

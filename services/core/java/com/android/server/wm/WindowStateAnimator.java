@@ -271,20 +271,17 @@ class WindowStateAnimator {
         if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.isVisibleByPolicy()) {
             // Upon completion of a not-visible to visible status bar animation a relayout is
             // required.
-            if (displayContent != null) {
-                displayContent.setLayoutNeeded();
-            }
+            displayContent.setLayoutNeeded();
         }
         mWin.onExitAnimationDone();
-        final int displayId = mWin.getDisplayId();
-        int pendingLayoutChanges = FINISH_LAYOUT_REDO_ANIM;
+        displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
         if (displayContent.mWallpaperController.isWallpaperTarget(mWin)) {
-            pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
-        mAnimator.setPendingLayoutChanges(displayId, pendingLayoutChanges);
-        if (DEBUG_LAYOUT_REPEATS)
+        if (DEBUG_LAYOUT_REPEATS) {
             mService.mWindowPlacerLocked.debugLayoutRepeats(
-                    "WindowStateAnimator", mAnimator.getPendingLayoutChanges(displayId));
+                    "WindowStateAnimator", displayContent.pendingLayoutChanges);
+        }
 
         if (mWin.mAppToken != null) {
             mWin.mAppToken.updateReportedVisibilityLocked();
@@ -427,10 +424,6 @@ class WindowStateAnimator {
                 && !mService.mDestroyPreservedSurface.contains(mWin)) {
             mService.mDestroyPreservedSurface.add(mWin);
         }
-    }
-
-    private int getLayerStack() {
-        return mWin.getDisplayContent().getDisplay().getLayerStack();
     }
 
     void resetDrawState() {
@@ -1072,8 +1065,7 @@ class WindowStateAnimator {
 
         if (mSurfaceResized) {
             mReportSurfaceResized = true;
-            mAnimator.setPendingLayoutChanges(w.getDisplayId(),
-                    FINISH_LAYOUT_REDO_WALLPAPER);
+            mWin.getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
     }
 
@@ -1168,16 +1160,16 @@ class WindowStateAnimator {
                         if (mIsWallpaper) {
                             w.dispatchWallpaperVisibility(true);
                         }
-                        if (!w.getDisplayContent().getLastHasContent()) {
+                        final DisplayContent displayContent = w.getDisplayContent();
+                        if (!displayContent.getLastHasContent()) {
                             // This draw means the difference between unique content and mirroring.
                             // Run another pass through performLayout to set mHasContent in the
                             // LogicalDisplay.
-                            mAnimator.setPendingLayoutChanges(w.getDisplayId(),
-                                    FINISH_LAYOUT_REDO_ANIM);
+                            displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
                             if (DEBUG_LAYOUT_REPEATS) {
                                 mService.mWindowPlacerLocked.debugLayoutRepeats(
                                         "showSurfaceRobustlyLocked " + w,
-                                        mAnimator.getPendingLayoutChanges(w.getDisplayId()));
+                                        displayContent.pendingLayoutChanges);
                             }
                         }
                     } else {

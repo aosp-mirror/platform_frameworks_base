@@ -47,7 +47,6 @@ import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
 import static android.os.FactoryTest.FACTORY_TEST_HIGH_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
@@ -550,7 +549,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The dimensions of the thumbnails in the Recents UI. */
     private int mThumbnailWidth;
     private int mThumbnailHeight;
-    private float mFullscreenThumbnailScale;
 
     /**
      * Flag that indicates if multi-window is enabled.
@@ -790,15 +788,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_height);
-
-            if ((globalConfig.uiMode & UI_MODE_TYPE_TELEVISION) == UI_MODE_TYPE_TELEVISION) {
-                mFullscreenThumbnailScale = (float) res
-                        .getInteger(com.android.internal.R.integer.thumbnail_width_tv) /
-                        (float) globalConfig.screenWidthDp;
-            } else {
-                mFullscreenThumbnailScale = res.getFraction(
-                        com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
-            }
         }
     }
 
@@ -1697,7 +1686,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             ActivityRecord.activityResumedLocked(token);
-            mWindowManager.notifyAppResumedFinished(token);
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -2920,7 +2908,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAmInternal.enforceCallingPermission(Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
                     "updateLockTaskPackages()");
         }
-        synchronized (this) {
+        synchronized (mGlobalLock) {
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":"
                     + Arrays.toString(packages));
             getLockTaskController().updateLockTaskPackages(userId, packages);
@@ -5365,7 +5353,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final float scaleFactor = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 FONT_SCALE, 1.0f, userId);
 
-        synchronized (this) {
+        synchronized (mGlobalLock) {
             if (getGlobalConfiguration().fontScale == scaleFactor) {
                 return;
             }

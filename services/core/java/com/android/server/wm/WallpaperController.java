@@ -110,7 +110,6 @@ class WallpaperController {
     private final FindWallpaperTargetResult mFindResults = new FindWallpaperTargetResult();
 
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
-        final WindowAnimator winAnimator = mService.mAnimator;
         if ((w.mAttrs.type == TYPE_WALLPAPER)) {
             if (mFindResults.topWallpaper == null || mFindResults.resetTopWallpaper) {
                 mFindResults.setTopWallpaper(w);

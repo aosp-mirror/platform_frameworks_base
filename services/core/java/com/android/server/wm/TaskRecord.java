@@ -1085,8 +1085,8 @@ class TaskRecord extends ConfigurationContainer {
 
         clearRootProcess();
 
-        // TODO: Use window container controller once tasks are better synced between AM and WM
-        mService.mWindowManager.notifyTaskRemovedFromRecents(taskId, userId);
+        mService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
+                taskId, userId);
     }
 
     void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {

@@ -2167,7 +2167,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      *               so only need to configure display.
      */
     void setForcedDensity(int density, int userId) {
-        final boolean clear = density == mInitialDisplayDensity;
         final boolean updateCurrent = userId == UserHandle.USER_CURRENT;
         if (mWmService.mCurrentUserId == userId || updateCurrent) {
             mBaseDisplayDensity = density;
@@ -3881,21 +3880,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             syswin = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
-        }
-    }
-
-    private static final class ScreenshotApplicationState {
-        WindowState appWin;
-        int maxLayer;
-        int minLayer;
-        boolean screenshotReady;
-
-        void reset(boolean screenshotReady) {
-            appWin = null;
-            maxLayer = 0;
-            minLayer = 0;
-            this.screenshotReady = screenshotReady;
-            minLayer = (screenshotReady) ? 0 : Integer.MAX_VALUE;
         }
     }
 
