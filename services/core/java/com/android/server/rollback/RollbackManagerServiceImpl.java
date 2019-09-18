@@ -550,22 +550,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             while (iter.hasNext()) {
                 Rollback rollback = iter.next();
                 synchronized (rollback.getLock()) {
-                    for (PackageRollbackInfo info : rollback.info.getPackages()) {
-                        if (info.getPackageName().equals(packageName)) {
-                            iter.remove();
-                            deleteRollback(rollback);
-                            break;
-                        }
+                    if (rollback.includesPackage(packageName)) {
+                        iter.remove();
+                        deleteRollback(rollback);
                     }
                 }
             }
             for (NewRollback newRollback : mNewRollbacks) {
                 synchronized (newRollback.rollback.getLock()) {
-                    for (PackageRollbackInfo info : newRollback.rollback.info.getPackages()) {
-                        if (info.getPackageName().equals(packageName)) {
-                            newRollback.isCancelled = true;
-                            break;
-                        }
+                    if (newRollback.rollback.includesPackage(packageName)) {
+                        newRollback.isCancelled = true;
                     }
                 }
             }
@@ -648,11 +642,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                 restoreInProgress.add(rollback);
                             }
 
-                            for (PackageRollbackInfo info : rollback.info.getPackages()) {
-                                if (info.isApex()) {
-                                    apexPackageNames.add(info.getPackageName());
-                                }
-                            }
+                            apexPackageNames.addAll(rollback.getApexPackageNames());
                         }
                     }
                 }
@@ -714,7 +704,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private void onPackageReplaced(String packageName) {
         // TODO: Could this end up incorrectly deleting a rollback for a
         // package that is about to be installed?
-        VersionedPackage installedVersion = getInstalledPackageVersion(packageName);
+        long installedVersion = getInstalledPackageVersion(packageName);
 
         synchronized (mLock) {
             Iterator<Rollback> iter = mRollbacks.iterator();
@@ -722,17 +712,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Rollback rollback = iter.next();
                 synchronized (rollback.getLock()) {
                     // TODO: Should we remove rollbacks in the ENABLING state here?
-                    if (rollback.isEnabling() || rollback.isAvailable()) {
-                        for (PackageRollbackInfo info : rollback.info.getPackages()) {
-                            if (info.getPackageName().equals(packageName)
-                                    && !packageVersionsEqual(
-                                    info.getVersionRolledBackFrom(),
-                                    installedVersion)) {
-                                iter.remove();
-                                deleteRollback(rollback);
-                                break;
-                            }
-                        }
+                    if ((rollback.isEnabling() || rollback.isAvailable())
+                            && rollback.includesPackageWithDifferentVersion(packageName,
+                            installedVersion)) {
+                        iter.remove();
+                        deleteRollback(rollback);
                     }
                 }
             }
@@ -1251,18 +1235,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     /**
      * Gets the version of the package currently installed.
-     * Returns null if the package is not currently installed.
+     * Returns -1 if the package is not currently installed.
      */
-    private VersionedPackage getInstalledPackageVersion(String packageName) {
+    private long getInstalledPackageVersion(String packageName) {
         PackageManager pm = mContext.getPackageManager();
         PackageInfo pkgInfo = null;
         try {
             pkgInfo = getPackageInfo(packageName);
         } catch (PackageManager.NameNotFoundException e) {
-            return null;
+            return -1;
         }
 
-        return new VersionedPackage(packageName, pkgInfo.getLongVersionCode());
+        return pkgInfo.getLongVersionCode();
     }
 
     /**
@@ -1391,11 +1375,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // should document in PackageInstaller.SessionParams#setEnableRollback
         // After enabling and commiting any rollback, observe packages and
         // prepare to rollback if packages crashes too frequently.
-        List<String> packages = new ArrayList<>();
-        for (int i = 0; i < rollback.info.getPackages().size(); i++) {
-            packages.add(rollback.info.getPackages().get(i).getPackageName());
-        }
-        mPackageHealthObserver.startObservingHealth(packages,
+        mPackageHealthObserver.startObservingHealth(rollback.getPackageNames(),
                 mRollbackLifetimeDurationInMillis);
         scheduleExpiration(mRollbackLifetimeDurationInMillis);
     }

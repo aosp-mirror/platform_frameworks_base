@@ -29,6 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -280,6 +281,60 @@ class Rollback {
     @GuardedBy("getLock")
     void setRestoreUserDataInProgress(boolean restoreUserDataInProgress) {
         mRestoreUserDataInProgress = restoreUserDataInProgress;
+    }
+
+    /**
+     * Returns true if this rollback includes the package with the provided {@code packageName}.
+     */
+    @GuardedBy("getLock")
+    boolean includesPackage(String packageName) {
+        for (PackageRollbackInfo info : info.getPackages()) {
+            if (info.getPackageName().equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this rollback includes the package with the provided {@code packageName}
+     * with a <i>version rolled back from</i> that is not {@code versionCode}.
+     */
+    @GuardedBy("getLock")
+    boolean includesPackageWithDifferentVersion(String packageName, long versionCode) {
+        for (PackageRollbackInfo info : info.getPackages()) {
+            if (info.getPackageName().equals(packageName)
+                    && info.getVersionRolledBackFrom().getLongVersionCode() != versionCode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns a list containing the names of all the packages included in this rollback.
+     */
+    @GuardedBy("getLock")
+    List<String> getPackageNames() {
+        List<String> result = new ArrayList<>();
+        for (PackageRollbackInfo info : info.getPackages()) {
+            result.add(info.getPackageName());
+        }
+        return result;
+    }
+
+    /**
+     * Returns a list containing the names of all the apex packages included in this rollback.
+     */
+    @GuardedBy("getLock")
+    List<String> getApexPackageNames() {
+        List<String> result = new ArrayList<>();
+        for (PackageRollbackInfo info : info.getPackages()) {
+            if (info.isApex()) {
+                result.add(info.getPackageName());
+            }
+        }
+        return result;
     }
 
     static String rollbackStateToString(@RollbackState int state) {
