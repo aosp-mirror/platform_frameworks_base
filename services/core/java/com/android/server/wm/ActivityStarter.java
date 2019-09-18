@@ -2342,7 +2342,12 @@ class ActivityStarter {
                             REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                             "reparentingHome");
                     mMovedToFront = true;
+                } else if (launchStack.topTask() == null) {
+                    // The task does not need to be reparented to the launch stack. Remove the
+                    // launch stack if there is no activity in it.
+                    launchStack.remove();
                 }
+
                 mOptions = null;
 
                 // We are moving a task to the front, use starting window to hide initial drawn

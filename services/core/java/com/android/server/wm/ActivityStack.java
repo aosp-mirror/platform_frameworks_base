@@ -839,11 +839,12 @@ class ActivityStack extends ConfigurationContainer {
                 // so that the divider matches and remove this logic.
                 // TODO: This is currently only called when entering split-screen while in another
                 // task, and from the tests
-                // TODO (b/78247419): Check if launcher and overview are same then move home stack
-                // instead of recents stack. Then fix the rotation animation from fullscreen to
-                // minimized mode
+                // TODO (b/78247419): Fix the rotation animation from fullscreen to minimized mode
+                final boolean isRecentsComponentHome =
+                        mService.getRecentTasks().isRecentsComponentHomeActivity(mCurrentUser);
                 final ActivityStack recentStack = display.getOrCreateStack(
-                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_RECENTS,
+                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+                        isRecentsComponentHome ? ACTIVITY_TYPE_HOME : ACTIVITY_TYPE_RECENTS,
                         true /* onTop */);
                 recentStack.moveToFront("setWindowingMode");
                 // If task moved to docked stack - show recents if needed.
