@@ -39,6 +39,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.FgThread;
 import com.android.server.compat.PlatformCompat;
 
@@ -55,13 +56,10 @@ import java.util.Set;
  * The entity responsible for filtering visibility between apps based on declarations in their
  * manifests.
  */
-class AppsFilter {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class AppsFilter {
 
     private static final String TAG = PackageManagerService.TAG;
-
-    // Forces filtering logic to run for debug purposes.
-    // STOPSHIP (b/136675067): should be false after development is complete
-    private static final boolean DEBUG_RUN_WHEN_DISABLED = false;
 
     // Logs all filtering instead of enforcing
     private static final boolean DEBUG_ALLOW_ALL = false;
@@ -128,15 +126,13 @@ class AppsFilter {
 
         /** @return true if the feature is enabled for the given package. */
         boolean packageIsEnabled(PackageParser.Package pkg);
+
     }
 
     private static class FeatureConfigImpl implements FeatureConfig {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
-
-        // STOPSHIP(patb): set this to true if we plan to launch this in R
-        private static final boolean DEFAULT_ENABLED_STATE = false;
         private final PackageManagerService.Injector mInjector;
-        private volatile boolean mFeatureEnabled = DEFAULT_ENABLED_STATE;
+        private volatile boolean mFeatureEnabled = true;
 
         private FeatureConfigImpl(PackageManagerService.Injector injector) {
             mInjector = injector;
@@ -146,13 +142,13 @@ class AppsFilter {
         public void onSystemReady() {
             mFeatureEnabled = DeviceConfig.getBoolean(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME,
-                    DEFAULT_ENABLED_STATE);
+                    true);
             DeviceConfig.addOnPropertiesChangedListener(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
                     properties -> {
                         synchronized (FeatureConfigImpl.this) {
                             mFeatureEnabled = properties.getBoolean(
-                                    FILTERING_ENABLED_NAME, DEFAULT_ENABLED_STATE);
+                                    FILTERING_ENABLED_NAME, true);
                         }
                     });
         }
@@ -353,7 +349,7 @@ class AppsFilter {
     public boolean shouldFilterApplication(int callingUid, @Nullable SettingBase callingSetting,
             PackageSetting targetPkgSetting, int userId) {
         final boolean featureEnabled = mFeatureConfig.isGloballyEnabled();
-        if (!featureEnabled && !DEBUG_RUN_WHEN_DISABLED) {
+        if (!featureEnabled) {
             if (DEBUG_LOGGING) {
                 Slog.d(TAG, "filtering disabled; skipped");
             }
@@ -399,21 +395,12 @@ class AppsFilter {
                 return true;
             }
         }
-        if (!featureEnabled) {
-            return false;
+
+        if (DEBUG_LOGGING) {
+            log(callingPkgSetting, targetPkgSetting,
+                    DEBUG_ALLOW_ALL ? "ALLOWED" : "BLOCKED");
         }
-        if (mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting,
-                        DEBUG_ALLOW_ALL ? "ALLOWED" : "BLOCKED");
-            }
-            return !DEBUG_ALLOW_ALL;
-        } else {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "DISABLED");
-            }
-            return false;
-        }
+        return !DEBUG_ALLOW_ALL;
     }
 
     private boolean shouldFilterApplicationInternal(
@@ -421,6 +408,12 @@ class AppsFilter {
         final String callingName = callingPkgSetting.pkg.packageName;
         final PackageParser.Package targetPkg = targetPkgSetting.pkg;
 
+        if (!mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
+            if (DEBUG_LOGGING) {
+                log(callingPkgSetting, targetPkgSetting, "DISABLED");
+            }
+            return false;
+        }
         // This package isn't technically installed and won't be written to settings, so we can
         // treat it as filtered until it's available again.
         if (targetPkg == null) {
