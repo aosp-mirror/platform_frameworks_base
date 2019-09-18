@@ -26,6 +26,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -38,6 +39,7 @@ import org.junit.runners.MethodSorters;
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 140856143)
+@Ignore("Waiting bug feedback")
 public class SplitScreenToLauncherTest extends FlickerTestBase {
 
     public SplitScreenToLauncherTest() {
@@ -66,7 +68,6 @@ public class SplitScreenToLauncherTest extends FlickerTestBase {
                 .forAllEntries());
     }
 
-    @FlakyTest(bugId = 79686616)
     @Test
     public void checkVisibility_appLayerBecomesInVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)

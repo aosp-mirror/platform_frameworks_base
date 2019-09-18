@@ -30,7 +30,6 @@ import android.graphics.Rect;
 import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
@@ -51,7 +50,6 @@ import java.util.Collection;
 @LargeTest
 @RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 140855415)
 public class SeamlessAppRotationTest extends FlickerTestBase {
     private int mBeginRotation;
     private int mEndRotation;

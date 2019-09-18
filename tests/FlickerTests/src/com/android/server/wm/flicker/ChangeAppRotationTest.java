@@ -29,10 +29,12 @@ import android.util.Log;
 import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -83,12 +85,16 @@ public class ChangeAppRotationTest extends FlickerTestBase {
                 changeAppRotation(mTestApp, mUiDevice, mBeginRotation, mEndRotation).build());
     }
 
+    @FlakyTest(bugId = 140855415)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_navBarWindowIsAlwaysVisible() {
         checkResults(result -> assertThat(result)
                 .showsAboveAppWindow(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries());
     }
 
+    @FlakyTest(bugId = 140855415)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_statusBarWindowIsAlwaysVisible() {
         checkResults(result -> assertThat(result)
@@ -137,12 +143,16 @@ public class ChangeAppRotationTest extends FlickerTestBase {
         );
     }
 
+    @FlakyTest(bugId = 140855415)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_navBarLayerIsAlwaysVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
                 .showsLayer(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries());
     }
 
+    @FlakyTest(bugId = 140855415)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_statusBarLayerIsAlwaysVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
