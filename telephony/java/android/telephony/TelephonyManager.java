@@ -11378,10 +11378,13 @@ public class TelephonyManager {
      *  3) APN type is whitelisted. E.g. MMS is whitelisted if
      *  {@link SubscriptionManager#setAlwaysAllowMmsData} is turned on.
      *
+     * @param apnType Value indicating the apn type. Apn types are defined in {@link ApnSetting}.
      * @return whether data is enabled for a apn type.
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isDataEnabledForApn(@ApnType int apnType) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         try {
