@@ -69,6 +69,7 @@ android_library {
 
     libs: [
         "telephony-common",
+        "ims-common",
     ],
 
     aaptflags: [
@@ -127,6 +128,7 @@ android_library {
         "android.test.runner",
         "telephony-common",
         "android.test.base",
+        "ims-common",
     ],
     aaptflags: [
         "--extra-packages",
@@ -153,6 +155,7 @@ android_app {
 
     libs: [
         "telephony-common",
+        "ims-common",
     ],
 
     dxflags: ["--multi-dex"],
@@ -189,6 +192,7 @@ android_app {
     ],
     libs: [
         "telephony-common",
+        "ims-common",
     ],
 
     srcs: [
