@@ -23,23 +23,20 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.util.ProximitySensor;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import java.lang.reflect.Field;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -78,8 +75,8 @@ public class ProximityClassifierTest extends ClassifierTest {
     @Test
     public void testPass_mostlyUncovered() {
         touchDown();
-        mClassifier.onSensorEvent(createSensorEvent(true, 1));
-        mClassifier.onSensorEvent(createSensorEvent(false, 2));
+        mClassifier.onProximityEvent(createSensorEvent(true, 1));
+        mClassifier.onProximityEvent(createSensorEvent(false, 2));
         touchUp(20);
         assertThat(mClassifier.isFalseTouch(), is(false));
     }
@@ -88,8 +85,8 @@ public class ProximityClassifierTest extends ClassifierTest {
     public void testPass_quickSettings() {
         touchDown();
         when(mDataProvider.getInteractionType()).thenReturn(QUICK_SETTINGS);
-        mClassifier.onSensorEvent(createSensorEvent(true, 1));
-        mClassifier.onSensorEvent(createSensorEvent(false, 11));
+        mClassifier.onProximityEvent(createSensorEvent(true, 1));
+        mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
         assertThat(mClassifier.isFalseTouch(), is(false));
     }
@@ -97,8 +94,8 @@ public class ProximityClassifierTest extends ClassifierTest {
     @Test
     public void testFail_covered() {
         touchDown();
-        mClassifier.onSensorEvent(createSensorEvent(true, 1));
-        mClassifier.onSensorEvent(createSensorEvent(false, 11));
+        mClassifier.onProximityEvent(createSensorEvent(true, 1));
+        mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
         assertThat(mClassifier.isFalseTouch(), is(true));
     }
@@ -106,10 +103,10 @@ public class ProximityClassifierTest extends ClassifierTest {
     @Test
     public void testFail_mostlyCovered() {
         touchDown();
-        mClassifier.onSensorEvent(createSensorEvent(true, 1));
-        mClassifier.onSensorEvent(createSensorEvent(true, 95));
-        mClassifier.onSensorEvent(createSensorEvent(true, 96));
-        mClassifier.onSensorEvent(createSensorEvent(false, 100));
+        mClassifier.onProximityEvent(createSensorEvent(true, 1));
+        mClassifier.onProximityEvent(createSensorEvent(true, 95));
+        mClassifier.onProximityEvent(createSensorEvent(true, 96));
+        mClassifier.onProximityEvent(createSensorEvent(false, 100));
         touchUp(100);
         assertThat(mClassifier.isFalseTouch(), is(true));
     }
@@ -117,8 +114,8 @@ public class ProximityClassifierTest extends ClassifierTest {
     @Test
     public void testPass_coveredWithLongSwipe() {
         touchDown();
-        mClassifier.onSensorEvent(createSensorEvent(true, 1));
-        mClassifier.onSensorEvent(createSensorEvent(false, 11));
+        mClassifier.onProximityEvent(createSensorEvent(true, 1));
+        mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
         when(mDistanceClassifier.isLongSwipe()).thenReturn(true);
         assertThat(mClassifier.isFalseTouch(), is(false));
@@ -139,26 +136,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         motionEvent.recycle();
     }
 
-    private SensorEvent createSensorEvent(boolean covered, long timestampMs) {
-        SensorEvent sensorEvent = Mockito.mock(SensorEvent.class);
-        Sensor sensor = Mockito.mock(Sensor.class);
-        when(sensor.getType()).thenReturn(Sensor.TYPE_PROXIMITY);
-        when(sensor.getMaximumRange()).thenReturn(1f);
-        sensorEvent.sensor = sensor;
-        sensorEvent.timestamp = timestampMs * NS_PER_MS;
-        try {
-            Field valuesField = SensorEvent.class.getField("values");
-            valuesField.setAccessible(true);
-            float[] sensorValue = {covered ? 0 : 1};
-            try {
-                valuesField.set(sensorEvent, sensorValue);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-
-        return sensorEvent;
+    private ProximitySensor.ProximityEvent createSensorEvent(boolean covered, long timestampMs) {
+        return new ProximitySensor.ProximityEvent(covered, timestampMs * NS_PER_MS);
     }
 }
