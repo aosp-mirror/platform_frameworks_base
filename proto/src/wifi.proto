@@ -1798,12 +1798,12 @@ message ExperimentValues {
   optional int32 data_stall_duration_ms = 5;
 
   // Threshold of Tx throughput below which to trigger a data stall
-  // measured in Mbps
-  optional int32 data_stall_tx_tput_thr_mbps = 6;
+  // measured in Kbps
+  optional int32 data_stall_tx_tput_thr_kbps = 6;
 
   // Threshold of Rx throughput below which to trigger a data stall
-  // measured in Mbps
-  optional int32 data_stall_rx_tput_thr_mbps = 7;
+  // measured in Kbps
+  optional int32 data_stall_rx_tput_thr_kbps = 7;
 
   // Threshold of Tx packet error rate above which to trigger a data stall
   // in percentage
