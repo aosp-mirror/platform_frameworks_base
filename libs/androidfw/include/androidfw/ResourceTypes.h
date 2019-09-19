@@ -523,6 +523,8 @@ public:
     size_t size() const;
     size_t styleCount() const;
     size_t bytes() const;
+    const void* data() const;
+
 
     bool isSorted() const;
     bool isUTF8() const;

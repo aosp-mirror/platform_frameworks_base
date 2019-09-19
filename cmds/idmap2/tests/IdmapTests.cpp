@@ -179,8 +179,7 @@ void CreateIdmap(const StringPiece& target_apk_path, const StringPiece& overlay_
   ASSERT_THAT(overlay_apk, NotNull());
 
   auto result =
-      Idmap::FromApkAssets(target_apk_path.to_string(), *target_apk, overlay_apk_path.to_string(),
-                           *overlay_apk, fulfilled_policies, enforce_overlayable);
+      Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, enforce_overlayable);
   *out_idmap = result ? std::move(*result) : nullptr;
 }
 
@@ -195,7 +194,7 @@ TEST(IdmapTests, CreateIdmapFromApkAssets) {
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
   ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x01U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x76a20829);
-  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0x8635c2ed);
+  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0xc054fb26);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), target_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
@@ -480,9 +479,8 @@ TEST(IdmapTests, FailToCreateIdmapFromApkAssetsIfPathTooLong) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  const auto result =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  const auto result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+                                           /* enforce_overlayable */ true);
   ASSERT_FALSE(result);
 }
 
@@ -497,8 +495,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  auto result = Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                                     PolicyFlags::POLICY_PUBLIC,
+  auto result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
                                      /* enforce_overlayable */ true);
   ASSERT_TRUE(result);
   const auto idmap = std::move(*result);

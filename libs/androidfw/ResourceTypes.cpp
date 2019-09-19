@@ -1063,6 +1063,11 @@ size_t ResStringPool::bytes() const
     return (mError == NO_ERROR) ? mHeader->header.size : 0;
 }
 
+const void* ResStringPool::data() const
+{
+    return mHeader;
+}
+
 bool ResStringPool::isSorted() const
 {
     return (mHeader->flags&ResStringPool_header::SORTED_FLAG)!=0;

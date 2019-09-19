@@ -2840,6 +2840,9 @@
 
         <!-- The name of the overlayable whose resources will be overlaid. -->
         <attr name="targetName" />
+
+        <!-- The xml file that defines the target id to overlay value mappings. -->
+        <attr name="resourcesMap" format="reference" />
     </declare-styleable>
 
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May

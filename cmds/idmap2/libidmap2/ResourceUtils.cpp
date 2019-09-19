@@ -98,6 +98,15 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
     info.target_name = *result_str;
   }
 
+  if (auto result_value = overlay_it->GetAttributeValue("resourcesMap")) {
+    if ((*result_value).dataType == Res_value::TYPE_REFERENCE) {
+      info.resource_mapping = (*result_value).data;
+    } else {
+      return Error("android:resourcesMap is not a reference in AndroidManifest.xml of %s",
+                   path.c_str());
+    }
+  }
+
   if (auto result_value = overlay_it->GetAttributeValue("isStatic")) {
     if ((*result_value).dataType >= Res_value::TYPE_FIRST_INT &&
         (*result_value).dataType <= Res_value::TYPE_LAST_INT) {
@@ -116,14 +125,12 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
     }
   }
 
-  iter = tag->find("requiredSystemPropertyName");
-  if (iter != tag->end()) {
-    info.requiredSystemPropertyName = iter->second;
+  if (auto result_str = overlay_it->GetAttributeStringValue("requiredSystemPropertyName")) {
+    info.requiredSystemPropertyName = *result_str;
   }
 
-  iter = tag->find("requiredSystemPropertyValue");
-  if (iter != tag->end()) {
-    info.requiredSystemPropertyValue = iter->second;
+   if (auto result_str = overlay_it->GetAttributeStringValue("requiredSystemPropertyValue")) {
+    info.requiredSystemPropertyValue = *result_str;
   }
 
   return info;
