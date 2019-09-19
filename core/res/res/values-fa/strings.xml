@@ -291,7 +291,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود به تقویم شما دسترسی پیدا کند؟"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ارسال و مشاهده پیامک‌ها"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود پیامک‌ها را ارسال و مشاهده کند؟"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏به «&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt;» اجازه داده شود پیامک ارسال و مشاهده کند؟"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"حافظه"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"دسترسی به عکس‌ها، رسانه‌ها و فایل‌های روی دستگاهتان"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏به برنامه &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود به عکس‌ها، رسانه، و فایل‌های موجود در دستگاهتان دسترسی داشته باشد؟"</string>
