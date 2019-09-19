@@ -24,7 +24,7 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /**
- * Services and Activities that are injectable should go here.
+ * SystemUI objects that are injectable should go here.
  */
 @Module
 public abstract class SystemUIBinder {

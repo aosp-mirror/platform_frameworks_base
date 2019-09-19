@@ -16,19 +16,16 @@
 
 package com.android.systemui;
 
-import javax.inject.Singleton;
+import dagger.Binds;
+import dagger.Module;
 
-import dagger.Component;
-
-@Singleton
-@Component(
-        modules = {
-                DependencyProvider.class,
-                DependencyBinder.class,
-                SystemUIFactory.ContextHolder.class,
-                SystemUIModule.class,
-                CarSystemUIModule.class
-        })
-interface CarSystemUIRootComponent extends SystemUIRootComponent {
-
+/**
+ * Dagger Module that collects related sub-modules together.
+ */
+@Module(includes = {ActivityBinder.class, ServiceBinder.class, SystemUIBinder.class})
+public abstract class ComponentBinder {
+    /** */
+    @Binds
+    public abstract ContextComponentHelper bindComponentHelper(
+            ContextComponentResolver componentHelper);
 }
