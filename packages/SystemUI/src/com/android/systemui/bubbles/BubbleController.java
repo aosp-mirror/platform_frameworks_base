@@ -53,7 +53,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
@@ -130,9 +129,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_INVALID_INTENT = 10;
 
     public static final int MAX_BUBBLES = 5; // TODO: actually enforce this
-
-    /** Flag to enable or disable the entire feature */
-    private static final String ENABLE_BUBBLES = "experiment_enable_bubbles";
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -638,9 +634,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
-            if (!areBubblesEnabled(mContext)) {
-                return;
-            }
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && canLaunchInActivityView(mContext, entry)) {
                 updateBubble(entry);
@@ -649,9 +642,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void onPreEntryUpdated(NotificationEntry entry) {
-            if (!areBubblesEnabled(mContext)) {
-                return;
-            }
             boolean shouldBubble = mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && canLaunchInActivityView(mContext, entry);
             if (!shouldBubble && mBubbleData.hasBubbleWithKey(entry.key)) {
@@ -943,11 +933,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 expandedBubble.getExpandedView().notifyDisplayEmpty();
             }
         }
-    }
-
-    private static boolean areBubblesEnabled(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ENABLE_BUBBLES, 1) != 0;
     }
 
     /**
