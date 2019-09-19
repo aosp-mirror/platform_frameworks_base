@@ -21,7 +21,7 @@ java_sdk_library {
 
     srcs: [
         "src/**/*.java",
-        ":framework-srcs",
+        ":framework-all-sources",
     ],
 
     api_packages: [
