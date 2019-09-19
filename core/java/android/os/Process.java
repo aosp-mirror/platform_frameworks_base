@@ -182,6 +182,12 @@ public class Process {
      */
     public static final int NETWORK_STACK_UID = 1073;
 
+    /**
+     * Defines the UID/GID for fs-verity certificate ownership in keystore.
+     * @hide
+     */
+    public static final int FSVERITY_CERT_UID = 1075;
+
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 
