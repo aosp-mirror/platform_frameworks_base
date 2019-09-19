@@ -519,9 +519,9 @@ public class LauncherApps {
      * <li>The app is a system app.</li>
      * <li>The app doesn't request any <a href="/guide/topics/permissions/overview">permissions</a>.
      * </li>
-     * <li>The <code>&lt;application&gt;</code> tag in the app's manifest doesn't contain any child
-     * elements that represent
-     * <a href="/guide/components/fundamentals#DeclaringComponents">app components</a>.</li>
+     * <li>The app doesn't have a <em>launcher activity</em> that is enabled by default. A launcher
+     * activity has an intent containing the <code>ACTION_MAIN</code> action and the
+     * <code>CATEGORY_LAUNCHER</code> category.</li>
      * </ul>
      *
      * <p>Additionally, the system hides synthesized activities for some or all apps in the
