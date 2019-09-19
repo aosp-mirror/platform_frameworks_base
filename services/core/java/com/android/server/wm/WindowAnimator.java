@@ -306,24 +306,6 @@ public class WindowAnimator {
         }
     }
 
-    int getPendingLayoutChanges(final int displayId) {
-        if (displayId < 0) {
-            return 0;
-        }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
-        return (displayContent != null) ? displayContent.pendingLayoutChanges : 0;
-    }
-
-    void setPendingLayoutChanges(final int displayId, final int changes) {
-        if (displayId < 0) {
-            return;
-        }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
-        if (displayContent != null) {
-            displayContent.pendingLayoutChanges |= changes;
-        }
-    }
-
     private DisplayContentsAnimator getDisplayContentsAnimatorLocked(int displayId) {
         if (displayId < 0) {
             return null;

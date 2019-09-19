@@ -738,7 +738,6 @@ public class TaskStack extends WindowContainer<Task> implements
         // surface position.
         updateSurfaceSize(getPendingTransaction());
         final int windowingMode = getWindowingMode();
-        final boolean isAlwaysOnTop = isAlwaysOnTop();
 
         if (mDisplayContent == null) {
             return;

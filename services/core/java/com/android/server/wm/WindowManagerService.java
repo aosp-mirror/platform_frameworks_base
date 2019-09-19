@@ -313,11 +313,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int WINDOW_LAYER_MULTIPLIER = 5;
 
     /**
-     * Dim surface layer is immediately below target window.
-     */
-    static final int LAYER_OFFSET_DIM = 1;
-
-    /**
      * Animation thumbnail is as far as possible below the window above
      * the thumbnail (or in other words as far as possible above the window
      * below it).
@@ -366,8 +361,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final String DENSITY_OVERRIDE = "ro.config.density_override";
     private static final String SIZE_OVERRIDE = "ro.config.size_override";
-
-    private static final int MAX_SCREENSHOT_RETRIES = 3;
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
@@ -2064,13 +2057,11 @@ public class WindowManagerService extends IWindowManager.Stub
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         long origId = Binder.clearCallingIdentity();
-        final int displayId;
         synchronized (mGlobalLock) {
             final WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
                 return 0;
             }
-            displayId = win.getDisplayId();
             final DisplayContent displayContent = win.getDisplayContent();
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
 
@@ -2648,16 +2639,14 @@ public class WindowManagerService extends IWindowManager.Stub
         getDefaultDisplayContentLocked().executeAppTransition();
     }
 
-    public void initializeRecentsAnimation(int targetActivityType,
+    void initializeRecentsAnimation(int targetActivityType,
             IRecentsAnimationRunner recentsAnimationRunner,
             RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId,
             SparseBooleanArray recentTaskIds) {
-        synchronized (mGlobalLock) {
-            mRecentsAnimationController = new RecentsAnimationController(this,
-                    recentsAnimationRunner, callbacks, displayId);
-            mRoot.getDisplayContent(displayId).mAppTransition.updateBooster();
-            mRecentsAnimationController.initialize(targetActivityType, recentTaskIds);
-        }
+        mRecentsAnimationController = new RecentsAnimationController(this, recentsAnimationRunner,
+                callbacks, displayId);
+        mRoot.getDisplayContent(displayId).mAppTransition.updateBooster();
+        mRecentsAnimationController.initialize(targetActivityType, recentTaskIds);
     }
 
     @VisibleForTesting
@@ -2801,12 +2790,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId) {
         mAtmInternal.notifyKeyguardFlagsChanged(callback, displayId);
-    }
-
-    public boolean isKeyguardTrusted() {
-        synchronized (mGlobalLock) {
-            return mPolicy.isKeyguardTrustedLw();
-        }
     }
 
     public void setKeyguardGoingAway(boolean keyguardGoingAway) {
@@ -2954,13 +2937,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public boolean isShowingDream() {
-        synchronized (mGlobalLock) {
-            // TODO(b/123372519): Fix this when dream can be shown on non-default display.
-            return getDefaultDisplayContentLocked().getDisplayPolicy().isShowingDreamLw();
-        }
-    }
-
     @Override
     public void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message) {
         if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
@@ -2968,12 +2944,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         synchronized (mGlobalLock) {
             mPolicy.dismissKeyguardLw(callback, message);
-        }
-    }
-
-    public void onKeyguardOccludedChanged(boolean occluded) {
-        synchronized (mGlobalLock) {
-            mPolicy.onKeyguardOccludedChangedLw(occluded);
         }
     }
 
@@ -5347,9 +5317,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void requestTraversal() {
-        synchronized (mGlobalLock) {
-            mWindowPlacerLocked.requestTraversal();
-        }
+        mWindowPlacerLocked.requestTraversal();
     }
 
     /** Note that Locked in this case is on mLayoutToAnim */
@@ -5814,55 +5782,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return null;
             }
             return stats;
-        }
-    }
-
-    public void notifyAppRelaunching(IBinder token) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
-            if (appWindow != null) {
-                appWindow.startRelaunching();
-            }
-        }
-    }
-
-    public void notifyAppRelaunchingFinished(IBinder token) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
-            if (appWindow != null) {
-                appWindow.finishRelaunching();
-            }
-        }
-    }
-
-    public void notifyAppRelaunchesCleared(IBinder token) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
-            if (appWindow != null) {
-                appWindow.clearRelaunching();
-            }
-        }
-    }
-
-    public void notifyAppResumedFinished(IBinder token) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
-            if (appWindow != null) {
-                appWindow.getDisplayContent().mUnknownAppVisibilityController
-                        .notifyAppResumedFinished(appWindow);
-            }
-        }
-    }
-
-    /**
-     * Called when a task has been removed from the recent tasks list.
-     * <p>
-     * Note: This doesn't go through {@link TaskWindowContainerController} yet as the window
-     * container may not exist when this happens.
-     */
-    public void notifyTaskRemovedFromRecents(int taskId, int userId) {
-        synchronized (mGlobalLock) {
-            mTaskSnapshotController.notifyTaskRemovedFromRecents(taskId, userId);
         }
     }
 
@@ -6375,16 +6294,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void onDisplayChanged(int displayId) {
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent != null) {
-                displayContent.updateDisplayInfo();
-            }
-            mWindowPlacerLocked.requestTraversal();
-        }
-    }
-
     @Override
     public Object getWindowManagerLock() {
         return mGlobalLock;
@@ -6395,21 +6304,18 @@ public class WindowManagerService extends IWindowManager.Stub
      * a window.
      * @param token Application token for which the activity will be relaunched.
      */
-    public void setWillReplaceWindow(IBinder token, boolean animate) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
-            if (appWindowToken == null) {
-                Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
-                        + token);
-                return;
-            }
-            if (!appWindowToken.hasContentToDisplay()) {
-                Slog.w(TAG_WM, "Attempted to set replacing window on app token with no content"
-                        + token);
-                return;
-            }
-            appWindowToken.setWillReplaceWindows(animate);
+    void setWillReplaceWindow(IBinder token, boolean animate) {
+        final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
+        if (appWindowToken == null) {
+            Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token " + token);
+            return;
         }
+        if (!appWindowToken.hasContentToDisplay()) {
+            Slog.w(TAG_WM, "Attempted to set replacing window on app token with no content"
+                    + token);
+            return;
+        }
+        appWindowToken.setWillReplaceWindows(animate);
     }
 
     /**
@@ -6457,19 +6363,17 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param token Application token for the activity whose window might be replaced.
      * @param replacing Whether the window is being replaced or not.
      */
-    public void scheduleClearWillReplaceWindows(IBinder token, boolean replacing) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
-            if (appWindowToken == null) {
-                Slog.w(TAG_WM, "Attempted to reset replacing window on non-existing app token "
-                        + token);
-                return;
-            }
-            if (replacing) {
-                scheduleWindowReplacementTimeouts(appWindowToken);
-            } else {
-                appWindowToken.clearWillReplaceWindows();
-            }
+    void scheduleClearWillReplaceWindows(IBinder token, boolean replacing) {
+        final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
+        if (appWindowToken == null) {
+            Slog.w(TAG_WM, "Attempted to reset replacing window on non-existing app token "
+                    + token);
+            return;
+        }
+        if (replacing) {
+            scheduleWindowReplacementTimeouts(appWindowToken);
+        } else {
+            appWindowToken.clearWillReplaceWindows();
         }
     }
 
@@ -6491,11 +6395,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setDockedStackResizing(boolean resizing) {
-        synchronized (mGlobalLock) {
-            getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
-            requestTraversal();
-        }
+    void setDockedStackResizing(boolean resizing) {
+        getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
+        requestTraversal();
     }
 
     @Override
@@ -7040,7 +6942,9 @@ public class WindowManagerService extends IWindowManager.Stub
     private final class LocalService extends WindowManagerInternal {
         @Override
         public void requestTraversalFromDisplayManager() {
-            requestTraversal();
+            synchronized (mGlobalLock) {
+                requestTraversal();
+            }
         }
 
         @Override

@@ -335,7 +335,6 @@ public class DisplayPolicy {
 
     private static final Rect sTmpDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private static final Rect sTmpRect = new Rect();
-    private static final Rect sTmpDockedFrame = new Rect();
     private static final Rect sTmpNavFrame = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
 
