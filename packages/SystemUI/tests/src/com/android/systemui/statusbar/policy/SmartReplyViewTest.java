@@ -500,6 +500,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private void setSmartActions(String[] actionTitles, boolean useDelayedOnClickListener) {
         mView.resetSmartSuggestions(mContainer);
         List<Button> actions = mView.inflateSmartActions(
+                getContext(),
                 new SmartReplyView.SmartActions(createActions(actionTitles), false),
                 mLogger,
                 mEntry,
@@ -520,6 +521,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         List<Button> smartSuggestions = inflateSmartReplies(choices, fromAssistant,
                 useDelayedOnClickListener);
         smartSuggestions.addAll(mView.inflateSmartActions(
+                getContext(),
                 new SmartReplyView.SmartActions(createActions(actionTitles), fromAssistant),
                 mLogger,
                 mEntry,
@@ -866,7 +868,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     }
 
     private Button inflateActionButton(Notification.Action action) {
-        return SmartReplyView.inflateActionButton(mView, getContext(), 0,
+        return SmartReplyView.inflateActionButton(mView, getContext(), getContext(), 0,
                 new SmartReplyView.SmartActions(Collections.singletonList(action), false),
                 mLogger, mEntry, mHeadsUpManager, true /* useDelayedOnClickListener */);
     }
