@@ -25,6 +25,8 @@ import android.view.MotionEvent;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 
+import java.util.Locale;
+
 
 /**
  * False touch if proximity sensor is covered for more than a certain percentage of the gesture.
@@ -119,6 +121,16 @@ class ProximityClassifier extends FalsingClassifier {
         }
 
         return false;
+    }
+
+    @Override
+    String getReason() {
+        return String.format(
+                (Locale) null,
+                "{percentInProximity=%f, threshold=%f, distanceClassifier=%s}",
+                mPercentNear,
+                mPercentCoveredThreshold,
+                mDistanceClassifier.getReason());
     }
 
     /**
