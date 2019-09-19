@@ -2394,7 +2394,6 @@ package android.provider {
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
-    field @Deprecated public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";

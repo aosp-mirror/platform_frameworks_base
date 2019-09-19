@@ -7903,16 +7903,6 @@ public final class Settings {
         public static final String NOTIFICATION_BADGING = "notification_badging";
 
         /**
-         * Whether the notification bubbles are globally enabled
-         * The value is boolean (1 or 0).
-         * @hide
-         * @deprecated use {@link Global#NOTIFICATION_BUBBLES} instead.
-         */
-        @TestApi
-        @Deprecated
-        public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
-
-        /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right
          * swipe).
          *

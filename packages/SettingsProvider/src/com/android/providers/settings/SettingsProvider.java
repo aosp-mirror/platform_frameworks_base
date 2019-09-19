@@ -4385,8 +4385,7 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 182) {
                     // Remove secure bubble settings.
-                    getSecureSettingsLocked(userId).deleteSettingLocked(
-                            Secure.NOTIFICATION_BUBBLES);
+                    getSecureSettingsLocked(userId).deleteSettingLocked("notification_bubbles");
 
                     // Add global bubble settings.
                     getGlobalSettingsLocked().insertSettingLocked(Global.NOTIFICATION_BUBBLES,

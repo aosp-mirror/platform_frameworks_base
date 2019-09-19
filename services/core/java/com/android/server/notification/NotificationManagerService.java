@@ -94,7 +94,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
-import static com.android.server.notification.PreferencesHelper.DEFAULT_ALLOW_BUBBLE;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_CRITICAL;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
@@ -1429,10 +1428,8 @@ public class NotificationManagerService extends SystemService {
     private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_BADGING_URI
                 = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
-        private final Uri NOTIFICATION_BUBBLES_URI_GLOBAL
+        private final Uri NOTIFICATION_BUBBLES_URI
                 = Settings.Global.getUriFor(Settings.Global.NOTIFICATION_BUBBLES);
-        private final Uri NOTIFICATION_BUBBLES_URI_SECURE
-                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BUBBLES);
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
@@ -1450,9 +1447,7 @@ public class NotificationManagerService extends SystemService {
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
                     false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(NOTIFICATION_BUBBLES_URI_GLOBAL,
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(NOTIFICATION_BUBBLES_URI_SECURE,
+            resolver.registerContentObserver(NOTIFICATION_BUBBLES_URI,
                     false, this, UserHandle.USER_ALL);
             update(null);
         }
@@ -1479,40 +1474,8 @@ public class NotificationManagerService extends SystemService {
             if (uri == null || NOTIFICATION_BADGING_URI.equals(uri)) {
                 mPreferencesHelper.updateBadgingEnabled();
             }
-            // In QPR we moved the setting to Global rather than Secure so that the setting
-            // applied to work profiles. Unfortunately we need to maintain both to pass CTS without
-            // a change to CTS outside of a normal letter release.
-            if (uri == null || NOTIFICATION_BUBBLES_URI_GLOBAL.equals(uri)) {
-                syncBubbleSettings(resolver, NOTIFICATION_BUBBLES_URI_GLOBAL);
+            if (uri == null || NOTIFICATION_BUBBLES_URI.equals(uri)) {
                 mPreferencesHelper.updateBubblesEnabled();
-            }
-            if (NOTIFICATION_BUBBLES_URI_SECURE.equals(uri)) {
-                syncBubbleSettings(resolver, NOTIFICATION_BUBBLES_URI_SECURE);
-            }
-        }
-
-        private void syncBubbleSettings(ContentResolver resolver, Uri settingToFollow) {
-            boolean followSecureSetting = settingToFollow.equals(NOTIFICATION_BUBBLES_URI_SECURE);
-
-            int secureSettingValue = Settings.Secure.getInt(resolver,
-                    Settings.Secure.NOTIFICATION_BUBBLES, DEFAULT_ALLOW_BUBBLE ? 1 : 0);
-            int globalSettingValue = Settings.Global.getInt(resolver,
-                    Settings.Global.NOTIFICATION_BUBBLES, DEFAULT_ALLOW_BUBBLE ? 1 : 0);
-
-            if (globalSettingValue == secureSettingValue) {
-                return;
-            }
-
-            if (followSecureSetting) {
-                // Global => secure
-                Settings.Global.putInt(resolver,
-                        Settings.Global.NOTIFICATION_BUBBLES,
-                        secureSettingValue);
-            } else {
-                // Secure => Global
-                Settings.Secure.putInt(resolver,
-                        Settings.Secure.NOTIFICATION_BADGING,
-                        globalSettingValue);
             }
         }
     }
