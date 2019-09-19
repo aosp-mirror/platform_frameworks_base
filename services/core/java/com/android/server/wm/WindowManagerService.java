@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
@@ -7745,5 +7746,28 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public boolean mirrorDisplay(int displayId, SurfaceControl outSurfaceControl) {
+        if (!checkCallingPermission(ACCESS_SURFACE_FLINGER, "mirrorDisplay()")) {
+            throw new SecurityException("Requires ACCESS_SURFACE_FLINGER permission");
+        }
+
+        final SurfaceControl displaySc;
+        synchronized (mGlobalLock) {
+            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.e(TAG, "Invalid displayId " + displayId + " for mirrorDisplay");
+                return false;
+            }
+
+            displaySc = displayContent.getSurfaceControl();
+        }
+
+        final SurfaceControl mirror = SurfaceControl.mirrorSurface(displaySc);
+        outSurfaceControl.copyFrom(mirror);
+
+        return true;
     }
 }
