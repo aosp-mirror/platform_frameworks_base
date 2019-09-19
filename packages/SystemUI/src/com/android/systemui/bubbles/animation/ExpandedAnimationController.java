@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
 
@@ -57,6 +58,9 @@ public class ExpandedAnimationController
     /** Stiffness for the expand/collapse path-following animation. */
     private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
 
+    /** What percentage of the screen to use when centering the bubbles in landscape. */
+    private static final float CENTER_BUBBLES_LANDSCAPE_PERCENT = 0.66f;
+
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
     /** Space between status bar and bubbles in the expanded state. */
@@ -69,8 +73,8 @@ public class ExpandedAnimationController
     private Point mDisplaySize;
     /** Max number of bubbles shown in row above expanded view.*/
     private int mBubblesMaxRendered;
-    /** Width of current screen orientation. */
-    private float mScreenWidth;
+    /** What the current screen orientation is. */
+    private int mScreenOrientation;
 
     /** Whether the dragged-out bubble is in the dismiss target. */
     private boolean mIndividualBubbleWithinDismissTarget = false;
@@ -97,8 +101,7 @@ public class ExpandedAnimationController
 
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
             int orientation) {
-        mDisplaySize = displaySize;
-        updateOrientation(orientation);
+        updateOrientation(orientation, displaySize);
         mExpandedViewPadding = expandedViewPadding;
         mLauncherGridDiff = 30f;
     }
@@ -136,18 +139,16 @@ public class ExpandedAnimationController
     /**
      * Update effective screen width based on current orientation.
      * @param orientation Landscape or portrait.
+     * @param displaySize Updated display size.
      */
-    public void updateOrientation(int orientation) {
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            mScreenWidth = mDisplaySize.y;
-        } else {
-            mScreenWidth = mDisplaySize.x;
-        }
+    public void updateOrientation(int orientation, Point displaySize) {
+        mScreenOrientation = orientation;
+        mDisplaySize = displaySize;
         if (mLayout != null) {
             Resources res = mLayout.getContext().getResources();
+            mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
             mStatusBarHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_height);
-            mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         }
     }
 
@@ -499,6 +500,50 @@ public class ExpandedAnimationController
         return getRowLeft() + bubbleFromRowLeft;
     }
 
+    /**
+     * When expanded, the bubbles are centered in the screen. In portrait, all available space is
+     * used. In landscape we have too much space so the value is restricted. This method accounts
+     * for window decorations (nav bar, cutouts).
+     *
+     * @return the desired width to display the expanded bubbles in.
+     */
+    private float getWidthForDisplayingBubbles() {
+        final float availableWidth = getAvailableScreenWidth(true /* includeStableInsets */);
+        if (mScreenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // display size y in landscape will be the smaller dimension of the screen
+            return Math.max(mDisplaySize.y, availableWidth * CENTER_BUBBLES_LANDSCAPE_PERCENT);
+        } else {
+            return availableWidth;
+        }
+    }
+
+    /**
+     * Determines the available screen width without the cutout.
+     *
+     * @param subtractStableInsets Whether or not stable insets should also be removed from the
+     *                            returned width.
+     * @return the total screen width available accounting for cutouts and insets,
+     * iff {@param includeStableInsets} is true.
+     */
+    private float getAvailableScreenWidth(boolean subtractStableInsets) {
+        float availableSize = mDisplaySize.x;
+        WindowInsets insets = mLayout != null ? mLayout.getRootWindowInsets() : null;
+        if (insets != null) {
+            int cutoutLeft = 0;
+            int cutoutRight = 0;
+            DisplayCutout cutout = insets.getDisplayCutout();
+            if (cutout != null) {
+                cutoutLeft = cutout.getSafeInsetLeft();
+                cutoutRight = cutout.getSafeInsetRight();
+            }
+            final int stableLeft = subtractStableInsets ? insets.getStableInsetLeft() : 0;
+            final int stableRight = subtractStableInsets ? insets.getStableInsetRight() : 0;
+            availableSize -= Math.max(stableLeft, cutoutLeft);
+            availableSize -= Math.max(stableRight, cutoutRight);
+        }
+        return availableSize;
+    }
+
     private float getRowLeft() {
         if (mLayout == null) {
             return 0;
@@ -510,9 +555,12 @@ public class ExpandedAnimationController
         final float totalGapWidth = (bubbleCount - 1) * getSpaceBetweenBubbles();
         final float rowWidth = totalGapWidth + totalBubbleWidth;
 
-        final float centerScreen = mScreenWidth / 2f;
+        // This display size we're using includes the size of the insets, we want the true
+        // center of the display minus the notch here, which means we should include the
+        // stable insets (e.g. status bar, nav bar) in this calculation.
+        final float trueCenter = getAvailableScreenWidth(false /* subtractStableInsets */) / 2f;
         final float halfRow = rowWidth / 2f;
-        final float rowLeft = centerScreen - halfRow;
+        final float rowLeft = trueCenter - halfRow;
 
         return rowLeft;
     }
@@ -530,7 +578,7 @@ public class ExpandedAnimationController
          *  Launcher's app icon grid edge that we must match
          */
         final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
-        final float maxRowWidth = mScreenWidth - rowMargins;
+        final float maxRowWidth = getWidthForDisplayingBubbles() - rowMargins;
 
         final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;
         final float totalGapWidth = maxRowWidth - totalBubbleWidth;
