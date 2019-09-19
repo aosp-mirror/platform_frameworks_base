@@ -9520,7 +9520,9 @@ package android.telephony.ims.stub {
     method public void acknowledgeSmsReport(int, int, int);
     method public String getSmsFormat();
     method public void onReady();
-    method public final void onSendSmsResult(int, int, int, int) throws java.lang.RuntimeException;
+    method @Deprecated public final void onSendSmsResult(int, int, int, int) throws java.lang.RuntimeException;
+    method public final void onSendSmsResultError(int, int, int, int, int) throws java.lang.RuntimeException;
+    method public final void onSendSmsResultSuccess(int, int) throws java.lang.RuntimeException;
     method public final void onSmsReceived(int, String, byte[]) throws java.lang.RuntimeException;
     method @Deprecated public final void onSmsStatusReportReceived(int, int, String, byte[]) throws java.lang.RuntimeException;
     method public final void onSmsStatusReportReceived(int, String, byte[]) throws java.lang.RuntimeException;
@@ -9529,6 +9531,7 @@ package android.telephony.ims.stub {
     field public static final int DELIVER_STATUS_ERROR_NO_MEMORY = 3; // 0x3
     field public static final int DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED = 4; // 0x4
     field public static final int DELIVER_STATUS_OK = 1; // 0x1
+    field public static final int RESULT_NO_NETWORK_ERROR = -1; // 0xffffffff
     field public static final int SEND_STATUS_ERROR = 2; // 0x2
     field public static final int SEND_STATUS_ERROR_FALLBACK = 4; // 0x4
     field public static final int SEND_STATUS_ERROR_RETRY = 3; // 0x3
