@@ -8674,6 +8674,7 @@ package android.telephony.ims {
     method public android.os.Bundle getCallExtras();
     method public int getCallType();
     method public static int getCallTypeFromVideoState(int);
+    method public int getCallerNumberVerificationStatus();
     method public int getEmergencyCallRouting();
     method public int getEmergencyServiceCategories();
     method @NonNull public java.util.List<java.lang.String> getEmergencyUrns();
@@ -8691,6 +8692,7 @@ package android.telephony.ims {
     method public void setCallExtraBoolean(String, boolean);
     method public void setCallExtraInt(String, int);
     method public void setCallRestrictCause(int);
+    method public void setCallerNumberVerificationStatus(int);
     method public void setEmergencyCallRouting(int);
     method public void setEmergencyCallTesting(boolean);
     method public void setEmergencyServiceCategories(int);
@@ -8741,6 +8743,9 @@ package android.telephony.ims {
     field public static final int SERVICE_TYPE_EMERGENCY = 2; // 0x2
     field public static final int SERVICE_TYPE_NONE = 0; // 0x0
     field public static final int SERVICE_TYPE_NORMAL = 1; // 0x1
+    field public static final int VERIFICATION_STATUS_FAILED = 2; // 0x2
+    field public static final int VERIFICATION_STATUS_NOT_VERIFIED = 0; // 0x0
+    field public static final int VERIFICATION_STATUS_PASSED = 1; // 0x1
   }
 
   public class ImsCallSessionListener {
