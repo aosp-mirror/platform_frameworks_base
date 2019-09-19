@@ -26,15 +26,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Trace;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-import java.util.Arrays;
 
 class Benchmark {
     // Time limit to run benchmarks in seconds
@@ -105,6 +101,22 @@ public class SystemServerBenchmarkActivity extends Activity {
         GridLayout benchmarkList = findViewById(R.id.benchmark_list);
 
         new Benchmark(benchmarkList, "Empty", () -> {
+        });
+
+        new Benchmark(benchmarkList, "CPU Intensive (1 thread)", () -> {
+            CPUIntensive.doSomeWork(1);
+        });
+
+        new Benchmark(benchmarkList, "CPU Intensive (2 thread)", () -> {
+            CPUIntensive.doSomeWork(2);
+        });
+
+        new Benchmark(benchmarkList, "CPU Intensive (4 thread)", () -> {
+            CPUIntensive.doSomeWork(4);
+        });
+
+        new Benchmark(benchmarkList, "CPU Intensive (8 thread)", () -> {
+            CPUIntensive.doSomeWork(8);
         });
 
         PackageManager pm = getPackageManager();
