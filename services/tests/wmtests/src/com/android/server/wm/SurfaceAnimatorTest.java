@@ -138,6 +138,19 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
+    public void testCancelWithNullFinishCallbackAnimation() {
+        SurfaceAnimator animator = new SurfaceAnimator(mAnimatable, null, mWm);
+        animator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        assertTrue(animator.isAnimating());
+        assertNotNull(animator.getAnimation());
+        animator.cancelAnimation();
+        assertFalse(animator.isAnimating());
+        assertNull(animator.getAnimation());
+        verify(mSpec).onAnimationCancelled(any());
+        verify(mTransaction).remove(eq(mAnimatable.mLeash));
+    }
+
+    @Test
     public void testDelayingAnimationStart() {
         mAnimatable.mSurfaceAnimator.startDelayingAnimationStart();
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
