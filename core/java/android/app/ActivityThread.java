@@ -4845,7 +4845,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         View.sDebugViewAttributesApplicationPackage = mCoreSettings.getString(
                 Settings.Global.DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE, "");
         String currentPackage = (mBoundApplication != null && mBoundApplication.appInfo != null)
-                ? mBoundApplication.appInfo.packageName : "";
+                ? mBoundApplication.appInfo.packageName : "<unknown-app>";
         View.sDebugViewAttributes =
                 mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0
                         || View.sDebugViewAttributesApplicationPackage.equals(currentPackage);
