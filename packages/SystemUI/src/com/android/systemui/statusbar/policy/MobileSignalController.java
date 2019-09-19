@@ -294,7 +294,8 @@ public class MobileSignalController extends SignalController<
             }
             boolean dataDisabled = mCurrentState.userSetup
                     && (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
-                    || mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA);
+                    || (mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA
+                            && mCurrentState.defaultDataOff));
             boolean noInternet = mCurrentState.inetCondition == 0;
             boolean cutOut = dataDisabled || noInternet;
             return SignalDrawable.getState(level, getNumLevels(), cutOut);
@@ -320,7 +321,7 @@ public class MobileSignalController extends SignalController<
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
         final boolean dataDisabled = (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
-                || mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA)
+                || (mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA))
                 && mCurrentState.userSetup;
 
         // Show icon in QS when we are connected or data is disabled.
@@ -484,6 +485,7 @@ public class MobileSignalController extends SignalController<
             Log.d(mTag, "updateTelephonySignalStrength: hasService=" +
                     Utils.isInService(mServiceState) + " ss=" + mSignalStrength);
         }
+        checkDefaultData();
         mCurrentState.connected = Utils.isInService(mServiceState)
                 && mSignalStrength != null;
         if (mCurrentState.connected) {
@@ -538,6 +540,23 @@ public class MobileSignalController extends SignalController<
             mCurrentState.networkNameData = mServiceState.getDataOperatorAlphaShort();
         }
 
+        notifyListenersIfNecessary();
+    }
+
+    /**
+     * If we are controlling the NOT_DEFAULT_DATA icon, check the status of the other one
+     */
+    private void checkDefaultData() {
+        if (mCurrentState.iconGroup != TelephonyIcons.NOT_DEFAULT_DATA) {
+            mCurrentState.defaultDataOff = false;
+            return;
+        }
+
+        mCurrentState.defaultDataOff = mNetworkController.isDataControllerDisabled();
+    }
+
+    void onMobileDataChanged() {
+        checkDefaultData();
         notifyListenersIfNecessary();
     }
 
@@ -617,7 +636,7 @@ public class MobileSignalController extends SignalController<
         return candidateIconGroup;
     }
 
-    private boolean isDataDisabled() {
+    boolean isDataDisabled() {
         return !mPhone.isDataCapable();
     }
 
@@ -750,6 +769,7 @@ public class MobileSignalController extends SignalController<
         boolean isDefault;
         boolean userSetup;
         boolean roaming;
+        boolean defaultDataOff;  // Tracks the on/off state of the defaultDataSubscription
 
         @Override
         public void copyFrom(State s) {
@@ -765,6 +785,7 @@ public class MobileSignalController extends SignalController<
             carrierNetworkChangeMode = state.carrierNetworkChangeMode;
             userSetup = state.userSetup;
             roaming = state.roaming;
+            defaultDataOff = state.defaultDataOff;
         }
 
         @Override
@@ -781,7 +802,8 @@ public class MobileSignalController extends SignalController<
             builder.append("airplaneMode=").append(airplaneMode).append(',');
             builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode)
                     .append(',');
-            builder.append("userSetup=").append(userSetup);
+            builder.append("userSetup=").append(userSetup).append(',');
+            builder.append("defaultDataOff=").append(defaultDataOff);
         }
 
         @Override
@@ -796,7 +818,8 @@ public class MobileSignalController extends SignalController<
                     && ((MobileState) o).carrierNetworkChangeMode == carrierNetworkChangeMode
                     && ((MobileState) o).userSetup == userSetup
                     && ((MobileState) o).isDefault == isDefault
-                    && ((MobileState) o).roaming == roaming;
+                    && ((MobileState) o).roaming == roaming
+                    && ((MobileState) o).defaultDataOff == defaultDataOff;
         }
     }
 }
