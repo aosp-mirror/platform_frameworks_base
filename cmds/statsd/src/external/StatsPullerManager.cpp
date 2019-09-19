@@ -17,12 +17,17 @@
 #define DEBUG false
 #include "Log.h"
 
+#include "StatsPullerManager.h"
+
 #include <android/os/IStatsCompanionService.h>
 #include <android/os/IStatsPullerCallback.h>
 #include <cutils/log.h>
 #include <math.h>
 #include <stdint.h>
+
 #include <algorithm>
+#include <iostream>
+
 #include "../StatsService.h"
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
@@ -32,12 +37,10 @@
 #include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
 #include "StatsCompanionServicePuller.h"
-#include "StatsPullerManager.h"
 #include "SubsystemSleepStatePuller.h"
+#include "SurfaceflingerStatsPuller.h"
 #include "TrainInfoPuller.h"
 #include "statslog.h"
-
-#include <iostream>
 
 using std::make_shared;
 using std::map;
@@ -266,6 +269,10 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // App ops
         {android::util::APP_OPS,
          {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
+        // SurfaceflingerStatsGlobalInfo
+        {android::util::SURFACEFLINGER_STATS_GLOBAL_INFO,
+         {.puller =
+                  new SurfaceflingerStatsPuller(android::util::SURFACEFLINGER_STATS_GLOBAL_INFO)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
