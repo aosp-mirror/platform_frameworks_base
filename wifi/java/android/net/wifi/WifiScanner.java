@@ -17,6 +17,7 @@
 package android.net.wifi;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -375,19 +376,27 @@ public class WifiScanner {
          */
         private int mBandScanned;
         /** all scan results discovered in this scan, sorted by timestamp in ascending order */
-        private ScanResult mResults[];
+        private final List<ScanResult> mResults;
 
-        ScanData() {}
+        ScanData() {
+            mResults = new ArrayList<>();
+        }
 
         public ScanData(int id, int flags, ScanResult[] results) {
             mId = id;
             mFlags = flags;
-            mResults = results;
+            mResults = new ArrayList<>(Arrays.asList(results));
         }
 
         /** {@hide} */
         public ScanData(int id, int flags, int bucketsScanned, int bandScanned,
                         ScanResult[] results) {
+            this(id, flags, bucketsScanned, bandScanned, new ArrayList<>(Arrays.asList(results)));
+        }
+
+        /** {@hide} */
+        public ScanData(int id, int flags, int bucketsScanned, int bandScanned,
+                        List<ScanResult> results) {
             mId = id;
             mFlags = flags;
             mBucketsScanned = bucketsScanned;
@@ -400,11 +409,9 @@ public class WifiScanner {
             mFlags = s.mFlags;
             mBucketsScanned = s.mBucketsScanned;
             mBandScanned = s.mBandScanned;
-            mResults = new ScanResult[s.mResults.length];
-            for (int i = 0; i < s.mResults.length; i++) {
-                ScanResult result = s.mResults[i];
-                ScanResult newResult = new ScanResult(result);
-                mResults[i] = newResult;
+            mResults = new ArrayList<>();
+            for (ScanResult scanResult : s.mResults) {
+                mResults.add(new ScanResult(scanResult));
             }
         }
 
@@ -427,7 +434,14 @@ public class WifiScanner {
         }
 
         public ScanResult[] getResults() {
-            return mResults;
+            return mResults.toArray(new ScanResult[0]);
+        }
+
+        /** {@hide} */
+        public void addResults(@NonNull ScanResult[] newResults) {
+            for (ScanResult result : newResults) {
+                mResults.add(new ScanResult(result));
+            }
         }
 
         /** Implement the Parcelable interface {@hide} */
@@ -437,19 +451,11 @@ public class WifiScanner {
 
         /** Implement the Parcelable interface {@hide} */
         public void writeToParcel(Parcel dest, int flags) {
-            if (mResults != null) {
-                dest.writeInt(mId);
-                dest.writeInt(mFlags);
-                dest.writeInt(mBucketsScanned);
-                dest.writeInt(mBandScanned);
-                dest.writeInt(mResults.length);
-                for (int i = 0; i < mResults.length; i++) {
-                    ScanResult result = mResults[i];
-                    result.writeToParcel(dest, flags);
-                }
-            } else {
-                dest.writeInt(0);
-            }
+            dest.writeInt(mId);
+            dest.writeInt(mFlags);
+            dest.writeInt(mBucketsScanned);
+            dest.writeInt(mBandScanned);
+            dest.writeParcelableList(mResults, 0);
         }
 
         /** Implement the Parcelable interface {@hide} */
@@ -460,11 +466,8 @@ public class WifiScanner {
                         int flags = in.readInt();
                         int bucketsScanned = in.readInt();
                         int bandScanned = in.readInt();
-                        int n = in.readInt();
-                        ScanResult results[] = new ScanResult[n];
-                        for (int i = 0; i < n; i++) {
-                            results[i] = ScanResult.CREATOR.createFromParcel(in);
-                        }
+                        List<ScanResult> results = new ArrayList<>();
+                        in.readParcelableList(results, ScanResult.class.getClassLoader());
                         return new ScanData(id, flags, bucketsScanned, bandScanned, results);
                     }
 
