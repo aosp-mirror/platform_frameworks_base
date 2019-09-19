@@ -206,6 +206,8 @@
   <java-symbol type="id" name="action3" />
   <java-symbol type="id" name="action4" />
   <java-symbol type="id" name="media_seamless" />
+  <java-symbol type="id" name="media_seamless_image" />
+  <java-symbol type="id" name="media_seamless_text" />
   <java-symbol type="id" name="notification_media_seekbar_container" />
   <java-symbol type="id" name="notification_media_content" />
   <java-symbol type="id" name="notification_media_progress" />

@@ -175,5 +175,9 @@
             android:contentDescription="@string/notification_appops_overlay_active"
             />
     </LinearLayout>
+    <include
+        layout="@layout/notification_material_media_transfer_action"
+        android:id="@+id/media_seamless"
+    />
 </NotificationHeaderView>
 

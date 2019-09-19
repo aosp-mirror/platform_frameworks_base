@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -54,6 +55,7 @@ public class NotificationHeaderView extends ViewGroup {
     private OnClickListener mExpandClickListener;
     private OnClickListener mAppOpsListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
+    private LinearLayout mTransferChip;
     private ImageView mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
@@ -116,6 +118,7 @@ public class NotificationHeaderView extends ViewGroup {
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mHeaderText = findViewById(com.android.internal.R.id.header_text);
         mSecondaryHeaderText = findViewById(com.android.internal.R.id.header_text_secondary);
+        mTransferChip = findViewById(com.android.internal.R.id.media_seamless);
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
@@ -148,9 +151,11 @@ public class NotificationHeaderView extends ViewGroup {
             int childHeightSpec = getChildMeasureSpec(wrapContentHeightSpec,
                     lp.topMargin + lp.bottomMargin, lp.height);
             child.measure(childWidthSpec, childHeightSpec);
+            // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps) {
+                    || child == mAppOps
+                    || child == mTransferChip) {
                 iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             } else {
                 totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
@@ -211,9 +216,11 @@ public class NotificationHeaderView extends ViewGroup {
             int layoutRight;
             int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
             int bottom = top + childHeight;
+            // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps) {
+                    || child == mAppOps
+                    || child == mTransferChip) {
                 if (end == getMeasuredWidth()) {
                     layoutRight = end - mContentEndMargin;
                 } else {
