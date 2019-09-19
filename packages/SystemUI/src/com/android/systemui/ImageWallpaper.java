@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.HandlerThread;
+import android.os.Trace;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.util.Size;
@@ -48,6 +49,7 @@ public class ImageWallpaper extends WallpaperService {
     private static final int DELAY_FINISH_RENDERING = 1000;
     private static final int INTERVAL_WAIT_FOR_RENDERING = 100;
     private static final int PATIENCE_WAIT_FOR_RENDERING = 10;
+    private static final boolean DEBUG = true;
     private HandlerThread mWorker;
 
     @Override
@@ -125,6 +127,10 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
             if (!mNeedTransition) return;
+            if (DEBUG) {
+                Log.d(TAG, "onAmbientModeChanged: inAmbient=" + inAmbientMode
+                        + ", duration=" + animationDuration);
+            }
             mWorker.getThreadHandler().post(
                     () -> mRenderer.updateAmbientMode(inAmbientMode, animationDuration));
             if (inAmbientMode && animationDuration == 0) {
@@ -184,14 +190,29 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
+            if (DEBUG) {
+                Log.d(TAG, "onSurfaceRedrawNeeded: mNeedRedraw=" + mNeedRedraw);
+            }
+
             mWorker.getThreadHandler().post(() -> {
                 if (mNeedRedraw) {
-                    preRender();
-                    requestRender();
-                    postRender();
+                    drawFrame();
                     mNeedRedraw = false;
                 }
             });
+        }
+
+        @Override
+        public void onVisibilityChanged(boolean visible) {
+            if (DEBUG) {
+                Log.d(TAG, "wallpaper visibility changes: " + visible);
+            }
+        }
+
+        private void drawFrame() {
+            preRender();
+            requestRender();
+            postRender();
         }
 
         @Override
@@ -205,7 +226,9 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void preRender() {
             // This method should only be invoked from worker thread.
+            Trace.beginSection("ImageWallpaper#preRender");
             preRenderInternal();
+            Trace.endSection();
         }
 
         private void preRenderInternal() {
@@ -240,7 +263,9 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void requestRender() {
             // This method should only be invoked from worker thread.
+            Trace.beginSection("ImageWallpaper#requestRender");
             requestRenderInternal();
+            Trace.endSection();
         }
 
         private void requestRenderInternal() {
@@ -263,8 +288,10 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void postRender() {
             // This method should only be invoked from worker thread.
+            Trace.beginSection("ImageWallpaper#postRender");
             notifyWaitingThread();
             scheduleFinishRendering();
+            Trace.endSection();
         }
 
         private void notifyWaitingThread() {
@@ -289,12 +316,14 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void finishRendering() {
+            Trace.beginSection("ImageWallpaper#finishRendering");
             if (mEglHelper != null) {
                 mEglHelper.destroyEglSurface();
                 if (!needPreserveEglContext()) {
                     mEglHelper.destroyEglContext();
                 }
             }
+            Trace.endSection();
         }
 
         private boolean needPreserveEglContext() {

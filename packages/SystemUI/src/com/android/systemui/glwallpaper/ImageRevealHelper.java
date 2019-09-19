@@ -19,6 +19,7 @@ package com.android.systemui.glwallpaper;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.util.Log;
 
 import com.android.systemui.Interpolators;
 
@@ -30,6 +31,7 @@ class ImageRevealHelper {
     private static final String TAG = ImageRevealHelper.class.getSimpleName();
     private static final float MAX_REVEAL = 0f;
     private static final float MIN_REVEAL = 1f;
+    private static final boolean DEBUG = true;
 
     private final ValueAnimator mAnimator;
     private final RevealStateListener mRevealListener;
@@ -57,6 +59,9 @@ class ImageRevealHelper {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!mIsCanceled && mRevealListener != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "transition end");
+                    }
                     mRevealListener.onRevealEnd();
                 }
                 mIsCanceled = false;
@@ -65,6 +70,9 @@ class ImageRevealHelper {
             @Override
             public void onAnimationStart(Animator animation) {
                 if (mRevealListener != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "transition start");
+                    }
                     mRevealListener.onRevealStart(true /* animate */);
                 }
             }
@@ -82,6 +90,9 @@ class ImageRevealHelper {
     }
 
     void updateAwake(boolean awake, long duration) {
+        if (DEBUG) {
+            Log.d(TAG, "updateAwake: awake=" + awake + ", duration=" + duration);
+        }
         mAwake = awake;
         mAnimator.setDuration(duration);
         if (duration == 0) {
