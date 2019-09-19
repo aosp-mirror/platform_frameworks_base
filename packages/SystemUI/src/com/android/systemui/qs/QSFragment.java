@@ -462,6 +462,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
         mPanelView.onQsHeightChanged();
+
+        // when we come back from customize update
+        if (!mQSCustomizer.isCustomizing()) {
+            mQSPanel.updateSettings();
+        }
     }
 
     /**
