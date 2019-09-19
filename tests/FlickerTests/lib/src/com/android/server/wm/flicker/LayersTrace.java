@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker;
 
-import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.surfaceflinger.nano.Layers.LayerProto;
 import android.surfaceflinger.nano.Layers.RectProto;
@@ -25,11 +24,14 @@ import android.surfaceflinger.nano.Layerstrace.LayersTraceFileProto;
 import android.surfaceflinger.nano.Layerstrace.LayersTraceProto;
 import android.util.SparseArray;
 
+import androidx.annotation.Nullable;
+
 import com.android.server.wm.flicker.Assertions.Result;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,7 +59,7 @@ public class LayersTrace {
      * @param data   binary proto data
      * @param source Path to source of data for additional debug information
      */
-    static LayersTrace parseFrom(byte[] data, Path source) {
+    public static LayersTrace parseFrom(byte[] data, Path source) {
         List<Entry> entries = new ArrayList<>();
         LayersTraceFileProto fileProto;
         try {
@@ -79,15 +81,15 @@ public class LayersTrace {
      *
      * @param data binary proto data
      */
-    static LayersTrace parseFrom(byte[] data) {
+    public static LayersTrace parseFrom(byte[] data) {
         return parseFrom(data, null);
     }
 
-    List<Entry> getEntries() {
+    public List<Entry> getEntries() {
         return mEntries;
     }
 
-    Entry getEntry(long timestamp) {
+    public Entry getEntry(long timestamp) {
         Optional<Entry> entry = mEntries.stream()
                 .filter(e -> e.getTimestamp() == timestamp)
                 .findFirst();
@@ -97,14 +99,14 @@ public class LayersTrace {
         return entry.get();
     }
 
-    Optional<Path> getSource() {
+    public Optional<Path> getSource() {
         return Optional.ofNullable(mSource);
     }
 
     /**
      * Represents a single Layer trace entry.
      */
-    static class Entry implements ITraceEntry {
+    public static class Entry implements ITraceEntry {
         private long mTimestamp;
         private List<Layer> mRootLayers; // hierarchical representation of layers
         private List<Layer> mFlattenedLayers = null;
@@ -117,7 +119,7 @@ public class LayersTrace {
         /**
          * Constructs the layer hierarchy from a flattened list of layers.
          */
-        static Entry fromFlattenedLayers(long timestamp, LayerProto[] protos) {
+        public static Entry fromFlattenedLayers(long timestamp, LayerProto[] protos) {
             SparseArray<Layer> layerMap = new SparseArray<>();
             ArrayList<Layer> orphans = new ArrayList<>();
             for (LayerProto proto : protos) {
@@ -181,7 +183,7 @@ public class LayersTrace {
         /**
          * Checks if a region specified by {@code testRect} is covered by all visible layers.
          */
-        Result coversRegion(Rect testRect) {
+        public Result coversRegion(Rect testRect) {
             String assertionName = "coversRegion";
             Collection<Layer> layers = asFlattenedLayers();
 
@@ -224,7 +226,7 @@ public class LayersTrace {
          * Checks if a layer with name {@code layerName} has a visible region
          * {@code expectedVisibleRegion}.
          */
-        Result hasVisibleRegion(String layerName, Rect expectedVisibleRegion) {
+        public Result hasVisibleRegion(String layerName, Rect expectedVisibleRegion) {
             String assertionName = "hasVisibleRegion";
             String reason = "Could not find " + layerName;
             for (Layer layer : asFlattenedLayers()) {
@@ -252,7 +254,7 @@ public class LayersTrace {
         /**
          * Checks if a layer with name {@code layerName} is visible.
          */
-        Result isVisible(String layerName) {
+        public Result isVisible(String layerName) {
             String assertionName = "isVisible";
             String reason = "Could not find " + layerName;
             for (Layer layer : asFlattenedLayers()) {
@@ -277,24 +279,27 @@ public class LayersTrace {
             return mTimestamp;
         }
 
-        List<Layer> getRootLayers() {
+        public List<Layer> getRootLayers() {
             return mRootLayers;
         }
 
-        List<Layer> asFlattenedLayers() {
+        /**
+         * Returns all layers as a flattened list using a depth first traversal.
+         */
+        public List<Layer> asFlattenedLayers() {
             if (mFlattenedLayers == null) {
-                mFlattenedLayers = new ArrayList<>();
+                mFlattenedLayers = new LinkedList<>();
                 ArrayList<Layer> pendingLayers = new ArrayList<>(this.mRootLayers);
                 while (!pendingLayers.isEmpty()) {
                     Layer layer = pendingLayers.remove(0);
                     mFlattenedLayers.add(layer);
-                    pendingLayers.addAll(layer.mChildren);
+                    pendingLayers.addAll(0, layer.mChildren);
                 }
             }
             return mFlattenedLayers;
         }
 
-        Rect getVisibleBounds(String layerName) {
+        public Rect getVisibleBounds(String layerName) {
             List<Layer> layers = asFlattenedLayers();
             for (Layer layer : layers) {
                 if (layer.mProto.name.contains(layerName) && layer.isVisible()) {
@@ -308,12 +313,12 @@ public class LayersTrace {
     /**
      * Represents a single layer with links to its parent and child layers.
      */
-    static class Layer {
+    public static class Layer {
         @Nullable
-        LayerProto mProto;
-        List<Layer> mChildren;
+        public LayerProto mProto;
+        public List<Layer> mChildren;
         @Nullable
-        Layer mParent = null;
+        public Layer mParent = null;
 
         private Layer(LayerProto proto) {
             this.mProto = proto;
@@ -328,16 +333,16 @@ public class LayersTrace {
             this.mParent = parentLayer;
         }
 
-        int getId() {
+        public int getId() {
             return mProto.id;
         }
 
-        boolean isActiveBufferEmpty() {
+        public boolean isActiveBufferEmpty() {
             return this.mProto.activeBuffer == null || this.mProto.activeBuffer.height == 0
                     || this.mProto.activeBuffer.width == 0;
         }
 
-        boolean isVisibleRegionEmpty() {
+        public boolean isVisibleRegionEmpty() {
             if (this.mProto.visibleRegion == null) {
                 return true;
             }
@@ -345,32 +350,35 @@ public class LayersTrace {
             return visibleRect.height() == 0 || visibleRect.width() == 0;
         }
 
-        boolean isHidden() {
+        public boolean isHidden() {
             return (this.mProto.flags & /* FLAG_HIDDEN */ 0x1) != 0x0;
         }
 
-        boolean isVisible() {
-            return (!isActiveBufferEmpty() || isColorLayer()) &&
-                    !isHidden() && this.mProto.color.a > 0 && !isVisibleRegionEmpty();
+        public boolean isVisible() {
+            return (!isActiveBufferEmpty() || isColorLayer())
+                    && !isHidden()
+                    && this.mProto.color != null
+                    && this.mProto.color.a > 0
+                    && !isVisibleRegionEmpty();
         }
 
-        boolean isColorLayer() {
+        public boolean isColorLayer() {
             return this.mProto.type.equals("ColorLayer");
         }
 
-        boolean isRootLayer() {
+        public boolean isRootLayer() {
             return mParent == null || mParent.mProto == null;
         }
 
-        boolean isInvisible() {
+        public boolean isInvisible() {
             return !isVisible();
         }
 
-        boolean isHiddenByParent() {
+        public boolean isHiddenByParent() {
             return !isRootLayer() && (mParent.isHidden() || mParent.isHiddenByParent());
         }
 
-        String getHiddenByParentReason() {
+        public String getHiddenByParentReason() {
             String reason = "Layer " + mProto.name;
             if (isHiddenByParent()) {
                 reason += " is hidden by parent: " + mParent.mProto.name;
@@ -380,7 +388,7 @@ public class LayersTrace {
             return reason;
         }
 
-        String getVisibilityReason() {
+        public String getVisibilityReason() {
             String reason = "Layer " + mProto.name;
             if (isVisible()) {
                 reason += " is visible:";
@@ -399,7 +407,7 @@ public class LayersTrace {
                 if (isHidden()) {
                     reason += " flags=" + this.mProto.flags + " (FLAG_HIDDEN set)";
                 }
-                if (this.mProto.color.a == 0) {
+                if (this.mProto.color == null || this.mProto.color.a == 0) {
                     reason += " color.a=0";
                 }
                 if (isVisibleRegionEmpty()) {

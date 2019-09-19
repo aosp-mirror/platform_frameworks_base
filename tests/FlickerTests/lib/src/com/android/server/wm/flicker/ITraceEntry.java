@@ -19,7 +19,7 @@ package com.android.server.wm.flicker;
 /**
  * Common interface for Layer and WindowManager trace entries.
  */
-interface ITraceEntry {
+public interface ITraceEntry {
     /**
      * @return timestamp of current entry
      */

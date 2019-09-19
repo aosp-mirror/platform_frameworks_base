@@ -16,10 +16,12 @@
 
 package com.android.server.wm.flicker;
 
-import android.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import static com.android.server.wm.flicker.monitor.ITransitionMonitor.OUTPUT_DIR;
+
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.server.wm.flicker.monitor.ITransitionMonitor;
@@ -89,7 +91,7 @@ import java.util.List;
  * }
  * </pre>
  */
-class TransitionRunner {
+public class TransitionRunner {
     private static final String TAG = "FLICKER";
     private final ScreenRecorder mScreenRecorder;
     private final WindowManagerTraceMonitor mWmTraceMonitor;
@@ -128,8 +130,12 @@ class TransitionRunner {
         mTestTag = builder.mTestTag;
     }
 
-    static TransitionBuilder newBuilder() {
-        return new TransitionBuilder();
+    public static TransitionBuilder newBuilder() {
+        return newBuilder(OUTPUT_DIR.toString());
+    }
+
+    public static TransitionBuilder newBuilder(String outputDir) {
+        return new TransitionBuilder(outputDir);
     }
 
     /**
@@ -138,7 +144,7 @@ class TransitionRunner {
      *
      * @return itself
      */
-    TransitionRunner run() {
+    public TransitionRunner run() {
         mResults = new ArrayList<>();
         mAllRunsMonitors.forEach(ITransitionMonitor::start);
         mBeforeAlls.forEach(Runnable::run);
@@ -159,8 +165,7 @@ class TransitionRunner {
         mAfterAlls.forEach(Runnable::run);
         mAllRunsMonitors.forEach(monitor -> {
             monitor.stop();
-            Path path = monitor.save(mTestTag);
-            Log.e(TAG, "Video saved to " + path.toString());
+            monitor.save(mTestTag);
         });
         return this;
     }
@@ -170,7 +175,7 @@ class TransitionRunner {
      *
      * @return list of transition results.
      */
-    List<TransitionResult> getResults() {
+    public List<TransitionResult> getResults() {
         if (mResults == null) {
             throw new IllegalStateException("Results do not exist!");
         }
@@ -182,7 +187,7 @@ class TransitionRunner {
      *
      * @return list of transition results.
      */
-    void deleteResults() {
+    public void deleteResults() {
         if (mResults == null) {
             return;
         }
@@ -228,33 +233,33 @@ class TransitionRunner {
     @VisibleForTesting
     public static class TransitionResult {
         @Nullable
-        final Path layersTrace;
+        public final Path layersTrace;
         @Nullable
-        final Path windowManagerTrace;
+        public final Path windowManagerTrace;
         @Nullable
-        final Path screenCaptureVideo;
+        public final Path screenCaptureVideo;
         private boolean flaggedForSaving;
 
-        TransitionResult(@Nullable Path layersTrace, @Nullable Path windowManagerTrace,
+        public TransitionResult(@Nullable Path layersTrace, @Nullable Path windowManagerTrace,
                 @Nullable Path screenCaptureVideo) {
             this.layersTrace = layersTrace;
             this.windowManagerTrace = windowManagerTrace;
             this.screenCaptureVideo = screenCaptureVideo;
         }
 
-        void flagForSaving() {
+        public void flagForSaving() {
             flaggedForSaving = true;
         }
 
-        boolean canDelete() {
+        public boolean canDelete() {
             return !flaggedForSaving;
         }
 
-        boolean layersTraceExists() {
+        public boolean layersTraceExists() {
             return layersTrace != null && layersTrace.toFile().exists();
         }
 
-        byte[] getLayersTrace() {
+        public byte[] getLayersTrace() {
             try {
                 return Files.toByteArray(this.layersTrace.toFile());
             } catch (IOException e) {
@@ -262,11 +267,11 @@ class TransitionRunner {
             }
         }
 
-        Path getLayersTracePath() {
+        public Path getLayersTracePath() {
             return layersTrace;
         }
 
-        boolean windowManagerTraceExists() {
+        public boolean windowManagerTraceExists() {
             return windowManagerTrace != null && windowManagerTrace.toFile().exists();
         }
 
@@ -278,19 +283,19 @@ class TransitionRunner {
             }
         }
 
-        Path getWindowManagerTracePath() {
+        public Path getWindowManagerTracePath() {
             return windowManagerTrace;
         }
 
-        boolean screenCaptureVideoExists() {
+        public boolean screenCaptureVideoExists() {
             return screenCaptureVideo != null && screenCaptureVideo.toFile().exists();
         }
 
-        Path screenCaptureVideoPath() {
+        public Path screenCaptureVideoPath() {
             return screenCaptureVideo;
         }
 
-        void delete() {
+        public void delete() {
             if (layersTraceExists()) layersTrace.toFile().delete();
             if (windowManagerTraceExists()) windowManagerTrace.toFile().delete();
             if (screenCaptureVideoExists()) screenCaptureVideo.toFile().delete();
@@ -300,7 +305,7 @@ class TransitionRunner {
     /**
      * Builds a {@link TransitionRunner} instance.
      */
-    static class TransitionBuilder {
+    public static class TransitionBuilder {
         private ScreenRecorder mScreenRecorder;
         private WindowManagerTraceMonitor mWmTraceMonitor;
         private LayersTraceMonitor mLayersTraceMonitor;
@@ -323,15 +328,15 @@ class TransitionRunner {
 
         private boolean mRecordAllRuns = false;
 
-        TransitionBuilder() {
+        public TransitionBuilder(String outputDir) {
             mScreenRecorder = new ScreenRecorder();
-            mWmTraceMonitor = new WindowManagerTraceMonitor();
-            mLayersTraceMonitor = new LayersTraceMonitor();
+            mWmTraceMonitor = new WindowManagerTraceMonitor(outputDir);
+            mLayersTraceMonitor = new LayersTraceMonitor(outputDir);
             mFrameStatsMonitor = new
                     WindowAnimationFrameStatsMonitor(InstrumentationRegistry.getInstrumentation());
         }
 
-        TransitionRunner build() {
+        public TransitionRunner build() {
             if (mCaptureWindowManagerTrace) {
                 mPerRunMonitors.add(mWmTraceMonitor);
             }
@@ -355,52 +360,52 @@ class TransitionRunner {
             return new TransitionRunner(this);
         }
 
-        TransitionBuilder runBeforeAll(Runnable runnable) {
+        public TransitionBuilder runBeforeAll(Runnable runnable) {
             mBeforeAlls.add(runnable);
             return this;
         }
 
-        TransitionBuilder runBefore(Runnable runnable) {
+        public TransitionBuilder runBefore(Runnable runnable) {
             mBefores.add(runnable);
             return this;
         }
 
-        TransitionBuilder run(Runnable runnable) {
+        public TransitionBuilder run(Runnable runnable) {
             mTransitions.add(runnable);
             return this;
         }
 
-        TransitionBuilder runAfter(Runnable runnable) {
+        public TransitionBuilder runAfter(Runnable runnable) {
             mAfters.add(runnable);
             return this;
         }
 
-        TransitionBuilder runAfterAll(Runnable runnable) {
+        public TransitionBuilder runAfterAll(Runnable runnable) {
             mAfterAlls.add(runnable);
             return this;
         }
 
-        TransitionBuilder repeat(int iterations) {
+        public TransitionBuilder repeat(int iterations) {
             mIterations = iterations;
             return this;
         }
 
-        TransitionBuilder skipWindowManagerTrace() {
+        public TransitionBuilder skipWindowManagerTrace() {
             mCaptureWindowManagerTrace = false;
             return this;
         }
 
-        TransitionBuilder skipLayersTrace() {
+        public TransitionBuilder skipLayersTrace() {
             mCaptureLayersTrace = false;
             return this;
         }
 
-        TransitionBuilder includeJankyRuns() {
+        public TransitionBuilder includeJankyRuns() {
             mRunJankFree = false;
             return this;
         }
 
-        TransitionBuilder recordEachRun() {
+        public TransitionBuilder recordEachRun() {
             if (mRecordAllRuns) {
                 throw new IllegalArgumentException("Invalid option with recordAllRuns");
             }
@@ -408,7 +413,7 @@ class TransitionRunner {
             return this;
         }
 
-        TransitionBuilder recordAllRuns() {
+        public TransitionBuilder recordAllRuns() {
             if (mRecordEachRun) {
                 throw new IllegalArgumentException("Invalid option with recordEachRun");
             }
@@ -416,7 +421,11 @@ class TransitionRunner {
             return this;
         }
 
-        TransitionBuilder withTag(String testTag) {
+        public TransitionBuilder withTag(String testTag) {
+            if (testTag.contains(" ")) {
+                throw new IllegalArgumentException("The test tag can not contain spaces since it "
+                        + "is a part of the file name");
+            }
             mTestTag = testTag;
             return this;
         }
