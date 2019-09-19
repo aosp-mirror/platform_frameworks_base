@@ -1017,20 +1017,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCancelImmediatelyAfterEnqueueNotifiesListeners_ForegroundServiceFlag()
-            throws Exception {
-        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        sbn.getNotification().flags =
-                Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE;
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
-                sbn.getId(), sbn.getNotification(), sbn.getUserId());
-        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
-        waitForIdle();
-        verify(mListeners, times(1)).notifyPostedLocked(any(), any());
-        verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), any());
-    }
-
-    @Test
     public void testUserInitiatedClearAll_noLeak() throws Exception {
         final NotificationRecord n = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
