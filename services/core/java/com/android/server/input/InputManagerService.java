@@ -47,6 +47,7 @@ import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -1787,6 +1788,12 @@ public class InputManagerService extends IInputManager.Stub
             args.arg1 = Boolean.valueOf((switchValues & SW_TABLET_MODE_BIT) != 0);
             mHandler.obtainMessage(MSG_DELIVER_TABLET_MODE_CHANGED,
                     args).sendToTarget();
+        }
+
+        if ((switchMask & SW_MUTE_DEVICE_BIT) != 0) {
+            final boolean micMute = ((switchValues & SW_MUTE_DEVICE_BIT) != 0);
+            AudioManager audioManager = mContext.getSystemService(AudioManager.class);
+            audioManager.setMicrophoneMuteFromSwitch(micMute);
         }
     }
 
