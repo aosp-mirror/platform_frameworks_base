@@ -595,6 +595,40 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    /**
+     * This method will update the flags of the summary.
+     * It will set it to FLAG_ONGOING_EVENT if any of its group members
+     * has the same flag. It will delete the flag otherwise
+     * @param userId user id of the autogroup summary
+     * @param pkg package of the autogroup summary
+     * @param needsOngoingFlag true if the group has at least one ongoing notification
+     */
+    @GuardedBy("mNotificationLock")
+    protected void updateAutobundledSummaryFlags(int userId, String pkg, boolean needsOngoingFlag) {
+        ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
+        if (summaries == null) {
+            return;
+        }
+        String summaryKey = summaries.get(pkg);
+        if (summaryKey == null) {
+            return;
+        }
+        NotificationRecord summary = mNotificationsByKey.get(summaryKey);
+        if (summary == null) {
+            return;
+        }
+        int oldFlags = summary.sbn.getNotification().flags;
+        if (needsOngoingFlag) {
+            summary.sbn.getNotification().flags |= FLAG_ONGOING_EVENT;
+        } else {
+            summary.sbn.getNotification().flags &= ~FLAG_ONGOING_EVENT;
+        }
+
+        if (summary.sbn.getNotification().flags != oldFlags) {
+            mHandler.post(new EnqueueNotificationRunnable(userId, summary));
+        }
+    }
+
     private void allowDndPackage(String packageName) {
         try {
             getBinderService().setNotificationPolicyAccessGranted(packageName, true);
@@ -1948,7 +1982,6 @@ public class NotificationManagerService extends SystemService {
                 });
     }
 
-
     private GroupHelper getGroupHelper() {
         mAutoGroupAtCount =
                 getContext().getResources().getInteger(R.integer.config_autoGroupAtCount);
@@ -1976,6 +2009,15 @@ public class NotificationManagerService extends SystemService {
             public void removeAutoGroupSummary(int userId, String pkg) {
                 synchronized (mNotificationLock) {
                     clearAutogroupSummaryLocked(userId, pkg);
+                }
+            }
+
+            @Override
+            public void updateAutogroupSummary(String key, boolean needsOngoingFlag) {
+                synchronized (mNotificationLock) {
+                    NotificationRecord r = mNotificationsByKey.get(key);
+                    updateAutobundledSummaryFlags(r.getUser().getIdentifier(),
+                            r.sbn.getPackageName(), needsOngoingFlag);
                 }
             }
         });
@@ -5792,6 +5834,10 @@ public class NotificationManagerService extends SystemService {
                                             n, hasAutoGroupSummaryLocked(n));
                                 }
                             });
+                        } else if (oldSbn != null) {
+                            final NotificationRecord finalRecord = r;
+                            mHandler.post(() -> mGroupHelper.onNotificationUpdated(
+                                    finalRecord.sbn, hasAutoGroupSummaryLocked(n)));
                         }
                     } else {
                         Slog.e(TAG, "Not posting notification without small icon: " + notification);
