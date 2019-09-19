@@ -37,7 +37,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
@@ -1582,7 +1582,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int USER_RUNTIME_GRANT_MASK =
             FLAG_PERMISSION_USER_SET
             | FLAG_PERMISSION_USER_FIXED
-            | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+            | FLAG_PERMISSION_REVOKED_COMPAT;
 
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
