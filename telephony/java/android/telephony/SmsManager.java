@@ -1916,6 +1916,14 @@ public final class SmsManager {
      */
     public boolean isImsSmsSupported() {
         boolean boSupported = false;
+        final Context mContext = ActivityThread.currentApplication().getApplicationContext();
+        boolean mSmsCapable = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sms_capable);
+        if (!mSmsCapable) {
+            Log.d(TAG, "isImsSmsSupported: false");
+            return false;
+        }
+
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
