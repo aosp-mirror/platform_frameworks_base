@@ -1997,7 +1997,6 @@ public final class ViewRootImpl implements ViewParent,
         mIsInTraversal = true;
         mWillDrawSoon = true;
         boolean windowSizeMayChange = false;
-        final boolean windowAttributesChanged = mWindowAttributesChanged;
         WindowManager.LayoutParams lp = mWindowAttributes;
 
         int desiredWindowWidth;
@@ -2014,10 +2013,6 @@ public final class ViewRootImpl implements ViewParent,
                 ((mViewVisibility == View.VISIBLE) != (viewVisibility == View.VISIBLE));
 
         WindowManager.LayoutParams params = null;
-        if (mWindowAttributesChanged) {
-            mWindowAttributesChanged = false;
-            params = lp;
-        }
         CompatibilityInfo compatibilityInfo =
                 mDisplay.getDisplayAdjustments().getCompatibilityInfo();
         if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
@@ -2194,16 +2189,6 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (params != null) {
-            if ((host.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) != 0) {
-                if (!PixelFormat.formatHasAlpha(params.format)) {
-                    params.format = PixelFormat.TRANSLUCENT;
-                }
-            }
-            mAttachInfo.mOverscanRequested = (params.flags
-                    & WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN) != 0;
-        }
-
         if (mApplyInsetsRequested) {
             mApplyInsetsRequested = false;
             mLastOverscanRequested = mAttachInfo.mOverscanRequested;
@@ -2258,6 +2243,21 @@ public final class ViewRootImpl implements ViewParent,
         boolean surfaceDestroyed = false;
         /* True if surface generation id changes. */
         boolean surfaceReplaced = false;
+
+        final boolean windowAttributesChanged = mWindowAttributesChanged;
+        if (windowAttributesChanged) {
+            mWindowAttributesChanged = false;
+            params = lp;
+        }
+
+        if (params != null) {
+            if ((host.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) != 0
+                    && !PixelFormat.formatHasAlpha(params.format)) {
+                params.format = PixelFormat.TRANSLUCENT;
+            }
+            mAttachInfo.mOverscanRequested =
+                    (params.flags & WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN) != 0;
+        }
 
         if (mFirst || windowShouldResize || insetsChanged ||
                 viewVisibilityChanged || params != null || mForceNextWindowRelayout) {
