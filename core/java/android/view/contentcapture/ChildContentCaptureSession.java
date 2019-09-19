@@ -89,6 +89,11 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    public void internalNotifySessionLifecycle(boolean started) {
+        getMainCaptureSession().notifySessionLifecycle(mId, started);
+    }
+
+    @Override
     boolean isContentCaptureEnabled() {
         return getMainCaptureSession().isContentCaptureEnabled();
     }

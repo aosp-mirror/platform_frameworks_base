@@ -583,6 +583,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    public void internalNotifySessionLifecycle(boolean started) {
+        notifySessionLifecycle(mId, started);
+    }
+
+    @Override
     boolean isContentCaptureEnabled() {
         return super.isContentCaptureEnabled() && mManager.isContentCaptureEnabled();
     }
@@ -637,10 +642,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH);
     }
 
-    /** Public because is also used by ViewRootImpl */
-    public void notifySessionLifecycle(boolean started) {
+    void notifySessionLifecycle(int sessionId, boolean started) {
         final int type = started ? TYPE_SESSION_RESUMED : TYPE_SESSION_PAUSED;
-        sendEvent(new ContentCaptureEvent(mId, type), FORCE_FLUSH);
+        sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH);
     }
 
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
