@@ -5265,6 +5265,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Inform checkpointing systems of success
         try {
+            // This line is needed to CTS test for the correct exception handling
+            // See b/138952436#comment36 for context
+            Slog.i(TAG, "About to commit checkpoint");
             IStorageManager storageManager = PackageHelper.getStorageManager();
             storageManager.commitChanges();
         } catch (Exception e) {
