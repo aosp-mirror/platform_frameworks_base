@@ -396,6 +396,22 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
+    /**
+     * Indicates that the provided display is no longer in use and should be cleaned up.
+     *
+     * @param displayId the id of the display to clean up.
+     */
+    void notifyDisplayEmpty(int displayId) {
+        for (Bubble b : mBubbles) {
+            if (b.getDisplayId() == displayId) {
+                if (b.getExpandedView() != null) {
+                    b.getExpandedView().notifyDisplayEmpty();
+                }
+                return;
+            }
+        }
+    }
+
     private void dispatchPendingChanges() {
         if (mListener != null && mStateChange.anythingChanged()) {
             mListener.applyUpdate(mStateChange);

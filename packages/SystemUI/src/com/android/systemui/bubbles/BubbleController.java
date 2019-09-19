@@ -558,7 +558,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
                 // Need to check for !appCancel here because the notification may have
                 // previously been dismissed & entry.isRowDismissed would still be true
-                boolean userRemovedNotif = (entry.isRowDismissed() && !isAppCancel)
+                boolean userRemovedNotif = (entry != null && entry.isRowDismissed() && !isAppCancel)
                         || isClearAll || isUserDimiss || isSummaryCancel;
 
                 if (isSummaryOfBubbles) {
@@ -568,7 +568,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // The bubble notification sticks around in the data as long as the bubble is
                 // not dismissed and the app hasn't cancelled the notification.
                 Bubble bubble = mBubbleData.getBubbleWithKey(key);
-                boolean bubbleExtended = entry.isBubble() && userRemovedNotif;
+                boolean bubbleExtended = entry != null && entry.isBubble() && userRemovedNotif;
                 if (bubbleExtended) {
                     bubble.setShowInShadeWhenBubble(false);
                     bubble.setShowBubbleDot(false);
@@ -577,7 +577,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                     mNotificationEntryManager.updateNotifications();
                     return true;
-                } else if (!userRemovedNotif) {
+                } else if (!userRemovedNotif && entry != null) {
                     // This wasn't a user removal so we should remove the bubble as well
                     mBubbleData.notificationEntryRemoved(entry, DISMISS_NOTIF_CANCEL);
                     return false;
@@ -937,13 +937,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             final Bubble expandedBubble = mStackView != null
                     ? mStackView.getExpandedBubble()
                     : null;
-            if (expandedBubble == null) {
-                return;
-            }
-            if (expandedBubble.getDisplayId() == displayId) {
+            int expandedId = expandedBubble != null ? expandedBubble.getDisplayId() : -1;
+            if (mStackView != null && mStackView.isExpanded() && expandedId == displayId) {
                 mBubbleData.setExpanded(false);
-                expandedBubble.getExpandedView().notifyDisplayEmpty();
             }
+            mBubbleData.notifyDisplayEmpty(displayId);
         }
     }
 
