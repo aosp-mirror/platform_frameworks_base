@@ -45,6 +45,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.StatsLog;
 import android.view.Choreographer;
+import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -340,7 +341,8 @@ public class BubbleStackView extends FrameLayout {
 
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getSize(mDisplaySize);
+        // We use the real size & subtract screen decorations / window insets ourselves when needed
+        wm.getDefaultDisplay().getRealSize(mDisplaySize);
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -417,7 +419,35 @@ public class BubbleStackView extends FrameLayout {
 
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    mExpandedAnimationController.updateOrientation(mOrientation);
+                    mExpandedAnimationController.updateOrientation(mOrientation, mDisplaySize);
+                    mStackAnimationController.updateOrientation(mOrientation);
+
+                    // Reposition & adjust the height for new orientation
+                    if (mIsExpanded) {
+                        mExpandedViewContainer.setTranslationY(getExpandedViewY());
+                        mExpandedBubble.getExpandedView().updateView();
+                    }
+
+                    // Need to update the padding around the view
+                    WindowInsets insets = getRootWindowInsets();
+                    int leftPadding = mExpandedViewPadding;
+                    int rightPadding = mExpandedViewPadding;
+                    if (insets != null) {
+                        // Can't have the expanded view overlaying notches
+                        int cutoutLeft = 0;
+                        int cutoutRight = 0;
+                        DisplayCutout cutout = insets.getDisplayCutout();
+                        if (cutout != null) {
+                            cutoutLeft = cutout.getSafeInsetLeft();
+                            cutoutRight = cutout.getSafeInsetRight();
+                        }
+                        // Or overlaying nav or status bar
+                        leftPadding += Math.max(cutoutLeft, insets.getStableInsetLeft());
+                        rightPadding += Math.max(cutoutRight, insets.getStableInsetRight());
+                    }
+                    mExpandedViewContainer.setPadding(leftPadding, mExpandedViewPadding,
+                            rightPadding, mExpandedViewPadding);
+
                     if (mIsExpanded) {
                         // Re-draw bubble row and pointer for new orientation.
                         mExpandedAnimationController.expandFromStack(() -> {
@@ -487,6 +517,11 @@ public class BubbleStackView extends FrameLayout {
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
     public void onOrientationChanged(int orientation) {
         mOrientation = orientation;
+
+        // Display size is based on the rotation device was in when requested, we should update it
+        // We use the real size & subtract screen decorations / window insets ourselves when needed
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        wm.getDefaultDisplay().getRealSize(mDisplaySize);
 
         // Some resources change depending on orientation
         Resources res = getContext().getResources();
@@ -1584,11 +1619,9 @@ public class BubbleStackView extends FrameLayout {
         int index = getBubbleIndex(expandedBubble);
         float bubbleLeftFromScreenLeft = mExpandedAnimationController.getBubbleLeft(index);
         float halfBubble = mBubbleSize / 2f;
-
-        // Bubbles live in expanded view container (x includes expanded view padding).
-        // Pointer lives in expanded view, which has padding (x does not include padding).
-        // Remove padding when deriving pointer location from bubbles.
-        float bubbleCenter = bubbleLeftFromScreenLeft + halfBubble - mExpandedViewPadding;
+        float bubbleCenter = bubbleLeftFromScreenLeft + halfBubble;
+        // Padding might be adjusted for insets, so get it directly from the view
+        bubbleCenter -= mExpandedViewContainer.getPaddingLeft();
 
         expandedBubble.getExpandedView().setPointerPosition(bubbleCenter);
     }
