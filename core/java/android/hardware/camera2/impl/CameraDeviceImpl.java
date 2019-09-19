@@ -2338,6 +2338,12 @@ public class CameraDeviceImpl extends CameraDevice
             final CaptureCallbackHolder holder =
                     CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);
 
+            if (holder == null) {
+                Log.e(TAG, String.format("Receive capture error on unknown request ID %d",
+                        requestId));
+                return;
+            }
+
             final CaptureRequest request = holder.getRequest(subsequenceId);
 
             Runnable failureDispatch = null;
