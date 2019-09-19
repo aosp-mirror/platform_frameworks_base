@@ -48,7 +48,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -61,8 +60,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseSetArray;
 import android.view.Display;
-import android.view.IPinnedStackController;
-import android.view.IPinnedStackListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -76,6 +73,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.PinnedStackListenerForwarder;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -997,32 +995,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /** PinnedStackListener that dispatches IME visibility updates to the stack. */
-    private class BubblesImeListener extends IPinnedStackListener.Stub {
-
-        @Override
-        public void onListenerRegistered(IPinnedStackController controller) throws RemoteException {
-        }
-
-        @Override
-        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
-                int displayRotation) throws RemoteException {}
-
+    private class BubblesImeListener extends PinnedStackListenerForwarder.PinnedStackListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             if (mStackView != null && mStackView.getBubbleCount() > 0) {
                 mStackView.post(() -> mStackView.onImeVisibilityChanged(imeVisible, imeHeight));
             }
         }
-
-        @Override
-        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight)
-                throws RemoteException {}
-
-        @Override
-        public void onMinimizedStateChanged(boolean isMinimized) throws RemoteException {}
-
-        @Override
-        public void onActionsChanged(ParceledListSlice actions) throws RemoteException {}
     }
 }
