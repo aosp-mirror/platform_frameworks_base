@@ -38,11 +38,11 @@ public class AssertionsChecker<T extends ITraceEntry> {
     private AssertionOption mOption = AssertionOption.NONE;
     private List<NamedAssertion<T>> mAssertions = new LinkedList<>();
 
-    void add(Assertions.TraceAssertion<T> assertion, String name) {
+    public void add(Assertions.TraceAssertion<T> assertion, String name) {
         mAssertions.add(new NamedAssertion<>(assertion, name));
     }
 
-    void filterByRange(long startTime, long endTime) {
+    public void filterByRange(long startTime, long endTime) {
         mFilterEntriesByRange = true;
         mFilterStartTime = startTime;
         mFilterEndTime = endTime;
@@ -75,7 +75,7 @@ public class AssertionsChecker<T extends ITraceEntry> {
      * @param entries list of entries to perform assertions on
      * @return list of failed assertion results
      */
-    List<Result> test(List<T> entries) {
+    public List<Result> test(List<T> entries) {
         List<T> filteredEntries;
         List<Result> failures;
 

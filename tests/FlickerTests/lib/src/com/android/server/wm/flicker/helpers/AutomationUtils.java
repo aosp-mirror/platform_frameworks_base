@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker;
+package com.android.server.wm.flicker.helpers;
 
 import static android.os.SystemClock.sleep;
 import static android.system.helpers.OverviewHelper.isRecentsInLauncher;
@@ -44,6 +44,8 @@ import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.wm.flicker.WindowUtils;
+
 /**
  * Collection of UI Automation helper functions.
  */
@@ -70,14 +72,14 @@ public class AutomationUtils {
      * This removes some delays when using the UIAutomator library required to create fast UI
      * transitions.
      */
-    static void setFastWait() {
+    public static void setFastWait() {
         Configurator.getInstance().setWaitForIdleTimeout(0);
     }
 
     /**
      * Reverts {@link android.app.UiAutomation#waitForIdle(long, long)} to default behavior.
      */
-    static void setDefaultWait() {
+    public static void setDefaultWait() {
         Configurator.getInstance().setWaitForIdleTimeout(10000);
     }
 
@@ -124,7 +126,7 @@ public class AutomationUtils {
         device.waitForIdle();
     }
 
-    static void clearRecents(UiDevice device) {
+    public static void clearRecents(UiDevice device) {
         if (isQuickstepEnabled(device)) {
             openQuickstep(device);
 
@@ -201,7 +203,7 @@ public class AutomationUtils {
         sleep(2000);
     }
 
-    static void resizeSplitScreen(UiDevice device, Rational windowHeightRatio) {
+    public static void resizeSplitScreen(UiDevice device, Rational windowHeightRatio) {
         BySelector dividerSelector = By.res(SYSTEMUI_PACKAGE, "docked_divider_handle");
         UiObject2 divider = device.wait(Until.findObject(dividerSelector), FIND_TIMEOUT);
         assertNotNull("Unable to find Split screen divider", divider);
@@ -218,7 +220,7 @@ public class AutomationUtils {
         sleep(2000);
     }
 
-    static void closePipWindow(UiDevice device) {
+    public static void closePipWindow(UiDevice device) {
         UiObject2 pipWindow = device.findObject(
                 By.res(SYSTEMUI_PACKAGE, "background"));
         pipWindow.click();
@@ -229,7 +231,7 @@ public class AutomationUtils {
         sleep(2000);
     }
 
-    static void expandPipWindow(UiDevice device) {
+    public static void expandPipWindow(UiDevice device) {
         UiObject2 pipWindow = device.findObject(
                 By.res(SYSTEMUI_PACKAGE, "background"));
         pipWindow.click();
