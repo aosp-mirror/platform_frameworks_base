@@ -2205,6 +2205,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         synchronized(mLock) {
             final UserState userState = getUserStateLocked(mCurrentUserId);
+            if (userState.mServiceToEnableWithShortcut == null) {
+                return null;
+            }
             return userState.mServiceToEnableWithShortcut.flattenToString();
         }
     }
