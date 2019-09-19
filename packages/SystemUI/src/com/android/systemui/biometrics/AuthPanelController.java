@@ -90,18 +90,19 @@ public class AuthPanelController extends ViewOutlineProvider {
             return;
         }
 
+        final int margin = mUseFullScreen ? 0 : (int) mContext.getResources()
+                .getDimension(R.dimen.biometric_dialog_border_padding);
+        final float cornerRadius = mUseFullScreen ? 0 : mContext.getResources()
+                .getDimension(R.dimen.biometric_dialog_corner_size);
+
         if (animateDurationMs > 0) {
             // Animate margin
-            final int margin = mUseFullScreen ? 0 : (int) mContext.getResources()
-                    .getDimension(R.dimen.biometric_dialog_border_padding);
             ValueAnimator marginAnimator = ValueAnimator.ofInt(mMargin, margin);
             marginAnimator.addUpdateListener((animation) -> {
                 mMargin = (int) animation.getAnimatedValue();
             });
 
             // Animate corners
-            final float cornerRadius = mUseFullScreen ? 0 : mContext.getResources()
-                    .getDimension(R.dimen.biometric_dialog_corner_size);
             ValueAnimator cornerAnimator = ValueAnimator.ofFloat(mCornerRadius, cornerRadius);
             cornerAnimator.addUpdateListener((animation) -> {
                 mCornerRadius = (float) animation.getAnimatedValue();
@@ -127,6 +128,8 @@ public class AuthPanelController extends ViewOutlineProvider {
             as.playTogether(cornerAnimator, heightAnimator, widthAnimator, marginAnimator);
             as.start();
         } else {
+            mMargin = margin;
+            mCornerRadius = cornerRadius;
             mContentWidth = contentWidth;
             mContentHeight = contentHeight;
             mPanelView.invalidateOutline();

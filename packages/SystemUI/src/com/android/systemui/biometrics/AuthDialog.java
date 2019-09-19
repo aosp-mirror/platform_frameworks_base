@@ -31,6 +31,8 @@ import java.lang.annotation.RetentionPolicy;
 public interface AuthDialog {
 
     String KEY_CONTAINER_STATE = "container_state";
+    String KEY_BIOMETRIC_SHOWING = "biometric_showing";
+    String KEY_CREDENTIAL_SHOWING = "credential_showing";
 
     String KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY = "try_agian_visibility";
     String KEY_BIOMETRIC_STATE = "state";

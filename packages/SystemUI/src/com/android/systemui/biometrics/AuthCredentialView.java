@@ -57,6 +57,8 @@ public class AuthCredentialView extends LinearLayout {
     private Callback mCallback;
     private ErrorTimer mErrorTimer;
     private Bundle mBiometricPromptBundle;
+    private AuthPanelController mPanelController;
+    private boolean mShouldAnimatePanel;
 
     private TextView mTitleView;
     private TextView mSubtitleView;
@@ -213,6 +215,11 @@ public class AuthCredentialView extends LinearLayout {
         mBiometricPromptBundle = bundle;
     }
 
+    void setPanelController(AuthPanelController panelController, boolean animatePanel) {
+        mPanelController = panelController;
+        mShouldAnimatePanel = animatePanel;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -256,6 +263,19 @@ public class AuthCredentialView extends LinearLayout {
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
         mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(mUserId));
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        if (mShouldAnimatePanel) {
+            // Credential view is always full screen.
+            mPanelController.setUseFullScreen(true);
+            mPanelController.updateForContentDimensions(mPanelController.getContainerWidth(),
+                    mPanelController.getContainerHeight(), 0 /* animateDurationMs */);
+            mShouldAnimatePanel = false;
+        }
     }
 
 }

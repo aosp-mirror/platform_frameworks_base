@@ -312,7 +312,7 @@ public class AuthControllerTest extends SysuiTestCase {
         @Override
         protected AuthDialog buildDialog(Bundle biometricPromptBundle,
                 boolean requireConfirmation, int userId, int type, String opPackageName,
-                boolean skipIntro) {
+                boolean skipIntro, @AuthContainerView.Builder.InitialView int initialView) {
             AuthDialog dialog;
             if (mBuildCount == 0) {
                 dialog = mDialog1;
