@@ -30,6 +30,14 @@ import java.util.function.Consumer;
  */
 public class SyncRtSurfaceTransactionApplier {
 
+    public static final int FLAG_ALL = 0xffffffff;
+    public static final int FLAG_ALPHA = 1;
+    public static final int FLAG_MATRIX = 1 << 1;
+    public static final int FLAG_WINDOW_CROP = 1 << 2;
+    public static final int FLAG_LAYER = 1 << 3;
+    public static final int FLAG_CORNER_RADIUS = 1 << 4;
+    public static final int FLAG_VISIBILITY = 1 << 5;
+
     private final Surface mTargetSurface;
     private final ViewRootImpl mTargetViewRootImpl;
     private final float[] mTmpFloat9 = new float[9];
@@ -72,15 +80,27 @@ public class SyncRtSurfaceTransactionApplier {
     }
 
     public static void applyParams(Transaction t, SurfaceParams params, float[] tmpFloat9) {
-        t.setMatrix(params.surface, params.matrix, tmpFloat9);
-        t.setWindowCrop(params.surface, params.windowCrop);
-        t.setAlpha(params.surface, params.alpha);
-        t.setLayer(params.surface, params.layer);
-        t.setCornerRadius(params.surface, params.cornerRadius);
-        if (params.visible) {
-            t.show(params.surface);
-        } else {
-            t.hide(params.surface);
+        if ((params.flags & FLAG_MATRIX) != 0) {
+            t.setMatrix(params.surface, params.matrix, tmpFloat9);
+        }
+        if ((params.flags & FLAG_WINDOW_CROP) != 0) {
+            t.setWindowCrop(params.surface, params.windowCrop);
+        }
+        if ((params.flags & FLAG_ALPHA) != 0) {
+            t.setAlpha(params.surface, params.alpha);
+        }
+        if ((params.flags & FLAG_LAYER) != 0) {
+            t.setLayer(params.surface, params.layer);
+        }
+        if ((params.flags & FLAG_CORNER_RADIUS) != 0) {
+            t.setCornerRadius(params.surface, params.cornerRadius);
+        }
+        if ((params.flags & FLAG_VISIBILITY) != 0) {
+            if (params.visible) {
+                t.show(params.surface);
+            } else {
+                t.hide(params.surface);
+            }
         }
     }
 
@@ -115,17 +135,95 @@ public class SyncRtSurfaceTransactionApplier {
 
     public static class SurfaceParams {
 
-        /**
-         * Constructs surface parameters to be applied when the current view state gets pushed to
-         * RenderThread.
-         *
-         * @param surface The surface to modify.
-         * @param alpha Alpha to apply.
-         * @param matrix Matrix to apply.
-         * @param windowCrop Crop to apply.
-         */
-        public SurfaceParams(SurfaceControl surface, float alpha, Matrix matrix,
+        public static class Builder {
+            final SurfaceControl surface;
+            int flags;
+            float alpha;
+            float cornerRadius;
+            Matrix matrix;
+            Rect windowCrop;
+            int layer;
+            boolean visible;
+
+            /**
+             * @param surface The surface to modify.
+             */
+            public Builder(SurfaceControl surface) {
+                this.surface = surface;
+            }
+
+            /**
+             * @param alpha The alpha value to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withAlpha(float alpha) {
+                this.alpha = alpha;
+                flags |= FLAG_ALPHA;
+                return this;
+            }
+
+            /**
+             * @param matrix The matrix to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withMatrix(Matrix matrix) {
+                this.matrix = matrix;
+                flags |= FLAG_MATRIX;
+                return this;
+            }
+
+            /**
+             * @param windowCrop The window crop to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withWindowCrop(Rect windowCrop) {
+                this.windowCrop = windowCrop;
+                flags |= FLAG_WINDOW_CROP;
+                return this;
+            }
+
+            /**
+             * @param layer The layer to assign the surface.
+             * @return this Builder
+             */
+            public Builder withLayer(int layer) {
+                this.layer = layer;
+                flags |= FLAG_LAYER;
+                return this;
+            }
+
+            /**
+             * @param radius the Radius for rounded corners to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withCornerRadius(float radius) {
+                this.cornerRadius = radius;
+                flags |= FLAG_CORNER_RADIUS;
+                return this;
+            }
+
+            /**
+             * @param visible The visibility to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withVisibility(boolean visible) {
+                this.visible = visible;
+                flags |= FLAG_VISIBILITY;
+                return this;
+            }
+
+            /**
+             * @return a new SurfaceParams instance
+             */
+            public SurfaceParams build() {
+                return new SurfaceParams(surface, flags, alpha, matrix, windowCrop, layer,
+                        cornerRadius, visible);
+            }
+        }
+
+        private SurfaceParams(SurfaceControl surface, int params, float alpha, Matrix matrix,
                 Rect windowCrop, int layer, float cornerRadius, boolean visible) {
+            this.flags = params;
             this.surface = surface;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
@@ -134,6 +232,36 @@ public class SyncRtSurfaceTransactionApplier {
             this.cornerRadius = cornerRadius;
             this.visible = visible;
         }
+
+
+        /**
+         * Constructs surface parameters to be applied when the current view state gets pushed to
+         * RenderThread.
+         *
+         * @param surface The surface to modify.
+         * @param alpha Alpha to apply.
+         * @param matrix Matrix to apply.
+         * @param windowCrop Crop to apply.
+         * @param layer The layer to apply.
+         * @param cornerRadius The corner radius to apply.
+         * @param visible The visibility to apply.
+         *
+         * @deprecated Use {@link SurfaceParams.Builder} to create an instance.
+         */
+        @Deprecated
+        public SurfaceParams(SurfaceControl surface, float alpha, Matrix matrix,
+                Rect windowCrop, int layer, float cornerRadius, boolean visible) {
+            this.flags = FLAG_ALL;
+            this.surface = surface;
+            this.alpha = alpha;
+            this.matrix = new Matrix(matrix);
+            this.windowCrop = new Rect(windowCrop);
+            this.layer = layer;
+            this.cornerRadius = cornerRadius;
+            this.visible = visible;
+        }
+
+        private final int flags;
 
         @VisibleForTesting
         public final SurfaceControl surface;

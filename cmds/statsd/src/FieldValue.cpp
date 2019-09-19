@@ -116,28 +116,13 @@ void translateFieldMatcher(const FieldMatcher& matcher, std::vector<Matcher>* ou
 }
 
 bool isAttributionUidField(const FieldValue& value) {
-    int field = value.mField.getField() & 0xff007f;
-    if (field == 0x10001 && value.mValue.getType() == INT) {
-        return true;
-    }
-    return false;
+    return isAttributionUidField(value.mField, value.mValue);
 }
 
 int32_t getUidIfExists(const FieldValue& value) {
-    bool isUid = false;
     // the field is uid field if the field is the uid field in attribution node or marked as
     // is_uid in atoms.proto
-    if (isAttributionUidField(value)) {
-        isUid = true;
-    } else {
-        auto it = android::util::AtomsInfo::kAtomsWithUidField.find(value.mField.getTag());
-        if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
-            int uidField = it->second;  // uidField is the field number in proto
-            isUid = value.mField.getDepth() == 0 && value.mField.getPosAtDepth(0) == uidField &&
-                    value.mValue.getType() == INT;
-        }
-    }
-
+    bool isUid = isAttributionUidField(value) || isUidField(value.mField, value.mValue);
     return isUid ? value.mValue.int_value : -1;
 }
 
@@ -153,7 +138,7 @@ bool isUidField(const Field& field, const Value& value) {
     auto it = android::util::AtomsInfo::kAtomsWithUidField.find(field.getTag());
 
     if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
-        int uidField = it->second;
+        int uidField = it->second;  // uidField is the field number in proto
         return field.getDepth() == 0 && field.getPosAtDepth(0) == uidField &&
                value.getType() == INT;
     }

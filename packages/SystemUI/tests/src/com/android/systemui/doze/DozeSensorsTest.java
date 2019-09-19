@@ -44,7 +44,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.util.AsyncSensorManager;
+import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import org.junit.Before;

@@ -23,7 +23,7 @@ import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.ProximitySensor;
+import com.android.systemui.util.sensors.ProximitySensor;
 
 
 /**

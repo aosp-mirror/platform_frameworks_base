@@ -22,7 +22,6 @@ import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.parseCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromMemcg;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromProcfs;
-import static com.android.server.am.MemoryStatUtil.parseVmHWMFromProcfs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -227,18 +226,6 @@ public class MemoryStatUtilTest {
     public void testParseMemoryStatFromProcfs_invalidValue() {
         String contents = String.join(" ", Collections.nCopies(24, "memory"));
         assertNull(parseMemoryStatFromProcfs(contents, PROC_STATUS_CONTENTS));
-    }
-
-    @Test
-    public void testParseVmHWMFromProcfs_parsesCorrectValue() {
-        assertEquals(137668, parseVmHWMFromProcfs(PROC_STATUS_CONTENTS));
-    }
-
-    @Test
-    public void testParseVmHWMFromProcfs_emptyContents() {
-        assertEquals(0, parseVmHWMFromProcfs(""));
-
-        assertEquals(0, parseVmHWMFromProcfs(null));
     }
 
     @Test

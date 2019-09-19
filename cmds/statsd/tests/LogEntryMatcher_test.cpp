@@ -330,6 +330,7 @@ TEST(AtomMatcherTest, TestUidFieldMatcher) {
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
 
     // Tag found in kAtomsWithUidField and has matching uid
+    simpleMatcher->set_atom_id(TAG_ID_2);
     EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event2));
 
     // Tag found in kAtomsWithUidField but has non-matching uid

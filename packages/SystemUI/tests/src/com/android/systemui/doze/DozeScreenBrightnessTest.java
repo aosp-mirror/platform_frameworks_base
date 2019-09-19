@@ -40,7 +40,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.utils.hardware.FakeSensorManager;
+import com.android.systemui.util.sensors.FakeSensorManager;
 
 import org.junit.Before;
 import org.junit.Test;

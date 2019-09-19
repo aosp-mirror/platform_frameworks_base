@@ -30,7 +30,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.ProximitySensor;
+import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

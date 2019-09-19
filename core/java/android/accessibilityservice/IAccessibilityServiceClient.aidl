@@ -20,7 +20,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.graphics.Region;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityWindowInfo;
-import android.accessibilityservice.AccessibilityGestureInfo;
+import android.accessibilityservice.AccessibilityGestureEvent;
 import android.view.KeyEvent;
 
 /**
@@ -36,7 +36,7 @@ import android.view.KeyEvent;
 
     void onInterrupt();
 
-    void onGesture(in AccessibilityGestureInfo gestureInfo);
+    void onGesture(in AccessibilityGestureEvent gestureEvent);
 
     void clearAccessibilityCache();
 

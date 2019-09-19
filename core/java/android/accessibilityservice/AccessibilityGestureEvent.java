@@ -44,17 +44,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * This class describes the gesture information including gesture id and which display it happens
+ * This class describes the gesture event including gesture id and which display it happens
  * on.
  * <p>
  * <strong>Note:</strong> Accessibility services setting the
  * {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE}
  * flag can receive gestures.
  *
- * @see AccessibilityService#onGesture(AccessibilityGestureInfo)
+ * @see AccessibilityService#onGesture(AccessibilityGestureEvent)
  */
 
-public final class AccessibilityGestureInfo implements Parcelable {
+public final class AccessibilityGestureEvent implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = { "GESTURE_" }, value = {
@@ -84,12 +84,12 @@ public final class AccessibilityGestureInfo implements Parcelable {
 
     /** @hide */
     @TestApi
-    public AccessibilityGestureInfo(int gestureId, int displayId) {
+    public AccessibilityGestureEvent(int gestureId, int displayId) {
         mGestureId = gestureId;
         mDisplayId = displayId;
     }
 
-    private AccessibilityGestureInfo(@NonNull Parcel parcel) {
+    private AccessibilityGestureEvent(@NonNull Parcel parcel) {
         mGestureId = parcel.readInt();
         mDisplayId = parcel.readInt();
     }
@@ -117,7 +117,7 @@ public final class AccessibilityGestureInfo implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("AccessibilityGestureInfo[");
+        StringBuilder stringBuilder = new StringBuilder("AccessibilityGestureEvent[");
         stringBuilder.append("gestureId: ").append(mGestureId);
         stringBuilder.append(", ");
         stringBuilder.append("displayId: ").append(mDisplayId);
@@ -142,14 +142,14 @@ public final class AccessibilityGestureInfo implements Parcelable {
     /**
      * @see Parcelable.Creator
      */
-    public static final @NonNull Parcelable.Creator<AccessibilityGestureInfo> CREATOR =
-            new Parcelable.Creator<AccessibilityGestureInfo>() {
-        public AccessibilityGestureInfo createFromParcel(Parcel parcel) {
-            return new AccessibilityGestureInfo(parcel);
+    public static final @NonNull Parcelable.Creator<AccessibilityGestureEvent> CREATOR =
+            new Parcelable.Creator<AccessibilityGestureEvent>() {
+        public AccessibilityGestureEvent createFromParcel(Parcel parcel) {
+            return new AccessibilityGestureEvent(parcel);
         }
 
-        public AccessibilityGestureInfo[] newArray(int size) {
-            return new AccessibilityGestureInfo[size];
+        public AccessibilityGestureEvent[] newArray(int size) {
+            return new AccessibilityGestureEvent[size];
         }
     };
 

@@ -193,6 +193,9 @@ class RootActivityContainer extends ConfigurationContainer
     /** Set when a power hint has started, but not ended. */
     private boolean mPowerHintSent;
 
+    /** Used to keep ensureActivitiesVisible() from being entered recursively. */
+    private boolean mInEnsureActivitiesVisible = false;
+
     // The default minimal size that will be used if the activity doesn't specify its minimal size.
     // It will be calculated when the default display gets added.
     int mDefaultMinSizeOfResizeableTaskDp = -1;
@@ -805,8 +808,14 @@ class RootActivityContainer extends ConfigurationContainer
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
-        mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
+        if (mInEnsureActivitiesVisible) {
+            // Don't do recursive work.
+            return;
+        }
+        mInEnsureActivitiesVisible = true;
+
         try {
+            mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
             // First the front stacks. In case any are not fullscreen and are in front of home.
             for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
                 final ActivityDisplay display = mActivityDisplays.get(displayNdx);
@@ -815,6 +824,7 @@ class RootActivityContainer extends ConfigurationContainer
             }
         } finally {
             mStackSupervisor.getKeyguardController().endActivityVisibilityUpdate();
+            mInEnsureActivitiesVisible = false;
         }
     }
 

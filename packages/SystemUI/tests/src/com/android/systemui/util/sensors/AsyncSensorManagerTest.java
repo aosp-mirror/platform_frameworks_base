@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util;
+package com.android.systemui.util.sensors;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,15 +23,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.utils.hardware.FakeSensorManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,20 +39,21 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class AsyncSensorManagerTest extends SysuiTestCase {
 
-    private TestableAsyncSensorManager mAsyncSensorManager;
-    private FakeSensorManager mFakeSensorManager;
+    private AsyncSensorManager mAsyncSensorManager;
     private SensorEventListener mListener;
-    private FakeSensorManager.MockProximitySensor mSensor;
+    private FakeSensorManager.FakeProximitySensor mSensor;
     private PluginManager mPluginManager;
 
     @Before
     public void setUp() throws Exception {
         mPluginManager = mock(PluginManager.class);
-        mFakeSensorManager = new FakeSensorManager(mContext);
-        mAsyncSensorManager = new TestableAsyncSensorManager(mFakeSensorManager);
-        mSensor = mFakeSensorManager.getMockProximitySensor();
+        FakeSensorManager fakeSensorManager = new FakeSensorManager(mContext);
+        mAsyncSensorManager = new AsyncSensorManager(
+                fakeSensorManager, mPluginManager, new Handler());
+        mSensor = fakeSensorManager.getFakeProximitySensor();
         mListener = mock(SensorEventListener.class);
     }
 
@@ -61,7 +61,7 @@ public class AsyncSensorManagerTest extends SysuiTestCase {
     public void registerListenerImpl() throws Exception {
         mAsyncSensorManager.registerListener(mListener, mSensor.getSensor(), 100);
 
-        mAsyncSensorManager.waitUntilRequestsCompleted();
+        waitUntilRequestsCompleted();
 
         // Verify listener was registered.
         mSensor.sendProximityResult(true);
@@ -73,7 +73,7 @@ public class AsyncSensorManagerTest extends SysuiTestCase {
         mAsyncSensorManager.registerListener(mListener, mSensor.getSensor(), 100);
         mAsyncSensorManager.unregisterListener(mListener);
 
-        mAsyncSensorManager.waitUntilRequestsCompleted();
+        waitUntilRequestsCompleted();
 
         // Verify listener was unregistered.
         mSensor.sendProximityResult(true);
@@ -85,7 +85,7 @@ public class AsyncSensorManagerTest extends SysuiTestCase {
         mAsyncSensorManager.registerListener(mListener, mSensor.getSensor(), 100);
         mAsyncSensorManager.unregisterListener(mListener, mSensor.getSensor());
 
-        mAsyncSensorManager.waitUntilRequestsCompleted();
+        waitUntilRequestsCompleted();
 
         // Verify listener was unregistered.
         mSensor.sendProximityResult(true);
@@ -98,13 +98,7 @@ public class AsyncSensorManagerTest extends SysuiTestCase {
                 eq(SensorManagerPlugin.class), eq(true) /* allowMultiple */);
     }
 
-    private class TestableAsyncSensorManager extends AsyncSensorManager {
-        public TestableAsyncSensorManager(SensorManager sensorManager) {
-            super(sensorManager, mPluginManager);
-        }
-
-        public void waitUntilRequestsCompleted() {
-            assertTrue(mHandler.runWithScissors(() -> {}, 0));
-        }
+    public void waitUntilRequestsCompleted() {
+        TestableLooper.get(this).processAllMessages();
     }
 }

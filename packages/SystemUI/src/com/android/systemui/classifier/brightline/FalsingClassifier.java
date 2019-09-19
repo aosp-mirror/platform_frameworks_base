@@ -19,7 +19,7 @@ package com.android.systemui.classifier.brightline;
 import android.view.MotionEvent;
 
 import com.android.systemui.classifier.Classifier;
-import com.android.systemui.util.ProximitySensor;
+import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.util.List;
 

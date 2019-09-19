@@ -30,7 +30,7 @@ import android.view.MotionEvent;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.util.DeviceConfigProxyFake;
-import com.android.systemui.util.ProximitySensor;
+import com.android.systemui.util.sensors.ProximitySensor;
 
 import org.junit.After;
 import org.junit.Before;

@@ -1550,10 +1550,11 @@ class ActivityStarter {
 
         mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
-        mService.getPackageManagerInternalLocked().grantEphemeralAccess(
+        mService.getPackageManagerInternalLocked().grantImplicitAccess(
                 mStartActivity.mUserId, mIntent,
-                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid),
-                UserHandle.getAppId(mCallingUid));
+                UserHandle.getAppId(mCallingUid),
+                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid)
+        );
         if (newTask) {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.mUserId,
                     mStartActivity.getTaskRecord().taskId);
@@ -2341,7 +2342,12 @@ class ActivityStarter {
                             REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                             "reparentingHome");
                     mMovedToFront = true;
+                } else if (launchStack.topTask() == null) {
+                    // The task does not need to be reparented to the launch stack. Remove the
+                    // launch stack if there is no activity in it.
+                    launchStack.remove();
                 }
+
                 mOptions = null;
 
                 // We are moving a task to the front, use starting window to hide initial drawn

@@ -375,6 +375,22 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
+    /**
+     * If set, new app transition framework which supports setting animation on any element
+     * in a surface is used.
+     * <p>
+     * Only set this to non-zero once the new app transition framework is productionalized.
+     * </p>
+     */
+    private static final String HIERARCHICAL_ANIMATIONS_PROPERTY =
+            "persist.wm.hierarchical_animations";
+
+    /**
+     * @see #HIERARCHICAL_ANIMATIONS_PROPERTY
+     */
+    static boolean sHierarchicalAnimations =
+            SystemProperties.getBoolean(HIERARCHICAL_ANIMATIONS_PROPERTY, false);
+
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE})

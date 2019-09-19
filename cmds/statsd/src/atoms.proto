@@ -335,6 +335,8 @@ message Atom {
         UpdateEngineUpdateAttemptReported update_engine_update_attempt_reported = 225;
         UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
         CameraActionEvent camera_action_event = 227;
+        AppCompatibilityChangeReported app_compatibility_change_reported =
+            228 [(allow_from_any_uid) = true];
     }
 
     // Pulled events will start at field 10000.
@@ -7170,7 +7172,6 @@ message FrameTimingHistogram {
     repeated int64 frame_counts = 2;
 }
 
-
 /**
  * Information about camera facing and API level usage.
  * Logged from:
@@ -7194,4 +7195,40 @@ message CameraActionEvent {
         EXTERNAL = 3;
     }
     optional Facing facing = 4;
+}
+
+/**
+ * Logs when a compatibility change is affecting an app.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/android/app/AppCompatCallbacks.java and
+ *   frameworks/base/services/core/java/com/android/server/compat/PlatformCompat.java
+ */
+message AppCompatibilityChangeReported {
+    // The UID of the app being affected by the compatibilty change.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The ID of the change affecting the app.
+    optional int64 change_id = 2;
+
+    enum State {
+        UNKNOWN_STATE = 0;
+        ENABLED = 1;
+        DISABLED = 2;
+        LOGGED = 3;
+    }
+
+    // The state of the change - if logged from gating whether it was enabled or disabled, or just
+    // logged otherwise.
+    optional State state = 3;
+
+    enum Source {
+        UNKNOWN_SOURCE = 0;
+        APP_PROCESS = 1;
+        SYSTEM_SERVER = 2;
+    }
+
+    // Where it was logged from.
+    optional Source source = 4;
+
 }

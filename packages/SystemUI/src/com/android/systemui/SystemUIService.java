@@ -84,7 +84,7 @@ public class SystemUIService extends Service {
             }
         } else {
             String svc = args[0].toLowerCase();
-            if (Dependency.class.getName().endsWith(svc)) {
+            if (Dependency.class.getName().toLowerCase().endsWith(svc)) {
                 Dependency.staticDump(fd, pw, args);
             }
             for (SystemUI ui: services) {

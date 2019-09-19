@@ -608,7 +608,10 @@ public abstract class AuthBiometricView extends LinearLayout {
                         MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
             }
-            totalHeight += child.getMeasuredHeight();
+
+            if (child.getVisibility() != View.GONE) {
+                totalHeight += child.getMeasuredHeight();
+            }
         }
 
         // Use the new width so it's centered horizontally

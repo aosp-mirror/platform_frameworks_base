@@ -26,7 +26,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
@@ -43,11 +42,12 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.systemui.R;
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.SensorManagerPlugin;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.util.AlarmTimeout;
-import com.android.systemui.util.AsyncSensorManager;
+import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
@@ -62,7 +62,7 @@ public class DozeSensors {
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
-    private final SensorManager mSensorManager;
+    private final AsyncSensorManager mSensorManager;
     private final ContentResolver mResolver;
     private final TriggerSensor mPickupSensor;
     private final DozeParameters mDozeParameters;
@@ -74,13 +74,13 @@ public class DozeSensors {
     protected TriggerSensor[] mSensors;
 
     private final Handler mHandler = new Handler();
-    private final ProxSensor mProxSensor;
+    private final ProximitySensor mProximitySensor;
     private long mDebounceFrom;
     private boolean mSettingRegistered;
     private boolean mListening;
     private boolean mPaused;
 
-    public DozeSensors(Context context, AlarmManager alarmManager, SensorManager sensorManager,
+    public DozeSensors(Context context, AlarmManager alarmManager, AsyncSensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
             Callback callback, Consumer<Boolean> proxCallback, AlwaysOnDisplayPolicy policy) {
         mContext = context;
@@ -91,6 +91,7 @@ public class DozeSensors {
         mWakeLock = wakeLock;
         mProxCallback = proxCallback;
         mResolver = mContext.getContentResolver();
+        mCallback = callback;
 
         boolean alwaysOn = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mSensors = new TriggerSensor[] {
@@ -146,8 +147,11 @@ public class DozeSensors {
                         false /* touchscreen */, mConfig.getWakeLockScreenDebounce()),
         };
 
-        mProxSensor = new ProxSensor(policy);
-        mCallback = callback;
+        mProximitySensor = new ProximitySensor(
+                context, sensorManager, Dependency.get(PluginManager.class));
+
+        mProximitySensor.register(
+                proximityEvent -> mProxCallback.accept(!proximityEvent.getNear()));
     }
 
     /**
@@ -236,7 +240,15 @@ public class DozeSensors {
     }
 
     public void setProxListening(boolean listen) {
-        mProxSensor.setRequested(listen);
+        if (mProximitySensor.isRegistered() && listen) {
+            mProximitySensor.alertListeners();
+        } else {
+            if (listen) {
+                mProximitySensor.resume();
+            } else {
+                mProximitySensor.pause();
+            }
+        }
     }
 
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
@@ -267,115 +279,16 @@ public class DozeSensors {
     /** Dump current state */
     public void dump(PrintWriter pw) {
         for (TriggerSensor s : mSensors) {
-            pw.print("  Sensor: "); pw.println(s.toString());
+            pw.println("  Sensor: " + s.toString());
         }
-        pw.print("  ProxSensor: "); pw.println(mProxSensor.toString());
+        pw.println("  ProxSensor: " + mProximitySensor.toString());
     }
 
     /**
-     * @return true if prox is currently far, false if near or null if unknown.
+     * @return true if prox is currently near, false if far or null if unknown.
      */
-    public Boolean isProximityCurrentlyFar() {
-        return mProxSensor.mCurrentlyFar;
-    }
-
-    private class ProxSensor implements SensorEventListener {
-
-        boolean mRequested;
-        boolean mRegistered;
-        Boolean mCurrentlyFar;
-        long mLastNear;
-        final AlarmTimeout mCooldownTimer;
-        final AlwaysOnDisplayPolicy mPolicy;
-        final Sensor mSensor;
-        final boolean mUsingBrightnessSensor;
-
-        public ProxSensor(AlwaysOnDisplayPolicy policy) {
-            mPolicy = policy;
-            mCooldownTimer = new AlarmTimeout(mAlarmManager, this::updateRegistered,
-                    "prox_cooldown", mHandler);
-
-            // The default prox sensor can be noisy, so let's use a prox gated brightness sensor
-            // if available.
-            Sensor sensor = DozeSensors.findSensorWithType(mSensorManager,
-                    mContext.getString(R.string.doze_brightness_sensor_type));
-            mUsingBrightnessSensor = sensor != null;
-            if (sensor == null) {
-                sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-            }
-            mSensor = sensor;
-        }
-
-        void setRequested(boolean requested) {
-            if (mRequested == requested) {
-                // Send an update even if we don't re-register.
-                mHandler.post(() -> {
-                    if (mCurrentlyFar != null) {
-                        mProxCallback.accept(mCurrentlyFar);
-                    }
-                });
-                return;
-            }
-            mRequested = requested;
-            updateRegistered();
-        }
-
-        private void updateRegistered() {
-            setRegistered(mRequested && !mCooldownTimer.isScheduled());
-        }
-
-        private void setRegistered(boolean register) {
-            if (mRegistered == register) {
-                return;
-            }
-            if (register) {
-                mRegistered = mSensorManager.registerListener(this, mSensor,
-                        SensorManager.SENSOR_DELAY_NORMAL, mHandler);
-            } else {
-                mSensorManager.unregisterListener(this);
-                mRegistered = false;
-                mCurrentlyFar = null;
-            }
-        }
-
-        @Override
-        public void onSensorChanged(android.hardware.SensorEvent event) {
-            if (DEBUG) Log.d(TAG, "onSensorChanged " + event);
-
-            if (mUsingBrightnessSensor) {
-                // The custom brightness sensor is gated by the proximity sensor and will return 0
-                // whenever prox is covered.
-                mCurrentlyFar = event.values[0] > 0;
-            } else {
-                mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
-            }
-            mProxCallback.accept(mCurrentlyFar);
-
-            long now = SystemClock.elapsedRealtime();
-            if (mCurrentlyFar == null) {
-                // Sensor has been unregistered by the proxCallback. Do nothing.
-            } else if (!mCurrentlyFar) {
-                mLastNear = now;
-            } else if (mCurrentlyFar && now - mLastNear < mPolicy.proxCooldownTriggerMs) {
-                // If the last near was very recent, we might be using more power for prox
-                // wakeups than we're saving from turning of the screen. Instead, turn it off
-                // for a while.
-                mCooldownTimer.schedule(mPolicy.proxCooldownPeriodMs,
-                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
-                updateRegistered();
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        }
-
-        @Override
-        public String toString() {
-            return String.format("{registered=%s, requested=%s, coolingDown=%s, currentlyFar=%s,"
-                    + " sensor=%s}", mRegistered, mRequested, mCooldownTimer.isScheduled(),
-                    mCurrentlyFar, mSensor);
-        }
+    public Boolean isProximityCurrentlyNear() {
+        return mProximitySensor.isNear();
     }
 
     @VisibleForTesting

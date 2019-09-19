@@ -394,6 +394,17 @@ int DumpXmlTreeCommand::Dump(LoadedApk* apk) {
   return 0;
 }
 
+int DumpOverlayableCommand::Dump(LoadedApk* apk) {
+  ResourceTable* table = apk->GetResourceTable();
+  if (!table) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    return 1;
+  }
+
+  Debug::DumpOverlayable(*table, GetPrinter());
+  return 0;
+}
+
 const char DumpBadgerCommand::kBadgerData[2925] = {
     32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
     32,  32,  32,  32,  32,  32,  95,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,

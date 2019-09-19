@@ -5759,7 +5759,9 @@ public class NotificationManagerService extends SystemService {
                         notification.flags |=
                                 old.getNotification().flags & FLAG_FOREGROUND_SERVICE;
                         r.isUpdate = true;
-                        r.setTextChanged(isVisuallyInterruptive(old, r));
+                        final boolean isInterruptive = isVisuallyInterruptive(old, r);
+                        r.setTextChanged(isInterruptive);
+                        r.setInterruptive(isInterruptive);
                     }
 
                     mNotificationsByKey.put(n.getKey(), r);
@@ -5858,7 +5860,6 @@ public class NotificationManagerService extends SystemService {
 
         Notification oldN = old.sbn.getNotification();
         Notification newN = r.sbn.getNotification();
-
         if (oldN.extras == null || newN.extras == null) {
             if (DEBUG_INTERRUPTIVENESS) {
                 Slog.v(TAG, "INTERRUPTIVENESS: "
@@ -5890,6 +5891,7 @@ public class NotificationManagerService extends SystemService {
             }
             return true;
         }
+
         // Do not compare Spannables (will always return false); compare unstyled Strings
         final String oldText = String.valueOf(oldN.extras.get(Notification.EXTRA_TEXT));
         final String newText = String.valueOf(newN.extras.get(Notification.EXTRA_TEXT));
@@ -5904,6 +5906,7 @@ public class NotificationManagerService extends SystemService {
             }
             return true;
         }
+
         if (oldN.hasCompletedProgress() != newN.hasCompletedProgress()) {
             if (DEBUG_INTERRUPTIVENESS) {
                 Slog.v(TAG, "INTERRUPTIVENESS: "
@@ -5911,6 +5914,16 @@ public class NotificationManagerService extends SystemService {
             }
             return true;
         }
+
+        // Fields below are invisible to bubbles.
+        if (r.canBubble()) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Slog.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is not interruptive: bubble");
+            }
+            return false;
+        }
+
         // Actions
         if (Notification.areActionsVisiblyDifferent(oldN, newN)) {
             if (DEBUG_INTERRUPTIVENESS) {
@@ -5944,7 +5957,6 @@ public class NotificationManagerService extends SystemService {
         } catch (Exception e) {
             Slog.w(TAG, "error recovering builder", e);
         }
-
         return false;
     }
 
@@ -6139,12 +6151,17 @@ public class NotificationManagerService extends SystemService {
                     Slog.v(TAG, "INTERRUPTIVENESS: "
                             + record.getKey() + " is not interruptive: summary");
                 }
+            } else if (record.canBubble()) {
+                if (DEBUG_INTERRUPTIVENESS) {
+                    Slog.v(TAG, "INTERRUPTIVENESS: "
+                            + record.getKey() + " is not interruptive: bubble");
+                }
             } else {
+                record.setInterruptive(true);
                 if (DEBUG_INTERRUPTIVENESS) {
                     Slog.v(TAG, "INTERRUPTIVENESS: "
                             + record.getKey() + " is interruptive: alerted");
                 }
-                record.setInterruptive(true);
             }
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_ALERT)
@@ -6503,15 +6520,21 @@ public class NotificationManagerService extends SystemService {
             int indexBefore = findNotificationRecordIndexLocked(record);
             boolean interceptBefore = record.isIntercepted();
             int visibilityBefore = record.getPackageVisibilityOverride();
+            boolean interruptiveBefore = record.isInterruptive();
+
             recon.applyChangesLocked(record);
             applyZenModeLocked(record);
             mRankingHelper.sort(mNotificationList);
-            int indexAfter = findNotificationRecordIndexLocked(record);
-            boolean interceptAfter = record.isIntercepted();
-            int visibilityAfter = record.getPackageVisibilityOverride();
-            changed = indexBefore != indexAfter || interceptBefore != interceptAfter
-                    || visibilityBefore != visibilityAfter;
-            if (interceptBefore && !interceptAfter
+            boolean indexChanged = indexBefore != findNotificationRecordIndexLocked(record);
+            boolean interceptChanged = interceptBefore != record.isIntercepted();
+            boolean visibilityChanged = visibilityBefore != record.getPackageVisibilityOverride();
+
+            // Broadcast isInterruptive changes for bubbles.
+            boolean interruptiveChanged =
+                    record.canBubble() && (interruptiveBefore != record.isInterruptive());
+
+            changed = indexChanged || interceptChanged || visibilityChanged || interruptiveChanged;
+            if (interceptBefore && !record.isIntercepted()
                     && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
             }
@@ -7661,7 +7684,8 @@ public class NotificationManagerService extends SystemService {
                     record.getSound() != null || record.getVibration() != null,
                     record.getSystemGeneratedSmartActions(),
                     record.getSmartReplies(),
-                    record.canBubble()
+                    record.canBubble(),
+                    record.isInterruptive()
             );
             rankings.add(ranking);
         }

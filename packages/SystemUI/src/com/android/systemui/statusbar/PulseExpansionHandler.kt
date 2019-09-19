@@ -33,6 +33,7 @@ import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -56,7 +57,8 @@ constructor(
     private val wakeUpCoordinator: NotificationWakeUpCoordinator,
     private val bypassController: KeyguardBypassController,
     private val headsUpManager: HeadsUpManagerPhone,
-    private val roundnessManager: NotificationRoundnessManager
+    private val roundnessManager: NotificationRoundnessManager,
+    private val statusBarStateController: StatusBarStateController
 ) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
@@ -188,7 +190,8 @@ constructor(
             MotionEvent.ACTION_MOVE -> updateExpansionHeight(moveDistance)
             MotionEvent.ACTION_UP -> {
                 velocityTracker!!.computeCurrentVelocity(1000 /* units */)
-                val canExpand = moveDistance > 0 && velocityTracker!!.getYVelocity() > -1000
+                val canExpand = moveDistance > 0 && velocityTracker!!.getYVelocity() > -1000 &&
+                        statusBarStateController.state != StatusBarState.SHADE
                 if (!mFalsingManager.isUnlockingDisabled && !isFalseTouch && canExpand) {
                     finishExpansion()
                 } else {
