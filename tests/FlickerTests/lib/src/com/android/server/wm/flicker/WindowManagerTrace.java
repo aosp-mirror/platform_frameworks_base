@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker;
 
-import android.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.android.server.wm.flicker.Assertions.Result;
 import com.android.server.wm.nano.AppWindowTokenProto;
@@ -58,7 +58,7 @@ public class WindowManagerTrace {
      * @param data   binary proto data
      * @param source Path to source of data for additional debug information
      */
-    static WindowManagerTrace parseFrom(byte[] data, Path source) {
+    public static WindowManagerTrace parseFrom(byte[] data, Path source) {
         List<Entry> entries = new ArrayList<>();
 
         WindowManagerTraceFileProto fileProto;
@@ -73,7 +73,7 @@ public class WindowManagerTrace {
         return new WindowManagerTrace(entries, source);
     }
 
-    static WindowManagerTrace parseFrom(byte[] data) {
+    public static WindowManagerTrace parseFrom(byte[] data) {
         return parseFrom(data, null);
     }
 
@@ -81,7 +81,7 @@ public class WindowManagerTrace {
         return mEntries;
     }
 
-    Entry getEntry(long timestamp) {
+    public Entry getEntry(long timestamp) {
         Optional<Entry> entry = mEntries.stream()
                 .filter(e -> e.getTimestamp() == timestamp)
                 .findFirst();
@@ -91,17 +91,17 @@ public class WindowManagerTrace {
         return entry.get();
     }
 
-    Optional<Path> getSource() {
+    public Optional<Path> getSource() {
         return Optional.ofNullable(mSource);
     }
 
     /**
      * Represents a single WindowManager trace entry.
      */
-    static class Entry implements ITraceEntry {
+    public static class Entry implements ITraceEntry {
         private final WindowManagerTraceProto mProto;
 
-        Entry(WindowManagerTraceProto proto) {
+        public Entry(WindowManagerTraceProto proto) {
             mProto = proto;
         }
 
@@ -162,7 +162,7 @@ public class WindowManagerTrace {
         /**
          * Checks if aboveAppWindow with {@code windowTitle} is visible.
          */
-        Result isAboveAppWindowVisible(String windowTitle) {
+        public Result isAboveAppWindowVisible(String windowTitle) {
             WindowTokenProto[] windowTokenProtos = mProto.windowManagerService
                     .rootWindowContainer
                     .displays[DEFAULT_DISPLAY].aboveAppWindows;
@@ -173,7 +173,7 @@ public class WindowManagerTrace {
         /**
          * Checks if belowAppWindow with {@code windowTitle} is visible.
          */
-        Result isBelowAppWindowVisible(String windowTitle) {
+        public Result isBelowAppWindowVisible(String windowTitle) {
             WindowTokenProto[] windowTokenProtos = mProto.windowManagerService
                     .rootWindowContainer
                     .displays[DEFAULT_DISPLAY].belowAppWindows;
@@ -185,7 +185,7 @@ public class WindowManagerTrace {
         /**
          * Checks if imeWindow with {@code windowTitle} is visible.
          */
-        Result isImeWindowVisible(String windowTitle) {
+        public Result isImeWindowVisible(String windowTitle) {
             WindowTokenProto[] windowTokenProtos = mProto.windowManagerService
                     .rootWindowContainer
                     .displays[DEFAULT_DISPLAY].imeWindows;
@@ -197,7 +197,7 @@ public class WindowManagerTrace {
         /**
          * Checks if app window with {@code windowTitle} is on top.
          */
-        Result isVisibleAppWindowOnTop(String windowTitle) {
+        public Result isVisibleAppWindowOnTop(String windowTitle) {
             String topAppWindow = getTopVisibleAppWindow();
             boolean success = topAppWindow.contains(windowTitle);
             String reason = "wanted=" + windowTitle + " found=" + topAppWindow;
@@ -207,7 +207,7 @@ public class WindowManagerTrace {
         /**
          * Checks if app window with {@code windowTitle} is visible.
          */
-        Result isAppWindowVisible(String windowTitle) {
+        public Result isAppWindowVisible(String windowTitle) {
             final String assertionName = "isAppWindowVisible";
             boolean titleFound = false;
             StackProto[] stacks = mProto.windowManagerService.rootWindowContainer

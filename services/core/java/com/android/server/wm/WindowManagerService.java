@@ -7807,4 +7807,64 @@ public class WindowManagerService extends IWindowManager.Stub
                     0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
         }
     }
+
+    /** Return whether layer tracing is enabled */
+    public boolean isLayerTracing() {
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
+                "isLayerTracing");
+        long token = Binder.clearCallingIdentity();
+        try {
+            Parcel data = null;
+            Parcel reply = null;
+            try {
+                IBinder sf = ServiceManager.getService("SurfaceFlinger");
+                if (sf != null) {
+                    reply = Parcel.obtain();
+                    data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    sf.transact(/* LAYER_TRACE_STATUS_CODE */ 1026, data, reply, 0 /* flags */);
+                    return reply.readBoolean();
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get layer tracing");
+            } finally {
+                if (data != null) {
+                    data.recycle();
+                }
+                if (reply != null) {
+                    reply.recycle();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return false;
+    }
+
+    /** Enable or disable layer tracing */
+    public void setLayerTracing(boolean enabled) {
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
+                "setLayerTracing");
+        long token = Binder.clearCallingIdentity();
+        try {
+            Parcel data = null;
+            try {
+                IBinder sf = ServiceManager.getService("SurfaceFlinger");
+                if (sf != null) {
+                    data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    data.writeInt(enabled ? 1 : 0);
+                    sf.transact(/* LAYER_TRACE_CONTROL_CODE */ 1025, data, null, 0 /* flags */);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set layer tracing");
+            } finally {
+                if (data != null) {
+                    data.recycle();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
 }
