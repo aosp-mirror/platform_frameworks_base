@@ -282,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા સંપર્કોને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને આ ડિવાઇસના સ્થાનને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"જ્યારે તમે ઍપનો ઉપયોગ કરી રહ્યા હશો માત્ર ત્યારે જ ઍપ સ્થાનને ઍક્સેસ કરી શકશે"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને આ ડિવાઇસનું સ્થાન &lt;b&gt;હંમેશાં&lt;/b&gt; ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"હાલમાં માત્ર જ્યારે તમે ઍપનો ઉપયોગ કરી રહ્યા હશો હોય ત્યારે જ ઍપ સ્થાનને ઍક્સેસ કરી શકશે"</string>

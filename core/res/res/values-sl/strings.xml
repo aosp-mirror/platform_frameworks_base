@@ -1300,7 +1300,7 @@
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Vzpostavi povezavo"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Vsa omrežja"</string>
     <string name="wifi_suggestion_title" msgid="6396033039578436801">"Želite dovoliti predlagana omrežja Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> – predlagana omrežja Naprava se lahko poveže samodejno."</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> – predlagana omrežja. Naprava se lahko poveže samodejno."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Dovoli"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Ne, hvala"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Povezava Wi‑Fi se bo samodejno vklopila"</string>

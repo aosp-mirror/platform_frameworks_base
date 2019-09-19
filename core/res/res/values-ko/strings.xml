@@ -1855,8 +1855,8 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"다운타임"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"주말"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"캘린더 일정 중"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"수면 중"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"캘린더 일정"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"수면 시간"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>(이)가 일부 소리를 음소거함"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"사용 중인 기기 내부에 문제가 발생했습니다. 자세한 내용은 제조업체에 문의하세요."</string>

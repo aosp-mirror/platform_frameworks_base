@@ -282,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; auf deine Kontakte zugreift?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zugreifen"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; den Gerätestandort abruft?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Zulassen, dass die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; den Gerätestandort abruft?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Die App hat nur Zugriff auf den Gerätestandort, solange du sie verwendest"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;ständig&lt;/b&gt; auf deinen Standort zugreift?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Die App hat gegenwärtig nur dann Zugriff auf den Gerätestandort, wenn du sie verwendest"</string>
@@ -291,7 +291,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; auf deinen Kalender zugreift?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS senden und abrufen"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS sendet und aufruft?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Zulassen, dass die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS sendet und aufruft?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"auf Fotos, Medien und Dateien auf deinem Gerät zugreifen"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; auf Fotos, Medien und Dateien auf deinem Gerät zugreift?"</string>

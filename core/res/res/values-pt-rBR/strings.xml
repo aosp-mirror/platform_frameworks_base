@@ -1476,7 +1476,7 @@
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"O app para carro está sendo usado"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toque para sair do app para carro."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Vínculo ou ponto de acesso ativo"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Ponto de acesso ou tethering ativo"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toque para configurar."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering desativado"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Fale com seu administrador para saber detalhes"</string>

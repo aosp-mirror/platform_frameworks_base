@@ -294,7 +294,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi vašem kalendaru?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"šalje i pregleda SMS poruke"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; slanje i pregled SMS poruka?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da šalje i pregleda SMS poruke?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pohrana"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"pristupa slikama, medijskim fajlovima i fajlovima na vašem uređaju"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa fotografijama, medijima i fajlovima na vašem uređaju?"</string>
