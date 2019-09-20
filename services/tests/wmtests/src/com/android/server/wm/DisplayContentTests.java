@@ -26,6 +26,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.Surface.ROTATION_90;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
@@ -62,6 +63,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.annotation.SuppressLint;
@@ -70,11 +72,14 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.metrics.LogMaker;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.Gravity;
+import android.view.IDisplayWindowRotationCallback;
+import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -656,7 +661,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         portraitDisplay.getDisplayRotation().setRotation(Surface.ROTATION_0);
         assertFalse(isOptionsPanelAtRight(portraitDisplay.getDisplayId()));
-        portraitDisplay.getDisplayRotation().setRotation(Surface.ROTATION_90);
+        portraitDisplay.getDisplayRotation().setRotation(ROTATION_90);
         assertTrue(isOptionsPanelAtRight(portraitDisplay.getDisplayId()));
 
         final DisplayContent landscapeDisplay = createNewDisplay();
@@ -665,7 +670,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         landscapeDisplay.getDisplayRotation().setRotation(Surface.ROTATION_0);
         assertTrue(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
-        landscapeDisplay.getDisplayRotation().setRotation(Surface.ROTATION_90);
+        landscapeDisplay.getDisplayRotation().setRotation(ROTATION_90);
         assertFalse(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
     }
 
@@ -915,6 +920,45 @@ public class DisplayContentTests extends WindowTestsBase {
                 is(MetricsProto.MetricsEvent.ACTION_PHONE_ORIENTATION_CHANGED));
         assertThat(logMakerCaptor.getValue().getSubtype(),
                 is(Configuration.ORIENTATION_PORTRAIT));
+    }
+
+    @Test
+    public void testRemoteRotation() {
+        DisplayContent dc = createNewDisplay();
+
+        final DisplayRotation dr = dc.getDisplayRotation();
+        Mockito.doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
+        Mockito.doReturn(ROTATION_90).when(dr).rotationForOrientation(anyInt(), anyInt());
+        final boolean[] continued = new boolean[1];
+        spyOn(dc.mActivityDisplay);
+        Mockito.doAnswer(
+                invocation -> {
+                    continued[0] = true;
+                    return true;
+                }).when(dc.mActivityDisplay).updateDisplayOverrideConfigurationLocked();
+        final boolean[] called = new boolean[1];
+        mWm.mDisplayRotationController =
+                new IDisplayWindowRotationController.Stub() {
+                    @Override
+                    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
+                            IDisplayWindowRotationCallback callback) {
+                        called[0] = true;
+
+                        try {
+                            callback.continueRotateDisplay(toRotation, null);
+                        } catch (RemoteException e) {
+                            assertTrue(false);
+                        }
+                    }
+                };
+
+        // kill any existing rotation animation (vestigial from test setup).
+        dc.setRotationAnimation(null);
+
+        mWm.updateRotation(true /* alwaysSendConfiguration */, false /* forceRelayout */);
+        assertTrue(called[0]);
+        waitUntilHandlersIdle();
+        assertTrue(continued[0]);
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

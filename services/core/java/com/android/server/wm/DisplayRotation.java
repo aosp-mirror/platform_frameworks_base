@@ -45,15 +45,19 @@ import android.database.ContentObserver;
 import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.IDisplayWindowRotationCallback;
 import android.view.Surface;
+import android.view.WindowContainerTransaction;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
@@ -211,6 +215,31 @@ public class DisplayRotation {
     private int mDemoRotation;
     private boolean mDemoHdmiRotationLock;
     private boolean mDemoRotationLock;
+
+    private static final int REMOTE_ROTATION_TIMEOUT_MS = 800;
+
+    private boolean mIsWaitingForRemoteRotation = false;
+
+    private final Runnable mDisplayRotationHandlerTimeout =
+            new Runnable() {
+                @Override
+                public void run() {
+                    continueRotation(mRotation, null /* transaction */);
+                }
+            };
+
+    private final IDisplayWindowRotationCallback mRemoteRotationCallback =
+            new IDisplayWindowRotationCallback.Stub() {
+                @Override
+                public void continueRotateDisplay(int targetRotation,
+                        WindowContainerTransaction t) {
+                    synchronized (mService.getWindowManagerLock()) {
+                        mService.mH.sendMessage(PooledLambda.obtainMessage(
+                                DisplayRotation::continueRotation, DisplayRotation.this,
+                                targetRotation, t));
+                    }
+                }
+            };
 
     DisplayRotation(WindowManagerService service, DisplayContent displayContent) {
         this(service, displayContent, displayContent.getDisplayPolicy(),
@@ -471,7 +500,50 @@ public class DisplayRotation {
             prepareNormalRotationAnimation();
         }
 
+        // The display is frozen now, give a remote handler (system ui) some time to reposition
+        // things.
+        startRemoteRotation(oldRotation, mRotation);
+
         return true;
+    }
+
+    /**
+     * A Remote rotation is when we are waiting for some registered (remote)
+     * {@link IDisplayWindowRotationController} to calculate and return some hierarchy operations
+     *  to perform in sync with the rotation.
+     */
+    boolean isWaitingForRemoteRotation() {
+        return mIsWaitingForRemoteRotation;
+    }
+
+    private void startRemoteRotation(int fromRotation, int toRotation) {
+        if (mService.mDisplayRotationController == null) {
+            return;
+        }
+        mIsWaitingForRemoteRotation = true;
+        try {
+            mService.mDisplayRotationController.onRotateDisplay(mDisplayContent.getDisplayId(),
+                    fromRotation, toRotation, mRemoteRotationCallback);
+            mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
+            mService.mH.postDelayed(mDisplayRotationHandlerTimeout, REMOTE_ROTATION_TIMEOUT_MS);
+        } catch (RemoteException e) {
+            mIsWaitingForRemoteRotation = false;
+            return;
+        }
+    }
+
+    private void continueRotation(int targetRotation, WindowContainerTransaction t) {
+        synchronized (mService.mGlobalLock) {
+            if (targetRotation != mRotation || !mIsWaitingForRemoteRotation) {
+                // Drop it, this is either coming from an outdated remote rotation; or, we've
+                // already moved on.
+                return;
+            }
+            mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
+            mIsWaitingForRemoteRotation = false;
+            mService.mAtmService.applyContainerTransaction(t);
+            mDisplayContent.sendNewConfiguration();
+        }
     }
 
     void prepareNormalRotationAnimation() {

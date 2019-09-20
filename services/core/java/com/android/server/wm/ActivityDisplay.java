@@ -180,6 +180,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         mDisplayContent.reconfigureDisplayLocked();
         onRequestedOverrideConfigurationChanged(
                 mDisplayContent.getRequestedOverrideConfiguration());
+        mService.mWindowManager.mDisplayNotificationController.dispatchDisplayAdded(this);
     }
 
     void onDisplayChanged() {

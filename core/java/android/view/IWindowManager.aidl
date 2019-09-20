@@ -35,7 +35,9 @@ import android.os.ParcelFileDescriptor;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
+import android.view.IDisplayWindowListener;
 import android.view.IDisplayFoldListener;
+import android.view.IDisplayWindowRotationController;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.RemoteAnimationAdapter;
@@ -95,6 +97,13 @@ interface IWindowManager
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
+
+    /**
+     * Sets a singular remote controller of display rotations. There can only be one. The
+     * controller is called after the display has "frozen" for a rotation and display rotation will
+     * only continue once the controller has finished calculating associated configurations.
+     */
+    void setDisplayWindowRotationController(IDisplayWindowRotationController controller);
 
     /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is
@@ -474,6 +483,16 @@ interface IWindowManager
      * Unregisters an IDisplayFoldListener.
      */
     void unregisterDisplayFoldListener(IDisplayFoldListener listener);
+
+    /**
+     * Registers an IDisplayContainerListener
+     */
+    void registerDisplayWindowListener(IDisplayWindowListener listener);
+
+    /**
+     * Unregisters an IDisplayContainerListener.
+     */
+    void unregisterDisplayWindowListener(IDisplayWindowListener listener);
 
     /**
      * Starts a window trace.
