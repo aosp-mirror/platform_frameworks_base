@@ -2407,7 +2407,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 // Update the view states first...
                 mCurrentViewId = viewState.id;
-                viewState.setCurrentValue(value);
+                if (value != null) {
+                    viewState.setCurrentValue(value);
+                }
 
                 if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
                     if (sDebug) Slog.d(TAG, "Ignoring VIEW_ENTERED on URL BAR (id=" + id + ")");
