@@ -18,6 +18,7 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.NonNull;
 import android.app.SharedElementCallback.OnSharedElementsReadyListener;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -66,13 +67,16 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private final boolean mIsCrossTask;
     private Drawable mReplacedBackground;
     private ArrayList<String> mPendingExitNames;
+    private Runnable mOnTransitionComplete;
 
-    public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
-            ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask) {
+    EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
+            ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask,
+            @NonNull Runnable onTransitionComplete) {
         super(activity.getWindow(), sharedElementNames,
                 getListener(activity, isReturning && !isCrossTask), isReturning);
         mActivity = activity;
         mIsCrossTask = isCrossTask;
+        mOnTransitionComplete = onTransitionComplete;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();
@@ -578,6 +582,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 window.setBackgroundDrawable(null);
             }
         }
+        if (mOnTransitionComplete != null) {
+            mOnTransitionComplete.run();
+            mOnTransitionComplete = null;
+        }
     }
 
     private void sharedElementTransitionStarted() {
@@ -671,6 +679,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mBackgroundAnimator != null) {
             mBackgroundAnimator.cancel();
             mBackgroundAnimator = null;
+        }
+        if (mOnTransitionComplete != null) {
+            mOnTransitionComplete.run();
+            mOnTransitionComplete = null;
         }
         super.clearState();
     }
