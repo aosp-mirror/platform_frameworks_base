@@ -931,7 +931,7 @@ stubs_defaults {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
-    previous_api: ":last-released-public-api",
+    previous_api: ":last-released-public-api-for-metalava-annotations",
     merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-sdk-stubs",
@@ -988,7 +988,7 @@ stubs_defaults {
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":last-released-public-api-for-metalava-annotations",
     merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-sdk-stubs",
@@ -1324,7 +1324,7 @@ droidstubs {
     installable: false,
     sdk_version: "core_platform",
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":last-released-public-api-for-metalava-annotations",
     merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-sdk-stubs",
