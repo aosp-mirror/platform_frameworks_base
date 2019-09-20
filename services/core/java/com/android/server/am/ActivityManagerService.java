@@ -9108,13 +9108,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             final Resources res = mContext.getResources();
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
-            mUserController.mUserSwitchUiEnabled = !res.getBoolean(
+            final boolean userSwitchUiEnabled = !res.getBoolean(
                     com.android.internal.R.bool.config_customUserSwitchUi);
-            mUserController.mMaxRunningUsers = res.getInteger(
+            final int maxRunningUsers = res.getInteger(
                     com.android.internal.R.integer.config_multiuserMaxRunningUsers);
-            mUserController.mDelayUserDataLocking = res.getBoolean(
+            final boolean delayUserDataLocking = res.getBoolean(
                     com.android.internal.R.bool.config_multiuserDelayUserDataLocking);
-
+            mUserController.setInitialConfig(userSwitchUiEnabled, maxRunningUsers,
+                    delayUserDataLocking);
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
             mPssDeferralTime = pssDeferralMs;
         }
@@ -17926,7 +17927,31 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, callback, null /* keyEvictedCallback */);
+        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ false,
+                /* callback= */ callback, /* keyEvictedCallback= */ null);
+    }
+
+    /**
+     * Stops user but allow delayed locking. Delayed locking keeps user unlocked even after
+     * stopping only if {@code config_multiuserDelayUserDataLocking} overlay is set true.
+     *
+     * <p>When delayed locking is not enabled through the overlay, this call becomes the same
+     * with {@link #stopUser(int, boolean, IStopUserCallback)} call.
+     *
+     * @param userId User id to stop.
+     * @param force Force stop the user even if the user is related with system user or current
+     *              user.
+     * @param callback Callback called when user has stopped.
+     *
+     * @return {@link ActivityManager#USER_OP_SUCCESS} when user is stopped successfully. Returns
+     *         other {@code ActivityManager#USER_OP_*} codes for failure.
+     *
+     */
+    @Override
+    public int stopUserWithDelayedLocking(final int userId, boolean force,
+            final IStopUserCallback callback) {
+        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ true,
+                /* callback= */ callback, /* keyEvictedCallback= */ null);
     }
 
     @Override
@@ -18332,7 +18357,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public int getMaxRunningUsers() {
-            return mUserController.mMaxRunningUsers;
+            return mUserController.getMaxRunningUsers();
         }
 
         @Override
