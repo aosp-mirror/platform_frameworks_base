@@ -4965,6 +4965,16 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
 
         /**
+         * Whether to invert navigation bar buttons
+         * @hide
+         */
+        public static final String NAV_BAR_INVERSE = "navbar_inverse";
+
+        /** @hide */
+        public static final Validator NAV_BAR_INVERSE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5198,6 +5208,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(VOLUME_ANSWER_CALL);
             PRIVATE_SETTINGS.add(RING_HOME_BUTTON_BEHAVIOR);
             PRIVATE_SETTINGS.add(SWAP_VOLUME_KEYS_ON_ROTATION);
+            PRIVATE_SETTINGS.add(NAV_BAR_INVERSE);
         }
 
         /**
@@ -5334,6 +5345,7 @@ public final class Settings {
             VALIDATORS.put(VOLUME_ANSWER_CALL, VOLUME_ANSWER_CALL_VALIDATOR);
             VALIDATORS.put(RING_HOME_BUTTON_BEHAVIOR, RING_HOME_BUTTON_BEHAVIOR_VALIDATOR);
             VALIDATORS.put(SWAP_VOLUME_KEYS_ON_ROTATION, SWAP_VOLUME_KEYS_ON_ROTATION_VALIDATOR);
+            VALIDATORS.put(NAV_BAR_INVERSE, NAV_BAR_INVERSE_VALIDATOR);
         }
 
         /**
