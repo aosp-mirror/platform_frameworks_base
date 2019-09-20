@@ -108,7 +108,7 @@ void SystemProperties_set(JNIEnv *env, jobject clazz, jstring keyJ,
     if (!ConvertKeyAndForward(env, keyJ, true, handler)) {
         // Must have been a failure in SetProperty.
         jniThrowException(env, "java/lang/RuntimeException",
-                          "failed to set system property");
+                          "failed to set system property (check logcat for reason)");
     }
 }
 

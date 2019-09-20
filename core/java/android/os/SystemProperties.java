@@ -189,6 +189,8 @@ public class SystemProperties {
      * Set the value for the given {@code key} to {@code val}.
      *
      * @throws IllegalArgumentException if the {@code val} exceeds 91 characters
+     * @throws RuntimeException if the property cannot be set, for example, if it was blocked by
+     * SELinux. libc will log the underlying reason.
      * @hide
      */
     @UnsupportedAppUsage
