@@ -149,8 +149,6 @@ final class DisplayWhiteBalanceTintController extends TintController {
             cct = mTemperatureMax;
         }
 
-        Slog.d(ColorDisplayService.TAG, "setDisplayWhiteBalanceTemperatureMatrix: cct = " + cct);
-
         synchronized (mLock) {
             mCurrentColorTemperature = cct;
 
@@ -185,6 +183,9 @@ final class DisplayWhiteBalanceTintController extends TintController {
             java.lang.System.arraycopy(result, 3, mMatrixDisplayWhiteBalance, 4, 3);
             java.lang.System.arraycopy(result, 6, mMatrixDisplayWhiteBalance, 8, 3);
         }
+
+        Slog.d(ColorDisplayService.TAG, "setDisplayWhiteBalanceTemperatureMatrix: cct = " + cct
+                + " matrix = " + matrixToString(mMatrixDisplayWhiteBalance, 16));
     }
 
     @Override
@@ -223,28 +224,6 @@ final class DisplayWhiteBalanceTintController extends TintController {
             pw.println("    mMatrixDisplayWhiteBalance = "
                     + matrixToString(mMatrixDisplayWhiteBalance, 4));
         }
-    }
-
-    /**
-     * Format a given matrix into a string.
-     *
-     * @param matrix the matrix to format
-     * @param columns number of columns in the matrix
-     */
-    private String matrixToString(float[] matrix, int columns) {
-        if (matrix == null || columns <= 0) {
-            Slog.e(ColorDisplayService.TAG, "Invalid arguments when formatting matrix to string");
-            return "";
-        }
-
-        final StringBuilder sb = new StringBuilder("");
-        for (int i = 0; i < matrix.length; i++) {
-            if (i % columns == 0) {
-                sb.append("\n      ");
-            }
-            sb.append(String.format("%9.6f", matrix[i]));
-        }
-        return sb.toString();
     }
 
     private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {
