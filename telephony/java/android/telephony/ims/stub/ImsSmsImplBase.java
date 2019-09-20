@@ -118,6 +118,12 @@ public class ImsSmsImplBase {
      */
     public static final int STATUS_REPORT_STATUS_ERROR = 2;
 
+    /**
+     * No network error was generated while processing the SMS message.
+     */
+    // Should match SmsResponse.NO_ERROR_CODE
+    public static final int RESULT_NO_NETWORK_ERROR = -1;
+
     // Lock for feature synchronization
     private final Object mLock = new Object();
     private IImsSmsListener mListener;
@@ -231,16 +237,37 @@ public class ImsSmsImplBase {
     }
 
     /**
+     * This method should be triggered by the IMS providers when an outgoing SMS message has been
+     * sent successfully.
+     *
+     * @param token token provided in {@link #sendSms(int, int, String, String, boolean, byte[])}
+     * @param messageRef the message reference. Should be between 0 and 255 per TS.123.040
+     *
+     * @throws RuntimeException if called before {@link #onReady()} is triggered or if the
+     * connection to the framework is not available. If this happens attempting to send the SMS
+     * should be aborted.
+     */
+    public final void onSendSmsResultSuccess(int token, int messageRef) throws RuntimeException {
+        synchronized (mLock) {
+            if (mListener == null) {
+                throw new RuntimeException("Feature not ready.");
+            }
+            try {
+                mListener.onSendSmsResult(token, messageRef, SEND_STATUS_OK,
+                        SmsManager.RESULT_ERROR_NONE, RESULT_NO_NETWORK_ERROR);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * This method should be triggered by the IMS providers to pass the result of the sent message
      * to the platform.
      *
      * @param token token provided in {@link #sendSms(int, int, String, String, boolean, byte[])}
      * @param messageRef the message reference. Should be between 0 and 255 per TS.123.040
-     * @param status result of sending the SMS. Valid values are:
-     *  {@link #SEND_STATUS_OK},
-     *  {@link #SEND_STATUS_ERROR},
-     *  {@link #SEND_STATUS_ERROR_RETRY},
-     *  {@link #SEND_STATUS_ERROR_FALLBACK},
+     * @param status result of sending the SMS.
      * @param reason reason in case status is failure. Valid values are:
      *  {@link SmsManager#RESULT_ERROR_NONE},
      *  {@link SmsManager#RESULT_ERROR_GENERIC_FAILURE},
@@ -271,7 +298,11 @@ public class ImsSmsImplBase {
      * @throws RuntimeException if called before {@link #onReady()} is triggered or if the
      * connection to the framework is not available. If this happens attempting to send the SMS
      * should be aborted.
+     * @deprecated Use {@link #onSendSmsResultSuccess(int, int)} or
+     * {@link #onSendSmsResultError(int, int, int, int, int)} to notify the framework of the SMS
+     * send result.
      */
+    @Deprecated
     public final void onSendSmsResult(int token, int messageRef,  @SendStatusResult int status,
             int reason) throws RuntimeException {
         synchronized (mLock) {
@@ -279,7 +310,65 @@ public class ImsSmsImplBase {
                 throw new RuntimeException("Feature not ready.");
             }
             try {
-                mListener.onSendSmsResult(token, messageRef, status, reason);
+                mListener.onSendSmsResult(token, messageRef, status, reason,
+                        RESULT_NO_NETWORK_ERROR);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * This method should be triggered by the IMS providers when an outgoing message fails to be
+     * sent due to an error generated while processing the message or after being sent to the
+     * network.
+     *
+     * @param token token provided in {@link #sendSms(int, int, String, String, boolean, byte[])}
+     * @param messageRef the message reference. Should be between 0 and 255 per TS.123.040
+     * @param status result of sending the SMS.
+     * @param reason Valid values are:
+     *  {@link SmsManager#RESULT_ERROR_NONE},
+     *  {@link SmsManager#RESULT_ERROR_GENERIC_FAILURE},
+     *  {@link SmsManager#RESULT_ERROR_RADIO_OFF},
+     *  {@link SmsManager#RESULT_ERROR_NULL_PDU},
+     *  {@link SmsManager#RESULT_ERROR_NO_SERVICE},
+     *  {@link SmsManager#RESULT_ERROR_LIMIT_EXCEEDED},
+     *  {@link SmsManager#RESULT_ERROR_FDN_CHECK_FAILURE},
+     *  {@link SmsManager#RESULT_ERROR_SHORT_CODE_NOT_ALLOWED},
+     *  {@link SmsManager#RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED},
+     *  {@link SmsManager#RESULT_RADIO_NOT_AVAILABLE},
+     *  {@link SmsManager#RESULT_NETWORK_REJECT},
+     *  {@link SmsManager#RESULT_INVALID_ARGUMENTS},
+     *  {@link SmsManager#RESULT_INVALID_STATE},
+     *  {@link SmsManager#RESULT_NO_MEMORY},
+     *  {@link SmsManager#RESULT_INVALID_SMS_FORMAT},
+     *  {@link SmsManager#RESULT_SYSTEM_ERROR},
+     *  {@link SmsManager#RESULT_MODEM_ERROR},
+     *  {@link SmsManager#RESULT_NETWORK_ERROR},
+     *  {@link SmsManager#RESULT_ENCODING_ERROR},
+     *  {@link SmsManager#RESULT_INVALID_SMSC_ADDRESS},
+     *  {@link SmsManager#RESULT_OPERATION_NOT_ALLOWED},
+     *  {@link SmsManager#RESULT_INTERNAL_ERROR},
+     *  {@link SmsManager#RESULT_NO_RESOURCES},
+     *  {@link SmsManager#RESULT_CANCELLED},
+     *  {@link SmsManager#RESULT_REQUEST_NOT_SUPPORTED}
+     * @param networkErrorCode the error code reported by the carrier network if sending this SMS
+     *  has resulted in an error or {@link #RESULT_NO_NETWORK_ERROR} if no network error was
+     *  generated. See 3GPP TS 24.011 Section 7.3.4 for valid error codes and more information.
+     *
+     * @throws RuntimeException if called before {@link #onReady()} is triggered or if the
+     * connection to the framework is not available. If this happens attempting to send the SMS
+     * should be aborted.
+     */
+    public final void onSendSmsResultError(int token, int messageRef,  @SendStatusResult int status,
+            int reason, int networkErrorCode)
+            throws RuntimeException {
+        synchronized (mLock) {
+            if (mListener == null) {
+                throw new RuntimeException("Feature not ready.");
+            }
+            try {
+                mListener.onSendSmsResult(token, messageRef, status, reason, networkErrorCode);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
