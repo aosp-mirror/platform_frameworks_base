@@ -146,7 +146,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
     if (surface) {
         mNativeSurface = new ReliableSurface{std::move(surface)};
         // TODO: Fix error handling & re-shorten timeout
-        mNativeSurface->setDequeueTimeout(4000_ms);
+        ANativeWindow_setDequeueTimeout(mNativeSurface.get(), 4000_ms);
         mNativeSurface->enableFrameTimestamps(true);
     } else {
         mNativeSurface = nullptr;
