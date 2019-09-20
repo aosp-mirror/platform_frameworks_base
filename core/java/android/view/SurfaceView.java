@@ -136,6 +136,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     boolean mIsCreating = false;
     private volatile boolean mRtHandlingPositionUpdates = false;
+    private volatile boolean mRtReleaseSurfaces = false;
 
     private final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener =
             this::updateSurface;
@@ -658,7 +659,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void releaseSurfaces() {
+        mSurfaceAlpha = 1f;
+
         synchronized (mSurfaceControlLock) {
+            if (mRtHandlingPositionUpdates) {
+                mRtReleaseSurfaces = true;
+                return;
+            }
+
             if (mSurfaceControl != null) {
                 mTmpTransaction.remove(mSurfaceControl);
                 mSurfaceControl = null;
@@ -669,7 +677,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
             mTmpTransaction.apply();
         }
-        mSurfaceAlpha = 1f;
     }
 
     /** @hide */
@@ -1084,7 +1091,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             // the synchronization would violate the rule that RT must never block
             // on the UI thread which would open up potential deadlocks. The risk of
             // a single-frame desync is therefore preferable for now.
-            mRtHandlingPositionUpdates = true;
+            synchronized(mSurfaceControlLock) {
+                mRtHandlingPositionUpdates = true;
+            }
             if (mRTLastReportedPosition.left == left
                     && mRTLastReportedPosition.top == top
                     && mRTLastReportedPosition.right == right
@@ -1126,6 +1135,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         frameNumber);
             }
             mRtTransaction.hide(mSurfaceControl);
+
+            synchronized (mSurfaceControlLock) {
+                if (mRtReleaseSurfaces) {
+                    mRtReleaseSurfaces = false;
+                    mRtTransaction.remove(mSurfaceControl);
+                    mRtTransaction.remove(mBackgroundControl);
+                    mSurfaceControl = null;
+                    mBackgroundControl = null;
+                }
+                mRtHandlingPositionUpdates = false;
+            }
+
             mRtTransaction.apply();
         }
     };
