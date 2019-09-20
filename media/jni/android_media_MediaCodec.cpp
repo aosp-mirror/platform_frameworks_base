@@ -745,6 +745,8 @@ status_t JMediaCodec::getCodecInfo(JNIEnv *env, jobject *codecInfoObject) const 
 status_t JMediaCodec::getMetrics(JNIEnv *, MediaAnalyticsItem * &reply) const {
     mediametrics_handle_t reply2 = MediaAnalyticsItem::convert(reply);
     status_t status = mCodec->getMetrics(reply2);
+    // getMetrics() updates reply2, pass the converted update along to our caller.
+    reply = MediaAnalyticsItem::convert(reply2);
     return status;
 }
 
