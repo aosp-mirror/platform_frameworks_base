@@ -248,6 +248,7 @@ public class AppTransitionTests extends WindowTestsBase {
         boolean mCancelled = false;
         @Override
         public void onAnimationStart(RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers,
                 IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
         }
 

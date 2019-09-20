@@ -658,6 +658,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
                     @Override
                     public void onAnimationStart(RemoteAnimationTarget[] apps,
+                            RemoteAnimationTarget[] wallpapers,
                             IRemoteAnimationFinishedCallback finishedCallback) {
 
                     }

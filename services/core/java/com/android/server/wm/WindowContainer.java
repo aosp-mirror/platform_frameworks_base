@@ -895,6 +895,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    void forAllWallpaperWindows(Consumer<WallpaperWindowToken> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).forAllWallpaperWindows(callback);
+        }
+    }
+
     /**
      * For all tasks at or below this container call the callback.
      *
