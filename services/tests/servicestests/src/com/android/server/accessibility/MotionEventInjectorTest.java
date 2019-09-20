@@ -46,7 +46,6 @@ import android.graphics.Point;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -54,6 +53,8 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.accessibility.utils.MotionEventMatcher;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -759,56 +760,6 @@ public class MotionEventInjectorTest {
         EventStreamTransformation next = mock(EventStreamTransformation.class);
         motionEventInjector.setNext(next);
         return next;
-    }
-
-    static class MotionEventMatcher extends TypeSafeMatcher<MotionEvent> {
-        long mDownTime;
-        long mEventTime;
-        long mActionMasked;
-        int mX;
-        int mY;
-
-        MotionEventMatcher(long downTime, long eventTime, int actionMasked, int x, int y) {
-            mDownTime = downTime;
-            mEventTime = eventTime;
-            mActionMasked = actionMasked;
-            mX = x;
-            mY = y;
-        }
-
-        MotionEventMatcher(MotionEvent event) {
-            this(event.getDownTime(), event.getEventTime(), event.getActionMasked(),
-                    (int) event.getX(), (int) event.getY());
-        }
-
-        void offsetTimesBy(long timeOffset) {
-            mDownTime += timeOffset;
-            mEventTime += timeOffset;
-        }
-
-        @Override
-        public boolean matchesSafely(MotionEvent event) {
-            if ((event.getDownTime() == mDownTime) && (event.getEventTime() == mEventTime)
-                    && (event.getActionMasked() == mActionMasked) && ((int) event.getX() == mX)
-                    && ((int) event.getY() == mY)) {
-                return true;
-            }
-            Log.e(LOG_TAG, "MotionEvent match failed");
-            Log.e(LOG_TAG, "event.getDownTime() = " + event.getDownTime()
-                    + ", expected " + mDownTime);
-            Log.e(LOG_TAG, "event.getEventTime() = " + event.getEventTime()
-                    + ", expected " + mEventTime);
-            Log.e(LOG_TAG, "event.getActionMasked() = " + event.getActionMasked()
-                    + ", expected " + mActionMasked);
-            Log.e(LOG_TAG, "event.getX() = " + event.getX() + ", expected " + mX);
-            Log.e(LOG_TAG, "event.getY() = " + event.getY() + ", expected " + mY);
-            return false;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            description.appendText("Motion event matcher");
-        }
     }
 
     private static class MotionEventActionMatcher extends TypeSafeMatcher<MotionEvent> {
