@@ -8040,6 +8040,11 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
+        public void onFocusEvent(boolean hasFocus, boolean inTouchMode) {
+            windowFocusChanged(hasFocus, inTouchMode);
+        }
+
+        @Override
         public void dispose() {
             unscheduleConsumeBatchedInput();
             super.dispose();

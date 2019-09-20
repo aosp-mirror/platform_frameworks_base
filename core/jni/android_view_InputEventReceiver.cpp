@@ -40,10 +40,15 @@ namespace android {
 
 static const bool kDebugDispatchCycle = false;
 
+static const char* toString(bool value) {
+    return value ? "true" : "false";
+}
+
 static struct {
     jclass clazz;
 
     jmethodID dispatchInputEvent;
+    jmethodID onFocusEvent;
     jmethodID dispatchBatchedInputEventPending;
 } gInputEventReceiverClassInfo;
 
@@ -219,8 +224,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
         bool consumeBatches, nsecs_t frameTime, bool* outConsumedBatch) {
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Consuming input events, consumeBatches=%s, frameTime=%" PRId64,
-                getInputChannelName().c_str(),
-                consumeBatches ? "true" : "false", frameTime);
+              getInputChannelName().c_str(), toString(consumeBatches), frameTime);
     }
 
     if (consumeBatches) {
@@ -235,6 +239,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
     for (;;) {
         uint32_t seq;
         InputEvent* inputEvent;
+
         status_t status = mInputConsumer.consume(&mInputEventFactory,
                 consumeBatches, frameTime, &seq, &inputEvent);
         if (status) {
@@ -301,6 +306,19 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 }
                 inputEventObj = android_view_MotionEvent_obtainAsCopy(env, motionEvent);
                 break;
+            }
+            case AINPUT_EVENT_TYPE_FOCUS: {
+                FocusEvent* focusEvent = static_cast<FocusEvent*>(inputEvent);
+                if (kDebugDispatchCycle) {
+                    ALOGD("channel '%s' ~ Received focus event: hasFocus=%s, inTouchMode=%s.",
+                          getInputChannelName().c_str(), toString(focusEvent->getHasFocus()),
+                          toString(focusEvent->getInTouchMode()));
+                }
+                env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onFocusEvent,
+                                    jboolean(focusEvent->getHasFocus()),
+                                    jboolean(focusEvent->getInTouchMode()));
+                finishInputEvent(seq, true /* handled */);
+                return OK;
             }
 
             default:
@@ -421,6 +439,8 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
     gInputEventReceiverClassInfo.dispatchInputEvent = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz,
             "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
+    gInputEventReceiverClassInfo.onFocusEvent =
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onFocusEvent", "(ZZ)V");
     gInputEventReceiverClassInfo.dispatchBatchedInputEventPending = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz, "dispatchBatchedInputEventPending", "()V");
 
