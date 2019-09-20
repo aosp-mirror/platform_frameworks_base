@@ -1552,7 +1552,7 @@ class ActivityStarter {
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
         mService.getPackageManagerInternalLocked().grantImplicitAccess(
                 mStartActivity.mUserId, mIntent,
-                UserHandle.getAppId(mCallingUid),
+                mCallingUid,
                 UserHandle.getAppId(mStartActivity.info.applicationInfo.uid)
         );
         if (newTask) {

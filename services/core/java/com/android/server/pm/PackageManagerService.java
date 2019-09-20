@@ -8375,15 +8375,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean isInstantApp(String packageName, int userId) {
-        mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
+        final int callingUid = Binder.getCallingUid();
+        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "isInstantApp");
+
+        return isInstantAppInternal(packageName, userId, callingUid);
+    }
+
+    private boolean isInstantAppInternal(String packageName, @UserIdInt int userId,
+            int callingUid) {
         if (HIDE_EPHEMERAL_APIS) {
             return false;
         }
-
         synchronized (mLock) {
-            int callingUid = Binder.getCallingUid();
             if (Process.isIsolated(callingUid)) {
                 callingUid = mIsolatedOwners.get(callingUid);
             }
@@ -23381,19 +23386,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void grantImplicitAccess(int userId, Intent intent,
-                int callingAppId, int targetAppId) {
+                int callingUid, int targetAppId) {
             synchronized (mLock) {
-                final PackageParser.Package callingPackage = getPackage(
-                        UserHandle.getUid(userId, callingAppId));
-                final PackageParser.Package targetPackage = getPackage(
-                        UserHandle.getUid(userId, targetAppId));
+                final PackageParser.Package callingPackage = getPackage(callingUid);
+                final PackageParser.Package targetPackage =
+                        getPackage(UserHandle.getUid(userId, targetAppId));
                 if (callingPackage == null || targetPackage == null) {
                     return;
                 }
 
-                if (isInstantApp(callingPackage.packageName, userId)) {
+                final boolean instantApp = isInstantAppInternal(callingPackage.packageName, userId,
+                        callingUid);
+                if (instantApp) {
                     mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
-                            callingAppId, targetAppId);
+                            UserHandle.getAppId(callingUid), targetAppId);
                 } else {
                     mAppsFilter.grantImplicitAccess(
                             callingPackage.packageName, targetPackage.packageName, userId);
