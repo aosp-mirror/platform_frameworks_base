@@ -1904,10 +1904,10 @@ public class ZenModeConfig implements Parcelable {
     }
 
     /**
-     * Determines whether dnd behavior should mute all notification/ringer sounds
-     * (sounds associated with ringer volume discluding system)
+     * Determines whether dnd behavior should mute all ringer-controlled sounds
+     * This includes notification, ringer and system sounds
      */
-    public static boolean areAllPriorityOnlyNotificationZenSoundsMuted(NotificationManager.Policy
+    public static boolean areAllPriorityOnlyRingerSoundsMuted(NotificationManager.Policy
             policy) {
         boolean allowReminders = (policy.priorityCategories
                 & NotificationManager.Policy.PRIORITY_CATEGORY_REMINDERS) != 0;
@@ -1920,20 +1920,19 @@ public class ZenModeConfig implements Parcelable {
         boolean allowRepeatCallers = (policy.priorityCategories
                 & NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CALLERS) != 0;
         boolean areChannelsBypassingDnd = (policy.state & Policy.STATE_CHANNELS_BYPASSING_DND) != 0;
+        boolean allowSystem =  (policy.priorityCategories & Policy.PRIORITY_CATEGORY_SYSTEM) != 0;
         return !allowReminders && !allowCalls && !allowMessages && !allowEvents
-                && !allowRepeatCallers && !areChannelsBypassingDnd;
+                && !allowRepeatCallers && !areChannelsBypassingDnd && !allowSystem;
     }
 
     /**
-     * Determines whether dnd behavior should mute all sounds controlled by ringer
+     * Determines whether dnd behavior should mute all sounds
      */
     public static boolean areAllZenBehaviorSoundsMuted(NotificationManager.Policy
             policy) {
         boolean allowAlarms = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS) != 0;
         boolean allowMedia = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MEDIA) != 0;
-        boolean allowSystem = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_SYSTEM) != 0;
-        return !allowAlarms && !allowMedia && !allowSystem
-                && areAllPriorityOnlyNotificationZenSoundsMuted(policy);
+        return !allowAlarms && !allowMedia && areAllPriorityOnlyRingerSoundsMuted(policy);
     }
 
     /**
@@ -1943,24 +1942,25 @@ public class ZenModeConfig implements Parcelable {
         return zen == Global.ZEN_MODE_NO_INTERRUPTIONS
                 || zen == Global.ZEN_MODE_ALARMS
                 || (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(consolidatedPolicy));
+                && ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(consolidatedPolicy));
     }
 
     /**
-     * Determines whether dnd behavior should mute all sounds controlled by ringer
+     * Determines whether dnd behavior should mute all ringer-controlled sounds
+     * This includes notification, ringer and system sounds
      */
-    public static boolean areAllPriorityOnlyNotificationZenSoundsMuted(ZenModeConfig config) {
+    public static boolean areAllPriorityOnlyRingerSoundsMuted(ZenModeConfig config) {
         return !config.allowReminders && !config.allowCalls && !config.allowMessages
                 && !config.allowEvents && !config.allowRepeatCallers
-                && !config.areChannelsBypassingDnd;
+                && !config.areChannelsBypassingDnd && !config.allowSystem;
     }
 
     /**
-     * Determines whether all dnd mutes all sounds
+     * Determines whether dnd mutes all sounds
      */
     public static boolean areAllZenBehaviorSoundsMuted(ZenModeConfig config) {
-        return !config.allowAlarms  && !config.allowMedia && !config.allowSystem
-                && areAllPriorityOnlyNotificationZenSoundsMuted(config);
+        return !config.allowAlarms  && !config.allowMedia
+                && areAllPriorityOnlyRingerSoundsMuted(config);
     }
 
     /**

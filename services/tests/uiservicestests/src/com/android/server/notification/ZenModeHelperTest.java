@@ -487,7 +487,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testRingerAffectedStreamsPriorityOnly() {
         // in priority only mode:
         // ringtone, notification and system streams are affected by ringer mode
-        // UNLESS ringer is muted due to all the other priority only dnd sounds being muted
         mZenModeHelperSpy.mConfig.allowAlarms = true;
         mZenModeHelperSpy.mConfig.allowReminders = true;
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
@@ -503,8 +502,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_ALARM)) == 0);
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_MUSIC)) == 0);
 
-        // special case: if ringer is muted (since all notification sounds cannot bypass)
-        // then system stream is not affected by ringer mode
+        // even when ringer is muted (since all ringer sounds cannot bypass DND),
+        // system stream is still affected by ringer mode
+        mZenModeHelperSpy.mConfig.allowSystem = false;
         mZenModeHelperSpy.mConfig.allowReminders = false;
         mZenModeHelperSpy.mConfig.allowCalls = false;
         mZenModeHelperSpy.mConfig.allowMessages = false;
@@ -519,7 +519,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertTrue((ringerMutedRingerModeAffectedStreams & (1 << AudioSystem.STREAM_NOTIFICATION))
                 != 0);
         assertTrue((ringerMutedRingerModeAffectedStreams & (1 << AudioSystem.STREAM_SYSTEM))
-                == 0);
+                != 0);
         assertTrue((ringerMutedRingerModeAffectedStreams & (1 << AudioSystem.STREAM_ALARM)) == 0);
         assertTrue((ringerMutedRingerModeAffectedStreams & (1 << AudioSystem.STREAM_MUSIC)) == 0);
     }
