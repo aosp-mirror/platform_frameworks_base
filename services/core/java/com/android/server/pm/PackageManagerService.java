@@ -23391,7 +23391,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
 
-                if (isInstantApp(callingPackage.packageName, userId)) {
+                final long caller = Binder.clearCallingIdentity();
+                final boolean instantApp = isInstantApp(callingPackage.packageName, userId);
+                Binder.restoreCallingIdentity(caller);
+                if (instantApp) {
                     mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
                             callingAppId, targetAppId);
                 } else {
