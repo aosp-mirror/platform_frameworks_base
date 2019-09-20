@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
@@ -446,7 +446,7 @@ public class AlwaysOnHotwordDetector {
 
     /**
      * Creates an intent to start the enrollment for the associated keyphrase.
-     * This intent must be invoked using {@link Context#startForegroundService(Intent)}.
+     * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
      * Starting re-enrollment is only valid if the keyphrase is un-enrolled,
      * i.e. {@link #STATE_KEYPHRASE_UNENROLLED},
      * otherwise {@link #createReEnrollIntent()} should be preferred.
@@ -468,7 +468,7 @@ public class AlwaysOnHotwordDetector {
 
     /**
      * Creates an intent to start the un-enrollment for the associated keyphrase.
-     * This intent must be invoked using {@link Context#startForegroundService(Intent)}.
+     * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
      * Starting re-enrollment is only valid if the keyphrase is already enrolled,
      * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
      *
@@ -489,7 +489,7 @@ public class AlwaysOnHotwordDetector {
 
     /**
      * Creates an intent to start the re-enrollment for the associated keyphrase.
-     * This intent must be invoked using {@link Context#startForegroundService(Intent)}.
+     * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
      * Starting re-enrollment is only valid if the keyphrase is already enrolled,
      * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
      *
