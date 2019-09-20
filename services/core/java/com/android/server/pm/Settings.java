@@ -62,6 +62,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.SELinux;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -94,6 +95,7 @@ import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.PermissionSettings;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
+import com.android.server.utils.TimingsTraceAndSlog;
 
 import libcore.io.IoUtils;
 
@@ -4012,8 +4014,11 @@ public final class Settings {
         }
     }
 
-    void createNewUserLI(@NonNull PackageManagerService service, @NonNull Installer installer,
-            int userHandle, String[] disallowedPackages) {
+    void createNewUserLI(@NonNull PackageManagerService service,
+            @NonNull Installer installer, int userHandle, String[] disallowedPackages) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
+                Trace.TRACE_TAG_PACKAGE_MANAGER);
+        t.traceBegin("createNewUser-" + userHandle);
         String[] volumeUuids;
         String[] names;
         int[] appIds;
@@ -4051,6 +4056,7 @@ public final class Settings {
                 targetSdkVersions[i] = ps.pkg.applicationInfo.targetSdkVersion;
             }
         }
+        t.traceBegin("createAppData");
         for (int i = 0; i < packagesCount; i++) {
             if (names[i] == null) {
                 continue;
@@ -4064,9 +4070,11 @@ public final class Settings {
                 Slog.w(TAG, "Failed to prepare app data", e);
             }
         }
+        t.traceEnd(); // createAppData
         synchronized (mLock) {
             applyDefaultPreferredAppsLPw(userHandle);
         }
+        t.traceEnd(); // createNewUser
     }
 
     void removeUserLPw(int userId) {
