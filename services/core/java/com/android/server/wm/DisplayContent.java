@@ -583,27 +583,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     };
 
-    private final Consumer<WindowState> mUpdateWallpaperForAnimator = w -> {
-        final WindowStateAnimator winAnimator = w.mWinAnimator;
-        if (winAnimator.mSurfaceController == null || !winAnimator.hasSurface()) {
-            return;
-        }
-
-        // If this window is animating, ensure the animation background is set.
-        final AnimationAdapter anim = w.mAppToken != null
-                ? w.mAppToken.getAnimation()
-                : w.getAnimation();
-        if (anim != null) {
-            final int color = anim.getBackgroundColor();
-            if (color != 0) {
-                final TaskStack stack = w.getStack();
-                if (stack != null) {
-                    stack.setAnimationBackground(winAnimator, color);
-                }
-            }
-        }
-    };
-
     private final Consumer<WindowState> mScheduleToastTimeout = w -> {
         final int lostFocusUid = mTmpWindow.mOwnerUid;
         final Handler handler = mWmService.mH;
@@ -2383,12 +2362,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayPolicy.switchUser();
     }
 
-    private void resetAnimationBackgroundAnimator() {
-        for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            mTaskStackContainers.getChildAt(stackNdx).resetAnimationBackgroundAnimator();
-        }
-    }
-
     @Override
     void removeIfPossible() {
         if (isAnimating()) {
@@ -3420,14 +3393,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void updateWindowsForAnimator() {
         forAllWindows(mUpdateWindowsForAnimator, true /* traverseTopToBottom */);
-    }
-
-    /**
-     * Updates the {@link TaskStack#setAnimationBackground} for all windows.
-     */
-    void updateBackgroundForAnimator() {
-        resetAnimationBackgroundAnimator();
-        forAllWindows(mUpdateWallpaperForAnimator, true /* traverseTopToBottom */);
     }
 
     boolean isInputMethodClientFocus(int uid, int pid) {

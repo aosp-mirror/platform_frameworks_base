@@ -238,11 +238,6 @@ class InsetsSourceProvider {
         }
 
         @Override
-        public int getBackgroundColor() {
-            return 0;
-        }
-
-        @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
             mCapturedLeash = animationLeash;

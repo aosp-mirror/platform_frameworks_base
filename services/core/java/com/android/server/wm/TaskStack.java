@@ -45,7 +45,6 @@ import static com.android.server.wm.StackProto.ADJUSTED_FOR_IME;
 import static com.android.server.wm.StackProto.ADJUST_DIVIDER_AMOUNT;
 import static com.android.server.wm.StackProto.ADJUST_IME_AMOUNT;
 import static com.android.server.wm.StackProto.ANIMATING_BOUNDS;
-import static com.android.server.wm.StackProto.ANIMATION_BACKGROUND_SURFACE_IS_DIMMING;
 import static com.android.server.wm.StackProto.BOUNDS;
 import static com.android.server.wm.StackProto.DEFER_REMOVAL;
 import static com.android.server.wm.StackProto.FILLS_PARENT;
@@ -110,12 +109,6 @@ public class TaskStack extends WindowContainer<Task> implements
      * represent the state when the animation has ended.
      */
     private final Rect mFullyAdjustedImeBounds = new Rect();
-
-    private SurfaceControl mAnimationBackgroundSurface;
-    private boolean mAnimationBackgroundSurfaceIsShown = false;
-
-    /** The particular window with an Animation with non-zero background color. */
-    private WindowStateAnimator mAnimationBackgroundAnimator;
 
     /** Application tokens that are exiting, but still on screen for animations. */
     final AppTokenList mExitingAppTokens = new AppTokenList();
@@ -230,39 +223,6 @@ public class TaskStack extends WindowContainer<Task> implements
         }
     }
 
-    private void updateAnimationBackgroundBounds() {
-        if (mAnimationBackgroundSurface == null) {
-            return;
-        }
-        getRawBounds(mTmpRect);
-        final Rect stackBounds = getBounds();
-        getPendingTransaction()
-                .setWindowCrop(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
-                .setPosition(mAnimationBackgroundSurface, mTmpRect.left - stackBounds.left,
-                        mTmpRect.top - stackBounds.top);
-        scheduleAnimation();
-    }
-
-    private void hideAnimationSurface() {
-        if (mAnimationBackgroundSurface == null) {
-            return;
-        }
-        getPendingTransaction().hide(mAnimationBackgroundSurface);
-        mAnimationBackgroundSurfaceIsShown = false;
-        scheduleAnimation();
-    }
-
-    private void showAnimationSurface(float alpha) {
-        if (mAnimationBackgroundSurface == null) {
-            return;
-        }
-        getPendingTransaction().setLayer(mAnimationBackgroundSurface, Integer.MIN_VALUE)
-                .setAlpha(mAnimationBackgroundSurface, alpha)
-                .show(mAnimationBackgroundSurface);
-        mAnimationBackgroundSurfaceIsShown = true;
-        scheduleAnimation();
-    }
-
     @Override
     public int setBounds(Rect bounds) {
         return setBounds(getRequestedOverrideBounds(), bounds);
@@ -274,10 +234,6 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         final int result = super.setBounds(bounds);
-
-        if (getParent() != null) {
-            updateAnimationBackgroundBounds();
-        }
 
         updateAdjustedBounds();
 
@@ -821,11 +777,6 @@ public class TaskStack extends WindowContainer<Task> implements
         super.onDisplayChanged(dc);
 
         updateSurfaceBounds();
-        if (mAnimationBackgroundSurface == null) {
-            mAnimationBackgroundSurface = makeChildSurface(null).setColorLayer()
-                    .setName("animation background stackId=" + mStackId)
-                    .build();
-        }
     }
 
     /**
@@ -1007,25 +958,8 @@ public class TaskStack extends WindowContainer<Task> implements
 
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 
-        if (mAnimationBackgroundSurface != null) {
-            mWmService.mTransactionFactory.get().remove(mAnimationBackgroundSurface).apply();
-            mAnimationBackgroundSurface = null;
-        }
-
         mDisplayContent = null;
         mWmService.mWindowPlacerLocked.requestTraversal();
-    }
-
-    void resetAnimationBackgroundAnimator() {
-        mAnimationBackgroundAnimator = null;
-        hideAnimationSurface();
-    }
-
-    void setAnimationBackground(WindowStateAnimator winAnimator, int color) {
-        if (mAnimationBackgroundAnimator == null) {
-            mAnimationBackgroundAnimator = winAnimator;
-            showAnimationSurface(((color >> 24) & 0xff) / 255f);
-        }
     }
 
     // TODO: Should each user have there own stacks?
@@ -1364,7 +1298,6 @@ public class TaskStack extends WindowContainer<Task> implements
         }
         proto.write(FILLS_PARENT, matchParentBounds());
         getRawBounds().writeToProto(proto, BOUNDS);
-        proto.write(ANIMATION_BACKGROUND_SURFACE_IS_DIMMING, mAnimationBackgroundSurfaceIsShown);
         proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.write(MINIMIZE_AMOUNT, mMinimizeAmount);
         proto.write(ADJUSTED_FOR_IME, mAdjustedForIme);
@@ -1393,9 +1326,6 @@ public class TaskStack extends WindowContainer<Task> implements
         }
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
             mChildren.get(taskNdx).dump(pw, prefix + "  ", dumpAll);
-        }
-        if (mAnimationBackgroundSurfaceIsShown) {
-            pw.println(prefix + "mWindowAnimationBackgroundSurface is shown");
         }
         if (!mExitingAppTokens.isEmpty()) {
             pw.println();

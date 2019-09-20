@@ -196,7 +196,7 @@ message StackProto {
     repeated TaskProto tasks = 3;
     optional bool fills_parent = 4;
     optional .android.graphics.RectProto bounds = 5;
-    optional bool animation_background_surface_is_dimming = 6;
+    optional bool animation_background_surface_is_dimming = 6 [deprecated=true];
     optional bool defer_removal = 7;
     optional float minimize_amount = 8;
     optional bool adjusted_for_ime = 9;

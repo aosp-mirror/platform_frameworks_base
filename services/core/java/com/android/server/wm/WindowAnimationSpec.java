@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static com.android.server.wm.AnimationAdapter.STATUS_BAR_TRANSITION_DURATION;
 import static com.android.server.wm.AnimationSpecProto.WINDOW;
 import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
 import android.graphics.Point;
@@ -78,11 +77,6 @@ public class WindowAnimationSpec implements AnimationSpec {
     @Override
     public boolean getShowWallpaper() {
         return mAnimation.getShowWallpaper();
-    }
-
-    @Override
-    public int getBackgroundColor() {
-        return mAnimation.getBackgroundColor();
     }
 
     @Override

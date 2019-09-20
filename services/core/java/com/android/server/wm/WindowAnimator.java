@@ -180,7 +180,6 @@ public class WindowAnimator {
                     // Update animations of all applications, including those
                     // associated with exiting/removed apps
                     dc.updateWindowsForAnimator();
-                    dc.updateBackgroundForAnimator();
                     dc.prepareSurfaces();
                 }
 
