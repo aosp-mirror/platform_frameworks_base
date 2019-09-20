@@ -5,6 +5,9 @@ java_library_static {
         "java/**/*.java",
         "java/**/*.aidl",
     ],
+    aidl: {
+        local_include_dirs: ["java"]
+    },
     libs: [
         "services.net",
     ],
