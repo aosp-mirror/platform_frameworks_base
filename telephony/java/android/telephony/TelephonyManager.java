@@ -361,7 +361,6 @@ public class TelephonyManager {
         }
     }
 
-
     /**
      * Returns the number of phones available.
      * Returns 0 if none of voice, sms, data is not supported
@@ -392,6 +391,31 @@ public class TelephonyManager {
                 break;
         }
         return phoneCount;
+    }
+
+    /**
+     *
+     * Return how many phone / logical modem can be active simultaneously, in terms of device
+     * capability.
+     * For example, for a dual-SIM capable device, it always returns 2, even if only one logical
+     * modem / SIM is active (aka in single SIM mode).
+     *
+     * TODO: b/139642279 publicize and rename.
+     * @hide
+     */
+    public static int getMaxPhoneCount() {
+        // TODO: b/139642279 when turning on this feature, remove dependency of
+        // PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE and always return result based on
+        // PROPERTY_MAX_ACTIVE_MODEMS.
+        String rebootRequired = SystemProperties.get(
+                TelephonyProperties.PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE);
+        if (rebootRequired.equals("false")) {
+            // If no reboot is required, return max possible active modems.
+            return SystemProperties.getInt(
+                    TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS, getDefault().getPhoneCount());
+        } else {
+            return getDefault().getPhoneCount();
+        }
     }
 
     /** {@hide} */
