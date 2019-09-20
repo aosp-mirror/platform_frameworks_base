@@ -3791,6 +3791,7 @@
 
   <!-- For high refresh rate displays -->
   <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
+  <java-symbol type="integer" name="config_defaultRefreshRateInZone" />
   <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
   <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />
 
