@@ -294,6 +294,9 @@ public class InputManagerService extends IInputManager.Stub
     /** Switch code: Camera lens cover. When set the lens is covered. */
     public static final int SW_CAMERA_LENS_COVER = 0x09;
 
+    /** Switch code: Microphone. When set it is off. */
+    public static final int SW_MUTE_DEVICE = 0x0e;
+
     public static final int SW_LID_BIT = 1 << SW_LID;
     public static final int SW_TABLET_MODE_BIT = 1 << SW_TABLET_MODE;
     public static final int SW_KEYPAD_SLIDE_BIT = 1 << SW_KEYPAD_SLIDE;
@@ -304,6 +307,7 @@ public class InputManagerService extends IInputManager.Stub
     public static final int SW_JACK_BITS =
             SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_JACK_PHYSICAL_INSERT_BIT | SW_LINEOUT_INSERT_BIT;
     public static final int SW_CAMERA_LENS_COVER_BIT = 1 << SW_CAMERA_LENS_COVER;
+    public static final int SW_MUTE_DEVICE_BIT = 1 << SW_MUTE_DEVICE;
 
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
     final boolean mUseDevInputEventForAudioJack;
@@ -967,6 +971,11 @@ public class InputManagerService extends IInputManager.Stub
             throw new SecurityException("Requires TABLET_MODE permission");
         }
         return getSwitchState(-1, InputDevice.SOURCE_ANY, SW_TABLET_MODE);
+    }
+
+    @Override // Binder call
+    public int isMicMuted() {
+        return getSwitchState(-1, InputDevice.SOURCE_ANY, SW_MUTE_DEVICE);
     }
 
     @Override // Binder call
