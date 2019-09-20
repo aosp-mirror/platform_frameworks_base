@@ -25,6 +25,8 @@ import android.provider.DeviceConfig;
 
 import com.android.systemui.util.DeviceConfigProxy;
 
+import java.util.Locale;
+
 /**
  * False on swipes that are too close to 45 degrees.
  *
@@ -82,6 +84,15 @@ class DiagonalClassifier extends FalsingClassifier {
                 || angleBetween(angle, minAngle - NINETY_DEG, maxAngle - NINETY_DEG)
                 || angleBetween(angle, minAngle + ONE_HUNDRED_EIGHTY_DEG,
                 maxAngle + ONE_HUNDRED_EIGHTY_DEG);
+    }
+
+    @Override
+    String getReason() {
+        return String.format(
+                (Locale) null,
+                "{angle=%f, vertical=%s}",
+                getAngle(),
+                isVertical());
     }
 
     private boolean angleBetween(float angle, float min, float max) {
