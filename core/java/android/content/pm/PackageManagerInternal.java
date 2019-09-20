@@ -334,11 +334,11 @@ public abstract class PackageManagerInternal {
      * <p>
      * @param userId the user
      * @param intent the intent that triggered the grant
-     * @param callingAppId The app ID of the calling application
+     * @param callingUid The uid of the calling application
      * @param targetAppId The app ID of the target application
      */
     public abstract void grantImplicitAccess(
-            @UserIdInt int userId, Intent intent, @AppIdInt int callingAppId,
+            @UserIdInt int userId, Intent intent, int callingUid,
             @AppIdInt int targetAppId);
 
     public abstract boolean isInstantAppInstallerComponent(ComponentName component);
