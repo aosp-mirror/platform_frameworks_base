@@ -204,6 +204,7 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
@@ -1603,7 +1604,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mDisplayId = displayId;
         }
 
-        int handleHomeButton(WindowState win, KeyEvent event) {
+        int handleHomeButton(IBinder focusedToken, KeyEvent event) {
             final boolean keyguardOn = keyguardOn();
             final int repeatCount = event.getRepeatCount();
             final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
@@ -1646,18 +1647,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return -1;
             }
 
-            // If a system window has focus, then it doesn't make sense
-            // right now to interact with applications.
-            WindowManager.LayoutParams attrs = win != null ? win.getAttrs() : null;
-            if (attrs != null) {
-                final int type = attrs.type;
-                if (type == TYPE_KEYGUARD_DIALOG
-                        || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+            final KeyInterceptionInfo info =
+                    mWindowManagerInternal.getKeyInterceptionInfoFromToken(focusedToken);
+            if (info != null) {
+                // If a system window has focus, then it doesn't make sense
+                // right now to interact with applications.
+                if (info.layoutParamsType == TYPE_KEYGUARD_DIALOG
+                        || (info.layoutParamsPrivateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     // the "app" is keyguard, so give it the key
                     return 0;
                 }
                 for (int t : WINDOW_TYPES_WHERE_HOME_DOESNT_WORK) {
-                    if (type == t) {
+                    if (info.layoutParamsType == t) {
                         // don't do anything, but also don't pass it to the app
                         return -1;
                     }
@@ -2598,8 +2599,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // TODO(b/117479243): handle it in InputPolicy
     /** {@inheritDoc} */
     @Override
-    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
-        final long result = interceptKeyBeforeDispatchingInner(win, event, policyFlags);
+    public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
+            int policyFlags) {
+        final long result = interceptKeyBeforeDispatchingInner(focusedToken, event, policyFlags);
         final int eventDisplayId = event.getDisplayId();
         if (result == 0 && !mPerDisplayFocusEnabled
                 && eventDisplayId != INVALID_DISPLAY && eventDisplayId != mTopFocusedDisplayId) {
@@ -2627,7 +2629,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return result;
     }
 
-    private long interceptKeyBeforeDispatchingInner(WindowState win, KeyEvent event,
+    private long interceptKeyBeforeDispatchingInner(IBinder focusedToken, KeyEvent event,
             int policyFlags) {
         final boolean keyguardOn = keyguardOn();
         final int keyCode = event.getKeyCode();
@@ -2730,7 +2732,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 handler = new DisplayHomeButtonHandler(displayId);
                 mDisplayHomeButtonHandlers.put(displayId, handler);
             }
-            return handler.handleHomeButton(win, event);
+            return handler.handleHomeButton(focusedToken, event);
         } else if (keyCode == KeyEvent.KEYCODE_MENU) {
             // Hijack modified menu keys for debugging features
             final int chordBug = KeyEvent.META_SHIFT_ON;
@@ -3131,10 +3133,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // TODO(b/117479243): handle it in InputPolicy
     /** {@inheritDoc} */
     @Override
-    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
+    public KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags) {
         // Note: This method is only called if the initial down was unhandled.
         if (DEBUG_INPUT) {
-            Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + event.getAction()
+            final KeyInterceptionInfo info =
+                    mWindowManagerInternal.getKeyInterceptionInfoFromToken(focusedToken);
+            final String title = info == null ? "<unknown>" : info.windowTitle;
+            Slog.d(TAG, "Unhandled key: inputToken=" + focusedToken
+                    + ", title=" + title
+                    + ", action=" + event.getAction()
                     + ", flags=" + event.getFlags()
                     + ", keyCode=" + event.getKeyCode()
                     + ", scanCode=" + event.getScanCode()
@@ -3173,7 +3180,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         event.getDeviceId(), event.getScanCode(),
                         flags, event.getSource(), event.getDisplayId(), null);
 
-                if (!interceptFallback(win, fallbackEvent, policyFlags)) {
+                if (!interceptFallback(focusedToken, fallbackEvent, policyFlags)) {
                     fallbackEvent.recycle();
                     fallbackEvent = null;
                 }
@@ -3197,11 +3204,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return fallbackEvent;
     }
 
-    private boolean interceptFallback(WindowState win, KeyEvent fallbackEvent, int policyFlags) {
+    private boolean interceptFallback(IBinder focusedToken, KeyEvent fallbackEvent,
+            int policyFlags) {
         int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             long delayMillis = interceptKeyBeforeDispatching(
-                    win, fallbackEvent, policyFlags);
+                    focusedToken, fallbackEvent, policyFlags);
             if (delayMillis == 0) {
                 return true;
             }

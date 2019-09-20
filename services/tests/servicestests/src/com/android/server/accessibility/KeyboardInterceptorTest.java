@@ -28,12 +28,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import android.os.IBinder;
 import android.view.KeyEvent;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.policy.WindowManagerPolicy.WindowState;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -79,7 +79,7 @@ public class KeyboardInterceptorTest {
     @Test
     public void whenVolumeKeyArrives_andPolicySaysUseIt_eventGoesToAms() {
         KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_DOWN);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(event)), eq(0))).thenReturn(0L);
         mInterceptor.onKeyEvent(event, 0);
         verify(mMockAms).notifyKeyEvent(argThat(matchesKeyEvent(event)), eq(0));
@@ -88,7 +88,7 @@ public class KeyboardInterceptorTest {
     @Test
     public void whenVolumeKeyArrives_andPolicySaysDropIt_eventDropped() {
         KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(event)), eq(0))).thenReturn(-1L);
         mInterceptor.onKeyEvent(event, 0);
         verify(mMockAms, times(0)).notifyKeyEvent(anyObject(), anyInt());
@@ -98,14 +98,14 @@ public class KeyboardInterceptorTest {
     @Test
     public void whenVolumeKeyArrives_andPolicySaysDelayThenUse_eventQueuedThenSentToAms() {
         KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(event)), eq(0))).thenReturn(150L);
         mInterceptor.onKeyEvent(event, 0);
 
         assertTrue(mHandler.hasMessages());
         verify(mMockAms, times(0)).notifyKeyEvent(anyObject(), anyInt());
 
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(event)), eq(0))).thenReturn(0L);
         mHandler.sendAllMessages();
 
@@ -115,14 +115,14 @@ public class KeyboardInterceptorTest {
     @Test
     public void whenVolumeKeyArrives_andPolicySaysDelayThenDrop_eventQueuedThenDropped() {
         KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_DOWN);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(event)), eq(0))).thenReturn(150L);
         mInterceptor.onKeyEvent(event, 0);
 
         assertTrue(mHandler.hasMessages());
         verify(mMockAms, times(0)).notifyKeyEvent(anyObject(), anyInt());
 
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(event)), eq(0))).thenReturn(-1L);
         mHandler.sendAllMessages();
 
@@ -137,18 +137,18 @@ public class KeyboardInterceptorTest {
                 new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_VOLUME_UP),
                 new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_0)};
 
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[1])), eq(0))).thenReturn(150L);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[3])), eq(0))).thenReturn(75L);
 
         for (KeyEvent event : events) {
             mInterceptor.onKeyEvent(event, 0);
         }
 
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[1])), eq(0))).thenReturn(0L);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[3])), eq(0))).thenReturn(0L);
 
         mHandler.sendAllMessages();
@@ -167,18 +167,18 @@ public class KeyboardInterceptorTest {
                 new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_VOLUME_UP),
                 new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_0)};
 
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[1])), eq(0))).thenReturn(150L);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[3])), eq(0))).thenReturn(75L);
 
         for (KeyEvent event : events) {
             mInterceptor.onKeyEvent(event, 0);
         }
 
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[1])), eq(0))).thenReturn(-1L);
-        when(mMockPolicy.interceptKeyBeforeDispatching((WindowState) argThat(nullValue()),
+        when(mMockPolicy.interceptKeyBeforeDispatching((IBinder) argThat(nullValue()),
                 argThat(matchesKeyEvent(events[3])), eq(0))).thenReturn(-1L);
 
         mHandler.sendAllMessages();

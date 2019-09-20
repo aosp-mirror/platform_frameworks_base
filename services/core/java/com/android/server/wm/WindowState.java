@@ -203,6 +203,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
@@ -638,6 +639,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private @Nullable InsetsSourceProvider mInsetProvider;
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
+    private KeyInterceptionInfo mKeyInterceptionInfo;
 
     void seamlesslyRotateIfAllowed(Transaction transaction, @Rotation int oldRotation,
             @Rotation int rotation, boolean requested) {
@@ -2225,6 +2227,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClientChannel.dispose();
             mClientChannel = null;
         }
+        mWmService.mKeyInterceptionInfoForToken.remove(mInputWindowHandle.token);
         mInputWindowHandle.token = null;
     }
 
@@ -5333,5 +5336,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             proto.write(DURATION_MS, mDuration);
             proto.end(token);
         }
+    }
+
+    KeyInterceptionInfo getKeyInterceptionInfo() {
+        if (mKeyInterceptionInfo == null
+                || mKeyInterceptionInfo.layoutParamsPrivateFlags != getAttrs().privateFlags
+                || mKeyInterceptionInfo.layoutParamsType != getAttrs().type
+                || mKeyInterceptionInfo.windowTitle != getWindowTag()) {
+            mKeyInterceptionInfo = new KeyInterceptionInfo(getAttrs().type, getAttrs().privateFlags,
+                    getWindowTag().toString());
+        }
+        return mKeyInterceptionInfo;
     }
 }

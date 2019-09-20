@@ -173,7 +173,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Interface to the Window Manager state associated with a particular
-     * window.  You can hold on to an instance of this interface from the call
+     * window. You can hold on to an instance of this interface from the call
      * to prepareAddWindow() until removeWindow().
      */
     public interface WindowState {
@@ -1025,7 +1025,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * behavior for keys that can not be overridden by applications.
      * This method is called from the input thread, with no locks held.
      *
-     * @param win The window that currently has focus.  This is where the key
+     * @param focusedToken Client window token that currently has focus. This is where the key
      *            event will normally go.
      * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
@@ -1034,7 +1034,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * milliseconds by which the key dispatch should be delayed before trying
      * again.
      */
-    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags);
+    long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event, int policyFlags);
 
     /**
      * Called from the input dispatcher thread when an application did not handle
@@ -1043,14 +1043,14 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * <p>Allows you to define default global behavior for keys that were not handled
      * by applications.  This method is called from the input thread, with no locks held.
      *
-     * @param win The window that currently has focus.  This is where the key
+     * @param focusedToken Client window token that currently has focus. This is where the key
      *            event will normally go.
      * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
      * @return Returns an alternate key event to redispatch as a fallback, or null to give up.
      * The caller is responsible for recycling the key event.
      */
-    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags);
+    KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags);
 
     /**
      * Called when the top focused display is changed.
