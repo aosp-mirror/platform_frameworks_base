@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -440,8 +441,15 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
             throws DeviceNotAvailableException {
         assertTrue(path.startsWith("/data/"));
         ITestDevice.MountPointInfo mountPoint = mDevice.getMountPointInfo("/data");
-        expectRemoteCommandToSucceed(String.join(" ", DAMAGING_EXECUTABLE,
-                    mountPoint.filesystem, path, Long.toString(offsetOfTargetingByte)));
+        ArrayList<String> args = new ArrayList<>();
+        args.add(DAMAGING_EXECUTABLE);
+        if ("f2fs".equals(mountPoint.type)) {
+            args.add("--use-f2fs-pinning");
+        }
+        args.add(mountPoint.filesystem);
+        args.add(path);
+        args.add(Long.toString(offsetOfTargetingByte));
+        expectRemoteCommandToSucceed(String.join(" ", args));
     }
 
     private String getApkPath(String packageName) throws DeviceNotAvailableException {
