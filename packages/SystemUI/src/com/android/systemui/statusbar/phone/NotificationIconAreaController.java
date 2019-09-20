@@ -537,17 +537,21 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (dozeParameters.shouldControlScreenOff()) {
             mAodIcons.setTranslationY(-mAodIconAppearTranslation);
             mAodIcons.setAlpha(0);
-            mAodIcons.animate()
-                    .setInterpolator(Interpolators.DECELERATE_QUINT)
-                    .translationY(0)
-                    .setDuration(AOD_ICONS_APPEAR_DURATION)
-                    .start();
+            animateInAodIconTranslation();
             mAodIcons.animate()
                     .alpha(1)
                     .setInterpolator(Interpolators.LINEAR)
                     .setDuration(AOD_ICONS_APPEAR_DURATION)
                     .start();
         }
+    }
+
+    private void animateInAodIconTranslation() {
+        mAodIcons.animate()
+                .setInterpolator(Interpolators.DECELERATE_QUINT)
+                .translationY(0)
+                .setDuration(AOD_ICONS_APPEAR_DURATION)
+                .start();
     }
 
     private void reloadAodColor() {
@@ -606,14 +610,19 @@ public class NotificationIconAreaController implements DarkReceiver,
                         mAodIcons.setAlpha(1.0f);
                         appearAodIcons();
                     } else {
+                        // Let's make sure the icon are translated to 0, since we cancelled it above
+                        animateInAodIconTranslation();
                         // We were fading out, let's fade in instead
                         CrossFadeHelper.fadeIn(mAodIcons);
                     }
                 } else {
+                    // Let's make sure the icon are translated to 0, since we cancelled it above
+                    animateInAodIconTranslation();
                     CrossFadeHelper.fadeOut(mAodIcons);
                 }
             } else {
                 mAodIcons.setAlpha(1.0f);
+                mAodIcons.setTranslationY(0);
                 mAodIcons.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
             }
         }
