@@ -38,8 +38,8 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     private int mWidth;
     private int mHeight;
 
-    TaskScreenshotAnimatable(Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory, Task task,
-            SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
+    TaskScreenshotAnimatable(Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory,
+            Task task, SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
         GraphicBuffer buffer = screenshotBuffer == null
                 ? null : screenshotBuffer.getGraphicBuffer();
         mTask = task;
@@ -58,6 +58,8 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
             surface.copyFrom(mSurfaceControl);
             surface.attachAndQueueBufferWithColorSpace(buffer, screenshotBuffer.getColorSpace());
             surface.release();
+            final float scale = 1.0f * mTask.getBounds().width() / mWidth;
+            mSurfaceControl.setMatrix(scale, 0, 0, scale);
         }
         getPendingTransaction().show(mSurfaceControl);
     }
