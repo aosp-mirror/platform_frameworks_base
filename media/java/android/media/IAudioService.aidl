@@ -106,7 +106,11 @@ interface IAudioService {
 
     List<AudioProductStrategy> getAudioProductStrategies();
 
+    boolean isMicrophoneMuted();
+
     void setMicrophoneMute(boolean on, String callingPackage, int userId);
+
+    oneway void setMicrophoneMuteFromSwitch(boolean on);
 
     void setRingerModeExternal(int ringerMode, String caller);
 
