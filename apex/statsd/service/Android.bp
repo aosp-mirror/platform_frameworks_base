@@ -1,0 +1,16 @@
+// Statsd Service jar, which will eventually be put in the statsd mainline apex.
+// statsd-service needs to be added to PRODUCT_SYSTEM_SERVER_JARS.
+// This jar will contain StatsCompanionService
+java_library {
+    name: "statsd-service",
+    installable: true,
+
+    srcs: [
+        "java/**/*.java",
+    ],
+
+    libs: [
+        "framework",
+        "services.core",
+    ],
+}
