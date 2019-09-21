@@ -1696,7 +1696,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Prečac pristupačnosti isključio je uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Pritisnite i zadržite tipke za glasnoću na tri sekunde da biste koristili uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Odaberite uslugu koju ćete upotrebljavati kad dodirnete gumb pristupačnosti:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Odaberite uslugu koju ćete upotrebljavati uz pokret pristupačnosti (prelazak s dva prsta prema gore od dna zaslona):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Odaberite za što će se upotrebljavati pokret pristupačnosti (prelazak s dva prsta prema gore od dna zaslona):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Odaberite uslugu koju ćete upotrebljavati uz pokret pristupačnosti (prelazak s tri prsta prema gore od dna zaslona):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Da biste prešli na neku drugu uslugu, dodirnite i zadržite gumb pristupačnosti."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Da biste prešli na neku drugu uslugu, prijeđite s dva prsta prema gore i zadržite."</string>
@@ -1924,8 +1924,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nema kategorije"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Postavili ste važnost tih obavijesti."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Važno je zbog uključenih osoba."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Želite li dopustiti aplikaciji <xliff:g id="APP">%1$s</xliff:g> da izradi novog korisnika s računom <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Želite li dopustiti aplikaciji <xliff:g id="APP">%1$s</xliff:g> da izradi novog korisnika s računom <xliff:g id="ACCOUNT">%2$s</xliff:g> (korisnik s tim računom već postoji)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Dodavanje jezika"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Postavke regije"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Unesite naziv jezika"</string>

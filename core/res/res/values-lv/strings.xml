@@ -1924,8 +1924,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nav kategorijas"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Jūs iestatījāt šo paziņojumu svarīguma līmeni."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tas ir svarīgi iesaistīto personu dēļ."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g> (lietotājs ar šādu kontu jau pastāv)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Pievienot valodu"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Reģiona preference"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Ierakstiet valodas nosaukumu"</string>

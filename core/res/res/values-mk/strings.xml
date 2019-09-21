@@ -243,7 +243,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Тивок режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Звукот е исклучен"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Звукот е вклучен"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим на работа во авион"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Авионски режим"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режимот на работа во авион е вклучен"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режимот на работа во авион е исклучен"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Поставки"</string>
@@ -1358,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Откриен е аналоген аудиододаток"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Приложениот уред не е компатибилен со телефонов. Допрете за да дознаете повеќе."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку USB"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Допрете за да го исклучите отстранувањето грешки преку USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Допрете за да го исклучите"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изберете за да се оневозможи отстранување грешки на USB."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Овозможен е режимот на рамка за тестирање"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Извршете фабричко ресетирање за да го оневозможите режимот на рамка за тестирање."</string>
@@ -1893,8 +1893,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Некатегоризирано"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ја поставивте важноста на известувањава."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ова е важно заради луѓето кои се вклучени."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Дозволувате ли <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Дозволувате ли <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g> (веќе постои корисник со оваа сметка)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Додај јазик"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Претпочитувања за регион"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Внеси име на јазик"</string>
