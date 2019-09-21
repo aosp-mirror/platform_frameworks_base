@@ -516,5 +516,8 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
     <!-- Title for Stretch clock face that will appear in the picker app next to a preview image of
          the clock face. [CHAR LIMIT=8] -->
     <string name="clock_title_analog" translatable="false">Analog</string>
+    <!-- Title for Typographic clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_type" translatable="false">Type</string>
 
 </resources>
